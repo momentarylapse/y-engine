@@ -22,6 +22,10 @@ class TemplateDataScriptVariable;
 namespace Light{
 	class Light;
 };
+namespace vulkan {
+	class UBOWrapper;
+	class DescriptorSet;
+}
 
 class GodForceField
 {
@@ -90,6 +94,8 @@ struct MusicField {
 
 struct PartialModel {
 	Model *model;
+	vulkan::UBOWrapper *ubo;
+	vulkan::DescriptorSet *dset;
 	Material *material;
 	int mat_index;
 	float d;
@@ -209,8 +215,6 @@ public:
 };
 bool _cdecl GodTrace(const vector &p1, const vector &p2, TraceData &d, bool simple_test, Model *o_ignore = NULL);
 
-
-extern LevelData level_data;
 
 
 /*#define FFKindRadialConst		0

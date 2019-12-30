@@ -9,11 +9,13 @@
 \*----------------------------------------------------------------------------*/
 
 #include <algorithm>
-#include "../lib/file/file.h"
 #include "world.h"
+#include "../lib/file/file.h"
+#include "../lib/vulkan/vulkan.h"
 #include "../meta.h"
 #include "object.h"
 #include "model.h"
+#include "material.h"
 #if 0
 #include "model_manager.h"
 #include "terrain.h"
@@ -29,6 +31,8 @@
 #endif
 #include "camera.h"
 
+
+vulkan::Shader *_default_shader_ = nullptr;
 
 Model *LoadModelFull(const string &filename) {
 	Model *m = new Model();
@@ -71,8 +75,6 @@ inline void qode2x(const dQuaternion q, quaternion *qq)
 	bool PhysicsStopOnCollision = false;
 #endif
 
-
-LevelData level_data;
 
 
 // game data
@@ -520,6 +522,7 @@ bool LevelData::load(const string &filename) {
 }
 
 bool GodLoadWorld(const string &filename) {
+	LevelData level_data;
 	bool ok = level_data.load(filename);
 	ok &= world.load(level_data);
 	return ok;
@@ -1250,6 +1253,8 @@ void World::register_model(Model *m) {
 		PartialModel p;
 		p.model = m;
 		p.material = mat;
+		p.ubo = new vulkan::UBOWrapper(64*3);
+		p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo}, {mat->textures[0]});
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;

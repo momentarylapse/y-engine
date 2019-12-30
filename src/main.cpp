@@ -28,6 +28,7 @@ void DrawSplashScreen(const string &str, float per) {
 }
 
 void ExternalModelCleanup(Model *m) {}
+extern vulkan::Shader *_default_shader_;
 
 string ObjectDir;
 
@@ -61,11 +62,6 @@ private:
 	vulkan::CommandBuffer *cb;
 	vulkan::Pipeline *pipeline;
 
-	
-	Model *model;
-	vulkan::DescriptorSet *dset;
-	vulkan::UBOWrapper *ubo;
-	//Camera *cam;
 
 
 	void init() {
@@ -78,6 +74,7 @@ private:
 		engine.set_dirs("Textures/", "Maps/", "Objects/", "Sound", "Scripts/", "Materials/", "Fonts/");
 
 		auto shader = vulkan::Shader::load("3d.shader");
+		_default_shader_ = shader;
 		pipeline = vulkan::Pipeline::build(shader, vulkan::render_pass, 1, false);
 		//pipeline->wireframe = true;
 		//pipeline->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR);
@@ -85,15 +82,14 @@ private:
 //		pipeline->set_z(false, false);
 		pipeline->create();
 
-
-		ubo = new vulkan::UBOWrapper(sizeof(UniformBufferObject));
 		vulkan::descriptor_pool = vulkan::create_descriptor_pool();
 
 		cb = new vulkan::CommandBuffer();
 		
 		MaterialInit();
-		model = world.create_object("xwing", "xwing", v_0, quaternion::ID);
-		dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, {model->material[0]->textures[0]});
+		world.reset();
+		world.background = color(0.2f, 0.2f, 0.4f, 1);
+		auto *model = world.create_object("xwing", "xwing", v_0, quaternion::ID);
 
 		CameraReset();
 	}
@@ -133,10 +129,9 @@ private:
 
 
 
-	matrix mtr(const vector &t, const vector &a) {
-		matrix mt, mr;
-		mt = matrix::translation(t);
-		mr = matrix::rotation(a);
+	matrix mtr(const vector &t, const quaternion &a) {
+		auto mt = matrix::translation(t);
+		auto mr = matrix::rotation_q(a);
 		return mt * mr;
 	}
 
@@ -156,6 +151,31 @@ private:
 	};
 	Speedometer speedometer;
 
+	float time;
+
+	void render_world(vulkan::CommandBuffer *cb) {
+		cb->begin_render_pass(vulkan::render_pass, world.background);
+		cb->set_pipeline(pipeline);
+
+		for (auto &s: world.sorted_opaque) {
+			Model *m = s.model;
+
+			m->ang = quaternion::rotation_v(vector(-0.3f,0.5f,time));
+
+			UniformBufferObject u;
+			u.proj = cam->m_projection.transpose();
+			u.view = cam->m_view.transpose();
+			u.model = mtr(m->pos, m->ang).transpose();
+			s.ubo->update(&u);
+
+			cb->bind_descriptor_set(0, s.dset);
+			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
+		}
+
+		cb->end_render_pass();
+
+	}
+
 	void draw_frame() {
 		speedometer.tick();
 
@@ -165,13 +185,7 @@ private:
 		static auto start_time = high_resolution_clock::now();
 
 		auto current_time = high_resolution_clock::now();
-		float time = duration<float, seconds::period>(current_time - start_time).count();
-
-		UniformBufferObject u;
-		u.proj = cam->m_projection.transpose();
-		u.view = cam->m_view.transpose();
-		u.model = mtr(model->pos, vector(-0.3f,0.5f,time)).transpose();
-		ubo->update(&u);
+		time = duration<float, seconds::period>(current_time - start_time).count();
 
 		if (!vulkan::start_frame())
 			return;
@@ -180,14 +194,7 @@ private:
 
 
 		cb->begin();
-		cb->begin_render_pass(vulkan::render_pass, Black);
-		cb->set_pipeline(pipeline);
-
-		cb->bind_descriptor_set(0, dset);
-		cb->draw(model->mesh[0]->sub[0].vertex_buffer);
-
-
-		cb->end_render_pass();
+		render_world(cb);
 		cb->end();
 
 		vulkan::submit_command_buffer(cb);
