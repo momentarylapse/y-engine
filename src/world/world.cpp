@@ -7,15 +7,16 @@
 |                                                                              |
 | last updated: 2009.11.22 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if 0
+
 #include <algorithm>
 #include "../lib/file/file.h"
 #include "world.h"
+#include "../meta.h"
 #include "object.h"
 #include "model.h"
+#if 0
 #include "model_manager.h"
 #include "terrain.h"
-#include "../meta.h"
 #include "../lib/nix/nix.h"
 #ifdef _X_ALLOW_X_
 #include "../physics/physics.h"
@@ -24,8 +25,16 @@
 #include "../fx/fx.h"
 #include "../fx/light.h"
 #endif
+#include "../networking.h"
+#endif
 #include "camera.h"
 
+
+Model *LoadModelFull(const string &filename) {
+	Model *m = new Model();
+	m->load(engine.object_dir + filename + ".model");
+	return m;
+}
 
 
 
@@ -55,7 +64,6 @@ inline void qode2x(const dQuaternion q, quaternion *qq)
 }
 #endif
 
-int PhysicsNumSteps, PhysicsNumLinkSteps;
 
 #ifdef _X_ALLOW_PHYSICS_DEBUG_
 	int PhysicsTimer;
@@ -64,42 +72,35 @@ int PhysicsNumSteps, PhysicsNumLinkSteps;
 #endif
 
 
-GodLevelData LevelData;
-static int GodNumReservedObjects;
+LevelData level_data;
 
 
 // game data
-WorldData World;
+World world;
 
 
 #ifdef _X_ALLOW_X_
 void DrawSplashScreen(const string &str, float per);
 void ScriptingObjectInit(Object *o);
-#include "../networking.h"
 #else
 void DrawSplashScreen(const string &str, float per){}
 void ScriptingObjectInit(Object *o){}
 #endif
 
-// partial models
-static Array<PartialModel> SortedNonTrans, SortedTrans;
 
 // network messages
 void AddNetMsg(int msg, int argi0, const string &args)
 {
+#if 0
 #ifdef _X_ALLOW_X_
-	if ((!World.net_msg_enabled) || (!Net.Enabled))
+	if ((!world.net_msg_enabled) || (!Net.Enabled))
 		return;
-	if (World.net_messages.num >= GOD_MAX_NET_MSGS){
-		//for (int i=0;i<NetMsg.num_msgs;i++)
-		//	...
-		return;
-	}
 	GodNetMessage m;
 	m.msg = msg;
 	m.arg_i[0] = argi0;
 	m.arg_s = args;
-	World.net_messages.add(m);
+	world.net_messages.add(m);
+#endif
 #endif
 }
 
@@ -156,11 +157,10 @@ void TestObjectSanity(const char *str)
 
 void GodInit()
 {
-	World.gravity = v_0;
-	World.NumForceFields = 0;
+	world.reset();
 
-	World.terrain_object = new Object();
-	World.terrain_object->update_matrix();
+	world.terrain_object = new Object();
+	world.terrain_object->update_matrix();
 
 #if 0
 	COctree *octree = new COctree(v_0, 100);
@@ -192,31 +192,30 @@ void GodInit()
 #endif
 }
 
-void GodReset()
-{
-	World.net_msg_enabled = false;
-	World.net_messages.clear();
+void World::reset() {
+	net_msg_enabled = false;
+	net_messages.clear();
+
+	gravity = v_0;
 
 	// terrains
-	for (int i=0;i<World.terrains.num;i++)
-		delete(World.terrains[i]);
-	World.terrains.clear();
+#if 0
+	for (auto *t: terrains)
+		delete t;
+#endif
+	terrains.clear();
 
 	// objects
-	for (int i=0;i<World.objects.num;i++)
-		if (World.objects[i])
-			GodUnregisterObject(World.objects[i]); // actual deleting done by ModelManager
-	World.objects.clear();
-	GodNumReservedObjects = 0;
+	for (auto *o: objects)
+		if (o)
+			unregister_object(o); // actual deleting done by ModelManager
+	objects.clear();
+	num_reserved_objects = 0;
 	
-	SortedTrans.clear();
-	SortedNonTrans.clear();
+	sorted_trans.clear();
+	sorted_opaque.clear();
 
 
-	// force fields
-	for (int i=0;i<World.NumForceFields;i++)
-		delete(World.ForceField[i]);
-	World.NumForceFields = 0;
 
 	// music
 	/*if (meta->MusicEnabled){
@@ -225,28 +224,28 @@ void GodReset()
 
 	// skybox
 	//   (models deleted by meta)
-	World.skybox.clear();
+	skybox.clear();
 	
 
 	// initial data for empty world...
-	World.ambient = color(1,0.4f,0.4f,0.4f);
-	World.fog._color = White;
-	World.fog.mode = FOG_EXP;
-	World.fog.density = 0.001f;
-	World.fog.enabled = false;
-	World.fog.start = 0;
-	World.fog.end = 100000;
-	World.speed_of_sound = 1000;
+	ambient = color(1,0.4f,0.4f,0.4f);
+	fog._color = White;
+	fog.mode = 0;//FOG_EXP;
+	fog.density = 0.001f;
+	fog.enabled = false;
+	fog.start = 0;
+	fog.end = 100000;
+	speed_of_sound = 1000;
 	
-	Engine.PhysicsEnabled = false;
-	Engine.CollisionsEnabled = true;
-	PhysicsNumSteps = 10;
-	PhysicsNumLinkSteps = 5;
+	engine.physics_enabled = false;
+	engine.collisions_enabled = true;
+	physics_num_steps = 10;
+	physics_num_link_steps = 5;
 
 
 	// physics
 #ifdef _X_ALLOW_X_
-	LinksReset();
+	//LinksReset();
 #endif
 #ifdef USE_ODE
 	if (ode_world_created){
@@ -262,126 +261,119 @@ void GodReset()
 	dHashSpaceGetLevels(space_id, &m1, &m2);
 	printf("hash:    %d  %d\n", m1, m2);*/
 	ode_world_created = true;
-	World.terrain_object->body_id = 0;
-	World.terrain_object->geom_id = dCreateSphere(0, 1); // space, radius
-	dGeomSetBody((dGeomID)World.terrain_object->geom_id, (dBodyID)World.terrain_object->body_id);
+	world.terrain_object->body_id = 0;
+	world.terrain_object->geom_id = dCreateSphere(0, 1); // space, radius
+	dGeomSetBody((dGeomID)world.terrain_object->geom_id, (dBodyID)world.terrain_object->body_id);
 #endif
 }
 
-void GodResetLevelData()
-{
-	LevelData.world_filename = "";
-	LevelData.terrain.clear();
-	LevelData.object.clear();
-	LevelData.skybox_filename.clear();
-	LevelData.skybox_ang.clear();
-	LevelData.scripts.clear();
+void LevelData::reset() {
+	world_filename = "";
+	terrain.clear();
+	object.clear();
+	skybox_filename.clear();
+	skybox_ang.clear();
+	scripts.clear();
 
-	LevelData.ego_index = -1;
-	LevelData.background_color = Gray;
-	LevelData.sun_enabled = false;
-	//LevelData.sun_color[3];
-	LevelData.sun_ang = vector(1, 0, 0);
-	LevelData.ambient = color(1, 0.4f, 0.4f, 0.4f);
+	ego_index = -1;
+	background_color = Gray;
+	sun_enabled = false;
+	//sun_color[3];
+	sun_ang = vector(1, 0, 0);
+	ambient = color(1, 0.4f, 0.4f, 0.4f);
 
-	LevelData.gravity = v_0;
-	LevelData.fog.enabled = false;
+	gravity = v_0;
+	fog.enabled = false;
 }
 
-color ReadColor3(File *f)
-{
+color ReadColor3(File *f) {
 	int c[3];
 	for (int i=0;i<3;i++)
 		c[i] = f->read_float();
 	return ColorFromIntRGB(c);
 }
 
-color ReadColor4(File *f)
-{
+color ReadColor4(File *f) {
 	int c[4];
 	for (int i=0;i<4;i++)
 		c[i] = f->read_float();
 	return ColorFromIntARGB(c);
 }
 
-bool GodLoadWorldFromLevelData()
-{
-	World.net_msg_enabled = false;
+bool World::load(const LevelData &ld) {
+	net_msg_enabled = false;
 	bool ok = true;
+	reset();
 
-	Engine.PhysicsEnabled = LevelData.physics_enabled;
-	Engine.CollisionsEnabled = true;//LevelData.physics_enabled;
-	World.gravity = LevelData.gravity;
-	World.fog = LevelData.fog;
+	engine.physics_enabled = ld.physics_enabled;
+	engine.collisions_enabled = true;//LevelData.physics_enabled;
+	gravity = ld.gravity;
+	fog = ld.fog;
 
 	// set up light (sun and ambient)
-	World.ambient = LevelData.ambient;
-	nix::SetAmbientLight(World.ambient);
+	ambient = ld.ambient;
 
+#if 0
 #ifdef _X_ALLOW_X_
-	World.sun = new Light::Light;
-	World.sun->SetColors(LevelData.sun_color[0],
-	                     LevelData.sun_color[1],
-	                     LevelData.sun_color[2]);
-	World.sun->SetDirectional(LevelData.sun_ang.ang2dir());
-	World.sun->enabled = LevelData.sun_enabled;
+	sun = new Light::Light;
+	sun->set_colors(ld.sun_color[0],
+	                ld.sun_color[1],
+	                ld.sun_color[2]);
+	sun->SetDirectional(ld.sun_ang.ang2dir());
+	sun->enabled = ld.sun_enabled;
+#endif
 #endif
 
 	// skybox
-	World.skybox.resize(LevelData.skybox_filename.num);
-	for (int i=0;i<World.skybox.num;i++){
-		World.skybox[i] = LoadModelFull(LevelData.skybox_filename[i]);
-		if (World.skybox[i])
-			World.skybox[i]->ang = quaternion::rotation_v( LevelData.skybox_ang[i]);
-		LevelData.skybox_filename[i].clear();
+	skybox.resize(ld.skybox_filename.num);
+	for (int i=0; i<skybox.num; i++){
+		skybox[i] = LoadModelFull(ld.skybox_filename[i]);
+		if (skybox[i])
+			skybox[i]->ang = quaternion::rotation_v(ld.skybox_ang[i]);
 	}
-	LevelData.skybox_filename.clear();
-	LevelData.skybox_ang.clear();
-	World.background = LevelData.background_color;
+	background = ld.background_color;
 
 	// objects
-	World.ego = NULL;
-	World.objects.clear(); // make sure the "missing" objects are NULL
-	World.objects.resize(LevelData.object.num);
-	GodNumReservedObjects = LevelData.object.num;
-	foreachi(LevelDataObject &o, LevelData.object, i)
+	ego = NULL;
+	objects.clear(); // make sure the "missing" objects are NULL
+	objects.resize(ld.object.num);
+	num_reserved_objects = ld.object.num;
+	foreachi(auto &o, ld.object, i)
 		if (o.filename.num > 0){
-			quaternion q;
-			q = quaternion::rotation_v( o.ang);
-			Object *oo = GodCreateObject(o.filename, o.name, o.pos, q, i);
+			auto q = quaternion::rotation_v(o.ang);
+			Object *oo = create_object(o.filename, o.name, o.pos, q, i);
 			ok &= (oo >= 0);
 			if (oo){
 				oo->vel = o.vel;
 				oo->rot = o.rot;
 			}
-			if (LevelData.ego_index == i)
-				World.ego = oo;
+			if (ld.ego_index == i)
+				ego = oo;
 			if (i % 5 == 0)
-				DrawSplashScreen("Objects", (float)i / (float)LevelData.object.num / 5 * 3);
+				DrawSplashScreen("Objects", (float)i / (float)ld.object.num / 5 * 3);
 		}
-	LevelData.object.clear();
-	World.add_all_objects_to_lists = true;
+	add_all_objects_to_lists = true;
 
+#if 0
 	// terrains
-	foreachi(LevelDataTerrain &t, LevelData.terrain, i){
+	foreachi(auto &t, ld.terrain, i){
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)LevelData.terrain.num * 0.4f);
 		Terrain *tt = new Terrain(t.filename, t.pos);
-		World.terrains.add(tt);
+		terrains.add(tt);
 		ok &= !tt->error;
 	}
-	LevelData.terrain.clear();
+#endif
 
-	World.net_msg_enabled = true;
+	net_msg_enabled = true;
 	return ok;
 }
 
-bool GodLoadWorld(const string &filename)
-{
-	LevelData.world_filename = filename;
+bool LevelData::load(const string &filename) {
+	world_filename = filename;
 
 // read world file
 //   and put the data into LevelData
-	File *f = FileOpenText(MapDir + filename + ".world");
+	File *f = FileOpenText(engine.map_dir + filename + ".world");
 
 	int ffv = f->ReadFileFormatVersion();
 	if (ffv != 10){
@@ -389,7 +381,7 @@ bool GodLoadWorld(const string &filename)
 		throw Exception(format("wrong file format: %d (10 expected)", ffv));
 	}
 	bool ok = true;
-	GodResetLevelData();
+	reset();
 
 	// Terrains
 	f->read_comment();
@@ -398,42 +390,40 @@ bool GodLoadWorld(const string &filename)
 		LevelDataTerrain t;
 		t.filename = f->read_str();
 		f->read_vector(&t.pos);
-		LevelData.terrain.add(t);
+		terrain.add(t);
 	}
 
 	// Gravity
 	f->read_comment();
-	f->read_vector(&LevelData.gravity);
+	f->read_vector(&gravity);
 
 	// EgoIndex
 	f->read_comment();
-	LevelData.ego_index = f->read_int();
+	ego_index = f->read_int();
 
 	// Background
 	f->read_comment();
-	LevelData.background_color = ReadColor4(f);
+	background_color = ReadColor4(f);
 	n = f->read_int();
 	for (int i=0;i<n;i++){
-		LevelData.skybox_filename.add(f->read_str());
-		LevelData.skybox_ang.add(v_0);
+		skybox_filename.add(f->read_str());
+		skybox_ang.add(v_0);
 	}
 
 	// Fog
 	f->read_comment();
-	LevelData.fog.enabled = f->read_bool();
-	LevelData.fog.mode = f->read_word();
-	LevelData.fog.start = f->read_float();
-	LevelData.fog.end = f->read_float();
-	LevelData.fog.density = f->read_float();
-	LevelData.fog._color = ReadColor4(f);
+	fog.enabled = f->read_bool();
+	fog.mode = f->read_word();
+	fog.start = f->read_float();
+	fog.end = f->read_float();
+	fog.density = f->read_float();
+	fog._color = ReadColor4(f);
 
 	// Music
 	f->read_comment();
-	World.MusicFieldGlobal.NumMusicFiles = f->read_int();
-	for (int i=0;i<World.MusicFieldGlobal.NumMusicFiles;i++)
-		World.MusicFieldGlobal.MusicFile[i] = f->read_str();
-	World.MusicFieldCurrent = &World.MusicFieldGlobal;
-	World.MusicCurrent = -1;
+	n = f->read_int();
+	for (int i=0; i<n; i++)
+		/*world.MusicFieldGlobal.MusicFile[i] =*/ f->read_str();
 
 	// Objects
 	f->read_comment();
@@ -446,7 +436,7 @@ bool GodLoadWorld(const string &filename)
 		f->read_vector(&o.ang);
 		o.vel = v_0;
 		o.rot = v_0;
-		LevelData.object.add(o);
+		object.add(o);
 	}
 
 	// Scripts
@@ -462,7 +452,7 @@ bool GodLoadWorld(const string &filename)
 			v.value = f->read_str();
 			s.variables.add(v);
 		}
-		LevelData.scripts.add(s);
+		scripts.add(s);
 	}
 
 	// ScriptVars
@@ -474,17 +464,17 @@ bool GodLoadWorld(const string &filename)
 	// light
 	if (f->read_str() != "#"){
 		// Sun
-		LevelData.sun_enabled = f->read_bool();
+		sun_enabled = f->read_bool();
 		for (int i=0;i<3;i++)
-			LevelData.sun_color[i] = ReadColor3(f);
-		LevelData.sun_ang.x = f->read_float();
-		LevelData.sun_ang.y = f->read_float();
-		LevelData.sun_ang.z = 0;
-		// Ambient
+			sun_color[i] = ReadColor3(f);
+		sun_ang.x = f->read_float();
+		sun_ang.y = f->read_float();
+		sun_ang.z = 0;
+
 		f->read_comment();
-		LevelData.ambient = ReadColor3(f);
+		ambient = ReadColor3(f);
 		if (f->read_str() != "#"){
-			LevelData.physics_enabled = f->read_bool();
+			physics_enabled = f->read_bool();
 		}
 	}
 
@@ -525,20 +515,24 @@ bool GodLoadWorld(const string &filename)
 	// Waypoints
 
 	FileClose(f);
-	World.MusicFieldGlobal.NumMusicFiles = 0;
-
-	ok &= GodLoadWorldFromLevelData();
-
+	//world.MusicFieldGlobal.NumMusicFiles = 0;
 	return ok;
 }
 
+bool GodLoadWorld(const string &filename) {
+	bool ok = level_data.load(filename);
+	ok &= world.load(level_data);
+	return ok;
+}
+
+#if 0
 Object *GetObjectByName(const string &name)
 {
-	for (int i=0;i<World.objects.num;i++)
-		if (World.objects[i])
-			if (name == World.objects[i]->script_data.name){
+	for (int i=0;i<world.objects.num;i++)
+		if (world.objects[i])
+			if (name == world.objects[i]->script_data.name){
 				//msg_write(i);
-				return World.objects[i];
+				return world.objects[i];
 			}
 	msg_error(format("object \"%s\" not found!", name.c_str()));
 	return NULL;
@@ -549,9 +543,9 @@ bool NextObject(Object **o)
 	int id=-1;
 	if (*o)
 		id = (*o)->object_id;
-	for (int i=id+1;i<World.objects.num;i++)
-		if (World.objects[i]){
-			*o = World.objects[i];
+	for (int i=id+1;i<world.objects.num;i++)
+		if (world.objects[i]){
+			*o = world.objects[i];
 			return true;
 		}
 	return false;
@@ -559,9 +553,9 @@ bool NextObject(Object **o)
 
 void _cdecl GodObjectEnsureExistence(int id)
 {
-	if (id >= World.objects.num)
+	if (id >= world.objects.num)
 		return;
-	if (!World.objects[id]){
+	if (!world.objects[id]){
 		// reload...
 	}
 }
@@ -577,17 +571,17 @@ int GodFindObjects(vector &pos, float radius, int mode, Array<Object*> &a)
 	//     \(^_^)/   now they can!
 	
 	// old method.... better use octree...
-	for (int i=0;i<World.objects.num;i++)
-		if (World.objects[i]){
-			if (_vec_length_fuzzy_(pos - World.objects[i]->pos) < radius)
-				a.add(World.objects[i]);
+	for (int i=0;i<world.objects.num;i++)
+		if (world.objects[i]){
+			if (_vec_length_fuzzy_(pos - world.objects[i]->pos) < radius)
+				a.add(world.objects[i]);
 		}
 	return a.num;
 }
+#endif
 
-Object *GodCreateObject(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index)
-{
-	if (Engine.ResettingGame)
+Object *World::create_object(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index) {
+	if (engine.resetting_game)
 		throw Exception("CreateObject during game reset");
 
 	if (filename == "")
@@ -604,7 +598,7 @@ Object *GodCreateObject(const string &filename, const string &name, const vector
 	o->update_theta();
 
 
-	GodRegisterObject(m, w_index);
+	register_object(m, w_index);
 
 	m->on_init();
 
@@ -613,18 +607,19 @@ Object *GodCreateObject(const string &filename, const string &name, const vector
 	return o;
 }
 
+#if 0
 void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t)
 {
-	World.ForceField[World.NumForceFields]=new GodForceField;
-	World.ForceField[World.NumForceFields]->Kind=kind;
-	World.ForceField[World.NumForceFields]->Pos=pos;
-	World.ForceField[World.NumForceFields]->Dir=dir;
-	World.ForceField[World.NumForceFields]->Radius=r;
-	World.ForceField[World.NumForceFields]->Vel=v;
-	World.ForceField[World.NumForceFields]->Acc=a;
-	World.ForceField[World.NumForceFields]->Visible=visible;
-	World.ForceField[World.NumForceFields]->TimeToLife=t;
-	World.NumForceFields++;
+	world.ForceField[world.NumForceFields]=new GodForceField;
+	world.ForceField[world.NumForceFields]->Kind=kind;
+	world.ForceField[world.NumForceFields]->Pos=pos;
+	world.ForceField[world.NumForceFields]->Dir=dir;
+	world.ForceField[world.NumForceFields]->Radius=r;
+	world.ForceField[world.NumForceFields]->Vel=v;
+	world.ForceField[world.NumForceFields]->Acc=a;
+	world.ForceField[world.NumForceFields]->Visible=visible;
+	world.ForceField[world.NumForceFields]->TimeToLife=t;
+	world.NumForceFields++;
 }
 
 void DoForceFields()
@@ -640,8 +635,8 @@ void DoForceFields()
 		}
 
 		// die eigendlichen Berechnungen
-		ForceField[f]->TimeToLife -= Engine.Elapsed;
-		ForceField[f]->Radius += Engine.Elapsed * ForceField[f]->Vel;
+		ForceField[f]->TimeToLife -= engine.Elapsed;
+		ForceField[f]->Radius += engine.Elapsed * ForceField[f]->Vel;
 		for (int o=0;o<Objects.num;o++)
 			if (Objects[o]->physics_data.active)
 				if (Objects[o]->pos.bounding_cube(ForceField[f]->Pos, ForceField[f]->Radius)){
@@ -651,13 +646,13 @@ void DoForceFields()
 						float d = n.length();
 						n /= d;
 						if (ForceField[f]->Kind == FFKindRadialConst)
-							Objects[o]->vel += ForceField[f]->Acc*Engine.Elapsed*n;
+							Objects[o]->vel += ForceField[f]->Acc*engine.Elapsed*n;
 						if (ForceField[f]->Kind == FFKindRadialLinear)
-							Objects[o]->vel += ForceField[f]->Acc*Engine.Elapsed*n*(ForceField[f]->Radius-d)/ForceField[f]->Radius;
+							Objects[o]->vel += ForceField[f]->Acc*engine.Elapsed*n*(ForceField[f]->Radius-d)/ForceField[f]->Radius;
 						if (ForceField[f]->Kind == FFKindDirectionalConst)
-							Objects[o]->vel += ForceField[f]->Acc*Engine.Elapsed*ForceField[f]->Dir;
+							Objects[o]->vel += ForceField[f]->Acc*engine.Elapsed*ForceField[f]->Dir;
 						if (ForceField[f]->Kind == FFKindDirectionalLinear)
-							Objects[o]->vel += ForceField[f]->Acc*Engine.Elapsed*ForceField[f]->Dir*(ForceField[f]->Radius-d)/ForceField[f]->Radius;
+							Objects[o]->vel += ForceField[f]->Acc*engine.Elapsed*ForceField[f]->Dir*(ForceField[f]->Radius-d)/ForceField[f]->Radius;
 					}
 				}
 	}*/
@@ -720,7 +715,7 @@ void SetSoundState(bool paused,float scale,bool kill,bool restart)
 vector _cdecl GetG(vector &pos)
 {
 	// homogener, konstanter Anteil (Welt)
-	vector g=World.gravity;
+	vector g=world.gravity;
 /*		// radiale Kraftfelder
 		for (int i=0;i<FxNumForceFields;i++)
 			if (FxForceField[i]->Used)
@@ -745,7 +740,7 @@ vector _cdecl GetG(vector &pos)
 void PhysicsDataToODE()
 {
 	// data.. x -> ode
-	for (Model *o: World.objects){
+	for (Model *o: world.objects){
 		if (o){
 			dBodyID b = (dBodyID)o->body_id;
 			if (b != 0){
@@ -765,7 +760,7 @@ void PhysicsDataToODE()
 void PhysicsDataFromODE()
 {
 	// data.. ode -> x
-	for (Object *o: World.objects){
+	for (Object *o: world.objects){
 		if (o){
 			dBodyID b = (dBodyID)o->body_id;
 			if (b != 0){
@@ -791,22 +786,22 @@ void GodDoCollisionDetection()
 #endif
 	
 	// object <-> terrain
-	for (int i=0;i<World.objects.num;i++)
-		if (World.objects[i])
-			if (World.objects[i]->physics_data.active)
-				if (!World.objects[i]->frozen)
-					Test4Ground(World.objects[i]);
+	for (int i=0;i<world.objects.num;i++)
+		if (world.objects[i])
+			if (world.objects[i]->physics_data.active)
+				if (!world.objects[i]->frozen)
+					Test4Ground(world.objects[i]);
 
 	TestObjectSanity("God::Coll   1");
 
 	// object <-> object
-	for (int i=0;i<World.objects.num;i++)
-		if (World.objects[i])
-			for (int j=i+1;j<World.objects.num;j++)
-				if (World.objects[j])
-					if ((!World.objects[i]->frozen) || (!World.objects[j]->frozen))
-						if (!ObjectsLinked(World.objects[i], World.objects[j]))
-							Test4Object(World.objects[i],World.objects[j]);
+	for (int i=0;i<world.objects.num;i++)
+		if (world.objects[i])
+			for (int j=i+1;j<world.objects.num;j++)
+				if (world.objects[j])
+					if ((!world.objects[i]->frozen) || (!world.objects[j]->frozen))
+						if (!ObjectsLinked(world.objects[i], world.objects[j]))
+							Test4Object(world.objects[i],world.objects[j]);
 
 	TestObjectSanity("God::Coll   2");
 	
@@ -820,11 +815,11 @@ void GodDoCollisionDetection()
 
 void ApplyGravity()
 {
-	for (Object *o: World.objects)
+	for (Object *o: world.objects)
 		if (o)
 			if (!o->frozen){
 				float ttf = o->time_till_freeze;
-				vector g = o->physics_data.mass * o->physics_data.g_factor * World.gravity;
+				vector g = o->physics_data.mass * o->physics_data.g_factor * world.gravity;
 				o->add_force(g, v_0);
 				//                                                     GetG(o->Pos));
 				o->time_till_freeze = ttf;
@@ -833,7 +828,7 @@ void ApplyGravity()
 
 void ResetExternalForces()
 {
-	for (Object *o: World.objects)
+	for (Object *o: world.objects)
 		if (o)
 			o->force_ext = o->torque_ext = v_0;
 }
@@ -845,28 +840,28 @@ void GodCalcMove(float dt)
 		return;
 
 	//CreateObjectLists();
-	Engine.NumRealColTests = 0;
+	engine.NumRealColTests = 0;
 
 #ifdef _X_ALLOW_PHYSICS_DEBUG_
 	HuiGetTime(PhysicsTimer);
 #endif
 
 	TestObjectSanity("God::CM prae");
-	bool phys_en = Engine.PhysicsEnabled;// and (!Engine.FirstFrame);
-	bool coll_en = Engine.CollisionsEnabled;// and (!Engine.FirstFrame);
+	bool phys_en = engine.PhysicsEnabled;// and (!engine.FirstFrame);
+	bool coll_en = engine.CollisionsEnabled;// and (!engine.FirstFrame);
 
 	// no physics?
 	if (!phys_en){
-		for (int i=0;i<World.objects.num;i++)
-			if (World.objects[i])
-				World.objects[i]->update_matrix();
+		for (int i=0;i<world.objects.num;i++)
+			if (world.objects[i])
+				world.objects[i]->update_matrix();
 		ResetExternalForces();
 		return;
 	}else if (!coll_en){
-		for (int i=0;i<World.objects.num;i++)
-			if (World.objects[i])
-				//if (!World.objects[i]->Frozen)
-					World.objects[i]->do_physics(dt);
+		for (int i=0;i<world.objects.num;i++)
+			if (world.objects[i])
+				//if (!world.objects[i]->Frozen)
+					world.objects[i]->do_physics(dt);
 		ResetExternalForces();
 		return;
 	}
@@ -880,7 +875,7 @@ void GodCalcMove(float dt)
 
 	// do the physics several times to increase precision!
 	float elapsed_temp = dt;
-	Engine.Elapsed /= (float)PhysicsNumSteps;
+	engine.Elapsed /= (float)PhysicsNumSteps;
 	for (int ttt=0;ttt<PhysicsNumSteps;ttt++){
 
 #ifdef USE_ODE
@@ -902,10 +897,10 @@ void GodCalcMove(float dt)
 
 #ifndef USE_ODE
 		// propagate through space
-		for (int i=0;i<World.objects.num;i++)
-			if (World.objects[i])
-				//if (!World.objects[i]->Frozen)
-					World.objects[i]->DoPhysics();
+		for (int i=0;i<world.objects.num;i++)
+			if (world.objects[i])
+				//if (!world.objects[i]->Frozen)
+					world.objects[i]->DoPhysics();
 #endif
 
 
@@ -920,7 +915,7 @@ void GodCalcMove(float dt)
 
 #ifdef USE_ODE
 		// physics...
-		dWorldQuickStep(world_id, Engine.Elapsed);
+		dWorldQuickStep(world_id, engine.Elapsed);
 		dJointGroupEmpty(contactgroup);
 		PhysicsDataFromODE();
 #endif
@@ -929,7 +924,7 @@ void GodCalcMove(float dt)
 
 
 	}
-	Engine.Elapsed = elapsed_temp;
+	engine.Elapsed = elapsed_temp;
 
 	ResetExternalForces();
 
@@ -949,14 +944,14 @@ void GodCalcMove(float dt)
 void GodDoAnimation(float dt)
 {
 	// mainly model animation
-	for (int i=0;i<World.objects.num;i++)
-		if (World.objects[i])
-			World.objects[i]->do_animation(dt);
+	for (int i=0;i<world.objects.num;i++)
+		if (world.objects[i])
+			world.objects[i]->do_animation(dt);
 }
 
 void GodIterateObjects(float dt)
 {
-	for (Object* o: World.objects)
+	for (Object* o: world.objects)
 		if (o)
 			o->on_iterate(dt);
 }
@@ -964,19 +959,19 @@ void GodIterateObjects(float dt)
 void Test4Ground(Object *o)
 {
 #ifdef _X_ALLOW_X_
-	for (int i=0;i<World.terrains.num;i++){
-		if (CollideObjectTerrain(o, World.terrains[i])){
+	for (int i=0;i<world.terrains.num;i++){
+		if (CollideObjectTerrain(o, world.terrains[i])){
 			//msg->Write(string2("   col %d <-> terrain %d",i,j));
 
 			if (inf_v(o->vel))
 				msg_error("inf   Test4Ground Vel 1");
 
 			// script callback function
-			o->on_collide_t(World.terrains[i]);
+			o->on_collide_t(world.terrains[i]);
 
-			World.terrain_object->material[0]->friction = World.terrains[i]->material->friction;
-			World.terrain_object->object_id = i + 0x40000000; //(1<<30);
-			ColData.o2 = World.terrain_object;
+			world.terrain_object->material[0]->friction = world.terrains[i]->material->friction;
+			world.terrain_object->object_id = i + 0x40000000; //(1<<30);
+			ColData.o2 = world.terrain_object;
 			
 			// physical reaction
 #ifdef _X_ALLOW_PHYSICS_DEBUG_
@@ -1058,7 +1053,7 @@ bool GodTrace(const vector &p1, const vector &p2, TraceData &data, bool simple_t
 	dir /= range;
 	float dmin = range;
 	data.type = TRACE_TYPE_NONE;
-	for (Terrain* t: World.terrains){
+	for (Terrain* t: world.terrains){
 		if (t->Trace(p1, p2, dir, dmin, data, simple_test)){
 			if (simple_test)
 				return true;
@@ -1069,7 +1064,7 @@ bool GodTrace(const vector &p1, const vector &p2, TraceData &data, bool simple_t
 			}
 		}
 	}
-	for (Object* o: World.objects)
+	for (Object* o: world.objects)
 		if (o){
 			if (o == o_ignore)
 				continue;
@@ -1094,7 +1089,7 @@ bool GodTraceVisual(const vector &p1, const vector &p2, TraceData &data, bool si
 	dir /= range;
 	float dmin = range;
 	data.type = TRACE_TYPE_NONE;
-	for (Terrain* t: World.terrains){
+	for (Terrain* t: world.terrains){
 		if (t->Trace(p1, p2, dir, dmin, data, simple_test)){
 			if (simple_test)
 				return true;
@@ -1105,7 +1100,7 @@ bool GodTraceVisual(const vector &p1, const vector &p2, TraceData &data, bool si
 			}
 		}
 	}
-	for (Object* o: World.objects)
+	for (Object* o: world.objects)
 		if (o){
 			if (o == o_ignore)
 				continue;
@@ -1126,7 +1121,7 @@ bool GodTraceVisual(const vector &p1, const vector &p2, TraceData &data, bool si
 // do everything needed before drawing the objects
 void GodPreDraw(vector &cam_pos)
 {
-	World.add_all_objects_to_lists = false;
+	world.add_all_objects_to_lists = false;
 
 // sort models by depth
 	/*MetaClearSorted();
@@ -1150,9 +1145,9 @@ void GodDraw()
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_ONE);
 	nix::SetCull(CULL_NONE);
 	nix::SetZ(false,true);
-	for (int i=0;i<World.NumForceFields;i++)
-		if (World.ForceField[i]->Visible){
-			color c=color(World.ForceField[i]->TimeToLife/4,1,1,1);
+	for (int i=0;i<world.NumForceFields;i++)
+		if (world.ForceField[i]->Visible){
+			color c=color(world.ForceField[i]->TimeToLife/4,1,1,1);
 			nix::SetMaterial(c,c,Black,0,Black);
 			//Fx::DrawBall(ForceField[i]->Pos,ForceField[i]->Radius,8,16);
 		}
@@ -1161,33 +1156,32 @@ void GodDraw()
 	nix::SetAlpha(ALPHA_NONE);
 #endif
 }
+#endif
 
-void GodRegisterObject(Model *o, int index)
-{
+void World::register_object(Model *o, int index) {
 	int on = index;
 	if (on < 0){
 		// ..... better use a list of "empty" objects???
-		for (int i=GodNumReservedObjects;i<World.objects.num;i++)
-			if (!World.objects[i])
+		for (int i=num_reserved_objects; i<objects.num; i++)
+			if (!objects[i])
 				on = i;
 	}else{
-		if (on >= World.objects.num)
-			World.objects.resize(on+1);
-		if (World.objects[on]){
+		if (on >= objects.num)
+			objects.resize(on+1);
+		if (objects[on]){
 			msg_error("CreateObject:  object index already in use " + i2s(on));
 			return;
 		}
 	}
 	if (on < 0){
-		on = World.objects.num;
-		World.objects.add(NULL);
+		on = objects.num;
+		objects.add(NULL);
 	}
-	World.objects[on] = (Object*)o;
+	objects[on] = (Object*)o;
 
-	GodRegisterModel(o);
+	register_model(o);
 
 	o->object_id = on;
-//	strcpy(ObjectFilename[on], filename);
 
 #ifdef USE_ODE
 	if (o->physics_data.active){
@@ -1213,8 +1207,7 @@ void GodRegisterObject(Model *o, int index)
 
 
 // un-object a model
-void GodUnregisterObject(Model *m)
-{
+void World::unregister_object(Model *m) {
 	if (m->object_id < 0)
 		return;
 
@@ -1229,25 +1222,24 @@ void GodUnregisterObject(Model *m)
 #endif
 
 	// ego...
-	if (m == World.ego)
-		World.ego = NULL;
+	if (m == ego)
+		ego = NULL;
 
 	AddNetMsg(NET_MSG_DELETE_OBJECT, m->object_id, "");
 
 	// remove from list
-	World.objects[m->object_id] = NULL;
+	objects[m->object_id] = NULL;
 	m->object_id = -1;
 }
 
 // add a model to the (possible) rendering list
-void GodRegisterModel(Model *m)
-{
+void World::register_model(Model *m) {
 	if (m->registered)
 		return;
 	
 	for (int i=0;i<m->material.num;i++){
 		Material *mat = m->material[i];
-		bool trans = !mat->alpha.z_buffer; //false;
+		bool trans = false;//!mat->alpha.z_buffer; //false;
 		/*if (mat->TransparencyMode>0){
 			if (mat->TransparencyMode == TransparencyModeFunctions)
 				trans = true;
@@ -1262,12 +1254,12 @@ void GodRegisterModel(Model *m)
 		p.transparent = trans;
 		p.shadow = false;
 		if (trans)
-			SortedTrans.add(p);
-	    else
-			SortedNonTrans.add(p);
+			sorted_trans.add(p);
+		else
+			sorted_opaque.add(p);
 	}
 
-#ifdef _X_ALLOW_X_
+#ifdef _X_ALLOW_FX_
 	for (int i=0;i<m->fx.num;i++)
 		if (m->fx[i])
 			m->fx[i]->enable(true);
@@ -1278,25 +1270,24 @@ void GodRegisterModel(Model *m)
 	// sub models
 	for (int i=0;i<m->bone.num;i++)
 		if (m->bone[i].model)
-			GodRegisterModel(m->bone[i].model);
+			register_model(m->bone[i].model);
 }
 
 // remove a model from the (possible) rendering list
-void GodUnregisterModel(Model *m)
-{
+void World::unregister_model(Model *m) {
 	if (!m->registered)
 		return;
 	//printf("%p   %s\n", m, MetaGetModelFilename(m));
-	
-	for (int i=SortedTrans.num-1;i>=0;i--)
-		if (SortedTrans[i].model == m)
-			SortedTrans.erase(i);
-	for (int i=SortedNonTrans.num-1;i>=0;i--)
-		if (SortedNonTrans[i].model == m)
-			SortedNonTrans.erase(i);
 
-#ifdef _X_ALLOW_X_
-	if (!Engine.ResettingGame)
+	foreachi (auto &s, sorted_trans, i)
+		if (s.model == m)
+			sorted_trans.erase(i);
+	foreachi (auto &s, sorted_opaque, i)
+		if (s.model == m)
+			sorted_opaque.erase(i);
+
+#ifdef _X_ALLOW_FX_
+	if (!engine.resetting_game)
 		for (int i=0;i<m->fx.num;i++)
 			if (m->fx[i])
 				m->fx[i]->enable(false);
@@ -1308,15 +1299,16 @@ void GodUnregisterModel(Model *m)
 	// sub models
 	for (int i=0;i<m->bone.num;i++)
 		if (m->bone[i].model)
-			GodUnregisterModel(m->bone[i].model);
+			unregister_model(m->bone[i].model);
 }
 
+#if 0
 void WorldShiftAll(const vector &dpos)
 {
-	for (Object *o: World.objects)
+	for (Object *o: world.objects)
 		if (o)
 			o->pos += dpos;
-	for (Terrain *t: World.terrains)
+	for (Terrain *t: world.terrains)
 		t->pos += dpos;
 #ifdef _X_ALLOW_X_
 	Fx::ShiftAll(dpos);
@@ -1342,7 +1334,7 @@ inline void fill_pmv(vector &pos, Array<PartialModel> &p, Array<PartialModelView
 		
 		int detail = SKIN_HIGH;
 		float dist = _vec_length_(dpos); // real distance to the camera
-		float dist_2 = dist * Engine.DetailFactorInv; // more adequate distance value
+		float dist_2 = dist * engine.DetailFactorInv; // more adequate distance value
 
 		// ignore?
 		if (is_ignored(m))
@@ -1361,8 +1353,8 @@ inline void fill_pmv(vector &pos, Array<PartialModel> &p, Array<PartialModelView
 
 		// shadows...
 #ifdef _X_ALLOW_X_
-		if ((Engine.ShadowLevel > 0) and (detail == SKIN_HIGH) and (p[i].mat_index == 0) and (m->prop.allow_shadow)){
-			int sd = Engine.ShadowLowerDetail ? SKIN_MEDIUM : SKIN_HIGH;
+		if ((engine.ShadowLevel > 0) and (detail == SKIN_HIGH) and (p[i].mat_index == 0) and (m->prop.allow_shadow)){
+			int sd = engine.ShadowLowerDetail ? SKIN_MEDIUM : SKIN_HIGH;
 			if (m->skin[sd]->sub[p[i].mat_index].num_triangles > 0)
 				Fx::AddShadow(m, sd);
 		}
@@ -1427,7 +1419,7 @@ int ffframe = 0;
 
 void GroupDuplicates()
 {
-	for (int i=0;i<World.objects.num;i++){}
+	for (int i=0;i<world.objects.num;i++){}
 }
 
 void GodDrawSorted()
@@ -1441,14 +1433,14 @@ void GodDrawSorted()
 	//if (fill_frame > 10){
 		// TODO: refill when SortedNonTrans or SortedNonTrans change... pointers...vector allocation...
 		vector pos = cur_cam->pos;
-		fill_pmv(pos, SortedNonTrans, cur_cam->pmvd.opaque, Engine.SortingEnabled, true);
+		fill_pmv(pos, SortedNonTrans, cur_cam->pmvd.opaque, engine.SortingEnabled, true);
 		fill_pmv(pos, SortedTrans, cur_cam->pmvd.trans, true, false);
 		fill_frame = 0;
 	//}
 
 // non-transparent models
 	// overlapping each other
-	if (Engine.ZBufferEnabled)
+	if (engine.ZBufferEnabled)
 		nix::SetZ(true,true);
 	else
 		nix::SetZ(false,false);
@@ -1458,7 +1450,7 @@ void GodDrawSorted()
 
 //transparent models
 	// test but don't write
-	if (Engine.ZBufferEnabled)
+	if (engine.ZBufferEnabled)
 		nix::SetZ(false,true);
 
 	// drawing

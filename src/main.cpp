@@ -15,16 +15,21 @@
 #include "world/material.h"
 #include "world/model.h"
 #include "world/camera.h"
+#include "world/world.h"
+#include "world/object.h"
 
 
 // pipeline: shader + z buffer / blending parameters
 
 // descriptor set: textures + shader uniform buffers
 
+void DrawSplashScreen(const string &str, float per) {
+	std::cerr << " - splash - " << str.c_str() << "\n";
+}
 
 void ExternalModelCleanup(Model *m) {}
 
-bool AllowXContainer = true;
+string ObjectDir;
 
 using namespace std::chrono;
 
@@ -41,7 +46,7 @@ namespace vulkan {
 	extern VkDescriptorPool descriptor_pool;
 };
 
-class YEngine {
+class YEngineApp {
 public:
 	
 	void run() {
@@ -70,7 +75,9 @@ private:
 
 		std::cout << "on init..." << "\n";
 
-		auto shader = vulkan::Shader::load("shaders/3d.shader");
+		engine.set_dirs("Textures/", "Maps/", "Objects/", "Sound", "Scripts/", "Materials/", "Fonts/");
+
+		auto shader = vulkan::Shader::load("3d.shader");
 		pipeline = vulkan::Pipeline::build(shader, vulkan::render_pass, 1, false);
 		//pipeline->wireframe = true;
 		//pipeline->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR);
@@ -85,8 +92,7 @@ private:
 		cb = new vulkan::CommandBuffer();
 		
 		MaterialInit();
-		model = new Model();
-		model->load("xwing.model");
+		model = world.create_object("xwing", "xwing", v_0, quaternion::ID);
 		dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, {model->material[0]->textures[0]});
 
 		CameraReset();
@@ -194,7 +200,7 @@ private:
 };
 
 int hui_main(const Array<string> &arg) {
-	YEngine app;
+	YEngineApp app;
 	msg_init();
 
 	try {

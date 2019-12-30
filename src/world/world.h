@@ -10,11 +10,6 @@
 #if !defined(GOD_H__INCLUDED_)
 #define GOD_H__INCLUDED_
 
-#define GOD_MAX_FORCEFIELDS		64
-#define GOD_MAX_MUSIC_FILES		64
-#define GOD_MAX_NET_MSGS		64
-#define GOD_MAX_MUSICFIELDS		64
-
 
 #include "../lib/base/base.h"
 #include "../lib/math/math.h"
@@ -37,8 +32,7 @@ public:
 	bool Visible;
 };
 
-class Fog
-{
+class Fog {
 public:
 	bool enabled;
 	int mode;
@@ -46,30 +40,29 @@ public:
 	color _color;
 };
 
-class LevelDataTerrain
-{
+class LevelDataTerrain {
 public:
 	string filename;
 	vector pos;
 };
 
-class LevelDataObject
-{
+class LevelDataObject {
 public:
 	string filename, name;
 	vector pos, ang, vel, rot;
 };
 
-class LevelDataScript
-{
+class LevelDataScript {
 public:
 	string filename;
 	Array<TemplateDataScriptVariable> variables;
 };
 
-class GodLevelData
-{
+class LevelData {
 public:
+	void reset();
+	bool load(const string &filename);
+
 	string world_filename;
 	Array<string> skybox_filename;
 	Array<vector> skybox_ang;
@@ -89,14 +82,13 @@ public:
 	Fog fog;
 };
 
-struct MusicField
-{
+struct MusicField {
 	vector PosMin,PosMax;
 	int NumMusicFiles;
 	string MusicFile[16];
 };
 
-struct PartialModel{
+struct PartialModel {
 	Model *model;
 	Material *material;
 	int mat_index;
@@ -105,8 +97,7 @@ struct PartialModel{
 };
 
 // network messages
-struct GodNetMessage
-{
+struct GodNetMessage {
 	int msg, arg_i[4];
 	string arg_s;
 };
@@ -114,9 +105,18 @@ struct GodNetMessage
 
 
 // game data
-class WorldData
-{
+class World {
 public:
+	void reset();
+	bool load(const LevelData &ld);
+	Object *create_object(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
+
+	void register_object(Model *o, int index);
+	void unregister_object(Model *o);
+
+	void register_model(Model *m);
+	void unregister_model(Model *m);
+
 	string filename;
 	color background;
 	Array<Model*> skybox;
@@ -144,13 +144,17 @@ public:
 	Array<Object*> objects;
 	Object *ego;
 	Object *terrain_object;
+	int num_reserved_objects;
 
 	Array<Terrain*> terrains;
+
+	Array<PartialModel> sorted_opaque, sorted_trans;
 
 
 	// esotherical (not in the world)
 	bool add_all_objects_to_lists;
 
+#if 0
 	// music fields
 	int NumMusicFields;
 	MusicField MusicFieldGlobal,MusicFields[GOD_MAX_MUSICFIELDS];
@@ -160,21 +164,15 @@ public:
 	int NumForceFields;
 	GodForceField *ForceField[GOD_MAX_FORCEFIELDS];
 	MusicField *MusicFieldCurrent;
+#endif
 };
-extern WorldData World;
+extern World world;
 
 
 void GodInit();
 void GodReset();
-void GodResetLevelData();
-bool GodLoadWorldFromLevelData();
 bool GodLoadWorld(const string &filename);
 
-Object* _cdecl GodCreateObject(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index=-1);
-void GodRegisterObject(Model *m, int index = -1);
-void GodUnregisterObject(Model *m);
-void GodRegisterModel(Model *m);
-void GodUnregisterModel(Model *m);
 void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
 void _cdecl WorldShiftAll(const vector &dpos);
 //void DoSounds();
@@ -195,15 +193,13 @@ void Test4Object(Object *o1,Object *o2);
 
 
 // what is hit (TraceData.type)
-enum
-{
+enum {
 	TRACE_TYPE_NONE = -1,
 	TRACE_TYPE_TERRAIN,
 	TRACE_TYPE_MODEL
 };
 
-class TraceData
-{
+class TraceData {
 public:
 	int type;
 	vector point;
@@ -214,7 +210,7 @@ public:
 bool _cdecl GodTrace(const vector &p1, const vector &p2, TraceData &d, bool simple_test, Model *o_ignore = NULL);
 
 
-extern GodLevelData LevelData;
+extern LevelData level_data;
 
 
 /*#define FFKindRadialConst		0
@@ -224,8 +220,7 @@ extern GodLevelData LevelData;
 #define FFKindDirectionalLinear	11
 #define FFKindDirectionalQuad	12*/
 
-enum
-{
+enum {
 	NET_MSG_CREATE_OBJECT = 1000,
 	NET_MSG_DELETE_OBJECT = 1002,
 	NET_MSG_SCTEXT = 2000

@@ -4,6 +4,8 @@
 #include "common.h"
 #include "exception.h"
 
+#if 0
+
 
 #ifdef _X_ALLOW_X_
 	#include "../../../world/world.h"
@@ -1012,4 +1014,9 @@ void SIAddPackageX()
 #endif
 }
 
+};
+#endif
+
+namespace Kaba {
+void SIAddPackageX(){}
 };

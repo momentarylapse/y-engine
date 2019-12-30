@@ -45,6 +45,7 @@ namespace vulkan{
 		int push_size;
 		VkPrimitiveTopology topology;
 
+		static string directory;
 		static Shader* load(const string &filename);
 	};
 

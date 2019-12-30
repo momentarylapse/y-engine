@@ -37,6 +37,7 @@ namespace vulkan {
 		VkImageView view;
 		VkSampler sampler;
 
+		static string directory;
 		static Texture* load(const string &filename);
 	};
 };

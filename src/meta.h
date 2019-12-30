@@ -25,35 +25,40 @@ namespace Gui {
 
 class EngineData {
 public:
-	string AppName, Version;
-	bool Debug, ShowTimings, ConsoleEnabled, WireMode;
-	bool Record;
-	float DetailLevel;
-	float DetailFactorInv;
-	int ShadowLevel;
-	bool ShadowLowerDetail;
-	Light::Light *ShadowLight;
-	color ShadowColor;
+	EngineData();
+
+	string app_name, version;
+	bool debug, show_timings, console_enabled, wire_mode;
+	float detail_level;
+	float detail_factor_inv;
+	int shadow_level;
+	bool shadow_lower_detail;
+	Light::Light *shadow_light;
+	color shadow_color;
 	
-	int Multisampling;
+	int multisampling;
 	bool CullingEnabled, SortingEnabled, ZBufferEnabled;
-	bool ResettingGame;
-	Gui::Font *DefaultFont;
-	string InitialWorldFile, SecondWorldFile;
-	bool PhysicsEnabled, CollisionsEnabled;
-	int MirrorLevelMax;
+	bool resetting_game;
+	Gui::Font *default_font;
+	string initial_world_file, second_world_file;
+	bool physics_enabled, collisions_enabled;
+	int mirror_level_max;
 	
-	int NumRealColTests;
+	int num_real_col_tests;
 	
-	float FpsMax, FpsMin;
-	float TimeScale, Elapsed, ElapsedRT;
+	float fps_max, fps_min;
+	float time_scale, elapsed, elapsed_rt;
 
-	bool FirstFrame;
-	bool GameRunning;
+	bool first_frame;
+	bool game_running;
 
-	bool FileErrorsAreCritical;
+	bool file_errors_are_critical;
+
+	void set_dirs(const string &texture_dir, const string &map_dir, const string &object_dir, const string &sound_dir, const string &script_dir, const string &material_dir, const string &font_dir);
+
+	string map_dir, sound_dir, script_dir, object_dir;
 };
-extern EngineData Engine;
+extern EngineData engine;
 
 
 
@@ -72,17 +77,9 @@ public:
 typedef void str_float_func(const string&,float);
 
 
-void MetaInit();
-void MetaEnd();
 void MetaReset();
 void MetaCalcMove();
 
-// data to Meta
-void MetaSetDirs(const string &texture_dir, const string &map_dir, const string &object_dir, const string &sound_dir, const string &script_dir, const string &material_dir, const string &font_dir);
-
-
-// game data
-extern string MapDir, SoundDir, ScriptDir;
 
 
 enum {

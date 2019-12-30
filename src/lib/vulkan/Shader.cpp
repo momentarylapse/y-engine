@@ -211,6 +211,8 @@ namespace vulkan{
 		return shaderModule;
 	}
 
+	string Shader::directory;
+
 	Shader::Shader() {
 		vert_module = nullptr;
 		geom_module = nullptr;
@@ -268,8 +270,9 @@ namespace vulkan{
 		return rr;
 	}
 
-	Shader* Shader::load(const string &filename) {
+	Shader* Shader::load(const string &_filename) {
 		Shader *s = new Shader();
+		string filename = directory + _filename;
 		std::cout << "load shader " << filename.c_str() << "\n";
 
 		File *f = FileOpen(filename + ".compiled");

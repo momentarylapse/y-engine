@@ -58,10 +58,11 @@
 // uncomment the ones with their files in this project
 //#####################################################################
 
-//#define _X_ALLOW_X_					1
+#define _X_ALLOW_X_					1
+//#define _X_ALLOW_FX_
 
 
-#define USE_ODE			1
+//#define USE_ODE			1
 //#define _X_ALLOW_PHYSICS_DEBUG_		1
 
 

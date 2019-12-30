@@ -45,6 +45,7 @@ int pixel_size(VkFormat f) {
 	return 4;
 }
 
+string Texture::directory;
 
 Texture::Texture() {
 	image = nullptr;
@@ -73,7 +74,7 @@ void Texture::__delete__() {
 
 Texture* Texture::load(const string &filename) {
 	Texture *t = new Texture();
-	t->_load(filename);
+	t->_load(directory + filename);
 	return t;
 }
 
