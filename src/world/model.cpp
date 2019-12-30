@@ -161,7 +161,6 @@ void AppraiseDimensions(Model *m)
 
 void create_vb(Model *m, Mesh *mesh) {
 	for (auto &s: mesh->sub) {
-		msg_write("vb...");
 		s.vertex_buffer = new vulkan::VertexBuffer();
 		Array<vulkan::Vertex1> vertices;
 		for (int i=0; i<s.num_triangles; i++) {
@@ -175,7 +174,6 @@ void create_vb(Model *m, Mesh *mesh) {
 				vertices.add(v);
 			}
 		}
-		msg_write(vertices.num);
 		s.vertex_buffer->build1(vertices);
 	}
 }

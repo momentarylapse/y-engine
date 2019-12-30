@@ -4,12 +4,46 @@
 #include <vulkan/vulkan.h>
 
 #include <cmath>
+#include <iostream>
 
 #include "helper.h"
 #include "CommandBuffer.h"
 #include "../image/image.h"
 
 namespace vulkan {
+
+VkFormat parse_format(const string &s) {
+	if (s == "rgba:i8")
+		return VK_FORMAT_R8G8B8A8_UNORM;
+	if (s == "rgb:i8")
+		return VK_FORMAT_R8G8B8_UNORM;
+	if (s == "r:i8")
+		return VK_FORMAT_R8_UNORM;
+	if (s == "rgba:f32")
+		return VK_FORMAT_R32G32B32A32_SFLOAT;
+	if (s == "rgb:f32")
+		return VK_FORMAT_R32G32B32_SFLOAT;
+	if (s == "r:f32")
+		return VK_FORMAT_R32_SFLOAT;
+	std::cerr << "unknown image format: " << s.c_str() << "\n";
+	return VK_FORMAT_R8G8B8A8_UNORM;
+}
+
+int pixel_size(VkFormat f) {
+	if (f == VK_FORMAT_R8G8B8A8_UNORM)
+		return 4;
+	if (f == VK_FORMAT_R8G8B8_UNORM)
+		return 3;
+	if (f == VK_FORMAT_R8_UNORM)
+		return 1;
+	if (f == VK_FORMAT_R32G32B32A32_SFLOAT)
+		return 16;
+	if (f == VK_FORMAT_R32G32B32_SFLOAT)
+		return 12;
+	if (f == VK_FORMAT_R32_SFLOAT)
+		return 4;
+	return 4;
+}
 
 
 Texture::Texture() {
@@ -54,20 +88,21 @@ void Texture::_load(const string &filename) {
 }
 
 void Texture::override(const Image *im) {
-	overridex(im->data.data, im->width, im->height, 1);
+	overridex(im->data.data, im->width, im->height, 1, "rgba:i8");
 }
 
-void Texture::overridex(const void *data, int nx, int ny, int nz) {
-	_create_image(data, nx, ny, nz);
+void Texture::overridex(const void *data, int nx, int ny, int nz, const string &format) {
+	_create_image(data, nx, ny, nz, parse_format(format));
 	_create_view();
 	_create_sampler();
 }
 
-void Texture::_create_image(const void *image_data, int nx, int ny, int nz) {
+void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFormat image_format) {
 	width = nx;
 	height = ny;
 	depth = nz;
-	VkDeviceSize image_size = width * height  * 4;
+	int ps = pixel_size(image_format);
+	VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 
@@ -80,15 +115,16 @@ void Texture::_create_image(const void *image_data, int nx, int ny, int nz) {
 		memcpy(data, image_data, static_cast<size_t>(image_size));
 	vkUnmapMemory(device, staging_memory);
 
-	create_image(width, height, 1, mip_levels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+	create_image(width, height, depth, mip_levels, image_format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 
-	transition_image_layout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
+	transition_image_layout(image, image_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
 	copy_buffer_to_image(staging_buffer, image, width, height, depth);
 
 	vkDestroyBuffer(device, staging_buffer, nullptr);
 	vkFreeMemory(device, staging_memory, nullptr);
 
-	_generate_mipmaps(VK_FORMAT_R8G8B8A8_UNORM);
+	if (depth == 1)
+		_generate_mipmaps(image_format);
 }
 
 void Texture::_generate_mipmaps(VkFormat image_format) {

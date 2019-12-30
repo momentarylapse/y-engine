@@ -14,6 +14,7 @@
 
 #include "world/material.h"
 #include "world/model.h"
+#include "world/camera.h"
 
 
 // pipeline: shader + z buffer / blending parameters
@@ -23,6 +24,7 @@
 
 void ExternalModelCleanup(Model *m) {}
 
+bool AllowXContainer = true;
 
 using namespace std::chrono;
 
@@ -58,6 +60,7 @@ private:
 	Model *model;
 	vulkan::DescriptorSet *dset;
 	vulkan::UBOWrapper *ubo;
+	//Camera *cam;
 
 
 	void init() {
@@ -85,6 +88,8 @@ private:
 		model = new Model();
 		model->load("xwing.model");
 		dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, {model->material[0]->textures[0]});
+
+		CameraReset();
 	}
 	
 	GLFWwindow* create_window() {
@@ -147,8 +152,9 @@ private:
 
 	void draw_frame() {
 		speedometer.tick();
-		
-		vector cam_pos = 1000*vector::EZ;
+
+		cam->pos = 1000*vector::EZ;
+		cam->set_view();
 
 		static auto start_time = high_resolution_clock::now();
 
@@ -156,8 +162,8 @@ private:
 		float time = duration<float, seconds::period>(current_time - start_time).count();
 
 		UniformBufferObject u;
-		u.proj = matrix::perspective(pi/4, vulkan::target_width / (float) vulkan::target_height, 0.1f, 10000.0f).transpose();
-		u.view = matrix::translation(-cam_pos).transpose();
+		u.proj = cam->m_projection.transpose();
+		u.view = cam->m_view.transpose();
 		u.model = mtr(model->pos, vector(-0.3f,0.5f,time)).transpose();
 		ubo->update(&u);
 

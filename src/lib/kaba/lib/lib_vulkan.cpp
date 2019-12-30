@@ -144,6 +144,7 @@ void SIAddPackageVulkan() {
 			func_add_param("nx", TypeInt);
 			func_add_param("ny", TypeInt);
 			func_add_param("nz", TypeInt);
+			func_add_param("format", TypeString);
 		class_add_funcx("load", TypeTextureP, vul_p(&__VulkanLoadTexture), FLAG_STATIC);
 			func_add_param("filename", TypeString);
 

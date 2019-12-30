@@ -21,10 +21,10 @@ namespace vulkan {
 
 		void _load(const string &filename);
 		void override(const Image *image);
-		void overridex(const void *image, int nx, int ny, int nz);
+		void overridex(const void *image, int nx, int ny, int nz, const string &format);
 
 		void _generate_mipmaps(VkFormat image_format);
-		void _create_image(const void *data, int nx, int ny, int nz);
+		void _create_image(const void *data, int nx, int ny, int nz, VkFormat image_format);
 		void _create_view();
 		void _create_sampler();
 
