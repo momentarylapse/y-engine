@@ -103,7 +103,7 @@ namespace vulkan{
 	}*/
 
 	void DescriptorSet::set(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
-		std::cout << "create dset with " << ubos.num << " ubos, " << tex.num << " samplers\n";
+		//std::cout << "create dset with " << ubos.num << " ubos, " << tex.num << " samplers\n";
 		for (size_t i=0; i<swap_chain_images.num; i++) {
 			std::vector<VkDescriptorBufferInfo> buffer_info;
 			for (int j=0; j<ubos.num; j++) {

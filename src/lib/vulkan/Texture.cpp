@@ -57,11 +57,7 @@ Texture::Texture() {
 }
 
 Texture::~Texture() {
-	vkDestroySampler(device, sampler, nullptr);
-	vkDestroyImageView(device, view, nullptr);
-
-	vkDestroyImage(device, image, nullptr);
-	vkFreeMemory(device, memory, nullptr);
+	_reset();
 }
 
 void Texture::__init__() {
@@ -70,6 +66,23 @@ void Texture::__init__() {
 
 void Texture::__delete__() {
 	this->~Texture();
+}
+
+void Texture::_reset() {
+	if (sampler)
+		vkDestroySampler(device, sampler, nullptr);
+	if (view)
+		vkDestroyImageView(device, view, nullptr);
+	if (image)
+		vkDestroyImage(device, image, nullptr);
+	if (memory)
+		vkFreeMemory(device, memory, nullptr);
+	sampler = nullptr;
+	view = nullptr;
+	image = nullptr;
+	memory = nullptr;
+	width = height = depth = 0;
+	mip_levels = 0;
 }
 
 Texture* Texture::load(const string &filename) {
@@ -93,6 +106,7 @@ void Texture::override(const Image *im) {
 }
 
 void Texture::overridex(const void *data, int nx, int ny, int nz, const string &format) {
+	_reset();
 	_create_image(data, nx, ny, nz, parse_format(format));
 	_create_view();
 	_create_sampler();

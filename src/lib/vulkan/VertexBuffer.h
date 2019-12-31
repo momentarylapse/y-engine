@@ -14,6 +14,8 @@ namespace vulkan {
 		vector pos;
 		vector normal;
 		float u,v;
+		Vertex1() {}
+		Vertex1(const vector &p, const vector &n, float u, float v);
 
 		static VkVertexInputBindingDescription binding_description();
 		static std::vector<VkVertexInputAttributeDescription> attribute_descriptions();

@@ -8,7 +8,12 @@
 
 namespace vulkan{
 
-
+Vertex1::Vertex1(const vector &p, const vector &n, float _u, float _v) {
+	pos = p;
+	normal = n;
+	u = _u;
+	v = _v;
+}
 
 VkVertexInputBindingDescription Vertex1::binding_description() {
 	VkVertexInputBindingDescription bd = {};
