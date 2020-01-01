@@ -16,9 +16,9 @@
 #include "object.h"
 #include "model.h"
 #include "material.h"
+#include "terrain.h"
 #if 0
 #include "model_manager.h"
-#include "terrain.h"
 #include "../lib/nix/nix.h"
 #ifdef _X_ALLOW_X_
 #include "../physics/physics.h"
@@ -201,10 +201,8 @@ void World::reset() {
 	gravity = v_0;
 
 	// terrains
-#if 0
 	for (auto *t: terrains)
 		delete t;
-#endif
 	terrains.clear();
 
 	// objects
@@ -356,15 +354,13 @@ bool World::load(const LevelData &ld) {
 		}
 	add_all_objects_to_lists = true;
 
-#if 0
 	// terrains
 	foreachi(auto &t, ld.terrain, i){
-		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)LevelData.terrain.num * 0.4f);
+		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrain.num * 0.4f);
 		Terrain *tt = new Terrain(t.filename, t.pos);
 		terrains.add(tt);
 		ok &= !tt->error;
 	}
-#endif
 
 	net_msg_enabled = true;
 	return ok;

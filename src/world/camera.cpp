@@ -104,6 +104,7 @@ void Camera::on_iterate(float dt) {
 
 void Camera::set_view() {
 	m_projection = matrix::perspective(pi/4 * zoom, vulkan::target_width / (float)vulkan::target_height, min_depth, max_depth);
+	m_projection = m_projection * matrix::rotation_x(pi);
 	m_view = matrix::rotation_q(ang).transpose() * matrix::translation(-pos);
 
 	m_all = m_projection * m_view;

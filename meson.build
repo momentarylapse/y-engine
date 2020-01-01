@@ -187,6 +187,7 @@ sources = [
 	'src/world/material.cpp',
 	'src/world/model.cpp',
 	'src/world/object.cpp',
+	'src/world/terrain.cpp',
 	'src/world/world.cpp',
 	'src/main.cpp',
 	'src/meta.cpp'

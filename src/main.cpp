@@ -17,6 +17,7 @@
 #include "world/camera.h"
 #include "world/world.h"
 #include "world/object.h"
+#include "world/terrain.h"
 
 
 // pipeline: shader + z buffer / blending parameters
@@ -320,14 +321,26 @@ private:
 		cb->begin_render_pass(vulkan::render_pass, world.background);
 		cb->set_pipeline(pipeline);
 
+
+		UniformBufferObject u;
+		u.proj = cam->m_projection.transpose();
+		u.view = cam->m_view.transpose();
+
+		for (auto *t: world.terrains) {
+			t->draw(); // rebuild stuff...
+
+			u.model = matrix::ID.transpose();
+			t->ubo->update(&u);
+
+			cb->bind_descriptor_set(0, t->dset);
+			cb->draw(t->vertex_buffer);
+		}
+
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 
-			m->ang = quaternion::rotation_v(vector(-0.3f,0.5f,time));
+			//m->ang = quaternion::rotation_v(vector(-0.3f,0.5f,time));
 
-			UniformBufferObject u;
-			u.proj = cam->m_projection.transpose();
-			u.view = cam->m_view.transpose();
 			u.model = mtr(m->pos, m->ang).transpose();
 			s.ubo->update(&u);
 
@@ -344,7 +357,7 @@ private:
 	void draw_frame() {
 		speedometer.tick(text);
 
-		cam->pos = 1000*vector::EZ;
+		cam->pos = -(1000+time*100)*vector::EZ;
 		cam->set_view();
 
 		static auto start_time = high_resolution_clock::now();
