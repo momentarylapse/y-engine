@@ -15,9 +15,7 @@
 class Model;
 class Object;
 class Terrain;
-namespace Light {
-	class Light;
-}
+class Light;
 
 namespace Gui {
 	class Font;
@@ -33,7 +31,7 @@ public:
 	float detail_factor_inv;
 	int shadow_level;
 	bool shadow_lower_detail;
-	Light::Light *shadow_light;
+	Light *shadow_light;
 	color shadow_color;
 	
 	int multisampling;

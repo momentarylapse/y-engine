@@ -17,6 +17,11 @@
 #include "model.h"
 #include "material.h"
 #include "terrain.h"
+
+#ifdef _X_ALLOW_X_
+#include "../fx/Light.h"
+#endif
+
 #if 0
 #include "model_manager.h"
 #include "../lib/nix/nix.h"
@@ -25,7 +30,6 @@
 #include "../physics/links.h"
 #include "../physics/collision.h"
 #include "../fx/fx.h"
-#include "../fx/light.h"
 #endif
 #include "../networking.h"
 #endif
@@ -324,15 +328,9 @@ bool World::load(const LevelData &ld) {
 	// set up light (sun and ambient)
 	ambient = ld.ambient;
 
-#if 0
 #ifdef _X_ALLOW_X_
-	sun = new Light::Light;
-	sun->set_colors(ld.sun_color[0],
-	                ld.sun_color[1],
-	                ld.sun_color[2]);
-	sun->SetDirectional(ld.sun_ang.ang2dir());
+	sun = new Light(v_0, ld.sun_ang.ang2dir(), ld.sun_color[1], -1, -1);
 	sun->enabled = ld.sun_enabled;
-#endif
 #endif
 
 	// skybox
@@ -1322,6 +1320,10 @@ void World::unregister_model(Model *m) {
 	for (int i=0;i<m->bone.num;i++)
 		if (m->bone[i].model)
 			unregister_model(m->bone[i].model);
+}
+
+void World::add_light(Light *l) {
+	lights.add(l);
 }
 
 #if 0

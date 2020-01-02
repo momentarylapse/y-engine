@@ -40,6 +40,7 @@ endif
 
 
 sources = [
+	'src/fx/Light.cpp',
 	'src/lib/any/any.cpp',
 	'src/lib/base/array.cpp',
 	'src/lib/base/strings.cpp',

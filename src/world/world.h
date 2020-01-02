@@ -19,9 +19,8 @@ class Object;
 class Material;
 class Terrain;
 class TemplateDataScriptVariable;
-namespace Light{
-	class Light;
-};
+class Light;
+
 namespace vulkan {
 	class UBOWrapper;
 	class DescriptorSet;
@@ -130,7 +129,12 @@ public:
 	Array<Model*> skybox;
 	color ambient;
 	Fog fog;
-	Light::Light *sun;
+
+	Array<Light*> lights;
+	Light *sun;
+	void add_light(Light *l);
+
+
 	float speed_of_sound;
 
 	vulkan::UBOWrapper *ubo_light;

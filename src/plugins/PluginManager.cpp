@@ -12,6 +12,7 @@
 #include "../world/model.h"
 #include "../world/terrain.h"
 #include "../world/camera.h"
+#include "../fx/Light.h"
 
 
 PluginManager plugin_manager;
@@ -66,6 +67,11 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("World.terrains", &World::terrains);
 	Kaba::declare_class_element("World.background", &World::background);
 	Kaba::declare_class_element("World.skyboxes", &World::skybox);
+	Kaba::declare_class_element("World.sun", &World::sun);
+	Kaba::declare_class_element("World.lights", &World::lights);
+	Kaba::link_external_class_func("World.create_object", &World::create_object);
+	Kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
+	Kaba::link_external_class_func("World.add_light", &World::add_light);
 
 
 	Controller con;
@@ -86,6 +92,19 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("Controller.on_right_button_down", &Controller::on_right_button_down, &con);
 	Kaba::link_external_virtual("Controller.on_right_button_up", &Controller::on_right_button_up, &con);
 	Kaba::link_external_virtual("Controller.before_draw", &Controller::before_draw, &con);
+
+
+	Kaba::declare_class_size("Light", sizeof(Light));
+	Kaba::declare_class_element("Light.pos", &Light::pos);
+	Kaba::declare_class_element("Light.dir", &Light::dir);
+	Kaba::declare_class_element("Light.color", &Light::col);
+	Kaba::declare_class_element("Light.radius", &Light::radius);
+	Kaba::declare_class_element("Light.theta", &Light::theta);
+	Kaba::declare_class_element("Light.enabled", &Light::enabled);
+
+	Kaba::link_external_class_func("LightParallel.__init__", &Light::__init_parallel__);
+	Kaba::link_external_class_func("LightSpherical.__init__", &Light::__init_spherical__);
+	Kaba::link_external_class_func("LightCone.__init__", &Light::__init_cone__);
 
 
 	Kaba::link_external("world", &world);

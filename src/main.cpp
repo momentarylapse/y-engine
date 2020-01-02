@@ -19,6 +19,8 @@
 #include "world/object.h"
 #include "world/terrain.h"
 
+#include "fx/Light.h"
+
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
 
@@ -294,6 +296,9 @@ private:
 		CameraReset();
 		GodLoadWorld(game_ini.default_world);
 
+		msg_write("sun");
+		msg_write(p2s(world.sun));
+
 		text = new Text(vector(0.05f,0.05f,0), "Hallo, kleiner Test äöü", 0.05f);
 
 		for (auto &s: world.scripts)
@@ -413,11 +418,14 @@ private:
 		u.view = cam->m_view.transpose();
 
 		UBOLight l;
-		l.pos = vector(0,0,0);
-		l.dir = vector(0,1,0);
-		l.col = White;
-		l.radius = 1000;
-		l.theta = pi/4;
+		l.col = Black;
+		if (world.sun->enabled) {
+			l.pos = world.sun->pos;
+			l.dir = world.sun->dir;
+			l.col = world.sun->col;
+			l.radius = world.sun->radius;
+			l.theta = world.sun->radius;
+		}
 		world.ubo_light->update(&l);
 
 		for (auto *t: world.terrains) {
