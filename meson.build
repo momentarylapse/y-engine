@@ -184,6 +184,8 @@ sources = [
 	'src/lib/vulkan/Texture.cpp',
 	'src/lib/vulkan/VertexBuffer.cpp',
 	'src/lib/vulkan/vulkan.cpp',
+	'src/plugins/Controller.cpp',
+	'src/plugins/PluginManager.cpp',
 	'src/world/camera.cpp',
 	'src/world/material.cpp',
 	'src/world/model.cpp',

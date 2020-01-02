@@ -194,6 +194,13 @@ void GodInit()
 #endif
 }
 
+World::World() {
+	ubo_light = nullptr;
+	sun = nullptr;
+
+	reset();
+}
+
 void World::reset() {
 	net_msg_enabled = false;
 	net_messages.clear();
@@ -305,6 +312,10 @@ bool World::load(const LevelData &ld) {
 	bool ok = true;
 	reset();
 
+
+	if (!ubo_light)
+		ubo_light = new vulkan::UBOWrapper(256);
+
 	engine.physics_enabled = ld.physics_enabled;
 	engine.collisions_enabled = true;//LevelData.physics_enabled;
 	gravity = ld.gravity;
@@ -357,13 +368,23 @@ bool World::load(const LevelData &ld) {
 	// terrains
 	foreachi(auto &t, ld.terrain, i){
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrain.num * 0.4f);
-		Terrain *tt = new Terrain(t.filename, t.pos);
-		terrains.add(tt);
+		Terrain *tt = create_terrain(t.filename, t.pos);
 		ok &= !tt->error;
 	}
 
+	scripts = ld.scripts;
+
 	net_msg_enabled = true;
 	return ok;
+}
+
+Terrain *World::create_terrain(const string &filename, const vector &pos) {
+	Terrain *tt = new Terrain(filename, pos);
+
+	tt->ubo = new vulkan::UBOWrapper(64*3);
+	tt->dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {tt->ubo, ubo_light}, {tt->material->textures[0]});
+	terrains.add(tt);
+	return tt;
 }
 
 bool LevelData::load(const string &filename) {
@@ -1250,7 +1271,7 @@ void World::register_model(Model *m) {
 		p.model = m;
 		p.material = mat;
 		p.ubo = new vulkan::UBOWrapper(64*3);
-		p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo}, {mat->textures[0]});
+		p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light}, {mat->textures[0]});
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;

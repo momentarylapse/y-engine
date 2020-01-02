@@ -121,6 +121,8 @@ void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFo
 	int ps = pixel_size(image_format);
 	VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+	if (depth > 1)
+		mip_levels = 0;
 
 
 	VkBuffer staging_buffer;
@@ -132,7 +134,8 @@ void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFo
 		memcpy(data, image_data, static_cast<size_t>(image_size));
 	vkUnmapMemory(device, staging_memory);
 
-	create_image(width, height, depth, mip_levels, image_format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+	auto usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	create_image(width, height, depth, mip_levels, image_format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 
 	transition_image_layout(image, image_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
 	copy_buffer_to_image(staging_buffer, image, width, height, depth);
@@ -140,7 +143,7 @@ void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFo
 	vkDestroyBuffer(device, staging_buffer, nullptr);
 	vkFreeMemory(device, staging_memory, nullptr);
 
-	if (depth == 1)
+	if (mip_levels > 0)
 		_generate_mipmaps(image_format);
 }
 

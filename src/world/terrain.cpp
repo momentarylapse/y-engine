@@ -36,6 +36,8 @@ void Terrain::reset()
 Terrain::Terrain()
 {
 	material = NULL;
+	ubo = nullptr;
+	dset = nullptr;
 	reset();
 }
 
@@ -100,8 +102,6 @@ bool Terrain::load(const string &_filename_, const vector &_pos_, bool deep)
 						partition[x][z] = -1;
 
 				vertex_buffer = new vulkan::VertexBuffer();
-				ubo = new vulkan::UBOWrapper(64*3);
-				dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {ubo}, {material->textures[0]});
 			}
 		}else{
 			msg_error(format("wrong file format: %d (4 expected)",ffv));

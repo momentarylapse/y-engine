@@ -113,9 +113,11 @@ struct GodNetMessage {
 // game data
 class World {
 public:
+	World();
 	void reset();
 	bool load(const LevelData &ld);
 	Object *create_object(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
+	Terrain *create_terrain(const string &filename, const vector &pos);
 
 	void register_object(Model *o, int index);
 	void unregister_object(Model *o);
@@ -130,6 +132,8 @@ public:
 	Fog fog;
 	Light::Light *sun;
 	float speed_of_sound;
+
+	vulkan::UBOWrapper *ubo_light;
 
 	vector gravity;
 
@@ -155,6 +159,9 @@ public:
 	Array<Terrain*> terrains;
 
 	Array<PartialModel> sorted_opaque, sorted_trans;
+
+
+	Array<LevelDataScript> scripts;
 
 
 	// esotherical (not in the world)

@@ -131,7 +131,7 @@ namespace vulkan{
 			VkWriteDescriptorSet w;
 			w.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			w.dstSet = descriptor_set;
-			w.dstBinding = 1 + j;
+			w.dstBinding = ubos.num + j;
 			w.dstArrayElement = 0;
 			w.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			w.descriptorCount = 1;

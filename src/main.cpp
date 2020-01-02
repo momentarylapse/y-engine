@@ -19,6 +19,9 @@
 #include "world/object.h"
 #include "world/terrain.h"
 
+#include "plugins/PluginManager.h"
+#include "plugins/Controller.h"
+
 
 // pipeline: shader + z buffer / blending parameters
 
@@ -42,10 +45,18 @@ string ObjectDir;
 using namespace std::chrono;
 
 
-struct UniformBufferObject {
+struct UBOMatrices {
 	alignas(16) matrix model;
 	alignas(16) matrix view;
 	alignas(16) matrix proj;
+};
+
+struct UBOLight {
+	alignas(16) vector pos;
+	alignas(16) vector dir;
+	alignas(16) float radius;
+	float theta;
+	alignas(16) color col;
 };
 
 
@@ -120,7 +131,7 @@ public:
 		height = h;
 		col = White;
 		tex = new vulkan::Texture();
-		ubo = new vulkan::UBOWrapper(sizeof(UniformBufferObject));
+		ubo = new vulkan::UBOWrapper(sizeof(UBOMatrices));
 		dset = nullptr;
 		rebuild();
 	}
@@ -231,6 +242,9 @@ private:
 
 		engine.set_dirs("Textures/", "Maps/", "Objects/", "Sound", "Scripts/", "Materials/", "Fonts/");
 
+		PluginManager::link_kaba();
+
+
 		auto shader = vulkan::Shader::load("3d.shader");
 		_default_shader_ = shader;
 		pipeline = vulkan::Pipeline::build(shader, vulkan::default_render_pass, 1, false);
@@ -244,15 +258,16 @@ private:
 		pipeline_2d->create();
 
 		Image im_x;
-		im_x.create(512, 512, Black);
+		im_x.create(128,128, Black);
 		texture_x = new vulkan::Texture();
 		texture_x->override(&im_x);
 
 		tex_ren = new TextureRenderer(texture_x);
 
-		pipeline_x = vulkan::Pipeline::build(shader_2d, tex_ren->render_pass, 1, false);
+		pipeline_x = vulkan::Pipeline::build(shader, tex_ren->render_pass, 1);
+		/*pipeline_x = vulkan::Pipeline::build(shader_2d, tex_ren->render_pass, 1, false);
 		pipeline_x->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-		pipeline_x->create();
+		pipeline_x->create();*/
 
 		vulkan::descriptor_pool = vulkan::create_descriptor_pool();
 
@@ -280,6 +295,9 @@ private:
 		GodLoadWorld(game_ini.default_world);
 
 		text = new Text(vector(0.05f,0.05f,0), "Hallo, kleiner Test äöü", 0.05f);
+
+		for (auto &s: world.scripts)
+			plugin_manager.add_controller(s.filename);
 	}
 	
 	GLFWwindow* create_window() {
@@ -301,6 +319,7 @@ private:
 	void main_loop() {
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
+			iterate();
 			draw_frame();
 		}
 
@@ -315,6 +334,13 @@ private:
 		glfwTerminate();
 	}
 
+	void iterate() {
+		for (auto *c: plugin_manager.controllers)
+			c->on_iterate(engine.elapsed);
+		for (auto *o: world.objects)
+			o->on_iterate(engine.elapsed);
+	}
+
 
 
 	matrix mtr(const vector &t, const quaternion &a) {
@@ -326,15 +352,19 @@ private:
 	struct Speedometer {
 		int frames = 0;
 		high_resolution_clock::time_point prev = high_resolution_clock::now();
+		high_resolution_clock::time_point prev_slow = high_resolution_clock::now();
 		void tick(Text *text) {
 			frames ++;
 		 	auto now = high_resolution_clock::now();
 			float dt = std::chrono::duration<float, std::chrono::seconds::period>(now - prev).count();
-			if (dt > 0.2f) {
-				text->text = f2s((float)frames/dt, 1);
+			engine.elapsed = dt;
+			prev = now;
+			float dt_slow = std::chrono::duration<float, std::chrono::seconds::period>(now - prev_slow).count();
+			if (dt_slow > 0.2f) {
+				text->text = f2s((float)frames/dt_slow, 1);
 				text->rebuild();
 				frames = 0;
-				prev = now;
+				prev_slow = now;
 			}
 		}
 	};
@@ -342,11 +372,12 @@ private:
 
 	float time;
 
+#if 0
 	void draw_x(vulkan::CommandBuffer *cb) {
 		cb->begin_render_pass(tex_ren->render_pass, vulkan::current_framebuffer);
 		cb->set_pipeline(pipeline_x);
 
-		UniformBufferObject u;
+		UBOMatrices u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
 		u.view = matrix::ID.transpose();
 		u.model = (matrix::translation(text->pos) * matrix::scale(text->width, text->height, 1)).transpose();
@@ -356,11 +387,12 @@ private:
 		cb->draw(vertex_buffer_2d);
 		cb->end_render_pass();
 	}
+#endif
 
 	void render_gui(vulkan::CommandBuffer *cb) {
 		cb->set_pipeline(pipeline_2d);
 
-		UniformBufferObject u;
+		UBOMatrices u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
 		u.view = matrix::ID.transpose();
 		u.model = (matrix::translation(text->pos) * matrix::scale(text->width, text->height, 1)).transpose();
@@ -370,15 +402,23 @@ private:
 		cb->draw(vertex_buffer_2d);
 	}
 
-	void render_all(vulkan::CommandBuffer *cb) {
-		vulkan::default_render_pass->clear_color = world.background;
-		cb->begin_render_pass(vulkan::default_render_pass, vulkan::current_framebuffer);
-		cb->set_pipeline(pipeline);
+	void render_all(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip) {
+		rp->clear_color = world.background;
+		cb->begin_render_pass(rp, vulkan::current_framebuffer);
+		cb->set_pipeline(pip);
 
 
-		UniformBufferObject u;
+		UBOMatrices u;
 		u.proj = cam->m_projection.transpose();
 		u.view = cam->m_view.transpose();
+
+		UBOLight l;
+		l.pos = vector(0,0,0);
+		l.dir = vector(0,1,0);
+		l.col = White;
+		l.radius = 1000;
+		l.theta = pi/4;
+		world.ubo_light->update(&l);
 
 		for (auto *t: world.terrains) {
 			t->draw(); // rebuild stuff...
@@ -408,23 +448,26 @@ private:
 
 	}
 
+#if 0
 	void render_to_texture() {
 		tex_ren->start_frame();
+		msg_write("a2");
 		cam->set_view();
 
-		cb->begin();
-		render_all(cb);
-	//	draw_x(cb);
+		/*cb->begin();
+		//render_all(cb, tex_ren->render_pass, pipeline_x);
+		draw_x(cb);
 		cb->end();
 
-		tex_ren->submit(cb);
+		tex_ren->submit(cb);*/
+		msg_write("a3");
 		vulkan::wait_device_idle();
 	}
+#endif
 
 	void draw_frame() {
 		speedometer.tick(text);
 
-		cam->pos = -(1000+time*100)*vector::EZ;
 		cam->set_view();
 
 		static auto start_time = high_resolution_clock::now();
@@ -432,19 +475,17 @@ private:
 		auto current_time = high_resolution_clock::now();
 		time = duration<float, seconds::period>(current_time - start_time).count();
 
-		render_to_texture();
+		//render_to_texture();
 
-		world.terrains[0]->dset->set({world.terrains[0]->ubo}, {texture_x});
+		//world.terrains[0]->dset->set({world.terrains[0]->ubo}, {texture_x});
 
 		if (!vulkan::start_frame())
 			return;
 		cam->set_view();
 
-		float pc = 0;
-
 
 		cb->begin();
-		render_all(cb);
+		render_all(cb, vulkan::default_render_pass, pipeline);
 		cb->end();
 
 		vulkan::submit_command_buffer(cb);
