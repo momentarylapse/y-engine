@@ -16,14 +16,11 @@
 
 
 namespace vulkan {
-	extern VkFormat swap_chain_image_format;
-	extern VkExtent2D swap_chain_extent;
-	extern std::vector<VkImageView> swap_chain_image_views;
-	extern std::vector<VkFramebuffer> swap_chain_framebuffers;
 
+// so far, we can only create a "default" render pass with 1 color and 1 depth attachement!
 	RenderPass::RenderPass(VkAttachmentLoadOp color_load_op, VkAttachmentLoadOp depth_load_op) {
 		color_attachment = {};
-		color_attachment.format = swap_chain_image_format;
+		color_attachment.format = swap_chain.image_format;
 		color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		color_attachment.loadOp = color_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
 		color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -64,6 +61,9 @@ namespace vulkan {
 		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
+		clear_color = Black;
+		clear_z = 1.0f;
+		clear_stencil = 0;
 
 		create();
 	}

@@ -14,6 +14,7 @@
 
 
 #include "../base/base.h"
+#include "../image/color.h"
 #include <vulkan/vulkan.h>
 #include <vector>
 
@@ -31,6 +32,9 @@ namespace vulkan{
 		void destroy();
 
 		VkRenderPass render_pass;
+		color clear_color;
+		float clear_z;
+		unsigned int clear_stencil;
 
 	private:
 		VkAttachmentDescription color_attachment;

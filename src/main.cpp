@@ -46,7 +46,7 @@ struct UniformBufferObject {
 
 
 namespace vulkan {
-	extern RenderPass *render_pass;
+	extern RenderPass *default_render_pass;
 	extern VkDescriptorPool descriptor_pool;
 };
 
@@ -206,13 +206,13 @@ private:
 
 		auto shader = vulkan::Shader::load("3d.shader");
 		_default_shader_ = shader;
-		pipeline = vulkan::Pipeline::build(shader, vulkan::render_pass, 1, false);
+		pipeline = vulkan::Pipeline::build(shader, vulkan::default_render_pass, 1, false);
 		//pipeline->wireframe = true;
 		pipeline->create();
 
 
 		shader_2d = vulkan::Shader::load("2d.shader");
-		pipeline_2d = vulkan::Pipeline::build(shader_2d, vulkan::render_pass, 1, false);
+		pipeline_2d = vulkan::Pipeline::build(shader_2d, vulkan::default_render_pass, 1, false);
 		pipeline_2d->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pipeline_2d->create();
 
@@ -318,7 +318,8 @@ private:
 	}
 
 	void render_world(vulkan::CommandBuffer *cb) {
-		cb->begin_render_pass(vulkan::render_pass, world.background);
+		vulkan::default_render_pass->clear_color = world.background;
+		cb->begin_render_pass(vulkan::default_render_pass);
 		cb->set_pipeline(pipeline);
 
 

@@ -221,14 +221,14 @@ void Pipeline::create() {
 	VkViewport viewport = {};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)swap_chain_extent.width;
-	viewport.height = (float)swap_chain_extent.height;
+	viewport.width = (float)swap_chain.extent.width;
+	viewport.height = (float)swap_chain.extent.height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor = {};
 	scissor.offset = {0, 0};
-	scissor.extent = swap_chain_extent;
+	scissor.extent = swap_chain.extent;
 
 	VkPipelineViewportStateCreateInfo viewport_state = {};
 	viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

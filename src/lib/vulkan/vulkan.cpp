@@ -118,18 +118,11 @@ VkDevice device;
 VkQueue graphics_queue;
 VkQueue present_queue;
 
-VkSwapchainKHR swap_chain;
-Array<VkImage> swap_chain_images;
-VkFormat swap_chain_image_format;
-VkExtent2D swap_chain_extent;
-Array<VkImageView> swap_chain_image_views;
-Array<VkFramebuffer> swap_chain_framebuffers;
+SwapChain swap_chain;
 
-RenderPass *render_pass;
+RenderPass *default_render_pass;
 
-VkImage depth_image;
-VkDeviceMemory depth_image_memory;
-VkImageView depth_image_view;
+DepthBuffer depth_buffer;
 
 
 std::vector<VkSemaphore> image_available_semaphores;
@@ -155,12 +148,12 @@ void init(GLFWwindow* window) {
 	pick_physical_device();
 	create_logical_device();
 	create_swap_chain();
-	create_image_views();
+	swap_chain.create_image_views();
 	create_command_pool();
-	create_depth_resources();
+	depth_buffer.create(swap_chain.extent);
 
-	render_pass = new RenderPass();
-	create_framebuffers(render_pass);
+	default_render_pass = new RenderPass();
+	create_framebuffers(default_render_pass);
 
 	create_sync_objects();
 }
@@ -169,15 +162,7 @@ void destroy() {
 	std::cout << "vulkan destroy" << "\n";
 	cleanup_swap_chain();
 
-	//delete tex;
-	//delete shader;
-
 	destroy_descriptor_pool(descriptor_pool);
-
-	//delete_uniform_buffers();
-	//delete ubo;
-
-	//delete vb;
 
 	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
 		vkDestroySemaphore(device, render_finished_semaphores[i], nullptr);
@@ -212,35 +197,39 @@ void recreate_swap_chain() {
 	cleanup_swap_chain();
 
 	create_swap_chain();
-	create_image_views();
-	create_depth_resources();
+	swap_chain.create_image_views();
+	depth_buffer.create(swap_chain.extent);
 
-	render_pass->create();
-	create_framebuffers(render_pass);
+	default_render_pass->create();
+	create_framebuffers(default_render_pass);
 	//shader = new Shader("shaders/vert4.spv", "shaders/frag4.spv");
 	for (auto *p: pipelines)
 		p->create();
 }
 
 
-void cleanup_swap_chain() {
-	vkDestroyImageView(device, depth_image_view, nullptr);
-	vkDestroyImage(device, depth_image, nullptr);
-	vkFreeMemory(device, depth_image_memory, nullptr);
+void DepthBuffer::destroy() {
+	vkDestroyImageView(device, view, nullptr);
+	vkDestroyImage(device, image, nullptr);
+	vkFreeMemory(device, memory, nullptr);
+}
 
-	for (auto framebuffer : swap_chain_framebuffers) {
+void cleanup_swap_chain() {
+	depth_buffer.destroy();
+
+	for (auto framebuffer: swap_chain.framebuffers) {
 		vkDestroyFramebuffer(device, framebuffer, nullptr);
 	}
 
 	for (auto *p: pipelines)
 		p->create();
-	render_pass->destroy();
+	default_render_pass->destroy();
 
-	for (auto imageView : swap_chain_image_views) {
-		vkDestroyImageView(device, imageView, nullptr);
+	for (auto image_view: swap_chain.image_views) {
+		vkDestroyImageView(device, image_view, nullptr);
 	}
 
-	vkDestroySwapchainKHR(device, swap_chain, nullptr);
+	vkDestroySwapchainKHR(device, swap_chain.swap_chain, nullptr);
 }
 
 bool check_validation_layer_support() {
@@ -493,16 +482,16 @@ void create_swap_chain() {
 	createInfo.presentMode = presentMode;
 	createInfo.clipped = VK_TRUE;
 
-	if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swap_chain) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swap_chain.swap_chain) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
-	vkGetSwapchainImagesKHR(device, swap_chain, &imageCount, nullptr);
-	swap_chain_images.resize(imageCount);
-	vkGetSwapchainImagesKHR(device, swap_chain, &imageCount, &swap_chain_images[0]);
+	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &imageCount, nullptr);
+	swap_chain.images.resize(imageCount);
+	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &imageCount, &swap_chain.images[0]);
 
-	swap_chain_image_format = surfaceFormat.format;
-	swap_chain_extent = extent;
+	swap_chain.image_format = surfaceFormat.format;
+	swap_chain.extent = extent;
 }
 
 
@@ -553,43 +542,47 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	}
 }
 
+VkFramebuffer create_frame_buffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent) {
+	VkFramebufferCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	info.renderPass = rp->render_pass;
+	info.attachmentCount = attachments.num;
+	info.pAttachments = &attachments[0];
+	info.width = extent.width;
+	info.height = extent.height;
+	info.layers = 1;
+
+	VkFramebuffer fb;
+	if (vkCreateFramebuffer(device, &info, nullptr, &fb) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create framebuffer!");
+	}
+	return fb;
+}
+
 
 void create_framebuffers(RenderPass *rp) {
-	swap_chain_framebuffers.resize(swap_chain_image_views.num);
+	swap_chain.framebuffers.resize(swap_chain.image_views.num);
 
-	for (size_t i=0; i<swap_chain_image_views.num; i++) {
-		std::array<VkImageView, 2> attachments = {swap_chain_image_views[i], depth_image_view};
-
-		VkFramebufferCreateInfo framebuffer_info = {};
-		framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebuffer_info.renderPass = rp->render_pass;
-		framebuffer_info.attachmentCount = static_cast<uint32_t>(attachments.size());
-		framebuffer_info.pAttachments = attachments.data();
-		framebuffer_info.width = swap_chain_extent.width;
-		framebuffer_info.height = swap_chain_extent.height;
-		framebuffer_info.layers = 1;
-
-		if (vkCreateFramebuffer(device, &framebuffer_info, nullptr, &swap_chain_framebuffers[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create framebuffer!");
-		}
+	for (size_t i=0; i<swap_chain.image_views.num; i++) {
+		swap_chain.framebuffers[i] = create_frame_buffer(rp, {swap_chain.image_views[i], depth_buffer.view}, swap_chain.extent);
 	}
 }
 
-void create_depth_resources() {
-	VkFormat depth_format = find_depth_format();
+void DepthBuffer::create(VkExtent2D extent) {
+	format = find_depth_format();
 
-	create_image(swap_chain_extent.width, swap_chain_extent.height, 1, 1, depth_format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depth_image, depth_image_memory);
-	depth_image_view = create_image_view(depth_image, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+	create_image(extent.width, extent.height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+	view = create_image_view(image, format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
-	transition_image_layout(depth_image, depth_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
+	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 }
 
 
-void create_image_views() {
-	swap_chain_image_views.resize(swap_chain_images.num);
+void SwapChain::create_image_views() {
+	image_views.resize(images.num);
 
-	for (uint32_t i=0; i<swap_chain_images.num; i++) {
-		swap_chain_image_views[i] = create_image_view(swap_chain_images[i], swap_chain_image_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+	for (uint32_t i=0; i<images.num; i++) {
+		image_views[i] = create_image_view(images[i], image_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 }
 
@@ -623,7 +616,7 @@ void create_sync_objects() {
 bool start_frame() {
 	vkWaitForFences(device, 1, &in_flight_fences[current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
-	VkResult result = vkAcquireNextImageKHR(device, swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
+	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		recreate_swap_chain();
@@ -667,7 +660,7 @@ void end_frame() {
 	present_info.waitSemaphoreCount = 1;
 	present_info.pWaitSemaphores = signal_semaphores;
 
-	VkSwapchainKHR swap_chains[] = {swap_chain};
+	VkSwapchainKHR swap_chains[] = {swap_chain.swap_chain};
 	present_info.swapchainCount = 1;
 	present_info.pSwapchains = swap_chains;
 

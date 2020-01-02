@@ -9,7 +9,7 @@
 
 #if HAS_LIB_VULKAN
 namespace vulkan {
-	extern RenderPass *render_pass;
+	extern RenderPass *default_render_pass;
 	extern VkDescriptorPool descriptor_pool;
 };
 #endif
@@ -240,7 +240,7 @@ void SIAddPackageVulkan() {
 
 
 
-	add_ext_var("render_pass", TypeRenderPassP, (void*)vul_p(&vulkan::render_pass));
+	add_ext_var("render_pass", TypeRenderPassP, (void*)vul_p(&vulkan::default_render_pass));
 	add_ext_var("target_width", TypeInt, (void*)vul_p(&vulkan::target_height));
 	add_ext_var("target_height", TypeInt, (void*)vul_p(&vulkan::target_height));
 	/*add_ext_var("target", TypeRect, vul_p(&vulkan::target_rect));

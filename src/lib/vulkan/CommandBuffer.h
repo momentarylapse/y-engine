@@ -14,7 +14,6 @@
 #include <vulkan/vulkan.h>
 #include "../base/base.h"
 
-class color;
 class rect;
 
 namespace vulkan{
@@ -50,7 +49,7 @@ namespace vulkan{
 		void set_pipeline(Pipeline *p);
 		void bind_descriptor_set(int index, DescriptorSet *dset);
 		void push_constant(int offset, int size, void *data);
-		void begin_render_pass(RenderPass *rp, const color &clear_color);
+		void begin_render_pass(RenderPass *rp);
 		void end_render_pass();
 		void draw(VertexBuffer *vb);
 		void scissor(const rect &r);

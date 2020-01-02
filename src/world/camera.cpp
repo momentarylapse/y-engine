@@ -91,7 +91,7 @@ void Camera::__delete__() {
 
 
 void CameraCalcMove(float dt) {
-	for(Camera *v: cameras){
+	for (Camera *v: cameras){
 		if (!v->enabled)
 			continue;
 		v->on_iterate(dt);

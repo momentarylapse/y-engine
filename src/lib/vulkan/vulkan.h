@@ -94,9 +94,7 @@ namespace vulkan {
 
 
 	void create_framebuffers(RenderPass *rp);
-	void create_image_views();
 
-	void create_depth_resources();
 	bool has_stencil_component(VkFormat format);
 
 

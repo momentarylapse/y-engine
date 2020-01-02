@@ -24,11 +24,8 @@
 namespace vulkan{
 
 	VkCommandPool command_pool;
-	extern Array<VkFramebuffer> swap_chain_framebuffers;
 	extern VkQueue graphics_queue;
-	extern VkQueue present_queue;
 	uint32_t image_index;
-	extern int target_width, target_height;
 
 
 void create_command_pool() {
@@ -98,7 +95,7 @@ void CommandBuffer::__delete__() {
 }
 
 void CommandBuffer::_create() {
-	buffers.resize(swap_chain_framebuffers.num);
+	buffers.resize(swap_chain.images.num);
 
 	VkCommandBufferAllocateInfo ai = {};
 	ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -154,24 +151,21 @@ void CommandBuffer::begin() {
 	}
 }
 
-void CommandBuffer::begin_render_pass(RenderPass *rp, const color &clear_color) {
+void CommandBuffer::begin_render_pass(RenderPass *rp) {
 	std::array<VkClearValue, 2> cv = {};
-	memcpy((void*)&cv[0].color, &clear_color, sizeof(color));
-	cv[1].depthStencil = {1.0f, 0};
+	memcpy((void*)&cv[0].color, &rp->clear_color, sizeof(color));
+	cv[1].depthStencil = {rp->clear_z, rp->clear_stencil};
 
 	VkRenderPassBeginInfo rpi = {};
 	rpi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	rpi.renderPass = rp->render_pass;
-	rpi.framebuffer = swap_chain_framebuffers[image_index];
+	rpi.framebuffer = swap_chain.framebuffers[image_index];
 	rpi.renderArea.offset = {0, 0};
-	rpi.renderArea.extent = swap_chain_extent;
+	rpi.renderArea.extent = swap_chain.extent;
 	rpi.clearValueCount = static_cast<uint32_t>(cv.size());
 	rpi.pClearValues = cv.data();
 
 	vkCmdBeginRenderPass(current, &rpi, VK_SUBPASS_CONTENTS_INLINE);
-
-	VkRect2D scissor = {0, 0, (unsigned)target_width, (unsigned)target_height};
-	vkCmdSetScissor(current, 0, 1, &scissor);
 }
 
 void CommandBuffer::scissor(const rect &r) {

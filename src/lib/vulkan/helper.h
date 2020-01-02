@@ -28,8 +28,28 @@ namespace vulkan{
 
 	extern VkSurfaceKHR surface;
 
-	extern Array<VkImage> swap_chain_images;
-	extern VkExtent2D swap_chain_extent;
+	struct DepthBuffer {
+		VkFormat format;
+		VkImage image;
+		VkDeviceMemory memory;
+		VkImageView view;
+
+		void create(VkExtent2D extent);
+		void destroy();
+	};
+
+	struct SwapChain {
+		Array<VkImage> images;
+		VkExtent2D extent;
+		VkSwapchainKHR swap_chain;
+		VkFormat image_format;
+		Array<VkImageView> image_views;
+		Array<VkFramebuffer> framebuffers;
+
+		void create_image_views();
+	};
+
+	extern SwapChain swap_chain;
 
 
 	struct QueueFamilyIndices {
