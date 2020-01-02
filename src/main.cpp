@@ -174,6 +174,31 @@ public:
 };
 static GameIni game_ini;
 
+
+
+class TextureRenderer {
+public:
+	TextureRenderer(vulkan::Texture *tex) {
+
+		depth_buffer = new vulkan::DepthBuffer();
+		VkExtent2D extent = {(unsigned)tex->width, (unsigned)tex->height};
+		depth_buffer->create(extent, VK_FORMAT_D32_SFLOAT);
+
+		render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true);
+		frame_buffer = new vulkan::FrameBuffer(render_pass, {tex->view, depth_buffer->view}, extent);
+	}
+	vulkan::DepthBuffer *depth_buffer;
+	vulkan::FrameBuffer *frame_buffer;
+	vulkan::RenderPass *render_pass;
+	void start_frame() {
+		vulkan::alt_start_frame();
+		vulkan::current_framebuffer = frame_buffer;
+	}
+	void submit(vulkan::CommandBuffer *cb) {
+		vulkan::alt_submit_command_buffer(cb);
+	}
+};
+
 class YEngineApp {
 public:
 	
@@ -191,10 +216,8 @@ private:
 	vulkan::Pipeline *pipeline;
 	vulkan::Pipeline *pipeline_2d;
 	vulkan::Pipeline *pipeline_x;
-	vulkan::RenderPass *render_pass_x;
 	vulkan::Texture *texture_x;
-	vulkan::FrameBuffer *framebuffer_x;
-	vulkan::DepthBuffer *depth_x;
+	TextureRenderer *tex_ren;
 
 	Text *text;
 	vulkan::VertexBuffer *vertex_buffer_2d;
@@ -220,28 +243,16 @@ private:
 		pipeline_2d->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pipeline_2d->create();
 
-		std::cout << "a\n";
 		Image im_x;
-		im_x.create(128, 128, Black);
-		std::cout << "a1\n";
+		im_x.create(512, 512, Black);
 		texture_x = new vulkan::Texture();
 		texture_x->override(&im_x);
-		std::cout << "a3\n";
-		depth_x = new vulkan::DepthBuffer();
-		std::cout << "a4\n";
-		depth_x->create({128, 128}, VK_FORMAT_D32_SFLOAT);
-		std::cout << "a5\n";
 
-		render_pass_x = new vulkan::RenderPass({texture_x->format, depth_x->format}, true);
-		std::cout << "a6\n";
-		framebuffer_x = new vulkan::FrameBuffer(render_pass_x, {texture_x->view, depth_x->view}, {128,128});
-		std::cout << "a7\n";
+		tex_ren = new TextureRenderer(texture_x);
 
-
-		pipeline_x = vulkan::Pipeline::build(shader_2d, render_pass_x, 1, false);
+		pipeline_x = vulkan::Pipeline::build(shader_2d, tex_ren->render_pass, 1, false);
 		pipeline_x->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pipeline_x->create();
-		std::cout << "a8\n";
 
 		vulkan::descriptor_pool = vulkan::create_descriptor_pool();
 
@@ -332,10 +343,8 @@ private:
 	float time;
 
 	void draw_x(vulkan::CommandBuffer *cb) {
-		cb->begin_render_pass(render_pass_x, framebuffer_x);
-		std::cout << "yy1\n";
+		cb->begin_render_pass(tex_ren->render_pass, vulkan::current_framebuffer);
 		cb->set_pipeline(pipeline_x);
-		std::cout << "yy2\n";
 
 		UniformBufferObject u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
@@ -361,7 +370,7 @@ private:
 		cb->draw(vertex_buffer_2d);
 	}
 
-	void render_world(vulkan::CommandBuffer *cb) {
+	void render_all(vulkan::CommandBuffer *cb) {
 		vulkan::default_render_pass->clear_color = world.background;
 		cb->begin_render_pass(vulkan::default_render_pass, vulkan::current_framebuffer);
 		cb->set_pipeline(pipeline);
@@ -400,23 +409,16 @@ private:
 	}
 
 	void render_to_texture() {
-		std::cout << "xxx1\n";
-
-		vulkan::alt_start_frame();
-		std::cout << "xxx2\n";
+		tex_ren->start_frame();
+		cam->set_view();
 
 		cb->begin();
-		std::cout << "xxx3\n";
-		draw_x(cb);
-		std::cout << "xxx4\n";
+		render_all(cb);
+	//	draw_x(cb);
 		cb->end();
-		std::cout << "xxx5\n";
 
-		vulkan::alt_submit_command_buffer(cb);
-		std::cout << "xxx6\n";
-
+		tex_ren->submit(cb);
 		vulkan::wait_device_idle();
-		std::cout << "xxx99\n";
 	}
 
 	void draw_frame() {
@@ -436,12 +438,13 @@ private:
 
 		if (!vulkan::start_frame())
 			return;
+		cam->set_view();
 
 		float pc = 0;
 
 
 		cb->begin();
-		render_world(cb);
+		render_all(cb);
 		cb->end();
 
 		vulkan::submit_command_buffer(cb);

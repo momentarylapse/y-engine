@@ -100,7 +100,8 @@ namespace vulkan {
 bool framebuffer_resized = false;
 
 GLFWwindow* vulkan_window;
-int target_width, target_height;
+int device_width, device_height; // default (window)
+int target_width, target_height; // current
 
 
 
@@ -148,10 +149,10 @@ void init(GLFWwindow* window) {
 	std::cout << "vulkan init" << "\n";
 	vulkan_window = window;
 
-	target_width = 0;
-	target_height = 0;
-	while (target_width == 0 or target_height == 0) {
-		glfwGetFramebufferSize(vulkan_window, &target_width, &target_height);
+	device_width = 0;
+	device_height = 0;
+	while (device_width == 0 or device_height == 0) {
+		glfwGetFramebufferSize(vulkan_window, &device_width, &device_height);
 		glfwWaitEvents();
 	}
 
@@ -194,8 +195,8 @@ void destroy() {
 }
 
 void on_resize(int width, int height) {
-	target_width = width;
-	target_height = height;
+	device_width = width;
+	device_height = height;
 	framebuffer_resized = true;
 }
 
@@ -536,8 +537,8 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	} else {
 
 		VkExtent2D actual_extent = {
-			static_cast<uint32_t>(target_width),
-			static_cast<uint32_t>(target_height)
+			static_cast<uint32_t>(device_width),
+			static_cast<uint32_t>(device_height)
 		};
 
 		actual_extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actual_extent.width));
@@ -669,6 +670,8 @@ void Renderer::present() {
 }
 
 bool start_frame() {
+	target_width = device_width;
+	target_height = device_height;
 	return default_renderer.start_frame();
 }
 
