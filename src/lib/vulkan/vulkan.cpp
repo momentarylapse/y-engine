@@ -227,23 +227,23 @@ void cleanup_swap_chain() {
 }
 
 bool check_validation_layer_support() {
-	uint32_t layerCount;
-	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+	uint32_t layer_count;
+	vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
-	std::vector<VkLayerProperties> availableLayers(layerCount);
-	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+	std::vector<VkLayerProperties> available_layers(layer_count);
+	vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
 
-	for (const char* layerName : validation_layers) {
-		bool layerFound = false;
+	for (const char* layer_name : validation_layers) {
+		bool layer_found = false;
 
-		for (const auto& layerProperties : availableLayers) {
-			if (strcmp(layerName, layerProperties.layerName) == 0) {
-				layerFound = true;
+		for (const auto& layer_properties : available_layers) {
+			if (strcmp(layer_name, layer_properties.layerName) == 0) {
+				layer_found = true;
 				break;
 			}
 		}
 
-		if (!layerFound) {
+		if (!layer_found) {
 			return false;
 		}
 	}
@@ -252,10 +252,10 @@ bool check_validation_layer_support() {
 }
 std::vector<const char*> get_required_extensions() {
 	uint32_t glfw_extension_count = 0;
-	const char** glfwExtensions;
-	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+	const char** glfw_extensions;
+	glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
-	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfw_extension_count);
+	std::vector<const char*> extensions(glfw_extensions, glfw_extensions + glfw_extension_count);
 
 	if (enable_validation_layers) {
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -275,9 +275,9 @@ void create_instance() {
 
 	VkApplicationInfo app_info = {};
 	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	app_info.pApplicationName = "Hello Triangle";
+	app_info.pApplicationName = "Y-Engine";
 	app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	app_info.pEngineName = "No Engine";
+	app_info.pEngineName = "Y-Engine";
 	app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 	app_info.apiVersion = VK_API_VERSION_1_0;
 
@@ -341,10 +341,10 @@ bool is_device_suitable(VkPhysicalDevice device) {
 		SwapChainSupportDetails swapChainSupport = query_swap_chain_support(device);
 		swap_chain_adequate = !swapChainSupport.formats.empty() and !swapChainSupport.presentModes.empty();
 	}
-	VkPhysicalDeviceFeatures supportedFeatures;
-	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+	VkPhysicalDeviceFeatures supported_features;
+	vkGetPhysicalDeviceFeatures(device, &supported_features);
 
-	return indices.is_complete() and extensions_supported and swap_chain_adequate and supportedFeatures.samplerAnisotropy;
+	return indices.is_complete() and extensions_supported and swap_chain_adequate and supported_features.samplerAnisotropy;
 }
 
 SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device) {
@@ -352,39 +352,39 @@ SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device) {
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
 
-	uint32_t formatCount;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+	uint32_t format_count;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, nullptr);
 
-	if (formatCount != 0) {
-		details.formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+	if (format_count != 0) {
+		details.formats.resize(format_count);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, details.formats.data());
 	}
 
-	uint32_t presentModeCount;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+	uint32_t present_mode_count;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &present_mode_count, nullptr);
 
-	if (presentModeCount != 0) {
-		details.presentModes.resize(presentModeCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+	if (present_mode_count != 0) {
+		details.presentModes.resize(present_mode_count);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &present_mode_count, details.presentModes.data());
 	}
 
 	return details;
 }
 
 bool check_device_extension_support(VkPhysicalDevice device) {
-	uint32_t extensionCount;
-	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+	uint32_t extension_count;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
 
-	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+	std::vector<VkExtensionProperties> available_extensions(extension_count);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, available_extensions.data());
 
-	std::set<std::string> requiredExtensions(device_extensions.begin(), device_extensions.end());
+	std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
 
-	for (const auto& extension : availableExtensions) {
-		requiredExtensions.erase(extension.extensionName);
+	for (const auto& extension : available_extensions) {
+		required_extensions.erase(extension.extensionName);
 	}
 
-	return requiredExtensions.empty();
+	return required_extensions.empty();
 }
 
 
@@ -396,12 +396,12 @@ void create_logical_device() {
 
 	float queue_priority = 1.0f;
 	for (uint32_t queue_family : unique_queue_families) {
-		VkDeviceQueueCreateInfo queueCreateInfo = {};
-		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queueCreateInfo.queueFamilyIndex = queue_family;
-		queueCreateInfo.queueCount = 1;
-		queueCreateInfo.pQueuePriorities = &queue_priority;
-		queue_create_infos.push_back(queueCreateInfo);
+		VkDeviceQueueCreateInfo queue_create_info = {};
+		queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queue_create_info.queueFamilyIndex = queue_family;
+		queue_create_info.queueCount = 1;
+		queue_create_info.pQueuePriorities = &queue_priority;
+		queue_create_infos.push_back(queue_create_info);
 	}
 
 	VkPhysicalDeviceFeatures device_features = {};
@@ -438,81 +438,81 @@ void create_logical_device() {
 
 
 void create_swap_chain() {
-	SwapChainSupportDetails swapChainSupport = query_swap_chain_support(physical_device);
+	SwapChainSupportDetails swap_chain_support = query_swap_chain_support(physical_device);
 
-	VkSurfaceFormatKHR surfaceFormat = choose_swap_surface_format(swapChainSupport.formats);
-	VkPresentModeKHR presentMode = choose_swap_present_mode(swapChainSupport.presentModes);
-	VkExtent2D extent = choose_swap_extent(swapChainSupport.capabilities);
+	VkSurfaceFormatKHR surface_format = choose_swap_surface_format(swap_chain_support.formats);
+	VkPresentModeKHR present_mode = choose_swap_present_mode(swap_chain_support.presentModes);
+	VkExtent2D extent = choose_swap_extent(swap_chain_support.capabilities);
 
-	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-	if (swapChainSupport.capabilities.maxImageCount > 0 and imageCount > swapChainSupport.capabilities.maxImageCount) {
-		imageCount = swapChainSupport.capabilities.maxImageCount;
+	uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
+	if (swap_chain_support.capabilities.maxImageCount > 0 and image_count > swap_chain_support.capabilities.maxImageCount) {
+		image_count = swap_chain_support.capabilities.maxImageCount;
 	}
 
-	VkSwapchainCreateInfoKHR createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = surface;
+	VkSwapchainCreateInfoKHR info = {};
+	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	info.surface = surface;
 
-	createInfo.minImageCount = imageCount;
-	createInfo.imageFormat = surfaceFormat.format;
-	createInfo.imageColorSpace = surfaceFormat.colorSpace;
-	createInfo.imageExtent = extent;
-	createInfo.imageArrayLayers = 1;
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	info.minImageCount = image_count;
+	info.imageFormat = surface_format.format;
+	info.imageColorSpace = surface_format.colorSpace;
+	info.imageExtent = extent;
+	info.imageArrayLayers = 1;
+	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 	QueueFamilyIndices indices = find_queue_families(physical_device);
-	uint32_t queueFamilyIndices[] = {indices.graphics_family.value(), indices.present_family.value()};
+	uint32_t queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
 
 	if (indices.graphics_family != indices.present_family) {
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+		info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		info.queueFamilyIndexCount = 2;
+		info.pQueueFamilyIndices = queue_family_indices;
 	} else {
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	}
 
-	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	createInfo.presentMode = presentMode;
-	createInfo.clipped = VK_TRUE;
+	info.preTransform = swap_chain_support.capabilities.currentTransform;
+	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	info.presentMode = present_mode;
+	info.clipped = VK_TRUE;
 
-	if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swap_chain.swap_chain) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(device, &info, nullptr, &swap_chain.swap_chain) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
-	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &imageCount, nullptr);
-	swap_chain.images.resize(imageCount);
-	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &imageCount, &swap_chain.images[0]);
+	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &image_count, nullptr);
+	swap_chain.images.resize(image_count);
+	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &image_count, &swap_chain.images[0]);
 
-	swap_chain.image_format = surfaceFormat.format;
+	swap_chain.image_format = surface_format.format;
 	swap_chain.extent = extent;
 }
 
 
 
 
-VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
-	if (availableFormats.size() == 1 and availableFormats[0].format == VK_FORMAT_UNDEFINED) {
+VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatKHR>& available_formats) {
+	if (available_formats.size() == 1 and available_formats[0].format == VK_FORMAT_UNDEFINED) {
 		return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
 	}
 
-	for (const auto& availableFormat: availableFormats) {
-		if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM and availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-			return availableFormat;
+	for (const auto& format: available_formats) {
+		if (format.format == VK_FORMAT_B8G8R8A8_UNORM and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+			return format;
 		}
 	}
 
-	return availableFormats[0];
+	return available_formats[0];
 }
 
-VkPresentModeKHR choose_swap_present_mode(const std::vector<VkPresentModeKHR> availablePresentModes) {
+VkPresentModeKHR choose_swap_present_mode(const std::vector<VkPresentModeKHR> available_present_modes) {
 	VkPresentModeKHR best_mode = VK_PRESENT_MODE_FIFO_KHR;
 
-	for (const auto& availablePresentMode : availablePresentModes) {
-		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-			return availablePresentMode;
-		} else if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-			best_mode = availablePresentMode;
+	for (const auto& mode : available_present_modes) {
+		if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+			return mode;
+		} else if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+			best_mode = mode;
 		}
 	}
 
@@ -602,13 +602,13 @@ void submit_command_buffer(CommandBuffer *cb) {
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 	VkSemaphore wait_semaphores[] = {image_available_semaphores[current_frame]};
-	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 	submit_info.waitSemaphoreCount = 1;
 	submit_info.pWaitSemaphores = wait_semaphores;
-	submit_info.pWaitDstStageMask = waitStages;
+	submit_info.pWaitDstStageMask = wait_stages;
 
 	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &cb->current;
+	submit_info.pCommandBuffers = &cb->buffer;
 
 	submit_info.signalSemaphoreCount = 1;
 	submit_info.pSignalSemaphores = &render_finished_semaphores[current_frame];

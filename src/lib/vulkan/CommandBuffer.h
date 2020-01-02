@@ -38,8 +38,7 @@ namespace vulkan{
 
 		void _create();
 		void _destroy();
-		Array<VkCommandBuffer> buffers;
-		VkCommandBuffer current;
+		VkCommandBuffer buffer;
 
 		Pipeline *current_pipeline;
 

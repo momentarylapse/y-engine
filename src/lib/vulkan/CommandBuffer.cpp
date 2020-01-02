@@ -96,48 +96,46 @@ void CommandBuffer::__delete__() {
 }
 
 void CommandBuffer::_create() {
-	buffers.resize(swap_chain.images.num);
 
 	VkCommandBufferAllocateInfo ai = {};
 	ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	ai.commandPool = command_pool;
 	ai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	ai.commandBufferCount = (uint32_t)buffers.num;
+	ai.commandBufferCount = 1;
 
-	if (vkAllocateCommandBuffers(device, &ai, &buffers[0]) != VK_SUCCESS) {
+	if (vkAllocateCommandBuffers(device, &ai, &buffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
 }
 
 void CommandBuffer::_destroy() {
-	vkFreeCommandBuffers(device, command_pool, buffers.num, &buffers[0]);
+	vkFreeCommandBuffers(device, command_pool, 1, &buffer);
 }
 
 
 //VkDescriptorSet current_set;
 
 void CommandBuffer::set_pipeline(Pipeline *pl) {
-	vkCmdBindPipeline(current, VK_PIPELINE_BIND_POINT_GRAPHICS, pl->pipeline);
+	vkCmdBindPipeline(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pl->pipeline);
 	current_pipeline = pl;
 }
 void CommandBuffer::bind_descriptor_set(int index, DescriptorSet *dset) {
-	vkCmdBindDescriptorSets(current, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->layout, index, 1, &dset->descriptor_sets[image_index], 0, nullptr);
+	vkCmdBindDescriptorSets(buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, current_pipeline->layout, index, 1, &dset->descriptor_set, 0, nullptr);
 }
 void CommandBuffer::push_constant(int offset, int size, void *data) {
 	auto stage_flags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-	vkCmdPushConstants(current, current_pipeline->layout, stage_flags, offset, size, data);
+	vkCmdPushConstants(buffer, current_pipeline->layout, stage_flags, offset, size, data);
 }
 
 void CommandBuffer::draw(VertexBuffer *vb) {
-	VkBuffer vertexBuffers[] = {vb->vertex_buffer};
 	VkDeviceSize offsets[] = {0};
-	vkCmdBindVertexBuffers(current, 0, 1, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers(buffer, 0, 1, &vb->vertex_buffer, offsets);
 
 	if (vb->index_buffer) {
-		vkCmdBindIndexBuffer(current, vb->index_buffer, 0, VK_INDEX_TYPE_UINT16);
-		vkCmdDrawIndexed(current, vb->output_count, 1, 0, 0, 0);
+		vkCmdBindIndexBuffer(buffer, vb->index_buffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdDrawIndexed(buffer, vb->output_count, 1, 0, 0, 0);
 	} else {
-		vkCmdDraw(current, vb->output_count, 1, 0, 0);
+		vkCmdDraw(buffer, vb->output_count, 1, 0, 0);
 	}
 }
 
@@ -146,8 +144,7 @@ void CommandBuffer::begin() {
 	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-	current = buffers[image_index];
-	if (vkBeginCommandBuffer(current, &info) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(buffer, &info) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 }
@@ -166,21 +163,21 @@ void CommandBuffer::begin_render_pass(RenderPass *rp) {
 	info.clearValueCount = static_cast<uint32_t>(cv.size());
 	info.pClearValues = cv.data();
 
-	vkCmdBeginRenderPass(current, &info, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void CommandBuffer::scissor(const rect &r) {
 	VkRect2D scissor = {(int)r.x1, (int)r.y1, (unsigned int)r.width(), (unsigned int)r.height()};
-	vkCmdSetScissor(current, 0, 1, &scissor);
+	vkCmdSetScissor(buffer, 0, 1, &scissor);
 }
 
 
 void CommandBuffer::end_render_pass() {
-	vkCmdEndRenderPass(current);
+	vkCmdEndRenderPass(buffer);
 }
 
 void CommandBuffer::end() {
-	if (vkEndCommandBuffer(current) != VK_SUCCESS) {
+	if (vkEndCommandBuffer(buffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to record command buffer!");
 	}
 }

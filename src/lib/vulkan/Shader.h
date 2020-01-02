@@ -25,8 +25,8 @@ namespace vulkan{
 		void update(void *source);
 
 		int size;
-		std::vector<VkBuffer> buffers;
-		std::vector<VkDeviceMemory> memory;
+		VkBuffer buffer;
+		VkDeviceMemory memory;
 	};
 
 	class Shader {
@@ -66,7 +66,7 @@ namespace vulkan{
 
 		void set(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex);
 
-		std::vector<VkDescriptorSet> descriptor_sets;
+		VkDescriptorSet descriptor_set;
 
 
 		static VkDescriptorSetLayout create_layout(int num_ubos, int num_samplers);
