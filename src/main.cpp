@@ -45,11 +45,6 @@ struct UniformBufferObject {
 };
 
 
-namespace vulkan {
-	extern RenderPass *default_render_pass;
-	extern VkDescriptorPool descriptor_pool;
-};
-
 
 
 
@@ -319,7 +314,7 @@ private:
 
 	void render_world(vulkan::CommandBuffer *cb) {
 		vulkan::default_render_pass->clear_color = world.background;
-		cb->begin_render_pass(vulkan::default_render_pass);
+		cb->begin_render_pass(vulkan::default_render_pass, vulkan::current_framebuffer);
 		cb->set_pipeline(pipeline);
 
 

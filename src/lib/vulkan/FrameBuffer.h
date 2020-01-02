@@ -35,6 +35,7 @@ public:
 	~FrameBuffer();
 
 	VkFramebuffer frame_buffer;
+	VkExtent2D extent;
 	void create(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent);
 	void destroy();
 };

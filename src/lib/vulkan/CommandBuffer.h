@@ -22,6 +22,7 @@ namespace vulkan{
 	class VertexBuffer;
 	class RenderPass;
 	class DescriptorSet;
+	class FrameBuffer;
 
 	extern VkCommandPool command_pool;
 
@@ -48,7 +49,7 @@ namespace vulkan{
 		void set_pipeline(Pipeline *p);
 		void bind_descriptor_set(int index, DescriptorSet *dset);
 		void push_constant(int offset, int size, void *data);
-		void begin_render_pass(RenderPass *rp);
+		void begin_render_pass(RenderPass *rp, FrameBuffer *fb);
 		void end_render_pass();
 		void draw(VertexBuffer *vb);
 		void scissor(const rect &r);

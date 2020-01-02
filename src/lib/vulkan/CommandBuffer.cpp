@@ -26,7 +26,6 @@ namespace vulkan{
 
 	VkCommandPool command_pool;
 	extern VkQueue graphics_queue;
-	uint32_t image_index;
 
 
 void create_command_pool() {
@@ -56,11 +55,11 @@ VkCommandBuffer begin_single_time_commands() {
 	VkCommandBuffer command_buffer;
 	vkAllocateCommandBuffers(device, &ai, &command_buffer);
 
-	VkCommandBufferBeginInfo bi = {};
-	bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	VkCommandBufferBeginInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-	vkBeginCommandBuffer(command_buffer, &bi);
+	vkBeginCommandBuffer(command_buffer, &info);
 
 	return command_buffer;
 }
@@ -149,7 +148,7 @@ void CommandBuffer::begin() {
 	}
 }
 
-void CommandBuffer::begin_render_pass(RenderPass *rp) {
+void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 	std::array<VkClearValue, 2> cv = {};
 	memcpy((void*)&cv[0].color, &rp->clear_color, sizeof(color));
 	cv[1].depthStencil = {rp->clear_z, rp->clear_stencil};
@@ -157,9 +156,9 @@ void CommandBuffer::begin_render_pass(RenderPass *rp) {
 	VkRenderPassBeginInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	info.renderPass = rp->render_pass;
-	info.framebuffer = swap_chain.framebuffers[image_index].frame_buffer;
+	info.framebuffer = fb->frame_buffer;
 	info.renderArea.offset = {0, 0};
-	info.renderArea.extent = swap_chain.extent;
+	info.renderArea.extent = fb->extent;swap_chain.extent;
 	info.clearValueCount = static_cast<uint32_t>(cv.size());
 	info.pClearValues = cv.data();
 

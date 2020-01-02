@@ -40,7 +40,9 @@ FrameBuffer::~FrameBuffer() {
 }
 
 
-void FrameBuffer::create(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent) {
+void FrameBuffer::create(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D _extent) {
+	extent = _extent;
+
 	VkFramebufferCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	info.renderPass = rp->render_pass;

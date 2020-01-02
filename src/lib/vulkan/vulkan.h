@@ -51,8 +51,10 @@ namespace vulkan {
 
 
 
-	extern size_t current_frame;
 	extern bool framebuffer_resized;
+	extern FrameBuffer *current_framebuffer;
+
+	extern RenderPass *default_render_pass;
 
 	extern GLFWwindow* vulkan_window;
 	extern int target_width, target_height;
@@ -99,8 +101,7 @@ namespace vulkan {
 	bool has_stencil_component(VkFormat format);
 
 
-	void create_sync_objects();
-	void recreateSwapChain(GLFWwindow* window);
+	void recreate_swap_chain(GLFWwindow* window);
 
 }
 

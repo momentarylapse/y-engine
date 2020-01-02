@@ -95,10 +95,8 @@ namespace vulkan {
 	}
 
 
-extern uint32_t image_index;
 
 
-size_t current_frame = 0;
 bool framebuffer_resized = false;
 
 GLFWwindow* vulkan_window;
@@ -124,10 +122,24 @@ RenderPass *default_render_pass;
 
 DepthBuffer depth_buffer;
 
+class Renderer {
+public:
 
-std::vector<VkSemaphore> image_available_semaphores;
-std::vector<VkSemaphore> render_finished_semaphores;
-std::vector<VkFence> in_flight_fences;
+	uint32_t image_index;
+	uint32_t current_frame;
+	std::vector<VkSemaphore> image_available_semaphores;
+	std::vector<VkSemaphore> render_finished_semaphores;
+	std::vector<VkFence> in_flight_fences;
+
+	void create_sync_objects();
+	void destroy();
+
+	bool start_frame();
+	void end_frame();
+	void submit_command_buffer(CommandBuffer *cb);
+};
+Renderer default_renderer;
+FrameBuffer *current_framebuffer;
 
 
 
@@ -155,7 +167,7 @@ void init(GLFWwindow* window) {
 	default_render_pass = new RenderPass({swap_chain.image_format, depth_buffer.format});
 	create_framebuffers(default_render_pass);
 
-	create_sync_objects();
+	default_renderer.create_sync_objects();
 }
 
 void destroy() {
@@ -164,11 +176,7 @@ void destroy() {
 
 	destroy_descriptor_pool(descriptor_pool);
 
-	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
-		vkDestroySemaphore(device, render_finished_semaphores[i], nullptr);
-		vkDestroySemaphore(device, image_available_semaphores[i], nullptr);
-		vkDestroyFence(device, in_flight_fences[i], nullptr);
-	}
+	default_renderer.destroy();
 
 	destroy_command_pool();
 
@@ -560,8 +568,18 @@ void SwapChain::create_image_views() {
 
 
 
+void Renderer::destroy() {
+	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
+		vkDestroySemaphore(device, render_finished_semaphores[i], nullptr);
+		vkDestroySemaphore(device, image_available_semaphores[i], nullptr);
+		vkDestroyFence(device, in_flight_fences[i], nullptr);
+	}
+}
 
-void create_sync_objects() {
+
+
+
+void Renderer::create_sync_objects() {
 	image_available_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -574,15 +592,16 @@ void create_sync_objects() {
 	fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
-		if (vkCreateSemaphore(device, &semaphore_info, nullptr, &image_available_semaphores[i]) != VK_SUCCESS ||
-			vkCreateSemaphore(device, &semaphore_info, nullptr, &render_finished_semaphores[i]) != VK_SUCCESS ||
+		if (vkCreateSemaphore(device, &semaphore_info, nullptr, &image_available_semaphores[i]) != VK_SUCCESS or
+			vkCreateSemaphore(device, &semaphore_info, nullptr, &render_finished_semaphores[i]) != VK_SUCCESS or
 			vkCreateFence(device, &fence_info, nullptr, &in_flight_fences[i]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create synchronization objects for a frame!");
 		}
 	}
 }
 
-bool start_frame() {
+bool Renderer::start_frame() {
+	current_framebuffer = &swap_chain.framebuffers[image_index];
 	vkWaitForFences(device, 1, &in_flight_fences[current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
 	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
@@ -596,7 +615,8 @@ bool start_frame() {
 	return true;
 }
 
-void submit_command_buffer(CommandBuffer *cb) {
+
+void Renderer::submit_command_buffer(CommandBuffer *cb) {
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -620,7 +640,8 @@ void submit_command_buffer(CommandBuffer *cb) {
 	}
 }
 
-void end_frame() {
+
+void Renderer::end_frame() {
 	VkPresentInfoKHR present_info = {};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.waitSemaphoreCount = 1;
@@ -631,7 +652,7 @@ void end_frame() {
 
 	VkResult result = vkQueuePresentKHR(present_queue, &present_info);
 
-	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebuffer_resized) {
+	if (result == VK_ERROR_OUT_OF_DATE_KHR or result == VK_SUBOPTIMAL_KHR or framebuffer_resized) {
 		framebuffer_resized = false;
 		recreate_swap_chain();
 	} else if (result != VK_SUCCESS) {
@@ -641,9 +662,25 @@ void end_frame() {
 	current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+bool start_frame() {
+	return default_renderer.start_frame();
+}
+
+void submit_command_buffer(CommandBuffer *cb) {
+	default_renderer.submit_command_buffer(cb);
+}
+
+void end_frame() {
+	default_renderer.end_frame();
+}
+
 void wait_device_idle() {
 	vkDeviceWaitIdle(vulkan::device);
 }
+
+
+
+
 
 
 static void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
