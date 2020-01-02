@@ -9,6 +9,8 @@
 
 namespace vulkan{
 
+	class FrameBuffer;
+
 	void create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 	void create_image(uint32_t width, uint32_t height, uint32_t depth, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	void copy_buffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
@@ -28,23 +30,13 @@ namespace vulkan{
 
 	extern VkSurfaceKHR surface;
 
-	struct DepthBuffer {
-		VkFormat format;
-		VkImage image;
-		VkDeviceMemory memory;
-		VkImageView view;
-
-		void create(VkExtent2D extent);
-		void destroy();
-	};
-
 	struct SwapChain {
 		Array<VkImage> images;
 		VkExtent2D extent;
 		VkSwapchainKHR swap_chain;
 		VkFormat image_format;
 		Array<VkImageView> image_views;
-		Array<VkFramebuffer> framebuffers;
+		Array<FrameBuffer> framebuffers;
 
 		void create_image_views();
 	};

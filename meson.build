@@ -176,6 +176,7 @@ sources = [
 	'src/lib/sound/sound.cpp',
 	'src/lib/sound/sound_al.cpp',
 	'src/lib/vulkan/CommandBuffer.cpp',
+	'src/lib/vulkan/FrameBuffer.cpp',
 	'src/lib/vulkan/helper.cpp',
 	'src/lib/vulkan/Pipeline.cpp',
 	'src/lib/vulkan/RenderPass.cpp',

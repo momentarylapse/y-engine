@@ -15,6 +15,7 @@
 #include "Pipeline.h"
 #include "RenderPass.h"
 #include "Shader.h"
+#include "FrameBuffer.h"
 #include "../image/color.h"
 #include "../math/rect.h"
 #include <array>
@@ -67,12 +68,12 @@ VkCommandBuffer begin_single_time_commands() {
 void end_single_time_commands(VkCommandBuffer command_buffer) {
 	vkEndCommandBuffer(command_buffer);
 
-	VkSubmitInfo si = {};
-	si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	si.commandBufferCount = 1;
-	si.pCommandBuffers = &command_buffer;
+	VkSubmitInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	info.commandBufferCount = 1;
+	info.pCommandBuffers = &command_buffer;
 
-	vkQueueSubmit(graphics_queue, 1, &si, VK_NULL_HANDLE);
+	vkQueueSubmit(graphics_queue, 1, &info, VK_NULL_HANDLE);
 	vkQueueWaitIdle(graphics_queue);
 
 	vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
@@ -141,12 +142,12 @@ void CommandBuffer::draw(VertexBuffer *vb) {
 }
 
 void CommandBuffer::begin() {
-	VkCommandBufferBeginInfo beginInfo = {};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+	VkCommandBufferBeginInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
 	current = buffers[image_index];
-	if (vkBeginCommandBuffer(current, &beginInfo) != VK_SUCCESS) {
+	if (vkBeginCommandBuffer(current, &info) != VK_SUCCESS) {
 		throw std::runtime_error("failed to begin recording command buffer!");
 	}
 }
@@ -156,16 +157,16 @@ void CommandBuffer::begin_render_pass(RenderPass *rp) {
 	memcpy((void*)&cv[0].color, &rp->clear_color, sizeof(color));
 	cv[1].depthStencil = {rp->clear_z, rp->clear_stencil};
 
-	VkRenderPassBeginInfo rpi = {};
-	rpi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	rpi.renderPass = rp->render_pass;
-	rpi.framebuffer = swap_chain.framebuffers[image_index];
-	rpi.renderArea.offset = {0, 0};
-	rpi.renderArea.extent = swap_chain.extent;
-	rpi.clearValueCount = static_cast<uint32_t>(cv.size());
-	rpi.pClearValues = cv.data();
+	VkRenderPassBeginInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	info.renderPass = rp->render_pass;
+	info.framebuffer = swap_chain.framebuffers[image_index].frame_buffer;
+	info.renderArea.offset = {0, 0};
+	info.renderArea.extent = swap_chain.extent;
+	info.clearValueCount = static_cast<uint32_t>(cv.size());
+	info.pClearValues = cv.data();
 
-	vkCmdBeginRenderPass(current, &rpi, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(current, &info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void CommandBuffer::scissor(const rect &r) {

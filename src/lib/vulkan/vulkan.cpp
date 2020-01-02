@@ -20,7 +20,7 @@
 #include "../math/vector.h"
 #include "../math/matrix.h"
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
+const int MAX_FRAMES_IN_FLIGHT = 1;
 
 //#define NDEBUG
 
@@ -150,7 +150,7 @@ void init(GLFWwindow* window) {
 	create_swap_chain();
 	swap_chain.create_image_views();
 	create_command_pool();
-	depth_buffer.create(swap_chain.extent);
+	depth_buffer.create(swap_chain.extent, find_depth_format());
 
 	default_render_pass = new RenderPass();
 	create_framebuffers(default_render_pass);
@@ -198,7 +198,7 @@ void recreate_swap_chain() {
 
 	create_swap_chain();
 	swap_chain.create_image_views();
-	depth_buffer.create(swap_chain.extent);
+	depth_buffer.create(swap_chain.extent, find_depth_format());
 
 	default_render_pass->create();
 	create_framebuffers(default_render_pass);
@@ -208,17 +208,11 @@ void recreate_swap_chain() {
 }
 
 
-void DepthBuffer::destroy() {
-	vkDestroyImageView(device, view, nullptr);
-	vkDestroyImage(device, image, nullptr);
-	vkFreeMemory(device, memory, nullptr);
-}
-
 void cleanup_swap_chain() {
 	depth_buffer.destroy();
 
 	for (auto framebuffer: swap_chain.framebuffers) {
-		vkDestroyFramebuffer(device, framebuffer, nullptr);
+		framebuffer.destroy();
 	}
 
 	for (auto *p: pipelines)
@@ -542,40 +536,15 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities) {
 	}
 }
 
-VkFramebuffer create_frame_buffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent) {
-	VkFramebufferCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	info.renderPass = rp->render_pass;
-	info.attachmentCount = attachments.num;
-	info.pAttachments = &attachments[0];
-	info.width = extent.width;
-	info.height = extent.height;
-	info.layers = 1;
-
-	VkFramebuffer fb;
-	if (vkCreateFramebuffer(device, &info, nullptr, &fb) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create framebuffer!");
-	}
-	return fb;
-}
-
 
 void create_framebuffers(RenderPass *rp) {
 	swap_chain.framebuffers.resize(swap_chain.image_views.num);
 
 	for (size_t i=0; i<swap_chain.image_views.num; i++) {
-		swap_chain.framebuffers[i] = create_frame_buffer(rp, {swap_chain.image_views[i], depth_buffer.view}, swap_chain.extent);
+		swap_chain.framebuffers[i].create(rp, {swap_chain.image_views[i], depth_buffer.view}, swap_chain.extent);
 	}
 }
 
-void DepthBuffer::create(VkExtent2D extent) {
-	format = find_depth_format();
-
-	create_image(extent.width, extent.height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
-	view = create_image_view(image, format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
-
-	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
-}
 
 
 void SwapChain::create_image_views() {
@@ -627,7 +596,6 @@ bool start_frame() {
 	return true;
 }
 
-VkSemaphore signal_semaphores[1];
 void submit_command_buffer(CommandBuffer *cb) {
 
 	VkSubmitInfo submit_info = {};
@@ -642,9 +610,8 @@ void submit_command_buffer(CommandBuffer *cb) {
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &cb->current;
 
-	signal_semaphores[0] = render_finished_semaphores[current_frame];
 	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = signal_semaphores;
+	submit_info.pSignalSemaphores = &render_finished_semaphores[current_frame];
 
 	vkResetFences(device, 1, &in_flight_fences[current_frame]);
 
@@ -656,14 +623,10 @@ void submit_command_buffer(CommandBuffer *cb) {
 void end_frame() {
 	VkPresentInfoKHR present_info = {};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
 	present_info.waitSemaphoreCount = 1;
-	present_info.pWaitSemaphores = signal_semaphores;
-
-	VkSwapchainKHR swap_chains[] = {swap_chain.swap_chain};
+	present_info.pWaitSemaphores = &render_finished_semaphores[current_frame];
 	present_info.swapchainCount = 1;
-	present_info.pSwapchains = swap_chains;
-
+	present_info.pSwapchains = &swap_chain.swap_chain;
 	present_info.pImageIndices = &image_index;
 
 	VkResult result = vkQueuePresentKHR(present_queue, &present_info);

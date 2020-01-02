@@ -15,6 +15,7 @@
 #include "RenderPass.h"
 #include "Pipeline.h"
 #include "CommandBuffer.h"
+#include "FrameBuffer.h"
 
 extern const int MAX_FRAMES_IN_FLIGHT;
 
