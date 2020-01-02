@@ -18,9 +18,15 @@
 namespace vulkan {
 
 // so far, we can only create a "default" render pass with 1 color and 1 depth attachement!
-	RenderPass::RenderPass(VkAttachmentLoadOp color_load_op, VkAttachmentLoadOp depth_load_op) {
+	RenderPass::RenderPass(const Array<VkFormat> &format, bool clear) {
+		VkAttachmentLoadOp color_load_op = VK_ATTACHMENT_LOAD_OP_LOAD;
+		VkAttachmentLoadOp depth_load_op = VK_ATTACHMENT_LOAD_OP_LOAD;
+		if (clear) {
+			color_load_op = depth_load_op = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		}
+
 		color_attachment = {};
-		color_attachment.format = swap_chain.image_format;
+		color_attachment.format = format[0];
 		color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		color_attachment.loadOp = color_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
 		color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -30,7 +36,7 @@ namespace vulkan {
 		color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		depth_attachment = {};
-		depth_attachment.format = find_depth_format();
+		depth_attachment.format = format[1];
 		depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 		depth_attachment.loadOp = depth_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
 		depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -73,8 +79,8 @@ namespace vulkan {
 	}
 
 
-	void RenderPass::__init__() {
-		new(this) RenderPass();
+	void RenderPass::__init__(const Array<VkFormat> &format, bool clear) {
+		new(this) RenderPass(format, clear);
 	}
 
 	void RenderPass::__delete__() {

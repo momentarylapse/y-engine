@@ -22,10 +22,10 @@ namespace vulkan{
 
 	class RenderPass {
 	public:
-		RenderPass(VkAttachmentLoadOp color_load_op = VK_ATTACHMENT_LOAD_OP_CLEAR, VkAttachmentLoadOp depth_load_op = VK_ATTACHMENT_LOAD_OP_CLEAR);
+		RenderPass(const Array<VkFormat> &format, bool clear = true);
 		~RenderPass();
 
-		void __init__();
+		void __init__(const Array<VkFormat> &format, bool clear = true);
 		void __delete__();
 
 		void create();

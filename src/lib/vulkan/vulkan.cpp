@@ -152,7 +152,7 @@ void init(GLFWwindow* window) {
 	create_command_pool();
 	depth_buffer.create(swap_chain.extent, find_depth_format());
 
-	default_render_pass = new RenderPass();
+	default_render_pass = new RenderPass({swap_chain.image_format, depth_buffer.format});
 	create_framebuffers(default_render_pass);
 
 	create_sync_objects();
