@@ -32,6 +32,7 @@ namespace vulkan {
 
 		int width, height, depth;
 		int mip_levels;
+		VkFormat format;
 		VkImage image;
 		VkDeviceMemory memory;
 

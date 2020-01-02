@@ -54,6 +54,7 @@ Texture::Texture() {
 	view = nullptr;
 	width = height = depth = 0;
 	mip_levels = 0;
+	format = VK_FORMAT_UNDEFINED;
 }
 
 Texture::~Texture() {
@@ -116,6 +117,7 @@ void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFo
 	width = nx;
 	height = ny;
 	depth = nz;
+	format = image_format;
 	int ps = pixel_size(image_format);
 	VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;

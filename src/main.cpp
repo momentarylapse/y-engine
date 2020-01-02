@@ -31,7 +31,11 @@ void DrawSplashScreen(const string &str, float per) {
 void ExternalModelCleanup(Model *m) {}
 extern vulkan::Shader *_default_shader_;
 vulkan::Shader *shader_2d;
-vulkan::Pipeline *pipeline_2d;
+
+namespace vulkan {
+	bool alt_start_frame();
+	void alt_submit_command_buffer(CommandBuffer *cb);
+}
 
 string ObjectDir;
 
@@ -185,7 +189,12 @@ private:
 
 	vulkan::CommandBuffer *cb;
 	vulkan::Pipeline *pipeline;
-
+	vulkan::Pipeline *pipeline_2d;
+	vulkan::Pipeline *pipeline_x;
+	vulkan::RenderPass *render_pass_x;
+	vulkan::Texture *texture_x;
+	vulkan::FrameBuffer *framebuffer_x;
+	vulkan::DepthBuffer *depth_x;
 
 	Text *text;
 	vulkan::VertexBuffer *vertex_buffer_2d;
@@ -210,6 +219,29 @@ private:
 		pipeline_2d = vulkan::Pipeline::build(shader_2d, vulkan::default_render_pass, 1, false);
 		pipeline_2d->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pipeline_2d->create();
+
+		std::cout << "a\n";
+		Image im_x;
+		im_x.create(128, 128, Black);
+		std::cout << "a1\n";
+		texture_x = new vulkan::Texture();
+		texture_x->override(&im_x);
+		std::cout << "a3\n";
+		depth_x = new vulkan::DepthBuffer();
+		std::cout << "a4\n";
+		depth_x->create({128, 128}, VK_FORMAT_D32_SFLOAT);
+		std::cout << "a5\n";
+
+		render_pass_x = new vulkan::RenderPass({texture_x->format, depth_x->format}, true);
+		std::cout << "a6\n";
+		framebuffer_x = new vulkan::FrameBuffer(render_pass_x, {texture_x->view, depth_x->view}, {128,128});
+		std::cout << "a7\n";
+
+
+		pipeline_x = vulkan::Pipeline::build(shader_2d, render_pass_x, 1, false);
+		pipeline_x->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+		pipeline_x->create();
+		std::cout << "a8\n";
 
 		vulkan::descriptor_pool = vulkan::create_descriptor_pool();
 
@@ -299,6 +331,23 @@ private:
 
 	float time;
 
+	void draw_x(vulkan::CommandBuffer *cb) {
+		cb->begin_render_pass(render_pass_x, framebuffer_x);
+		std::cout << "yy1\n";
+		cb->set_pipeline(pipeline_x);
+		std::cout << "yy2\n";
+
+		UniformBufferObject u;
+		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
+		u.view = matrix::ID.transpose();
+		u.model = (matrix::translation(text->pos) * matrix::scale(text->width, text->height, 1)).transpose();
+		text->ubo->update(&u);
+
+		cb->bind_descriptor_set(0, text->dset);
+		cb->draw(vertex_buffer_2d);
+		cb->end_render_pass();
+	}
+
 	void render_gui(vulkan::CommandBuffer *cb) {
 		cb->set_pipeline(pipeline_2d);
 
@@ -350,6 +399,26 @@ private:
 
 	}
 
+	void render_to_texture() {
+		std::cout << "xxx1\n";
+
+		vulkan::alt_start_frame();
+		std::cout << "xxx2\n";
+
+		cb->begin();
+		std::cout << "xxx3\n";
+		draw_x(cb);
+		std::cout << "xxx4\n";
+		cb->end();
+		std::cout << "xxx5\n";
+
+		vulkan::alt_submit_command_buffer(cb);
+		std::cout << "xxx6\n";
+
+		vulkan::wait_device_idle();
+		std::cout << "xxx99\n";
+	}
+
 	void draw_frame() {
 		speedometer.tick(text);
 
@@ -360,6 +429,10 @@ private:
 
 		auto current_time = high_resolution_clock::now();
 		time = duration<float, seconds::period>(current_time - start_time).count();
+
+		render_to_texture();
+
+		world.terrains[0]->dset->set({world.terrains[0]->ubo}, {texture_x});
 
 		if (!vulkan::start_frame())
 			return;

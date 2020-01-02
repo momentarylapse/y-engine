@@ -135,10 +135,11 @@ public:
 	void destroy();
 
 	bool start_frame();
-	void end_frame();
+	void present();
 	void submit_command_buffer(CommandBuffer *cb);
 };
 Renderer default_renderer;
+Renderer alt_renderer;
 FrameBuffer *current_framebuffer;
 
 
@@ -168,6 +169,7 @@ void init(GLFWwindow* window) {
 	create_framebuffers(default_render_pass);
 
 	default_renderer.create_sync_objects();
+	alt_renderer.create_sync_objects();
 }
 
 void destroy() {
@@ -177,6 +179,7 @@ void destroy() {
 	destroy_descriptor_pool(descriptor_pool);
 
 	default_renderer.destroy();
+	alt_renderer.destroy();
 
 	destroy_command_pool();
 
@@ -601,9 +604,12 @@ void Renderer::create_sync_objects() {
 }
 
 bool Renderer::start_frame() {
-	current_framebuffer = &swap_chain.framebuffers[image_index];
 	vkWaitForFences(device, 1, &in_flight_fences[current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
+	if (this != &default_renderer)
+		return true;
+
+	current_framebuffer = &swap_chain.framebuffers[image_index];
 	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -641,7 +647,7 @@ void Renderer::submit_command_buffer(CommandBuffer *cb) {
 }
 
 
-void Renderer::end_frame() {
+void Renderer::present() {
 	VkPresentInfoKHR present_info = {};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.waitSemaphoreCount = 1;
@@ -666,12 +672,20 @@ bool start_frame() {
 	return default_renderer.start_frame();
 }
 
+bool alt_start_frame() {
+	return alt_renderer.start_frame();
+}
+
 void submit_command_buffer(CommandBuffer *cb) {
 	default_renderer.submit_command_buffer(cb);
 }
 
+void alt_submit_command_buffer(CommandBuffer *cb) {
+	alt_renderer.submit_command_buffer(cb);
+}
+
 void end_frame() {
-	default_renderer.end_frame();
+	default_renderer.present();
 }
 
 void wait_device_idle() {
