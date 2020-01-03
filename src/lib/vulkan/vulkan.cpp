@@ -20,8 +20,6 @@
 #include "../math/vector.h"
 #include "../math/matrix.h"
 
-const int MAX_FRAMES_IN_FLIGHT = 1;
-
 //#define NDEBUG
 
 Array<const char*> sa2pa(const Array<string> &sa) {
@@ -129,11 +127,10 @@ class Renderer {
 public:
 
 	uint32_t image_index = 0;
-	uint32_t current_frame = 0;
 	bool is_default = false;
-	std::vector<VkSemaphore> image_available_semaphores;
-	std::vector<VkSemaphore> render_finished_semaphores;
-	std::vector<VkFence> in_flight_fences;
+	Semaphore *image_available_semaphore;
+	Semaphore *render_finished_semaphore;
+	Fence *in_flight_fence;
 
 	void create_sync_objects();
 	void destroy();
@@ -400,52 +397,20 @@ void create_logical_device() {
 
 
 void Renderer::destroy() {
-	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
-		vkDestroySemaphore(device, render_finished_semaphores[i], nullptr);
-		vkDestroySemaphore(device, image_available_semaphores[i], nullptr);
-		vkDestroyFence(device, in_flight_fences[i], nullptr);
-	}
-}
-
-
-VkSemaphore create_semaphore() {
-	VkSemaphoreCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-	VkSemaphore semaphore;
-	if (vkCreateSemaphore(device, &info, nullptr, &semaphore) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create semaphore");
-	}
-
-	return semaphore;
-}
-
-VkFence create_fence() {
-	VkFenceCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	VkFence fence;
-	if (vkCreateFence(device, &info, nullptr, &fence) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create fence");
-	}
-	return fence;
+	delete render_finished_semaphore;
+	delete image_available_semaphore;
+	delete in_flight_fence;
 }
 
 
 void Renderer::create_sync_objects() {
-	image_available_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
 
-	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
-		image_available_semaphores[i] = create_semaphore();
-		render_finished_semaphores[i] = create_semaphore();
-		in_flight_fences[i] = create_fence();
+	image_available_semaphore = new Semaphore();
+	render_finished_semaphore = new Semaphore();
+	in_flight_fence = new Fence();
 
-		std::cout << "-create sema-   image " << image_available_semaphores[i] << ", render "<< render_finished_semaphores[i] << "\n";
-		std::cout << "-create fence-  " << in_flight_fences[i] << "\n";
-	}
+	std::cout << "-create sema-   image " << image_available_semaphore << ", render "<< render_finished_semaphore << "\n";
+	std::cout << "-create fence-  " << in_flight_fence << "\n";
 }
 
 void rebuild_default_stuff() {
@@ -471,16 +436,16 @@ void rebuild_default_stuff() {
 
 bool Renderer::start_frame() {
 
-	std::cout << "-start frame-   wait fence " << in_flight_fences[current_frame] << "\n";
-	vkWaitForFences(device, 1, &in_flight_fences[current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+	std::cout << "-start frame-   wait fence " << in_flight_fence << "\n";
+	in_flight_fence->wait();
 
 	if (!is_default)
 		return true;
 
 	current_framebuffer = swap_chain.frame_buffers[image_index];
 
-	std::cout << "-aquire image-   wait sem image " << image_available_semaphores[current_frame] << "\n";
-	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
+	std::cout << "-aquire image-   wait sem image " << image_available_semaphore << "\n";
+	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphore->semaphore, VK_NULL_HANDLE, &image_index);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 		rebuild_default_stuff();
@@ -498,10 +463,10 @@ void Renderer::submit_command_buffer(CommandBuffer *cb) {
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkSemaphore wait_semaphores[] = {image_available_semaphores[current_frame]};
+	VkSemaphore wait_semaphores[] = {image_available_semaphore->semaphore};
 	VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 	if (is_default) {
-		std::cout << " wait sema image " << image_available_semaphores[current_frame] << "\n";
+		std::cout << " wait sema image " << image_available_semaphore << "\n";
 		submit_info.waitSemaphoreCount = 1;
 		submit_info.pWaitSemaphores = wait_semaphores;
 	} else {
@@ -514,15 +479,15 @@ void Renderer::submit_command_buffer(CommandBuffer *cb) {
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &cb->buffer;
 
-	std::cout << " signal sema render " << render_finished_semaphores[current_frame] << "\n";
+	std::cout << " signal sema render " << render_finished_semaphore << "\n";
 	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &render_finished_semaphores[current_frame];
+	submit_info.pSignalSemaphores = &render_finished_semaphore->semaphore;
 
 
-	std::cout << " reset/submit fence " << in_flight_fences[current_frame] << "\n";
-	vkResetFences(device, 1, &in_flight_fences[current_frame]);
+	std::cout << " reset/submit fence " << in_flight_fence << "\n";
+	in_flight_fence->reset();
 
-	VkResult result = vkQueueSubmit(graphics_queue, 1, &submit_info, in_flight_fences[current_frame]);
+	VkResult result = vkQueueSubmit(graphics_queue, 1, &submit_info, in_flight_fence->fence);
 	if (result != VK_SUCCESS) {
 		std::cerr << " SUBMIT ERROR " << result << "\n";
 		throw std::runtime_error("failed to submit draw command buffer!");
@@ -533,11 +498,11 @@ void Renderer::submit_command_buffer(CommandBuffer *cb) {
 void Renderer::present() {
 	if (!is_default)
 		return;
-	std::cout << "-present-   wait sem " << render_finished_semaphores[current_frame] << "\n";
+	std::cout << "-present-   wait sem " << render_finished_semaphore << "\n";
 	VkPresentInfoKHR present_info = {};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.waitSemaphoreCount = 1;
-	present_info.pWaitSemaphores = &render_finished_semaphores[current_frame];
+	present_info.pWaitSemaphores = &render_finished_semaphore->semaphore;
 	present_info.swapchainCount = 1;
 	present_info.pSwapchains = &swap_chain.swap_chain;
 	present_info.pImageIndices = &image_index;
@@ -550,8 +515,6 @@ void Renderer::present() {
 	} else if (result != VK_SUCCESS) {
 		throw std::runtime_error("failed to present swap chain image!");
 	}
-
-	current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 bool start_frame() {
