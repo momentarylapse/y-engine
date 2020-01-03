@@ -48,18 +48,18 @@ namespace vulkan{
 	VkDescriptorPool create_descriptor_pool() {
 		std::array<VkDescriptorPoolSize, 2> pool_sizes = {};
 		pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		pool_sizes[0].descriptorCount = static_cast<uint32_t>(swap_chain.images.num) * 64;
+		pool_sizes[0].descriptorCount = 1024;
 		pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		pool_sizes[1].descriptorCount = static_cast<uint32_t>(swap_chain.images.num) * 64;
+		pool_sizes[1].descriptorCount = 1024;
 
-		VkDescriptorPoolCreateInfo pci = {};
-		pci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		pci.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
-		pci.pPoolSizes = pool_sizes.data();
-		pci.maxSets = static_cast<uint32_t>(swap_chain.images.num) * 64;
+		VkDescriptorPoolCreateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
+		info.pPoolSizes = pool_sizes.data();
+		info.maxSets = 1024;
 
 		VkDescriptorPool pool;
-		if (vkCreateDescriptorPool(device, &pci, nullptr, &pool) != VK_SUCCESS) {
+		if (vkCreateDescriptorPool(device, &info, nullptr, &pool) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create descriptor pool!");
 		}
 		return pool;
@@ -70,12 +70,11 @@ namespace vulkan{
 	}
 
 	DescriptorSet::DescriptorSet(VkDescriptorSetLayout layout, const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
-		std::vector<VkDescriptorSetLayout> layouts(swap_chain.images.num, layout);
 		VkDescriptorSetAllocateInfo ai = {};
 		ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		ai.descriptorPool = descriptor_pool;
 		ai.descriptorSetCount = 1;
-		ai.pSetLayouts = layouts.data();
+		ai.pSetLayouts = &layout;
 
 		if (vkAllocateDescriptorSets(device, &ai, &descriptor_set) != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate descriptor sets!");
@@ -94,27 +93,28 @@ namespace vulkan{
 	}*/
 
 	void DescriptorSet::set(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
+
 		//std::cout << "create dset with " << ubos.num << " ubos, " << tex.num << " samplers\n";
-		std::vector<VkDescriptorBufferInfo> buffer_info;
+		Array<VkDescriptorBufferInfo> buffer_info;
 		for (int j=0; j<ubos.num; j++) {
 			VkDescriptorBufferInfo bi = {};
 			bi.buffer = ubos[j]->buffer;
 			bi.offset = 0;
 			bi.range = ubos[j]->size;
-			buffer_info.push_back(bi);
+			buffer_info.add(bi);
 		}
 
 
-		std::vector<VkDescriptorImageInfo> image_info;
+		Array<VkDescriptorImageInfo> image_info;
 		for (int j=0; j<tex.num; j++) {
 			VkDescriptorImageInfo ii = {};
 			ii.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			ii.imageView = tex[j]->view;
 			ii.sampler = tex[j]->sampler;
-			image_info.push_back(ii);
+			image_info.add(ii);
 		}
 
-		std::vector<VkWriteDescriptorSet> wds;
+		Array<VkWriteDescriptorSet> wds;
 		for (int j=0; j<ubos.num; j++) {
 			VkWriteDescriptorSet w;
 			w.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -124,7 +124,7 @@ namespace vulkan{
 			w.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			w.descriptorCount = 1;
 			w.pBufferInfo = &buffer_info[j];
-			wds.push_back(w);
+			wds.add(w);
 		}
 
 		for (int j=0; j<tex.num; j++) {
@@ -136,15 +136,15 @@ namespace vulkan{
 			w.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			w.descriptorCount = 1;
 			w.pImageInfo = &image_info[j];
-			wds.push_back(w);
+			wds.add(w);
 		}
 
-		vkUpdateDescriptorSets(device, static_cast<uint32_t>(wds.size()), wds.data(), 0, nullptr);
+		vkUpdateDescriptorSets(device, static_cast<uint32_t>(wds.num), &wds[0], 0, nullptr);
 	}
 
 	VkDescriptorSetLayout DescriptorSet::create_layout(int num_ubos, int num_samplers) {
 		std::cout << "create dset layout, " << num_ubos << " ubos, " << num_samplers << " samplers\n";
-		std::vector<VkDescriptorSetLayoutBinding> bindings;
+		Array<VkDescriptorSetLayoutBinding> bindings;
 		for (int i=0; i<num_ubos;i++) {
 			VkDescriptorSetLayoutBinding lb = {};
 			lb.binding = i;
@@ -152,7 +152,7 @@ namespace vulkan{
 			lb.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			lb.pImmutableSamplers = nullptr;
 			lb.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-			bindings.push_back(lb);
+			bindings.add(lb);
 		}
 
 		for (int i=0; i<num_samplers;i++) {
@@ -162,17 +162,17 @@ namespace vulkan{
 			lb.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			lb.pImmutableSamplers = nullptr;
 			lb.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-			bindings.push_back(lb);
+			bindings.add(lb);
 		}
 
 
-		VkDescriptorSetLayoutCreateInfo lci = {};
-		lci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		lci.bindingCount = static_cast<uint32_t>(bindings.size());
-		lci.pBindings = bindings.data();
+		VkDescriptorSetLayoutCreateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		info.bindingCount = bindings.num;
+		info.pBindings = &bindings[0];
 
 		VkDescriptorSetLayout layout;
-		if (vkCreateDescriptorSetLayout(device, &lci, nullptr, &layout) != VK_SUCCESS) {
+		if (vkCreateDescriptorSetLayout(device, &info, nullptr, &layout) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create descriptor set layout!");
 		}
 		return layout;

@@ -52,7 +52,8 @@ namespace vulkan{
 		void begin_render_pass(RenderPass *rp, FrameBuffer *fb);
 		void end_render_pass();
 		void draw(VertexBuffer *vb);
-		void scissor(const rect &r);
+		void set_scissor(const rect &r);
+		void set_viewport(const rect &r);
 	};
 
 	VkCommandBuffer begin_single_time_commands();

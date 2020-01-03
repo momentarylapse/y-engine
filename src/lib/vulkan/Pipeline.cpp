@@ -13,13 +13,16 @@
 #include "Shader.h"
 #include "helper.h"
 #include "RenderPass.h"
-
 #include "VertexBuffer.h"
 #include <iostream>
+
+#include "../math/rect.h"
 
 namespace vulkan {
 
 	std::vector<Pipeline*> pipelines;
+
+	extern int device_width, device_height;
 
 
 
@@ -144,6 +147,8 @@ Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int num_textures) 
 	depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
 	depth_stencil.depthBoundsTestEnable = VK_FALSE;
 	depth_stencil.stencilTestEnable = VK_FALSE;
+
+	set_viewport(rect(0, device_width, 0, device_height));
 }
 
 Pipeline::~Pipeline() {
@@ -205,8 +210,32 @@ void Pipeline::set_z(bool test, bool write) {
 	depth_stencil.depthWriteEnable = write ? VK_TRUE : VK_FALSE;
 }
 
-void Pipeline::set_dynamic(const Array<VkDynamicState> &_dynamic_states) {
-	dynamic_states = _dynamic_states;
+void Pipeline::set_viewport(const rect &r) {
+	viewport = {};
+	viewport.x = r.x1;
+	viewport.y = r.y1;
+	viewport.width = r.width();
+	viewport.height = r.height();
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+}
+
+VkDynamicState parse_dynamic_state(const string &d) {
+	if (d == "viewport")
+		return VK_DYNAMIC_STATE_VIEWPORT;
+	if (d == "scissor")
+		return VK_DYNAMIC_STATE_SCISSOR;
+	if (d == "viewport")
+		return VK_DYNAMIC_STATE_VIEWPORT;
+	if (d == "linewidth")
+		return VK_DYNAMIC_STATE_LINE_WIDTH;
+	std::cerr << "unknown dynamic state: " << d.c_str() << "\n";
+	return VK_DYNAMIC_STATE_MAX_ENUM;
+}
+
+void Pipeline::set_dynamic(const Array<string> &_dynamic_states) {
+	for (string &d: _dynamic_states)
+		dynamic_states.add(parse_dynamic_state(d));
 }
 
 Pipeline* Pipeline::build(Shader *shader, RenderPass *render_pass, int num_textures, bool _create) {
@@ -218,24 +247,17 @@ Pipeline* Pipeline::build(Shader *shader, RenderPass *render_pass, int num_textu
 }
 
 void Pipeline::create() {
-	VkViewport viewport = {};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)swap_chain.extent.width;
-	viewport.height = (float)swap_chain.extent.height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
 
-	VkRect2D scissor = {};
+	/*VkRect2D scissor = {};
 	scissor.offset = {0, 0};
-	scissor.extent = swap_chain.extent;
+	scissor.extent = {(unsigned)width, (unsigned)height};*/
 
 	VkPipelineViewportStateCreateInfo viewport_state = {};
 	viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewport_state.viewportCount = 1;
 	viewport_state.pViewports = &viewport;
-	viewport_state.scissorCount = 1;
-	viewport_state.pScissors = &scissor;
+	viewport_state.scissorCount = 0;
+	viewport_state.pScissors = nullptr;//&scissor;
 
 	VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 	pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

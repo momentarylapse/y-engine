@@ -30,19 +30,6 @@ namespace vulkan{
 
 	extern VkSurfaceKHR surface;
 
-	struct SwapChain {
-		Array<VkImage> images;
-		VkExtent2D extent;
-		VkSwapchainKHR swap_chain;
-		VkFormat image_format;
-		Array<VkImageView> image_views;
-		Array<FrameBuffer> framebuffers;
-
-		void create_image_views();
-	};
-
-	extern SwapChain swap_chain;
-
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphics_family;

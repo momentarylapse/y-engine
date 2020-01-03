@@ -201,9 +201,8 @@ class TextureRenderer {
 public:
 	TextureRenderer(vulkan::Texture *tex) {
 
-		depth_buffer = new vulkan::DepthBuffer();
 		VkExtent2D extent = {(unsigned)tex->width, (unsigned)tex->height};
-		depth_buffer->create(extent, VK_FORMAT_D32_SFLOAT);
+		depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT);
 
 		render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true);
 		frame_buffer = new vulkan::FrameBuffer(render_pass, {tex->view, depth_buffer->view}, extent);

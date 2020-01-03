@@ -165,9 +165,14 @@ void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 	vkCmdBeginRenderPass(buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void CommandBuffer::scissor(const rect &r) {
+void CommandBuffer::set_scissor(const rect &r) {
 	VkRect2D scissor = {(int)r.x1, (int)r.y1, (unsigned int)r.width(), (unsigned int)r.height()};
 	vkCmdSetScissor(buffer, 0, 1, &scissor);
+}
+
+void CommandBuffer::set_viewport(const rect &r) {
+	VkViewport viewport = {r.x1, r.y1, r.width(), r.height(), 0.0f, 1.0f};
+	vkCmdSetViewport(buffer, 0, 1, &viewport);
 }
 
 

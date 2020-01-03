@@ -12,6 +12,10 @@
 namespace vulkan {
 
 
+DepthBuffer::DepthBuffer(VkExtent2D extent, VkFormat _format) {
+	create(extent, _format);
+}
+
 void DepthBuffer::create(VkExtent2D extent, VkFormat _format) {
 	format = _format;
 
@@ -27,11 +31,8 @@ void DepthBuffer::destroy() {
 	vkFreeMemory(device, memory, nullptr);
 }
 
-FrameBuffer::FrameBuffer() {
-	frame_buffer = nullptr;
-}
-
 FrameBuffer::FrameBuffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent) {
+	frame_buffer = nullptr;
 	create(rp, attachments, extent);
 }
 

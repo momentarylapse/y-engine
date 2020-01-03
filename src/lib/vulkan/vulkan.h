@@ -16,6 +16,8 @@
 #include "Pipeline.h"
 #include "CommandBuffer.h"
 #include "FrameBuffer.h"
+#include "SwapChain.h"
+#include "Semaphore.h"
 
 extern const int MAX_FRAMES_IN_FLIGHT;
 
@@ -23,14 +25,6 @@ extern const int MAX_FRAMES_IN_FLIGHT;
 VkResult create_debug_utils_messenger_ext(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 void destroy_debug_utils_messenger_ext(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 
-
-
-
-struct SwapChainSupportDetails {
-	VkSurfaceCapabilitiesKHR capabilities;
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
-};
 
 
 
@@ -79,7 +73,6 @@ namespace vulkan {
 
 	void setup_debug_messenger();
 
-	void cleanup_swap_chain();
 	void create_instance();
 	bool check_validation_layer_support();
 	std::vector<const char*> get_required_extensions();
@@ -87,21 +80,10 @@ namespace vulkan {
 	void pick_physical_device();
 	bool is_device_suitable(VkPhysicalDevice device);
 	bool check_device_extension_support(VkPhysicalDevice device);
-	SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device);
 	void create_logical_device();
-	void create_swap_chain();
 
-	VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR choose_swap_present_mode(const std::vector<VkPresentModeKHR> availablePresentModes);
-	VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-
-	void create_framebuffers(RenderPass *rp);
 
 	bool has_stencil_component(VkFormat format);
-
-
-	void recreate_swap_chain(GLFWwindow* window);
 
 }
 

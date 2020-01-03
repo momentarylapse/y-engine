@@ -121,10 +121,9 @@ VkQueue graphics_queue;
 VkQueue present_queue;
 
 SwapChain swap_chain;
+DepthBuffer *depth_buffer;
 
 RenderPass *default_render_pass;
-
-DepthBuffer depth_buffer;
 
 class Renderer {
 public:
@@ -165,13 +164,13 @@ void init(GLFWwindow* window) {
 	create_surface();
 	pick_physical_device();
 	create_logical_device();
-	create_swap_chain();
+	swap_chain.create();
 	swap_chain.create_image_views();
 	create_command_pool();
-	depth_buffer.create(swap_chain.extent, find_depth_format());
+	depth_buffer = new DepthBuffer(swap_chain.extent, find_depth_format());
 
-	default_render_pass = new RenderPass({swap_chain.image_format, depth_buffer.format});
-	create_framebuffers(default_render_pass);
+	default_render_pass = new RenderPass({swap_chain.image_format, depth_buffer->format});
+	swap_chain.create_frame_buffers(default_render_pass, depth_buffer);
 
 	default_renderer.is_default = true;
 	default_renderer.create_sync_objects();
@@ -180,7 +179,12 @@ void init(GLFWwindow* window) {
 
 void destroy() {
 	std::cout << "vulkan destroy" << "\n";
-	cleanup_swap_chain();
+	swap_chain.cleanup();
+	depth_buffer->destroy();
+
+	for (auto *p: pipelines)
+		delete p;
+	pipelines.clear();
 
 	destroy_descriptor_pool(descriptor_pool);
 
@@ -205,43 +209,6 @@ void on_resize(int width, int height) {
 	framebuffer_resized = true;
 }
 
-
-void recreate_swap_chain() {
-	std::cout << "recreate swap chain" << "\n";
-
-	vkDeviceWaitIdle(device);
-
-	cleanup_swap_chain();
-
-	create_swap_chain();
-	swap_chain.create_image_views();
-	depth_buffer.create(swap_chain.extent, find_depth_format());
-
-	default_render_pass->create();
-	create_framebuffers(default_render_pass);
-	//shader = new Shader("shaders/vert4.spv", "shaders/frag4.spv");
-	for (auto *p: pipelines)
-		p->create();
-}
-
-
-void cleanup_swap_chain() {
-	depth_buffer.destroy();
-
-	for (auto framebuffer: swap_chain.framebuffers) {
-		framebuffer.destroy();
-	}
-
-	for (auto *p: pipelines)
-		p->create();
-	default_render_pass->destroy();
-
-	for (auto image_view: swap_chain.image_views) {
-		vkDestroyImageView(device, image_view, nullptr);
-	}
-
-	vkDestroySwapchainKHR(device, swap_chain.swap_chain, nullptr);
-}
 
 bool check_validation_layer_support() {
 	uint32_t layer_count;
@@ -356,36 +323,12 @@ bool is_device_suitable(VkPhysicalDevice device) {
 	bool swap_chain_adequate = false;
 	if (extensions_supported) {
 		SwapChainSupportDetails swapChainSupport = query_swap_chain_support(device);
-		swap_chain_adequate = !swapChainSupport.formats.empty() and !swapChainSupport.presentModes.empty();
+		swap_chain_adequate = (swapChainSupport.formats.num > 0) and (swapChainSupport.present_modes.num > 0);
 	}
 	VkPhysicalDeviceFeatures supported_features;
 	vkGetPhysicalDeviceFeatures(device, &supported_features);
 
 	return indices.is_complete() and extensions_supported and swap_chain_adequate and supported_features.samplerAnisotropy;
-}
-
-SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device) {
-	SwapChainSupportDetails details;
-
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
-
-	uint32_t format_count;
-	vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, nullptr);
-
-	if (format_count != 0) {
-		details.formats.resize(format_count);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, details.formats.data());
-	}
-
-	uint32_t present_mode_count;
-	vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &present_mode_count, nullptr);
-
-	if (present_mode_count != 0) {
-		details.presentModes.resize(present_mode_count);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &present_mode_count, details.presentModes.data());
-	}
-
-	return details;
 }
 
 bool check_device_extension_support(VkPhysicalDevice device) {
@@ -454,127 +397,6 @@ void create_logical_device() {
 
 
 
-void create_swap_chain() {
-	SwapChainSupportDetails swap_chain_support = query_swap_chain_support(physical_device);
-
-	VkSurfaceFormatKHR surface_format = choose_swap_surface_format(swap_chain_support.formats);
-	VkPresentModeKHR present_mode = choose_swap_present_mode(swap_chain_support.presentModes);
-	VkExtent2D extent = choose_swap_extent(swap_chain_support.capabilities);
-
-	uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
-	if (swap_chain_support.capabilities.maxImageCount > 0 and image_count > swap_chain_support.capabilities.maxImageCount) {
-		image_count = swap_chain_support.capabilities.maxImageCount;
-	}
-
-	VkSwapchainCreateInfoKHR info = {};
-	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	info.surface = surface;
-
-	info.minImageCount = image_count;
-	info.imageFormat = surface_format.format;
-	info.imageColorSpace = surface_format.colorSpace;
-	info.imageExtent = extent;
-	info.imageArrayLayers = 1;
-	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-	QueueFamilyIndices indices = find_queue_families(physical_device);
-	uint32_t queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
-
-	if (indices.graphics_family != indices.present_family) {
-		info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		info.queueFamilyIndexCount = 2;
-		info.pQueueFamilyIndices = queue_family_indices;
-	} else {
-		info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	}
-
-	info.preTransform = swap_chain_support.capabilities.currentTransform;
-	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	info.presentMode = present_mode;
-	info.clipped = VK_TRUE;
-
-	if (vkCreateSwapchainKHR(device, &info, nullptr, &swap_chain.swap_chain) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create swap chain!");
-	}
-
-	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &image_count, nullptr);
-	swap_chain.images.resize(image_count);
-	vkGetSwapchainImagesKHR(device, swap_chain.swap_chain, &image_count, &swap_chain.images[0]);
-
-	swap_chain.image_format = surface_format.format;
-	swap_chain.extent = extent;
-}
-
-
-
-
-VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatKHR>& available_formats) {
-	if (available_formats.size() == 1 and available_formats[0].format == VK_FORMAT_UNDEFINED) {
-		return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
-	}
-
-	for (const auto& format: available_formats) {
-		if (format.format == VK_FORMAT_B8G8R8A8_UNORM and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-			return format;
-		}
-	}
-
-	return available_formats[0];
-}
-
-VkPresentModeKHR choose_swap_present_mode(const std::vector<VkPresentModeKHR> available_present_modes) {
-	VkPresentModeKHR best_mode = VK_PRESENT_MODE_FIFO_KHR;
-
-	for (const auto& mode : available_present_modes) {
-		if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-			return mode;
-		} else if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-			best_mode = mode;
-		}
-	}
-
-	return best_mode;
-}
-
-VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities) {
-	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-		return capabilities.currentExtent;
-	} else {
-
-		VkExtent2D actual_extent = {
-			static_cast<uint32_t>(device_width),
-			static_cast<uint32_t>(device_height)
-		};
-
-		actual_extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actual_extent.width));
-		actual_extent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actual_extent.height));
-
-		return actual_extent;
-	}
-}
-
-
-void create_framebuffers(RenderPass *rp) {
-	swap_chain.framebuffers.resize(swap_chain.image_views.num);
-
-	for (size_t i=0; i<swap_chain.image_views.num; i++) {
-		swap_chain.framebuffers[i].create(rp, {swap_chain.image_views[i], depth_buffer.view}, swap_chain.extent);
-	}
-}
-
-
-
-void SwapChain::create_image_views() {
-	image_views.resize(images.num);
-
-	for (uint32_t i=0; i<images.num; i++) {
-		image_views[i] = create_image_view(images[i], image_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
-	}
-}
-
-
-
-
 
 
 void Renderer::destroy() {
@@ -626,6 +448,27 @@ void Renderer::create_sync_objects() {
 	}
 }
 
+void rebuild_default_stuff() {
+	std::cout << "recreate swap chain" << "\n";
+
+	vkDeviceWaitIdle(device);
+
+	swap_chain.cleanup();
+
+	swap_chain.create();
+	swap_chain.create_image_views();
+
+
+	depth_buffer->create(swap_chain.extent, find_depth_format());
+
+	default_render_pass->create();
+	swap_chain.create_frame_buffers(default_render_pass, depth_buffer);
+	//shader = new Shader("shaders/vert4.spv", "shaders/frag4.spv");
+
+	for (auto *p: pipelines)
+		p->create();
+}
+
 bool Renderer::start_frame() {
 
 	std::cout << "-start frame-   wait fence " << in_flight_fences[current_frame] << "\n";
@@ -634,13 +477,13 @@ bool Renderer::start_frame() {
 	if (!is_default)
 		return true;
 
-	current_framebuffer = &swap_chain.framebuffers[image_index];
+	current_framebuffer = swap_chain.frame_buffers[image_index];
 
 	std::cout << "-aquire image-   wait sem image " << image_available_semaphores[current_frame] << "\n";
 	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		recreate_swap_chain();
+		rebuild_default_stuff();
 		return false;
 	} else if (result != VK_SUCCESS and result != VK_SUBOPTIMAL_KHR) {
 		throw std::runtime_error("failed to acquire swap chain image!");
@@ -703,7 +546,7 @@ void Renderer::present() {
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR or result == VK_SUBOPTIMAL_KHR or framebuffer_resized) {
 		framebuffer_resized = false;
-		recreate_swap_chain();
+		rebuild_default_stuff();
 	} else if (result != VK_SUCCESS) {
 		throw std::runtime_error("failed to present swap chain image!");
 	}

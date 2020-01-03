@@ -16,7 +16,6 @@
 #include "../base/base.h"
 #include "../image/color.h"
 #include <vulkan/vulkan.h>
-#include <vector>
 
 namespace vulkan{
 

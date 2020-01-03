@@ -24,13 +24,13 @@ public:
 	VkDeviceMemory memory;
 	VkImageView view;
 
+	DepthBuffer(VkExtent2D extent, VkFormat format);
 	void create(VkExtent2D extent, VkFormat format);
 	void destroy();
 };
 
 class FrameBuffer {
 public:
-	FrameBuffer();
 	FrameBuffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent);
 	~FrameBuffer();
 

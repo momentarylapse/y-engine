@@ -25,6 +25,8 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
+class rect;
+
 namespace vulkan{
 
 	class Shader;
@@ -50,8 +52,9 @@ namespace vulkan{
 		void set_wireframe(bool wireframe);
 		void set_line_width(float line_width);
 		void set_z(bool test, bool write);
+		void set_viewport(const rect &r);
 
-		void set_dynamic(const Array<VkDynamicState> &dynamic_states);
+		void set_dynamic(const Array<string> &dynamic_states);
 
 		Shader *shader;
 		RenderPass *render_pass;
@@ -59,6 +62,7 @@ namespace vulkan{
 
 		VkPipelineLayout layout;
 		VkPipeline pipeline;
+		VkViewport viewport;
 
 	private:
 
