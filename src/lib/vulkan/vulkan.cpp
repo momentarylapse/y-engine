@@ -93,9 +93,6 @@ namespace vulkan {
 		}
 	}
 
-	VkSemaphore create_semaphore();
-	VkFence create_fence();
-
 
 
 bool framebuffer_resized = false;
@@ -456,6 +453,48 @@ bool Renderer::start_frame() {
 	return true;
 }
 
+VkFence fence_handle(Fence *f) {
+	if (f)
+		return f->fence;
+	return VK_NULL_HANDLE;
+}
+
+Array<VkSemaphore> extract_semaphores(const Array<Semaphore*> &sem) {
+	Array<VkSemaphore> semaphores;
+	for (auto *s: sem)
+		semaphores.add(s->semaphore);
+	return semaphores;
+}
+
+
+void queue_submit_command_buffer(CommandBuffer *cb, const Array<Semaphore*> &wait_sem, const Array<Semaphore*> &signal_sem, Fence *fence) {
+	std::cout << "-submit-\n";
+
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	auto wait_semaphores = extract_semaphores(wait_sem);
+	auto signal_semaphores = extract_semaphores(signal_sem);
+	VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	submit_info.waitSemaphoreCount = wait_semaphores.num;
+	submit_info.pWaitSemaphores = &wait_semaphores[0];
+	submit_info.pWaitDstStageMask = wait_stages;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &cb->buffer;
+	submit_info.signalSemaphoreCount = signal_semaphores.num;
+	submit_info.pSignalSemaphores = &signal_semaphores[0];
+
+
+	std::cout << " reset/submit fence " << fence << "\n";
+	if (fence)
+		fence->reset();
+
+	VkResult result = vkQueueSubmit(graphics_queue, 1, &submit_info, fence_handle(fence));
+	if (result != VK_SUCCESS) {
+		std::cerr << " SUBMIT ERROR " << result << "\n";
+		throw std::runtime_error("failed to submit draw command buffer!");
+	}
+}
 
 void Renderer::submit_command_buffer(CommandBuffer *cb) {
 	std::cout << "-submit-\n";
