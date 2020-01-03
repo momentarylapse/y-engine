@@ -42,6 +42,7 @@ vulkan::Shader *shader_2d;
 namespace vulkan {
 	bool alt_start_frame();
 	void alt_submit_command_buffer(CommandBuffer *cb);
+	void alt_end_frame();
 }
 
 string ObjectDir;
@@ -267,7 +268,7 @@ private:
 		pipeline_2d->create();
 
 		Image im_x;
-		im_x.create(128,128, Black);
+		im_x.create(512,512, Black);
 		texture_x = new vulkan::Texture();
 		texture_x->override(&im_x);
 
@@ -392,7 +393,7 @@ private:
 		u.model = (matrix::translation(text->pos) * matrix::scale(text->width, text->height, 1)).transpose();
 		text->ubo->update(&u);
 
-		cb->bind_descriptor_set(0, text->dset);
+	//	cb->bind_descriptor_set(0, text->dset);
 		cb->draw(vertex_buffer_2d);
 		cb->end_render_pass();
 	}
@@ -411,10 +412,9 @@ private:
 		cb->draw(vertex_buffer_2d);
 	}
 
-	void render_all(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip) {
-		rp->clear_color = world.background;
-		cb->begin_render_pass(rp, vulkan::current_framebuffer);
-		cb->set_pipeline(pip);
+	void prepare_all() {
+
+		cam->set_view();
 
 		world.fog._color = Red;
 		world.fog.density = 0.01f;
@@ -433,37 +433,69 @@ private:
 			l.theta = world.sun->radius;
 		}
 		world.ubo_light->update(&l);
+		msg_write("r2b");
 
 		UBOFog f;
 		f.col = world.fog._color;
 		f.density = world.fog.density;
 		world.ubo_fog->update(&f);
+		msg_write("r2c");
 
 		for (auto *t: world.terrains) {
-			t->draw(); // rebuild stuff...
+			msg_write("prep t1");
 
 			u.model = matrix::ID.transpose();
 			t->ubo->update(&u);
+			msg_write("t2");
 
-			cb->bind_descriptor_set(0, t->dset);
-			cb->draw(t->vertex_buffer);
+			t->draw(); // rebuild stuff...
+			msg_write("/prep t1");
 		}
-
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 
-			//m->ang = quaternion::rotation_v(vector(-0.3f,0.5f,time));
-
 			u.model = mtr(m->pos, m->ang).transpose();
 			s.ubo->update(&u);
+		}
+	}
+
+	void draw_world(vulkan::CommandBuffer *cb) {
+		for (auto *t: world.terrains) {
+			msg_write("t1");
+
+			cb->bind_descriptor_set(0, t->dset);
+			msg_write("t3");
+			cb->draw(t->vertex_buffer);
+			msg_write("t4");
+		}
+		msg_write("r7");
+
+		for (auto &s: world.sorted_opaque) {
+			Model *m = s.model;
 
 			cb->bind_descriptor_set(0, s.dset);
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
 		}
 
+		msg_write("r8");
+
+	}
+
+	void render_all(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip) {
+		rp->clear_color = world.background;
+		msg_write("r0");
+		cb->begin_render_pass(rp, vulkan::current_framebuffer);
+		msg_write("r1");
+		cb->set_pipeline(pip);
+		msg_write("r2");
+
+
+		draw_world(cb);
+
 		render_gui(cb);
 
 		cb->end_render_pass();
+		msg_write("r99");
 
 	}
 
@@ -475,47 +507,76 @@ private:
 		cam->set_view();
 
 		cb->begin();
-		//render_all(cb, tex_ren->render_pass, pipeline_x);
-		draw_x(cb, tex_ren->render_pass, pipeline_x);
+		//draw_x(cb, tex_ren->render_pass, pipeline_x);
+
+		tex_ren->render_pass->clear_color = Red;
+		cb->begin_render_pass(tex_ren->render_pass, vulkan::current_framebuffer);
+		cb->set_pipeline(pipeline_x);
+
+		for (auto &s: world.sorted_opaque) {
+			Model *m = s.model;
+
+			cb->bind_descriptor_set(0, s.dset);
+			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
+		}
+		cb->end_render_pass();
+
+		msg_write("r8");
+
+
 		//draw_x(cb, vulkan::default_render_pass, pipeline_2d);
 		cb->end();
 
 		tex_ren->submit(cb);
-		msg_write("a3...wait");
+		msg_write("a3...end");
+		vulkan::alt_end_frame();
+		msg_write("a4...wait");
 		vulkan::wait_device_idle();
+		msg_write("a5...ok");
 	}
 #endif
 
 	void draw_frame() {
+		msg_write("b0");
 		speedometer.tick(text);
 
-		cam->set_view();
+		msg_write("b0b");
 
 		static auto start_time = high_resolution_clock::now();
 
 		auto current_time = high_resolution_clock::now();
 		time = duration<float, seconds::period>(current_time - start_time).count();
 
+		prepare_all();
+
 #if RENDER_TO_TEXTURE
 		render_to_texture();
 
 		world.terrains[0]->dset->set({world.terrains[0]->ubo, world.ubo_light, world.ubo_fog}, {texture_x});
 #endif
+		msg_write("start frame....");
 
 		if (!vulkan::start_frame())
 			return;
+		msg_write("b1");
 		cam->set_view();
 
 
 		cb->begin();
+		msg_write("b2");
 		render_all(cb, vulkan::default_render_pass, pipeline);
+		msg_write("b3");
 		cb->end();
+		msg_write("b4");
 
 		vulkan::submit_command_buffer(cb);
+		msg_write("b5");
 
 		vulkan::end_frame();
+		msg_write("b6");
 
 		vulkan::wait_device_idle();
+		msg_write("b7");
 	}
 
 };

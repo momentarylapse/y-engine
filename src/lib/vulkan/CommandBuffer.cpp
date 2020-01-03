@@ -158,7 +158,7 @@ void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 	info.renderPass = rp->render_pass;
 	info.framebuffer = fb->frame_buffer;
 	info.renderArea.offset = {0, 0};
-	info.renderArea.extent = fb->extent;swap_chain.extent;
+	info.renderArea.extent = fb->extent;
 	info.clearValueCount = static_cast<uint32_t>(cv.size());
 	info.pClearValues = cv.data();
 

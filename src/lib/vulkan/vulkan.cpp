@@ -82,6 +82,7 @@ namespace vulkan {
 
 	void setup_debug_messenger() {
 		if (!enable_validation_layers) return;
+		std::cout << " VALIDATION LAYER!\n";
 
 		VkDebugUtilsMessengerCreateInfoEXT create_info = {};
 		create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -94,6 +95,8 @@ namespace vulkan {
 		}
 	}
 
+	VkSemaphore create_semaphore();
+	VkFence create_fence();
 
 
 
@@ -126,8 +129,9 @@ DepthBuffer depth_buffer;
 class Renderer {
 public:
 
-	uint32_t image_index;
-	uint32_t current_frame;
+	uint32_t image_index = 0;
+	uint32_t current_frame = 0;
+	bool is_default = false;
 	std::vector<VkSemaphore> image_available_semaphores;
 	std::vector<VkSemaphore> render_finished_semaphores;
 	std::vector<VkFence> in_flight_fences;
@@ -169,6 +173,7 @@ void init(GLFWwindow* window) {
 	default_render_pass = new RenderPass({swap_chain.image_format, depth_buffer.format});
 	create_framebuffers(default_render_pass);
 
+	default_renderer.is_default = true;
 	default_renderer.create_sync_objects();
 	alt_renderer.create_sync_objects();
 }
@@ -581,6 +586,29 @@ void Renderer::destroy() {
 }
 
 
+VkSemaphore create_semaphore() {
+	VkSemaphoreCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkSemaphore semaphore;
+	if (vkCreateSemaphore(device, &info, nullptr, &semaphore) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create semaphore");
+	}
+
+	return semaphore;
+}
+
+VkFence create_fence() {
+	VkFenceCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	VkFence fence;
+	if (vkCreateFence(device, &info, nullptr, &fence) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create fence");
+	}
+	return fence;
+}
 
 
 void Renderer::create_sync_objects() {
@@ -588,29 +616,27 @@ void Renderer::create_sync_objects() {
 	render_finished_semaphores.resize(MAX_FRAMES_IN_FLIGHT);
 	in_flight_fences.resize(MAX_FRAMES_IN_FLIGHT);
 
-	VkSemaphoreCreateInfo semaphore_info = {};
-	semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-	VkFenceCreateInfo fence_info = {};
-	fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
 	for (size_t i=0; i<MAX_FRAMES_IN_FLIGHT; i++) {
-		if (vkCreateSemaphore(device, &semaphore_info, nullptr, &image_available_semaphores[i]) != VK_SUCCESS or
-			vkCreateSemaphore(device, &semaphore_info, nullptr, &render_finished_semaphores[i]) != VK_SUCCESS or
-			vkCreateFence(device, &fence_info, nullptr, &in_flight_fences[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create synchronization objects for a frame!");
-		}
+		image_available_semaphores[i] = create_semaphore();
+		render_finished_semaphores[i] = create_semaphore();
+		in_flight_fences[i] = create_fence();
+
+		std::cout << "-create sema-   image " << image_available_semaphores[i] << ", render "<< render_finished_semaphores[i] << "\n";
+		std::cout << "-create fence-  " << in_flight_fences[i] << "\n";
 	}
 }
 
 bool Renderer::start_frame() {
+
+	std::cout << "-start frame-   wait fence " << in_flight_fences[current_frame] << "\n";
 	vkWaitForFences(device, 1, &in_flight_fences[current_frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
-	if (this != &default_renderer)
+	if (!is_default)
 		return true;
 
 	current_framebuffer = &swap_chain.framebuffers[image_index];
+
+	std::cout << "-aquire image-   wait sem image " << image_available_semaphores[current_frame] << "\n";
 	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphores[current_frame], VK_NULL_HANDLE, &image_index);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -624,32 +650,47 @@ bool Renderer::start_frame() {
 
 
 void Renderer::submit_command_buffer(CommandBuffer *cb) {
-	std::cout << "----submit----\n";
+	std::cout << "-submit-\n";
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
 	VkSemaphore wait_semaphores[] = {image_available_semaphores[current_frame]};
 	VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-	submit_info.waitSemaphoreCount = 1;
-	submit_info.pWaitSemaphores = wait_semaphores;
+	if (is_default) {
+		std::cout << " wait sema image " << image_available_semaphores[current_frame] << "\n";
+		submit_info.waitSemaphoreCount = 1;
+		submit_info.pWaitSemaphores = wait_semaphores;
+	} else {
+		std::cout <<" NON_DEFAULT.... no wait\n";
+		submit_info.waitSemaphoreCount = 0;
+		submit_info.pWaitSemaphores = nullptr;
+	}
 	submit_info.pWaitDstStageMask = wait_stages;
 
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &cb->buffer;
 
+	std::cout << " signal sema render " << render_finished_semaphores[current_frame] << "\n";
 	submit_info.signalSemaphoreCount = 1;
 	submit_info.pSignalSemaphores = &render_finished_semaphores[current_frame];
 
+
+	std::cout << " reset/submit fence " << in_flight_fences[current_frame] << "\n";
 	vkResetFences(device, 1, &in_flight_fences[current_frame]);
 
-	if (vkQueueSubmit(graphics_queue, 1, &submit_info, in_flight_fences[current_frame]) != VK_SUCCESS) {
+	VkResult result = vkQueueSubmit(graphics_queue, 1, &submit_info, in_flight_fences[current_frame]);
+	if (result != VK_SUCCESS) {
+		std::cerr << " SUBMIT ERROR " << result << "\n";
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 }
 
 
 void Renderer::present() {
+	if (!is_default)
+		return;
+	std::cout << "-present-   wait sem " << render_finished_semaphores[current_frame] << "\n";
 	VkPresentInfoKHR present_info = {};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.waitSemaphoreCount = 1;
@@ -690,6 +731,20 @@ void alt_submit_command_buffer(CommandBuffer *cb) {
 
 void end_frame() {
 	default_renderer.present();
+}
+
+void alt_end_frame() {
+	/*std::cout << "-end -alt-  wait sema render " << alt_renderer.render_finished_semaphores[alt_renderer.current_frame] << "\n";
+
+	uint64_t values[] = {1};
+
+	VkSemaphoreWaitInfoKHR info = {};
+	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO_KHR;
+	info.flags = VK_SEMAPHORE_WAIT_ANY_BIT_KHR;
+	info.semaphoreCount = 1;
+	info.pSemaphores = &alt_renderer.render_finished_semaphores[alt_renderer.current_frame];
+	info. pValues = values;
+	vkWaitSemaphoresKHR(device, &info, 1000000000);*/
 }
 
 void wait_device_idle() {
