@@ -24,6 +24,8 @@
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
 
+#define RENDER_TO_TEXTURE 1
+
 
 // pipeline: shader + z buffer / blending parameters
 
@@ -59,6 +61,11 @@ struct UBOLight {
 	alignas(16) float radius;
 	float theta;
 	alignas(16) color col;
+};
+
+struct UBOFog {
+	alignas(16) color col;
+	alignas(16) float density;
 };
 
 
@@ -296,9 +303,6 @@ private:
 		CameraReset();
 		GodLoadWorld(game_ini.default_world);
 
-		msg_write("sun");
-		msg_write(p2s(world.sun));
-
 		text = new Text(vector(0.05f,0.05f,0), "Hallo, kleiner Test äöü", 0.05f);
 
 		for (auto &s: world.scripts)
@@ -377,10 +381,10 @@ private:
 
 	float time;
 
-#if 0
-	void draw_x(vulkan::CommandBuffer *cb) {
-		cb->begin_render_pass(tex_ren->render_pass, vulkan::current_framebuffer);
-		cb->set_pipeline(pipeline_x);
+#if RENDER_TO_TEXTURE
+	void draw_x(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip) {
+		cb->begin_render_pass(rp, vulkan::current_framebuffer);
+		cb->set_pipeline(pip);
 
 		UBOMatrices u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
@@ -412,6 +416,8 @@ private:
 		cb->begin_render_pass(rp, vulkan::current_framebuffer);
 		cb->set_pipeline(pip);
 
+		world.fog._color = Red;
+		world.fog.density = 0.01f;
 
 		UBOMatrices u;
 		u.proj = cam->m_projection.transpose();
@@ -427,6 +433,11 @@ private:
 			l.theta = world.sun->radius;
 		}
 		world.ubo_light->update(&l);
+
+		UBOFog f;
+		f.col = world.fog._color;
+		f.density = world.fog.density;
+		world.ubo_fog->update(&f);
 
 		for (auto *t: world.terrains) {
 			t->draw(); // rebuild stuff...
@@ -456,19 +467,21 @@ private:
 
 	}
 
-#if 0
+#if RENDER_TO_TEXTURE
 	void render_to_texture() {
+		msg_write("render-to-texture...");
 		tex_ren->start_frame();
 		msg_write("a2");
 		cam->set_view();
 
-		/*cb->begin();
+		cb->begin();
 		//render_all(cb, tex_ren->render_pass, pipeline_x);
-		draw_x(cb);
+		draw_x(cb, tex_ren->render_pass, pipeline_x);
+		//draw_x(cb, vulkan::default_render_pass, pipeline_2d);
 		cb->end();
 
-		tex_ren->submit(cb);*/
-		msg_write("a3");
+		tex_ren->submit(cb);
+		msg_write("a3...wait");
 		vulkan::wait_device_idle();
 	}
 #endif
@@ -483,9 +496,11 @@ private:
 		auto current_time = high_resolution_clock::now();
 		time = duration<float, seconds::period>(current_time - start_time).count();
 
-		//render_to_texture();
+#if RENDER_TO_TEXTURE
+		render_to_texture();
 
-		//world.terrains[0]->dset->set({world.terrains[0]->ubo}, {texture_x});
+		world.terrains[0]->dset->set({world.terrains[0]->ubo, world.ubo_light, world.ubo_fog}, {texture_x});
+#endif
 
 		if (!vulkan::start_frame())
 			return;

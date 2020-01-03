@@ -200,6 +200,7 @@ void GodInit()
 
 World::World() {
 	ubo_light = nullptr;
+	ubo_fog = nullptr;
 	sun = nullptr;
 
 	reset();
@@ -318,7 +319,9 @@ bool World::load(const LevelData &ld) {
 
 
 	if (!ubo_light)
-		ubo_light = new vulkan::UBOWrapper(256);
+		ubo_light = new vulkan::UBOWrapper(32 * 64);
+	if (!ubo_fog)
+		ubo_fog = new vulkan::UBOWrapper(64);
 
 	engine.physics_enabled = ld.physics_enabled;
 	engine.collisions_enabled = true;//LevelData.physics_enabled;
@@ -380,7 +383,7 @@ Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
 	tt->ubo = new vulkan::UBOWrapper(64*3);
-	tt->dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {tt->ubo, ubo_light}, {tt->material->textures[0]});
+	tt->dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {tt->ubo, ubo_light, ubo_fog}, {tt->material->textures[0]});
 	terrains.add(tt);
 	return tt;
 }
@@ -1269,7 +1272,7 @@ void World::register_model(Model *m) {
 		p.model = m;
 		p.material = mat;
 		p.ubo = new vulkan::UBOWrapper(64*3);
-		p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light}, {mat->textures[0]});
+		p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light, ubo_fog}, {mat->textures[0]});
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;

@@ -138,6 +138,7 @@ public:
 	float speed_of_sound;
 
 	vulkan::UBOWrapper *ubo_light;
+	vulkan::UBOWrapper *ubo_fog;
 
 	vector gravity;
 

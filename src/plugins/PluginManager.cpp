@@ -69,6 +69,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("World.skyboxes", &World::skybox);
 	Kaba::declare_class_element("World.sun", &World::sun);
 	Kaba::declare_class_element("World.lights", &World::lights);
+	Kaba::declare_class_element("World.ego", &World::ego);
 	Kaba::link_external_class_func("World.create_object", &World::create_object);
 	Kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	Kaba::link_external_class_func("World.add_light", &World::add_light);

@@ -624,6 +624,7 @@ bool Renderer::start_frame() {
 
 
 void Renderer::submit_command_buffer(CommandBuffer *cb) {
+	std::cout << "----submit----\n";
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -692,7 +693,7 @@ void end_frame() {
 }
 
 void wait_device_idle() {
-	vkDeviceWaitIdle(vulkan::device);
+	vkDeviceWaitIdle(device);
 }
 
 
@@ -701,7 +702,7 @@ void wait_device_idle() {
 
 
 static void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
-	vulkan::on_resize(width, height);
+	on_resize(width, height);
 }
 
 GLFWwindow* create_window(const string &title, int width, int height) {
