@@ -441,29 +441,11 @@ bool Renderer::start_frame() {
 
 	current_framebuffer = swap_chain.frame_buffers[image_index];
 
-	std::cout << "-aquire image-   wait sem image " << image_available_semaphore << "\n";
-	VkResult result = vkAcquireNextImageKHR(device, swap_chain.swap_chain, std::numeric_limits<uint64_t>::max(), image_available_semaphore->semaphore, VK_NULL_HANDLE, &image_index);
-
-	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+	if (!swap_chain.aquire_image(&image_index, image_available_semaphore)) {
 		rebuild_default_stuff();
 		return false;
-	} else if (result != VK_SUCCESS and result != VK_SUBOPTIMAL_KHR) {
-		throw std::runtime_error("failed to acquire swap chain image!");
 	}
 	return true;
-}
-
-VkFence fence_handle(Fence *f) {
-	if (f)
-		return f->fence;
-	return VK_NULL_HANDLE;
-}
-
-Array<VkSemaphore> extract_semaphores(const Array<Semaphore*> &sem) {
-	Array<VkSemaphore> semaphores;
-	for (auto *s: sem)
-		semaphores.add(s->semaphore);
-	return semaphores;
 }
 
 
@@ -497,39 +479,10 @@ void queue_submit_command_buffer(CommandBuffer *cb, const Array<Semaphore*> &wai
 }
 
 void Renderer::submit_command_buffer(CommandBuffer *cb) {
-	std::cout << "-submit-\n";
-
-	VkSubmitInfo submit_info = {};
-	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-	VkSemaphore wait_semaphores[] = {image_available_semaphore->semaphore};
-	VkPipelineStageFlags wait_stages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 	if (is_default) {
-		std::cout << " wait sema image " << image_available_semaphore << "\n";
-		submit_info.waitSemaphoreCount = 1;
-		submit_info.pWaitSemaphores = wait_semaphores;
+		queue_submit_command_buffer(cb, {image_available_semaphore}, {render_finished_semaphore}, in_flight_fence);
 	} else {
-		std::cout <<" NON_DEFAULT.... no wait\n";
-		submit_info.waitSemaphoreCount = 0;
-		submit_info.pWaitSemaphores = nullptr;
-	}
-	submit_info.pWaitDstStageMask = wait_stages;
-
-	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &cb->buffer;
-
-	std::cout << " signal sema render " << render_finished_semaphore << "\n";
-	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &render_finished_semaphore->semaphore;
-
-
-	std::cout << " reset/submit fence " << in_flight_fence << "\n";
-	in_flight_fence->reset();
-
-	VkResult result = vkQueueSubmit(graphics_queue, 1, &submit_info, in_flight_fence->fence);
-	if (result != VK_SUCCESS) {
-		std::cerr << " SUBMIT ERROR " << result << "\n";
-		throw std::runtime_error("failed to submit draw command buffer!");
+		queue_submit_command_buffer(cb, {}, {render_finished_semaphore}, in_flight_fence);
 	}
 }
 
@@ -537,22 +490,9 @@ void Renderer::submit_command_buffer(CommandBuffer *cb) {
 void Renderer::present() {
 	if (!is_default)
 		return;
-	std::cout << "-present-   wait sem " << render_finished_semaphore << "\n";
-	VkPresentInfoKHR present_info = {};
-	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	present_info.waitSemaphoreCount = 1;
-	present_info.pWaitSemaphores = &render_finished_semaphore->semaphore;
-	present_info.swapchainCount = 1;
-	present_info.pSwapchains = &swap_chain.swap_chain;
-	present_info.pImageIndices = &image_index;
-
-	VkResult result = vkQueuePresentKHR(present_queue, &present_info);
-
-	if (result == VK_ERROR_OUT_OF_DATE_KHR or result == VK_SUBOPTIMAL_KHR or framebuffer_resized) {
+	if (!swap_chain.present(image_index, {render_finished_semaphore}) or framebuffer_resized) {
 		framebuffer_resized = false;
 		rebuild_default_stuff();
-	} else if (result != VK_SUCCESS) {
-		throw std::runtime_error("failed to present swap chain image!");
 	}
 }
 

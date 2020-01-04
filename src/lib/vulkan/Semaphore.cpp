@@ -63,4 +63,19 @@ void Semaphore::__delete__() {
 	this->~Semaphore();
 }
 
+
+VkFence fence_handle(Fence *f) {
+	if (f)
+		return f->fence;
+	return VK_NULL_HANDLE;
+}
+
+Array<VkSemaphore> extract_semaphores(const Array<Semaphore*> &sem) {
+	Array<VkSemaphore> semaphores;
+	for (auto *s: sem)
+		semaphores.add(s->semaphore);
+	return semaphores;
+}
+
+
 } /* namespace vulkan */

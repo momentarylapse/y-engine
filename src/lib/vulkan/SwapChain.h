@@ -18,11 +18,12 @@
 #include <GLFW/glfw3.h>
 
 
-class FrameBuffer;
-class RenderPass;
-
 namespace vulkan {
 
+
+class FrameBuffer;
+class RenderPass;
+class Semaphore;
 
 struct SwapChainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities;
@@ -47,6 +48,9 @@ public:
 	void create_image_views();
 
 	void create_frame_buffers(RenderPass *rp, DepthBuffer *db);
+
+	bool present(unsigned int image_index, const Array<Semaphore*> &wait_sem);
+	bool aquire_image(unsigned int *image_index, Semaphore *signal_sem);
 };
 
 extern SwapChain swap_chain;

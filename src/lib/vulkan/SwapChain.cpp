@@ -181,4 +181,41 @@ void SwapChain::cleanup() {
 	vkDestroySwapchainKHR(device, swap_chain, nullptr);
 }
 
+
+bool SwapChain::present(unsigned int image_index, const Array<Semaphore*> &wait_sem) {
+
+	auto wait_semaphores = extract_semaphores(wait_sem);
+
+	std::cout << "-present-   wait sem \n";
+	VkPresentInfoKHR present_info = {};
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.waitSemaphoreCount = wait_semaphores.num;
+	present_info.pWaitSemaphores = &wait_semaphores[0];
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = &swap_chain;
+	present_info.pImageIndices = &image_index;
+
+	VkResult result = vkQueuePresentKHR(present_queue, &present_info);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR or result == VK_SUBOPTIMAL_KHR) {
+		return false;
+	} else if (result != VK_SUCCESS) {
+		throw std::runtime_error("failed to present swap chain image!");
+	}
+	return true;
+}
+
+bool SwapChain::aquire_image(unsigned int *image_index, Semaphore *signal_sem) {
+
+	std::cout << "-aquire image-   wait sem image " << signal_sem << "\n";
+	VkResult result = vkAcquireNextImageKHR(device, swap_chain, std::numeric_limits<uint64_t>::max(), signal_sem->semaphore, VK_NULL_HANDLE, image_index);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+		return false;
+	} else if (result != VK_SUCCESS and result != VK_SUBOPTIMAL_KHR) {
+		throw std::runtime_error("failed to acquire swap chain image!");
+	}
+	return true;
+}
+
 } /* namespace vulkan */
