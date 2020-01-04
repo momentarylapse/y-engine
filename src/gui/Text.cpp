@@ -70,7 +70,7 @@ void render_text(const string &str, Image &im) {
 
 
 
-Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new vulkan::Texture()) {
+Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new vulkan::Texture(16, 16)) {
 	text = t;
 	rebuild();
 }

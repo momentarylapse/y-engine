@@ -31,11 +31,12 @@ namespace vulkan{
 void create_command_pool() {
 	QueueFamilyIndices queue_family_indices = find_queue_families(physical_device);
 
-	VkCommandPoolCreateInfo pool_info = {};
-	pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	pool_info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+	VkCommandPoolCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	info.queueFamilyIndex = queue_family_indices.graphics_family.value();
+	info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-	if (vkCreateCommandPool(device, &pool_info, nullptr, &command_pool) != VK_SUCCESS) {
+	if (vkCreateCommandPool(device, &info, nullptr, &command_pool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create command pool!");
 	}
 }

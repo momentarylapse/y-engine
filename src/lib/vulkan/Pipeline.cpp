@@ -259,11 +259,12 @@ void Pipeline::create() {
 	viewport_state.scissorCount = 1;
 	viewport_state.pScissors = &scissor;
 
+
 	VkPipelineLayoutCreateInfo pipeline_layout_info = {};
+	VkPushConstantRange pci = {0};
 	pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	if (shader->push_size > 0) {
-		VkPushConstantRange pci = {0};
-		pci.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pci.stageFlags = VK_SHADER_STAGE_VERTEX_BIT /*| VK_SHADER_STAGE_GEOMETRY_BIT*/ | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pci.offset = 0;
 		pci.size = shader->push_size;
 		pipeline_layout_info.pushConstantRangeCount = 1;

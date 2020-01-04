@@ -12,24 +12,29 @@
 namespace vulkan {
 
 
-DepthBuffer::DepthBuffer(VkExtent2D extent, VkFormat _format) {
+DepthBuffer::DepthBuffer(VkExtent2D extent, VkFormat _format, bool _with_sampler) {
+	with_sampler = _with_sampler;
 	create(extent, _format);
 }
 
 void DepthBuffer::create(VkExtent2D extent, VkFormat _format) {
 	format = _format;
 
-	create_image(extent.width, extent.height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+	auto usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	if (!with_sampler)
+		usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	create_image(extent.width, extent.height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 	view = create_image_view(image, format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
 	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
+
+
+	if (with_sampler)
+		_create_sampler();
 }
 
-void DepthBuffer::destroy() {
-	vkDestroyImageView(device, view, nullptr);
-	vkDestroyImage(device, image, nullptr);
-	vkFreeMemory(device, memory, nullptr);
-}
+
+
 
 FrameBuffer::FrameBuffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent) {
 	frame_buffer = nullptr;

@@ -120,7 +120,6 @@ private:
 	WindowRenderer *renderer;
 
 	Text *fps_display;
-	Picture *pic_tex_ren;
 
 	void init() {
 		window = create_window();
@@ -146,10 +145,7 @@ private:
 
 		gui::init(renderer->default_render_pass);
 
-		Image im_x;
-		im_x.create(512,512, Black);
-		texture_x = new vulkan::Texture();
-		texture_x->override(&im_x);
+		texture_x = new vulkan::DynamicTexture(512, 512, 1, "rgba:i8");
 
 		tex_ren = new TextureRenderer(texture_x);
 
@@ -174,8 +170,8 @@ private:
 
 		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.05f,0.05f,0), 0.05f);
 		gui::add(fps_display);
-		pic_tex_ren = new Picture(vector(0.7f, 0.7f, 0), 0.25f, 0.25f, texture_x);
-		gui::add(pic_tex_ren);
+		gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, texture_x));
+		gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, tex_ren->depth_buffer));
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -312,30 +308,37 @@ private:
 		auto *cb = r->cb;
 		auto *rp = r->default_render_pass;
 		auto *fb = r->current_frame_buffer();
+		msg_write("  -all");
 
 		cb->set_viewport(rect(0, r->width, 0, r->height));
+		msg_write(" a1");
 
 		rp->clear_color = world.background;
 		cb->begin_render_pass(rp, fb);
 		cb->set_pipeline(pip);
+		msg_write(" a2");
 
 		draw_world(cb);
+		msg_write(" a3");
 
 		gui::render(cb, rect(0, r->width, 0, r->height));
+		msg_write(" a4");
 
 		cb->end_render_pass();
+		msg_write(" a9");
 
 	}
 
 #if RENDER_TO_TEXTURE
 	void render_to_texture(Renderer *r) {
+		msg_write("render-to-tex");
 		r->start_frame();
 		auto *cb = r->cb;
 		cam->set_view(1.0f);
 
 		cb->begin();
 
-		r->default_render_pass->clear_color = Red;
+		r->default_render_pass->clear_color = Green;
 		cb->begin_render_pass(r->default_render_pass, r->current_frame_buffer());
 		cb->set_pipeline(pipeline_x);
 		cb->set_viewport(rect(0, r->width, 0, r->height));
@@ -369,19 +372,23 @@ private:
 		render_to_texture(tex_ren);
 #endif
 
-
 		prepare_all(renderer);
 
 		if (!renderer->start_frame())
 			return;
+		msg_write("render-to-win");
 		auto cb = renderer->cb;
 
 
 		cb->begin();
+		msg_write("a");
 		render_all(renderer, pipeline);
+		msg_write("b");
 		cb->end();
+		msg_write("c");
 
 		renderer->end_frame();
+		msg_write("z");
 
 		vulkan::wait_device_idle();
 	}

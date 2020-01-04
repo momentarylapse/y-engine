@@ -21,7 +21,7 @@ namespace vulkan{
 
 	class RenderPass {
 	public:
-		RenderPass(const Array<VkFormat> &format, bool clear = true);
+		RenderPass(const Array<VkFormat> &format, bool clear, bool presentable);
 		~RenderPass();
 
 		void __init__(const Array<VkFormat> &format, bool clear = true);

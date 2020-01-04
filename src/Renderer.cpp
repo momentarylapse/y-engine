@@ -124,9 +124,9 @@ TextureRenderer::TextureRenderer(vulkan::Texture *t) {
 	height = tex->height;
 
 	VkExtent2D extent = {(unsigned)width, (unsigned)height};
-	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT);
+	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT, true);
 
-	default_render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true);
+	default_render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true, false);
 	frame_buffer = new vulkan::FrameBuffer(default_render_pass, {tex->view, depth_buffer->view}, extent);
 }
 
@@ -136,7 +136,12 @@ bool TextureRenderer::start_frame() {
 }
 
 void TextureRenderer::end_frame() {
-	vulkan::queue_submit_command_buffer(cb, {}, {render_finished_semaphore}, in_flight_fence);
+	vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
+
+	vulkan::wait_device_idle();
+
+
+	tex->make_shader_readable();
 }
 
 

@@ -18,7 +18,7 @@
 namespace vulkan {
 
 // so far, we can only create a "default" render pass with 1 color and 1 depth attachement!
-	RenderPass::RenderPass(const Array<VkFormat> &format, bool clear) {
+	RenderPass::RenderPass(const Array<VkFormat> &format, bool clear, bool presentable) {
 		VkAttachmentLoadOp color_load_op = VK_ATTACHMENT_LOAD_OP_LOAD;
 		VkAttachmentLoadOp depth_load_op = VK_ATTACHMENT_LOAD_OP_LOAD;
 		if (clear) {
@@ -33,7 +33,10 @@ namespace vulkan {
 		color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		if (presentable)
+			color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		else
+			color_attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 		depth_attachment = {};
 		depth_attachment.format = format[1];
@@ -43,7 +46,10 @@ namespace vulkan {
 		depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		if (presentable)
+			depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		else
+			depth_attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 		color_attachment_ref = {};
 		color_attachment_ref.attachment = 0;
@@ -80,7 +86,7 @@ namespace vulkan {
 
 
 	void RenderPass::__init__(const Array<VkFormat> &format, bool clear) {
-		new(this) RenderPass(format, clear);
+		new(this) RenderPass(format, clear, true);
 	}
 
 	void RenderPass::__delete__() {

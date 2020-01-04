@@ -55,15 +55,17 @@ Texture::Texture() {
 	width = height = depth = 0;
 	mip_levels = 0;
 	format = VK_FORMAT_UNDEFINED;
+}
 
+Texture::Texture(int w, int h) : Texture() {
 	// sometimes a newly created texture is already used....
 	Image im;
-	im.create(16, 16, White);
+	im.create(w, h, White);
 	override(&im);
 }
 
 Texture::~Texture() {
-	_reset();
+	_destroy();
 }
 
 void Texture::__init__() {
@@ -74,7 +76,16 @@ void Texture::__delete__() {
 	this->~Texture();
 }
 
-void Texture::_reset() {
+DynamicTexture::DynamicTexture(int nx, int ny, int nz, const string &format) {
+	int n = nx * ny * nz * pixel_size(parse_format(format));
+	string s;
+	s.resize(n);
+	_create_image(&s[0], nx, ny, nz, parse_format(format), false);
+	_create_view();
+	_create_sampler();
+}
+
+void Texture::_destroy() {
 	if (sampler)
 		vkDestroySampler(device, sampler, nullptr);
 	if (view)
@@ -112,13 +123,13 @@ void Texture::override(const Image *im) {
 }
 
 void Texture::overridex(const void *data, int nx, int ny, int nz, const string &format) {
-	_reset();
-	_create_image(data, nx, ny, nz, parse_format(format));
+	_destroy();
+	_create_image(data, nx, ny, nz, parse_format(format), depth == 1);
 	_create_view();
 	_create_sampler();
 }
 
-void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFormat image_format) {
+void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFormat image_format, bool allow_mip) {
 	width = nx;
 	height = ny;
 	depth = nz;
@@ -126,30 +137,37 @@ void Texture::_create_image(const void *image_data, int nx, int ny, int nz, VkFo
 	int ps = pixel_size(image_format);
 	VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
-	if (depth > 1)
-		mip_levels = 0;
+	if (!allow_mip)
+		mip_levels = 1;
 
 
 	VkBuffer staging_buffer;
 	VkDeviceMemory staging_memory;
-	create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_memory);
+	if (image_data) {
+		create_buffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_memory);
 
-	void* data;
-	vkMapMemory(device, staging_memory, 0, image_size, 0, &data);
-		memcpy(data, image_data, static_cast<size_t>(image_size));
-	vkUnmapMemory(device, staging_memory);
+		void* data;
+		vkMapMemory(device, staging_memory, 0, image_size, 0, &data);
+			memcpy(data, image_data, static_cast<size_t>(image_size));
+		vkUnmapMemory(device, staging_memory);
+	}
 
 	auto usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	create_image(width, height, depth, mip_levels, image_format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+	create_image(width, height, depth, mip_levels, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 
-	transition_image_layout(image, image_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
-	copy_buffer_to_image(staging_buffer, image, width, height, depth);
+	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
 
-	vkDestroyBuffer(device, staging_buffer, nullptr);
-	vkFreeMemory(device, staging_memory, nullptr);
+	if (image_data) {
+		copy_buffer_to_image(staging_buffer, image, width, height, depth);
 
-	if (mip_levels > 0)
-		_generate_mipmaps(image_format);
+		vkDestroyBuffer(device, staging_buffer, nullptr);
+		vkFreeMemory(device, staging_memory, nullptr);
+	}
+
+	if (allow_mip)
+		_generate_mipmaps(format);
+	else
+		transition_image_layout(image, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mip_levels);
 }
 
 void Texture::_generate_mipmaps(VkFormat image_format) {
@@ -242,7 +260,7 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 
 void Texture::_create_view() {
-	view = create_image_view(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, mip_levels);
+	view = create_image_view(image, format, VK_IMAGE_ASPECT_COLOR_BIT, mip_levels);
 }
 
 void Texture::_create_sampler() {
@@ -267,6 +285,10 @@ void Texture::_create_sampler() {
 	if (vkCreateSampler(device, &si, nullptr, &sampler) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
+}
+
+void Texture::make_shader_readable() {
+	//transition_image_layout(image, format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mip_levels);
 }
 
 

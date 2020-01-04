@@ -11,22 +11,19 @@
 
 #include <vulkan/vulkan.h>
 #include "../base/base.h"
+#include "Texture.h"
 
 namespace vulkan {
 
 class RenderPass;
 
 
-class DepthBuffer {
+class DepthBuffer : public Texture {
 public:
-	VkFormat format;
-	VkImage image;
-	VkDeviceMemory memory;
-	VkImageView view;
+	bool with_sampler;
 
-	DepthBuffer(VkExtent2D extent, VkFormat format);
+	DepthBuffer(VkExtent2D extent, VkFormat format, bool with_sampler);
 	void create(VkExtent2D extent, VkFormat format);
-	void destroy();
 };
 
 class FrameBuffer {

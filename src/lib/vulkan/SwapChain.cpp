@@ -102,9 +102,9 @@ void SwapChain::create() {
 	get_images();
 	create_image_views();
 
-	depth_buffer = new DepthBuffer(extent, find_depth_format());
+	depth_buffer = new DepthBuffer(extent, find_depth_format(), false);
 
-	default_render_pass = new RenderPass({image_format, depth_buffer->format});
+	default_render_pass = new RenderPass({image_format, depth_buffer->format}, true, true);
 	create_frame_buffers(default_render_pass, depth_buffer);
 }
 
