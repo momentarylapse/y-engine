@@ -248,16 +248,18 @@ Pipeline* Pipeline::build(Shader *shader, RenderPass *render_pass, int num_textu
 
 void Pipeline::create() {
 
-	/*VkRect2D scissor = {};
+	// sometimes a dummy scissor is required!
+	VkRect2D scissor = {};
 	scissor.offset = {0, 0};
-	scissor.extent = {(unsigned)width, (unsigned)height};*/
+	scissor.extent = {(unsigned)1000000, (unsigned)1000000};
+	//scissor.extent = {(unsigned)width, (unsigned)height};
 
 	VkPipelineViewportStateCreateInfo viewport_state = {};
 	viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewport_state.viewportCount = 1;
 	viewport_state.pViewports = &viewport;
-	viewport_state.scissorCount = 0;
-	viewport_state.pScissors = nullptr;//&scissor;
+	viewport_state.scissorCount = 1;
+	viewport_state.pScissors = &scissor;
 
 	VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 	pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
