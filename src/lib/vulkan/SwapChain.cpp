@@ -172,8 +172,6 @@ void SwapChain::cleanup() {
 		frame_buffer->destroy();
 	}
 
-	default_render_pass->destroy();
-
 	for (auto image_view: image_views) {
 		vkDestroyImageView(device, image_view, nullptr);
 	}
@@ -186,7 +184,6 @@ bool SwapChain::present(unsigned int image_index, const Array<Semaphore*> &wait_
 
 	auto wait_semaphores = extract_semaphores(wait_sem);
 
-	std::cout << "-present-   wait sem \n";
 	VkPresentInfoKHR present_info = {};
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.waitSemaphoreCount = wait_semaphores.num;
@@ -207,7 +204,6 @@ bool SwapChain::present(unsigned int image_index, const Array<Semaphore*> &wait_
 
 bool SwapChain::aquire_image(unsigned int *image_index, Semaphore *signal_sem) {
 
-	std::cout << "-aquire image-   wait sem image " << signal_sem << "\n";
 	VkResult result = vkAcquireNextImageKHR(device, swap_chain, std::numeric_limits<uint64_t>::max(), signal_sem->semaphore, VK_NULL_HANDLE, image_index);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {

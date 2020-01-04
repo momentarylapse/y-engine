@@ -95,7 +95,6 @@ namespace vulkan {
 
 
 
-bool framebuffer_resized = false;
 
 GLFWwindow* vulkan_window;
 int device_width, device_height; // default (window)
@@ -116,29 +115,6 @@ VkQueue graphics_queue;
 VkQueue present_queue;
 
 SwapChain swap_chain;
-DepthBuffer *depth_buffer;
-
-RenderPass *default_render_pass;
-
-class Renderer {
-public:
-
-	uint32_t image_index = 0;
-	bool is_default = false;
-	Semaphore *image_available_semaphore;
-	Semaphore *render_finished_semaphore;
-	Fence *in_flight_fence;
-
-	void create_sync_objects();
-	void destroy();
-
-	bool start_frame();
-	void present();
-	void submit_command_buffer(CommandBuffer *cb);
-};
-Renderer default_renderer;
-Renderer alt_renderer;
-FrameBuffer *current_framebuffer;
 
 
 
@@ -158,32 +134,17 @@ void init(GLFWwindow* window) {
 	create_surface();
 	pick_physical_device();
 	create_logical_device();
-	swap_chain.create();
-	swap_chain.create_image_views();
 	create_command_pool();
-	depth_buffer = new DepthBuffer(swap_chain.extent, find_depth_format());
-
-	default_render_pass = new RenderPass({swap_chain.image_format, depth_buffer->format});
-	swap_chain.create_frame_buffers(default_render_pass, depth_buffer);
-
-	default_renderer.is_default = true;
-	default_renderer.create_sync_objects();
-	alt_renderer.create_sync_objects();
 }
 
 void destroy() {
 	std::cout << "vulkan destroy" << "\n";
-	swap_chain.cleanup();
-	depth_buffer->destroy();
 
 	for (auto *p: pipelines)
 		delete p;
 	pipelines.clear();
 
 	destroy_descriptor_pool(descriptor_pool);
-
-	default_renderer.destroy();
-	alt_renderer.destroy();
 
 	destroy_command_pool();
 
@@ -195,12 +156,6 @@ void destroy() {
 
 	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
-}
-
-void on_resize(int width, int height) {
-	device_width = width;
-	device_height = height;
-	framebuffer_resized = true;
 }
 
 
@@ -393,64 +348,13 @@ void create_logical_device() {
 
 
 
-void Renderer::destroy() {
-	delete render_finished_semaphore;
-	delete image_available_semaphore;
-	delete in_flight_fence;
-}
-
-
-void Renderer::create_sync_objects() {
-
-	image_available_semaphore = new Semaphore();
-	render_finished_semaphore = new Semaphore();
-	in_flight_fence = new Fence();
-
-	std::cout << "-create sema-   image " << image_available_semaphore << ", render "<< render_finished_semaphore << "\n";
-	std::cout << "-create fence-  " << in_flight_fence << "\n";
-}
-
-void rebuild_default_stuff() {
-	std::cout << "recreate swap chain" << "\n";
-
-	vkDeviceWaitIdle(device);
-
-	swap_chain.cleanup();
-
-	swap_chain.create();
-	swap_chain.create_image_views();
-
-
-	depth_buffer->create(swap_chain.extent, find_depth_format());
-
-	default_render_pass->create();
-	swap_chain.create_frame_buffers(default_render_pass, depth_buffer);
-	//shader = new Shader("shaders/vert4.spv", "shaders/frag4.spv");
-
+void rebuild_pipelines() {
 	for (auto *p: pipelines)
 		p->create();
 }
 
-bool Renderer::start_frame() {
-
-	std::cout << "-start frame-   wait fence " << in_flight_fence << "\n";
-	in_flight_fence->wait();
-
-	if (!is_default)
-		return true;
-
-	current_framebuffer = swap_chain.frame_buffers[image_index];
-
-	if (!swap_chain.aquire_image(&image_index, image_available_semaphore)) {
-		rebuild_default_stuff();
-		return false;
-	}
-	return true;
-}
-
 
 void queue_submit_command_buffer(CommandBuffer *cb, const Array<Semaphore*> &wait_sem, const Array<Semaphore*> &signal_sem, Fence *fence) {
-	std::cout << "-submit-\n";
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -467,7 +371,6 @@ void queue_submit_command_buffer(CommandBuffer *cb, const Array<Semaphore*> &wai
 	submit_info.pSignalSemaphores = &signal_semaphores[0];
 
 
-	std::cout << " reset/submit fence " << fence << "\n";
 	if (fence)
 		fence->reset();
 
@@ -478,59 +381,6 @@ void queue_submit_command_buffer(CommandBuffer *cb, const Array<Semaphore*> &wai
 	}
 }
 
-void Renderer::submit_command_buffer(CommandBuffer *cb) {
-	if (is_default) {
-		queue_submit_command_buffer(cb, {image_available_semaphore}, {render_finished_semaphore}, in_flight_fence);
-	} else {
-		queue_submit_command_buffer(cb, {}, {render_finished_semaphore}, in_flight_fence);
-	}
-}
-
-
-void Renderer::present() {
-	if (!is_default)
-		return;
-	if (!swap_chain.present(image_index, {render_finished_semaphore}) or framebuffer_resized) {
-		framebuffer_resized = false;
-		rebuild_default_stuff();
-	}
-}
-
-bool start_frame() {
-	target_width = device_width;
-	target_height = device_height;
-	return default_renderer.start_frame();
-}
-
-bool alt_start_frame() {
-	return alt_renderer.start_frame();
-}
-
-void submit_command_buffer(CommandBuffer *cb) {
-	default_renderer.submit_command_buffer(cb);
-}
-
-void alt_submit_command_buffer(CommandBuffer *cb) {
-	alt_renderer.submit_command_buffer(cb);
-}
-
-void end_frame() {
-	default_renderer.present();
-}
-
-void alt_end_frame() {
-	/*std::cout << "-end -alt-  wait sema render " << alt_renderer.render_finished_semaphores[alt_renderer.current_frame] << "\n";
-
-	uint64_t values[] = {1};
-
-	VkSemaphoreWaitInfoKHR info = {};
-	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO_KHR;
-	info.flags = VK_SEMAPHORE_WAIT_ANY_BIT_KHR;
-	info.semaphoreCount = 1;
-	info.pSemaphores = &alt_renderer.render_finished_semaphores[alt_renderer.current_frame];
-	info. pValues = values;
-	vkWaitSemaphoresKHR(device, &info, 1000000000);*/
-}
 
 void wait_device_idle() {
 	vkDeviceWaitIdle(device);
@@ -541,10 +391,6 @@ void wait_device_idle() {
 
 
 
-static void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
-	on_resize(width, height);
-}
-
 GLFWwindow* create_window(const string &title, int width, int height) {
 	glfwInit();
 
@@ -552,7 +398,6 @@ GLFWwindow* create_window(const string &title, int width, int height) {
 
 	GLFWwindow* window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 	//glfwSetWindowUserPointer(window, this);
-	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 	return window;
 }
 

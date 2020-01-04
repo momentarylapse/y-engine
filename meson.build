@@ -196,7 +196,8 @@ sources = [
 	'src/world/terrain.cpp',
 	'src/world/world.cpp',
 	'src/main.cpp',
-	'src/meta.cpp'
+	'src/meta.cpp',
+	'src/Renderer.cpp'
 ]
 
 

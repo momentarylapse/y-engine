@@ -42,14 +42,14 @@ namespace vulkan {
 	extern bool enable_validation_layers;
 
 
-
-	extern bool framebuffer_resized;
-	extern FrameBuffer *current_framebuffer;
-
-	extern RenderPass *default_render_pass;
-
 	extern GLFWwindow* vulkan_window;
 	extern int target_width, target_height;
+
+
+	VkFormat find_depth_format();
+	void rebuild_pipelines();
+	void queue_submit_command_buffer(CommandBuffer *cb, const Array<Semaphore*> &wait_sem, const Array<Semaphore*> &signal_sem, Fence *fence);
+
 
 	GLFWwindow* create_window(const string &title, int width, int height);
 	bool window_handle(GLFWwindow *window);
@@ -58,14 +58,8 @@ namespace vulkan {
 	void init(GLFWwindow* window);
 	void destroy();
 
-	void on_resize(int with, int height);
-
-	bool start_frame();
-	void end_frame();
 
 	void wait_device_idle();
-
-	void submit_command_buffer(CommandBuffer *cb);
 
 
 

@@ -231,18 +231,18 @@ void SIAddPackageVulkan() {
 
 	add_funcx("init_vulkan", TypeVoid, vul_p(&vulkan::init), FLAG_STATIC);
 		func_add_param("win", TypePointer);
-	add_funcx("start_frame", TypeBool, vul_p(&vulkan::start_frame), FLAG_STATIC);
-	add_funcx("end_frame", TypeVoid, vul_p(&vulkan::end_frame), FLAG_STATIC);
-	add_funcx("submit_command_buffer", TypeVoid, vul_p(&vulkan::submit_command_buffer), FLAG_STATIC);
-		func_add_param("cb", TypeCommandBuffer);
+//	add_funcx("start_frame", TypeBool, vul_p(&vulkan::start_frame), FLAG_STATIC);
+//	add_funcx("end_frame", TypeVoid, vul_p(&vulkan::end_frame), FLAG_STATIC);
+//	add_funcx("submit_command_buffer", TypeVoid, vul_p(&vulkan::submit_command_buffer), FLAG_STATIC);
+//		func_add_param("cb", TypeCommandBuffer);
 	add_funcx("create_default_descriptor_pool", TypeVoid, vul_p(&__create_default_descriptor_pool), FLAG_STATIC);
 	add_funcx("wait_device_idle", TypeVoid, vul_p(&vulkan::wait_device_idle), FLAG_STATIC);
 
 
 
-	add_ext_var("render_pass", TypeRenderPassP, (void*)vul_p(&vulkan::default_render_pass));
-	add_ext_var("target_width", TypeInt, (void*)vul_p(&vulkan::target_height));
-	add_ext_var("target_height", TypeInt, (void*)vul_p(&vulkan::target_height));
+//	add_ext_var("render_pass", TypeRenderPassP, (void*)vul_p(&vulkan::default_render_pass));
+//	add_ext_var("target_width", TypeInt, (void*)vul_p(&vulkan::target_height));
+//	add_ext_var("target_height", TypeInt, (void*)vul_p(&vulkan::target_height));
 	/*add_ext_var("target", TypeRect, vul_p(&vulkan::target_rect));
 	add_ext_var("fullscreen", TypeBool, vul_p(&vulkan::Fullscreen));
 	add_ext_var("Api", TypeString, vul_p(&vulkan::ApiName));*/

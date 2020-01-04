@@ -23,6 +23,7 @@
 
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
+#include "Renderer.h"
 
 #define RENDER_TO_TEXTURE 1
 
@@ -39,11 +40,7 @@ void ExternalModelCleanup(Model *m) {}
 extern vulkan::Shader *_default_shader_;
 vulkan::Shader *shader_2d;
 
-namespace vulkan {
-	bool alt_start_frame();
-	void alt_submit_command_buffer(CommandBuffer *cb);
-	void alt_end_frame();
-}
+
 
 string ObjectDir;
 
@@ -197,28 +194,6 @@ static GameIni game_ini;
 
 
 
-class TextureRenderer {
-public:
-	TextureRenderer(vulkan::Texture *tex) {
-
-		VkExtent2D extent = {(unsigned)tex->width, (unsigned)tex->height};
-		depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT);
-
-		render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true);
-		frame_buffer = new vulkan::FrameBuffer(render_pass, {tex->view, depth_buffer->view}, extent);
-	}
-	vulkan::DepthBuffer *depth_buffer;
-	vulkan::FrameBuffer *frame_buffer;
-	vulkan::RenderPass *render_pass;
-	void start_frame() {
-		vulkan::alt_start_frame();
-		vulkan::current_framebuffer = frame_buffer;
-	}
-	void submit(vulkan::CommandBuffer *cb) {
-		vulkan::alt_submit_command_buffer(cb);
-	}
-};
-
 class YEngineApp {
 public:
 	
@@ -232,12 +207,12 @@ public:
 private:
 	GLFWwindow* window;
 
-	vulkan::CommandBuffer *cb;
 	vulkan::Pipeline *pipeline;
 	vulkan::Pipeline *pipeline_2d;
 	vulkan::Pipeline *pipeline_x;
 	vulkan::Texture *texture_x;
 	TextureRenderer *tex_ren;
+	WindowRenderer *renderer;
 
 	Text *text;
 	vulkan::VertexBuffer *vertex_buffer_2d;
@@ -246,6 +221,8 @@ private:
 		window = create_window();
 		vulkan::init(window);
 		Kaba::init();
+
+		renderer = new WindowRenderer(window);
 
 		std::cout << "on init..." << "\n";
 
@@ -256,13 +233,13 @@ private:
 
 		auto shader = vulkan::Shader::load("3d.shader");
 		_default_shader_ = shader;
-		pipeline = vulkan::Pipeline::build(shader, vulkan::default_render_pass, 1, false);
+		pipeline = vulkan::Pipeline::build(shader, renderer->default_render_pass, 1, false);
 		//pipeline->wireframe = true;
 		pipeline->create();
 
 
 		shader_2d = vulkan::Shader::load("2d.shader");
-		pipeline_2d = vulkan::Pipeline::build(shader_2d, vulkan::default_render_pass, 1, false);
+		pipeline_2d = vulkan::Pipeline::build(shader_2d, renderer->default_render_pass, 1, false);
 		pipeline_2d->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pipeline_2d->create();
 
@@ -279,8 +256,6 @@ private:
 		pipeline_x->create();*/
 
 		vulkan::descriptor_pool = vulkan::create_descriptor_pool();
-
-		cb = new vulkan::CommandBuffer();
 		
 		game_ini.load();
 
@@ -317,12 +292,7 @@ private:
 
 		window = glfwCreateWindow(1024, 768, "Vulkan", nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
-		glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 		return window;
-	}
-
-	static void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
-		vulkan::on_resize(width, height);
 	}
 
 	void main_loop() {
@@ -336,6 +306,7 @@ private:
 	}
 
 	void cleanup() {
+		delete renderer;
 		vulkan::destroy();
 
 		glfwDestroyWindow(window);
@@ -381,23 +352,6 @@ private:
 
 	float time;
 
-#if RENDER_TO_TEXTURE
-	void draw_x(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip) {
-		cb->begin_render_pass(rp, vulkan::current_framebuffer);
-		cb->set_pipeline(pip);
-
-		UBOMatrices u;
-		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
-		u.view = matrix::ID.transpose();
-		u.model = (matrix::translation(text->pos) * matrix::scale(text->width, text->height, 1)).transpose();
-		text->ubo->update(&u);
-
-	//	cb->bind_descriptor_set(0, text->dset);
-		cb->draw(vertex_buffer_2d);
-		cb->end_render_pass();
-	}
-#endif
-
 	void render_gui(vulkan::CommandBuffer *cb) {
 		cb->set_pipeline(pipeline_2d);
 
@@ -432,23 +386,17 @@ private:
 			l.theta = world.sun->radius;
 		}
 		world.ubo_light->update(&l);
-		msg_write("r2b");
 
 		UBOFog f;
 		f.col = world.fog._color;
 		f.density = world.fog.density;
 		world.ubo_fog->update(&f);
-		msg_write("r2c");
 
 		for (auto *t: world.terrains) {
-			msg_write("prep t1");
-
 			u.model = matrix::ID.transpose();
 			t->ubo->update(&u);
-			msg_write("t2");
 
 			t->draw(); // rebuild stuff...
-			msg_write("/prep t1");
 		}
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
@@ -460,14 +408,9 @@ private:
 
 	void draw_world(vulkan::CommandBuffer *cb) {
 		for (auto *t: world.terrains) {
-			msg_write("t1");
-
 			cb->bind_descriptor_set(0, t->dset);
-			msg_write("t3");
 			cb->draw(t->vertex_buffer);
-			msg_write("t4");
 		}
-		msg_write("r7");
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
@@ -476,40 +419,31 @@ private:
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
 		}
 
-		msg_write("r8");
-
 	}
 
-	void render_all(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip) {
+	void render_all(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip, vulkan::FrameBuffer *fb) {
 		rp->clear_color = world.background;
-		msg_write("r0");
-		cb->begin_render_pass(rp, vulkan::current_framebuffer);
-		msg_write("r1");
+		cb->begin_render_pass(rp, fb);
 		cb->set_pipeline(pip);
-		msg_write("r2");
-
 
 		draw_world(cb);
 
 		render_gui(cb);
 
 		cb->end_render_pass();
-		msg_write("r99");
 
 	}
 
 #if RENDER_TO_TEXTURE
 	void render_to_texture() {
-		msg_write("render-to-texture...");
 		tex_ren->start_frame();
-		msg_write("a2");
+		auto *cb = tex_ren->cb;
 		cam->set_view();
 
 		cb->begin();
-		//draw_x(cb, tex_ren->render_pass, pipeline_x);
 
 		tex_ren->render_pass->clear_color = Red;
-		cb->begin_render_pass(tex_ren->render_pass, vulkan::current_framebuffer);
+		cb->begin_render_pass(tex_ren->render_pass, tex_ren->current_frame_buffer());
 		cb->set_pipeline(pipeline_x);
 
 		for (auto &s: world.sorted_opaque) {
@@ -519,27 +453,16 @@ private:
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
 		}
 		cb->end_render_pass();
-
-		msg_write("r8");
-
-
-		//draw_x(cb, vulkan::default_render_pass, pipeline_2d);
 		cb->end();
 
-		tex_ren->submit(cb);
-		msg_write("a3...end");
-		vulkan::alt_end_frame();
-		msg_write("a4...wait");
+		tex_ren->end_frame();
 		vulkan::wait_device_idle();
-		msg_write("a5...ok");
 	}
 #endif
 
 	void draw_frame() {
-		msg_write("b0");
 		speedometer.tick(text);
 
-		msg_write("b0b");
 
 		static auto start_time = high_resolution_clock::now();
 
@@ -553,29 +476,20 @@ private:
 
 		world.terrains[0]->dset->set({world.terrains[0]->ubo, world.ubo_light, world.ubo_fog}, {texture_x});
 #endif
-		msg_write("start frame....");
 
-		if (!vulkan::start_frame())
+		if (!renderer->start_frame())
 			return;
-		msg_write("b1");
+		auto cb = renderer->cb;
 		cam->set_view();
 
 
 		cb->begin();
-		msg_write("b2");
-		render_all(cb, vulkan::default_render_pass, pipeline);
-		msg_write("b3");
+		render_all(cb, renderer->default_render_pass, pipeline, renderer->current_frame_buffer());
 		cb->end();
-		msg_write("b4");
 
-		vulkan::submit_command_buffer(cb);
-		msg_write("b5");
-
-		vulkan::end_frame();
-		msg_write("b6");
+		renderer->end_frame();
 
 		vulkan::wait_device_idle();
-		msg_write("b7");
 	}
 
 };

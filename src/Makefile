@@ -160,7 +160,8 @@ OBJ = fx/Light.o \
  world/object.o \
  world/terrain.o \
  world/world.o \
- meta.o
+ meta.o \
+ Renderer.o
 
 $(BIN) : $(OBJ) main.o
 	$(CPP) $(OBJ) main.o -o $(BIN) $(CXXFLAGSLINKING)
@@ -584,13 +585,13 @@ lib/vulkan/FrameBuffer.o : lib/vulkan/FrameBuffer.cpp lib/vulkan/vulkan.h lib/vu
 lib/vulkan/helper.o : lib/vulkan/helper.cpp lib/vulkan/helper.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/vulkan/CommandBuffer.h
 	$(CPP) -c lib/vulkan/helper.cpp -o $@ $(CXXFLAGS)
 
-lib/vulkan/Pipeline.o : lib/vulkan/Pipeline.cpp lib/vulkan/Pipeline.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/helper.h lib/vulkan/RenderPass.h lib/image/color.h lib/vulkan/VertexBuffer.h lib/math/vector.h
+lib/vulkan/Pipeline.o : lib/vulkan/Pipeline.cpp lib/vulkan/Pipeline.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/helper.h lib/vulkan/RenderPass.h lib/image/color.h lib/vulkan/VertexBuffer.h lib/math/vector.h lib/math/rect.h
 	$(CPP) -c lib/vulkan/Pipeline.cpp -o $@ $(CXXFLAGS)
 
 lib/vulkan/RenderPass.o : lib/vulkan/RenderPass.cpp lib/vulkan/RenderPass.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/vulkan/helper.h
 	$(CPP) -c lib/vulkan/RenderPass.cpp -o $@ $(CXXFLAGS)
 
-lib/vulkan/Semaphore.o : lib/vulkan/Semaphore.cpp lib/vulkan/Semaphore.h
+lib/vulkan/Semaphore.o : lib/vulkan/Semaphore.cpp lib/vulkan/Semaphore.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/vulkan/vulkan.h lib/vulkan/VertexBuffer.h lib/math/vector.h lib/vulkan/Texture.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/RenderPass.h lib/image/color.h lib/vulkan/Pipeline.h lib/vulkan/CommandBuffer.h lib/vulkan/FrameBuffer.h lib/vulkan/SwapChain.h
 	$(CPP) -c lib/vulkan/Semaphore.cpp -o $@ $(CXXFLAGS)
 
 lib/vulkan/Shader.o : lib/vulkan/Shader.cpp lib/vulkan/Shader.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/math/matrix.h lib/vulkan/Texture.h lib/vulkan/helper.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/image/image.h lib/config.h lib/image/color.h
@@ -632,11 +633,14 @@ world/terrain.o : world/terrain.cpp world/terrain.h lib/base/base.h lib/base/mac
 world/world.o : world/world.cpp world/world.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/math/math.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/vulkan/vulkan.h lib/vulkan/VertexBuffer.h lib/vulkan/Texture.h lib/vulkan/Shader.h lib/vulkan/RenderPass.h lib/vulkan/Pipeline.h lib/vulkan/CommandBuffer.h lib/vulkan/FrameBuffer.h lib/vulkan/SwapChain.h lib/vulkan/Semaphore.h meta.h lib/hui/hui.h lib/hui/common.h lib/config.h lib/image/image.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h world/object.h world/model.h world/material.h world/terrain.h fx/Light.h world/camera.h
 	$(CPP) -c world/world.cpp -o $@ $(CXXFLAGS)
 
-main.o : main.cpp lib/hui/hui.h lib/hui/common.h lib/config.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/image/image.h lib/image/color.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/vulkan/vulkan.h lib/vulkan/VertexBuffer.h lib/math/vector.h lib/vulkan/Texture.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/RenderPass.h lib/vulkan/Pipeline.h lib/vulkan/CommandBuffer.h lib/vulkan/FrameBuffer.h lib/vulkan/SwapChain.h lib/vulkan/Semaphore.h lib/math/math.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/kaba/kaba.h lib/kaba/asm/asm.h lib/kaba/lib/lib.h lib/kaba/syntax/SyntaxTree.h lib/kaba/syntax/lexical.h lib/kaba/syntax/Class.h lib/kaba/syntax/Constant.h lib/kaba/syntax/Function.h lib/kaba/syntax/Node.h world/material.h world/model.h world/camera.h meta.h world/world.h world/object.h world/terrain.h fx/Light.h plugins/PluginManager.h plugins/Controller.h
+main.o : main.cpp lib/hui/hui.h lib/hui/common.h lib/config.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/image/image.h lib/image/color.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/vulkan/vulkan.h lib/vulkan/VertexBuffer.h lib/math/vector.h lib/vulkan/Texture.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/RenderPass.h lib/vulkan/Pipeline.h lib/vulkan/CommandBuffer.h lib/vulkan/FrameBuffer.h lib/vulkan/SwapChain.h lib/vulkan/Semaphore.h lib/math/math.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/kaba/kaba.h lib/kaba/asm/asm.h lib/kaba/lib/lib.h lib/kaba/syntax/SyntaxTree.h lib/kaba/syntax/lexical.h lib/kaba/syntax/Class.h lib/kaba/syntax/Constant.h lib/kaba/syntax/Function.h lib/kaba/syntax/Node.h world/material.h world/model.h world/camera.h meta.h world/world.h world/object.h world/terrain.h fx/Light.h plugins/PluginManager.h plugins/Controller.h Renderer.h
 	$(CPP) -c main.cpp -o $@ $(CXXFLAGS)
 
 meta.o : meta.cpp lib/file/file.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/file/msg.h lib/file/file_op.h meta.h lib/image/color.h lib/hui/hui.h lib/hui/common.h lib/config.h lib/image/image.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/vulkan/vulkan.h lib/vulkan/VertexBuffer.h lib/math/vector.h lib/vulkan/Texture.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/RenderPass.h lib/vulkan/Pipeline.h lib/vulkan/CommandBuffer.h lib/vulkan/FrameBuffer.h lib/vulkan/SwapChain.h lib/vulkan/Semaphore.h lib/kaba/kaba.h lib/kaba/asm/asm.h lib/kaba/lib/lib.h lib/kaba/syntax/SyntaxTree.h lib/kaba/syntax/lexical.h lib/kaba/syntax/Class.h lib/kaba/syntax/Constant.h lib/kaba/syntax/Function.h lib/kaba/syntax/Node.h world/model.h lib/math/math.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h world/material.h world/world.h world/camera.h
 	$(CPP) -c meta.cpp -o $@ $(CXXFLAGS)
+
+Renderer.o : Renderer.cpp Renderer.h lib/vulkan/vulkan.h lib/vulkan/VertexBuffer.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/math/vector.h lib/vulkan/Texture.h lib/vulkan/Shader.h lib/math/matrix.h lib/vulkan/RenderPass.h lib/image/color.h lib/vulkan/Pipeline.h lib/vulkan/CommandBuffer.h lib/vulkan/FrameBuffer.h lib/vulkan/SwapChain.h lib/vulkan/Semaphore.h
+	$(CPP) -c Renderer.cpp -o $@ $(CXXFLAGS)
 
 install :
 	mkdir -p $(prefix)/share/y
