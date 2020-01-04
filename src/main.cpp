@@ -234,6 +234,7 @@ private:
 		auto shader = vulkan::Shader::load("3d.shader");
 		_default_shader_ = shader;
 		pipeline = vulkan::Pipeline::build(shader, renderer->default_render_pass, 1, false);
+		pipeline->set_dynamic({"viewport"});
 		//pipeline->wireframe = true;
 		pipeline->create();
 
@@ -250,12 +251,11 @@ private:
 
 		tex_ren = new TextureRenderer(texture_x);
 
-		pipeline_x = vulkan::Pipeline::build(shader, tex_ren->render_pass, 1);
+		pipeline_x = vulkan::Pipeline::build(shader, tex_ren->default_render_pass, 1, false);
+		pipeline_x->set_dynamic({"viewport"});
 		/*pipeline_x = vulkan::Pipeline::build(shader_2d, tex_ren->render_pass, 1, false);
-		pipeline_x->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-		pipeline_x->create();*/
-
-		vulkan::descriptor_pool = vulkan::create_descriptor_pool();
+		pipeline_x->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);*/
+		pipeline_x->create();
 		
 		game_ini.load();
 
@@ -365,9 +365,9 @@ private:
 		cb->draw(vertex_buffer_2d);
 	}
 
-	void prepare_all() {
+	void prepare_all(Renderer *r) {
 
-		cam->set_view();
+		cam->set_view((float)r->width / (float)r->height);
 
 		world.fog._color = Red;
 		world.fog.density = 0.01f;
@@ -421,7 +421,13 @@ private:
 
 	}
 
-	void render_all(vulkan::CommandBuffer *cb, vulkan::RenderPass *rp, vulkan::Pipeline *pip, vulkan::FrameBuffer *fb) {
+	void render_all(Renderer *r, vulkan::Pipeline *pip) {
+		auto *cb = r->cb;
+		auto *rp = r->default_render_pass;
+		auto *fb = r->current_frame_buffer();
+
+		cb->set_viewport(rect(0, r->width, 0, r->height));
+
 		rp->clear_color = world.background;
 		cb->begin_render_pass(rp, fb);
 		cb->set_pipeline(pip);
@@ -435,16 +441,17 @@ private:
 	}
 
 #if RENDER_TO_TEXTURE
-	void render_to_texture() {
-		tex_ren->start_frame();
-		auto *cb = tex_ren->cb;
-		cam->set_view();
+	void render_to_texture(Renderer *r) {
+		r->start_frame();
+		auto *cb = r->cb;
+		cam->set_view(1.0f);
 
 		cb->begin();
 
-		tex_ren->render_pass->clear_color = Red;
-		cb->begin_render_pass(tex_ren->render_pass, tex_ren->current_frame_buffer());
+		r->default_render_pass->clear_color = Red;
+		cb->begin_render_pass(r->default_render_pass, r->current_frame_buffer());
 		cb->set_pipeline(pipeline_x);
+		cb->set_viewport(rect(0, r->width, 0, r->height));
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
@@ -455,7 +462,7 @@ private:
 		cb->end_render_pass();
 		cb->end();
 
-		tex_ren->end_frame();
+		r->end_frame();
 		vulkan::wait_device_idle();
 	}
 #endif
@@ -469,22 +476,24 @@ private:
 		auto current_time = high_resolution_clock::now();
 		time = duration<float, seconds::period>(current_time - start_time).count();
 
-		prepare_all();
 
 #if RENDER_TO_TEXTURE
-		render_to_texture();
+		prepare_all(tex_ren);
+		render_to_texture(tex_ren);
 
 		world.terrains[0]->dset->set({world.terrains[0]->ubo, world.ubo_light, world.ubo_fog}, {texture_x});
 #endif
 
+
+		prepare_all(renderer);
+
 		if (!renderer->start_frame())
 			return;
 		auto cb = renderer->cb;
-		cam->set_view();
 
 
 		cb->begin();
-		render_all(cb, renderer->default_render_pass, pipeline, renderer->current_frame_buffer());
+		render_all(renderer, pipeline);
 		cb->end();
 
 		renderer->end_frame();

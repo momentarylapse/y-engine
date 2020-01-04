@@ -225,8 +225,6 @@ VkDynamicState parse_dynamic_state(const string &d) {
 		return VK_DYNAMIC_STATE_VIEWPORT;
 	if (d == "scissor")
 		return VK_DYNAMIC_STATE_SCISSOR;
-	if (d == "viewport")
-		return VK_DYNAMIC_STATE_VIEWPORT;
 	if (d == "linewidth")
 		return VK_DYNAMIC_STATE_LINE_WIDTH;
 	std::cerr << "unknown dynamic state: " << d.c_str() << "\n";

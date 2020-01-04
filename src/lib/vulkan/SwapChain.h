@@ -39,13 +39,22 @@ public:
 	VkExtent2D extent;
 	VkSwapchainKHR swap_chain;
 	VkFormat image_format;
+	uint32_t image_count;
 	Array<VkImageView> image_views;
 	Array<FrameBuffer*> frame_buffers;
+	vulkan::DepthBuffer *depth_buffer;
+
+	SwapChain();
+	~SwapChain();
 
 	void cleanup();
 	void create();
 
+	void create_swap_chain();
+	void get_images();
 	void create_image_views();
+
+	void rebuild();
 
 	void create_frame_buffers(RenderPass *rp, DepthBuffer *db);
 

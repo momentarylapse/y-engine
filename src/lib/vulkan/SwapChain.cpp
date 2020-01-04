@@ -97,15 +97,23 @@ SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device) {
 }
 
 
-
 void SwapChain::create() {
+	create_swap_chain();
+	get_images();
+	create_image_views();
+
+	depth_buffer = new DepthBuffer(extent, find_depth_format());
+}
+
+
+void SwapChain::create_swap_chain() {
 	SwapChainSupportDetails swap_chain_support = query_swap_chain_support(physical_device);
 
 	VkSurfaceFormatKHR surface_format = choose_swap_surface_format(swap_chain_support.formats);
 	VkPresentModeKHR present_mode = choose_swap_present_mode(swap_chain_support.present_modes);
 	extent = choose_swap_extent(swap_chain_support.capabilities);
 
-	uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
+	image_count = swap_chain_support.capabilities.minImageCount + 1;
 	if (swap_chain_support.capabilities.maxImageCount > 0 and image_count > swap_chain_support.capabilities.maxImageCount) {
 		image_count = swap_chain_support.capabilities.maxImageCount;
 	}
@@ -140,12 +148,13 @@ void SwapChain::create() {
 	if (vkCreateSwapchainKHR(device, &info, nullptr, &swap_chain) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create swap chain!");
 	}
+	image_format = surface_format.format;
+}
 
+void SwapChain::get_images() {
 	vkGetSwapchainImagesKHR(device, swap_chain, &image_count, nullptr);
 	images.resize(image_count);
 	vkGetSwapchainImagesKHR(device, swap_chain, &image_count, &images[0]);
-
-	image_format = surface_format.format;
 }
 
 
@@ -163,7 +172,13 @@ void SwapChain::create_image_views() {
 
 
 
+SwapChain::SwapChain() {
+	//create();
+}
 
+SwapChain::~SwapChain() {
+	cleanup();
+}
 
 
 void SwapChain::cleanup() {
@@ -171,12 +186,18 @@ void SwapChain::cleanup() {
 	for (auto frame_buffer: frame_buffers) {
 		frame_buffer->destroy();
 	}
+	delete depth_buffer;
 
 	for (auto image_view: image_views) {
 		vkDestroyImageView(device, image_view, nullptr);
 	}
 
 	vkDestroySwapchainKHR(device, swap_chain, nullptr);
+}
+
+void SwapChain::rebuild() {
+	cleanup();
+	create();
 }
 
 

@@ -22,6 +22,9 @@ Renderer::Renderer() {
 	in_flight_fence = new vulkan::Fence();
 
 	cb = new vulkan::CommandBuffer();
+	default_render_pass = nullptr;
+
+	width = height = 0;
 }
 
 
@@ -31,6 +34,8 @@ Renderer::~Renderer() {
 	delete in_flight_fence;
 
 	delete cb;
+	if (default_render_pass)
+		delete default_render_pass;
 }
 
 
@@ -42,11 +47,11 @@ WindowRenderer::WindowRenderer(GLFWwindow *_window) {
 
 
 	vulkan::swap_chain.create();
-	vulkan::swap_chain.create_image_views();
-	depth_buffer = new vulkan::DepthBuffer(vulkan::swap_chain.extent, vulkan::find_depth_format());
+	width = vulkan::swap_chain.extent.width;
+	height = vulkan::swap_chain.extent.height;
 
-	default_render_pass = new vulkan::RenderPass({vulkan::swap_chain.image_format, depth_buffer->format});
-	vulkan::swap_chain.create_frame_buffers(default_render_pass, depth_buffer);
+	default_render_pass = new vulkan::RenderPass({vulkan::swap_chain.image_format, vulkan::swap_chain.depth_buffer->format});
+	vulkan::swap_chain.create_frame_buffers(default_render_pass, vulkan::swap_chain.depth_buffer);
 
 	main_renderer = this;
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
@@ -54,7 +59,6 @@ WindowRenderer::WindowRenderer(GLFWwindow *_window) {
 
 WindowRenderer::~WindowRenderer() {
 	vulkan::swap_chain.cleanup();
-	delete depth_buffer;
 }
 
 
@@ -62,7 +66,9 @@ void WindowRenderer::framebuffer_resize_callback(GLFWwindow* window, int width, 
 	main_renderer->on_resize(width, height);
 }
 
-void WindowRenderer::on_resize(int width, int height) {
+void WindowRenderer::on_resize(int w, int h) {
+	width = w;
+	height = h;
 	vulkan::device_width = width;
 	vulkan::device_height = height;
 	framebuffer_resized = true;
@@ -74,16 +80,11 @@ void WindowRenderer::rebuild_default_stuff() {
 
 	vulkan::wait_device_idle();
 
-	vulkan::swap_chain.cleanup();
 
-	vulkan::swap_chain.create();
-	vulkan::swap_chain.create_image_views();
+	vulkan::swap_chain.rebuild();
 
-
-	depth_buffer->create(vulkan::swap_chain.extent, vulkan::find_depth_format());
-
-	default_render_pass->create();
-	vulkan::swap_chain.create_frame_buffers(default_render_pass, depth_buffer);
+	default_render_pass->rebuild();
+	vulkan::swap_chain.create_frame_buffers(default_render_pass, vulkan::swap_chain.depth_buffer);
 
 	vulkan::rebuild_pipelines();
 }
@@ -126,12 +127,14 @@ void WindowRenderer::end_frame() {
 
 TextureRenderer::TextureRenderer(vulkan::Texture *t) {
 	tex = t;
+	width = tex->width;
+	height = tex->height;
 
-	VkExtent2D extent = {(unsigned)tex->width, (unsigned)tex->height};
+	VkExtent2D extent = {(unsigned)width, (unsigned)height};
 	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT);
 
-	render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true);
-	frame_buffer = new vulkan::FrameBuffer(render_pass, {tex->view, depth_buffer->view}, extent);
+	default_render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true);
+	frame_buffer = new vulkan::FrameBuffer(default_render_pass, {tex->view, depth_buffer->view}, extent);
 }
 
 bool TextureRenderer::start_frame() {

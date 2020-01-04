@@ -23,6 +23,9 @@ public:
 	vulkan::Fence *in_flight_fence;
 
 	vulkan::CommandBuffer *cb;
+	vulkan::RenderPass *default_render_pass;
+
+	int width, height;
 
 	virtual bool start_frame() { return false; }
 	virtual void end_frame() {}
@@ -39,9 +42,6 @@ public:
 	bool framebuffer_resized = false;
 
 	uint32_t image_index = 0;
-
-	vulkan::DepthBuffer *depth_buffer;
-	vulkan::RenderPass *default_render_pass;
 
 	void rebuild_default_stuff();
 
@@ -63,7 +63,6 @@ public:
 
 	vulkan::DepthBuffer *depth_buffer;
 	vulkan::FrameBuffer *frame_buffer;
-	vulkan::RenderPass *render_pass;
 
 	bool start_frame() override;
 	void end_frame() override;

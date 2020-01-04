@@ -135,6 +135,8 @@ void init(GLFWwindow* window) {
 	pick_physical_device();
 	create_logical_device();
 	create_command_pool();
+
+	descriptor_pool = create_descriptor_pool();
 }
 
 void destroy() {

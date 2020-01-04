@@ -33,7 +33,7 @@ public:
 	quaternion ang;
 	float zoom;
 
-	void set_view();
+	void set_view(float aspect_ratio);
 
 	matrix m_projection, m_view;
 	matrix m_all, im_all;

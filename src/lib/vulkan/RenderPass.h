@@ -29,6 +29,7 @@ namespace vulkan{
 
 		void create();
 		void destroy();
+		void rebuild();
 
 		VkRenderPass render_pass;
 		color clear_color;

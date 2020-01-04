@@ -107,6 +107,11 @@ namespace vulkan {
 		vkDestroyRenderPass(device, render_pass, nullptr);
 	}
 
+	void RenderPass::rebuild() {
+		destroy();
+		create();
+	}
+
 };
 
 #endif
