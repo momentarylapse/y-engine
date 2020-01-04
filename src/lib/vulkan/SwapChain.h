@@ -42,7 +42,8 @@ public:
 	uint32_t image_count;
 	Array<VkImageView> image_views;
 	Array<FrameBuffer*> frame_buffers;
-	vulkan::DepthBuffer *depth_buffer;
+	DepthBuffer *depth_buffer;
+	RenderPass *default_render_pass;
 
 	SwapChain();
 	~SwapChain();
@@ -61,8 +62,6 @@ public:
 	bool present(unsigned int image_index, const Array<Semaphore*> &wait_sem);
 	bool aquire_image(unsigned int *image_index, Semaphore *signal_sem);
 };
-
-extern SwapChain swap_chain;
 
 
 

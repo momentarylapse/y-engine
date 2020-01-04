@@ -41,6 +41,8 @@ public:
 	GLFWwindow *window;
 	bool framebuffer_resized = false;
 
+	vulkan::SwapChain *swap_chain;
+
 	uint32_t image_index = 0;
 
 	void rebuild_default_stuff();

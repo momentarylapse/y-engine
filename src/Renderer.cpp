@@ -46,19 +46,19 @@ WindowRenderer::WindowRenderer(GLFWwindow *_window) {
 	window = _window;
 
 
-	vulkan::swap_chain.create();
-	width = vulkan::swap_chain.extent.width;
-	height = vulkan::swap_chain.extent.height;
+	swap_chain = new vulkan::SwapChain();
+	width = swap_chain->extent.width;
+	height = swap_chain->extent.height;
 
-	default_render_pass = new vulkan::RenderPass({vulkan::swap_chain.image_format, vulkan::swap_chain.depth_buffer->format});
-	vulkan::swap_chain.create_frame_buffers(default_render_pass, vulkan::swap_chain.depth_buffer);
+	default_render_pass = swap_chain->default_render_pass;
+	swap_chain->create_frame_buffers(default_render_pass, swap_chain->depth_buffer);
 
 	main_renderer = this;
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 }
 
 WindowRenderer::~WindowRenderer() {
-	vulkan::swap_chain.cleanup();
+	delete swap_chain;
 }
 
 
@@ -81,26 +81,19 @@ void WindowRenderer::rebuild_default_stuff() {
 	vulkan::wait_device_idle();
 
 
-	vulkan::swap_chain.rebuild();
-
-	default_render_pass->rebuild();
-	vulkan::swap_chain.create_frame_buffers(default_render_pass, vulkan::swap_chain.depth_buffer);
+	swap_chain->rebuild();
 
 	vulkan::rebuild_pipelines();
 }
 
 vulkan::FrameBuffer *WindowRenderer::current_frame_buffer() {
-	return vulkan::swap_chain.frame_buffers[image_index];
+	return swap_chain->frame_buffers[image_index];
 }
 
 bool WindowRenderer::start_frame() {
-
-	vulkan::target_width = vulkan::device_width;
-	vulkan::target_height = vulkan::device_height;
-
 	in_flight_fence->wait();
 
-	if (!vulkan::swap_chain.aquire_image(&image_index, image_available_semaphore)) {
+	if (!swap_chain->aquire_image(&image_index, image_available_semaphore)) {
 		rebuild_default_stuff();
 		return false;
 	}
@@ -111,7 +104,7 @@ void WindowRenderer::end_frame() {
 
 	vulkan::queue_submit_command_buffer(cb, {image_available_semaphore}, {render_finished_semaphore}, in_flight_fence);
 
-	if (!vulkan::swap_chain.present(image_index, {render_finished_semaphore}) or framebuffer_resized) {
+	if (!swap_chain->present(image_index, {render_finished_semaphore}) or framebuffer_resized) {
 		framebuffer_resized = false;
 		rebuild_default_stuff();
 	}

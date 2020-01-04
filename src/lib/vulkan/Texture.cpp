@@ -55,6 +55,11 @@ Texture::Texture() {
 	width = height = depth = 0;
 	mip_levels = 0;
 	format = VK_FORMAT_UNDEFINED;
+
+	// sometimes a newly created texture is already used....
+	Image im;
+	im.create(16, 16, White);
+	override(&im);
 }
 
 Texture::~Texture() {

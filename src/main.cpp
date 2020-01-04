@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <chrono>
 
-#include "lib/hui/hui.h"
 #include "lib/vulkan/vulkan.h"
 #include "lib/math/math.h"
 #include "lib/image/color.h"
@@ -20,6 +19,9 @@
 #include "world/terrain.h"
 
 #include "fx/Light.h"
+
+#include "gui/Picture.h"
+#include "gui/Text.h"
 
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
@@ -38,7 +40,6 @@ void DrawSplashScreen(const string &str, float per) {
 
 void ExternalModelCleanup(Model *m) {}
 extern vulkan::Shader *_default_shader_;
-vulkan::Shader *shader_2d;
 
 
 
@@ -70,101 +71,6 @@ struct UBOFog {
 
 
 
-
-
-void cairo_render_text(const string &font_name, float font_size, const string &text, Image &im) {
-	bool failed = false;
-	cairo_surface_t *surface;
-	cairo_t *cr;
-
-	// initial surface size guess
-	int w_surf = 512;
-	int h_surf = font_size * 2;
-
-	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w_surf, h_surf);
-	cr = cairo_create(surface);
-
-	cairo_set_source_rgba(cr, 0, 0, 0, 1);
-	cairo_rectangle(cr, 0, 0, w_surf, h_surf);
-	cairo_fill(cr);
-
-	int x = 0, y = 0;
-
-	cairo_set_source_rgba(cr, 1, 1, 1, 1);
-
-	PangoLayout *layout = pango_cairo_create_layout(cr);
-	PangoFontDescription *desc = pango_font_description_from_string((font_name + "," + f2s(font_size, 1)).c_str());
-	pango_layout_set_font_description(layout, desc);
-	pango_font_description_free(desc);
-
-	pango_layout_set_text(layout, (char*)text.data, text.num);
-	//int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
-	int w_used, h_used;
-	pango_layout_get_pixel_size(layout, &w_used, &h_used);
-
-	pango_cairo_show_layout(cr, layout);
-	g_object_unref(layout);
-
-	cairo_surface_flush(surface);
-	unsigned char *c0 = cairo_image_surface_get_data(surface);
-	im.create(w_used, h_used, White);
-	for (int y=0;y<h_used;y++) {
-		unsigned char *c = c0 + 4 * y * w_surf;
-		for (int x=0;x<w_used;x++) {
-			float a = (float)c[1] / 255.0f;
-			im.set_pixel(x, y, color(a, 1, 1, 1));
-			c += 4;
-		}
-	}
-	im.alpha_used = true;
-
-	cairo_destroy(cr);
-	cairo_surface_destroy(surface);
-}
-
-void render_text(const string &str, Image &im) {
-	string font_name = "CAC Champagne";
-	float font_size = 30;
-	cairo_render_text(font_name, font_size, str, im);
-}
-
-
-
-class Text {
-public:
-	Text(const vector &p, const string &t, float h) {
-		pos = p;
-		text = t;
-		height = h;
-		col = White;
-		tex = new vulkan::Texture();
-		ubo = new vulkan::UBOWrapper(sizeof(UBOMatrices));
-		dset = nullptr;
-		rebuild();
-	}
-	void rebuild() {
-		Image im;
-		render_text(text, im);
-		tex->override(&im);
-		if (dset) {
-			dset->set({ubo}, {tex});
-		} else {
-			dset = new vulkan::DescriptorSet(shader_2d->descr_layouts[0], {ubo}, {tex});
-		}
-
-		width = height * (float)im.width / (float)im.height / 1.33f;
-
-	}
-	vector pos;
-	string text;
-	color col;
-	float height;
-	float width;
-
-	vulkan::Texture *tex;
-	vulkan::UBOWrapper *ubo;
-	vulkan::DescriptorSet *dset;
-};
 
 
 class GameIni {
@@ -208,14 +114,13 @@ private:
 	GLFWwindow* window;
 
 	vulkan::Pipeline *pipeline;
-	vulkan::Pipeline *pipeline_2d;
 	vulkan::Pipeline *pipeline_x;
 	vulkan::Texture *texture_x;
 	TextureRenderer *tex_ren;
 	WindowRenderer *renderer;
 
-	Text *text;
-	vulkan::VertexBuffer *vertex_buffer_2d;
+	Text *fps_display;
+	Picture *pic_tex_ren;
 
 	void init() {
 		window = create_window();
@@ -239,10 +144,7 @@ private:
 		pipeline->create();
 
 
-		shader_2d = vulkan::Shader::load("2d.shader");
-		pipeline_2d = vulkan::Pipeline::build(shader_2d, renderer->default_render_pass, 1, false);
-		pipeline_2d->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-		pipeline_2d->create();
+		gui::init(renderer->default_render_pass);
 
 		Image im_x;
 		im_x.create(512,512, Black);
@@ -260,14 +162,6 @@ private:
 		game_ini.load();
 
 		MaterialInit();
-
-		vertex_buffer_2d = new vulkan::VertexBuffer();
-		Array<vulkan::Vertex1> vertices;
-		vertices.add({vector(0,0,0), vector::EZ, 0,0});
-		vertices.add({vector(0,1,0), vector::EZ, 0,1});
-		vertices.add({vector(1,0,0), vector::EZ, 1,0});
-		vertices.add({vector(1,1,0), vector::EZ, 1,1});
-		vertex_buffer_2d->build1i(vertices, {0,2,1, 1,2,3});
 	}
 
 	void load_first_world() {
@@ -278,7 +172,10 @@ private:
 		CameraReset();
 		GodLoadWorld(game_ini.default_world);
 
-		text = new Text(vector(0.05f,0.05f,0), "Hallo, kleiner Test äöü", 0.05f);
+		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.05f,0.05f,0), 0.05f);
+		gui::add(fps_display);
+		pic_tex_ren = new Picture(vector(0.7f, 0.7f, 0), 0.25f, 0.25f, texture_x);
+		gui::add(pic_tex_ren);
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -352,18 +249,6 @@ private:
 
 	float time;
 
-	void render_gui(vulkan::CommandBuffer *cb) {
-		cb->set_pipeline(pipeline_2d);
-
-		UBOMatrices u;
-		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
-		u.view = matrix::ID.transpose();
-		u.model = (matrix::translation(text->pos) * matrix::scale(text->width, text->height, 1)).transpose();
-		text->ubo->update(&u);
-
-		cb->bind_descriptor_set(0, text->dset);
-		cb->draw(vertex_buffer_2d);
-	}
 
 	void prepare_all(Renderer *r) {
 
@@ -404,6 +289,8 @@ private:
 			u.model = mtr(m->pos, m->ang).transpose();
 			s.ubo->update(&u);
 		}
+
+		gui::update();
 	}
 
 	void draw_world(vulkan::CommandBuffer *cb) {
@@ -434,7 +321,7 @@ private:
 
 		draw_world(cb);
 
-		render_gui(cb);
+		gui::render(cb, rect(0, r->width, 0, r->height));
 
 		cb->end_render_pass();
 
@@ -468,7 +355,7 @@ private:
 #endif
 
 	void draw_frame() {
-		speedometer.tick(text);
+		speedometer.tick(fps_display);
 
 
 		static auto start_time = high_resolution_clock::now();
@@ -480,8 +367,6 @@ private:
 #if RENDER_TO_TEXTURE
 		prepare_all(tex_ren);
 		render_to_texture(tex_ren);
-
-		world.terrains[0]->dset->set({world.terrains[0]->ubo, world.ubo_light, world.ubo_fog}, {texture_x});
 #endif
 
 

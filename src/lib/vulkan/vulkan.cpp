@@ -98,7 +98,6 @@ namespace vulkan {
 
 GLFWwindow* vulkan_window;
 int device_width, device_height; // default (window)
-int target_width, target_height; // current
 
 
 
@@ -113,9 +112,6 @@ VkDevice device;
 
 VkQueue graphics_queue;
 VkQueue present_queue;
-
-SwapChain swap_chain;
-
 
 
 void init(GLFWwindow* window) {

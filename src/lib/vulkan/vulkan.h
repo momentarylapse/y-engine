@@ -43,7 +43,6 @@ namespace vulkan {
 
 
 	extern GLFWwindow* vulkan_window;
-	extern int target_width, target_height;
 
 
 	VkFormat find_depth_format();

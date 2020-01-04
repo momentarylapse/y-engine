@@ -41,6 +41,8 @@ endif
 
 sources = [
 	'src/fx/Light.cpp',
+	'src/gui/Picture.cpp',
+	'src/gui/Text.cpp',
 	'src/lib/any/any.cpp',
 	'src/lib/base/array.cpp',
 	'src/lib/base/strings.cpp',

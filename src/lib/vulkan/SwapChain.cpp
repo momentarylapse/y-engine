@@ -103,6 +103,9 @@ void SwapChain::create() {
 	create_image_views();
 
 	depth_buffer = new DepthBuffer(extent, find_depth_format());
+
+	default_render_pass = new RenderPass({image_format, depth_buffer->format});
+	create_frame_buffers(default_render_pass, depth_buffer);
 }
 
 
@@ -173,7 +176,7 @@ void SwapChain::create_image_views() {
 
 
 SwapChain::SwapChain() {
-	//create();
+	create();
 }
 
 SwapChain::~SwapChain() {
@@ -184,8 +187,9 @@ SwapChain::~SwapChain() {
 void SwapChain::cleanup() {
 
 	for (auto frame_buffer: frame_buffers) {
-		frame_buffer->destroy();
+		delete frame_buffer;
 	}
+	frame_buffers.clear();
 	delete depth_buffer;
 
 	for (auto image_view: image_views) {
@@ -198,6 +202,8 @@ void SwapChain::cleanup() {
 void SwapChain::rebuild() {
 	cleanup();
 	create();
+
+	//default_render_pass->rebuild();
 }
 
 
