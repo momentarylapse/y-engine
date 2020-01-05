@@ -108,6 +108,8 @@ void Texture::_destroy() {
 }
 
 Texture* Texture::load(const string &filename) {
+	if (filename == "")
+		return new Texture(16, 16);
 	Texture *t = new Texture();
 	t->_load(directory + filename);
 	return t;

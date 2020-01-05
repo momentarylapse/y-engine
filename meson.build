@@ -191,6 +191,10 @@ sources = [
 	'src/lib/vulkan/vulkan.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
+	'src/renderer/GBufferRenderer.cpp',
+	'src/renderer/Renderer.cpp',
+	'src/renderer/TextureRenderer.cpp',
+	'src/renderer/WindowRenderer.cpp',
 	'src/world/camera.cpp',
 	'src/world/material.cpp',
 	'src/world/model.cpp',
@@ -198,8 +202,7 @@ sources = [
 	'src/world/terrain.cpp',
 	'src/world/world.cpp',
 	'src/main.cpp',
-	'src/meta.cpp',
-	'src/Renderer.cpp'
+	'src/meta.cpp'
 ]
 
 

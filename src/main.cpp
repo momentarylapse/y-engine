@@ -25,7 +25,10 @@
 
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
-#include "Renderer.h"
+
+#include "renderer/Renderer.h"
+#include "renderer/WindowRenderer.h"
+#include "renderer/GBufferRenderer.h"
 
 #define RENDER_TO_TEXTURE 1
 
@@ -118,6 +121,7 @@ private:
 	WindowRenderer *renderer;
 
 	Text *fps_display;
+	Camera *light_cam;
 
 	void init() {
 		window = create_window();
@@ -169,6 +173,8 @@ private:
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
+
+		light_cam = new Camera(v_0, quaternion::ID, rect::ID);
 	}
 	
 	GLFWwindow* create_window() {
@@ -335,12 +341,7 @@ private:
 		cb->set_pipeline(r->pipeline);
 		cb->set_viewport(rect(0, r->width, 0, r->height));
 
-		for (auto &s: world.sorted_opaque) {
-			Model *m = s.model;
-
-			cb->bind_descriptor_set(0, s.dset);
-			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
-		}
+		draw_world(cb);
 		cb->end_render_pass();
 		cb->end();
 
