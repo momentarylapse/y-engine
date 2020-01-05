@@ -22,14 +22,29 @@ public:
 	vulkan::Texture *tex_normal;
 
 	vulkan::DepthBuffer *depth_buffer;
-	vulkan::FrameBuffer *frame_buffer;
+	vulkan::FrameBuffer *g_buffer;
 
 	vulkan::Shader *shader_into_gbuf;
-	vulkan::Pipeline *pipeline;
+	vulkan::Pipeline *pipeline_into_gbuf;
+	vulkan::RenderPass *render_pass_into_g;
 
-	bool start_frame() override;
-	void end_frame() override;
+	bool start_frame_into_gbuf();
+	void end_frame_into_gbuf();
 
+
+	vulkan::Texture *tex_output;
+
+	//vulkan::DepthBuffer *depth_buffer;
+	vulkan::FrameBuffer *frame_buffer;
+
+	vulkan::Shader *shader_merge;
+	vulkan::Pipeline *pipeline_merge;
+	vulkan::RenderPass *render_pass_merge;
+
+	bool start_frame_merge();
+	void end_frame_merge();
+
+	vulkan::FrameBuffer *_cfb;
 	vulkan::FrameBuffer *current_frame_buffer() override;
 };
 

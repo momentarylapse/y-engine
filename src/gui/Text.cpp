@@ -76,15 +76,15 @@ Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new vul
 }
 
 Text::~Text() {
-	delete texture;
+	delete textures[0];
 }
 
 
 void Text::rebuild() {
 	Image im;
 	render_text(text, im);
-	texture->override(&im);
-	dset->set({ubo}, {texture});
+	textures[0]->override(&im);
+	dset->set({ubo}, textures);
 
 	width = height * (float)im.width / (float)im.height / 1.33f;
 

@@ -353,8 +353,7 @@ void Model::load(const string &filename)
 			m->textures.resize(nt);
 		for (int t=0;t<nt;t++){
 			string fn = f->read_str();
-			if (fn.num > 0)
-				m->textures[t] = vulkan::Texture::load(fn);
+			m->textures[t] = vulkan::Texture::load(fn);
 		}
 	}
 	

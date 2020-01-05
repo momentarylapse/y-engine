@@ -11,6 +11,7 @@
 vulkan::Shader *Picture::shader = nullptr;
 vulkan::Pipeline *Picture::pipeline = nullptr;
 vulkan::VertexBuffer *Picture::vertex_buffer = nullptr;
+vulkan::RenderPass *Picture::render_pass = nullptr;
 
 static Array<Picture*> pictures;
 
@@ -21,28 +22,46 @@ struct UBOMatrices {
 	alignas(16) matrix proj;
 };
 
-Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex) {
+Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*> &tex, vulkan::Shader *_shader) {
 	pos = p;
 	width = w;
 	height = h;
-	texture = tex;
+	textures = tex;
 	col = White;
 	ubo = new vulkan::UBOWrapper(sizeof(UBOMatrices));
-	dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, {texture});
+	user_shader = _shader;
+	user_pipeline = nullptr;
+
+	if (user_shader) {
+		user_pipeline = vulkan::Pipeline::build(user_shader, render_pass, 1, false);
+		user_pipeline->set_dynamic({"viewport"});
+		user_pipeline->create();
+		dset = new vulkan::DescriptorSet(user_shader->descr_layouts[0], {ubo}, textures);
+	} else {
+		dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, textures);
+	}
+}
+
+Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex) : Picture(p, w, h, {tex}, nullptr) {
 }
 
 Picture::~Picture() {
 	delete ubo;
 	delete dset;
+//	if (user_shader)
+//		delete user_shader;
+	if (user_pipeline)
+		delete user_pipeline;
 }
 
 void Picture::rebuild() {
-	dset->set({ubo}, {texture});
+	dset->set({ubo}, textures);
 }
 
 namespace gui {
 
 void init(vulkan::RenderPass *rp) {
+	Picture::render_pass = rp;
 	Picture::shader = vulkan::Shader::load("2d.shader");
 	Picture::pipeline = vulkan::Pipeline::build(Picture::shader, rp, 1, false);
 	Picture::pipeline->set_dynamic({"viewport"});
@@ -79,6 +98,24 @@ void render(vulkan::CommandBuffer *cb, const rect &viewport) {
 	cb->set_viewport(viewport);
 
 	for (auto *p: pictures) {
+		if (p->user_shader)
+			continue;
+
+		UBOMatrices u;
+		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
+		u.view = matrix::ID.transpose();
+		u.model = (matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1)).transpose();
+		p->ubo->update(&u);
+
+		cb->bind_descriptor_set(0, p->dset);
+		cb->draw(Picture::vertex_buffer);
+	}
+
+	for (auto *p: pictures) {
+		if (!p->user_shader)
+			continue;
+		cb->set_pipeline(p->user_pipeline);
+		cb->set_viewport(viewport);
 
 		UBOMatrices u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();

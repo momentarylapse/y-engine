@@ -8,8 +8,8 @@
 #include "GBufferRenderer.h"
 
 GBufferRenderer::GBufferRenderer() {
-	width = 512;
-	height = 512;
+	width = 1024;
+	height = 768;
 	tex_color = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 	tex_pos = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 	tex_normal = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
@@ -17,39 +17,72 @@ GBufferRenderer::GBufferRenderer() {
 	VkExtent2D extent = {(unsigned)width, (unsigned)height};
 	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT, true);
 
-	default_render_pass = new vulkan::RenderPass({tex_color->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
-	frame_buffer = new vulkan::FrameBuffer(default_render_pass, {tex_color->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
+	render_pass_into_g = new vulkan::RenderPass({tex_color->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
+	g_buffer = new vulkan::FrameBuffer(render_pass_into_g, {tex_color->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
+	default_render_pass = render_pass_into_g;
 
 
 	shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
-	pipeline = vulkan::Pipeline::build(shader_into_gbuf, default_render_pass, 1, false);
-	pipeline->set_dynamic({"viewport"});
-	pipeline->create();
+	pipeline_into_gbuf = vulkan::Pipeline::build(shader_into_gbuf, render_pass_into_g, 1, false);
+	pipeline_into_gbuf->set_dynamic({"viewport"});
+	pipeline_into_gbuf->create();
+
+
+	tex_output = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
+
+	render_pass_merge = new vulkan::RenderPass({tex_output->format, depth_buffer->format}, true, false);
+	frame_buffer = new vulkan::FrameBuffer(render_pass_merge, {tex_output->view, depth_buffer->view}, extent);
+
+
+	shader_merge = vulkan::Shader::load("2d-gbuf-light.shader");
+	pipeline_merge = vulkan::Pipeline::build(shader_merge, render_pass_merge, 1, false);
+	pipeline_merge->set_dynamic({"viewport"});
+	pipeline_merge->create();
+
+	_cfb = nullptr;
 }
 
 GBufferRenderer::~GBufferRenderer() {
-	delete pipeline;
-	delete shader_into_gbuf;
+	delete pipeline_merge;
 	delete frame_buffer;
+	delete shader_merge;
+	delete render_pass_merge;
+	delete tex_output;
+
+	delete pipeline_into_gbuf;
+	delete shader_into_gbuf;
+	delete g_buffer;
 	delete depth_buffer;
 	delete tex_color;
 	delete tex_pos;
 	delete tex_normal;
 }
 
-bool GBufferRenderer::start_frame() {
+bool GBufferRenderer::start_frame_into_gbuf() {
 	in_flight_fence->wait();
+	_cfb = g_buffer;
 	return true;
 }
 
-void GBufferRenderer::end_frame() {
+void GBufferRenderer::end_frame_into_gbuf() {
+	vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
+	vulkan::wait_device_idle();
+}
+
+bool GBufferRenderer::start_frame_merge() {
+	in_flight_fence->wait();
+	_cfb = frame_buffer;
+	return true;
+}
+
+void GBufferRenderer::end_frame_merge() {
 	vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
 	vulkan::wait_device_idle();
 }
 
 
 vulkan::FrameBuffer *GBufferRenderer::current_frame_buffer() {
-	return frame_buffer;
+	return _cfb;
 }
 
 

@@ -108,6 +108,7 @@ void Texture::_destroy() {
 }
 
 Texture* Texture::load(const string &filename) {
+	std::cout << " load texture " << filename.c_str() << "\n";
 	if (filename == "")
 		return new Texture(16, 16);
 	Texture *t = new Texture();
