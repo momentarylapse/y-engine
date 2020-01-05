@@ -36,10 +36,11 @@ namespace vulkan{
 		float clear_z;
 		unsigned int clear_stencil;
 
+		int num_color_attachments() { return color_attachment_refs.num; }
+
 	private:
-		VkAttachmentDescription color_attachment;
-		VkAttachmentDescription depth_attachment;
-		VkAttachmentReference color_attachment_ref;
+		Array<VkAttachmentDescription> attachments;
+		Array<VkAttachmentReference> color_attachment_refs;
 		VkAttachmentReference depth_attachment_ref;
 		VkSubpassDescription subpass;
 		VkSubpassDependency dependency;

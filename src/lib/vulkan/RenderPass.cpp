@@ -25,44 +25,53 @@ namespace vulkan {
 			color_load_op = depth_load_op = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		}
 
-		color_attachment = {};
-		color_attachment.format = format[0];
-		color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		color_attachment.loadOp = color_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
-		color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		if (presentable)
-			color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		else
-			color_attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		// color attachments
+		for (int i=0; i<format.num-1; i++) {
+			VkAttachmentDescription a = {};
+			a.format = format[i];
+			a.samples = VK_SAMPLE_COUNT_1_BIT;
+			a.loadOp = color_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
+			a.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+			a.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			a.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			a.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			if (presentable)
+				a.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			else
+				a.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			attachments.add(a);
 
-		depth_attachment = {};
-		depth_attachment.format = format[1];
-		depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		depth_attachment.loadOp = depth_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		if (presentable)
-			depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		else
-			depth_attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			VkAttachmentReference r = {};
+			r.attachment = i;
+			r.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			color_attachment_refs.add(r);
+		}
 
-		color_attachment_ref = {};
-		color_attachment_ref.attachment = 0;
-		color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		{
+			VkAttachmentDescription a = {};
+			a = {};
+			a.format = format.back();
+			a.samples = VK_SAMPLE_COUNT_1_BIT;
+			a.loadOp = depth_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
+			a.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			a.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			a.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			a.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			if (presentable)
+				a.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			else
+				a.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			attachments.add(a);
 
-		depth_attachment_ref = {};
-		depth_attachment_ref.attachment = 1;
-		depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			depth_attachment_ref = {};
+			depth_attachment_ref.attachment = format.num-1;
+			depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
 
 		subpass = {};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &color_attachment_ref;
+		subpass.colorAttachmentCount = color_attachment_refs.num;
+		subpass.pColorAttachments = &color_attachment_refs[0];
 		subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
 		dependency = {};
@@ -94,17 +103,16 @@ namespace vulkan {
 	}
 
 	void RenderPass::create() {
-		std::array<VkAttachmentDescription, 2> attachments = {color_attachment, depth_attachment};
-		VkRenderPassCreateInfo render_pass_info = {};
-		render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		render_pass_info.attachmentCount = static_cast<uint32_t>(attachments.size());
-		render_pass_info.pAttachments = attachments.data();
-		render_pass_info.subpassCount = 1;
-		render_pass_info.pSubpasses = &subpass;
-		render_pass_info.dependencyCount = 1;
-		render_pass_info.pDependencies = &dependency;
+		VkRenderPassCreateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		info.attachmentCount = attachments.num;
+		info.pAttachments = &attachments[0];
+		info.subpassCount = 1;
+		info.pSubpasses = &subpass;
+		info.dependencyCount = 1;
+		info.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(device, &render_pass_info, nullptr, &render_pass) != VK_SUCCESS) {
+		if (vkCreateRenderPass(device, &info, nullptr, &render_pass) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create render pass!");
 		}
 	}

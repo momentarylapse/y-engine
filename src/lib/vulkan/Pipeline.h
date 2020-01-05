@@ -72,7 +72,7 @@ namespace vulkan{
 		Array<VkVertexInputAttributeDescription> attribute_descriptions;
 		Array<VkPipelineShaderStageCreateInfo> shader_stages;
 		VkPipelineVertexInputStateCreateInfo vertex_input_info;
-		VkPipelineColorBlendAttachmentState color_blend_attachment;
+		Array<VkPipelineColorBlendAttachmentState> color_blend_attachments; // per FrameBuffer color attachment
 		VkPipelineColorBlendStateCreateInfo color_blending;
 		VkPipelineRasterizationStateCreateInfo rasterizer;
 		VkPipelineMultisampleStateCreateInfo multisampling;

@@ -72,4 +72,23 @@ public:
 	vulkan::FrameBuffer *current_frame_buffer() override;
 };
 
+class GBufferRenderer : public Renderer {
+public:
+	GBufferRenderer();
+
+	vulkan::Texture *tex_color;
+	vulkan::Texture *tex_pos;
+	vulkan::Texture *tex_normal;
+
+	vulkan::DepthBuffer *depth_buffer;
+	vulkan::FrameBuffer *frame_buffer;
+
+	vulkan::Pipeline *pipeline;
+
+	bool start_frame() override;
+	void end_frame() override;
+
+	vulkan::FrameBuffer *current_frame_buffer() override;
+};
+
 #endif /* SRC_RENDERER_H_ */

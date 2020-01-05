@@ -150,9 +150,15 @@ void CommandBuffer::begin() {
 }
 
 void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
-	std::array<VkClearValue, 2> cv = {};
-	memcpy((void*)&cv[0].color, &rp->clear_color, sizeof(color));
-	cv[1].depthStencil = {rp->clear_z, rp->clear_stencil};
+	Array<VkClearValue> clear_values;
+	for (int i=0; i<rp->num_color_attachments(); i++) {
+		VkClearValue cv = {};
+		memcpy((void*)&cv.color, &rp->clear_color, sizeof(color));
+		clear_values.add(cv);
+	}
+	VkClearValue cv = {};
+	cv.depthStencil = {rp->clear_z, rp->clear_stencil};
+	clear_values.add(cv);
 
 	VkRenderPassBeginInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -160,8 +166,8 @@ void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 	info.framebuffer = fb->frame_buffer;
 	info.renderArea.offset = {0, 0};
 	info.renderArea.extent = fb->extent;
-	info.clearValueCount = static_cast<uint32_t>(cv.size());
-	info.pClearValues = cv.data();
+	info.clearValueCount = clear_values.num;
+	info.pClearValues = &clear_values[0];
 
 	vkCmdBeginRenderPass(buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 }

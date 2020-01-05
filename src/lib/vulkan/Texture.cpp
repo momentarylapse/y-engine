@@ -77,10 +77,7 @@ void Texture::__delete__() {
 }
 
 DynamicTexture::DynamicTexture(int nx, int ny, int nz, const string &format) {
-	int n = nx * ny * nz * pixel_size(parse_format(format));
-	string s;
-	s.resize(n);
-	_create_image(&s[0], nx, ny, nz, parse_format(format), false);
+	_create_image(nullptr, nx, ny, nz, parse_format(format), false);
 	_create_view();
 	_create_sampler();
 }

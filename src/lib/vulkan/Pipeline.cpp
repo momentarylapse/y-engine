@@ -109,16 +109,19 @@ Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int num_textures) 
 	input_assembly.topology = shader->topology;
 	input_assembly.primitiveRestartEnable = VK_FALSE;
 
-	color_blend_attachment = {};
-	color_blend_attachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	color_blend_attachment.blendEnable = VK_FALSE;
+	for (int i=0; i<render_pass->num_color_attachments(); i++) {
+		VkPipelineColorBlendAttachmentState a = {};
+		a.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		a.blendEnable = VK_FALSE;
+		color_blend_attachments.add(a);
+	}
 
 	color_blending = {};
 	color_blending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	color_blending.logicOpEnable = VK_FALSE;
 	color_blending.logicOp = VK_LOGIC_OP_COPY;
-	color_blending.attachmentCount = 1;
-	color_blending.pAttachments = &color_blend_attachment;
+	color_blending.attachmentCount = color_blend_attachments.num;
+	color_blending.pAttachments = &color_blend_attachments[0];
 	color_blending.blendConstants[0] = 0.0f;
 	color_blending.blendConstants[1] = 0.0f;
 	color_blending.blendConstants[2] = 0.0f;
@@ -166,31 +169,31 @@ void Pipeline::__delete__() {
 }
 
 void Pipeline::disable_blend() {
-	color_blend_attachment.blendEnable = VK_FALSE;
+	color_blend_attachments[0].blendEnable = VK_FALSE;
 }
 
 void Pipeline::set_blend(VkBlendFactor src, VkBlendFactor dst) {
-	color_blend_attachment.blendEnable = VK_TRUE;
-	color_blend_attachment.colorBlendOp = VK_BLEND_OP_ADD;
-	color_blend_attachment.srcColorBlendFactor = src;
-	color_blend_attachment.dstColorBlendFactor = dst;
-	color_blend_attachment.alphaBlendOp = VK_BLEND_OP_MAX;
-	color_blend_attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	color_blend_attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	color_blend_attachments[0].blendEnable = VK_TRUE;
+	color_blend_attachments[0].colorBlendOp = VK_BLEND_OP_ADD;
+	color_blend_attachments[0].srcColorBlendFactor = src;
+	color_blend_attachments[0].dstColorBlendFactor = dst;
+	color_blend_attachments[0].alphaBlendOp = VK_BLEND_OP_MAX;
+	color_blend_attachments[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+	color_blend_attachments[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 }
 
 void Pipeline::set_blend(float alpha) {
-	color_blend_attachment.blendEnable = VK_TRUE;
-	color_blend_attachment.colorBlendOp = VK_BLEND_OP_ADD;
-	color_blend_attachment.srcColorBlendFactor = VK_BLEND_FACTOR_CONSTANT_COLOR;
-	color_blend_attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+	color_blend_attachments[0].blendEnable = VK_TRUE;
+	color_blend_attachments[0].colorBlendOp = VK_BLEND_OP_ADD;
+	color_blend_attachments[0].srcColorBlendFactor = VK_BLEND_FACTOR_CONSTANT_COLOR;
+	color_blend_attachments[0].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
 	color_blending.blendConstants[0] = alpha;
 	color_blending.blendConstants[1] = alpha;
 	color_blending.blendConstants[2] = alpha;
 	color_blending.blendConstants[3] = alpha;
-	color_blend_attachment.alphaBlendOp = VK_BLEND_OP_MAX;
-	color_blend_attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	color_blend_attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	color_blend_attachments[0].alphaBlendOp = VK_BLEND_OP_MAX;
+	color_blend_attachments[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+	color_blend_attachments[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 }
 
 void Pipeline::set_line_width(float line_width) {
@@ -280,10 +283,10 @@ void Pipeline::create() {
 		throw std::runtime_error("failed to create pipeline layout!");
 	}
 
-	VkPipelineDynamicStateCreateInfo dynami_state = {};
-	dynami_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynami_state.dynamicStateCount = dynamic_states.num;
-	dynami_state.pDynamicStates = &dynamic_states[0];
+	VkPipelineDynamicStateCreateInfo dynamic_state = {};
+	dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamic_state.dynamicStateCount = dynamic_states.num;
+	dynamic_state.pDynamicStates = &dynamic_states[0];
 
 	VkGraphicsPipelineCreateInfo pipeline_info = {};
 	pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -300,7 +303,7 @@ void Pipeline::create() {
 	pipeline_info.renderPass = render_pass->render_pass;
 	pipeline_info.subpass = 0;
 	pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
-	pipeline_info.pDynamicState = &dynami_state;
+	pipeline_info.pDynamicState = &dynamic_state;
 
 	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &pipeline) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");

@@ -114,9 +114,7 @@ private:
 	GLFWwindow* window;
 
 	vulkan::Pipeline *pipeline;
-	vulkan::Pipeline *pipeline_x;
-	vulkan::Texture *texture_x;
-	TextureRenderer *tex_ren;
+	GBufferRenderer *gbuf_ren;
 	WindowRenderer *renderer;
 
 	Text *fps_display;
@@ -145,15 +143,8 @@ private:
 
 		gui::init(renderer->default_render_pass);
 
-		texture_x = new vulkan::DynamicTexture(512, 512, 1, "rgba:i8");
+		gbuf_ren = new GBufferRenderer();
 
-		tex_ren = new TextureRenderer(texture_x);
-
-		pipeline_x = vulkan::Pipeline::build(shader, tex_ren->default_render_pass, 1, false);
-		pipeline_x->set_dynamic({"viewport"});
-		/*pipeline_x = vulkan::Pipeline::build(shader_2d, tex_ren->render_pass, 1, false);
-		pipeline_x->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);*/
-		pipeline_x->create();
 		
 		game_ini.load();
 
@@ -170,8 +161,10 @@ private:
 
 		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.05f,0.05f,0), 0.05f);
 		gui::add(fps_display);
-		gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, texture_x));
-		gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, tex_ren->depth_buffer));
+		gui::add(new Picture(vector(0.8f, 0.2f, 0), 0.2f, 0.2f, gbuf_ren->tex_color));
+		gui::add(new Picture(vector(0.8f, 0.4f, 0), 0.2f, 0.2f, gbuf_ren->tex_pos));
+		gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, gbuf_ren->tex_normal));
+		gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, gbuf_ren->depth_buffer));
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -308,30 +301,23 @@ private:
 		auto *cb = r->cb;
 		auto *rp = r->default_render_pass;
 		auto *fb = r->current_frame_buffer();
-		msg_write("  -all");
 
 		cb->set_viewport(rect(0, r->width, 0, r->height));
-		msg_write(" a1");
 
 		rp->clear_color = world.background;
 		cb->begin_render_pass(rp, fb);
 		cb->set_pipeline(pip);
-		msg_write(" a2");
 
 		draw_world(cb);
-		msg_write(" a3");
 
 		gui::render(cb, rect(0, r->width, 0, r->height));
-		msg_write(" a4");
 
 		cb->end_render_pass();
-		msg_write(" a9");
 
 	}
 
-#if RENDER_TO_TEXTURE
-	void render_to_texture(Renderer *r) {
-		msg_write("render-to-tex");
+	void render_gbuffer(GBufferRenderer *r) {
+		//msg_write("render-to-tex");
 		r->start_frame();
 		auto *cb = r->cb;
 		cam->set_view(1.0f);
@@ -340,7 +326,7 @@ private:
 
 		r->default_render_pass->clear_color = Green;
 		cb->begin_render_pass(r->default_render_pass, r->current_frame_buffer());
-		cb->set_pipeline(pipeline_x);
+		cb->set_pipeline(r->pipeline);
 		cb->set_viewport(rect(0, r->width, 0, r->height));
 
 		for (auto &s: world.sorted_opaque) {
@@ -355,7 +341,6 @@ private:
 		r->end_frame();
 		vulkan::wait_device_idle();
 	}
-#endif
 
 	void draw_frame() {
 		speedometer.tick(fps_display);
@@ -367,28 +352,22 @@ private:
 		time = duration<float, seconds::period>(current_time - start_time).count();
 
 
-#if RENDER_TO_TEXTURE
-		prepare_all(tex_ren);
-		render_to_texture(tex_ren);
-#endif
+		prepare_all(gbuf_ren);
+		render_gbuffer(gbuf_ren);
 
 		prepare_all(renderer);
 
 		if (!renderer->start_frame())
 			return;
-		msg_write("render-to-win");
+		//msg_write("render-to-win");
 		auto cb = renderer->cb;
 
 
 		cb->begin();
-		msg_write("a");
 		render_all(renderer, pipeline);
-		msg_write("b");
 		cb->end();
-		msg_write("c");
 
 		renderer->end_frame();
-		msg_write("z");
 
 		vulkan::wait_device_idle();
 	}
