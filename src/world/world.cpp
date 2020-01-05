@@ -161,8 +161,10 @@ void TestObjectSanity(const char *str)
 
 
 
-void GodInit()
-{
+void GodInit() {
+	world.ubo_light = new vulkan::UBOWrapper(32 * 64);
+	world.ubo_fog = new vulkan::UBOWrapper(64);
+
 	world.reset();
 
 	world.terrain_object = new Object();
@@ -198,6 +200,11 @@ void GodInit()
 #endif
 }
 
+void GodEnd() {
+	delete world.ubo_light;
+	delete world.ubo_fog;
+}
+
 World::World() {
 	ubo_light = nullptr;
 	ubo_fog = nullptr;
@@ -220,11 +227,15 @@ void World::reset() {
 	// objects
 	for (auto *o: objects)
 		if (o)
-			unregister_object(o); // actual deleting done by ModelManager
+			delete o;//unregister_object(o); // actual deleting done by ModelManager
 	objects.clear();
 	num_reserved_objects = 0;
 	
+	for (auto &s: sorted_trans)
+		s.clear();
 	sorted_trans.clear();
+	for (auto &s: sorted_opaque)
+		s.clear();
 	sorted_opaque.clear();
 
 
@@ -317,11 +328,6 @@ bool World::load(const LevelData &ld) {
 	bool ok = true;
 	reset();
 
-
-	if (!ubo_light)
-		ubo_light = new vulkan::UBOWrapper(32 * 64);
-	if (!ubo_fog)
-		ubo_fog = new vulkan::UBOWrapper(64);
 
 	engine.physics_enabled = ld.physics_enabled;
 	engine.collisions_enabled = true;//LevelData.physics_enabled;
@@ -1253,6 +1259,11 @@ void World::unregister_object(Model *m) {
 	m->object_id = -1;
 }
 
+void PartialModel::clear() {
+	delete ubo;
+	delete dset;
+}
+
 // add a model to the (possible) rendering list
 void World::register_model(Model *m) {
 	if (m->registered)
@@ -1303,11 +1314,15 @@ void World::unregister_model(Model *m) {
 	//printf("%p   %s\n", m, MetaGetModelFilename(m));
 
 	foreachi (auto &s, sorted_trans, i)
-		if (s.model == m)
+		if (s.model == m) {
+			s.clear();
 			sorted_trans.erase(i);
+		}
 	foreachi (auto &s, sorted_opaque, i)
-		if (s.model == m)
+		if (s.model == m) {
+			s.clear();
 			sorted_opaque.erase(i);
+		}
 
 #ifdef _X_ALLOW_FX_
 	if (!engine.resetting_game)

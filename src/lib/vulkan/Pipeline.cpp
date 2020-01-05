@@ -20,7 +20,7 @@
 
 namespace vulkan {
 
-	std::vector<Pipeline*> pipelines;
+	Array<Pipeline*> pipelines;
 
 	extern int device_width, device_height;
 
@@ -156,6 +156,10 @@ Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int num_textures) 
 
 Pipeline::~Pipeline() {
 	destroy();
+
+	for (int i=0; i<pipelines.num; i++)
+		if (pipelines[i] == this)
+			pipelines.erase(i);
 }
 
 
@@ -241,7 +245,7 @@ void Pipeline::set_dynamic(const Array<string> &_dynamic_states) {
 
 Pipeline* Pipeline::build(Shader *shader, RenderPass *render_pass, int num_textures, bool _create) {
 	Pipeline *p = new Pipeline(shader, render_pass, num_textures);
-	pipelines.push_back(p);
+	pipelines.add(p);
 	if (_create)
 		p->create();
 	return p;

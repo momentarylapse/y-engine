@@ -185,7 +185,6 @@ SwapChain::~SwapChain() {
 
 
 void SwapChain::cleanup() {
-
 	for (auto frame_buffer: frame_buffers) {
 		delete frame_buffer;
 	}

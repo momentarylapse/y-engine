@@ -130,6 +130,7 @@ private:
 
 		engine.set_dirs("Textures/", "Maps/", "Objects/", "Sound", "Scripts/", "Materials/", "Fonts/");
 
+		GodInit();
 		PluginManager::link_kaba();
 
 
@@ -192,6 +193,11 @@ private:
 	}
 
 	void cleanup() {
+		world.reset();
+		GodEnd();
+		gui::reset();
+		delete pipeline;
+		delete gbuf_ren;
 		delete renderer;
 		vulkan::destroy();
 

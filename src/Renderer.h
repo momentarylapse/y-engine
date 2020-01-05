@@ -36,7 +36,7 @@ public:
 class WindowRenderer : public Renderer {
 public:
 	WindowRenderer(GLFWwindow *window);
-	virtual ~WindowRenderer();
+	~WindowRenderer() override;
 
 	GLFWwindow *window;
 	bool framebuffer_resized = false;
@@ -60,6 +60,7 @@ public:
 class TextureRenderer : public Renderer {
 public:
 	TextureRenderer(vulkan::Texture *tex);
+	~TextureRenderer() override;
 
 	vulkan::Texture *tex;
 
@@ -75,6 +76,7 @@ public:
 class GBufferRenderer : public Renderer {
 public:
 	GBufferRenderer();
+	~GBufferRenderer() override;
 
 	vulkan::Texture *tex_color;
 	vulkan::Texture *tex_pos;
@@ -83,6 +85,7 @@ public:
 	vulkan::DepthBuffer *depth_buffer;
 	vulkan::FrameBuffer *frame_buffer;
 
+	vulkan::Shader *shader_into_gbuf;
 	vulkan::Pipeline *pipeline;
 
 	bool start_frame() override;

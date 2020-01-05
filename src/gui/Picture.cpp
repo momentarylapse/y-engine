@@ -58,6 +58,12 @@ void init(vulkan::RenderPass *rp) {
 	Picture::vertex_buffer->build1i(vertices, {0,2,1, 1,2,3});
 }
 
+void reset() {
+	for (auto *p: pictures)
+		delete p;
+	pictures.clear();
+}
+
 void add(Picture *p) {
 	pictures.add(p);
 }

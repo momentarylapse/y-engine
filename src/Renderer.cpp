@@ -51,7 +51,6 @@ WindowRenderer::WindowRenderer(GLFWwindow *_window) {
 	height = swap_chain->extent.height;
 
 	default_render_pass = swap_chain->default_render_pass;
-	swap_chain->create_frame_buffers(default_render_pass, swap_chain->depth_buffer);
 
 	main_renderer = this;
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
@@ -130,6 +129,11 @@ TextureRenderer::TextureRenderer(vulkan::Texture *t) {
 	frame_buffer = new vulkan::FrameBuffer(default_render_pass, {tex->view, depth_buffer->view}, extent);
 }
 
+TextureRenderer::~TextureRenderer() {
+	delete depth_buffer;
+	delete frame_buffer;
+}
+
 bool TextureRenderer::start_frame() {
 	in_flight_fence->wait();
 	return true;
@@ -163,12 +167,20 @@ GBufferRenderer::GBufferRenderer() {
 	frame_buffer = new vulkan::FrameBuffer(default_render_pass, {tex_color->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
 
 
-	auto shader_x = vulkan::Shader::load("3d-multi.shader");
-	pipeline = vulkan::Pipeline::build(shader_x, default_render_pass, 1, false);
+	shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
+	pipeline = vulkan::Pipeline::build(shader_into_gbuf, default_render_pass, 1, false);
 	pipeline->set_dynamic({"viewport"});
 	pipeline->create();
+}
 
-
+GBufferRenderer::~GBufferRenderer() {
+	delete pipeline;
+	delete shader_into_gbuf;
+	delete frame_buffer;
+	delete depth_buffer;
+	delete tex_color;
+	delete tex_pos;
+	delete tex_normal;
 }
 
 bool GBufferRenderer::start_frame() {

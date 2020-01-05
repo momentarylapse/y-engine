@@ -33,6 +33,7 @@ public:
 
 namespace gui {
 	void init(vulkan::RenderPass *rp);
+	void reset();
 	void render(vulkan::CommandBuffer *cb, const rect &viewport);
 	void update();
 	void add(Picture *p);

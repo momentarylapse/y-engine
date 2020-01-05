@@ -23,7 +23,6 @@
 
 #include "../base/base.h"
 #include <vulkan/vulkan.h>
-#include <vector>
 
 class rect;
 
@@ -80,7 +79,7 @@ namespace vulkan{
 		VkPipelineInputAssemblyStateCreateInfo input_assembly;
 	};
 
-	extern std::vector<Pipeline*> pipelines;
+	extern Array<Pipeline*> pipelines;
 
 };
 

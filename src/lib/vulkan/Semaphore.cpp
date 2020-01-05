@@ -22,6 +22,7 @@ Fence::Fence() {
 }
 
 Fence::~Fence() {
+	vkDestroyFence(device, fence, nullptr);
 }
 
 void Fence::__init__() {

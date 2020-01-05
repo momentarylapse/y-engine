@@ -71,9 +71,9 @@ Material::Material() {
 }
 
 Material::~Material() {
-	//if (shader)
+	if (shader)
+		delete shader;
 	//	shader->unref();
-
 }
 
 

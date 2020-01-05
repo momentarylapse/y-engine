@@ -17,6 +17,10 @@ namespace vulkan{
 
 	VkDescriptorPool descriptor_pool;
 
+	Array<DescriptorSet*> descriptor_sets;
+	Array<Shader*> shaders;
+	Array<UBOWrapper*> ubo_wrappers;
+
 
 
 	UBOWrapper::UBOWrapper(int _size) {
@@ -208,6 +212,8 @@ namespace vulkan{
 		frag_module = nullptr;
 		topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		push_size = 0;
+
+		shaders.add(this);
 	}
 
 	Shader::~Shader() {
@@ -221,6 +227,10 @@ namespace vulkan{
 		for (auto &l: descr_layouts) {
 			DescriptorSet::destroy_layout(l);
 		}
+
+		for (int i=0; i<shaders.num; i++)
+			if (shaders[i] == this)
+				shaders.erase(i);
 	}
 
 

@@ -12,6 +12,8 @@
 
 namespace vulkan {
 
+Array<Texture*> textures;
+
 VkFormat parse_format(const string &s) {
 	if (s == "rgba:i8")
 		return VK_FORMAT_R8G8B8A8_UNORM;
@@ -55,6 +57,8 @@ Texture::Texture() {
 	width = height = depth = 0;
 	mip_levels = 0;
 	format = VK_FORMAT_UNDEFINED;
+
+	textures.add(this);
 }
 
 Texture::Texture(int w, int h) : Texture() {
@@ -66,6 +70,10 @@ Texture::Texture(int w, int h) : Texture() {
 
 Texture::~Texture() {
 	_destroy();
+
+	for (int i=0; i<textures.num; i++)
+		if (textures[i] == this)
+			textures.erase(i);
 }
 
 void Texture::__init__() {

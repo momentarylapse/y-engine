@@ -8,6 +8,8 @@
 
 namespace vulkan{
 
+Array<VertexBuffer*> vertex_buffers;
+
 Vertex1::Vertex1(const vector &p, const vector &n, float _u, float _v) {
 	pos = p;
 	normal = n;
@@ -56,6 +58,8 @@ VertexBuffer::VertexBuffer() {
 	index_memory = nullptr;
 	index_buffer_size = 0;
 	output_count = 0;
+
+	vertex_buffers.add(this);
 }
 
 VertexBuffer::~VertexBuffer() {
@@ -67,6 +71,10 @@ VertexBuffer::~VertexBuffer() {
 		vkDestroyBuffer(device, vertex_buffer, nullptr);
 		vkFreeMemory(device, vertex_memory, nullptr);
 	}
+
+	for (int i=0; i<vertex_buffers.num; i++)
+		if (vertex_buffers[i] == this)
+			vertex_buffers.erase(i);
 }
 
 void VertexBuffer::__init__() {

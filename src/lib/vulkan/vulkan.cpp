@@ -135,12 +135,31 @@ void init(GLFWwindow* window) {
 	descriptor_pool = create_descriptor_pool();
 }
 
+extern Array<VertexBuffer*> vertex_buffers;
+extern Array<Shader*> shaders;
+
 void destroy() {
 	std::cout << "vulkan destroy" << "\n";
 
-	for (auto *p: pipelines)
-		delete p;
+	auto _vertex_buffers = vertex_buffers;
+	vertex_buffers.clear();
+	for (auto *vb: _vertex_buffers)
+		delete vb;
+
+	auto _textures = textures;
+	textures.clear();
+	for (auto *t: _textures)
+		delete t;
+
+	auto _pipelines = pipelines;
 	pipelines.clear();
+	for (auto *p: _pipelines)
+		delete p;
+
+	auto _shaders = shaders;
+	shaders.clear();
+	for (auto *s: _shaders)
+		delete s;
 
 	destroy_descriptor_pool(descriptor_pool);
 

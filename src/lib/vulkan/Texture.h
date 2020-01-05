@@ -50,6 +50,8 @@ namespace vulkan {
 	public:
 		DynamicTexture(int nx, int ny, int nz, const string &format);
 	};
+
+	extern Array<Texture*> textures;
 };
 
 #endif

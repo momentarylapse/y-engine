@@ -99,6 +99,7 @@ struct PartialModel {
 	int mat_index;
 	float d;
 	bool shadow, transparent;
+	void clear();
 };
 
 // network messages
@@ -188,7 +189,7 @@ extern World world;
 
 
 void GodInit();
-void GodReset();
+void GodEnd();
 bool GodLoadWorld(const string &filename);
 
 void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
