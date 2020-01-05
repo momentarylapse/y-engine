@@ -8,8 +8,8 @@
 #include "GBufferRenderer.h"
 
 GBufferRenderer::GBufferRenderer() {
-	width = 1024;
-	height = 768;
+	width = 1024*2;
+	height = 768*2;
 	tex_color = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 	tex_emission = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 	tex_pos = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
@@ -37,6 +37,7 @@ GBufferRenderer::GBufferRenderer() {
 
 	shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");
 	shader_merge_light = vulkan::Shader::load("2d-gbuf-light.shader");
+	shader_merge_fog = vulkan::Shader::load("2d-gbuf-fog.shader");
 	pipeline_merge = vulkan::Pipeline::build(shader_merge_base, render_pass_merge, 1, false);
 	pipeline_merge->set_dynamic({"viewport"});
 	pipeline_merge->create();
@@ -49,6 +50,7 @@ GBufferRenderer::~GBufferRenderer() {
 	delete frame_buffer;
 	delete shader_merge_base;
 	delete shader_merge_light;
+	delete shader_merge_fog;
 	delete render_pass_merge;
 	delete tex_output;
 

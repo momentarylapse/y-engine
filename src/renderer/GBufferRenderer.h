@@ -40,6 +40,7 @@ public:
 
 	vulkan::Shader *shader_merge_base;
 	vulkan::Shader *shader_merge_light;
+	vulkan::Shader *shader_merge_fog;
 	vulkan::Pipeline *pipeline_merge;
 	vulkan::RenderPass *render_pass_merge;
 

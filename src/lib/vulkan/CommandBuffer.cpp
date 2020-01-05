@@ -151,9 +151,9 @@ void CommandBuffer::begin() {
 
 void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 	Array<VkClearValue> clear_values;
-	for (int i=0; i<rp->num_color_attachments(); i++) {
+	for (auto &c: rp->clear_color) {
 		VkClearValue cv = {};
-		memcpy((void*)&cv.color, &rp->clear_color, sizeof(color));
+		memcpy((void*)&cv.color, &c, sizeof(color));
 		clear_values.add(cv);
 	}
 	VkClearValue cv = {};

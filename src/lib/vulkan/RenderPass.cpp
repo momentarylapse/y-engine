@@ -82,7 +82,8 @@ namespace vulkan {
 		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-		clear_color = Black;
+		for (int i=0; i<format.num - 1; i++)
+			clear_color.add(Black);
 		clear_z = 1.0f;
 		clear_stencil = 0;
 

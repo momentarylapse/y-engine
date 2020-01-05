@@ -70,9 +70,14 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("World.sun", &World::sun);
 	Kaba::declare_class_element("World.lights", &World::lights);
 	Kaba::declare_class_element("World.ego", &World::ego);
+	Kaba::declare_class_element("World.fog", &World::fog);
 	Kaba::link_external_class_func("World.create_object", &World::create_object);
 	Kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	Kaba::link_external_class_func("World.add_light", &World::add_light);
+
+	Kaba::declare_class_element("Fog.color", &Fog::_color);
+	Kaba::declare_class_element("Fog.enabled", &Fog::enabled);
+	Kaba::declare_class_element("Fog.distance", &Fog::distance);
 
 
 	Controller con;
@@ -101,6 +106,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Light.color", &Light::col);
 	Kaba::declare_class_element("Light.radius", &Light::radius);
 	Kaba::declare_class_element("Light.theta", &Light::theta);
+	Kaba::declare_class_element("Light.harshness", &Light::harshness);
 	Kaba::declare_class_element("Light.enabled", &Light::enabled);
 
 	Kaba::link_external_class_func("LightParallel.__init__", &Light::__init_parallel__);

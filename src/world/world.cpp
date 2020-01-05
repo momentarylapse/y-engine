@@ -254,7 +254,7 @@ void World::reset() {
 	ambient = color(1,0.4f,0.4f,0.4f);
 	fog._color = White;
 	fog.mode = 0;//FOG_EXP;
-	fog.density = 0.001f;
+	fog.distance = 10000;
 	fog.enabled = false;
 	fog.start = 0;
 	fog.end = 100000;
@@ -443,7 +443,7 @@ bool LevelData::load(const string &filename) {
 	fog.mode = f->read_word();
 	fog.start = f->read_float();
 	fog.end = f->read_float();
-	fog.density = f->read_float();
+	fog.distance = 1.0f / f->read_float();
 	fog._color = ReadColor4(f);
 
 	// Music

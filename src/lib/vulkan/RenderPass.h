@@ -32,7 +32,7 @@ namespace vulkan{
 		void rebuild();
 
 		VkRenderPass render_pass;
-		color clear_color;
+		Array<color> clear_color;
 		float clear_z;
 		unsigned int clear_stencil;
 

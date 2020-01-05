@@ -30,7 +30,7 @@
 #include "renderer/WindowRenderer.h"
 #include "renderer/GBufferRenderer.h"
 
-#define RENDER_TO_TEXTURE 1
+const bool SHOW_GBUFFER = false;
 
 
 // pipeline: shader + z buffer / blending parameters
@@ -57,17 +57,9 @@ struct UBOMatrices {
 	alignas(16) matrix proj;
 };
 
-struct UBOLight {
-	alignas(16) vector pos;
-	alignas(16) vector dir;
-	alignas(16) float radius;
-	float theta;
-	alignas(16) color col;
-};
-
 struct UBOFog {
 	alignas(16) color col;
-	alignas(16) float density;
+	alignas(16) float distance;
 };
 
 
@@ -151,6 +143,7 @@ private:
 		gbuf_ren = new GBufferRenderer();
 
 		ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
+
 		pipeline_x1 = vulkan::Pipeline::build(gbuf_ren->shader_merge_base, renderer->default_render_pass, 1, false);
 		pipeline_x1->set_dynamic({"viewport"});
 		pipeline_x1->set_z(false, false);
@@ -161,9 +154,13 @@ private:
 		pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 		pipeline_x2->set_z(false, false);
 		pipeline_x2->create();
-		msg_write("aaaa");
+
+		pipeline_x3 = vulkan::Pipeline::build(gbuf_ren->shader_merge_fog, renderer->default_render_pass, 1, false);
+		pipeline_x3->set_dynamic({"viewport"});
+		pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+		pipeline_x3->set_z(false, false);
+		pipeline_x3->create();
 		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
-		msg_write("aaaa");
 
 		
 		game_ini.load();
@@ -181,12 +178,13 @@ private:
 
 		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.05f,0.05f,0), 0.05f);
 		gui::add(fps_display);
-//		gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, {gbuf_ren->tex_color, gbuf_ren->tex_pos, gbuf_ren->tex_normal}, gbuf_ren->shader_merge));
-//		gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, {gbuf_ren->tex_color, gbuf_ren->tex_pos, gbuf_ren->tex_normal}, nullptr));
-		gui::add(new Picture(vector(0.8f, 0.2f, 0), 0.2f, 0.2f, gbuf_ren->tex_color));
-		gui::add(new Picture(vector(0.8f, 0.4f, 0), 0.2f, 0.2f, gbuf_ren->tex_pos));
-		gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, gbuf_ren->tex_normal));
-		gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, gbuf_ren->depth_buffer));
+		if (SHOW_GBUFFER) {
+			gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, gbuf_ren->tex_color));
+			gui::add(new Picture(vector(0.8f, 0.2f, 0), 0.2f, 0.2f, gbuf_ren->tex_emission));
+			gui::add(new Picture(vector(0.8f, 0.4f, 0), 0.2f, 0.2f, gbuf_ren->tex_pos));
+			gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, gbuf_ren->tex_normal));
+			gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, gbuf_ren->depth_buffer));
+		}
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -279,9 +277,6 @@ private:
 
 		cam->set_view((float)r->width / (float)r->height);
 
-		world.fog._color = Red;
-		world.fog.density = 0.01f;
-
 		UBOMatrices u;
 		u.proj = cam->m_projection.transpose();
 		u.view = cam->m_view.transpose();
@@ -303,7 +298,7 @@ private:
 
 		UBOFog f;
 		f.col = world.fog._color;
-		f.density = world.fog.density;
+		f.distance = world.fog.distance;
 		world.ubo_fog->update(&f);
 
 		for (auto *t: world.terrains) {
@@ -337,28 +332,27 @@ private:
 
 	}
 
-	void render_all(Renderer *r, vulkan::Pipeline *pip) {
+	void render_all(Renderer *r) {
 		auto *cb = r->cb;
 		auto *rp = r->default_render_pass;
 		auto *fb = r->current_frame_buffer();
 
 		cb->set_viewport(rect(0, r->width, 0, r->height));
 
-		rp->clear_color = world.background;
+		//rp->clear_color[0] = world.background;
 		cb->begin_render_pass(rp, fb);
-		cb->set_pipeline(pip);
 
 		//draw_world(cb);
 
-		gui::render(cb, rect(0, r->width, 0, r->height));
-
 		draw_from_gbuf(cb);
+
+		gui::render(cb, rect(0, r->width, 0, r->height));
 
 		cb->end_render_pass();
 
 	}
 
-	void render_gbuffer(GBufferRenderer *r) {
+	void render_into_gbuffer(GBufferRenderer *r) {
 		//msg_write("render-to-tex");
 		r->start_frame_into_gbuf();
 		auto *cb = r->cb;
@@ -366,7 +360,7 @@ private:
 
 		cb->begin();
 
-		r->default_render_pass->clear_color = Green;
+		r->default_render_pass->clear_color[1] = world.background; // emission
 		cb->begin_render_pass(r->render_pass_into_g, r->current_frame_buffer());
 		cb->set_pipeline(r->pipeline_into_gbuf);
 		cb->set_viewport(rect(0, r->width, 0, r->height));
@@ -379,35 +373,20 @@ private:
 		vulkan::wait_device_idle();
 	}
 
-	/*void lighting_pass(GBufferRenderer *r) {
-		auto *cb = r->cb;
-
-		r->start_frame_merge();
-		cb->begin();
-		cb->begin_render_pass(r->render_pass_merge, r->current_frame_buffer());
-		cb->set_pipeline(r->pipeline_merge);
-		cb->set_viewport(rect(0, r->width, 0, r->height));
-
-		//draw_world(cb);
-
-		cb->end_render_pass();
-		cb->end();
-		r->end_frame_merge();
-	}*/
 
 	vulkan::UBOWrapper *ubo_x1;
 	vulkan::DescriptorSet *dset_x1;
-	vulkan::Pipeline *pipeline_x1, *pipeline_x2;
+	vulkan::Pipeline *pipeline_x1, *pipeline_x2, *pipeline_x3;
 
 
 
-	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip) {
+	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset) {
 
 		cb->set_pipeline(pip);
 		cb->set_viewport(rect(0, renderer->width, 0, renderer->height));
 		cb->push_constant(0, 12, &cam->pos);
 
-		cb->bind_descriptor_set(0, dset_x1);
+		cb->bind_descriptor_set(0, dset);
 		cb->draw(Picture::vertex_buffer);
 	}
 
@@ -422,7 +401,7 @@ private:
 
 
 		// base emission
-		draw_from_gbuf_single(cb, pipeline_x1);
+		draw_from_gbuf_single(cb, pipeline_x1, dset_x1);
 
 
 		// light passes
@@ -433,13 +412,21 @@ private:
 				l.dir = ll->dir;
 				l.col = ll->col;
 				l.radius = ll->radius;
-				l.theta = ll->radius;
-				world.ubo_light->update(&l);
+				l.theta = ll->theta;
+				l.harshness = ll->harshness;
+				ll->ubo->update(&l);
+				if (!ll->dset)
+					ll->dset = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+				else
+					ll->dset->set({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
-				draw_from_gbuf_single(cb, pipeline_x2);
-				break;
+				draw_from_gbuf_single(cb, pipeline_x2, ll->dset);
 			}
 		}
+
+		// fog
+		if (world.fog.enabled)
+			draw_from_gbuf_single(cb, pipeline_x3, dset_x1);
 	}
 
 	void draw_frame() {
@@ -453,9 +440,7 @@ private:
 
 
 		prepare_all(gbuf_ren);
-		render_gbuffer(gbuf_ren);
-
-		//lighting_pass();
+		render_into_gbuffer(gbuf_ren);
 
 		prepare_all(renderer);
 
@@ -466,7 +451,7 @@ private:
 
 
 		cb->begin();
-		render_all(renderer, pipeline);
+		render_all(renderer);
 		cb->end();
 
 		renderer->end_frame();

@@ -39,7 +39,7 @@ class Fog {
 public:
 	bool enabled;
 	int mode;
-	float start, end, density;
+	float start, end, distance;
 	color _color;
 };
 
