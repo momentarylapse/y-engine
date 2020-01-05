@@ -341,6 +341,7 @@ bool World::load(const LevelData &ld) {
 	sun = new Light(v_0, ld.sun_ang.ang2dir(), ld.sun_color[1], -1, -1);
 	sun->enabled = ld.sun_enabled;
 #endif
+	add_light(sun);
 
 	// skybox
 	skybox.resize(ld.skybox_filename.num);

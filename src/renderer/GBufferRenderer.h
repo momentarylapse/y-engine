@@ -17,6 +17,7 @@ public:
 	GBufferRenderer();
 	~GBufferRenderer() override;
 
+	vulkan::Texture *tex_emission;
 	vulkan::Texture *tex_color;
 	vulkan::Texture *tex_pos;
 	vulkan::Texture *tex_normal;
@@ -37,7 +38,8 @@ public:
 	//vulkan::DepthBuffer *depth_buffer;
 	vulkan::FrameBuffer *frame_buffer;
 
-	vulkan::Shader *shader_merge;
+	vulkan::Shader *shader_merge_base;
+	vulkan::Shader *shader_merge_light;
 	vulkan::Pipeline *pipeline_merge;
 	vulkan::RenderPass *render_pass_merge;
 

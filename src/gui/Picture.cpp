@@ -66,6 +66,7 @@ void init(vulkan::RenderPass *rp) {
 	Picture::pipeline = vulkan::Pipeline::build(Picture::shader, rp, 1, false);
 	Picture::pipeline->set_dynamic({"viewport"});
 	Picture::pipeline->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+	Picture::pipeline->set_z(false, false);
 	Picture::pipeline->create();
 
 	Picture::vertex_buffer = new vulkan::VertexBuffer();

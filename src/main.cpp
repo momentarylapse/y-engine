@@ -151,10 +151,19 @@ private:
 		gbuf_ren = new GBufferRenderer();
 
 		ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
-		pipeline_x1 = vulkan::Pipeline::build(gbuf_ren->shader_merge, renderer->default_render_pass, 1, false);
+		pipeline_x1 = vulkan::Pipeline::build(gbuf_ren->shader_merge_base, renderer->default_render_pass, 1, false);
 		pipeline_x1->set_dynamic({"viewport"});
+		pipeline_x1->set_z(false, false);
 		pipeline_x1->create();
-		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+
+		pipeline_x2 = vulkan::Pipeline::build(gbuf_ren->shader_merge_light, renderer->default_render_pass, 1, false);
+		pipeline_x2->set_dynamic({"viewport"});
+		pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+		pipeline_x2->set_z(false, false);
+		pipeline_x2->create();
+		msg_write("aaaa");
+		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+		msg_write("aaaa");
 
 		
 		game_ini.load();
@@ -215,6 +224,7 @@ private:
 		delete ubo_x1;
 		delete dset_x1;
 		delete pipeline_x1;
+		delete pipeline_x2;
 
 		delete pipeline;
 		delete gbuf_ren;
@@ -276,16 +286,20 @@ private:
 		u.proj = cam->m_projection.transpose();
 		u.view = cam->m_view.transpose();
 
-		UBOLight l;
-		l.col = Black;
-		if (world.sun->enabled) {
-			l.pos = world.sun->pos;
-			l.dir = world.sun->dir;
-			l.col = world.sun->col;
-			l.radius = world.sun->radius;
-			l.theta = world.sun->radius;
+		/*UBOLight l[32];
+		memset(&l, 0, sizeof(l));
+		int li = 0;
+		for (auto *ll: world.lights) {
+			if (ll->enabled) {
+				l[li].pos = ll->pos;
+				l[li].dir = ll->dir;
+				l[li].col = ll->col;
+				l[li].radius = ll->radius;
+				l[li].theta = ll->radius;
+				li ++;
+			}
 		}
-		world.ubo_light->update(&l);
+		world.ubo_light->update(&l);*/
 
 		UBOFog f;
 		f.col = world.fog._color;
@@ -383,22 +397,49 @@ private:
 
 	vulkan::UBOWrapper *ubo_x1;
 	vulkan::DescriptorSet *dset_x1;
-	vulkan::Pipeline *pipeline_x1;
+	vulkan::Pipeline *pipeline_x1, *pipeline_x2;
+
+
+
+	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip) {
+
+		cb->set_pipeline(pip);
+		cb->set_viewport(rect(0, renderer->width, 0, renderer->height));
+		cb->push_constant(0, 12, &cam->pos);
+
+		cb->bind_descriptor_set(0, dset_x1);
+		cb->draw(Picture::vertex_buffer);
+	}
 
 	void draw_from_gbuf(vulkan::CommandBuffer *cb) {
 
-		cb->set_pipeline(pipeline_x1);
-		cb->set_viewport(rect(0, renderer->width, 0, renderer->height));
 
 		UBOMatrices u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
 		u.view = matrix::ID.transpose();
 		u.model = matrix::ID.transpose();
 		ubo_x1->update(&u);
-		cb->push_constant(0, 12, &cam->pos);
 
-		cb->bind_descriptor_set(0, dset_x1);
-		cb->draw(Picture::vertex_buffer);
+
+		// base emission
+		draw_from_gbuf_single(cb, pipeline_x1);
+
+
+		// light passes
+		UBOLight l;
+		for (auto *ll: world.lights) {
+			if (ll->enabled) {
+				l.pos = ll->pos;
+				l.dir = ll->dir;
+				l.col = ll->col;
+				l.radius = ll->radius;
+				l.theta = ll->radius;
+				world.ubo_light->update(&l);
+
+				draw_from_gbuf_single(cb, pipeline_x2);
+				break;
+			}
+		}
 	}
 
 	void draw_frame() {

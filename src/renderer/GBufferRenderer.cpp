@@ -11,14 +11,15 @@ GBufferRenderer::GBufferRenderer() {
 	width = 1024;
 	height = 768;
 	tex_color = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
+	tex_emission = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 	tex_pos = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 	tex_normal = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 
 	VkExtent2D extent = {(unsigned)width, (unsigned)height};
 	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT, true);
 
-	render_pass_into_g = new vulkan::RenderPass({tex_color->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
-	g_buffer = new vulkan::FrameBuffer(render_pass_into_g, {tex_color->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
+	render_pass_into_g = new vulkan::RenderPass({tex_color->format, tex_emission->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
+	g_buffer = new vulkan::FrameBuffer(render_pass_into_g, {tex_color->view, tex_emission->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
 	default_render_pass = render_pass_into_g;
 
 
@@ -34,8 +35,9 @@ GBufferRenderer::GBufferRenderer() {
 	frame_buffer = new vulkan::FrameBuffer(render_pass_merge, {tex_output->view, depth_buffer->view}, extent);
 
 
-	shader_merge = vulkan::Shader::load("2d-gbuf-light.shader");
-	pipeline_merge = vulkan::Pipeline::build(shader_merge, render_pass_merge, 1, false);
+	shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");
+	shader_merge_light = vulkan::Shader::load("2d-gbuf-light.shader");
+	pipeline_merge = vulkan::Pipeline::build(shader_merge_base, render_pass_merge, 1, false);
 	pipeline_merge->set_dynamic({"viewport"});
 	pipeline_merge->create();
 
@@ -45,7 +47,8 @@ GBufferRenderer::GBufferRenderer() {
 GBufferRenderer::~GBufferRenderer() {
 	delete pipeline_merge;
 	delete frame_buffer;
-	delete shader_merge;
+	delete shader_merge_base;
+	delete shader_merge_light;
 	delete render_pass_merge;
 	delete tex_output;
 
