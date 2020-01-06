@@ -23,6 +23,7 @@ namespace vulkan{
 	class RenderPass;
 	class DescriptorSet;
 	class FrameBuffer;
+	class Texture;
 
 	extern VkCommandPool command_pool;
 
@@ -46,14 +47,19 @@ namespace vulkan{
 		void begin();
 		void end();
 		void submit();
+
 		void set_pipeline(Pipeline *p);
 		void bind_descriptor_set(int index, DescriptorSet *dset);
 		void push_constant(int offset, int size, void *data);
+
 		void begin_render_pass(RenderPass *rp, FrameBuffer *fb);
 		void end_render_pass();
 		void draw(VertexBuffer *vb);
+
 		void set_scissor(const rect &r);
 		void set_viewport(const rect &r);
+
+		void barrier(const Array<Texture*> &t, int mode);
 	};
 
 	VkCommandBuffer begin_single_time_commands();

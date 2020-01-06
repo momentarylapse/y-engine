@@ -94,7 +94,22 @@ public:
 };
 static GameIni game_ini;
 
+class ShadowMapRenderer : public TextureRenderer {
+public:
+	vulkan::Shader *shader;
+	vulkan::Pipeline *pipeline;
 
+	ShadowMapRenderer() : TextureRenderer(new vulkan::DynamicTexture(512, 512, 1, "rgba:i8")) {
+		shader = vulkan::Shader::load("3d-shadow.shader");
+		pipeline = new vulkan::Pipeline(shader, default_render_pass(), 1);
+	}
+
+	~ShadowMapRenderer() {
+		delete pipeline;
+		delete shader;
+	}
+
+};
 
 class YEngineApp {
 public:
@@ -112,7 +127,7 @@ private:
 	vulkan::Pipeline *pipeline;
 	GBufferRenderer *gbuf_ren;
 	WindowRenderer *renderer;
-	TextureRenderer *shadow_renderer;
+	ShadowMapRenderer *shadow_renderer;
 
 	Text *fps_display;
 	Camera *light_cam;
@@ -142,6 +157,7 @@ private:
 
 		gui::init(renderer->default_render_pass());
 
+		shadow_renderer = new ShadowMapRenderer();
 		gbuf_ren = new GBufferRenderer();
 
 		ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
@@ -168,10 +184,7 @@ private:
 		pipeline_x3->rebuild();
 		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
-		shadow_renderer = new TextureRenderer(new vulkan::DynamicTexture(256, 256, 1, "rgba:i8"));
-		
-		auto shadow_shader = vulkan::Shader::load("3d-shadow.shader");
-		pipeline_x4 = new vulkan::Pipeline(shadow_shader, shadow_renderer->default_render_pass(), 1);
+
 
 		game_ini.load();
 
@@ -239,7 +252,6 @@ private:
 		delete pipeline_x2;
 		delete pipeline_x2s;
 		delete pipeline_x3;
-		delete pipeline_x4;
 
 		delete shadow_renderer;
 		delete pipeline;
@@ -339,6 +351,7 @@ private:
 		auto *cb = r->cb;
 		auto *rp = r->default_render_pass();
 		auto *fb = r->current_frame_buffer();
+		cur_cam = cam;
 
 		cb->set_viewport(r->area());
 
@@ -360,8 +373,6 @@ private:
 		auto *cb = r->cb;
 		cam->set_view(1.0f);
 
-		cb->begin();
-
 		r->render_pass_into_g->clear_color[1] = world.background; // emission
 		cb->begin_render_pass(r->render_pass_into_g, r->current_frame_buffer());
 		cb->set_pipeline(r->pipeline_into_gbuf);
@@ -369,35 +380,30 @@ private:
 
 		draw_world(cb);
 		cb->end_render_pass();
-		cb->end();
 
 		r->end_frame_into_gbuf();
-		vulkan::wait_device_idle();
+		//vulkan::wait_device_idle();
 	}
 
-	void render_into_shadow(TextureRenderer *r) {
+	void render_into_shadow(ShadowMapRenderer *r) {
 		r->start_frame();
 		auto *cb = r->cb;
 
-		cb->begin();
-
 		cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
-		cb->set_pipeline(pipeline_x4);
+		cb->set_pipeline(r->pipeline);
 		cb->set_viewport(r->area());
 
 		draw_world(cb);
 		cb->end_render_pass();
-		cb->end();
 
 		r->end_frame();
-		vulkan::wait_device_idle();
+		//vulkan::wait_device_idle();
 	}
 
 
 	vulkan::UBOWrapper *ubo_x1;
 	vulkan::DescriptorSet *dset_x1;
 	vulkan::Pipeline *pipeline_x1, *pipeline_x2, *pipeline_x2s, *pipeline_x3;
-	vulkan::Pipeline *pipeline_x4;
 
 	vector project_pixel(const vector &v) {
 		vector p = cam->project(v);
@@ -505,8 +511,9 @@ private:
 		light_cam->pos = vector(0,1000,0);
 		light_cam->ang = quaternion::rotation_v(vector(pi/2, 0, 0));
 		light_cam->zoom = 2;
-		light_cam->min_depth = 100;
+		light_cam->min_depth = 50;
 		light_cam->max_depth = 10000;
+		light_cam->set_view(1.0f);
 
 		prepare_all(shadow_renderer, light_cam);
 		render_into_shadow(shadow_renderer);

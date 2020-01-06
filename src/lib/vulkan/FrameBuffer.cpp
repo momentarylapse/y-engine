@@ -12,11 +12,15 @@
 
 namespace vulkan {
 
+VkFormat parse_format(const string &s);
+
 
 DepthBuffer::DepthBuffer(int w, int h, VkFormat _format, bool _with_sampler) {
 	with_sampler = _with_sampler;
 	create(w, h, _format);
 }
+
+DepthBuffer::DepthBuffer(int w, int h, const string &format, bool _with_sampler) : DepthBuffer(w, h, parse_format(format), _with_sampler) {}
 
 void DepthBuffer::create(int w, int h, VkFormat _format) {
 	width = w;
@@ -29,7 +33,7 @@ void DepthBuffer::create(int w, int h, VkFormat _format) {
 	if (!with_sampler)
 		usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	create_image(width, height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
-	view = create_image_view(image, format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+	view = create_image_view(image, format, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_VIEW_TYPE_2D, 1);
 
 	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 

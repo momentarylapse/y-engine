@@ -175,7 +175,7 @@ void SwapChain::create_image_views() {
 	image_views.resize(image_count);
 
 	for (uint32_t i=0; i<image_count; i++) {
-		image_views[i] = create_image_view(images[i], image_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+		image_views[i] = create_image_view(images[i], image_format, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D, 1);
 	}
 }
 

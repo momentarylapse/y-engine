@@ -15,7 +15,7 @@ GBufferRenderer::GBufferRenderer() {
 	tex_pos = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 	tex_normal = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 
-	depth_buffer = new vulkan::DepthBuffer(width, height, VK_FORMAT_D32_SFLOAT, true);
+	depth_buffer = new vulkan::DepthBuffer(width, height, "d:f32", true);
 
 	render_pass_into_g = new vulkan::RenderPass({tex_color->format, tex_emission->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
 	g_buffer = new vulkan::FrameBuffer(width, height, render_pass_into_g, {tex_color->view, tex_emission->view, tex_pos->view, tex_normal->view, depth_buffer->view});
@@ -63,10 +63,14 @@ GBufferRenderer::~GBufferRenderer() {
 bool GBufferRenderer::start_frame_into_gbuf() {
 	in_flight_fence->wait();
 	_cfb = g_buffer;
+	cb->begin();
 	return true;
 }
 
 void GBufferRenderer::end_frame_into_gbuf() {
+	//cb->barrier({tex_color, tex_emission, tex_normal, tex_pos, depth_buffer}, 0);
+	cb->barrier({depth_buffer}, 0);
+	cb->end();
 	vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
 	vulkan::wait_device_idle();
 }

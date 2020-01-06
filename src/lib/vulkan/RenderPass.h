@@ -43,7 +43,7 @@ namespace vulkan{
 		Array<VkAttachmentReference> color_attachment_refs;
 		VkAttachmentReference depth_attachment_ref;
 		VkSubpassDescription subpass;
-		VkSubpassDependency dependency;
+		Array<VkSubpassDependency> dependencies;
 	};
 };
 

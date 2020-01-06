@@ -41,6 +41,7 @@ namespace vulkan {
 			if (presentable)
 				a.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 			else
+				//a.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				a.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			attachments.add(a);
 
@@ -59,10 +60,7 @@ namespace vulkan {
 			a.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			a.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			a.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			if (presentable)
-				a.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			else
-				a.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			a.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			attachments.add(a);
 
 			depth_attachment_ref = {};
@@ -76,13 +74,21 @@ namespace vulkan {
 		subpass.pColorAttachments = &color_attachment_refs[0];
 		subpass.pDepthStencilAttachment = &depth_attachment_ref;
 
-		dependency = {};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		VkSubpassDependency dep = {};
+		dep.srcSubpass = VK_SUBPASS_EXTERNAL;
+		dep.dstSubpass = 0;
+		dep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dep.srcAccessMask = 0;
+		dep.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencies.add(dep);
+		dep.srcSubpass = 0;
+		dep.dstSubpass = VK_SUBPASS_EXTERNAL;
+		dep.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dep.srcAccessMask = 0;
+		dep.dstStageMask = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;//VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dep.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencies.add(dep);
 
 		for (int i=0; i<format.num - 1; i++)
 			clear_color.add(Black);
@@ -112,8 +118,8 @@ namespace vulkan {
 		info.pAttachments = &attachments[0];
 		info.subpassCount = 1;
 		info.pSubpasses = &subpass;
-		info.dependencyCount = 1;
-		info.pDependencies = &dependency;
+		info.dependencyCount = dependencies.num;
+		info.pDependencies = &dependencies[0];
 
 		if (vkCreateRenderPass(device, &info, nullptr, &render_pass) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create render pass!");

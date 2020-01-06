@@ -83,11 +83,11 @@ void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
 	end_single_time_commands(command_buffer);
 }
 
-VkImageView create_image_view(VkImage image, VkFormat format, VkImageAspectFlags aspect, uint32_t mip_levels) {
+VkImageView create_image_view(VkImage image, VkFormat format, VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels) {
 	VkImageViewCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	info.image = image;
-	info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	info.viewType = type;
 	info.format = format;
 	info.subresourceRange.aspectMask = aspect;
 	info.subresourceRange.baseMipLevel = 0;

@@ -182,6 +182,45 @@ void CommandBuffer::set_viewport(const rect &r) {
 	vkCmdSetViewport(buffer, 0, 1, &viewport);
 }
 
+bool tex_is_depth_buffer(Texture *t) {
+	return (t->format == VK_FORMAT_D32_SFLOAT) or (t->format == VK_FORMAT_D32_SFLOAT_S8_UINT) or (t->format == VK_FORMAT_D24_UNORM_S8_UINT) or (t->format == VK_FORMAT_D16_UNORM);
+}
+
+void CommandBuffer::barrier(const Array<Texture*> &textures, int mode) {
+	Array<VkImageMemoryBarrier> barriers;
+	for (auto *t: textures) {
+		bool is_depth = tex_is_depth_buffer(t);
+		VkImageSubresourceRange sr = {};
+		sr.aspectMask = is_depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+		sr.baseArrayLayer = 0;
+		sr.baseMipLevel = 0;
+		sr.layerCount = 1;
+		sr.levelCount = 1;
+		VkImageMemoryBarrier b = {};
+		b.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		b.srcAccessMask = is_depth ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		b.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		b.oldLayout = is_depth ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		b.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		b.image = t->image;
+		b.subresourceRange = sr;
+		barriers.add(b);
+
+	}
+
+	auto source_stage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+	auto destination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+	vkCmdPipelineBarrier(
+		buffer,
+		source_stage, destination_stage,
+		0,
+		0, nullptr,
+		0, nullptr,
+		barriers.num, &barriers[0]
+	);
+}
+
 
 void CommandBuffer::end_render_pass() {
 	vkCmdEndRenderPass(buffer);

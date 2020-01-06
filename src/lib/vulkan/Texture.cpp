@@ -31,6 +31,8 @@ VkFormat parse_format(const string &s) {
 		return VK_FORMAT_R32_SFLOAT;
 	if (s == "d:f32")
 		return VK_FORMAT_D32_SFLOAT;
+	if (s == "d:i16")
+		return VK_FORMAT_D16_UNORM;
 	if (s == "ds:f32i8")
 		return VK_FORMAT_D32_SFLOAT_S8_UINT;
 	std::cerr << "unknown image format: " << s.c_str() << "\n";
@@ -52,6 +54,8 @@ int pixel_size(VkFormat f) {
 		return 4;
 	if (f == VK_FORMAT_D32_SFLOAT)
 		return 4;
+	if (f == VK_FORMAT_D16_UNORM)
+		return 2;
 	if (f == VK_FORMAT_D32_SFLOAT_S8_UINT)
 		return 5; // ?
 	return 4;
@@ -210,8 +214,8 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 	barrier.subresourceRange.layerCount = 1;
 	barrier.subresourceRange.levelCount = 1;
 
-	int32_t mipWidth = width;
-	int32_t mipHeight = height;
+	int32_t mip_width = width;
+	int32_t mip_height = height;
 
 	for (uint32_t i=1; i<mip_levels; i++) {
 		barrier.subresourceRange.baseMipLevel = i - 1;
@@ -228,13 +232,13 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 		VkImageBlit blit = {};
 		blit.srcOffsets[0] = {0, 0, 0};
-		blit.srcOffsets[1] = {mipWidth, mipHeight, 1};
+		blit.srcOffsets[1] = {mip_width, mip_height, 1};
 		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.srcSubresource.mipLevel = i - 1;
 		blit.srcSubresource.baseArrayLayer = 0;
 		blit.srcSubresource.layerCount = 1;
 		blit.dstOffsets[0] = {0, 0, 0};
-		blit.dstOffsets[1] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
+		blit.dstOffsets[1] = {mip_width > 1 ? mip_width / 2 : 1, mip_height > 1 ? mip_height / 2 : 1, 1};
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.dstSubresource.mipLevel = i;
 		blit.dstSubresource.baseArrayLayer = 0;
@@ -257,8 +261,8 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 			0, nullptr,
 			1, &barrier);
 
-		if (mipWidth > 1) mipWidth /= 2;
-		if (mipHeight > 1) mipHeight /= 2;
+		if (mip_width > 1) mip_width /= 2;
+		if (mip_height > 1) mip_height /= 2;
 	}
 
 	barrier.subresourceRange.baseMipLevel = mip_levels - 1;
@@ -279,7 +283,10 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 
 void Texture::_create_view() {
-	view = create_image_view(image, format, VK_IMAGE_ASPECT_COLOR_BIT, mip_levels);
+	VkImageViewType type = VK_IMAGE_VIEW_TYPE_2D;
+	if (depth > 1)
+		type = VK_IMAGE_VIEW_TYPE_3D;
+	view = create_image_view(image, format, VK_IMAGE_ASPECT_COLOR_BIT, type, mip_levels);
 }
 
 void Texture::_create_sampler() {
