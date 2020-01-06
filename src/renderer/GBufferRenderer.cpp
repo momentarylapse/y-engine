@@ -8,8 +8,8 @@
 #include "GBufferRenderer.h"
 
 GBufferRenderer::GBufferRenderer() {
-	width = 1024*2;
-	height = 768*2;
+	width = 1024;
+	height = 768;
 	tex_color = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 	tex_emission = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 	tex_pos = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");

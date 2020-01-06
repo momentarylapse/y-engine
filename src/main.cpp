@@ -150,7 +150,7 @@ private:
 		pipeline_x1->create();
 
 		pipeline_x2 = vulkan::Pipeline::build(gbuf_ren->shader_merge_light, renderer->default_render_pass, 1, false);
-		pipeline_x2->set_dynamic({"viewport"});
+		pipeline_x2->set_dynamic({"viewport", "scissor"});
 		pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 		pipeline_x2->set_z(false, false);
 		pipeline_x2->create();
@@ -281,21 +281,6 @@ private:
 		u.proj = cam->m_projection.transpose();
 		u.view = cam->m_view.transpose();
 
-		/*UBOLight l[32];
-		memset(&l, 0, sizeof(l));
-		int li = 0;
-		for (auto *ll: world.lights) {
-			if (ll->enabled) {
-				l[li].pos = ll->pos;
-				l[li].dir = ll->dir;
-				l[li].col = ll->col;
-				l[li].radius = ll->radius;
-				l[li].theta = ll->radius;
-				li ++;
-			}
-		}
-		world.ubo_light->update(&l);*/
-
 		UBOFog f;
 		f.col = world.fog._color;
 		f.distance = world.fog.distance;
@@ -378,11 +363,45 @@ private:
 	vulkan::DescriptorSet *dset_x1;
 	vulkan::Pipeline *pipeline_x1, *pipeline_x2, *pipeline_x3;
 
+	vector project_pixel(const vector &v) {
+		vector p = cam->project(v);
+		return vector(p.x * renderer->width, (1-p.y) * renderer->height, p.z);
+	}
+
+	float projected_sphere_radius(vector &v, float r) {
+
+		vector p = project_pixel(v);
+		float rmax = 0;
+		static Array<vector> dirs = {vector::EX, vector::EY, vector::EZ, vector(0.7f, 0.7f, 0), vector(0.7f, 0, 0.7f), vector(0, 0.7f, 0.7f)};
+		for (auto &dir: dirs) {
+			float f = (p - project_pixel(v + dir * r)).length();
+			rmax = max(rmax, f);
+		}
+		return rmax;
+	}
+
+	rect light_rect(Light *l) {
+		float w = renderer->width;
+		float h = renderer->height;
+		if (l->radius < 0)
+			return rect(0, w, 0, h);
+		vector p = project_pixel(l->pos);
+		float r = projected_sphere_radius(l->pos, l->radius);
+		if (l->theta < 0)
+			r *= 0.17f;
+		else
+			r *= 0.4f;
+
+		return rect(clampf(p.x - r, 0, w), clampf(p.x + r, 0, w), clampf(p.y - r, 0, h), clampf(p.y + r, 0, h));
+	}
 
 
-	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset) {
+	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset, const rect &r = rect::EMPTY) {
 
 		cb->set_pipeline(pip);
+		if (r.area() > 0)
+			cb->set_scissor(r);
+
 		cb->set_viewport(rect(0, renderer->width, 0, renderer->height));
 		cb->push_constant(0, 12, &cam->pos);
 
@@ -420,7 +439,7 @@ private:
 				else
 					ll->dset->set({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
-				draw_from_gbuf_single(cb, pipeline_x2, ll->dset);
+				draw_from_gbuf_single(cb, pipeline_x2, ll->dset, light_rect(ll));
 			}
 		}
 
