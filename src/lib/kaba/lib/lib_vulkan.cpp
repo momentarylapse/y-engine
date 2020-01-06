@@ -171,6 +171,9 @@ void SIAddPackageVulkan() {
 
 	add_class(TypePipeline);
 		class_add_funcx(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::Pipeline::__init__));
+			func_add_param("shader", TypeShader);
+			func_add_param("pass", TypeRenderPass);
+			func_add_param("num_textures", TypeInt);
 		class_add_funcx(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::Pipeline::__delete__));
 		class_add_funcx("set_wireframe", TypeVoid, vul_p(&vulkan::Pipeline::set_wireframe));
 			func_add_param("w", TypeBool);
@@ -188,12 +191,7 @@ void SIAddPackageVulkan() {
 			func_add_param("write", TypeBool);
 		class_add_funcx("set_dynamic", TypeVoid, vul_p(&vulkan::Pipeline::set_dynamic));
 			func_add_param("mode", TypeIntList);
-		class_add_funcx("create", TypeVoid, vul_p(&vulkan::Pipeline::create));
-		class_add_funcx("build", TypePipelineP, vul_p(&vulkan::Pipeline::build), FLAG_STATIC);
-			func_add_param("shader", TypeShader);
-			func_add_param("pass", TypeRenderPass);
-			func_add_param("num_textures", TypeInt);
-			func_add_param("create", TypeBool);
+		class_add_funcx("rebuild", TypeVoid, vul_p(&vulkan::Pipeline::rebuild));
 
 	add_class(TypeRenderPass);
 		class_add_funcx(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::RenderPass::__init__));

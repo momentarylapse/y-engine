@@ -97,11 +97,6 @@ namespace vulkan {
 
 
 GLFWwindow* vulkan_window;
-int device_width, device_height; // default (window)
-
-
-
-
 
 VkInstance instance;
 VkDebugUtilsMessengerEXT debug_messenger;
@@ -118,12 +113,6 @@ void init(GLFWwindow* window) {
 	std::cout << "vulkan init" << "\n";
 	vulkan_window = window;
 
-	device_width = 0;
-	device_height = 0;
-	while (device_width == 0 or device_height == 0) {
-		glfwGetFramebufferSize(vulkan_window, &device_width, &device_height);
-		glfwWaitEvents();
-	}
 
 	create_instance();
 	setup_debug_messenger();
@@ -367,7 +356,7 @@ void create_logical_device() {
 
 void rebuild_pipelines() {
 	for (auto *p: pipelines)
-		p->create();
+		p->rebuild();
 }
 
 

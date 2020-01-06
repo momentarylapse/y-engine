@@ -18,13 +18,14 @@ TextureRenderer::TextureRenderer(vulkan::Texture *t) {
 	VkExtent2D extent = {(unsigned)width, (unsigned)height};
 	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT, true);
 
-	default_render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true, false);
-	frame_buffer = new vulkan::FrameBuffer(default_render_pass, {tex->view, depth_buffer->view}, extent);
+	_default_render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true, false);
+	frame_buffer = new vulkan::FrameBuffer(_default_render_pass, {tex->view, depth_buffer->view}, extent);
 }
 
 TextureRenderer::~TextureRenderer() {
 	delete depth_buffer;
 	delete frame_buffer;
+	delete _default_render_pass;
 }
 
 bool TextureRenderer::start_frame() {

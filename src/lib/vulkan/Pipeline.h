@@ -39,10 +39,8 @@ namespace vulkan{
 		void __init__(Shader *shader, RenderPass *render_pass, int num_textures);
 		void __delete__();
 
-		void create();
+		void rebuild();
 		void destroy();
-
-		static Pipeline* build(Shader *shader, RenderPass *render_pass, int num_textures, bool create = true);
 
 		// configuration
 		void disable_blend();

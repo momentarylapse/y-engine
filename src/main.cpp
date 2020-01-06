@@ -26,7 +26,6 @@
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
 
-#include "renderer/Renderer.h"
 #include "renderer/WindowRenderer.h"
 #include "renderer/GBufferRenderer.h"
 
@@ -132,34 +131,32 @@ private:
 
 		auto shader = vulkan::Shader::load("3d.shader");
 		_default_shader_ = shader;
-		pipeline = vulkan::Pipeline::build(shader, renderer->default_render_pass, 1, false);
+		pipeline = new vulkan::Pipeline(shader, renderer->default_render_pass(), 1);
 		pipeline->set_dynamic({"viewport"});
 		//pipeline->wireframe = true;
-		pipeline->create();
+		pipeline->rebuild();
 
 
-		gui::init(renderer->default_render_pass);
+		gui::init(renderer->default_render_pass());
 
 		gbuf_ren = new GBufferRenderer();
 
 		ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
 
-		pipeline_x1 = vulkan::Pipeline::build(gbuf_ren->shader_merge_base, renderer->default_render_pass, 1, false);
-		pipeline_x1->set_dynamic({"viewport"});
+		pipeline_x1 = new vulkan::Pipeline(gbuf_ren->shader_merge_base, renderer->default_render_pass(), 1);
 		pipeline_x1->set_z(false, false);
-		pipeline_x1->create();
+		pipeline_x1->rebuild();
 
-		pipeline_x2 = vulkan::Pipeline::build(gbuf_ren->shader_merge_light, renderer->default_render_pass, 1, false);
-		pipeline_x2->set_dynamic({"viewport", "scissor"});
+		pipeline_x2 = new vulkan::Pipeline(gbuf_ren->shader_merge_light, renderer->default_render_pass(), 1);
+		pipeline_x2->set_dynamic({"scissor"});
 		pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 		pipeline_x2->set_z(false, false);
-		pipeline_x2->create();
+		pipeline_x2->rebuild();
 
-		pipeline_x3 = vulkan::Pipeline::build(gbuf_ren->shader_merge_fog, renderer->default_render_pass, 1, false);
-		pipeline_x3->set_dynamic({"viewport"});
+		pipeline_x3 = new vulkan::Pipeline(gbuf_ren->shader_merge_fog, renderer->default_render_pass(), 1);
 		pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 		pipeline_x3->set_z(false, false);
-		pipeline_x3->create();
+		pipeline_x3->rebuild();
 		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
 		
@@ -223,6 +220,7 @@ private:
 		delete dset_x1;
 		delete pipeline_x1;
 		delete pipeline_x2;
+		delete pipeline_x3;
 
 		delete pipeline;
 		delete gbuf_ren;
@@ -319,10 +317,10 @@ private:
 
 	void render_all(Renderer *r) {
 		auto *cb = r->cb;
-		auto *rp = r->default_render_pass;
+		auto *rp = r->default_render_pass();
 		auto *fb = r->current_frame_buffer();
 
-		cb->set_viewport(rect(0, r->width, 0, r->height));
+		cb->set_viewport(r->area());
 
 		//rp->clear_color[0] = world.background;
 		cb->begin_render_pass(rp, fb);
@@ -331,24 +329,23 @@ private:
 
 		draw_from_gbuf(cb);
 
-		gui::render(cb, rect(0, r->width, 0, r->height));
+		gui::render(cb, r->area());
 
 		cb->end_render_pass();
 
 	}
 
 	void render_into_gbuffer(GBufferRenderer *r) {
-		//msg_write("render-to-tex");
 		r->start_frame_into_gbuf();
 		auto *cb = r->cb;
 		cam->set_view(1.0f);
 
 		cb->begin();
 
-		r->default_render_pass->clear_color[1] = world.background; // emission
+		r->render_pass_into_g->clear_color[1] = world.background; // emission
 		cb->begin_render_pass(r->render_pass_into_g, r->current_frame_buffer());
 		cb->set_pipeline(r->pipeline_into_gbuf);
-		cb->set_viewport(rect(0, r->width, 0, r->height));
+		cb->set_viewport(r->area());
 
 		draw_world(cb);
 		cb->end_render_pass();
@@ -402,7 +399,7 @@ private:
 		if (r.area() > 0)
 			cb->set_scissor(r);
 
-		cb->set_viewport(rect(0, renderer->width, 0, renderer->height));
+		cb->set_viewport(renderer->area());
 		cb->push_constant(0, 12, &cam->pos);
 
 		cb->bind_descriptor_set(0, dset);

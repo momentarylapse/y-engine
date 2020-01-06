@@ -22,8 +22,6 @@ namespace vulkan {
 
 	Array<Pipeline*> pipelines;
 
-	extern int device_width, device_height;
-
 
 
 	VkVertexInputBindingDescription create_binding_description(int num_textures) {
@@ -151,7 +149,12 @@ Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int num_textures) 
 	depth_stencil.depthBoundsTestEnable = VK_FALSE;
 	depth_stencil.stencilTestEnable = VK_FALSE;
 
-	set_viewport(rect(0, device_width, 0, device_height));
+	dynamic_states.add(VK_DYNAMIC_STATE_VIEWPORT);
+	set_viewport(rect(0, 400, 0, 400)); // always override dynamically!
+
+	rebuild();
+
+	pipelines.add(this);
 }
 
 Pipeline::~Pipeline() {
@@ -239,19 +242,15 @@ VkDynamicState parse_dynamic_state(const string &d) {
 }
 
 void Pipeline::set_dynamic(const Array<string> &_dynamic_states) {
-	for (string &d: _dynamic_states)
-		dynamic_states.add(parse_dynamic_state(d));
+	for (string &d: _dynamic_states) {
+		auto ds = parse_dynamic_state(d);
+		if (ds != VK_DYNAMIC_STATE_VIEWPORT)
+			dynamic_states.add(ds);
+	}
 }
 
-Pipeline* Pipeline::build(Shader *shader, RenderPass *render_pass, int num_textures, bool _create) {
-	Pipeline *p = new Pipeline(shader, render_pass, num_textures);
-	pipelines.add(p);
-	if (_create)
-		p->create();
-	return p;
-}
-
-void Pipeline::create() {
+void Pipeline::rebuild() {
+	destroy();
 
 	// sometimes a dummy scissor is required!
 	VkRect2D scissor = {};
@@ -315,8 +314,12 @@ void Pipeline::create() {
 }
 
 void Pipeline::destroy() {
-	vkDestroyPipeline(device, pipeline, nullptr);
-	vkDestroyPipelineLayout(device, layout, nullptr);
+	if (pipeline)
+		vkDestroyPipeline(device, pipeline, nullptr);
+	if (layout)
+		vkDestroyPipelineLayout(device, layout, nullptr);
+	pipeline = nullptr;
+	layout = nullptr;
 }
 
 };

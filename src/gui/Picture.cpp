@@ -33,9 +33,7 @@ Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*
 	user_pipeline = nullptr;
 
 	if (user_shader) {
-		user_pipeline = vulkan::Pipeline::build(user_shader, render_pass, 1, false);
-		user_pipeline->set_dynamic({"viewport"});
-		user_pipeline->create();
+		user_pipeline = new vulkan::Pipeline(user_shader, render_pass, 1);
 		dset = new vulkan::DescriptorSet(user_shader->descr_layouts[0], {ubo}, textures);
 	} else {
 		dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, textures);
@@ -63,11 +61,10 @@ namespace gui {
 void init(vulkan::RenderPass *rp) {
 	Picture::render_pass = rp;
 	Picture::shader = vulkan::Shader::load("2d.shader");
-	Picture::pipeline = vulkan::Pipeline::build(Picture::shader, rp, 1, false);
-	Picture::pipeline->set_dynamic({"viewport"});
+	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 1);
 	Picture::pipeline->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 	Picture::pipeline->set_z(false, false);
-	Picture::pipeline->create();
+	Picture::pipeline->rebuild();
 
 	Picture::vertex_buffer = new vulkan::VertexBuffer();
 	Array<vulkan::Vertex1> vertices;

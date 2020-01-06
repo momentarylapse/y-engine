@@ -25,6 +25,8 @@ public:
 
 	vulkan::SwapChain *swap_chain;
 
+	vulkan::RenderPass *default_render_pass() override { return swap_chain->default_render_pass; }
+
 	uint32_t image_index = 0;
 
 	void rebuild_default_stuff();

@@ -6,7 +6,7 @@
  */
 
 #include "Renderer.h"
-#include <iostream>
+#include "../lib/math/rect.h"
 
 
 Renderer::Renderer() {
@@ -15,7 +15,6 @@ Renderer::Renderer() {
 	in_flight_fence = new vulkan::Fence();
 
 	cb = new vulkan::CommandBuffer();
-	default_render_pass = nullptr;
 
 	width = height = 0;
 }
@@ -27,8 +26,10 @@ Renderer::~Renderer() {
 	delete in_flight_fence;
 
 	delete cb;
-	if (default_render_pass)
-		delete default_render_pass;
+}
+
+rect Renderer::area() const {
+	return rect(0, width, 0, height);
 }
 
 

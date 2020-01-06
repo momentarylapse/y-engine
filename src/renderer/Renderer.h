@@ -10,6 +10,8 @@
 
 #include "../lib/vulkan/vulkan.h"
 
+class rect;
+
 class Renderer {
 public:
 	Renderer();
@@ -20,9 +22,10 @@ public:
 	vulkan::Fence *in_flight_fence;
 
 	vulkan::CommandBuffer *cb;
-	vulkan::RenderPass *default_render_pass;
+	virtual vulkan::RenderPass *default_render_pass() { return nullptr; }
 
 	int width, height;
+	rect area() const;
 
 	virtual bool start_frame() { return false; }
 	virtual void end_frame() {}

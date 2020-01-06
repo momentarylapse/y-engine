@@ -238,6 +238,10 @@ void World::reset() {
 		s.clear();
 	sorted_opaque.clear();
 
+	for (auto *l: lights)
+		delete l;
+	lights.clear();
+
 
 
 	// music

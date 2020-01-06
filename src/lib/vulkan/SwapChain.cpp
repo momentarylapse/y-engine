@@ -15,9 +15,6 @@ namespace vulkan {
 
 
 
-extern int device_width, device_height;
-
-
 
 
 VkSurfaceFormatKHR choose_swap_surface_format(const Array<VkSurfaceFormatKHR>& available_formats) {
@@ -37,7 +34,7 @@ VkSurfaceFormatKHR choose_swap_surface_format(const Array<VkSurfaceFormatKHR>& a
 VkPresentModeKHR choose_swap_present_mode(const Array<VkPresentModeKHR> available_present_modes) {
 	VkPresentModeKHR best_mode = VK_PRESENT_MODE_FIFO_KHR;
 
-	for (const auto& mode : available_present_modes) {
+	for (const auto& mode: available_present_modes) {
 		if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
 			return mode;
 		} else if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
@@ -53,7 +50,15 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities) {
 		return capabilities.currentExtent;
 	} else {
 
-		VkExtent2D actual_extent = {(unsigned)device_width, (unsigned)device_height};
+
+		int win_width = 0;
+		int win_height = 0;
+		while (win_width == 0 or win_height == 0) {
+			glfwGetFramebufferSize(vulkan_window, &win_width, &win_height);
+			glfwWaitEvents();
+		}
+
+		VkExtent2D actual_extent = {(unsigned)win_width, (unsigned)win_height};
 
 		actual_extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actual_extent.width));
 		actual_extent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actual_extent.height));
@@ -64,9 +69,9 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities) {
 
 
 void SwapChain::create_frame_buffers(RenderPass *render_pass, DepthBuffer *depth_buffer) {
-	frame_buffers.resize(image_views.num);
+	frame_buffers.resize(image_count);
 
-	for (size_t i=0; i<image_views.num; i++) {
+	for (size_t i=0; i<image_count; i++) {
 		frame_buffers[i] = new FrameBuffer(render_pass, {image_views[i], depth_buffer->view}, extent);
 	}
 }
@@ -165,9 +170,9 @@ void SwapChain::get_images() {
 
 
 void SwapChain::create_image_views() {
-	image_views.resize(images.num);
+	image_views.resize(image_count);
 
-	for (uint32_t i=0; i<images.num; i++) {
+	for (uint32_t i=0; i<image_count; i++) {
 		image_views[i] = create_image_view(images[i], image_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 	}
 }
@@ -185,15 +190,21 @@ SwapChain::~SwapChain() {
 
 
 void SwapChain::cleanup() {
-	for (auto frame_buffer: frame_buffers) {
-		delete frame_buffer;
-	}
-	frame_buffers.clear();
-	delete depth_buffer;
+	if (default_render_pass)
+		delete default_render_pass;
+	default_render_pass = nullptr;
 
-	for (auto image_view: image_views) {
+	for (auto frame_buffer: frame_buffers)
+		delete frame_buffer;
+	frame_buffers.clear();
+	images.clear(); // only references anyways
+
+	if (depth_buffer)
+		delete depth_buffer;
+	depth_buffer = nullptr;
+
+	for (auto image_view: image_views)
 		vkDestroyImageView(device, image_view, nullptr);
-	}
 
 	vkDestroySwapchainKHR(device, swap_chain, nullptr);
 }

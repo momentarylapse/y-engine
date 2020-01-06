@@ -9,6 +9,7 @@
 #include "RenderPass.h"
 #include "helper.h"
 
+#include <iostream>
 #include <array>
 
 #if HAS_LIB_VULKAN
@@ -19,6 +20,8 @@ namespace vulkan {
 
 // so far, we can only create a "default" render pass with 1 color and 1 depth attachement!
 	RenderPass::RenderPass(const Array<VkFormat> &format, bool clear, bool presentable) {
+		render_pass = nullptr;
+
 		VkAttachmentLoadOp color_load_op = VK_ATTACHMENT_LOAD_OP_LOAD;
 		VkAttachmentLoadOp depth_load_op = VK_ATTACHMENT_LOAD_OP_LOAD;
 		if (clear) {
@@ -49,7 +52,6 @@ namespace vulkan {
 
 		{
 			VkAttachmentDescription a = {};
-			a = {};
 			a.format = format.back();
 			a.samples = VK_SAMPLE_COUNT_1_BIT;
 			a.loadOp = depth_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -119,7 +121,9 @@ namespace vulkan {
 	}
 
 	void RenderPass::destroy() {
-		vkDestroyRenderPass(device, render_pass, nullptr);
+		if (render_pass)
+			vkDestroyRenderPass(device, render_pass, nullptr);
+		render_pass = nullptr;
 	}
 
 	void RenderPass::rebuild() {

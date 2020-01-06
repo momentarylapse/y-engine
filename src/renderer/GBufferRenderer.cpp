@@ -20,13 +20,10 @@ GBufferRenderer::GBufferRenderer() {
 
 	render_pass_into_g = new vulkan::RenderPass({tex_color->format, tex_emission->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
 	g_buffer = new vulkan::FrameBuffer(render_pass_into_g, {tex_color->view, tex_emission->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
-	default_render_pass = render_pass_into_g;
 
 
 	shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
-	pipeline_into_gbuf = vulkan::Pipeline::build(shader_into_gbuf, render_pass_into_g, 1, false);
-	pipeline_into_gbuf->set_dynamic({"viewport"});
-	pipeline_into_gbuf->create();
+	pipeline_into_gbuf = new vulkan::Pipeline(shader_into_gbuf, render_pass_into_g, 1);
 
 
 	tex_output = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
@@ -38,9 +35,7 @@ GBufferRenderer::GBufferRenderer() {
 	shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");
 	shader_merge_light = vulkan::Shader::load("2d-gbuf-light.shader");
 	shader_merge_fog = vulkan::Shader::load("2d-gbuf-fog.shader");
-	pipeline_merge = vulkan::Pipeline::build(shader_merge_base, render_pass_merge, 1, false);
-	pipeline_merge->set_dynamic({"viewport"});
-	pipeline_merge->create();
+	pipeline_merge = new vulkan::Pipeline(shader_merge_base, render_pass_merge, 1);
 
 	_cfb = nullptr;
 }
@@ -54,6 +49,7 @@ GBufferRenderer::~GBufferRenderer() {
 	delete render_pass_merge;
 	delete tex_output;
 
+	delete render_pass_into_g;
 	delete pipeline_into_gbuf;
 	delete shader_into_gbuf;
 	delete g_buffer;
