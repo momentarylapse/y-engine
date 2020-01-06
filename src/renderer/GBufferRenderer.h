@@ -12,6 +12,7 @@
 #include "Renderer.h"
 
 
+// for creating g-buffers
 class GBufferRenderer : public Renderer {
 public:
 	GBufferRenderer();
@@ -27,28 +28,12 @@ public:
 
 	vulkan::Shader *shader_into_gbuf;
 	vulkan::Pipeline *pipeline_into_gbuf;
-	vulkan::RenderPass *render_pass_into_g;
 
-	bool start_frame_into_gbuf();
-	void end_frame_into_gbuf();
+	vulkan::RenderPass *_default_render_pass;
 
-
-	vulkan::Texture *tex_output;
-
-	//vulkan::DepthBuffer *depth_buffer;
-	vulkan::FrameBuffer *frame_buffer;
-
-	vulkan::Shader *shader_merge_base;
-	vulkan::Shader *shader_merge_light;
-	vulkan::Shader *shader_merge_light_shadow;
-	vulkan::Shader *shader_merge_fog;
-	vulkan::Pipeline *pipeline_merge;
-	vulkan::RenderPass *render_pass_merge;
-
-	bool start_frame_merge();
-	void end_frame_merge();
-
-	vulkan::FrameBuffer *_cfb;
+	bool start_frame() override;
+	void end_frame() override;
+	vulkan::RenderPass *default_render_pass() override { return _default_render_pass; }
 	vulkan::FrameBuffer *current_frame_buffer() override;
 };
 

@@ -30,8 +30,8 @@
 #include "renderer/GBufferRenderer.h"
 #include "renderer/TextureRenderer.h"
 
-const bool SHOW_GBUFFER = true;
-const bool SHOW_SHADOW = true;
+const bool SHOW_GBUFFER = false;
+const bool SHOW_SHADOW = false;
 
 
 // pipeline: shader + z buffer / blending parameters
@@ -94,7 +94,60 @@ public:
 };
 static GameIni game_ini;
 
-class ShadowMapRenderer : public TextureRenderer {
+class ShadowMapRenderer : public Renderer {
+public:
+	ShadowMapRenderer() {
+		width = 512;
+		height = 512;
+
+		depth_buffer = new vulkan::DepthBuffer(width, height, "d:f32", true);
+
+		_default_render_pass = new vulkan::RenderPass({depth_buffer->format}, true, false);
+		frame_buffer = new vulkan::FrameBuffer(width, height, _default_render_pass, {depth_buffer->view});
+
+
+		//shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
+		shader = vulkan::Shader::load("3d-shadow2.shader");
+		pipeline = new vulkan::Pipeline(shader, _default_render_pass, 1);
+
+	}
+	~ShadowMapRenderer() {
+		delete _default_render_pass;
+		delete pipeline;
+		delete shader;
+		delete frame_buffer;
+		delete depth_buffer;
+	}
+
+	vulkan::DepthBuffer *depth_buffer;
+	vulkan::FrameBuffer *frame_buffer;
+
+	vulkan::Shader *shader;
+	vulkan::Pipeline *pipeline;
+
+	vulkan::RenderPass *_default_render_pass;
+
+	bool start_frame() override {
+		//in_flight_fence->wait();
+		cb->begin();
+		return true;
+
+	}
+	void end_frame() override {
+		//cb->barrier({tex_color, tex_emission, tex_normal, tex_pos, depth_buffer}, 0);
+		cb->barrier({depth_buffer}, 0);
+		cb->end();
+		vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
+		in_flight_fence->wait();
+	}
+	vulkan::RenderPass *default_render_pass() override { return _default_render_pass; }
+	vulkan::FrameBuffer *current_frame_buffer() override {
+		return frame_buffer;
+	}
+
+};
+
+/*class ShadowMapRenderer : public TextureRenderer {
 public:
 	vulkan::Shader *shader;
 	vulkan::Pipeline *pipeline;
@@ -108,7 +161,93 @@ public:
 		delete pipeline;
 		delete shader;
 	}
+};*/
 
+
+
+
+class DeferredRenderer : public Renderer {
+public:
+	DeferredRenderer(WindowRenderer *output_renderer, GBufferRenderer *gbuf_ren) {
+		shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");
+		shader_merge_light = vulkan::Shader::load("2d-gbuf-light.shader");
+		shader_merge_light_shadow = vulkan::Shader::load("2d-gbuf-light-shadow.shader");
+		shader_merge_fog = vulkan::Shader::load("2d-gbuf-fog.shader");
+		//pipeline_merge = new vulkan::Pipeline(shader_merge_base, render_pass_merge, 1);
+
+
+
+		pipeline_x1 = new vulkan::Pipeline(shader_merge_base, output_renderer->default_render_pass(), 1);
+		pipeline_x1->set_z(false, false);
+		pipeline_x1->rebuild();
+
+		pipeline_x2 = new vulkan::Pipeline(shader_merge_light, output_renderer->default_render_pass(), 1);
+		pipeline_x2->set_dynamic({"scissor"});
+		pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+		pipeline_x2->set_z(false, false);
+		pipeline_x2->rebuild();
+
+		pipeline_x2s = new vulkan::Pipeline(shader_merge_light_shadow, output_renderer->default_render_pass(), 1);
+		pipeline_x2s->set_dynamic({"scissor"});
+		pipeline_x2s->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+		pipeline_x2s->set_z(false, false);
+		pipeline_x2s->rebuild();
+
+		pipeline_x3 = new vulkan::Pipeline(shader_merge_fog, output_renderer->default_render_pass(), 1);
+		pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+		pipeline_x3->set_z(false, false);
+		pipeline_x3->rebuild();
+
+
+
+		ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
+		dset_x1 = new vulkan::DescriptorSet(shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+	}
+	~DeferredRenderer() override {
+		delete dset_x1;
+		delete ubo_x1;
+		delete pipeline_x1;
+		delete pipeline_x2;
+		delete pipeline_x2s;
+		delete pipeline_x3;
+
+		delete shader_merge_base;
+		delete shader_merge_light;
+		delete shader_merge_light_shadow;
+		delete shader_merge_fog;
+	}
+
+	/*bool start_frame_into_gbuf();
+	void end_frame_into_gbuf();
+
+
+	vulkan::Texture *tex_output;
+
+	//vulkan::DepthBuffer *depth_buffer;
+	vulkan::FrameBuffer *frame_buffer;*/
+
+	vulkan::UBOWrapper *ubo_x1;
+	vulkan::DescriptorSet *dset_x1;
+
+	vulkan::Shader *shader_merge_base;
+	vulkan::Shader *shader_merge_light;
+	vulkan::Shader *shader_merge_light_shadow;
+	vulkan::Shader *shader_merge_fog;
+
+
+	vulkan::Pipeline *pipeline_x1;
+	vulkan::Pipeline *pipeline_x2;
+	vulkan::Pipeline *pipeline_x2s;
+	vulkan::Pipeline *pipeline_x3;
+
+	/*vulkan::Pipeline *pipeline_merge;
+	vulkan::RenderPass *render_pass_merge;
+
+	bool start_frame_merge();
+	void end_frame_merge();
+
+	vulkan::FrameBuffer *_cfb;
+	vulkan::FrameBuffer *current_frame_buffer() override;*/
 };
 
 class YEngineApp {
@@ -128,6 +267,7 @@ private:
 	GBufferRenderer *gbuf_ren;
 	WindowRenderer *renderer;
 	ShadowMapRenderer *shadow_renderer;
+	DeferredRenderer *deferred_reenderer;
 
 	Text *fps_display;
 	Camera *light_cam;
@@ -160,29 +300,7 @@ private:
 		shadow_renderer = new ShadowMapRenderer();
 		gbuf_ren = new GBufferRenderer();
 
-		ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
-
-		pipeline_x1 = new vulkan::Pipeline(gbuf_ren->shader_merge_base, renderer->default_render_pass(), 1);
-		pipeline_x1->set_z(false, false);
-		pipeline_x1->rebuild();
-
-		pipeline_x2 = new vulkan::Pipeline(gbuf_ren->shader_merge_light, renderer->default_render_pass(), 1);
-		pipeline_x2->set_dynamic({"scissor"});
-		pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
-		pipeline_x2->set_z(false, false);
-		pipeline_x2->rebuild();
-
-		pipeline_x2s = new vulkan::Pipeline(gbuf_ren->shader_merge_light_shadow, renderer->default_render_pass(), 1);
-		pipeline_x2s->set_dynamic({"scissor"});
-		pipeline_x2s->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
-		pipeline_x2s->set_z(false, false);
-		pipeline_x2s->rebuild();
-
-		pipeline_x3 = new vulkan::Pipeline(gbuf_ren->shader_merge_fog, renderer->default_render_pass(), 1);
-		pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
-		pipeline_x3->set_z(false, false);
-		pipeline_x3->rebuild();
-		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+		deferred_reenderer = new DeferredRenderer(renderer, gbuf_ren);
 
 
 
@@ -209,7 +327,6 @@ private:
 			gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, gbuf_ren->depth_buffer));
 		}
 		if (SHOW_SHADOW) {
-			gui::add(new Picture(vector(0, 0.6f, 0), 0.2f, 0.2f, shadow_renderer->tex));
 			gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, shadow_renderer->depth_buffer));
 		}
 
@@ -245,14 +362,7 @@ private:
 		GodEnd();
 		gui::reset();
 
-
-		delete ubo_x1;
-		delete dset_x1;
-		delete pipeline_x1;
-		delete pipeline_x2;
-		delete pipeline_x2s;
-		delete pipeline_x3;
-
+		delete deferred_reenderer;
 		delete shadow_renderer;
 		delete pipeline;
 		delete gbuf_ren;
@@ -360,7 +470,7 @@ private:
 
 		//draw_world(cb);
 
-		draw_from_gbuf(cb);
+		draw_from_gbuf(cb, deferred_reenderer);
 
 		gui::render(cb, r->area());
 
@@ -369,20 +479,19 @@ private:
 	}
 
 	void render_into_gbuffer(GBufferRenderer *r) {
-		r->start_frame_into_gbuf();
+		r->start_frame();
 		auto *cb = r->cb;
 		cam->set_view(1.0f);
 
-		r->render_pass_into_g->clear_color[1] = world.background; // emission
-		cb->begin_render_pass(r->render_pass_into_g, r->current_frame_buffer());
+		r->default_render_pass()->clear_color[1] = world.background; // emission
+		cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
 		cb->set_pipeline(r->pipeline_into_gbuf);
 		cb->set_viewport(r->area());
 
 		draw_world(cb);
 		cb->end_render_pass();
 
-		r->end_frame_into_gbuf();
-		//vulkan::wait_device_idle();
+		r->end_frame();
 	}
 
 	void render_into_shadow(ShadowMapRenderer *r) {
@@ -397,13 +506,8 @@ private:
 		cb->end_render_pass();
 
 		r->end_frame();
-		//vulkan::wait_device_idle();
 	}
 
-
-	vulkan::UBOWrapper *ubo_x1;
-	vulkan::DescriptorSet *dset_x1;
-	vulkan::Pipeline *pipeline_x1, *pipeline_x2, *pipeline_x2s, *pipeline_x3;
 
 	vector project_pixel(const vector &v) {
 		vector p = cam->project(v);
@@ -445,7 +549,7 @@ private:
 			cb->set_scissor(r);
 
 		cb->set_viewport(renderer->area());
-		if (pip == pipeline_x2s) {
+		if (pip == deferred_reenderer->pipeline_x2s) {
 			matrix v = light_cam->m_all.transpose();
 			cb->push_constant(0, 64, &v);
 			cb->push_constant(64, 12, &cam->pos);
@@ -457,18 +561,18 @@ private:
 		cb->draw(Picture::vertex_buffer);
 	}
 
-	void draw_from_gbuf(vulkan::CommandBuffer *cb) {
+	void draw_from_gbuf(vulkan::CommandBuffer *cb, DeferredRenderer *r) {
 
 
 		UBOMatrices u;
 		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
 		u.view = matrix::ID.transpose();
 		u.model = matrix::ID.transpose();
-		ubo_x1->update(&u);
+		r->ubo_x1->update(&u);
 
 
 		// base emission
-		draw_from_gbuf_single(cb, pipeline_x1, dset_x1);
+		draw_from_gbuf_single(cb, r->pipeline_x1, r->dset_x1);
 
 
 		// light passes
@@ -483,20 +587,20 @@ private:
 				l.harshness = ll->harshness;
 				ll->ubo->update(&l);
 				if (!ll->dset)
-					ll->dset = new vulkan::DescriptorSet(gbuf_ren->shader_merge_light->descr_layouts[0], {ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
+					ll->dset = new vulkan::DescriptorSet(r->shader_merge_light->descr_layouts[0], {r->ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 				else
-					ll->dset->set({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
+					ll->dset->set({r->ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 
 				if (ll == world.lights[0])
-					draw_from_gbuf_single(cb, pipeline_x2s, ll->dset, light_rect(ll));
+					draw_from_gbuf_single(cb, deferred_reenderer->pipeline_x2s, ll->dset, light_rect(ll));
 				else
-					draw_from_gbuf_single(cb, pipeline_x2, ll->dset, light_rect(ll));
+					draw_from_gbuf_single(cb, deferred_reenderer->pipeline_x2, ll->dset, light_rect(ll));
 			}
 		}
 
 		// fog
 		if (world.fog.enabled)
-			draw_from_gbuf_single(cb, pipeline_x3, dset_x1);
+			draw_from_gbuf_single(cb, r->pipeline_x3, r->dset_x1);
 	}
 
 	void draw_frame() {

@@ -27,13 +27,12 @@ TextureRenderer::TextureRenderer(vulkan::Texture *t) {
 }
 
 TextureRenderer::~TextureRenderer() {
+	delete _default_render_pass;
 	delete depth_buffer;
 	delete frame_buffer;
-	delete _default_render_pass;
 }
 
 bool TextureRenderer::start_frame() {
-	in_flight_fence->wait();
 	cb->begin();
 	return true;
 }
@@ -42,7 +41,9 @@ void TextureRenderer::end_frame() {
 	//cb->barrier({tex, depth_buffer}, 0);
 	cb->barrier({depth_buffer}, 0);
 	cb->end();
+
 	vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
+	in_flight_fence->wait();
 	vulkan::wait_device_idle();
 }
 

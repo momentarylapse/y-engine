@@ -10,7 +10,6 @@
 #include "helper.h"
 
 #include <iostream>
-#include <array>
 
 #if HAS_LIB_VULKAN
 
@@ -33,7 +32,7 @@ namespace vulkan {
 			VkAttachmentDescription a = {};
 			a.format = format[i];
 			a.samples = VK_SAMPLE_COUNT_1_BIT;
-			a.loadOp = color_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
+			a.loadOp = color_load_op;
 			a.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			a.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			a.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -55,8 +54,8 @@ namespace vulkan {
 			VkAttachmentDescription a = {};
 			a.format = format.back();
 			a.samples = VK_SAMPLE_COUNT_1_BIT;
-			a.loadOp = depth_load_op;//VK_ATTACHMENT_LOAD_OP_CLEAR;
-			a.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			a.loadOp = depth_load_op;
+			a.storeOp = VK_ATTACHMENT_STORE_OP_STORE;//VK_ATTACHMENT_STORE_OP_DONT_CARE; // ARGH, might be needed for shadow maps
 			a.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			a.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			a.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;

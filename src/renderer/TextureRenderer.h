@@ -19,13 +19,12 @@ public:
 
 	vulkan::DepthBuffer *depth_buffer;
 	vulkan::FrameBuffer *frame_buffer;
-
 	vulkan::RenderPass *_default_render_pass;
-	vulkan::RenderPass *default_render_pass() override { return _default_render_pass; }
 
 	bool start_frame() override;
 	void end_frame() override;
 
+	vulkan::RenderPass *default_render_pass() override { return _default_render_pass; }
 	vulkan::FrameBuffer *current_frame_buffer() override;
 };
 
