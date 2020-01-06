@@ -17,6 +17,9 @@ class Object;
 class Terrain;
 class Light;
 
+
+
+
 namespace Gui {
 	class Font;
 }
