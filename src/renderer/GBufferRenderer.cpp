@@ -15,11 +15,10 @@ GBufferRenderer::GBufferRenderer() {
 	tex_pos = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 	tex_normal = new vulkan::DynamicTexture(width, height, 1, "rgba:f32");
 
-	VkExtent2D extent = {(unsigned)width, (unsigned)height};
-	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT, true);
+	depth_buffer = new vulkan::DepthBuffer(width, height, VK_FORMAT_D32_SFLOAT, true);
 
 	render_pass_into_g = new vulkan::RenderPass({tex_color->format, tex_emission->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
-	g_buffer = new vulkan::FrameBuffer(render_pass_into_g, {tex_color->view, tex_emission->view, tex_pos->view, tex_normal->view, depth_buffer->view}, extent);
+	g_buffer = new vulkan::FrameBuffer(width, height, render_pass_into_g, {tex_color->view, tex_emission->view, tex_pos->view, tex_normal->view, depth_buffer->view});
 
 
 	shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
@@ -29,7 +28,7 @@ GBufferRenderer::GBufferRenderer() {
 	tex_output = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
 
 	render_pass_merge = new vulkan::RenderPass({tex_output->format, depth_buffer->format}, true, false);
-	frame_buffer = new vulkan::FrameBuffer(render_pass_merge, {tex_output->view, depth_buffer->view}, extent);
+	frame_buffer = new vulkan::FrameBuffer(width, height, render_pass_merge, {tex_output->view, depth_buffer->view});
 
 
 	shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");

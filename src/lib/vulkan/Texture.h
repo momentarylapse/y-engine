@@ -41,6 +41,7 @@ namespace vulkan {
 
 		VkImageView view;
 		VkSampler sampler;
+		VkCompareOp compare_op;
 
 		static string directory;
 		static Texture* load(const string &filename);

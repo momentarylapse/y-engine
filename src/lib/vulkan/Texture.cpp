@@ -14,6 +14,8 @@ namespace vulkan {
 
 Array<Texture*> textures;
 
+VkCompareOp next_compare_op = VK_COMPARE_OP_ALWAYS;
+
 VkFormat parse_format(const string &s) {
 	if (s == "rgba:i8")
 		return VK_FORMAT_R8G8B8A8_UNORM;
@@ -27,6 +29,10 @@ VkFormat parse_format(const string &s) {
 		return VK_FORMAT_R32G32B32_SFLOAT;
 	if (s == "r:f32")
 		return VK_FORMAT_R32_SFLOAT;
+	if (s == "d:f32")
+		return VK_FORMAT_D32_SFLOAT;
+	if (s == "ds:f32i8")
+		return VK_FORMAT_D32_SFLOAT_S8_UINT;
 	std::cerr << "unknown image format: " << s.c_str() << "\n";
 	return VK_FORMAT_R8G8B8A8_UNORM;
 }
@@ -44,6 +50,10 @@ int pixel_size(VkFormat f) {
 		return 12;
 	if (f == VK_FORMAT_R32_SFLOAT)
 		return 4;
+	if (f == VK_FORMAT_D32_SFLOAT)
+		return 4;
+	if (f == VK_FORMAT_D32_SFLOAT_S8_UINT)
+		return 5; // ?
 	return 4;
 }
 
@@ -57,6 +67,7 @@ Texture::Texture() {
 	width = height = depth = 0;
 	mip_levels = 0;
 	format = VK_FORMAT_UNDEFINED;
+	compare_op = next_compare_op;
 
 	textures.add(this);
 }
@@ -283,8 +294,8 @@ void Texture::_create_sampler() {
 	si.maxAnisotropy = 16;
 	si.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	si.unnormalizedCoordinates = VK_FALSE;
-	si.compareEnable = VK_FALSE;
-	si.compareOp = VK_COMPARE_OP_ALWAYS;
+	si.compareEnable = (compare_op == VK_COMPARE_OP_ALWAYS) ? VK_FALSE : VK_TRUE;
+	si.compareOp = compare_op;
 	si.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	si.minLod = 0;
 	si.maxLod = static_cast<float>(mip_levels);

@@ -13,18 +13,22 @@
 namespace vulkan {
 
 
-DepthBuffer::DepthBuffer(VkExtent2D extent, VkFormat _format, bool _with_sampler) {
+DepthBuffer::DepthBuffer(int w, int h, VkFormat _format, bool _with_sampler) {
 	with_sampler = _with_sampler;
-	create(extent, _format);
+	create(w, h, _format);
 }
 
-void DepthBuffer::create(VkExtent2D extent, VkFormat _format) {
+void DepthBuffer::create(int w, int h, VkFormat _format) {
+	width = w;
+	height = h;
+	depth = 1;
+	mip_levels = 1;
 	format = _format;
 
 	auto usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	if (!with_sampler)
 		usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-	create_image(extent.width, extent.height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+	create_image(width, height, 1, 1, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 	view = create_image_view(image, format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
 	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
@@ -37,9 +41,9 @@ void DepthBuffer::create(VkExtent2D extent, VkFormat _format) {
 
 
 
-FrameBuffer::FrameBuffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent) {
+FrameBuffer::FrameBuffer(int w, int h, RenderPass *rp, const Array<VkImageView> &attachments) {
 	frame_buffer = nullptr;
-	create(rp, attachments, extent);
+	create(w, h, rp, attachments);
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -47,16 +51,17 @@ FrameBuffer::~FrameBuffer() {
 }
 
 
-void FrameBuffer::create(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D _extent) {
-	extent = _extent;
+void FrameBuffer::create(int w, int h, RenderPass *rp, const Array<VkImageView> &attachments) {
+	width = w;
+	height = h;
 
 	VkFramebufferCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	info.renderPass = rp->render_pass;
 	info.attachmentCount = attachments.num;
 	info.pAttachments = &attachments[0];
-	info.width = extent.width;
-	info.height = extent.height;
+	info.width = w;
+	info.height = h;
 	info.layers = 1;
 
 	if (vkCreateFramebuffer(device, &info, nullptr, &frame_buffer) != VK_SUCCESS) {

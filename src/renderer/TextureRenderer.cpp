@@ -8,6 +8,9 @@
 
 #include "TextureRenderer.h"
 
+namespace vulkan {
+	extern VkCompareOp next_compare_op;
+}
 
 
 TextureRenderer::TextureRenderer(vulkan::Texture *t) {
@@ -15,11 +18,12 @@ TextureRenderer::TextureRenderer(vulkan::Texture *t) {
 	width = tex->width;
 	height = tex->height;
 
-	VkExtent2D extent = {(unsigned)width, (unsigned)height};
-	depth_buffer = new vulkan::DepthBuffer(extent, VK_FORMAT_D32_SFLOAT, true);
+	vulkan::next_compare_op = VK_COMPARE_OP_LESS;
+	depth_buffer = new vulkan::DepthBuffer(width, height, VK_FORMAT_D32_SFLOAT, true);
+	vulkan::next_compare_op = VK_COMPARE_OP_ALWAYS;
 
 	_default_render_pass = new vulkan::RenderPass({tex->format, depth_buffer->format}, true, false);
-	frame_buffer = new vulkan::FrameBuffer(_default_render_pass, {tex->view, depth_buffer->view}, extent);
+	frame_buffer = new vulkan::FrameBuffer(width, height, _default_render_pass, {tex->view, depth_buffer->view});
 }
 
 TextureRenderer::~TextureRenderer() {

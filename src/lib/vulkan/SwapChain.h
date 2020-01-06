@@ -36,7 +36,7 @@ SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device);
 class SwapChain {
 public:
 	Array<VkImage> images;
-	VkExtent2D extent;
+	int width, height;
 	VkSwapchainKHR swap_chain;
 	VkFormat image_format;
 	uint32_t image_count;

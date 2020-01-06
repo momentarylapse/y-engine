@@ -30,7 +30,8 @@
 #include "renderer/GBufferRenderer.h"
 #include "renderer/TextureRenderer.h"
 
-const bool SHOW_GBUFFER = false;
+const bool SHOW_GBUFFER = true;
+const bool SHOW_SHADOW = true;
 
 
 // pipeline: shader + z buffer / blending parameters
@@ -167,7 +168,7 @@ private:
 		pipeline_x3->rebuild();
 		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
-		shadow_renderer = new TextureRenderer(new vulkan::DynamicTexture(512, 512, 1, "rgba:i8"));
+		shadow_renderer = new TextureRenderer(new vulkan::DynamicTexture(256, 256, 1, "rgba:i8"));
 		
 		auto shadow_shader = vulkan::Shader::load("3d-shadow.shader");
 		pipeline_x4 = new vulkan::Pipeline(shadow_shader, shadow_renderer->default_render_pass(), 1);
@@ -194,8 +195,10 @@ private:
 			gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, gbuf_ren->tex_normal));
 			gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, gbuf_ren->depth_buffer));
 		}
-		//gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, shadow_renderer->tex));
-		//gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, shadow_renderer->depth_buffer));
+		if (SHOW_SHADOW) {
+			gui::add(new Picture(vector(0, 0.6f, 0), 0.2f, 0.2f, shadow_renderer->tex));
+			gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, shadow_renderer->depth_buffer));
+		}
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -502,6 +505,8 @@ private:
 		light_cam->pos = vector(0,1000,0);
 		light_cam->ang = quaternion::rotation_v(vector(pi/2, 0, 0));
 		light_cam->zoom = 2;
+		light_cam->min_depth = 100;
+		light_cam->max_depth = 10000;
 
 		prepare_all(shadow_renderer, light_cam);
 		render_into_shadow(shadow_renderer);

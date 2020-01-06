@@ -22,18 +22,18 @@ class DepthBuffer : public Texture {
 public:
 	bool with_sampler;
 
-	DepthBuffer(VkExtent2D extent, VkFormat format, bool with_sampler);
-	void create(VkExtent2D extent, VkFormat format);
+	DepthBuffer(int w, int h, VkFormat format, bool with_sampler);
+	void create(int w, int h, VkFormat format);
 };
 
 class FrameBuffer {
 public:
-	FrameBuffer(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent);
+	FrameBuffer(int w, int h, RenderPass *rp, const Array<VkImageView> &attachments);
 	~FrameBuffer();
 
 	VkFramebuffer frame_buffer;
-	VkExtent2D extent;
-	void create(RenderPass *rp, const Array<VkImageView> &attachments, VkExtent2D extent);
+	int width, height;
+	void create(int w, int h, RenderPass *rp, const Array<VkImageView> &attachments);
 	void destroy();
 };
 

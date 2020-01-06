@@ -165,7 +165,7 @@ void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 	info.renderPass = rp->render_pass;
 	info.framebuffer = fb->frame_buffer;
 	info.renderArea.offset = {0, 0};
-	info.renderArea.extent = fb->extent;
+	info.renderArea.extent = {(unsigned)fb->width, (unsigned)fb->height};
 	info.clearValueCount = clear_values.num;
 	info.pClearValues = &clear_values[0];
 

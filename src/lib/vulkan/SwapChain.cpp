@@ -72,7 +72,7 @@ void SwapChain::create_frame_buffers(RenderPass *render_pass, DepthBuffer *depth
 	frame_buffers.resize(image_count);
 
 	for (size_t i=0; i<image_count; i++) {
-		frame_buffers[i] = new FrameBuffer(render_pass, {image_views[i], depth_buffer->view}, extent);
+		frame_buffers[i] = new FrameBuffer(width, height, render_pass, {image_views[i], depth_buffer->view});
 	}
 }
 
@@ -107,7 +107,7 @@ void SwapChain::create() {
 	get_images();
 	create_image_views();
 
-	depth_buffer = new DepthBuffer(extent, find_depth_format(), false);
+	depth_buffer = new DepthBuffer(width, height, find_depth_format(), false);
 
 	default_render_pass = new RenderPass({image_format, depth_buffer->format}, true, true);
 	create_frame_buffers(default_render_pass, depth_buffer);
@@ -119,7 +119,9 @@ void SwapChain::create_swap_chain() {
 
 	VkSurfaceFormatKHR surface_format = choose_swap_surface_format(swap_chain_support.formats);
 	VkPresentModeKHR present_mode = choose_swap_present_mode(swap_chain_support.present_modes);
-	extent = choose_swap_extent(swap_chain_support.capabilities);
+	auto extent = choose_swap_extent(swap_chain_support.capabilities);
+	width = extent.width;
+	height = extent.height;
 
 	image_count = swap_chain_support.capabilities.minImageCount + 1;
 	if (swap_chain_support.capabilities.maxImageCount > 0 and image_count > swap_chain_support.capabilities.maxImageCount) {

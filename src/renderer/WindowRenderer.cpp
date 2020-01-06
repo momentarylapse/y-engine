@@ -19,8 +19,8 @@ WindowRenderer::WindowRenderer(GLFWwindow *_window) {
 
 
 	swap_chain = new vulkan::SwapChain();
-	width = swap_chain->extent.width;
-	height = swap_chain->extent.height;
+	width = swap_chain->width;
+	height = swap_chain->height;
 
 	main_renderer = this;
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
@@ -47,6 +47,8 @@ void WindowRenderer::rebuild_default_stuff() {
 	vulkan::wait_device_idle();
 
 	swap_chain->rebuild();
+	width = swap_chain->width;
+	height = swap_chain->height;
 }
 
 vulkan::FrameBuffer *WindowRenderer::current_frame_buffer() {
