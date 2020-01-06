@@ -28,6 +28,7 @@
 
 #include "renderer/WindowRenderer.h"
 #include "renderer/GBufferRenderer.h"
+#include "renderer/TextureRenderer.h"
 
 const bool SHOW_GBUFFER = false;
 
@@ -110,6 +111,7 @@ private:
 	vulkan::Pipeline *pipeline;
 	GBufferRenderer *gbuf_ren;
 	WindowRenderer *renderer;
+	TextureRenderer *shadow_renderer;
 
 	Text *fps_display;
 	Camera *light_cam;
@@ -153,13 +155,23 @@ private:
 		pipeline_x2->set_z(false, false);
 		pipeline_x2->rebuild();
 
+		pipeline_x2s = new vulkan::Pipeline(gbuf_ren->shader_merge_light_shadow, renderer->default_render_pass(), 1);
+		pipeline_x2s->set_dynamic({"scissor"});
+		pipeline_x2s->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+		pipeline_x2s->set_z(false, false);
+		pipeline_x2s->rebuild();
+
 		pipeline_x3 = new vulkan::Pipeline(gbuf_ren->shader_merge_fog, renderer->default_render_pass(), 1);
 		pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 		pipeline_x3->set_z(false, false);
 		pipeline_x3->rebuild();
 		dset_x1 = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
+		shadow_renderer = new TextureRenderer(new vulkan::DynamicTexture(512, 512, 1, "rgba:i8"));
 		
+		auto shadow_shader = vulkan::Shader::load("3d-shadow.shader");
+		pipeline_x4 = new vulkan::Pipeline(shadow_shader, shadow_renderer->default_render_pass(), 1);
+
 		game_ini.load();
 
 		MaterialInit();
@@ -182,6 +194,8 @@ private:
 			gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, gbuf_ren->tex_normal));
 			gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, gbuf_ren->depth_buffer));
 		}
+		//gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, shadow_renderer->tex));
+		//gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, shadow_renderer->depth_buffer));
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -220,8 +234,11 @@ private:
 		delete dset_x1;
 		delete pipeline_x1;
 		delete pipeline_x2;
+		delete pipeline_x2s;
 		delete pipeline_x3;
+		delete pipeline_x4;
 
+		delete shadow_renderer;
 		delete pipeline;
 		delete gbuf_ren;
 		delete renderer;
@@ -271,13 +288,13 @@ private:
 	float time;
 
 
-	void prepare_all(Renderer *r) {
+	void prepare_all(Renderer *r, Camera *c) {
 
-		cam->set_view((float)r->width / (float)r->height);
+		c->set_view((float)r->width / (float)r->height);
 
 		UBOMatrices u;
-		u.proj = cam->m_projection.transpose();
-		u.view = cam->m_view.transpose();
+		u.proj = c->m_projection.transpose();
+		u.view = c->m_view.transpose();
 
 		UBOFog f;
 		f.col = world.fog._color;
@@ -355,10 +372,29 @@ private:
 		vulkan::wait_device_idle();
 	}
 
+	void render_into_shadow(TextureRenderer *r) {
+		r->start_frame();
+		auto *cb = r->cb;
+
+		cb->begin();
+
+		cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
+		cb->set_pipeline(pipeline_x4);
+		cb->set_viewport(r->area());
+
+		draw_world(cb);
+		cb->end_render_pass();
+		cb->end();
+
+		r->end_frame();
+		vulkan::wait_device_idle();
+	}
+
 
 	vulkan::UBOWrapper *ubo_x1;
 	vulkan::DescriptorSet *dset_x1;
-	vulkan::Pipeline *pipeline_x1, *pipeline_x2, *pipeline_x3;
+	vulkan::Pipeline *pipeline_x1, *pipeline_x2, *pipeline_x2s, *pipeline_x3;
+	vulkan::Pipeline *pipeline_x4;
 
 	vector project_pixel(const vector &v) {
 		vector p = cam->project(v);
@@ -400,7 +436,13 @@ private:
 			cb->set_scissor(r);
 
 		cb->set_viewport(renderer->area());
-		cb->push_constant(0, 12, &cam->pos);
+		if (pip == pipeline_x2s) {
+			matrix v = light_cam->m_all.transpose();
+			cb->push_constant(0, 64, &v);
+			cb->push_constant(64, 12, &cam->pos);
+		} else {
+			cb->push_constant(0, 12, &cam->pos);
+		}
 
 		cb->bind_descriptor_set(0, dset);
 		cb->draw(Picture::vertex_buffer);
@@ -432,11 +474,14 @@ private:
 				l.harshness = ll->harshness;
 				ll->ubo->update(&l);
 				if (!ll->dset)
-					ll->dset = new vulkan::DescriptorSet(gbuf_ren->shader_merge_base->descr_layouts[0], {ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+					ll->dset = new vulkan::DescriptorSet(gbuf_ren->shader_merge_light->descr_layouts[0], {ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 				else
-					ll->dset->set({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+					ll->dset->set({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 
-				draw_from_gbuf_single(cb, pipeline_x2, ll->dset, light_rect(ll));
+				if (ll == world.lights[0])
+					draw_from_gbuf_single(cb, pipeline_x2s, ll->dset, light_rect(ll));
+				else
+					draw_from_gbuf_single(cb, pipeline_x2, ll->dset, light_rect(ll));
 			}
 		}
 
@@ -454,11 +499,17 @@ private:
 		auto current_time = high_resolution_clock::now();
 		time = duration<float, seconds::period>(current_time - start_time).count();
 
+		light_cam->pos = vector(0,1000,0);
+		light_cam->ang = quaternion::rotation_v(vector(pi/2, 0, 0));
+		light_cam->zoom = 2;
 
-		prepare_all(gbuf_ren);
+		prepare_all(shadow_renderer, light_cam);
+		render_into_shadow(shadow_renderer);
+
+		prepare_all(gbuf_ren, cam);
 		render_into_gbuffer(gbuf_ren);
 
-		prepare_all(renderer);
+		prepare_all(renderer, cam);
 
 		if (!renderer->start_frame())
 			return;

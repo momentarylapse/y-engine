@@ -34,6 +34,7 @@ GBufferRenderer::GBufferRenderer() {
 
 	shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");
 	shader_merge_light = vulkan::Shader::load("2d-gbuf-light.shader");
+	shader_merge_light_shadow = vulkan::Shader::load("2d-gbuf-light-shadow.shader");
 	shader_merge_fog = vulkan::Shader::load("2d-gbuf-fog.shader");
 	pipeline_merge = new vulkan::Pipeline(shader_merge_base, render_pass_merge, 1);
 
@@ -45,6 +46,7 @@ GBufferRenderer::~GBufferRenderer() {
 	delete frame_buffer;
 	delete shader_merge_base;
 	delete shader_merge_light;
+	delete shader_merge_light_shadow;
 	delete shader_merge_fog;
 	delete render_pass_merge;
 	delete tex_output;
