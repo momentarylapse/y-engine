@@ -18,6 +18,8 @@
 #include "world/object.h"
 #include "world/terrain.h"
 
+#include "helper/PerformanceMonitor.h"
+
 #include "fx/Light.h"
 
 #include "gui/Picture.h"
@@ -114,6 +116,8 @@ private:
 	WindowRenderer *renderer;
 	DeferredRenderer *deferred_reenderer;
 
+	PerformanceMonitor perf_mon;
+
 	Text *fps_display;
 
 	void init() {
@@ -158,7 +162,7 @@ private:
 		CameraReset();
 		GodLoadWorld(game_ini.default_world);
 
-		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.05f,0.05f,0), 0.05f);
+		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.02f,0.02f,0), 0.03f);
 		gui::add(fps_display);
 		if (SHOW_GBUFFER) {
 			gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, deferred_reenderer->gbuf_ren->tex_color));
@@ -189,6 +193,10 @@ private:
 	void main_loop() {
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
+			perf_mon.frame();
+			engine.elapsed_rt = perf_mon.frame_dt;
+			engine.elapsed = perf_mon.frame_dt;
+
 			iterate();
 			draw_frame();
 		}
@@ -225,29 +233,6 @@ private:
 		auto mr = matrix::rotation_q(a);
 		return mt * mr;
 	}
-
-	struct Speedometer {
-		int frames = 0;
-		high_resolution_clock::time_point prev = high_resolution_clock::now();
-		high_resolution_clock::time_point prev_slow = high_resolution_clock::now();
-		void tick(Text *text) {
-			frames ++;
-		 	auto now = high_resolution_clock::now();
-			float dt = std::chrono::duration<float, std::chrono::seconds::period>(now - prev).count();
-			engine.elapsed = dt;
-			prev = now;
-			float dt_slow = std::chrono::duration<float, std::chrono::seconds::period>(now - prev_slow).count();
-			if (dt_slow > 0.2f) {
-				text->text = f2s((float)frames/dt_slow, 1);
-				text->rebuild();
-				frames = 0;
-				prev_slow = now;
-			}
-		}
-	};
-	Speedometer speedometer;
-
-	float time;
 
 
 	void prepare_all(Renderer *r, Camera *c) {
@@ -343,21 +328,23 @@ private:
 	}
 
 
+	void update_statistics() {
+		vulkan::wait_device_idle();
+		fps_display->text = format("%.1f          s%.2f  g%.2f  c%.2f", 1.0f / perf_mon.avg.frame_time, perf_mon.avg.location[0]*1000, perf_mon.avg.location[1]*1000, perf_mon.avg.location[2]*1000);
+		fps_display->rebuild();
+	}
+
 
 
 
 	void draw_frame() {
+		if (perf_mon.frames == 0)
+			update_statistics();
+
 		vulkan::wait_device_idle();
-		speedometer.tick(fps_display);
-
-
-		static auto start_time = high_resolution_clock::now();
-
-		auto current_time = high_resolution_clock::now();
-		time = duration<float, seconds::period>(current_time - start_time).count();
-
 		//deferred_reenderer->pick_shadow_source();
 
+		perf_mon.tick(0);
 		deferred_reenderer->light_cam->pos = vector(0,1000,0);
 		deferred_reenderer->light_cam->ang = quaternion::rotation_v(vector(pi/2, 0, 0));
 		deferred_reenderer->light_cam->zoom = 2;
@@ -367,9 +354,11 @@ private:
 
 		prepare_all(deferred_reenderer->shadow_renderer, deferred_reenderer->light_cam);
 		render_into_shadow(deferred_reenderer->shadow_renderer);
+		perf_mon.tick(1);
 
 		prepare_all(deferred_reenderer->gbuf_ren, cam);
 		render_into_gbuffer(deferred_reenderer->gbuf_ren);
+		perf_mon.tick(2);
 
 		prepare_all(renderer, cam);
 
@@ -384,6 +373,7 @@ private:
 		cb->end();
 
 		renderer->end_frame();
+		perf_mon.tick(3);
 	}
 
 };

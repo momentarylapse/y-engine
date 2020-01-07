@@ -32,6 +32,8 @@ namespace vulkan {
 		void _create_vertex_buffer(const void *vdata, int size);
 		void _create_index_buffer(const Array<uint16_t> &indices);
 
+		void _destroy();
+
 		unsigned int output_count;
 
 		VkBuffer vertex_buffer;

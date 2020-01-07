@@ -16,6 +16,8 @@ Light::Light(const vector &p, const vector &d, const color &c, float r, float t)
 	radius = r;
 	theta = t;
 	harshness = 0.8f;
+	if (radius >= 0)
+		harshness = 1;
 	enabled = true;
 
 	ubo = new vulkan::UBOWrapper(sizeof(UBOLight));

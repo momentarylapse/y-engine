@@ -306,7 +306,7 @@ bool check_device_extension_support(VkPhysicalDevice device) {
 void create_logical_device() {
 	QueueFamilyIndices indices = find_queue_families(physical_device);
 
-	std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
+	Array<VkDeviceQueueCreateInfo> queue_create_infos;
 	std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
 
 	float queue_priority = 1.0f;
@@ -316,7 +316,7 @@ void create_logical_device() {
 		queue_create_info.queueFamilyIndex = queue_family;
 		queue_create_info.queueCount = 1;
 		queue_create_info.pQueuePriorities = &queue_priority;
-		queue_create_infos.push_back(queue_create_info);
+		queue_create_infos.add(queue_create_info);
 	}
 
 	VkPhysicalDeviceFeatures device_features = {};
@@ -325,8 +325,8 @@ void create_logical_device() {
 	VkDeviceCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-	create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
-	create_info.pQueueCreateInfos = queue_create_infos.data();
+	create_info.queueCreateInfoCount = queue_create_infos.num;
+	create_info.pQueueCreateInfos = &queue_create_infos[0];
 
 	create_info.pEnabledFeatures = &device_features;
 
