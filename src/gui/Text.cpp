@@ -8,6 +8,7 @@
 #include "Text.h"
 
 #include "../lib/hui/hui.h"
+#include <iostream>
 
 
 
@@ -18,7 +19,7 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 	cairo_t *cr;
 
 	// initial surface size guess
-	int w_surf = 512;
+	int w_surf = 800;
 	int h_surf = font_size * 2;
 
 	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w_surf, h_surf);
@@ -42,6 +43,9 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 	int w_used, h_used;
 	pango_layout_get_pixel_size(layout, &w_used, &h_used);
 
+	if (w_used > w_surf)
+		std::cerr << "Text: too large!\n";
+
 	pango_cairo_show_layout(cr, layout);
 	g_object_unref(layout);
 
@@ -64,7 +68,7 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 
 void render_text(const string &str, Image &im) {
 	string font_name = "CAC Champagne";
-	float font_size = 30;
+	float font_size = 23;
 	cairo_render_text(font_name, font_size, str, im);
 }
 

@@ -31,6 +31,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Camera.show", &Camera::show);
 	Kaba::declare_class_element("Camera.min_depth", &Camera::min_depth);
 	Kaba::declare_class_element("Camera.max_depth", &Camera::max_depth);
+	Kaba::declare_class_element("Camera.m_view", &Camera::m_view);
 	Kaba::link_external_virtual("Camera.__delete__", &Camera::__delete__, &_cam);
 	Kaba::link_external_virtual("Camera.on_init", &Camera::on_init, &_cam);
 	Kaba::link_external_virtual("Camera.on_delete", &Camera::on_delete, &_cam);
@@ -132,11 +133,16 @@ void PluginManager::reset() {
 
 void *PluginManager::create_instance(const string &filename, const string &base_class) {
 
-	auto *s = Kaba::Load(filename);
-	for (auto *c: s->classes()) {
-		if (c->is_derived_from_s(base_class)) {
-			return c->create_instance();
+	try{
+		auto *s = Kaba::Load(filename);
+		for (auto *c: s->classes()) {
+			if (c->is_derived_from_s(base_class)) {
+				return c->create_instance();
+			}
 		}
+	}catch(Kaba::Exception &e) {
+		msg_error(e.message());
+		throw std::runtime_error(e.message().c_str());
 	}
 	throw std::runtime_error(("script does not contain a class derived from " + base_class).c_str());
 	return nullptr;

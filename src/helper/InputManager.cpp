@@ -40,6 +40,12 @@ void InputManager::init(GLFWwindow *window) {
 	if (glfwRawMouseMotionSupported())
 		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
+	// init with current position (to avoid dmouse jumps)
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+	state_prev.mx = state.mx = xpos;
+	state_prev.my = state.my = ypos;
+
 
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, cursor_position_callback);

@@ -333,7 +333,11 @@ private:
 
 	void update_statistics() {
 		vulkan::wait_device_idle();
-		fps_display->text = format("%.1f          s%.2f  g%.2f  c%.2f", 1.0f / perf_mon.avg.frame_time, perf_mon.avg.location[0]*1000, perf_mon.avg.location[1]*1000, perf_mon.avg.location[2]*1000);
+		fps_display->text = format("%.1f     s%.2f  g%.2f  c%.2f",
+				1.0f / perf_mon.avg.frame_time,
+				perf_mon.avg.location[0]*1000,
+				perf_mon.avg.location[1]*1000,
+				perf_mon.avg.location[2]*1000);
 		fps_display->rebuild();
 	}
 
@@ -346,6 +350,9 @@ private:
 
 		vulkan::wait_device_idle();
 		//deferred_reenderer->pick_shadow_source();
+
+		if (!renderer->start_frame())
+			return;
 
 		perf_mon.tick(0);
 		deferred_reenderer->light_cam->pos = vector(0,1000,0);
@@ -365,9 +372,6 @@ private:
 
 		prepare_all(renderer, cam);
 
-		if (!renderer->start_frame())
-			return;
-		//msg_write("render-to-win");
 		auto cb = renderer->cb;
 
 

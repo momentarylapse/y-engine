@@ -38,6 +38,15 @@ else
 	add_project_arguments('-DHAS_LIB_UNWIND=0', language : ['cpp'])
 endif
 
+# optional dependency: dl
+d = cc.find_library('dl', required : false)
+if d.found()
+	add_project_arguments('-DHAS_LIB_DL=1', language : ['cpp'])
+	deps += [d]
+else
+	add_project_arguments('-DHAS_LIB_DL=0', language : ['cpp'])
+endif
+
 
 sources = [
 	'src/fx/Light.cpp',
