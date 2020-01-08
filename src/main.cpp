@@ -19,6 +19,7 @@
 #include "world/terrain.h"
 
 #include "helper/PerformanceMonitor.h"
+#include "helper/InputManager.h"
 
 #include "fx/Light.h"
 
@@ -147,6 +148,7 @@ private:
 
 		deferred_reenderer = new DeferredRenderer(renderer);
 
+		InputManager::init(window);
 
 
 		game_ini.load();
@@ -185,14 +187,15 @@ private:
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-		window = glfwCreateWindow(1024, 768, "Vulkan", nullptr, nullptr);
+		window = glfwCreateWindow(1024, 768, "y-engine", nullptr, nullptr);
+		//window = glfwCreateWindow(1024, 768, "y-engine", glfwGetPrimaryMonitor(), nullptr);
 		glfwSetWindowUserPointer(window, this);
 		return window;
 	}
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window)) {
-			glfwPollEvents();
+			InputManager::iterate();
 			perf_mon.frame();
 			engine.elapsed_rt = perf_mon.frame_dt;
 			engine.elapsed = perf_mon.frame_dt;

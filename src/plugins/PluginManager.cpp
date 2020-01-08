@@ -13,6 +13,7 @@
 #include "../world/terrain.h"
 #include "../world/camera.h"
 #include "../fx/Light.h"
+#include "../helper/InputManager.h"
 
 
 PluginManager plugin_manager;
@@ -113,9 +114,16 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("LightSpherical.__init__", &Light::__init_spherical__);
 	Kaba::link_external_class_func("LightCone.__init__", &Light::__init_cone__);
 
+	Kaba::link_external("get_key", (void*)&InputManager::get_key);
+	Kaba::link_external("get_key_down", (void*)&InputManager::get_key_down);
+	Kaba::link_external("get_key_up", (void*)&InputManager::get_key_up);
+
 
 	Kaba::link_external("world", &world);
 	Kaba::link_external("cam", &cam);
+	Kaba::link_external("mouse", &InputManager::mouse);
+	Kaba::link_external("dmouse", &InputManager::dmouse);
+	Kaba::link_external("scroll", &InputManager::scroll);
 }
 
 void PluginManager::reset() {
