@@ -51,7 +51,7 @@ DeferredRenderer::DeferredRenderer(Renderer *_output_renderer) {
 	pipeline_x2s->rebuild();
 
 	pipeline_x3 = new vulkan::Pipeline(shader_merge_fog, output_renderer->default_render_pass(), 1);
-	pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+	pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 	pipeline_x3->set_z(false, false);
 	pipeline_x3->rebuild();
 

@@ -114,6 +114,20 @@ int key_decode(int key) {
 				return hui::KEY_LCONTROL;
 	if (key == GLFW_KEY_RIGHT_CONTROL)
 				return hui::KEY_RCONTROL;
+	if (key == GLFW_KEY_PAGE_UP)
+				return hui::KEY_PRIOR;
+	if (key == GLFW_KEY_PAGE_DOWN)
+				return hui::KEY_NEXT;
+	if (key == GLFW_KEY_HOME)
+				return hui::KEY_HOME;
+	if (key == GLFW_KEY_END)
+				return hui::KEY_END;
+	if (key == GLFW_KEY_DELETE)
+				return hui::KEY_DELETE;
+	if (key == GLFW_KEY_INSERT)
+				return hui::KEY_INSERT;
+	if (key == GLFW_KEY_TAB)
+				return hui::KEY_TAB;
 	return -1;
 }
 

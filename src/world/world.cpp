@@ -20,6 +20,7 @@
 
 #ifdef _X_ALLOW_X_
 #include "../fx/Light.h"
+#include "../fx/Particle.h"
 #endif
 
 #if 0
@@ -210,6 +211,8 @@ World::World() {
 	ubo_fog = nullptr;
 	sun = nullptr;
 
+	world.particle_manager = new ParticleManager();
+
 	reset();
 }
 
@@ -241,6 +244,8 @@ void World::reset() {
 	for (auto *l: lights)
 		delete l;
 	lights.clear();
+
+	particle_manager->clear();
 
 
 
@@ -1347,6 +1352,10 @@ void World::unregister_model(Model *m) {
 
 void World::add_light(Light *l) {
 	lights.add(l);
+}
+
+void World::add_particle(Particle *p) {
+	particle_manager->add(p);
 }
 
 #if 0

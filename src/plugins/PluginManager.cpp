@@ -13,6 +13,7 @@
 #include "../world/terrain.h"
 #include "../world/camera.h"
 #include "../fx/Light.h"
+#include "../fx/Particle.h"
 #include "../helper/InputManager.h"
 
 
@@ -76,6 +77,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("World.create_object", &World::create_object);
 	Kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	Kaba::link_external_class_func("World.add_light", &World::add_light);
+	Kaba::link_external_class_func("World.add_particle", &World::add_particle);
 
 	Kaba::declare_class_element("Fog.color", &Fog::_color);
 	Kaba::declare_class_element("Fog.enabled", &Fog::enabled);
@@ -114,6 +116,14 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("LightParallel.__init__", &Light::__init_parallel__);
 	Kaba::link_external_class_func("LightSpherical.__init__", &Light::__init_spherical__);
 	Kaba::link_external_class_func("LightCone.__init__", &Light::__init_cone__);
+
+
+	Kaba::declare_class_size("Particle", sizeof(Particle));
+	Kaba::declare_class_element("Particle.pos", &Particle::pos);
+	Kaba::declare_class_element("Particle.radius", &Particle::radius);
+	Kaba::declare_class_element("Particle.texture", &Particle::texture);
+	Kaba::declare_class_element("Particle.color", &Particle::col);
+	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 
 	Kaba::link_external("get_key", (void*)&InputManager::get_key);
 	Kaba::link_external("get_key_down", (void*)&InputManager::get_key_down);

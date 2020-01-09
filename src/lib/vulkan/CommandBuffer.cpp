@@ -171,6 +171,9 @@ void CommandBuffer::begin_render_pass(RenderPass *rp, FrameBuffer *fb) {
 
 	vkCmdBeginRenderPass(buffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 }
+void CommandBuffer::next_subpass() {
+	vkCmdNextSubpass(buffer, VK_SUBPASS_CONTENTS_INLINE);
+}
 
 void CommandBuffer::set_scissor(const rect &r) {
 	VkRect2D scissor = {(int)r.x1, (int)r.y1, (unsigned int)r.width(), (unsigned int)r.height()};

@@ -53,6 +53,7 @@ namespace vulkan{
 		void push_constant(int offset, int size, void *data);
 
 		void begin_render_pass(RenderPass *rp, FrameBuffer *fb);
+		void next_subpass();
 		void end_render_pass();
 		void draw(VertexBuffer *vb);
 

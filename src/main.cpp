@@ -22,6 +22,7 @@
 #include "helper/InputManager.h"
 
 #include "fx/Light.h"
+#include "fx/Particle.h"
 
 #include "gui/Picture.h"
 #include "gui/Text.h"
@@ -38,6 +39,9 @@
 const bool SHOW_GBUFFER = false;
 const bool SHOW_SHADOW = false;
 
+extern vulkan::Shader *_default_shader_;
+extern vulkan::Shader *shader_fx;
+
 
 // pipeline: shader + z buffer / blending parameters
 
@@ -48,7 +52,6 @@ void DrawSplashScreen(const string &str, float per) {
 }
 
 void ExternalModelCleanup(Model *m) {}
-extern vulkan::Shader *_default_shader_;
 
 
 
@@ -113,11 +116,13 @@ public:
 private:
 	GLFWwindow* window;
 
-	vulkan::Pipeline *pipeline;
 	WindowRenderer *renderer;
 	DeferredRenderer *deferred_reenderer;
 
 	PerformanceMonitor perf_mon;
+
+	vulkan::Pipeline *pipeline_fx;
+	vulkan::VertexBuffer *particle_vb;
 
 	Text *fps_display;
 
@@ -136,17 +141,27 @@ private:
 		PluginManager::link_kaba();
 
 
-		auto shader = vulkan::Shader::load("3d.shader");
-		_default_shader_ = shader;
-		pipeline = new vulkan::Pipeline(shader, renderer->default_render_pass(), 1);
-		pipeline->set_dynamic({"viewport"});
-		//pipeline->wireframe = true;
-		pipeline->rebuild();
-
 
 		gui::init(renderer->default_render_pass());
 
 		deferred_reenderer = new DeferredRenderer(renderer);
+		_default_shader_ = deferred_reenderer->gbuf_ren->shader_into_gbuf;
+
+		shader_fx = vulkan::Shader::load("fx.shader");
+		pipeline_fx = new vulkan::Pipeline(shader_fx, renderer->default_render_pass(), 1);
+		pipeline_fx->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+		pipeline_fx->set_z(true, false);
+		pipeline_fx->set_culling(0);
+		pipeline_fx->rebuild();
+
+		particle_vb = new vulkan::VertexBuffer();
+		Array<vulkan::Vertex1> vertices;
+		vertices.add({vector(-1,-1,0), vector::EZ, 0,0});
+		vertices.add({vector(-1, 1,0), vector::EZ, 0,1});
+		vertices.add({vector( 1,-1,0), vector::EZ, 1,0});
+		vertices.add({vector( 1, 1,0), vector::EZ, 1,1});
+		particle_vb->build1i(vertices, {0,2,1, 1,2,3});
+
 
 		InputManager::init(window);
 
@@ -212,8 +227,9 @@ private:
 		GodEnd();
 		gui::reset();
 
+		delete particle_vb;
+		delete pipeline_fx;
 		delete deferred_reenderer;
-		delete pipeline;
 		delete renderer;
 		vulkan::destroy();
 
@@ -282,6 +298,33 @@ private:
 
 	}
 
+	void render_fx(vulkan::CommandBuffer *cb, Renderer *r) {
+		cb->set_pipeline(pipeline_fx);
+		cb->set_viewport(r->area());
+
+		cb->push_constant(80, sizeof(color), &world.fog._color);
+		float density0 = 0;
+		cb->push_constant(96, 4, &density0);
+
+		for (auto *g: world.particle_manager->groups) {
+			g->dset->set({}, {deferred_reenderer->gbuf_ren->depth_buffer, g->texture});
+			cb->bind_descriptor_set(0, g->dset);
+
+			for (auto *p: g->particles) {
+				matrix m = (cam->m_all * matrix::translation(p->pos) * matrix::rotation_q(cam->ang) * matrix::scale(p->radius, p->radius, 1)).transpose();
+				cb->push_constant(0, sizeof(m), &m);
+				cb->push_constant(64, sizeof(color), &p->col);
+				if (world.fog.enabled) {
+					float dist = (cam->pos - p->pos).length(); //(cam->m_view * p->pos).z;
+					float fog_density = 1-exp(-dist / world.fog.distance);
+					cb->push_constant(96, 4, &fog_density);
+				}
+				cb->draw(particle_vb);
+			}
+		}
+
+	}
+
 	void render_all(Renderer *r) {
 		auto *cb = r->cb;
 		auto *rp = r->default_render_pass();
@@ -293,6 +336,9 @@ private:
 		cb->begin_render_pass(rp, fb);
 
 		deferred_reenderer->render_out(cb, r);
+		perf_mon.tick(3);
+		render_fx(cb, r);
+		perf_mon.tick(4);
 
 		gui::render(cb, r->area());
 
@@ -333,11 +379,13 @@ private:
 
 	void update_statistics() {
 		vulkan::wait_device_idle();
-		fps_display->text = format("%.1f     s%.2f  g%.2f  c%.2f",
+		fps_display->text = format("%.1f     s:%.2f  g:%.2f  c:%.2f  fx:%.2f  2d:%.2f",
 				1.0f / perf_mon.avg.frame_time,
 				perf_mon.avg.location[0]*1000,
 				perf_mon.avg.location[1]*1000,
-				perf_mon.avg.location[2]*1000);
+				perf_mon.avg.location[2]*1000,
+				perf_mon.avg.location[3]*1000,
+				perf_mon.avg.location[4]*1000);
 		fps_display->rebuild();
 	}
 
@@ -380,7 +428,7 @@ private:
 		cb->end();
 
 		renderer->end_frame();
-		perf_mon.tick(3);
+		perf_mon.tick(5);
 	}
 
 };

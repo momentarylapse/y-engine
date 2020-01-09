@@ -230,6 +230,14 @@ void Pipeline::set_viewport(const rect &r) {
 	viewport.maxDepth = 1.0f;
 }
 
+void Pipeline::set_culling(int mode) {
+	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+	if (mode == 0)
+		rasterizer.cullMode = VK_CULL_MODE_NONE;
+	if (mode == -1)
+		rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
+}
+
 VkDynamicState parse_dynamic_state(const string &d) {
 	if (d == "viewport")
 		return VK_DYNAMIC_STATE_VIEWPORT;

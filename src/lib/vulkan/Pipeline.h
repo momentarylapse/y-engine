@@ -50,6 +50,7 @@ namespace vulkan{
 		void set_line_width(float line_width);
 		void set_z(bool test, bool write);
 		void set_viewport(const rect &r);
+		void set_culling(int mode);
 
 		void set_dynamic(const Array<string> &dynamic_states);
 

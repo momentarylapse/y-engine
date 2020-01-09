@@ -20,6 +20,8 @@ class Material;
 class Terrain;
 class TemplateDataScriptVariable;
 class Light;
+class ParticleManager;
+class Particle;
 
 namespace vulkan {
 	class UBOWrapper;
@@ -134,6 +136,9 @@ public:
 	Array<Light*> lights;
 	Light *sun;
 	void add_light(Light *l);
+
+	ParticleManager *particle_manager;
+	void add_particle(Particle *p);
 
 
 	float speed_of_sound;
