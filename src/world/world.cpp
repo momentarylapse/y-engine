@@ -38,6 +38,8 @@
 
 
 vulkan::Shader *_default_shader_ = nullptr;
+vulkan::Texture *tex_white = nullptr;
+vulkan::Texture *tex_black = nullptr;
 
 Model *LoadModelFull(const string &filename) {
 	Model *m = new Model();
@@ -165,6 +167,14 @@ void TestObjectSanity(const char *str)
 void GodInit() {
 	world.ubo_light = new vulkan::UBOWrapper(32 * 64);
 	world.ubo_fog = new vulkan::UBOWrapper(64);
+
+	Image im;
+	tex_white = new vulkan::Texture();
+	tex_black = new vulkan::Texture();
+	im.create(16, 16, White);
+	tex_white->override(&im);
+	im.create(16, 16, Black);
+	tex_black->override(&im);
 
 	world.reset();
 
@@ -399,7 +409,7 @@ Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
 	tt->ubo = new vulkan::UBOWrapper(64*3);
-	tt->dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {tt->ubo, ubo_light, ubo_fog}, {tt->material->textures[0]});
+	tt->dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {tt->ubo, ubo_light, ubo_fog}, {tt->material->textures[0], tex_white, tex_black});
 	terrains.add(tt);
 	return tt;
 }
@@ -1293,7 +1303,10 @@ void World::register_model(Model *m) {
 		p.model = m;
 		p.material = mat;
 		p.ubo = new vulkan::UBOWrapper(64*3);
-		p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light, ubo_fog}, {mat->textures[0]});
+		if (mat->textures.num == 3)
+			p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light, ubo_fog}, mat->textures);
+		else
+			p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light, ubo_fog}, {mat->textures[0], tex_white, tex_black});
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;

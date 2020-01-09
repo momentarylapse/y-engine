@@ -128,6 +128,8 @@ void CommandBuffer::push_constant(int offset, int size, void *data) {
 }
 
 void CommandBuffer::draw(VertexBuffer *vb) {
+	if (vb->output_count == 0)
+		return;
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(buffer, 0, 1, &vb->vertex_buffer, offsets);
 

@@ -270,6 +270,8 @@ namespace vulkan{
 	}
 
 	Shader* Shader::load(const string &_filename) {
+		if (_filename == "")
+			return nullptr;
 		Shader *s = new Shader();
 		string filename = directory + _filename;
 		std::cout << "load shader " << filename.c_str() << "\n";

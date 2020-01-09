@@ -283,14 +283,28 @@ private:
 		gui::update();
 	}
 
+	struct GeoPush {
+		matrix model;
+		color emission;
+	};
+
 	void draw_world(vulkan::CommandBuffer *cb) {
+
+		GeoPush gp;
+
 		for (auto *t: world.terrains) {
+			gp.model = matrix::ID.transpose();
+			gp.emission = Black;
+			cb->push_constant(0, sizeof(gp), &gp);
 			cb->bind_descriptor_set(0, t->dset);
 			cb->draw(t->vertex_buffer);
 		}
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
+			gp.model = mtr(m->pos, m->ang).transpose();
+			gp.emission = s.material->emission;
+			cb->push_constant(0, sizeof(gp), &gp);
 
 			cb->bind_descriptor_set(0, s.dset);
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);
