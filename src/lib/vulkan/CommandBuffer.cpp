@@ -187,6 +187,10 @@ void CommandBuffer::set_viewport(const rect &r) {
 	vkCmdSetViewport(buffer, 0, 1, &viewport);
 }
 
+void CommandBuffer::dispatch(int nx, int ny, int nz) {
+	vkCmdDispatch(buffer, nx, ny, nz);
+}
+
 bool tex_is_depth_buffer(Texture *t) {
 	return (t->format == VK_FORMAT_D32_SFLOAT) or (t->format == VK_FORMAT_D32_SFLOAT_S8_UINT) or (t->format == VK_FORMAT_D24_UNORM_S8_UINT) or (t->format == VK_FORMAT_D16_UNORM);
 }

@@ -37,7 +37,6 @@
 #include "camera.h"
 
 
-vulkan::Shader *_default_shader_ = nullptr;
 vulkan::Texture *tex_white = nullptr;
 vulkan::Texture *tex_black = nullptr;
 

@@ -15,8 +15,12 @@
 // for creating g-buffers
 class GBufferRenderer : public Renderer {
 public:
-	GBufferRenderer();
+	GBufferRenderer(int w, int h);
 	~GBufferRenderer() override;
+
+	void _create(int w, int h);
+	void _destroy();
+	void resize(int w, int h);
 
 	vulkan::Texture *tex_emission;
 	vulkan::Texture *tex_color;

@@ -21,6 +21,10 @@ public:
 	DeferredRenderer(Renderer *_output_renderer);
 	~DeferredRenderer() override;
 
+	void _create_dynamic_data();
+	void _destroy_dynamic_data();
+	void resize(int w, int h);
+
 	vector project_pixel(const vector &v);
 	float projected_sphere_radius(vector &v, float r);
 	rect light_rect(Light *l);

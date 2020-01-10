@@ -17,8 +17,6 @@
 //#include "../fx/light.h"
 #endif
 
-extern vulkan::Shader *_default_shader_;
-
 #define Index(x,z)		((x)*(num_z+1)+(z))
 #define Index2(t,x,z)	((x)*(t->num_z+1)+(z))
 //#define max(a,b)		(((a)>(b))?(a):(b))

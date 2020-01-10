@@ -39,7 +39,6 @@
 const bool SHOW_GBUFFER = false;
 const bool SHOW_SHADOW = false;
 
-extern vulkan::Shader *_default_shader_;
 extern vulkan::Shader *shader_fx;
 
 
@@ -145,7 +144,6 @@ private:
 		gui::init(renderer->default_render_pass());
 
 		deferred_reenderer = new DeferredRenderer(renderer);
-		_default_shader_ = deferred_reenderer->gbuf_ren->shader_into_gbuf;
 
 		shader_fx = vulkan::Shader::load("fx.shader");
 		pipeline_fx = new vulkan::Pipeline(shader_fx, renderer->default_render_pass(), 1);
@@ -412,6 +410,8 @@ private:
 
 		vulkan::wait_device_idle();
 		//deferred_reenderer->pick_shadow_source();
+
+		deferred_reenderer->resize(renderer->width, renderer->height);
 
 		if (!renderer->start_frame())
 			return;

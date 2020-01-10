@@ -60,6 +60,8 @@ namespace vulkan{
 		void set_scissor(const rect &r);
 		void set_viewport(const rect &r);
 
+		void dispatch(int nx, int ny, int nz);
+
 		void barrier(const Array<Texture*> &t, int mode);
 	};
 

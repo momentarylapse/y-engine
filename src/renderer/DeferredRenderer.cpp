@@ -17,6 +17,8 @@
 #include "../lib/math/rect.h"
 #include "../gui/Picture.h"
 
+#include <iostream>
+
 
 struct UBOMatrices {
 	alignas(16) matrix model;
@@ -27,12 +29,43 @@ struct UBOMatrices {
 
 DeferredRenderer::DeferredRenderer(Renderer *_output_renderer) {
 	output_renderer = _output_renderer;
-	gbuf_ren = new GBufferRenderer();
+	width = output_renderer->width;
+	height = output_renderer->height;
+	gbuf_ren = new GBufferRenderer(output_renderer->width, output_renderer->height);
+
+
 	shader_merge_base = vulkan::Shader::load("2d-gbuf-emission.shader");
 	shader_merge_light = vulkan::Shader::load("2d-gbuf-light.shader");
 	shader_merge_light_shadow = vulkan::Shader::load("2d-gbuf-light-shadow.shader");
 	shader_merge_fog = vulkan::Shader::load("2d-gbuf-fog.shader");
-	//pipeline_merge = new vulkan::Pipeline(shader_merge_base, render_pass_merge, 1);
+
+	ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
+
+	_create_dynamic_data();
+
+	shadow_renderer = new ShadowMapRenderer();
+
+	AllowXContainer = false;
+	light_cam = new Camera(v_0, quaternion::ID, rect::ID);
+	AllowXContainer = true;
+}
+DeferredRenderer::~DeferredRenderer() {
+	_destroy_dynamic_data();
+
+	delete shadow_renderer;
+	delete gbuf_ren;
+	delete ubo_x1;
+
+	delete shader_merge_base;
+	delete shader_merge_light;
+	delete shader_merge_light_shadow;
+	delete shader_merge_fog;
+
+	delete light_cam;
+}
+
+void DeferredRenderer::_create_dynamic_data() {
+
 
 	pipeline_x1 = new vulkan::Pipeline(shader_merge_base, output_renderer->default_render_pass(), 1);
 	pipeline_x1->set_z(false, false);
@@ -55,35 +88,29 @@ DeferredRenderer::DeferredRenderer(Renderer *_output_renderer) {
 	pipeline_x3->set_z(false, false);
 	pipeline_x3->rebuild();
 
-
-
-	ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
 	dset_x1 = new vulkan::DescriptorSet({ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
-
-	shadow_renderer = new ShadowMapRenderer();
-
-	AllowXContainer = false;
-	light_cam = new Camera(v_0, quaternion::ID, rect::ID);
-	AllowXContainer = true;
 }
-DeferredRenderer::~DeferredRenderer() {
-	delete shadow_renderer;
-	delete gbuf_ren;
+
+void DeferredRenderer::_destroy_dynamic_data() {
 	delete dset_x1;
-	delete ubo_x1;
 	delete pipeline_x1;
 	delete pipeline_x2;
 	delete pipeline_x2s;
 	delete pipeline_x3;
-
-	delete shader_merge_base;
-	delete shader_merge_light;
-	delete shader_merge_light_shadow;
-	delete shader_merge_fog;
-
-	delete light_cam;
 }
 
+void DeferredRenderer::resize(int w, int h) {
+	if (w == width and h == height)
+		return;
+
+	std::cout << " resize " << w << " x " << h << "\n";
+	_destroy_dynamic_data();
+	gbuf_ren->resize(w, h);
+	_create_dynamic_data();
+
+	width = w;
+	height = h;
+}
 
 vector DeferredRenderer::project_pixel(const vector &v) {
 	vector p = cam->project(v);
@@ -110,7 +137,7 @@ rect DeferredRenderer::light_rect(Light *l) {
 	vector p = project_pixel(l->pos);
 	float r = projected_sphere_radius(l->pos, l->radius);
 	if (l->theta < 0)
-		r *= 0.17f;
+		r *= 0.10f;//0.17f;
 	else
 		r *= 0.4f;
 
