@@ -142,8 +142,7 @@ void DeferredRenderer::draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::
 
 	cb->set_viewport(output_renderer->area());
 	if (pip == pipeline_x2s) {
-		matrix v = light_cam->m_all.transpose();
-		cb->push_constant(0, 64, &v);
+		cb->push_constant(0, 64, &light_cam->m_all);
 		cb->push_constant(64, 12, &cam->pos);
 	} else {
 		cb->push_constant(0, 12, &cam->pos);
@@ -157,9 +156,9 @@ void DeferredRenderer::draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::
 void DeferredRenderer::render_out(vulkan::CommandBuffer *cb, Renderer *ro) {
 
 	UBOMatrices u;
-	u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
-	u.view = matrix::ID.transpose();
-	u.model = matrix::ID.transpose();
+	u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
+	u.view = matrix::ID;
+	u.model = matrix::ID;
 	ubo_x1->update(&u);
 
 

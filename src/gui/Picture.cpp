@@ -98,9 +98,9 @@ void render(vulkan::CommandBuffer *cb, const rect &viewport) {
 			continue;
 
 		UBOMatrices u;
-		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
-		u.view = matrix::ID.transpose();
-		u.model = (matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1)).transpose();
+		u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
+		u.view = matrix::ID;
+		u.model = matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1);
 		p->ubo->update(&u);
 
 		cb->bind_descriptor_set(0, p->dset);
@@ -114,9 +114,9 @@ void render(vulkan::CommandBuffer *cb, const rect &viewport) {
 		cb->set_viewport(viewport);
 
 		UBOMatrices u;
-		u.proj = (matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1)).transpose();
-		u.view = matrix::ID.transpose();
-		u.model = (matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1)).transpose();
+		u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
+		u.view = matrix::ID;
+		u.model = matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1);
 		p->ubo->update(&u);
 
 		cb->bind_descriptor_set(0, p->dset);

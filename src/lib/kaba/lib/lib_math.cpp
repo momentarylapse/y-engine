@@ -556,8 +556,6 @@ void SIAddPackageMath() {
 			func_add_param("ang", TypeFloat32);
 		class_add_func("rotation_q", TypeMatrix, (void*)&matrix::rotation_q, ScriptFlag(FLAG_PURE | FLAG_STATIC));
 			func_add_param("ang", TypeQuaternion);
-		class_add_func("rotation_view", TypeMatrix, (void*)&matrix::rotation_view, ScriptFlag(FLAG_PURE | FLAG_STATIC));
-			func_add_param("ang", TypeVector);
 		class_add_func("scale", TypeMatrix, (void*)&matrix::scale, ScriptFlag(FLAG_PURE | FLAG_STATIC));
 			func_add_param("s_x", TypeFloat32);
 			func_add_param("s_y", TypeFloat32);

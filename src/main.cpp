@@ -259,8 +259,8 @@ private:
 		c->set_view((float)r->width / (float)r->height);
 
 		UBOMatrices u;
-		u.proj = c->m_projection.transpose();
-		u.view = c->m_view.transpose();
+		u.proj = c->m_projection;
+		u.view = c->m_view;
 
 		UBOFog f;
 		f.col = world.fog._color;
@@ -268,7 +268,7 @@ private:
 		world.ubo_fog->update(&f);
 
 		for (auto *t: world.terrains) {
-			u.model = matrix::ID.transpose();
+			u.model = matrix::ID;
 			t->ubo->update(&u);
 
 			t->draw(); // rebuild stuff...
@@ -276,7 +276,7 @@ private:
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 
-			u.model = mtr(m->pos, m->ang).transpose();
+			u.model = mtr(m->pos, m->ang);
 			s.ubo->update(&u);
 		}
 
@@ -293,7 +293,7 @@ private:
 		GeoPush gp;
 
 		for (auto *t: world.terrains) {
-			gp.model = matrix::ID.transpose();
+			gp.model = matrix::ID;
 			gp.emission = Black;
 			cb->push_constant(0, sizeof(gp), &gp);
 			cb->bind_descriptor_set(0, t->dset);
@@ -302,7 +302,7 @@ private:
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
-			gp.model = mtr(m->pos, m->ang).transpose();
+			gp.model = mtr(m->pos, m->ang);
 			gp.emission = s.material->emission;
 			cb->push_constant(0, sizeof(gp), &gp);
 
@@ -325,7 +325,7 @@ private:
 			cb->bind_descriptor_set(0, g->dset);
 
 			for (auto *p: g->particles) {
-				matrix m = (cam->m_all * matrix::translation(p->pos) * matrix::rotation_q(cam->ang) * matrix::scale(p->radius, p->radius, 1)).transpose();
+				matrix m = cam->m_all * matrix::translation(p->pos) * matrix::rotation_q(cam->ang) * matrix::scale(p->radius, p->radius, 1);
 				cb->push_constant(0, sizeof(m), &m);
 				cb->push_constant(64, sizeof(color), &p->col);
 				if (world.fog.enabled) {
