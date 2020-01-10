@@ -58,7 +58,7 @@ DeferredRenderer::DeferredRenderer(Renderer *_output_renderer) {
 
 
 	ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
-	dset_x1 = new vulkan::DescriptorSet(shader_merge_base->descr_layouts[0], {ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
+	dset_x1 = new vulkan::DescriptorSet({ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 
 	shadow_renderer = new ShadowMapRenderer();
 
@@ -127,7 +127,7 @@ void DeferredRenderer::set_light(Light *ll) {
 	l.harshness = ll->harshness;
 	ll->ubo->update(&l);
 	if (!ll->dset)
-		ll->dset = new vulkan::DescriptorSet(shader_merge_light->descr_layouts[0], {ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
+		ll->dset = new vulkan::DescriptorSet({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 	else
 		ll->dset->set({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 }

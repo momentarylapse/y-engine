@@ -34,10 +34,8 @@ Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*
 
 	if (user_shader) {
 		user_pipeline = new vulkan::Pipeline(user_shader, render_pass, 1);
-		dset = new vulkan::DescriptorSet(user_shader->descr_layouts[0], {ubo}, textures);
-	} else {
-		dset = new vulkan::DescriptorSet(shader->descr_layouts[0], {ubo}, textures);
 	}
+	dset = new vulkan::DescriptorSet({ubo}, textures);
 }
 
 Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex) : Picture(p, w, h, {tex}, nullptr) {

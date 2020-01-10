@@ -128,6 +128,8 @@ bool Terrain::load(const string &_filename_, const vector &_pos_, bool deep)
 }
 
 Terrain::~Terrain() {
+	if (dset)
+		delete dset;
 	delete ubo;
 	delete vertex_buffer;
 	delete material;

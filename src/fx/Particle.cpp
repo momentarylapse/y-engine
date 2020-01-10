@@ -29,12 +29,13 @@ void Particle::__init__(const vector &p, float r, vulkan::Texture *t) {
 
 ParticleGroup::ParticleGroup(vulkan::Texture *t) {
 	texture = t;
-	dset = new vulkan::DescriptorSet(shader_fx->descr_layouts[0], {}, {t, t});
+	dset = new vulkan::DescriptorSet({}, {t, t});
 }
 
 ParticleGroup::~ParticleGroup() {
 	for (auto *p: particles)
 		delete p;
+	delete dset;
 }
 
 

@@ -58,14 +58,15 @@ namespace vulkan{
 
 	class DescriptorSet {
 	public:
-		DescriptorSet(VkDescriptorSetLayout layout, const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex);
-		//~DescriptorSet();
+		DescriptorSet(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex);
+		~DescriptorSet();
 
-		void __init__(VkDescriptorSetLayout layout, const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex);
-		//void __delete__();
+		void __init__(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex);
+		void __delete__();
 
 		void set(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex);
 
+		VkDescriptorSetLayout layout;
 		VkDescriptorSet descriptor_set;
 
 

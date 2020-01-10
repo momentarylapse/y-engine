@@ -73,28 +73,34 @@ namespace vulkan{
 		vkDestroyDescriptorPool(device, pool, nullptr);
 	}
 
-	DescriptorSet::DescriptorSet(VkDescriptorSetLayout layout, const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
-		VkDescriptorSetAllocateInfo ai = {};
-		ai.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		ai.descriptorPool = descriptor_pool;
-		ai.descriptorSetCount = 1;
-		ai.pSetLayouts = &layout;
+	DescriptorSet::DescriptorSet(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
 
-		if (vkAllocateDescriptorSets(device, &ai, &descriptor_set) != VK_SUCCESS) {
+		layout = create_layout(ubos.num, tex.num);
+
+		VkDescriptorSetAllocateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		info.descriptorPool = descriptor_pool;
+		info.descriptorSetCount = 1;
+		info.pSetLayouts = &layout;
+
+		if (vkAllocateDescriptorSets(device, &info, &descriptor_set) != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
 
 		set(ubos, tex);
 	}
-	
-	
-
-	void DescriptorSet::__init__(VkDescriptorSetLayout layout, const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
-		new(this) DescriptorSet(layout, ubos, tex);
+	DescriptorSet::~DescriptorSet() {
+		// no VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT...
+		//vkFreeDescriptorSets(device, descriptor_pool, 1, &descriptor_set);
+		destroy_layout(layout);
 	}
-	/*void DescriptorSet::__delete__() {
+
+	void DescriptorSet::__init__(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
+		new(this) DescriptorSet(ubos, tex);
+	}
+	void DescriptorSet::__delete__() {
 		this->~DescriptorSet();
-	}*/
+	}
 
 	void DescriptorSet::set(const Array<UBOWrapper*> &ubos, const Array<Texture*> &tex) {
 
@@ -191,13 +197,13 @@ namespace vulkan{
 	VkShaderModule create_shader_module(const string &code) {
 		if (code == "")
 			return nullptr;
-		VkShaderModuleCreateInfo ci = {};
-		ci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		ci.codeSize = code.num;
-		ci.pCode = reinterpret_cast<const uint32_t*>(code.data);
+		VkShaderModuleCreateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		info.codeSize = code.num;
+		info.pCode = reinterpret_cast<const uint32_t*>(code.data);
 
 		VkShaderModule shaderModule;
-		if (vkCreateShaderModule(device, &ci, nullptr, &shaderModule) != VK_SUCCESS) {
+		if (vkCreateShaderModule(device, &info, nullptr, &shaderModule) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create shader module!");
 		}
 

@@ -409,7 +409,7 @@ Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
 	tt->ubo = new vulkan::UBOWrapper(64*3);
-	tt->dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {tt->ubo, ubo_light, ubo_fog}, {tt->material->textures[0], tex_white, tex_black});
+	tt->dset = new vulkan::DescriptorSet({tt->ubo, ubo_light, ubo_fog}, {tt->material->textures[0], tex_white, tex_black});
 	terrains.add(tt);
 	return tt;
 }
@@ -1304,9 +1304,9 @@ void World::register_model(Model *m) {
 		p.material = mat;
 		p.ubo = new vulkan::UBOWrapper(64*3);
 		if (mat->textures.num == 3)
-			p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light, ubo_fog}, mat->textures);
+			p.dset = new vulkan::DescriptorSet({p.ubo, ubo_light, ubo_fog}, mat->textures);
 		else
-			p.dset = new vulkan::DescriptorSet(_default_shader_->descr_layouts[0], {p.ubo, ubo_light, ubo_fog}, {mat->textures[0], tex_white, tex_black});
+			p.dset = new vulkan::DescriptorSet({p.ubo, ubo_light, ubo_fog}, {mat->textures[0], tex_white, tex_black});
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;
