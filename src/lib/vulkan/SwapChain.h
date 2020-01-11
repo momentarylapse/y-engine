@@ -48,6 +48,9 @@ public:
 	SwapChain();
 	~SwapChain();
 
+	void __init__();
+	void __delete__();
+
 	void cleanup();
 	void create();
 

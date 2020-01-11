@@ -24,6 +24,8 @@ public:
 
 	DepthBuffer(int w, int h, VkFormat format, bool with_sampler);
 	DepthBuffer(int w, int h, const string &format, bool with_sampler);
+	void __init__(int w, int h, const string &format, bool with_sampler);
+
 	void create(int w, int h, VkFormat format);
 };
 
@@ -31,6 +33,9 @@ class FrameBuffer {
 public:
 	FrameBuffer(int w, int h, RenderPass *rp, const Array<VkImageView> &attachments);
 	~FrameBuffer();
+
+	void __init__(int w, int h, RenderPass *rp, const Array<VkImageView> &attachments);
+	void __delete__();
 
 	VkFramebuffer frame_buffer;
 	int width, height;

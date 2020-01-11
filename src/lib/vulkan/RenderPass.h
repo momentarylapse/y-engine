@@ -24,7 +24,7 @@ namespace vulkan{
 		RenderPass(const Array<VkFormat> &format, bool clear, bool presentable);
 		~RenderPass();
 
-		void __init__(const Array<VkFormat> &format, bool clear = true);
+		void __init__(const Array<VkFormat> &format, bool clear, bool representable);
 		void __delete__();
 
 		void create();

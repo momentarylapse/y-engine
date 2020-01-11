@@ -102,8 +102,8 @@ namespace vulkan {
 	}
 
 
-	void RenderPass::__init__(const Array<VkFormat> &format, bool clear) {
-		new(this) RenderPass(format, clear, true);
+	void RenderPass::__init__(const Array<VkFormat> &format, bool clear, bool representable) {
+		new(this) RenderPass(format, clear, representable);
 	}
 
 	void RenderPass::__delete__() {

@@ -30,8 +30,6 @@ namespace vulkan {
 		void _create_view();
 		void _create_sampler();
 
-		void make_shader_readable();
-
 
 		int width, height, depth;
 		int mip_levels;
@@ -50,6 +48,7 @@ namespace vulkan {
 	class DynamicTexture : public Texture {
 	public:
 		DynamicTexture(int nx, int ny, int nz, const string &format);
+		void __init__(int nx, int ny, int nz, const string &format);
 	};
 
 	extern Array<Texture*> textures;

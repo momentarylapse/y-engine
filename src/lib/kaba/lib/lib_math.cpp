@@ -42,6 +42,7 @@ extern const Class *TypeVectorList;
 extern const Class *TypeMatrix;
 extern const Class *TypePlane;
 extern const Class *TypePlaneList;
+extern const Class *TypeColorList;
 extern const Class *TypeMatrix3;
 extern const Class *TypeIntList;
 extern const Class *TypeBoolList;
@@ -229,6 +230,7 @@ void SIAddPackageMath() {
 	TypePlane = add_type("plane", sizeof(plane));
 	TypePlaneList = add_type_a("plane[]", TypePlane, -1);
 	TypeColor = add_type("color", sizeof(color));
+	TypeColorList = add_type_a("color[]", TypeColor, -1);
 	TypeMatrix3 = add_type("matrix3", sizeof(matrix3));
 	const Class *TypeFloatArray3 = add_type_a("float[3]", TypeFloat32, 3);
 	const Class *TypeFloatArray4 = add_type_a("float[4]", TypeFloat32, 4);
@@ -478,7 +480,10 @@ void SIAddPackageMath() {
 			func_add_param("r", TypeFloat32);
 			func_add_param("g", TypeFloat32);
 			func_add_param("b", TypeFloat32);
-	
+
+	add_class(TypeColorList);
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, mf(&Array<color>::__init__));
+
 	add_class(TypePlane);
 		class_add_element("a", TypeFloat32, 0);
 		class_add_element("b", TypeFloat32, 4);

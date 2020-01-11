@@ -191,6 +191,14 @@ SwapChain::~SwapChain() {
 }
 
 
+void SwapChain::__init__() {
+	new(this) SwapChain;
+}
+
+void SwapChain::__delete__() {
+	this->~SwapChain();
+}
+
 void SwapChain::cleanup() {
 	if (default_render_pass)
 		delete default_render_pass;

@@ -105,6 +105,10 @@ DynamicTexture::DynamicTexture(int nx, int ny, int nz, const string &format) {
 	_create_sampler();
 }
 
+void DynamicTexture::__init__(int nx, int ny, int nz, const string &format) {
+	new(this) DynamicTexture(nx, ny, nz, format);
+}
+
 void Texture::_destroy() {
 	if (sampler)
 		vkDestroySampler(device, sampler, nullptr);
@@ -311,10 +315,6 @@ void Texture::_create_sampler() {
 	if (vkCreateSampler(device, &si, nullptr, &sampler) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
-}
-
-void Texture::make_shader_readable() {
-	//transition_image_layout(image, format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mip_levels);
 }
 
 
