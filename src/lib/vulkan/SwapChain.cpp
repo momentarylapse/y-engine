@@ -5,6 +5,9 @@
  *      Author: michi
  */
 
+#if HAS_LIB_VULKAN
+
+
 #include "SwapChain.h"
 #include "vulkan.h"
 #include "helper.h"
@@ -109,7 +112,7 @@ void SwapChain::create() {
 
 	depth_buffer = new DepthBuffer(width, height, find_depth_format(), false);
 
-	default_render_pass = new RenderPass({image_format, depth_buffer->format}, true, true);
+	default_render_pass = new RenderPass({image_format, depth_buffer->format}, "clear,present");
 	create_frame_buffers(default_render_pass, depth_buffer);
 }
 
@@ -262,3 +265,6 @@ bool SwapChain::aquire_image(unsigned int *image_index, Semaphore *signal_sem) {
 }
 
 } /* namespace vulkan */
+
+#endif
+

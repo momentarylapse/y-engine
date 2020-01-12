@@ -14,13 +14,13 @@ ShadowMapRenderer::ShadowMapRenderer() {
 
 	depth_buffer = new vulkan::DepthBuffer(width, height, "d:f32", true);
 
-	_default_render_pass = new vulkan::RenderPass({depth_buffer->format}, true, false);
+	_default_render_pass = new vulkan::RenderPass({depth_buffer->format}, "clear");
 	frame_buffer = new vulkan::FrameBuffer(width, height, _default_render_pass, {depth_buffer->view});
 
 
 	//shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
 	shader = vulkan::Shader::load("3d-shadow2.shader");
-	pipeline = new vulkan::Pipeline(shader, _default_render_pass, 1);
+	pipeline = new vulkan::Pipeline(shader, _default_render_pass, 0, 1);
 
 }
 ShadowMapRenderer::~ShadowMapRenderer() {

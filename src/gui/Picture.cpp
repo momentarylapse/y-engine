@@ -33,7 +33,7 @@ Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*
 	user_pipeline = nullptr;
 
 	if (user_shader) {
-		user_pipeline = new vulkan::Pipeline(user_shader, render_pass, 1);
+		user_pipeline = new vulkan::Pipeline(user_shader, render_pass, 0, 1);
 	}
 	dset = new vulkan::DescriptorSet({ubo}, textures);
 }
@@ -59,7 +59,7 @@ namespace gui {
 void init(vulkan::RenderPass *rp) {
 	Picture::render_pass = rp;
 	Picture::shader = vulkan::Shader::load("2d.shader");
-	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 1);
+	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 0, 1);
 	Picture::pipeline->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 	Picture::pipeline->set_z(false, false);
 	Picture::pipeline->rebuild();

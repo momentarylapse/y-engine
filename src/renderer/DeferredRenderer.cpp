@@ -67,23 +67,23 @@ DeferredRenderer::~DeferredRenderer() {
 void DeferredRenderer::_create_dynamic_data() {
 
 
-	pipeline_x1 = new vulkan::Pipeline(shader_merge_base, output_renderer->default_render_pass(), 1);
+	pipeline_x1 = new vulkan::Pipeline(shader_merge_base, output_renderer->default_render_pass(), 0, 1);
 	pipeline_x1->set_z(false, false);
 	pipeline_x1->rebuild();
 
-	pipeline_x2 = new vulkan::Pipeline(shader_merge_light, output_renderer->default_render_pass(), 1);
+	pipeline_x2 = new vulkan::Pipeline(shader_merge_light, output_renderer->default_render_pass(), 0, 1);
 	pipeline_x2->set_dynamic({"scissor"});
 	pipeline_x2->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 	pipeline_x2->set_z(false, false);
 	pipeline_x2->rebuild();
 
-	pipeline_x2s = new vulkan::Pipeline(shader_merge_light_shadow, output_renderer->default_render_pass(), 1);
+	pipeline_x2s = new vulkan::Pipeline(shader_merge_light_shadow, output_renderer->default_render_pass(), 0, 1);
 	pipeline_x2s->set_dynamic({"scissor"});
 	pipeline_x2s->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 	pipeline_x2s->set_z(false, false);
 	pipeline_x2s->rebuild();
 
-	pipeline_x3 = new vulkan::Pipeline(shader_merge_fog, output_renderer->default_render_pass(), 1);
+	pipeline_x3 = new vulkan::Pipeline(shader_merge_fog, output_renderer->default_render_pass(), 0, 1);
 	pipeline_x3->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 	pipeline_x3->set_z(false, false);
 	pipeline_x3->rebuild();

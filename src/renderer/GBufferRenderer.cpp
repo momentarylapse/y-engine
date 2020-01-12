@@ -28,11 +28,11 @@ void GBufferRenderer::_create(int w, int h) {
 
 	depth_buffer = new vulkan::DepthBuffer(width, height, "d:f32", true);
 
-	_default_render_pass = new vulkan::RenderPass({tex_color->format, tex_emission->format, tex_pos->format, tex_normal->format, depth_buffer->format}, true, false);
+	_default_render_pass = new vulkan::RenderPass({tex_color->format, tex_emission->format, tex_pos->format, tex_normal->format, depth_buffer->format}, "clear");
 	g_buffer = new vulkan::FrameBuffer(width, height, _default_render_pass, {tex_color->view, tex_emission->view, tex_pos->view, tex_normal->view, depth_buffer->view});
 
 
-	pipeline_into_gbuf = new vulkan::Pipeline(shader_into_gbuf, _default_render_pass, 1);
+	pipeline_into_gbuf = new vulkan::Pipeline(shader_into_gbuf, _default_render_pass, 0, 1);
 }
 
 void GBufferRenderer::_destroy() {

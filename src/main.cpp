@@ -146,7 +146,7 @@ private:
 		deferred_reenderer = new DeferredRenderer(renderer);
 
 		shader_fx = vulkan::Shader::load("fx.shader");
-		pipeline_fx = new vulkan::Pipeline(shader_fx, renderer->default_render_pass(), 1);
+		pipeline_fx = new vulkan::Pipeline(shader_fx, renderer->default_render_pass(), 0, 1);
 		pipeline_fx->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 		pipeline_fx->set_z(true, false);
 		pipeline_fx->set_culling(0);
