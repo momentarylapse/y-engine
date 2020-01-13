@@ -100,6 +100,38 @@ public:
 };
 static GameIni game_ini;
 
+class Config {
+public:
+	Map<string,string> map;
+	void load() {
+		File *f = FileOpenText("config.txt");
+		while(!f->eof()) {
+			string s = f->read_str();
+			if (s.num == 0)
+				continue;
+			if (s[0] == '#')
+				continue;
+			int p = s.find("=");
+			if (p >= 0) {
+				map.set(s.head(p).replace(" ", ""), s.substr(p+1, -1).replace(" ", ""));
+			}
+		}
+		for (auto &k: map.keys())
+			msg_write("config:  " + k + " == " + map[k]);
+		delete f;
+	}
+	string get(const string &key, const string &def) {
+		if (map.find(key) >= 0)
+			return map[key];
+		return def;
+	}
+	bool get_bool(const string &key, bool def) {
+		string s = get(key, def ? "yes" : "no");
+		return s == "yes" or s == "true" or s == "1";
+	}
+};
+static Config config;
+
 
 
 class YEngineApp {
@@ -129,6 +161,8 @@ private:
 		window = create_window();
 		vulkan::init(window);
 		Kaba::init();
+
+		config.load();
 
 		renderer = new WindowRenderer(window);
 
@@ -282,17 +316,21 @@ private:
 	}
 
 	struct GeoPush {
-		matrix model;
-		color emission;
+		alignas(16) matrix model;
+		alignas(16) color emission;
+		alignas(16) vector eye_pos;
+		alignas(16) float xxx[4];
 	};
 
 	void draw_world(vulkan::CommandBuffer *cb) {
 
 		GeoPush gp;
+		gp.eye_pos = cam->pos;
 
 		for (auto *t: world.terrains) {
 			gp.model = matrix::ID;
 			gp.emission = Black;
+			gp.xxx[0] = 0.0f;
 			cb->push_constant(0, sizeof(gp), &gp);
 			cb->bind_descriptor_set(0, t->dset);
 			cb->draw(t->vertex_buffer);
@@ -302,6 +340,7 @@ private:
 			Model *m = s.model;
 			gp.model = mtr(m->pos, m->ang);
 			gp.emission = s.material->emission;
+			gp.xxx[0] = 0.2f;
 			cb->push_constant(0, sizeof(gp), &gp);
 
 			cb->bind_descriptor_set(0, s.dset);
