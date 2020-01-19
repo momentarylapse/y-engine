@@ -14,6 +14,7 @@
 namespace vulkan {
 	class Texture;
 	class DescriptorSet;
+	class UniformBuffer;
 }
 
 /*struct ParticlePushData {
@@ -41,6 +42,7 @@ public:
 	~ParticleGroup();
 	Array<Particle*> particles;
 	vulkan::Texture *texture;
+	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 };
 

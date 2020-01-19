@@ -12,13 +12,14 @@
 #include "../world/world.h"
 #include "../world/camera.h"
 #include "../fx/Light.h"
+#include "../fx/Particle.h"
 #include "../helper/PerformanceMonitor.h"
 #include "../gui/Picture.h"
 
 extern vulkan::Texture *tex_white;
 extern vulkan::Texture *tex_black;
 
-RenderPathForward::RenderPathForward(Renderer *r, PerformanceMonitor *pm) : RenderPath(r, pm, "forward/3d-shadow.shader") {
+RenderPathForward::RenderPathForward(Renderer *r, PerformanceMonitor *pm) : RenderPath(r, pm, "forward/3d-shadow.shader", "forward/3d-fx.shader") {
 
 	// emission and directional sun pass
 	shader_base = vulkan::Shader::load("forward/3d-base.shader");
@@ -30,11 +31,61 @@ RenderPathForward::RenderPathForward(Renderer *r, PerformanceMonitor *pm) : Rend
 	pipeline_light->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
 	pipeline_light->set_z(true, false);
 	pipeline_light->rebuild();
+
+
+	// fog
+/*	msg_write("a");
+	shader_fog = vulkan::Shader::load("forward/2d-fog.shader");
+	msg_write("a2");
+	pipeline_fog = new vulkan::Pipeline(shader_fog, renderer->default_render_pass(), 0, 1);
+	msg_write("a3");
+	pipeline_fog->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
+	pipeline_fog->set_z(false, false);
+	pipeline_fog->rebuild();
+	msg_write("a4");
+	ubo_fog = new vulkan::UniformBuffer(256);
+	dset_fog = new vulkan::DescriptorSet({ubo_fog, world.ubo_light, world.ubo_fog}, {r->depth_buffer()});
+	msg_write("a5");*/
 }
 
 RenderPathForward::~RenderPathForward() {
 	delete shader_base;
 	delete pipeline_base;
+
+	delete shader_light;
+	delete pipeline_light;
+
+	/*delete shader_fog;
+	delete pipeline_fog;
+	delete dset_fog;*/
+}
+
+void RenderPathForward::render_fx(vulkan::CommandBuffer *cb, Renderer *r) {
+	cb->set_pipeline(pipeline_fx);
+	cb->set_viewport(r->area());
+
+	cb->push_constant(80, sizeof(color), &world.fog._color);
+	float density0 = 0;
+	cb->push_constant(96, 4, &density0);
+
+
+	for (auto *g: world.particle_manager->groups) {
+		g->dset->set({g->ubo, world.ubo_light, world.ubo_fog}, {g->texture});
+		cb->bind_descriptor_set_dynamic(0, g->dset, {0});
+
+		for (auto *p: g->particles) {
+			matrix m = cam->m_all * matrix::translation(p->pos) * matrix::rotation_q(cam->ang) * matrix::scale(p->radius, p->radius, 1);
+			cb->push_constant(0, sizeof(m), &m);
+			cb->push_constant(64, sizeof(color), &p->col);
+			if (world.fog.enabled) {
+				float dist = (cam->pos - p->pos).length(); //(cam->m_view * p->pos).z;
+				float fog_density = 1-exp(-dist / world.fog.distance);
+				cb->push_constant(96, 4, &fog_density);
+			}
+			cb->draw(particle_vb);
+		}
+	}
+
 }
 
 void RenderPathForward::draw() {
@@ -65,10 +116,22 @@ void RenderPathForward::draw() {
 	cb->begin();
 	cam->set_view(1.0f);
 
+	/*dset_fog->set({ubo_fog, world.ubo_light, world.ubo_fog}, {r->depth_buffer()});
+
+
+	UBOMatrices u;
+	u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
+	u.view = matrix::ID;
+	u.model = matrix::ID;
+	ubo_fog->update(&u);*/
+
+
 	r->default_render_pass()->clear_color[0] = world.background; // emission
 	cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
 
 
+
+	// emission + sun
 	cb->set_pipeline(pipeline_base);
 	cb->set_viewport(r->area());
 
@@ -76,6 +139,7 @@ void RenderPathForward::draw() {
 	perf_mon->tick(2);
 
 
+	// light passes
 	foreachi (auto *l, world.lights, light_index) {
 		if (l == world.sun)
 			continue;
@@ -86,6 +150,22 @@ void RenderPathForward::draw() {
 		draw_world(cb, light_index);
 		perf_mon->tick(2);
 	}
+
+
+
+/*	cb->set_pipeline(pipeline_fog);
+
+	cb->set_viewport(r->area());
+	//cb->push_constant(0, 12, &cam->pos);
+
+	cb->bind_descriptor_set(0, dset_fog);
+	cb->draw(Picture::vertex_buffer);*/
+
+
+
+	render_fx(cb, r);
+
+
 
 	gui::render(cb, r->area());
 
@@ -106,3 +186,9 @@ vulkan::DescriptorSet *RenderPathForward::rp_create_dset(const Array<vulkan::Tex
 	else
 		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, {tex[0], tex_white, tex_black, shadow_renderer->depth_buffer});
 }
+
+vulkan::DescriptorSet *RenderPathForward::rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) {
+	return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, {tex});
+}
+
+

@@ -11,6 +11,8 @@
 
 vulkan::Shader *shader_fx;
 
+vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo);
+
 Particle::Particle(const vector &p, float r, vulkan::Texture *t) {
 	pos = p;
 	col = White;
@@ -29,13 +31,15 @@ void Particle::__init__(const vector &p, float r, vulkan::Texture *t) {
 
 ParticleGroup::ParticleGroup(vulkan::Texture *t) {
 	texture = t;
-	dset = new vulkan::DescriptorSet({}, {t, t});
+	ubo = new vulkan::UniformBuffer(256);
+	dset = rp_create_dset_fx(t, ubo);
 }
 
 ParticleGroup::~ParticleGroup() {
 	for (auto *p: particles)
 		delete p;
 	delete dset;
+	delete ubo;
 }
 
 

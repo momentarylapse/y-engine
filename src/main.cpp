@@ -287,6 +287,10 @@ vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan
 	return app.render_path->rp_create_dset(tex, ubo);
 }
 
+vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) {
+	return app.render_path->rp_create_dset_fx(tex, ubo);
+}
+
 
 int hui_main(const Array<string> &arg) {
 	msg_init();

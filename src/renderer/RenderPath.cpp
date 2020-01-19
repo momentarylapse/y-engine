@@ -36,12 +36,12 @@ matrix mtr(const vector &t, const quaternion &a) {
 	return mt * mr;
 }
 
-RenderPath::RenderPath(Renderer *r, PerformanceMonitor *pm, const string &shadow_shader_filename) {
+RenderPath::RenderPath(Renderer *r, PerformanceMonitor *pm, const string &shadow_shader_filename, const string &fx_shader_filename) {
 	renderer = r;
 	perf_mon = pm;
 
 
-	shader_fx = vulkan::Shader::load("fx.shader");
+	shader_fx = vulkan::Shader::load(fx_shader_filename);
 	pipeline_fx = new vulkan::Pipeline(shader_fx, renderer->default_render_pass(), 0, 1);
 	pipeline_fx->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
 	pipeline_fx->set_z(true, false);
@@ -102,34 +102,6 @@ void RenderPath::draw_world(vulkan::CommandBuffer *cb, int light_index) {
 		cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
 		cb->draw(m->mesh[0]->sub[0].vertex_buffer);
 	}
-
-}
-
-void RenderPath::render_fx(vulkan::CommandBuffer *cb, Renderer *r) {
-	cb->set_pipeline(pipeline_fx);
-	cb->set_viewport(r->area());
-
-	cb->push_constant(80, sizeof(color), &world.fog._color);
-	float density0 = 0;
-	cb->push_constant(96, 4, &density0);
-
-	/*
-	for (auto *g: world.particle_manager->groups) {
-		g->dset->set({}, {deferred_reenderer->gbuf_ren->depth_buffer, g->texture});
-		cb->bind_descriptor_set(0, g->dset);
-
-		for (auto *p: g->particles) {
-			matrix m = cam->m_all * matrix::translation(p->pos) * matrix::rotation_q(cam->ang) * matrix::scale(p->radius, p->radius, 1);
-			cb->push_constant(0, sizeof(m), &m);
-			cb->push_constant(64, sizeof(color), &p->col);
-			if (world.fog.enabled) {
-				float dist = (cam->pos - p->pos).length(); //(cam->m_view * p->pos).z;
-				float fog_density = 1-exp(-dist / world.fog.distance);
-				cb->push_constant(96, 4, &fog_density);
-			}
-			cb->draw(particle_vb);
-		}
-	}*/
 
 }
 

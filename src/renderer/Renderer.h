@@ -31,6 +31,7 @@ public:
 	virtual void end_frame() {}
 
 	virtual vulkan::FrameBuffer *current_frame_buffer() { return nullptr; }
+	virtual vulkan::DepthBuffer *depth_buffer() { return nullptr; }
 };
 
 #endif /* SRC_RENDERER_H_ */

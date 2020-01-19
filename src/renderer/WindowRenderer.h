@@ -35,6 +35,7 @@ public:
 	void end_frame() override;
 
 	vulkan::FrameBuffer *current_frame_buffer() override;
+	vulkan::DepthBuffer *depth_buffer() override;
 
 	static void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
 	static WindowRenderer *main_renderer;

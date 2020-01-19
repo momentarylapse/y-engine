@@ -18,6 +18,7 @@
 #include "../world/camera.h"
 #include "../world/model.h"
 #include "../fx/Light.h"
+#include "../fx/Particle.h"
 #include "../lib/math/rect.h"
 #include "../gui/Picture.h"
 #include "../helper/PerformanceMonitor.h"
@@ -30,7 +31,7 @@ extern vulkan::Texture *tex_black;
 
 
 
-RenderPathDeferred::RenderPathDeferred(Renderer *_output_renderer, PerformanceMonitor *pm) : RenderPath(_output_renderer, pm, "3d-shadow2.shader") {
+RenderPathDeferred::RenderPathDeferred(Renderer *_output_renderer, PerformanceMonitor *pm) : RenderPath(_output_renderer, pm, "3d-shadow2.shader", "fx.shader") {
 	output_renderer = _output_renderer;
 	width = output_renderer->width;
 	height = output_renderer->height;
@@ -235,6 +236,34 @@ void RenderPathDeferred::render_into_gbuffer(GBufferRenderer *r) {
 	r->end_frame();
 }
 
+void RenderPathDeferred::render_fx(vulkan::CommandBuffer *cb, Renderer *r) {
+	cb->set_pipeline(pipeline_fx);
+	cb->set_viewport(r->area());
+
+	cb->push_constant(80, sizeof(color), &world.fog._color);
+	float density0 = 0;
+	cb->push_constant(96, 4, &density0);
+
+
+	for (auto *g: world.particle_manager->groups) {
+		g->dset->set({}, {gbuf_ren->depth_buffer, g->texture});
+		cb->bind_descriptor_set(0, g->dset);
+
+		for (auto *p: g->particles) {
+			matrix m = cam->m_all * matrix::translation(p->pos) * matrix::rotation_q(cam->ang) * matrix::scale(p->radius, p->radius, 1);
+			cb->push_constant(0, sizeof(m), &m);
+			cb->push_constant(64, sizeof(color), &p->col);
+			if (world.fog.enabled) {
+				float dist = (cam->pos - p->pos).length(); //(cam->m_view * p->pos).z;
+				float fog_density = 1-exp(-dist / world.fog.distance);
+				cb->push_constant(96, 4, &fog_density);
+			}
+			cb->draw(particle_vb);
+		}
+	}
+
+}
+
 
 void RenderPathDeferred::draw() {
 
@@ -282,4 +311,9 @@ vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset(const Array<vulkan::Te
 		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, tex);
 	else
 		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, {tex[0], tex_white, tex_black});
+}
+
+
+vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) {
+	return new vulkan::DescriptorSet({}, {tex, tex});
 }

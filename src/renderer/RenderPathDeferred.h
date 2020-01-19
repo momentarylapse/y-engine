@@ -33,6 +33,7 @@ public:
 	void set_light(Light *ll);
 	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset, const rect &r);
 	void render_out(vulkan::CommandBuffer *cb, Renderer *ro);
+	void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
 
 	void render_all_from_deferred(Renderer *r);
 	void render_into_gbuffer(GBufferRenderer *r);
@@ -56,6 +57,7 @@ public:
 	vulkan::Pipeline *pipeline_x3;
 
 	vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) override;
+	vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) override;
 };
 
 

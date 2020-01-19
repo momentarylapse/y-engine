@@ -55,6 +55,10 @@ vulkan::FrameBuffer *WindowRenderer::current_frame_buffer() {
 	return swap_chain->frame_buffers[image_index];
 }
 
+vulkan::DepthBuffer *WindowRenderer::depth_buffer() {
+	return swap_chain->depth_buffer;
+}
+
 bool WindowRenderer::start_frame() {
 	in_flight_fence->wait();
 

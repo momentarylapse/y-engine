@@ -48,7 +48,7 @@ struct UBOFog {
 
 class RenderPath {
 public:
-	RenderPath(Renderer *renderer, PerformanceMonitor *perf_mon, const string &shadow_shader_filename);
+	RenderPath(Renderer *renderer, PerformanceMonitor *perf_mon, const string &shadow_shader_filename, const string &fx_shader_filename);
 	virtual ~RenderPath();
 
 	virtual void draw() = 0;
@@ -56,7 +56,7 @@ public:
 
 	void prepare_all(Renderer *r, Camera *c);
 	void draw_world(vulkan::CommandBuffer *cb, int light_index);
-	void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
+	//void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
 
 	void render_into_shadow(ShadowMapRenderer *r);
 
@@ -73,6 +73,7 @@ public:
 
 
 	virtual vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) = 0;
+	virtual vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) = 0;
 };
 
 #endif /* SRC_RENDERER_RENDERPATH_H_ */
