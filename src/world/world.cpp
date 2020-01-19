@@ -15,6 +15,7 @@
 #include "../meta.h"
 #include "object.h"
 #include "model.h"
+#include "ModelManager.h"
 #include "material.h"
 #include "terrain.h"
 
@@ -42,12 +43,6 @@ vulkan::Texture *tex_black = nullptr;
 
 
 vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo);
-
-Model *LoadModelFull(const string &filename) {
-	Model *m = new Model();
-	m->load(engine.object_dir + filename + ".model");
-	return m;
-}
 
 
 
@@ -367,7 +362,7 @@ bool World::load(const LevelData &ld) {
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
 	for (int i=0; i<skybox.num; i++){
-		skybox[i] = LoadModelFull(ld.skybox_filename[i]);
+		skybox[i] = ModelManager::load(ld.skybox_filename[i]);
 		if (skybox[i])
 			skybox[i]->ang = quaternion::rotation_v(ld.skybox_ang[i]);
 	}
@@ -637,7 +632,7 @@ Object *World::create_object(const string &filename, const string &name, const v
 		throw Exception("CreateObject: empty filename");
 
 	//msg_write(on);
-	Model *m = LoadModelFull(filename);
+	Model *m = ModelManager::load(filename);
 
 	Object *o = (Object*)m;
 	m->script_data.name = name;

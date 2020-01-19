@@ -214,6 +214,7 @@ sources = [
 	'src/world/camera.cpp',
 	'src/world/material.cpp',
 	'src/world/model.cpp',
+	'src/world/ModelManager.cpp',
 	'src/world/object.cpp',
 	'src/world/terrain.cpp',
 	'src/world/world.cpp',

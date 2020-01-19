@@ -742,6 +742,7 @@ void CopyPhysicalSkin(PhysicalMesh *orig, PhysicalMesh **copy)
 	(*copy) = new PhysicalMesh;
 	(**copy) = (*orig);
 }
+#endif
 
 Model *Model::copy(Model *pre_allocated)
 {
@@ -768,8 +769,8 @@ Model *Model::copy(Model *pre_allocated)
 	// "copy" presettings (just using references)
 	m->is_copy = true;
 	for (int i=0;i<MODEL_NUM_MESHES;i++){
-		m->skin[i] = skin[i];
-		m->skin_is_reference[i] = true;
+		m->mesh[i] = mesh[i];
+		m->mesh_is_reference[i] = true;
 		m->_detail_needed_[i] = false;
 	}
 	m->phys = phys;
@@ -777,14 +778,16 @@ Model *Model::copy(Model *pre_allocated)
 	m->registered = false;
 	m->visible = true;
 
+#if 0
 	// skins
 	if ((anim.meta) or (bone.num > 0)){
 		for (int i=0;i<MODEL_NUM_MESHES;i++){
 			// mostly needs it's own vertex_buffer...but well
-			m->skin[i] = skin[i]->copy(m);
-			m->skin_is_reference[i] = false;
+			m->mesh[i] = mesh[i]->copy(m);
+			m->mesh_is_reference[i] = false;
 		}
 	}
+#endif
 
 	// skeleton
 	m->bone = bone;
@@ -808,8 +811,6 @@ Model *Model::copy(Model *pre_allocated)
 
 	return m;
 }
-
-#endif
 
 void ExternalModelCleanup(Model *m);
 
