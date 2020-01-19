@@ -24,7 +24,7 @@ class ParticleManager;
 class Particle;
 
 namespace vulkan {
-	class UBOWrapper;
+	class UniformBuffer;
 	class DescriptorSet;
 }
 
@@ -95,7 +95,7 @@ struct MusicField {
 
 struct PartialModel {
 	Model *model;
-	vulkan::UBOWrapper *ubo;
+	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 	Material *material;
 	int mat_index;
@@ -143,8 +143,8 @@ public:
 
 	float speed_of_sound;
 
-	vulkan::UBOWrapper *ubo_light;
-	vulkan::UBOWrapper *ubo_fog;
+	vulkan::UniformBuffer *ubo_light;
+	vulkan::UniformBuffer *ubo_fog;
 
 	vector gravity;
 

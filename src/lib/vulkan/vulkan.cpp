@@ -103,6 +103,7 @@ VkDebugUtilsMessengerEXT debug_messenger;
 VkSurfaceKHR surface;
 
 VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+VkPhysicalDeviceProperties device_properties;
 VkDevice device;
 
 VkQueue graphics_queue;
@@ -267,6 +268,11 @@ void pick_physical_device() {
 	if (physical_device == VK_NULL_HANDLE) {
 		throw std::runtime_error("failed to find a suitable GPU!");
 	}
+
+	vkGetPhysicalDeviceProperties(physical_device, &device_properties);
+	std::cout << "  min ubo align  " << device_properties.limits.minUniformBufferOffsetAlignment << "\n";
+	std::cout << "  max push  " << device_properties.limits.maxPushConstantsSize << "\n";
+	std::cout << "  max image 2d dim  " << device_properties.limits.maxImageDimension2D << "\n";
 }
 
 

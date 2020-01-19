@@ -42,7 +42,7 @@ RenderPathDeferred::RenderPathDeferred(Renderer *_output_renderer, PerformanceMo
 	shader_merge_light_shadow = vulkan::Shader::load("2d-gbuf-light-shadow.shader");
 	shader_merge_fog = vulkan::Shader::load("2d-gbuf-fog.shader");
 
-	ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
+	ubo_x1 = new vulkan::UniformBuffer(sizeof(UBOMatrices));
 
 	_create_dynamic_data();
 }
@@ -229,7 +229,7 @@ void RenderPathDeferred::render_into_gbuffer(GBufferRenderer *r) {
 	cb->set_pipeline(r->pipeline_into_gbuf);
 	cb->set_viewport(r->area());
 
-	draw_world(cb);
+	draw_world(cb, 0);
 	cb->end_render_pass();
 
 	r->end_frame();
@@ -277,7 +277,7 @@ void RenderPathDeferred::draw() {
 }
 
 
-vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) {
+vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) {
 	if (tex.num == 3)
 		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, tex);
 	else

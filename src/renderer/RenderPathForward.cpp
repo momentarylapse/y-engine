@@ -19,13 +19,22 @@ extern vulkan::Texture *tex_white;
 extern vulkan::Texture *tex_black;
 
 RenderPathForward::RenderPathForward(Renderer *r, PerformanceMonitor *pm) : RenderPath(r, pm, "forward/3d-shadow.shader") {
-	fw_shader_a = vulkan::Shader::load("forward/3d-base.shader");
-	fw_pipeline_a = new vulkan::Pipeline(fw_shader_a, renderer->default_render_pass(), 0, 1);
+
+	// emission and directional sun pass
+	shader_base = vulkan::Shader::load("forward/3d-base.shader");
+	pipeline_base = new vulkan::Pipeline(shader_base, renderer->default_render_pass(), 0, 1);
+
+	// additive light pass
+	shader_light = vulkan::Shader::load("forward/3d-light.shader");
+	pipeline_light = new vulkan::Pipeline(shader_light, renderer->default_render_pass(), 0, 1);
+	pipeline_light->set_blend(VK_BLEND_FACTOR_SRC_COLOR, VK_BLEND_FACTOR_ONE);
+	pipeline_light->set_z(true, false);
+	pipeline_light->rebuild();
 }
 
 RenderPathForward::~RenderPathForward() {
-	delete fw_shader_a;
-	delete fw_pipeline_a;
+	delete shader_base;
+	delete pipeline_base;
 }
 
 void RenderPathForward::draw() {
@@ -47,23 +56,41 @@ void RenderPathForward::draw() {
 
 	perf_mon->tick(1);
 
+	foreachi (auto *l, world.lights, i)
+		world.ubo_light->update_single(l, i);
+
 	prepare_all(renderer, cam);
 	auto r = renderer;
 	auto cb = r->cb;
 	cb->begin();
 	cam->set_view(1.0f);
 
-	//cb->push_constant(112, sizeof(UBOLight), world.sun);
-
 	r->default_render_pass()->clear_color[0] = world.background; // emission
 	cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
-	cb->set_pipeline(fw_pipeline_a);
+
+
+	cb->set_pipeline(pipeline_base);
 	cb->set_viewport(r->area());
 
-	draw_world(cb);
+	draw_world(cb, 0);
 	perf_mon->tick(2);
 
+
+	foreachi (auto *l, world.lights, light_index) {
+		if (l == world.sun)
+			continue;
+		vulkan::wait_device_idle();
+		cb->set_pipeline(pipeline_light);
+		cb->set_viewport(r->area());
+
+		draw_world(cb, light_index);
+		perf_mon->tick(2);
+	}
+
 	gui::render(cb, r->area());
+
+
+
 	cb->end_render_pass();
 	cb->end();
 
@@ -73,7 +100,7 @@ void RenderPathForward::draw() {
 }
 
 
-vulkan::DescriptorSet *RenderPathForward::rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) {
+vulkan::DescriptorSet *RenderPathForward::rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) {
 	if (tex.num == 3)
 		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, {tex[0], tex[1], tex[2], shadow_renderer->depth_buffer});
 	else

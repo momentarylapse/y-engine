@@ -78,7 +78,7 @@ void RenderPath::pick_shadow_source() {
 
 }
 
-void RenderPath::draw_world(vulkan::CommandBuffer *cb) {
+void RenderPath::draw_world(vulkan::CommandBuffer *cb, int light_index) {
 
 	GeoPush gp;
 	gp.eye_pos = cam->pos;
@@ -88,7 +88,7 @@ void RenderPath::draw_world(vulkan::CommandBuffer *cb) {
 		gp.emission = Black;
 		gp.xxx[0] = 0.0f;
 		cb->push_constant(0, sizeof(gp), &gp);
-		cb->bind_descriptor_set(0, t->dset);
+		cb->bind_descriptor_set_dynamic(0, t->dset, {light_index});
 		cb->draw(t->vertex_buffer);
 	}
 
@@ -99,7 +99,7 @@ void RenderPath::draw_world(vulkan::CommandBuffer *cb) {
 		gp.xxx[0] = 0.2f;
 		cb->push_constant(0, sizeof(gp), &gp);
 
-		cb->bind_descriptor_set(0, s.dset);
+		cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
 		cb->draw(m->mesh[0]->sub[0].vertex_buffer);
 	}
 
@@ -137,8 +137,6 @@ void RenderPath::prepare_all(Renderer *r, Camera *c) {
 
 	c->set_view((float)r->width / (float)r->height);
 
-	world.ubo_light->update(world.sun);
-
 	UBOMatrices u;
 	u.proj = c->m_projection;
 	u.view = c->m_view;
@@ -174,7 +172,7 @@ void RenderPath::render_into_shadow(ShadowMapRenderer *r) {
 	cb->set_pipeline(r->pipeline);
 	cb->set_viewport(r->area());
 
-	draw_world(cb);
+	draw_world(cb, 0);
 	cb->end_render_pass();
 
 	r->end_frame();

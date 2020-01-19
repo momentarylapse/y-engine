@@ -20,7 +20,7 @@ Light::Light(const vector &p, const vector &d, const color &c, float r, float t)
 		harshness = 1;
 	enabled = true;
 
-	ubo = new vulkan::UBOWrapper(sizeof(UBOLight));
+	ubo = new vulkan::UniformBuffer(sizeof(UBOLight));
 	dset = nullptr;
 }
 

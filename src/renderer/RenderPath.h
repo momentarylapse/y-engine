@@ -16,7 +16,7 @@ namespace vulkan {
 	class CommandBuffer;
 	class VertexBuffer;
 	class DescriptorSet;
-	class UBOWrapper;
+	class UniformBuffer;
 	class Texture;
 }
 class Renderer;
@@ -55,7 +55,7 @@ public:
 
 
 	void prepare_all(Renderer *r, Camera *c);
-	void draw_world(vulkan::CommandBuffer *cb);
+	void draw_world(vulkan::CommandBuffer *cb, int light_index);
 	void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
 
 	void render_into_shadow(ShadowMapRenderer *r);
@@ -72,7 +72,7 @@ public:
 	void pick_shadow_source();
 
 
-	virtual vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) = 0;
+	virtual vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) = 0;
 };
 
 #endif /* SRC_RENDERER_RENDERPATH_H_ */

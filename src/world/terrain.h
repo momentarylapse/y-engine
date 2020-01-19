@@ -16,7 +16,7 @@ class Material;
 class TraceData;
 namespace vulkan {
 	class VertexBuffer;
-	class UBOWrapper;
+	class UniformBuffer;
 	class DescriptorSet;
 };
 
@@ -77,7 +77,7 @@ public:
 	Array<vector> vertex, normal;
 	Array<plane> pl; // for collision detection
 	vulkan::VertexBuffer *vertex_buffer;
-	vulkan::UBOWrapper *ubo;
+	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 	int partition[128][128], partition_old[128][128];
 	vector pattern, min, max;

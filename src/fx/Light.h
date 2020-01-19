@@ -15,7 +15,7 @@
 
 namespace vulkan {
 	class DescriptorSet;
-	class UBOWrapper;
+	class UniformBuffer;
 }
 
 struct UBOLight {
@@ -38,7 +38,7 @@ public:
 	//color col;
 	bool enabled;
 	//float radius, theta, harshness;
-	vulkan::UBOWrapper *ubo;
+	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 };
 

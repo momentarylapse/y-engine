@@ -17,11 +17,13 @@ public:
 
 	void draw() override;
 
-	vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) override;
+	vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) override;
 
 
-	vulkan::Shader *fw_shader_a;
-	vulkan::Pipeline *fw_pipeline_a;
+	vulkan::Shader *shader_base;
+	vulkan::Pipeline *pipeline_base;
+	vulkan::Shader *shader_light;
+	vulkan::Pipeline *pipeline_light;
 };
 
 #endif /* SRC_RENDERER_RENDERPATHFORWARD_H_ */

@@ -28,7 +28,7 @@ Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*
 	height = h;
 	textures = tex;
 	col = White;
-	ubo = new vulkan::UBOWrapper(sizeof(UBOMatrices));
+	ubo = new vulkan::UniformBuffer(sizeof(UBOMatrices));
 	user_shader = _shader;
 	user_pipeline = nullptr;
 

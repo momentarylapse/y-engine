@@ -41,7 +41,7 @@ public:
 	Renderer *output_renderer;
 	GBufferRenderer *gbuf_ren;
 
-	vulkan::UBOWrapper *ubo_x1;
+	vulkan::UniformBuffer *ubo_x1;
 	vulkan::DescriptorSet *dset_x1;
 
 	vulkan::Shader *shader_merge_base;
@@ -55,7 +55,7 @@ public:
 	vulkan::Pipeline *pipeline_x2s;
 	vulkan::Pipeline *pipeline_x3;
 
-	vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) override;
+	vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) override;
 };
 
 

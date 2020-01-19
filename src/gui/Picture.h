@@ -22,7 +22,7 @@ public:
 	float width;
 
 	Array<vulkan::Texture*> textures;
-	vulkan::UBOWrapper *ubo;
+	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 	vulkan::Shader *user_shader;
 	vulkan::Pipeline *user_pipeline;

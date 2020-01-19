@@ -283,7 +283,7 @@ public:
 
 YEngineApp app;
 
-vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) {
+vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) {
 	return app.render_path->rp_create_dset(tex, ubo);
 }
 
