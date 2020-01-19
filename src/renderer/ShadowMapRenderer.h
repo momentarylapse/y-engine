@@ -13,7 +13,7 @@
 
 class ShadowMapRenderer : public Renderer {
 public:
-	ShadowMapRenderer();
+	ShadowMapRenderer(const string &shader_filename);
 	~ShadowMapRenderer() override;
 
 	vulkan::DepthBuffer *depth_buffer;

@@ -8,7 +8,7 @@
 #include "ShadowMapRenderer.h"
 
 
-ShadowMapRenderer::ShadowMapRenderer() {
+ShadowMapRenderer::ShadowMapRenderer(const string &shader_filename) {
 	width = 512;
 	height = 512;
 
@@ -18,8 +18,7 @@ ShadowMapRenderer::ShadowMapRenderer() {
 	frame_buffer = new vulkan::FrameBuffer(width, height, _default_render_pass, {depth_buffer->view});
 
 
-	//shader_into_gbuf = vulkan::Shader::load("3d-multi.shader");
-	shader = vulkan::Shader::load("3d-shadow2.shader");
+	shader = vulkan::Shader::load(shader_filename);
 	pipeline = new vulkan::Pipeline(shader, _default_render_pass, 0, 1);
 
 }

@@ -1,33 +1,36 @@
 /*
- * DeferredRenderer.cpp
+ * RenderPathDeferred.cpp
  *
  *  Created on: 06.01.2020
  *      Author: michi
  */
 
 
-#include "DeferredRenderer.h"
+#include "RenderPathDeferred.h"
+
 #include "ShadowMapRenderer.h"
 #include "GBufferRenderer.h"
+
+#include "../lib/vulkan/vulkan.h"
 
 #include "../meta.h"
 #include "../world/world.h"
 #include "../world/camera.h"
+#include "../world/model.h"
 #include "../fx/Light.h"
 #include "../lib/math/rect.h"
 #include "../gui/Picture.h"
+#include "../helper/PerformanceMonitor.h"
 
 #include <iostream>
 
 
-struct UBOMatrices {
-	alignas(16) matrix model;
-	alignas(16) matrix view;
-	alignas(16) matrix proj;
-};
+extern vulkan::Texture *tex_white;
+extern vulkan::Texture *tex_black;
 
 
-DeferredRenderer::DeferredRenderer(Renderer *_output_renderer) {
+
+RenderPathDeferred::RenderPathDeferred(Renderer *_output_renderer, PerformanceMonitor *pm) : RenderPath(_output_renderer, pm, "3d-shadow2.shader") {
 	output_renderer = _output_renderer;
 	width = output_renderer->width;
 	height = output_renderer->height;
@@ -42,17 +45,10 @@ DeferredRenderer::DeferredRenderer(Renderer *_output_renderer) {
 	ubo_x1 = new vulkan::UBOWrapper(sizeof(UBOMatrices));
 
 	_create_dynamic_data();
-
-	shadow_renderer = new ShadowMapRenderer();
-
-	AllowXContainer = false;
-	light_cam = new Camera(v_0, quaternion::ID, rect::ID);
-	AllowXContainer = true;
 }
-DeferredRenderer::~DeferredRenderer() {
+RenderPathDeferred::~RenderPathDeferred() {
 	_destroy_dynamic_data();
 
-	delete shadow_renderer;
 	delete gbuf_ren;
 	delete ubo_x1;
 
@@ -60,11 +56,9 @@ DeferredRenderer::~DeferredRenderer() {
 	delete shader_merge_light;
 	delete shader_merge_light_shadow;
 	delete shader_merge_fog;
-
-	delete light_cam;
 }
 
-void DeferredRenderer::_create_dynamic_data() {
+void RenderPathDeferred::_create_dynamic_data() {
 
 
 	pipeline_x1 = new vulkan::Pipeline(shader_merge_base, output_renderer->default_render_pass(), 0, 1);
@@ -91,7 +85,7 @@ void DeferredRenderer::_create_dynamic_data() {
 	dset_x1 = new vulkan::DescriptorSet({ubo_x1, world.ubo_light, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal});
 }
 
-void DeferredRenderer::_destroy_dynamic_data() {
+void RenderPathDeferred::_destroy_dynamic_data() {
 	delete dset_x1;
 	delete pipeline_x1;
 	delete pipeline_x2;
@@ -99,7 +93,7 @@ void DeferredRenderer::_destroy_dynamic_data() {
 	delete pipeline_x3;
 }
 
-void DeferredRenderer::resize(int w, int h) {
+void RenderPathDeferred::resize(int w, int h) {
 	if (w == width and h == height)
 		return;
 
@@ -112,12 +106,12 @@ void DeferredRenderer::resize(int w, int h) {
 	height = h;
 }
 
-vector DeferredRenderer::project_pixel(const vector &v) {
+vector RenderPathDeferred::project_pixel(const vector &v) {
 	vector p = cam->project(v);
 	return vector(p.x * output_renderer->width, (1-p.y) * output_renderer->height, p.z);
 }
 
-float DeferredRenderer::projected_sphere_radius(vector &v, float r) {
+float RenderPathDeferred::projected_sphere_radius(vector &v, float r) {
 
 	vector p = project_pixel(v);
 	float rmax = 0;
@@ -129,7 +123,7 @@ float DeferredRenderer::projected_sphere_radius(vector &v, float r) {
 	return rmax;
 }
 
-rect DeferredRenderer::light_rect(Light *l) {
+rect RenderPathDeferred::light_rect(Light *l) {
 	float w = output_renderer->width;
 	float h = output_renderer->height;
 	if (l->radius < 0)
@@ -144,15 +138,8 @@ rect DeferredRenderer::light_rect(Light *l) {
 	return rect(clampf(p.x - r, 0, w), clampf(p.x + r, 0, w), clampf(p.y - r, 0, h), clampf(p.y + r, 0, h));
 }
 
-void DeferredRenderer::set_light(Light *ll) {
-	UBOLight l;
-	l.pos = ll->pos;
-	l.dir = ll->dir;
-	l.col = ll->col;
-	l.radius = ll->radius;
-	l.theta = ll->theta;
-	l.harshness = ll->harshness;
-	ll->ubo->update(&l);
+void RenderPathDeferred::set_light(Light *ll) {
+	ll->ubo->update(ll);
 	if (!ll->dset)
 		ll->dset = new vulkan::DescriptorSet({ubo_x1, ll->ubo, world.ubo_fog}, {gbuf_ren->tex_color, gbuf_ren->tex_emission, gbuf_ren->tex_pos, gbuf_ren->tex_normal, shadow_renderer->depth_buffer});
 	else
@@ -161,7 +148,7 @@ void DeferredRenderer::set_light(Light *ll) {
 
 
 
-void DeferredRenderer::draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset, const rect &r = rect::EMPTY) {
+void RenderPathDeferred::draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset, const rect &r = rect::EMPTY) {
 
 	cb->set_pipeline(pip);
 	if (r.area() > 0)
@@ -180,7 +167,7 @@ void DeferredRenderer::draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::
 }
 
 
-void DeferredRenderer::render_out(vulkan::CommandBuffer *cb, Renderer *ro) {
+void RenderPathDeferred::render_out(vulkan::CommandBuffer *cb, Renderer *ro) {
 
 	UBOMatrices u;
 	u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
@@ -210,7 +197,89 @@ void DeferredRenderer::render_out(vulkan::CommandBuffer *cb, Renderer *ro) {
 		draw_from_gbuf_single(cb, pipeline_x3, dset_x1, rect::EMPTY);
 }
 
-void DeferredRenderer::DeferredRenderer::pick_shadow_source() {
+
+void RenderPathDeferred::render_all_from_deferred(Renderer *r) {
+	auto *cb = r->cb;
+	auto *rp = r->default_render_pass();
+	auto *fb = r->current_frame_buffer();
+	cur_cam = cam;
+
+	cb->set_viewport(r->area());
+
+	cb->begin_render_pass(rp, fb);
+
+	render_out(cb, r);
+	perf_mon->tick(3);
+	render_fx(cb, r);
+	perf_mon->tick(4);
+
+	gui::render(cb, r->area());
+
+	cb->end_render_pass();
 
 }
 
+void RenderPathDeferred::render_into_gbuffer(GBufferRenderer *r) {
+	r->start_frame();
+	auto *cb = r->cb;
+	cam->set_view(1.0f);
+
+	r->default_render_pass()->clear_color[1] = world.background; // emission
+	cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
+	cb->set_pipeline(r->pipeline_into_gbuf);
+	cb->set_viewport(r->area());
+
+	draw_world(cb);
+	cb->end_render_pass();
+
+	r->end_frame();
+}
+
+
+void RenderPathDeferred::draw() {
+
+	vulkan::wait_device_idle();
+	//deferred_reenderer->pick_shadow_source();
+
+
+	resize(renderer->width, renderer->height);
+
+	if (!renderer->start_frame())
+		return;
+
+	perf_mon->tick(0);
+	light_cam->pos = vector(0,1000,0);
+	light_cam->ang = quaternion::rotation_v(vector(pi/2, 0, 0));
+	light_cam->zoom = 2;
+	light_cam->min_depth = 50;
+	light_cam->max_depth = 10000;
+	light_cam->set_view(1.0f);
+
+	prepare_all(shadow_renderer, light_cam);
+	render_into_shadow(shadow_renderer);
+	perf_mon->tick(1);
+
+	prepare_all(gbuf_ren, cam);
+	render_into_gbuffer(gbuf_ren);
+	perf_mon->tick(2);
+
+	prepare_all(renderer, cam);
+
+	auto cb = renderer->cb;
+
+
+	cb->begin();
+	render_all_from_deferred(renderer);
+	cb->end();
+
+	renderer->end_frame();
+	perf_mon->tick(5);
+}
+
+
+vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UBOWrapper *ubo) {
+	if (tex.num == 3)
+		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, tex);
+	else
+		return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, {tex[0], tex_white, tex_black});
+}
