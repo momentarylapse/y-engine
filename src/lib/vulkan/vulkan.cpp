@@ -270,9 +270,17 @@ void pick_physical_device() {
 	}
 
 	vkGetPhysicalDeviceProperties(physical_device, &device_properties);
-	std::cout << "  min ubo align  " << device_properties.limits.minUniformBufferOffsetAlignment << "\n";
-	std::cout << "  max push  " << device_properties.limits.maxPushConstantsSize << "\n";
-	std::cout << "  max image 2d dim  " << device_properties.limits.maxImageDimension2D << "\n";
+	std::cout << "  minUniformBufferOffsetAlignment  " << device_properties.limits.minUniformBufferOffsetAlignment << "\n";
+	std::cout << "  maxPushConstantsSize  " << device_properties.limits.maxPushConstantsSize << "\n";
+	std::cout << "  maxImageDimension2D  " << device_properties.limits.maxImageDimension2D << "\n";
+	std::cout << "  maxUniformBufferRange  " << device_properties.limits.maxUniformBufferRange << "\n";
+	std::cout << "  maxPerStageDescriptorUniformBuffers  " << device_properties.limits.maxPerStageDescriptorUniformBuffers << "\n";
+	std::cout << "  maxPerStageDescriptorSamplers  " << device_properties.limits.maxPerStageDescriptorSamplers << "\n";
+	std::cout << "  maxDescriptorSetSamplers  " << device_properties.limits.maxDescriptorSetSamplers << "\n";
+	std::cout << "  maxDescriptorSetUniformBuffers  " << device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
+	std::cout << "  maxDescriptorSetUniformBuffersDynamic  " << device_properties.limits.maxDescriptorSetUniformBuffersDynamic << "\n";
+	//std::cout << "  maxDescriptorSetUniformBuffers  " << device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
+	//std::cout << "  maxDescriptorSetUniformBuffers  " << device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
 }
 
 
