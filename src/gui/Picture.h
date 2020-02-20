@@ -12,7 +12,7 @@
 
 class Picture {
 public:
-	Picture(const vector &pos, float w, float h, const Array<vulkan::Texture*> &tex, vulkan::Shader *shader);
+	Picture(const vector &pos, float w, float h, vulkan::Texture *tex, vulkan::Shader *shader);
 	Picture(const vector &pos, float w, float h, vulkan::Texture *tex);
 	virtual ~Picture();
 
@@ -21,7 +21,7 @@ public:
 	float height;
 	float width;
 
-	Array<vulkan::Texture*> textures;
+	vulkan::Texture *texture;
 	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 	vulkan::Shader *user_shader;

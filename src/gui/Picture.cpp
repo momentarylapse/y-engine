@@ -22,11 +22,11 @@ struct UBOMatrices {
 	alignas(16) matrix proj;
 };
 
-Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*> &tex, vulkan::Shader *_shader) {
+Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex, vulkan::Shader *_shader) {
 	pos = p;
 	width = w;
 	height = h;
-	textures = tex;
+	texture = tex;
 	col = White;
 	ubo = new vulkan::UniformBuffer(sizeof(UBOMatrices));
 	user_shader = _shader;
@@ -35,10 +35,10 @@ Picture::Picture(const vector &p, float w, float h, const Array<vulkan::Texture*
 	if (user_shader) {
 		user_pipeline = new vulkan::Pipeline(user_shader, render_pass, 0, 1);
 	}
-	dset = new vulkan::DescriptorSet({ubo}, textures);
+	dset = new vulkan::DescriptorSet({ubo}, {texture});
 }
 
-Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex) : Picture(p, w, h, {tex}, nullptr) {
+Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex) : Picture(p, w, h, tex, nullptr) {
 }
 
 Picture::~Picture() {
@@ -51,7 +51,7 @@ Picture::~Picture() {
 }
 
 void Picture::rebuild() {
-	dset->set({ubo}, textures);
+	dset->set({ubo}, {texture});
 }
 
 namespace gui {

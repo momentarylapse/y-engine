@@ -7,7 +7,10 @@
 
 #include "Text.h"
 
-#include "../lib/hui/hui.h"
+//#include "../lib/hui/hui.h"
+#include "../lib/image/image.h"
+#include <cairo/cairo.h>
+#include <gtk/gtk.h>
 #include <iostream>
 
 
@@ -80,15 +83,15 @@ Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new vul
 }
 
 Text::~Text() {
-	delete textures[0];
+	delete texture;
 }
 
 
 void Text::rebuild() {
 	Image im;
 	render_text(text, im);
-	textures[0]->override(&im);
-	dset->set({ubo}, textures);
+	texture->override(&im);
+	dset->set({ubo}, {texture});
 
 	width = height * (float)im.width / (float)im.height / 1.33f;
 
