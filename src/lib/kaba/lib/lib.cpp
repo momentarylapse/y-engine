@@ -30,7 +30,7 @@
 
 namespace Kaba{
 
-string LibVersion = "0.17.12.0";
+string LibVersion = "0.17.12.1";
 
 
 const string IDENTIFIER_CLASS = "class";
@@ -829,8 +829,11 @@ void link_external(const string &name, void *pointer) {
 	for (auto *p: Packages)
 		foreachi(Function *f, p->syntax->functions, i)
 			if (f->long_name() == sname) {
+				int n = f->num_params;
+				if (!f->is_static)
+					n ++;
 				if (names.num > 0)
-					if (f->num_params != names[1]._int())
+					if (n != names[1]._int())
 						continue;
 				f->address = pointer;
 			}

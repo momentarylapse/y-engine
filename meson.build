@@ -16,9 +16,11 @@ zlibdep = dependency('zlib')
 add_project_arguments('-DHAS_LIB_ZLIB=1', language : ['cpp'])
 glfwdep = dependency('glfw')
 add_project_arguments('-DHAS_LIB_GLFW=1', language : ['cpp'])
+gldep = dependency('GL')
+add_project_arguments('-DHAS_LIB_GL=1', language : ['cpp'])
 vulkandep = dependency('vulkan')
 add_project_arguments('-DHAS_LIB_VULKAN=1', language : ['cpp'])
-deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, vulkandep]
+deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep, vulkandep]
 
 # optional dependency: ode
 d = cc.find_library('ode', required : false)
@@ -188,6 +190,13 @@ sources = [
 	'src/lib/math/rect.cpp',
 	'src/lib/math/vector.cpp',
 	'src/lib/net/net.cpp',
+	'src/lib/nix/nix.cpp',
+	'src/lib/nix/nix_draw.cpp',
+	'src/lib/nix/nix_light.cpp',
+	'src/lib/nix/nix_shader.cpp',
+	'src/lib/nix/nix_textures.cpp',
+	'src/lib/nix/nix_vertexbuffer.cpp',
+	'src/lib/nix/nix_view.cpp',
 	'src/lib/sound/sound.cpp',
 	'src/lib/sound/sound_al.cpp',
 	'src/lib/vulkan/CommandBuffer.cpp',
