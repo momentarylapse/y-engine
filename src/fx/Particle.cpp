@@ -6,14 +6,13 @@
  */
 
 #include "Particle.h"
-#include "../lib/vulkan/vulkan.h"
 #include <iostream>
 
-vulkan::Shader *shader_fx;
+nix::Shader *shader_fx;
 
-vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo);
+//DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
 
-Particle::Particle(const vector &p, float r, vulkan::Texture *t) {
+Particle::Particle(const vector &p, float r, nix::Texture *t) {
 	pos = p;
 	col = White;
 	radius = r;
@@ -23,23 +22,28 @@ Particle::Particle(const vector &p, float r, vulkan::Texture *t) {
 Particle::~Particle() {
 }
 
-void Particle::__init__(const vector &p, float r, vulkan::Texture *t) {
+void Particle::__init__(const vector &p, float r, nix::Texture *t) {
 	new(this) Particle(p, r, t);
 }
 
 
 
-ParticleGroup::ParticleGroup(vulkan::Texture *t) {
+ParticleGroup::ParticleGroup(nix::Texture *t) {
 	texture = t;
-	ubo = new vulkan::UniformBuffer(256);
+	ubo = nullptr;
+#if USE_API_VULKAN
+	ubo = new UniformBuffer(256);
 	dset = rp_create_dset_fx(t, ubo);
+#endif
 }
 
 ParticleGroup::~ParticleGroup() {
 	for (auto *p: particles)
 		delete p;
+#if USE_API_VULKAN
 	delete dset;
 	delete ubo;
+#endif
 }
 
 

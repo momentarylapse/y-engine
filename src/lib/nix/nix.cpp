@@ -129,6 +129,9 @@ void Init() {
 	msg_write("Nix");
 	msg_right();
 	msg_write("[" + version + "]");
+
+	//msg_write((char*)glGetString(GL_VERSION));
+	//msg_write((char*)glGetString(GL_VENDOR));
 	
 
 	Fullscreen = false; // before nix is started, we're hopefully not in fullscreen mode

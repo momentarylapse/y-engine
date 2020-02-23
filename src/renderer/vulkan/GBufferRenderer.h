@@ -8,12 +8,12 @@
 #ifndef SRC_RENDERER_GBUFFERRENDERER_H_
 #define SRC_RENDERER_GBUFFERRENDERER_H_
 
-
-#include "Renderer.h"
+#if HAS_LIB_VULKAN
+#include "../Renderer.h"
 
 
 // for creating g-buffers
-class GBufferRenderer : public Renderer {
+class GBufferRenderer : public RendererVulkan {
 public:
 	GBufferRenderer(int w, int h);
 	~GBufferRenderer() override;
@@ -41,5 +41,6 @@ public:
 	vulkan::FrameBuffer *current_frame_buffer() override;
 };
 
+#endif
 
 #endif /* SRC_RENDERER_GBUFFERRENDERER_H_ */

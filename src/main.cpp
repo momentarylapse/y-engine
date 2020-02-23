@@ -1,12 +1,20 @@
 
+
+#include "lib/nix/nix.h"
+
+#if HAS_LIB_VULKAN
 #define GLFW_INCLUDE_VULKAN
+#endif
 #include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
 
+
+#if HAS_LIB_VULKAN
 #include "lib/vulkan/vulkan.h"
+#endif
 #include "lib/math/math.h"
 #include "lib/image/color.h"
 #include "lib/image/image.h"
@@ -31,12 +39,15 @@
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
 
-#include "renderer/WindowRenderer.h"
-#include "renderer/GBufferRenderer.h"
-#include "renderer/RenderPathDeferred.h"
-#include "renderer/ShadowMapRenderer.h"
+#include "renderer/RenderPath.h"
+#if HAS_LIB_VULKAN
+#include "renderer/vulkan/WindowRendererVulkan.h"
+#include "renderer/vulkan/GBufferRenderer.h"
+#include "renderer/vulkan/RenderPathDeferred.h"
+#include "renderer/vulkan/ShadowMapRenderer.h"
 
-#include "renderer/RenderPathForward.h"
+#include "renderer/vulkan/RenderPathForward.h"
+#endif
 
 const bool SHOW_GBUFFER = false;
 const bool SHOW_SHADOW = false;
@@ -120,6 +131,64 @@ public:
 static Config config;
 
 
+class RenderPathGL : public RenderPath {
+public:
+	int width, height;
+	GLFWwindow* window;
+	RenderPathGL(GLFWwindow* w) {
+		window = w;
+		glfwMakeContextCurrent(window);
+		glfwGetFramebufferSize(window, &width, &height);
+
+		nix::Init();
+	}
+	void draw() override {
+		glfwGetFramebufferSize(window, &width, &height);
+		nix::SetViewport(width, height);
+		cam->set_view(1.3f);
+		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
+		nix::SetViewMatrix(cam->m_view);
+
+		nix::ResetToColor(world.background);
+		nix::ResetZ();
+
+		nix::SetZ(true, true);
+
+		nix::SetLightDirectional(0, world.lights[0]->dir, world.lights[0]->col, world.lights[0]->harshness);
+
+
+		/*for (auto *t: world.terrains) {
+			gp.model = matrix::ID;
+			gp.emission = Black;
+			gp.xxx[0] = 0.0f;
+			cb->push_constant(0, sizeof(gp), &gp);
+			cb->bind_descriptor_set_dynamic(0, t->dset, {light_index});
+			cb->draw(t->vertex_buffer);
+		}*/
+
+		for (auto &s: world.sorted_opaque) {
+			Model *m = s.model;
+			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
+			nix::SetMaterial(White, White, White, 20, Black);
+			nix::SetTextures(s.material->textures);
+			nix::SetShader(s.material->shader);
+			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+
+			/*gp.model = mtr(m->pos, m->ang);
+			gp.emission = s.material->emission;
+			gp.xxx[0] = 0.2f;
+			cb->push_constant(0, sizeof(gp), &gp);
+
+			cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
+			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
+		}
+
+
+		glfwSwapBuffers(window);
+	}
+};
+
+
 class YEngineApp {
 public:
 	
@@ -133,7 +202,9 @@ public:
 //private:
 	GLFWwindow* window;
 
-	WindowRenderer *renderer;
+#if HAS_LIB_VULKAN
+	WindowRendererVulkan *renderer;
+#endif
 	RenderPath *render_path;
 
 	PerformanceMonitor perf_mon;
@@ -142,12 +213,16 @@ public:
 
 	void init() {
 		window = create_window();
+#if HAS_LIB_VULKAN
 		vulkan::init(window);
+#endif
 		Kaba::init();
 
 		config.load();
-
-		renderer = new WindowRenderer(window);
+#if HAS_LIB_VULKAN
+		renderer = new WindowRendererVulkan(window);
+#endif
+		render_path = new RenderPathGL(window);
 
 		std::cout << "on init..." << "\n";
 
@@ -158,6 +233,7 @@ public:
 
 
 
+#if HAS_LIB_VULKAN
 		gui::init(renderer->default_render_pass());
 
 		if (config.get("renderer.path", "forward") == "deferred") {
@@ -165,6 +241,8 @@ public:
 		} else {
 			render_path = new RenderPathForward(renderer, &perf_mon);
 		}
+#endif
+		gui::init();
 
 
 		InputManager::init(window);
@@ -185,18 +263,21 @@ public:
 
 		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.02f,0.02f,0), 0.03f);
 		gui::add(fps_display);
-		if (auto *deferred_reenderer = dynamic_cast<RenderPathDeferred*>(render_path)){
-			if (SHOW_GBUFFER) {
-				gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, deferred_reenderer->gbuf_ren->tex_color));
-				gui::add(new Picture(vector(0.8f, 0.2f, 0), 0.2f, 0.2f, deferred_reenderer->gbuf_ren->tex_emission));
-				gui::add(new Picture(vector(0.8f, 0.4f, 0), 0.2f, 0.2f, deferred_reenderer->gbuf_ren->tex_pos));
-				gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, deferred_reenderer->gbuf_ren->tex_normal));
-				gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, deferred_reenderer->gbuf_ren->depth_buffer));
+#if HAS_LIB_VULKAN
+		if (SHOW_GBUFFER) {
+			if (auto *rpd = dynamic_cast<RenderPathDeferred*>(render_path)) {
+				gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_color));
+				gui::add(new Picture(vector(0.8f, 0.2f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_emission));
+				gui::add(new Picture(vector(0.8f, 0.4f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_pos));
+				gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_normal));
+				gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, rpd->gbuf_ren->depth_buffer));
 			}
 		}
 		if (SHOW_SHADOW) {
-			gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, render_path->shadow_renderer->depth_buffer));
+			if (auto *rpv = dynamic_cast<RenderPathVulkan*>(render_path))
+				gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, rpv->shadow_renderer->depth_buffer));
 		}
+#endif
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -205,8 +286,9 @@ public:
 	GLFWwindow* create_window() {
 		GLFWwindow* window;
 		glfwInit();
-
+#if HAS_LIB_VULKAN
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#endif
 
 		window = glfwCreateWindow(1024, 768, "y-engine", nullptr, nullptr);
 		//window = glfwCreateWindow(1024, 768, "y-engine", glfwGetPrimaryMonitor(), nullptr);
@@ -225,7 +307,9 @@ public:
 			draw_frame();
 		}
 
+#if HAS_LIB_VULKAN
 		vkDeviceWaitIdle(vulkan::device);
+#endif
 	}
 
 	void cleanup() {
@@ -234,8 +318,10 @@ public:
 		gui::reset();
 
 		delete render_path;
+#if HAS_LIB_VULKAN
 		delete renderer;
 		vulkan::destroy();
+#endif
 
 		glfwDestroyWindow(window);
 
@@ -256,7 +342,9 @@ public:
 
 
 	void update_statistics() {
+#if HAS_LIB_VULKAN
 		vulkan::wait_device_idle();
+#endif
 		fps_display->text = format("%.1f     s:%.2f  g:%.2f  c:%.2f  fx:%.2f  2d:%.2f",
 				1.0f / perf_mon.avg.frame_time,
 				perf_mon.avg.location[0]*1000,
@@ -271,8 +359,8 @@ public:
 
 
 	void draw_frame() {
-		if (perf_mon.frames == 0)
-			update_statistics();
+//		if (perf_mon.frames == 0)
+//			update_statistics();
 
 		render_path->draw();
 	}
@@ -283,13 +371,17 @@ public:
 
 YEngineApp app;
 
+#if HAS_LIB_VULKAN
 vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) {
-	return app.render_path->rp_create_dset(tex, ubo);
+	auto *rpv = dynamic_cast<RenderPathVulkan*>(app.render_path);
+	return rpv->rp_create_dset(tex, ubo);
 }
 
 vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) {
-	return app.render_path->rp_create_dset_fx(tex, ubo);
+	auto *rpv = dynamic_cast<RenderPathVulkan*>(app.render_path);
+	return rpv->rp_create_dset_fx(tex, ubo);
 }
+#endif
 
 
 int hui_main(const Array<string> &arg) {

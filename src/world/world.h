@@ -23,10 +23,10 @@ class Light;
 class ParticleManager;
 class Particle;
 
-namespace vulkan {
+/*namespace vulkan {
 	class UniformBuffer;
 	class DescriptorSet;
-}
+}*/
 
 class GodForceField
 {
@@ -95,8 +95,8 @@ struct MusicField {
 
 struct PartialModel {
 	Model *model;
-	vulkan::UniformBuffer *ubo;
-	vulkan::DescriptorSet *dset;
+	/*vulkan::UniformBuffer *ubo;
+	vulkan::DescriptorSet *dset;*/
 	Material *material;
 	int mat_index;
 	float d;
@@ -143,8 +143,8 @@ public:
 
 	float speed_of_sound;
 
-	vulkan::UniformBuffer *ubo_light;
-	vulkan::UniformBuffer *ubo_fog;
+	/*vulkan::UniformBuffer *ubo_light;
+	vulkan::UniformBuffer *ubo_fog;*/
 
 	vector gravity;
 

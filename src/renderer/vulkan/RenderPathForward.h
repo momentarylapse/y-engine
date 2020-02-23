@@ -8,14 +8,16 @@
 #ifndef SRC_RENDERER_RENDERPATHFORWARD_H_
 #define SRC_RENDERER_RENDERPATHFORWARD_H_
 
+#if HAS_LIB_VULKAN
+
 #include "RenderPath.h"
 
-class RenderPathForward: public RenderPath {
+class RenderPathForward: public RenderPathVulkan {
 public:
-	RenderPathForward(Renderer *renderer, PerformanceMonitor *perf_mon);
+	RenderPathForward(RendererVulkan *renderer, PerformanceMonitor *perf_mon);
 	virtual ~RenderPathForward();
 
-	void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
+	void render_fx(vulkan::CommandBuffer *cb, RendererVulkan *r);
 	void draw() override;
 
 	vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) override;
@@ -31,5 +33,7 @@ public:
 	vulkan::UniformBuffer *ubo_fog;
 	vulkan::DescriptorSet *dset_fog;*/
 };
+
+#endif
 
 #endif /* SRC_RENDERER_RENDERPATHFORWARD_H_ */

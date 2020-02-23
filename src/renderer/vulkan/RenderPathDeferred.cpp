@@ -5,6 +5,7 @@
  *      Author: michi
  */
 
+#if HAS_LIB_VULKAN
 
 #include "RenderPathDeferred.h"
 
@@ -31,7 +32,7 @@ extern vulkan::Texture *tex_black;
 
 
 
-RenderPathDeferred::RenderPathDeferred(Renderer *_output_renderer, PerformanceMonitor *pm) : RenderPath(_output_renderer, pm, "3d-shadow2.shader", "fx.shader") {
+RenderPathDeferred::RenderPathDeferred(RendererVulkan *_output_renderer, PerformanceMonitor *pm) : RenderPathVulkan(_output_renderer, pm, "3d-shadow2.shader", "fx.shader") {
 	output_renderer = _output_renderer;
 	width = output_renderer->width;
 	height = output_renderer->height;
@@ -168,7 +169,7 @@ void RenderPathDeferred::draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan
 }
 
 
-void RenderPathDeferred::render_out(vulkan::CommandBuffer *cb, Renderer *ro) {
+void RenderPathDeferred::render_out(vulkan::CommandBuffer *cb, RendererVulkan *ro) {
 
 	UBOMatrices u;
 	u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
@@ -199,7 +200,7 @@ void RenderPathDeferred::render_out(vulkan::CommandBuffer *cb, Renderer *ro) {
 }
 
 
-void RenderPathDeferred::render_all_from_deferred(Renderer *r) {
+void RenderPathDeferred::render_all_from_deferred(RendererVulkan *r) {
 	auto *cb = r->cb;
 	auto *rp = r->default_render_pass();
 	auto *fb = r->current_frame_buffer();
@@ -236,7 +237,7 @@ void RenderPathDeferred::render_into_gbuffer(GBufferRenderer *r) {
 	r->end_frame();
 }
 
-void RenderPathDeferred::render_fx(vulkan::CommandBuffer *cb, Renderer *r) {
+void RenderPathDeferred::render_fx(vulkan::CommandBuffer *cb, RendererVulkan *r) {
 	cb->set_pipeline(pipeline_fx);
 	cb->set_viewport(r->area());
 
@@ -317,3 +318,5 @@ vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset(const Array<vulkan::Te
 vulkan::DescriptorSet *RenderPathDeferred::rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) {
 	return new vulkan::DescriptorSet({}, {tex, tex});
 }
+
+#endif

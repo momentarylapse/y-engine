@@ -8,12 +8,13 @@
 #ifndef SRC_GUI_PICTURE_H_
 #define SRC_GUI_PICTURE_H_
 
-#include "../lib/vulkan/vulkan.h"
+//#include "../lib/vulkan/vulkan.h"
+#include "../lib/nix/nix.h"
 
 class Picture {
 public:
-	Picture(const vector &pos, float w, float h, vulkan::Texture *tex, vulkan::Shader *shader);
-	Picture(const vector &pos, float w, float h, vulkan::Texture *tex);
+	Picture(const vector &pos, float w, float h, nix::Texture *tex, nix::Shader *shader);
+	Picture(const vector &pos, float w, float h, nix::Texture *tex);
 	virtual ~Picture();
 
 	vector pos;
@@ -21,24 +22,27 @@ public:
 	float height;
 	float width;
 
-	vulkan::Texture *texture;
+	nix::Texture *texture;
+	/*vulkan::Texture *texture;
 	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;
 	vulkan::Shader *user_shader;
-	vulkan::Pipeline *user_pipeline;
+	vulkan::Pipeline *user_pipeline;*/
 
 	virtual void rebuild();
 
-	static vulkan::Shader *shader;
+	static nix::Shader *shader;
+	/*static vulkan::Shader *shader;
 	static vulkan::Pipeline *pipeline;
 	static vulkan::VertexBuffer *vertex_buffer;
-	static vulkan::RenderPass *render_pass;
+	static vulkan::RenderPass *render_pass;*/
 };
 
 namespace gui {
-	void init(vulkan::RenderPass *rp);
+	//void init(vulkan::RenderPass *rp);
+	void init();
 	void reset();
-	void render(vulkan::CommandBuffer *cb, const rect &viewport);
+	//void render(vulkan::CommandBuffer *cb, const rect &viewport);
 	void update();
 	void add(Picture *p);
 }

@@ -1,7 +1,7 @@
 #include "material.h"
 #include "model.h"
 #include "../lib/file/file.h"
-#include "../lib/vulkan/vulkan.h"
+#include "../lib/nix/nix.h"
 #ifdef _X_ALLOW_X_
 #include "../meta.h"
 #endif
@@ -77,40 +77,6 @@ Material::~Material() {
 }
 
 
-static bool _alpha_enabled_ = false;
-
-void Material::apply(vulkan::CommandBuffer *cb) {
-#if 0
-	color _diff = diffuse;
-
-	if (alpha.mode > 0) {
-		if (alpha.mode == TRANSPARENCY_FUNCTIONS) {
-			nix::SetAlphaSD(alpha.source, alpha.destination);
-		} else if (alpha.mode == TRANSPARENCY_FACTOR) {
-			nix::SetAlphaM(ALPHA_MATERIAL);
-			_diff.a = alpha.factor;
-		} else if (alpha.mode == TRANSPARENCY_COLOR_KEY_HARD) {
-			nix::SetAlphaM(ALPHA_COLOR_KEY_HARD);
-		} else if (alpha.mode == TRANSPARENCY_COLOR_KEY_SMOOTH) {
-			nix::SetAlphaM(ALPHA_COLOR_KEY_SMOOTH);
-		}
-		_alpha_enabled_ = true;
-	} else if (_alpha_enabled_) {
-		nix::SetAlpha(ALPHA_NONE);
-		_alpha_enabled_ = false;
-	}
-	nix::SetMaterial(ambient, _diff, specular, shininess, emission);
-	nix::SetShader(shader);
-	if (reflection.cube_map) {
-		Array<nix::Texture*> tex = textures;
-		tex.add(reflection.cube_map);
-		nix::SetTextures(tex);
-	} else {
-		nix::SetTextures(textures);
-	}
-#endif
-}
-
 Material* Material::copy() {
 	Material *m = new Material;
 	m->ambient = ambient;
@@ -160,7 +126,7 @@ Material *LoadMaterial(const string &filename) {
 		int nt = f->read_int();
 		m->textures.resize(nt);
 		for (int i=0;i<nt;i++)
-			m->textures[i] = vulkan::Texture::load(f->read_str());
+			m->textures[i] = nix::LoadTexture(f->read_str());
 		// Colors
 		f->read_comment();
 		m->ambient = file_read_color4i(f);
@@ -188,9 +154,9 @@ Material *LoadMaterial(const string &filename) {
 		m->reflection.mode = f->read_int();
 		m->reflection.density = float(f->read_int()) * 0.01f;
 		m->reflection.cube_map_size = f->read_int();
-		vulkan::Texture *cmt[6];
+		nix::Texture *cmt[6];
 		for (int i=0;i<6;i++)
-			cmt[i] = vulkan::Texture::load(f->read_str());
+			cmt[i] = nix::LoadTexture(f->read_str());
 		if (m->reflection.mode == REFLECTION_CUBE_MAP_DYNAMIC){
 			//m->cube_map = FxCubeMapNew(m->cube_map_size);
 			//FxCubeMapCreate(m->cube_map,cmt[0],cmt[1],cmt[2],cmt[3],cmt[4],cmt[5]);
@@ -204,7 +170,7 @@ Material *LoadMaterial(const string &filename) {
 		// ShaderFile
 		f->read_comment();
 		string ShaderFile = f->read_str();
-		m->shader = vulkan::Shader::load(ShaderFile);
+		m->shader = nix::Shader::load(ShaderFile);
 		// Physics
 		f->read_comment();
 		m->friction.jump = (float)f->read_int() * 0.001f;

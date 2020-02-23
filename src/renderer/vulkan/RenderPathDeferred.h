@@ -8,6 +8,8 @@
 #ifndef SRC_RENDERER_RENDERPATHDEFERRED_H_
 #define SRC_RENDERER_RENDERPATHDEFERRED_H_
 
+#if HAS_LIB_VULKAN
+
 #include "RenderPath.h"
 
 class rect;
@@ -16,9 +18,9 @@ class Camera;
 class ShadowMapRenderer;
 class GBufferRenderer;
 
-class RenderPathDeferred : public RenderPath {
+class RenderPathDeferred : public RenderPathVulkan {
 public:
-	RenderPathDeferred(Renderer *_output_renderer, PerformanceMonitor *perf_mon);
+	RenderPathDeferred(RendererVulkan *_output_renderer, PerformanceMonitor *perf_mon);
 	~RenderPathDeferred() override;
 
 	void draw() override;
@@ -32,14 +34,14 @@ public:
 	rect light_rect(Light *l);
 	void set_light(Light *ll);
 	void draw_from_gbuf_single(vulkan::CommandBuffer *cb, vulkan::Pipeline *pip, vulkan::DescriptorSet *dset, const rect &r);
-	void render_out(vulkan::CommandBuffer *cb, Renderer *ro);
-	void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
+	void render_out(vulkan::CommandBuffer *cb, RendererVulkan *ro);
+	void render_fx(vulkan::CommandBuffer *cb, RendererVulkan *r);
 
-	void render_all_from_deferred(Renderer *r);
+	void render_all_from_deferred(RendererVulkan *r);
 	void render_into_gbuffer(GBufferRenderer *r);
 
 	int width, height;
-	Renderer *output_renderer;
+	RendererVulkan *output_renderer;
 	GBufferRenderer *gbuf_ren;
 
 	vulkan::UniformBuffer *ubo_x1;
@@ -60,6 +62,6 @@ public:
 	vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) override;
 };
 
-
+#endif
 
 #endif /* SRC_RENDERER_RENDERPATHDEFERRED_H_ */

@@ -5,6 +5,8 @@
  *      Author: michi
  */
 
+#if HAS_LIB_VULKAN
+
 #include "RenderPathForward.h"
 #include "Renderer.h"
 #include "ShadowMapRenderer.h"
@@ -19,7 +21,7 @@
 extern vulkan::Texture *tex_white;
 extern vulkan::Texture *tex_black;
 
-RenderPathForward::RenderPathForward(Renderer *r, PerformanceMonitor *pm) : RenderPath(r, pm, "forward/3d-shadow.shader", "forward/3d-fx.shader") {
+RenderPathForward::RenderPathForward(RendererVulkan *r, PerformanceMonitor *pm) : RenderPathVulkan(r, pm, "forward/3d-shadow.shader", "forward/3d-fx.shader") {
 
 	// emission and directional sun pass
 	shader_base = vulkan::Shader::load("forward/3d-base.shader");
@@ -60,7 +62,7 @@ RenderPathForward::~RenderPathForward() {
 	delete dset_fog;*/
 }
 
-void RenderPathForward::render_fx(vulkan::CommandBuffer *cb, Renderer *r) {
+void RenderPathForward::render_fx(vulkan::CommandBuffer *cb, RendererVulkan *r) {
 	cb->set_pipeline(pipeline_fx);
 	cb->set_viewport(r->area());
 
@@ -191,4 +193,4 @@ vulkan::DescriptorSet *RenderPathForward::rp_create_dset_fx(vulkan::Texture *tex
 	return new vulkan::DescriptorSet({ubo, world.ubo_light, world.ubo_fog}, {tex});
 }
 
-
+#endif

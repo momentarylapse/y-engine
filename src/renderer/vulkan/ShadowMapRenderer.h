@@ -9,9 +9,11 @@
 #define SRC_RENDERER_SHADOWMAPRENDERER_H_
 
 
-#include "Renderer.h"
+#include "../Renderer.h"
 
-class ShadowMapRenderer : public Renderer {
+#if LIB_HAS_VULKAN
+
+class ShadowMapRenderer : public RendererVulkan {
 public:
 	ShadowMapRenderer(const string &shader_filename);
 	~ShadowMapRenderer() override;
@@ -33,6 +35,7 @@ public:
 
 
 
+#endif
 
 
 #endif /* SRC_RENDERER_SHADOWMAPRENDERER_H_ */

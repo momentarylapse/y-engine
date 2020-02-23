@@ -18,9 +18,7 @@ glfwdep = dependency('glfw')
 add_project_arguments('-DHAS_LIB_GLFW=1', language : ['cpp'])
 gldep = dependency('GL')
 add_project_arguments('-DHAS_LIB_GL=1', language : ['cpp'])
-vulkandep = dependency('vulkan')
-add_project_arguments('-DHAS_LIB_VULKAN=1', language : ['cpp'])
-deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep, vulkandep]
+deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep]
 
 # optional dependency: ode
 d = cc.find_library('ode', required : false)
@@ -47,6 +45,15 @@ if d.found()
 	deps += [d]
 else
 	add_project_arguments('-DHAS_LIB_DL=0', language : ['cpp'])
+endif
+
+# optional dependency: vulkan
+d = cc.find_library('vulkan', required : false)
+if d.found()
+	add_project_arguments('-DHAS_LIB_VULKAN=1', language : ['cpp'])
+	deps += [d]
+else
+	add_project_arguments('-DHAS_LIB_VULKAN=0', language : ['cpp'])
 endif
 
 
@@ -212,14 +219,14 @@ sources = [
 	'src/lib/vulkan/vulkan.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
-	'src/renderer/GBufferRenderer.cpp',
+	'src/renderer/vulkan/GBufferRenderer.cpp',
+	'src/renderer/vulkan/RenderPathDeferred.cpp',
+	'src/renderer/vulkan/RenderPathForward.cpp',
+	'src/renderer/vulkan/ShadowMapRenderer.cpp',
+	'src/renderer/vulkan/TextureRenderer.cpp',
+	'src/renderer/vulkan/WindowRendererVulkan.cpp',
 	'src/renderer/Renderer.cpp',
 	'src/renderer/RenderPath.cpp',
-	'src/renderer/RenderPathDeferred.cpp',
-	'src/renderer/RenderPathForward.cpp',
-	'src/renderer/ShadowMapRenderer.cpp',
-	'src/renderer/TextureRenderer.cpp',
-	'src/renderer/WindowRenderer.cpp',
 	'src/world/camera.cpp',
 	'src/world/material.cpp',
 	'src/world/model.cpp',

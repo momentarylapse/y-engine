@@ -6,12 +6,15 @@
  */
 
 #include "Picture.h"
+#include "../lib/nix/nix.h"
 #include <iostream>
 
-vulkan::Shader *Picture::shader = nullptr;
+nix::Shader *Picture::shader = nullptr;
+
+/*vulkan::Shader *Picture::shader = nullptr;
 vulkan::Pipeline *Picture::pipeline = nullptr;
 vulkan::VertexBuffer *Picture::vertex_buffer = nullptr;
-vulkan::RenderPass *Picture::render_pass = nullptr;
+vulkan::RenderPass *Picture::render_pass = nullptr;*/
 
 static Array<Picture*> pictures;
 
@@ -22,12 +25,13 @@ struct UBOMatrices {
 	alignas(16) matrix proj;
 };
 
-Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex, vulkan::Shader *_shader) {
+Picture::Picture(const vector &p, float w, float h, nix::Texture *tex, nix::Shader *_shader) {
 	pos = p;
 	width = w;
 	height = h;
 	texture = tex;
 	col = White;
+#if 0
 	ubo = new vulkan::UniformBuffer(sizeof(UBOMatrices));
 	user_shader = _shader;
 	user_pipeline = nullptr;
@@ -36,27 +40,29 @@ Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex, vulkan
 		user_pipeline = new vulkan::Pipeline(user_shader, render_pass, 0, 1);
 	}
 	dset = new vulkan::DescriptorSet({ubo}, {texture});
+#endif
 }
 
-Picture::Picture(const vector &p, float w, float h, vulkan::Texture *tex) : Picture(p, w, h, tex, nullptr) {
+Picture::Picture(const vector &p, float w, float h, nix::Texture *tex) : Picture(p, w, h, tex, nullptr) {
 }
 
 Picture::~Picture() {
+	/*
 	delete ubo;
 	delete dset;
 //	if (user_shader)
 //		delete user_shader;
 	if (user_pipeline)
-		delete user_pipeline;
+		delete user_pipeline;*/
 }
 
 void Picture::rebuild() {
-	dset->set({ubo}, {texture});
+	//dset->set({ubo}, {texture});
 }
 
 namespace gui {
 
-void init(vulkan::RenderPass *rp) {
+void init(){}/*vulkan::RenderPass *rp) {
 	Picture::render_pass = rp;
 	Picture::shader = vulkan::Shader::load("2d.shader");
 	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 0, 1);
@@ -71,7 +77,7 @@ void init(vulkan::RenderPass *rp) {
 	vertices.add({vector(1,0,0), vector::EZ, 1,0});
 	vertices.add({vector(1,1,0), vector::EZ, 1,1});
 	Picture::vertex_buffer->build1i(vertices, {0,2,1, 1,2,3});
-}
+}*/
 
 void reset() {
 	for (auto *p: pictures)
@@ -89,6 +95,7 @@ void update() {
 	}
 }
 
+#if 0
 void render(vulkan::CommandBuffer *cb, const rect &viewport) {
 	cb->set_pipeline(Picture::pipeline);
 	cb->set_viewport(viewport);
@@ -123,5 +130,6 @@ void render(vulkan::CommandBuffer *cb, const rect &viewport) {
 		cb->draw(Picture::vertex_buffer);
 	}
 }
+#endif
 
 }

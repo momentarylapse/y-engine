@@ -24,7 +24,8 @@
 \*----------------------------------------------------------------------------*/
 #include "lib/file/file.h"
 #include "meta.h"
-#include "lib/vulkan/vulkan.h"
+//#include "lib/vulkan/vulkan.h"
+#include "lib/nix/nix.h"
 #include "lib/kaba/kaba.h"
 #ifdef _X_ALLOW_X_
 #include "world/model.h"
@@ -112,8 +113,12 @@ void MetaReset() {
 }
 
 void EngineData::set_dirs(const string &texture_dir, const string &_map_dir, const string &_object_dir, const string &_sound_dir, const string &_script_dir, const string &material_dir, const string &font_dir) {
+#if LIB_HAS_VULKAN
 	vulkan::Texture::directory = texture_dir;
 	vulkan::Shader::directory = material_dir;
+#endif
+	nix::texture_dir = texture_dir;
+	nix::shader_dir = material_dir;
 
 	map_dir = _map_dir;
 	object_dir = _object_dir;

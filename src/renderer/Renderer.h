@@ -8,7 +8,9 @@
 #ifndef SRC_RENDERER_H_
 #define SRC_RENDERER_H_
 
+#if HAS_LIB_VULKAN
 #include "../lib/vulkan/vulkan.h"
+#endif
 
 class rect;
 
@@ -17,6 +19,19 @@ public:
 	Renderer();
 	virtual ~Renderer();
 
+	int width, height;
+	rect area() const;
+
+	virtual bool start_frame() { return false; }
+	virtual void end_frame() {}
+};
+
+#if HAS_LIB_VULKAN
+class RendererVulkan : public Renderer {
+public:
+	RendererVulkan();
+	virtual ~RendererVulkan();
+
 	vulkan::Semaphore *image_available_semaphore;
 	vulkan::Semaphore *render_finished_semaphore;
 	vulkan::Fence *in_flight_fence;
@@ -24,14 +39,9 @@ public:
 	vulkan::CommandBuffer *cb;
 	virtual vulkan::RenderPass *default_render_pass() { return nullptr; }
 
-	int width, height;
-	rect area() const;
-
-	virtual bool start_frame() { return false; }
-	virtual void end_frame() {}
-
 	virtual vulkan::FrameBuffer *current_frame_buffer() { return nullptr; }
 	virtual vulkan::DepthBuffer *depth_buffer() { return nullptr; }
 };
+#endif
 
 #endif /* SRC_RENDERER_H_ */

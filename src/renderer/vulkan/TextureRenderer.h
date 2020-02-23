@@ -8,9 +8,11 @@
 #ifndef SRC_RENDERER_TEXTURERENDERER_H_
 #define SRC_RENDERER_TEXTURERENDERER_H_
 
-#include "Renderer.h"
+#if HAS_LIB_VULKAN
 
-class TextureRenderer : public Renderer {
+#include "../Renderer.h"
+
+class TextureRenderer : public RendererVulkan {
 public:
 	TextureRenderer(vulkan::Texture *tex);
 	~TextureRenderer() override;
@@ -29,5 +31,6 @@ public:
 };
 
 
+#endif
 
 #endif /* SRC_RENDERER_TEXTURERENDERER_H_ */

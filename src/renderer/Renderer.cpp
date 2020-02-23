@@ -10,22 +10,11 @@
 
 
 Renderer::Renderer() {
-	image_available_semaphore = new vulkan::Semaphore();
-	render_finished_semaphore = new vulkan::Semaphore();
-	in_flight_fence = new vulkan::Fence();
-
-	cb = new vulkan::CommandBuffer();
-
 	width = height = 0;
 }
 
 
 Renderer::~Renderer() {
-	delete render_finished_semaphore;
-	delete image_available_semaphore;
-	delete in_flight_fence;
-
-	delete cb;
 }
 
 rect Renderer::area() const {
@@ -33,4 +22,24 @@ rect Renderer::area() const {
 }
 
 
+#if HAS_LIB_VULKAN
+
+RendererVulkan::RendererVulkan() {
+	image_available_semaphore = new vulkan::Semaphore();
+	render_finished_semaphore = new vulkan::Semaphore();
+	in_flight_fence = new vulkan::Fence();
+
+	cb = new vulkan::CommandBuffer();
+}
+
+
+RendererVulkan::~RendererVulkan() {
+	delete render_finished_semaphore;
+	delete image_available_semaphore;
+	delete in_flight_fence;
+
+	delete cb;
+}
+
+#endif
 

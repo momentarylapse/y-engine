@@ -11,11 +11,13 @@
 #include "../lib/base/base.h"
 #include "../lib/math/math.h"
 
-namespace vulkan {
+
+namespace nix {
 	class Texture;
-	class DescriptorSet;
 	class UniformBuffer;
+	class Shader;
 }
+
 
 /*struct ParticlePushData {
 	alignas(16) matrix m;
@@ -25,25 +27,25 @@ namespace vulkan {
 
 class Particle {
 public:
-	Particle(const vector &pos, float r, vulkan::Texture *tex);
+	Particle(const vector &pos, float r, nix::Texture *tex);
 	virtual ~Particle();
 
-	void __init__(const vector &pos, float r, vulkan::Texture *tex);
+	void __init__(const vector &pos, float r, nix::Texture *tex);
 
 	vector pos;
 	color col;
 	float radius;
-	vulkan::Texture *texture;
+	nix::Texture *texture;
 };
 
 class ParticleGroup {
 public:
-	ParticleGroup(vulkan::Texture *t);
+	ParticleGroup(nix::Texture *t);
 	~ParticleGroup();
 	Array<Particle*> particles;
-	vulkan::Texture *texture;
-	vulkan::UniformBuffer *ubo;
-	vulkan::DescriptorSet *dset;
+	nix::Texture *texture;
+	nix::UniformBuffer *ubo;
+	//DescriptorSet *dset;
 };
 
 class ParticleManager {

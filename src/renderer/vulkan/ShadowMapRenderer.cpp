@@ -7,6 +7,8 @@
 
 #include "ShadowMapRenderer.h"
 
+#if HAS_LIB_VULKAN
+
 
 ShadowMapRenderer::ShadowMapRenderer(const string &shader_filename) {
 	width = 512;
@@ -43,4 +45,6 @@ void ShadowMapRenderer::end_frame() {
 	vulkan::queue_submit_command_buffer(cb, {}, {}, in_flight_fence);
 	in_flight_fence->wait();
 }
+
+#endif
 

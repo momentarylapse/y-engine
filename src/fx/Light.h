@@ -13,10 +13,10 @@
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
 
-namespace vulkan {
+/*namespace vulkan {
 	class DescriptorSet;
 	class UniformBuffer;
-}
+}*/
 
 struct UBOLight {
 	alignas(16) matrix proj;
@@ -38,8 +38,8 @@ public:
 	//color col;
 	bool enabled;
 	//float radius, theta, harshness;
-	vulkan::UniformBuffer *ubo;
-	vulkan::DescriptorSet *dset;
+//	vulkan::UniformBuffer *ubo;
+//	vulkan::DescriptorSet *dset;
 };
 
 

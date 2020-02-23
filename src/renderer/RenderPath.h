@@ -10,6 +10,7 @@
 
 #include "../lib/math/math.h"
 
+#if HAS_LIB_VULKAN
 namespace vulkan {
 	class Shader;
 	class Pipeline;
@@ -19,7 +20,9 @@ namespace vulkan {
 	class UniformBuffer;
 	class Texture;
 }
+#endif
 class Renderer;
+class RendererVulkan;
 class ShadowMapRenderer;
 class PerformanceMonitor;
 class World;
@@ -45,13 +48,19 @@ struct UBOFog {
 };
 
 
-
 class RenderPath {
 public:
-	RenderPath(Renderer *renderer, PerformanceMonitor *perf_mon, const string &shadow_shader_filename, const string &fx_shader_filename);
-	virtual ~RenderPath();
-
+	RenderPath() {}
+	virtual ~RenderPath() {}
 	virtual void draw() = 0;
+};
+
+
+#if HAS_LIB_VULKAN
+class RenderPathVulkan : public RenderPath {
+public:
+	RenderPathVulkan(RendererVulkan *renderer, PerformanceMonitor *perf_mon, const string &shadow_shader_filename, const string &fx_shader_filename);
+	virtual ~RenderPathVulkan();
 
 
 	void prepare_all(Renderer *r, Camera *c);
@@ -64,7 +73,7 @@ public:
 	vulkan::Pipeline *pipeline_fx;
 	vulkan::VertexBuffer *particle_vb;
 
-	Renderer *renderer;
+	RendererVulkan *renderer;
 	ShadowMapRenderer *shadow_renderer;
 	PerformanceMonitor *perf_mon;
 
@@ -75,5 +84,6 @@ public:
 	virtual vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) = 0;
 	virtual vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) = 0;
 };
+#endif
 
 #endif /* SRC_RENDERER_RENDERPATH_H_ */

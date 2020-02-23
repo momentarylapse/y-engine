@@ -8,7 +8,8 @@
 \*----------------------------------------------------------------------------*/
 
 #include "terrain.h"
-#include "../lib/vulkan/vulkan.h"
+//#include "../lib/vulkan/vulkan.h"
+#include "../lib/nix/nix.h"
 #include "material.h"
 #include "world.h"
 #include "camera.h"
@@ -35,7 +36,7 @@ Terrain::Terrain()
 {
 	material = NULL;
 	ubo = nullptr;
-	dset = nullptr;
+//	dset = nullptr;
 	reset();
 }
 
@@ -88,7 +89,7 @@ bool Terrain::load(const string &_filename_, const vector &_pos_, bool deep)
 				if (num_textures > material->textures.num)
 					material->textures.resize(num_textures);
 				for (int i=0;i<num_textures;i++)
-					material->textures[i] = vulkan::Texture::load(texture_file[i]);
+					material->textures[i] = nix::LoadTexture(texture_file[i]);
 
 				// height
 				for (int x=0;x<num_x+1;x++)
@@ -98,7 +99,7 @@ bool Terrain::load(const string &_filename_, const vector &_pos_, bool deep)
 					for (int z=0;z<num_z/32+1;z++)
 						partition[x][z] = -1;
 
-				vertex_buffer = new vulkan::VertexBuffer();
+				vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
 			}
 		}else{
 			msg_error(format("wrong file format: %d (4 expected)",ffv));
@@ -126,9 +127,11 @@ bool Terrain::load(const string &_filename_, const vector &_pos_, bool deep)
 }
 
 Terrain::~Terrain() {
+#if HAS_LIB_VULKAN
 	if (dset)
 		delete dset;
 	delete ubo;
+#endif
 	delete vertex_buffer;
 	delete material;
 }
@@ -452,7 +455,9 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 }
 
 void Terrain::build_vertex_buffer() {
-	Array<vulkan::Vertex1> vertices;
+	//Array<vulkan::Vertex1> vertices;
+	Array<vector> p,n;
+	Array<float> uv;
 
 	// number of 32-blocks (including the partially filled ones)
 	int nx = ( num_x - 1 ) / 32 + 1;
@@ -552,12 +557,18 @@ void Terrain::build_vertex_buffer() {
 						td[i*2]=(float)(x+e)*texture_scale[i].x,	td[i*2+1]=(float)(z+e)*texture_scale[i].z;
 					}
 
-					vertices.add({va,na,ta[0],ta[1]});
+					/*vertices.add({va,na,ta[0],ta[1]});
 					vertices.add({vc,nc,tc[0],tc[1]});
 					vertices.add({vd,nd,td[0],td[1]});
 					vertices.add({va,na,ta[0],ta[1]});
 					vertices.add({vd,nd,td[0],td[1]});
-					vertices.add({vb,nb,tb[0],tb[1]});
+					vertices.add({vb,nb,tb[0],tb[1]});*/
+					p.add(va);	n.add(na);	uv.add(ta[0]);	uv.add(ta[1]);
+					p.add(vc);	n.add(nc);	uv.add(tc[0]);	uv.add(tc[1]);
+					p.add(vd);	n.add(nd);	uv.add(td[0]);	uv.add(td[1]);
+					p.add(va);	n.add(na);	uv.add(ta[0]);	uv.add(ta[1]);
+					p.add(vd);	n.add(nd);	uv.add(td[0]);	uv.add(td[1]);
+					p.add(vb);	n.add(nb);	uv.add(tb[0]);	uv.add(tb[1]);
 
 #if 0
 					// add to buffer
@@ -579,7 +590,10 @@ void Terrain::build_vertex_buffer() {
 #endif
 				}
 		}
-	vertex_buffer->build1(vertices);
+//	vertex_buffer->build1(vertices);
+	vertex_buffer->update(0, p);
+	vertex_buffer->update(1, n);
+	vertex_buffer->update(2, uv);
 }
 
 void Terrain::draw() {

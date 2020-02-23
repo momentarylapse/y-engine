@@ -5,6 +5,9 @@
  *      Author: michi
  */
 
+
+#if HAS_LIB_VULKAN
+
 #include "GBufferRenderer.h"
 
 GBufferRenderer::GBufferRenderer(int w, int h) {
@@ -70,4 +73,5 @@ vulkan::FrameBuffer *GBufferRenderer::current_frame_buffer() {
 	return g_buffer;
 }
 
+#endif
 

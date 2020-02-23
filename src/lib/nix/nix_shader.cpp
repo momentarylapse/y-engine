@@ -55,8 +55,10 @@ void NixBindUniform(UniformBuffer *ub, int index) {
 
 
 int create_empty_shader_program() {
+
 	int gl_p = glCreateProgram();
 	TestGLError("CreateProgram");
+
 	if (gl_p <= 0){
 		msg_error("could not create gl shader program");
 		return -1;

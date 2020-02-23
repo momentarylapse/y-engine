@@ -161,6 +161,24 @@ void AppraiseDimensions(Model *m)
 
 void create_vb(Model *m, Mesh *mesh) {
 	for (auto &s: mesh->sub) {
+		s.vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
+		Array<vector> p, n;
+		Array<float> uv;
+		for (int i=0; i<s.num_triangles; i++) {
+			for (int k=0; k<3; k++) {
+				int vi = s.triangle_index[i*3+k];
+				p.add(mesh->vertex[vi]);
+				n.add(s.normal[i*3+k]);
+				uv.add(s.skin_vertex[i*6+k*2  ]);
+				uv.add(s.skin_vertex[i*6+k*2+1]);
+			}
+		}
+		s.vertex_buffer->update(0, p);
+		s.vertex_buffer->update(1, n);
+		s.vertex_buffer->update(2, uv);
+
+
+#if LIB_HAS_VULKAN
 		s.vertex_buffer = new vulkan::VertexBuffer();
 		Array<vulkan::Vertex1> vertices;
 		for (int i=0; i<s.num_triangles; i++) {
@@ -175,6 +193,7 @@ void create_vb(Model *m, Mesh *mesh) {
 			}
 		}
 		s.vertex_buffer->build1(vertices);
+#endif
 	}
 }
 
@@ -353,7 +372,7 @@ void Model::load(const string &filename)
 			m->textures.resize(nt);
 		for (int t=0;t<nt;t++){
 			string fn = f->read_str();
-			m->textures[t] = vulkan::Texture::load(fn);
+			m->textures[t] = nix::LoadTexture(fn);
 		}
 	}
 	

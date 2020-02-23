@@ -34,17 +34,17 @@ extern string ObjectDir;
 class Model;
 namespace Fx {
 	class Effect;
-};
+}
 class Material;
 class TraceData;
 class Terrain;
 class TemplateDataScriptVariable;
-namespace vulkan {
+namespace nix {
 	class VertexBuffer;
-};
+}
 namespace Kaba {
 	class Script;
-};
+}
 
 
 #define MODEL_MAX_POLY_FACES			32
@@ -67,7 +67,7 @@ public:
 	// normals
 	Array<vector> normal;
 
-	vulkan::VertexBuffer *vertex_buffer;
+	nix::VertexBuffer *vertex_buffer;
 
 	// refill the vertex buffer etc...
 	bool force_update;

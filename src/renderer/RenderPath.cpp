@@ -7,8 +7,10 @@
 
 #include "RenderPath.h"
 #include "Renderer.h"
-#include "ShadowMapRenderer.h"
+#if HAS_LIB_VULKAN
+#include "vulkan/ShadowMapRenderer.h"
 #include "../lib/vulkan/vulkan.h"
+#endif
 #include "../world/world.h"
 #include "../world/terrain.h"
 #include "../world/model.h"
@@ -17,10 +19,11 @@
 #include "../fx/Particle.h"
 #include "../gui/Picture.h"
 
-
+#if HAS_LIB_VULKAN
 extern vulkan::Shader *shader_fx;
 extern vulkan::Texture *tex_white;
 extern vulkan::Texture *tex_black;
+#endif
 
 struct GeoPush {
 	alignas(16) matrix model;
@@ -36,7 +39,11 @@ matrix mtr(const vector &t, const quaternion &a) {
 	return mt * mr;
 }
 
-RenderPath::RenderPath(Renderer *r, PerformanceMonitor *pm, const string &shadow_shader_filename, const string &fx_shader_filename) {
+
+#if HAS_LIB_VULKAN
+
+
+RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, PerformanceMonitor *pm, const string &shadow_shader_filename, const string &fx_shader_filename) {
 	renderer = r;
 	perf_mon = pm;
 
@@ -65,7 +72,7 @@ RenderPath::RenderPath(Renderer *r, PerformanceMonitor *pm, const string &shadow
 	AllowXContainer = true;
 }
 
-RenderPath::~RenderPath() {
+RenderPathVulkan::~RenderPathVulkan() {
 	delete particle_vb;
 	delete pipeline_fx;
 
@@ -74,11 +81,11 @@ RenderPath::~RenderPath() {
 	delete light_cam;
 }
 
-void RenderPath::pick_shadow_source() {
+void RenderPathVulkan::pick_shadow_source() {
 
 }
 
-void RenderPath::draw_world(vulkan::CommandBuffer *cb, int light_index) {
+void RenderPathVulkan::draw_world(vulkan::CommandBuffer *cb, int light_index) {
 
 	GeoPush gp;
 	gp.eye_pos = cam->pos;
@@ -105,7 +112,7 @@ void RenderPath::draw_world(vulkan::CommandBuffer *cb, int light_index) {
 
 }
 
-void RenderPath::prepare_all(Renderer *r, Camera *c) {
+void RenderPathVulkan::prepare_all(Renderer *r, Camera *c) {
 
 	c->set_view((float)r->width / (float)r->height);
 
@@ -136,7 +143,7 @@ void RenderPath::prepare_all(Renderer *r, Camera *c) {
 }
 
 
-void RenderPath::render_into_shadow(ShadowMapRenderer *r) {
+void RenderPathVulkan::render_into_shadow(ShadowMapRenderer *r) {
 	r->start_frame();
 	auto *cb = r->cb;
 
@@ -149,4 +156,6 @@ void RenderPath::render_into_shadow(ShadowMapRenderer *r) {
 
 	r->end_frame();
 }
+
+#endif
 

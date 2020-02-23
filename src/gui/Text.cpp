@@ -77,7 +77,7 @@ void render_text(const string &str, Image &im) {
 
 
 
-Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new vulkan::Texture(16, 16)) {
+Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new nix::Texture()) {
 	text = t;
 	rebuild();
 }
@@ -90,8 +90,8 @@ Text::~Text() {
 void Text::rebuild() {
 	Image im;
 	render_text(text, im);
-	texture->override(&im);
-	dset->set({ubo}, {texture});
+	texture->overwrite(im);
+	//dset->set({ubo}, {texture});
 
 	width = height * (float)im.width / (float)im.height / 1.33f;
 

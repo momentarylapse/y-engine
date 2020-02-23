@@ -14,10 +14,10 @@
 #include "material.h"
 class Material;
 class TraceData;
-namespace vulkan {
+namespace nix {
 	class VertexBuffer;
 	class UniformBuffer;
-	class DescriptorSet;
+	//class DescriptorSet;
 };
 
 enum {
@@ -76,9 +76,9 @@ public:
 	Array<float> height;
 	Array<vector> vertex, normal;
 	Array<plane> pl; // for collision detection
-	vulkan::VertexBuffer *vertex_buffer;
-	vulkan::UniformBuffer *ubo;
-	vulkan::DescriptorSet *dset;
+	nix::VertexBuffer *vertex_buffer;
+	nix::UniformBuffer *ubo;
+	//vulkan::DescriptorSet *dset;
 	int partition[128][128], partition_old[128][128];
 	vector pattern, min, max;
 	Material *material;

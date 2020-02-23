@@ -8,17 +8,19 @@
 #ifndef SRC_RENDERER_WINDOWRENDERER_H_
 #define SRC_RENDERER_WINDOWRENDERER_H_
 
+#if HAS_LIB_VULKAN
+
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#include "Renderer.h"
+#include "../Renderer.h"
 
 
-class WindowRenderer : public Renderer {
+class WindowRendererVulkan : public RendererVulkan {
 public:
-	WindowRenderer(GLFWwindow *window);
-	~WindowRenderer() override;
+	WindowRendererVulkan(GLFWwindow *window);
+	~WindowRendererVulkan() override;
 
 	GLFWwindow *window;
 	bool framebuffer_resized = false;
@@ -38,9 +40,11 @@ public:
 	vulkan::DepthBuffer *depth_buffer() override;
 
 	static void framebuffer_resize_callback(GLFWwindow* window, int width, int height);
-	static WindowRenderer *main_renderer;
+	static WindowRendererVulkan *main_renderer;
 	void on_resize(int width, int height);
 };
+
+#endif
 
 
 #endif /* SRC_RENDERER_WINDOWRENDERER_H_ */

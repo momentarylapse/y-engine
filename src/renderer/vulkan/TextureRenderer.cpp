@@ -5,6 +5,8 @@
  *      Author: michi
  */
 
+#if HAS_LIB_VULKAN
+
 
 #include "TextureRenderer.h"
 
@@ -53,4 +55,4 @@ vulkan::FrameBuffer *TextureRenderer::current_frame_buffer() {
 }
 
 
-
+#endif

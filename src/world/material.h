@@ -7,12 +7,11 @@
 #define MATERIAL_MAX_TEXTURES		8
 
 class Model;
-namespace vulkan {
+namespace nix {
 	class Texture;
 	//class CubeMap;
 	class Shader;
-	class CommandBuffer;
-};
+}
 
 
 // visual and physical properties
@@ -21,8 +20,8 @@ public:
 	// name of the material
 	string name;
 
-	Array<vulkan::Texture*> textures;
-	vulkan::Shader *shader;
+	Array<nix::Texture*> textures;
+	nix::Shader *shader;
 
 	// light
 	color ambient, diffuse, specular, emission;
@@ -38,8 +37,8 @@ public:
 	struct Reflection {
 		int mode;
 		float density;
-		//vulkan::CubeMap *cube_map;
-		vulkan::Texture *cube_map;
+		//CubeMap *cube_map;
+		nix::Texture *cube_map;
 		int cube_map_size;
 	} reflection;
 
@@ -49,7 +48,6 @@ public:
 
 	Material();
 	~Material();
-	void apply(vulkan::CommandBuffer *cb);
 	Material *copy();
 };
 

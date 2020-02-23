@@ -5,16 +5,18 @@
  *      Author: michi
  */
 
-#include "WindowRenderer.h"
+#if HAS_LIB_VULKAN
+
+#include "WindowRendererVulkan.h"
 #include <iostream>
 
 
-WindowRenderer *WindowRenderer::main_renderer = nullptr;
+WindowRendererVulkan *WindowRendererVulkan::main_renderer = nullptr;
 
 
 
 
-WindowRenderer::WindowRenderer(GLFWwindow *_window) {
+WindowRendererVulkan::WindowRendererVulkan(GLFWwindow *_window) {
 	window = _window;
 
 
@@ -26,22 +28,22 @@ WindowRenderer::WindowRenderer(GLFWwindow *_window) {
 	glfwSetFramebufferSizeCallback(window, framebuffer_resize_callback);
 }
 
-WindowRenderer::~WindowRenderer() {
+WindowRendererVulkan::~WindowRendererVulkan() {
 	delete swap_chain;
 }
 
 
-void WindowRenderer::framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
+void WindowRendererVulkan::framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
 	main_renderer->on_resize(width, height);
 }
 
-void WindowRenderer::on_resize(int w, int h) {
+void WindowRendererVulkan::on_resize(int w, int h) {
 	width = w;
 	height = h;
 	framebuffer_resized = true;
 }
 
-void WindowRenderer::rebuild_default_stuff() {
+void WindowRendererVulkan::rebuild_default_stuff() {
 	std::cout << "recreate swap chain" << "\n";
 
 	vulkan::wait_device_idle();
@@ -51,15 +53,15 @@ void WindowRenderer::rebuild_default_stuff() {
 	height = swap_chain->height;
 }
 
-vulkan::FrameBuffer *WindowRenderer::current_frame_buffer() {
+vulkan::FrameBuffer *WindowRendererVulkan::current_frame_buffer() {
 	return swap_chain->frame_buffers[image_index];
 }
 
-vulkan::DepthBuffer *WindowRenderer::depth_buffer() {
+vulkan::DepthBuffer *WindowRendererVulkan::depth_buffer() {
 	return swap_chain->depth_buffer;
 }
 
-bool WindowRenderer::start_frame() {
+bool WindowRendererVulkan::start_frame() {
 	in_flight_fence->wait();
 
 	if (!swap_chain->aquire_image(&image_index, image_available_semaphore)) {
@@ -69,7 +71,7 @@ bool WindowRenderer::start_frame() {
 	return true;
 }
 
-void WindowRenderer::end_frame() {
+void WindowRendererVulkan::end_frame() {
 
 	vulkan::queue_submit_command_buffer(cb, {image_available_semaphore}, {render_finished_semaphore}, in_flight_fence);
 
@@ -81,4 +83,4 @@ void WindowRenderer::end_frame() {
 
 
 
-
+#endif

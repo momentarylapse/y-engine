@@ -11,7 +11,8 @@
 #include <algorithm>
 #include "world.h"
 #include "../lib/file/file.h"
-#include "../lib/vulkan/vulkan.h"
+//#include "../lib/vulkan/vulkan.h"
+#include "../lib/nix/nix.h"
 #include "../meta.h"
 #include "object.h"
 #include "model.h"
@@ -38,11 +39,11 @@
 #include "camera.h"
 
 
-vulkan::Texture *tex_white = nullptr;
-vulkan::Texture *tex_black = nullptr;
+nix::Texture *tex_white = nullptr;
+nix::Texture *tex_black = nullptr;
 
 
-vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo);
+//vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo);
 
 
 
@@ -162,16 +163,16 @@ void TestObjectSanity(const char *str)
 
 
 void GodInit() {
-	world.ubo_light = new vulkan::UniformBuffer(sizeof(UBOLight), 64);
-	world.ubo_fog = new vulkan::UniformBuffer(64);
+//	world.ubo_light = new vulkan::UniformBuffer(sizeof(UBOLight), 64);
+//	world.ubo_fog = new vulkan::UniformBuffer(64);
 
 	Image im;
-	tex_white = new vulkan::Texture();
-	tex_black = new vulkan::Texture();
+	tex_white = new nix::Texture();
+	tex_black = new nix::Texture();
 	im.create(16, 16, White);
-	tex_white->override(&im);
+	tex_white->overwrite(im);
 	im.create(16, 16, Black);
-	tex_black->override(&im);
+	tex_black->overwrite(im);
 
 	world.reset();
 
@@ -209,13 +210,13 @@ void GodInit() {
 }
 
 void GodEnd() {
-	delete world.ubo_light;
-	delete world.ubo_fog;
+//	delete world.ubo_light;
+//	delete world.ubo_fog;
 }
 
 World::World() {
-	ubo_light = nullptr;
-	ubo_fog = nullptr;
+//	ubo_light = nullptr;
+//	ubo_fog = nullptr;
 	sun = nullptr;
 
 	world.particle_manager = new ParticleManager();
@@ -405,8 +406,8 @@ bool World::load(const LevelData &ld) {
 Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
-	tt->ubo = new vulkan::UniformBuffer(64*3);
-	tt->dset = rp_create_dset(tt->material->textures, tt->ubo);
+//	tt->ubo = new vulkan::UniformBuffer(64*3);
+//	tt->dset = rp_create_dset(tt->material->textures, tt->ubo);
 	terrains.add(tt);
 	return tt;
 }
@@ -1277,8 +1278,8 @@ void World::unregister_object(Model *m) {
 }
 
 void PartialModel::clear() {
-	delete ubo;
-	delete dset;
+//	delete ubo;
+//	delete dset;
 }
 
 // add a model to the (possible) rendering list
@@ -1299,8 +1300,8 @@ void World::register_model(Model *m) {
 		PartialModel p;
 		p.model = m;
 		p.material = mat;
-		p.ubo = new vulkan::UniformBuffer(64*3);
-		p.dset = rp_create_dset(mat->textures, p.ubo);
+//		p.ubo = new vulkan::UniformBuffer(64*3);
+//		p.dset = rp_create_dset(mat->textures, p.ubo);
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;
