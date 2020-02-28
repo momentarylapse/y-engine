@@ -627,12 +627,12 @@ void Terrain::draw() {
 	// the actual drawing
 	nix::SetWorldMatrix(matrix::ID);
 	nix::Draw3D(vertex_buffer);
+#endif
 
 	pos_old = cur_cam->pos;
 	force_redraw = false;
 	for (int x=0;x<num_x/32;x++)
 		for (int z=0;z<num_z/32;z++)
 			partition_old[x][z]=partition[x][z];
-#endif
 }
 

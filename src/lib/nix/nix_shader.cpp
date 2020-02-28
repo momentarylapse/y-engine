@@ -251,7 +251,7 @@ Shader *Shader::load(const string &filename) {
 
 		msg_left();
 		return shader;
-	} catch(FileError &e) {
+	} catch(Exception &e) {
 		msg_error(e.message());
 		default_shader_3d->reference_count ++;
 		return default_shader_3d;

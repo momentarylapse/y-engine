@@ -9,14 +9,12 @@
 #include "../lib/nix/nix.h"
 #include <iostream>
 
-nix::Shader *Picture::shader = nullptr;
 
 /*vulkan::Shader *Picture::shader = nullptr;
 vulkan::Pipeline *Picture::pipeline = nullptr;
 vulkan::VertexBuffer *Picture::vertex_buffer = nullptr;
 vulkan::RenderPass *Picture::render_pass = nullptr;*/
 
-static Array<Picture*> pictures;
 
 
 struct UBOMatrices {
@@ -60,9 +58,29 @@ void Picture::rebuild() {
 	//dset->set({ubo}, {texture});
 }
 
+void vb_create_rect(nix::VertexBuffer *vb, const rect &s) {
+	Array<vector> p = {vector(s.x1,s.y1,0), vector(s.x1,s.y2,0), vector(s.x2,s.y2,0),  vector(s.x1,s.y1,0), vector(s.x2,s.y2,0), vector(s.x2,s.y1,0)};
+	Array<float> uv = {0,0, 0,1, 1,1,  0,0, 1,1, 1,0};
+	vb->update(0, p);
+	vb->update(1, p);
+	vb->update(2, uv);
+}
+
 namespace gui {
 
-void init(){}/*vulkan::RenderPass *rp) {
+nix::Shader *shader = nullptr;
+nix::VertexBuffer *vertex_buffer = nullptr;
+Array<Picture*> pictures;
+
+
+void init() {
+	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
+	vb_create_rect(vertex_buffer, rect::ID);
+
+	shader = nix::Shader::load("forward/2d.shader");
+}
+
+/*vulkan::RenderPass *rp) {
 	Picture::render_pass = rp;
 	Picture::shader = vulkan::Shader::load("2d.shader");
 	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 0, 1);

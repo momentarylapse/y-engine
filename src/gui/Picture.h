@@ -31,7 +31,6 @@ public:
 
 	virtual void rebuild();
 
-	static nix::Shader *shader;
 	/*static vulkan::Shader *shader;
 	static vulkan::Pipeline *pipeline;
 	static vulkan::VertexBuffer *vertex_buffer;
@@ -45,6 +44,12 @@ namespace gui {
 	//void render(vulkan::CommandBuffer *cb, const rect &viewport);
 	void update();
 	void add(Picture *p);
+
+	extern Array<Picture*> pictures;
+	extern nix::Shader *shader;
+	extern nix::VertexBuffer *vertex_buffer;
 }
+
+void vb_create_rect(nix::VertexBuffer *vb, const rect &s);
 
 #endif /* SRC_GUI_PICTURE_H_ */

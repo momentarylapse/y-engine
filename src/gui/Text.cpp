@@ -78,21 +78,24 @@ void render_text(const string &str, Image &im) {
 
 
 Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new nix::Texture()) {
-	text = t;
-	rebuild();
+	set_text(t);
 }
 
 Text::~Text() {
 	delete texture;
 }
 
-
 void Text::rebuild() {
 	Image im;
 	render_text(text, im);
+
 	texture->overwrite(im);
 	//dset->set({ubo}, {texture});
 
 	width = height * (float)im.width / (float)im.height / 1.33f;
+}
 
+void Text::set_text(const string &t) {
+	text = t;
+	rebuild();
 }

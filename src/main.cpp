@@ -117,13 +117,6 @@ public:
 };
 static Config config;
 
-void vb_create_rect(nix::VertexBuffer *vb) {
-	Array<vector> p = {vector(-1,-1,0), vector(-1,1,0), vector(1,1,0),  vector(-1,-1,0), vector(1,1,0), vector(1,-1,0)};
-	Array<float> uv = {0,0, 0,1, 1,1,  0,0, 1,1, 1,0};
-	vb->update(0, p);
-	vb->update(1, p);
-	vb->update(2, uv);
-}
 
 #define METHOD 2
 
@@ -135,7 +128,7 @@ public:
 	nix::DepthBuffer *depth_buffer = nullptr;
 	nix::FrameBuffer *fb = nullptr;
 	nix::Shader *shader_out = nullptr;
-	float time = 0;
+
 	RenderPathGL(GLFWwindow* w) {
 		window = w;
 		glfwMakeContextCurrent(window);
@@ -155,7 +148,6 @@ public:
 
 	}
 	void draw() override {
-		time += 0.02f;
 
 		render_into_texture();
 		int w, h;
@@ -164,6 +156,33 @@ public:
 		nix::FrameBuffer::DEFAULT->height = h;
 
 		nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
+
+		render_out();
+
+		draw_gui();
+
+
+		glfwSwapBuffers(window);
+	}
+
+	void draw_gui() {
+		nix::SetProjectionOrtho(true);
+		nix::SetCull(CULL_NONE);
+		nix::SetShader(gui::shader);
+		nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
+
+		for (auto *p: gui::pictures) {
+			nix::SetTexture(p->texture);
+			nix::SetWorldMatrix(matrix::translation(p->pos) * matrix::scale(p->width, p->height, 0));
+			nix::DrawTriangles(gui::vertex_buffer);
+		}
+		nix::SetCull(CULL_DEFAULT);
+
+		nix::SetAlpha(ALPHA_NONE);
+	}
+
+	void render_out() {
+
 		nix::SetTexture(dyn_tex);
 		nix::SetShader(shader_out);
 		shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
@@ -175,12 +194,9 @@ public:
 
 
 
-		vb_create_rect(nix::vb_temp);
+		vb_create_rect(nix::vb_temp, rect(-1,1, -1,1));
 
 		nix::DrawTriangles(nix::vb_temp);
-
-
-		glfwSwapBuffers(window);
 	}
 
 	void render_into_texture() {
@@ -198,14 +214,15 @@ public:
 		nix::SetLightDirectional(0, world.lights[0]->dir, world.lights[0]->col, world.lights[0]->harshness);
 
 
-		/*for (auto *t: world.terrains) {
-			gp.model = matrix::ID;
-			gp.emission = Black;
-			gp.xxx[0] = 0.0f;
-			cb->push_constant(0, sizeof(gp), &gp);
-			cb->bind_descriptor_set_dynamic(0, t->dset, {light_index});
-			cb->draw(t->vertex_buffer);
-		}*/
+		for (auto *t: world.terrains) {
+			//nix::SetWorldMatrix(matrix::translation(t->pos));
+			nix::SetWorldMatrix(matrix::ID);
+			nix::SetMaterial(White, White, White, 20, Black);
+			nix::SetTextures(t->material->textures);
+			nix::SetShader(t->material->shader);
+			t->draw();
+			nix::DrawTriangles(t->vertex_buffer);
+		}
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
@@ -383,22 +400,21 @@ public:
 #if HAS_LIB_VULKAN
 		vulkan::wait_device_idle();
 #endif
-		fps_display->text = format("%.1f     s:%.2f  g:%.2f  c:%.2f  fx:%.2f  2d:%.2f",
+		fps_display->set_text(format("%.1f     s:%.2f  g:%.2f  c:%.2f  fx:%.2f  2d:%.2f",
 				1.0f / perf_mon.avg.frame_time,
 				perf_mon.avg.location[0]*1000,
 				perf_mon.avg.location[1]*1000,
 				perf_mon.avg.location[2]*1000,
 				perf_mon.avg.location[3]*1000,
-				perf_mon.avg.location[4]*1000);
-		fps_display->rebuild();
+				perf_mon.avg.location[4]*1000));
 	}
 
 
 
 
 	void draw_frame() {
-//		if (perf_mon.frames == 0)
-//			update_statistics();
+		if (perf_mon.frames == 0)
+			update_statistics();
 
 		render_path->draw();
 	}

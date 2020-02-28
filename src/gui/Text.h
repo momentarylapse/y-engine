@@ -16,6 +16,7 @@ public:
 	virtual ~Text();
 
 	void rebuild() override;
+	void set_text(const string &t);
 
 	string text;
 };
