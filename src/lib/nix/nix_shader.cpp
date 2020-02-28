@@ -5,6 +5,7 @@
 | last update: 2010.03.11 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
 
+#define HAS_LIB_GL 1
 #if HAS_LIB_GL
 
 #include "nix.h"
@@ -55,14 +56,10 @@ void NixBindUniform(UniformBuffer *ub, int index) {
 
 
 int create_empty_shader_program() {
-
 	int gl_p = glCreateProgram();
 	TestGLError("CreateProgram");
-
-	if (gl_p <= 0){
-		msg_error("could not create gl shader program");
-		return -1;
-	}
+	if (gl_p <= 0)
+		throw Exception("could not create gl shader program");
 	return gl_p;
 }
 
@@ -131,11 +128,8 @@ int create_gl_shader(const string &source, int type) {
 		return -1;
 	int gl_shader = glCreateShader(type);
 	TestGLError("CreateShader create");
-	if (gl_shader <= 0) {
-		shader_error = "could not create gl shader object";
-		msg_error(shader_error);
-		return -1;
-	}
+	if (gl_shader <= 0)
+		throw Exception("could not create gl shader object");
 	
 	const char *pbuf[2];
 
@@ -155,8 +149,7 @@ int create_gl_shader(const string &source, int type) {
 		int size;
 		glGetShaderInfoLog(gl_shader, shader_error.num, &size, (char*)shader_error.data);
 		shader_error.resize(size);
-		msg_error("while compiling shader: " + shader_error);
-		return -1;
+		throw Exception("while compiling shader: " + shader_error);
 	}
 	return gl_shader;
 }
@@ -164,21 +157,14 @@ int create_gl_shader(const string &source, int type) {
 Shader *Shader::create(const string &source) {
 	auto parts = get_shader_parts(source);
 
-	if (parts.num == 0) {
-		shader_error = "no shader tags found (<VertexShader>...</VertexShader> or <FragmentShader>...</FragmentShader>)";
-		msg_error(shader_error);
-		return NULL;
-	}
+	if (parts.num == 0)
+		throw Exception("no shader tags found (<VertexShader>...</VertexShader> or <FragmentShader>...</FragmentShader>)");
 
 	int prog = create_empty_shader_program();
-	if (prog < 0)
-		return NULL;
 
 	Array<int> shaders;
 	for (auto p: parts) {
 		int shader = create_gl_shader(p.source, p.type);
-		if ((shader < 0) and (p.source.num > 0))
-			return NULL;
 		shaders.add(shader);
 		if (shader >= 0)
 			glAttachShader(prog, shader);
@@ -195,9 +181,7 @@ Shader *Shader::create(const string &source) {
 		int size;
 		glGetProgramInfoLog(prog, shader_error.num, &size, (char*)shader_error.data);
 		shader_error.resize(size);
-		msg_error("while linking the shader program: " + shader_error);
-		msg_left();
-		return NULL;
+		throw Exception("while linking the shader program: " + shader_error);
 	}
 
 	for (int shader: shaders)

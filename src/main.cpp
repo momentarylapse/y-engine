@@ -2,9 +2,6 @@
 
 #include "lib/nix/nix.h"
 
-#if HAS_LIB_VULKAN
-#define GLFW_INCLUDE_VULKAN
-#endif
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -12,9 +9,6 @@
 #include <chrono>
 
 
-#if HAS_LIB_VULKAN
-#include "lib/vulkan/vulkan.h"
-#endif
 #include "lib/math/math.h"
 #include "lib/image/color.h"
 #include "lib/image/image.h"
@@ -40,14 +34,6 @@
 #include "plugins/Controller.h"
 
 #include "renderer/RenderPath.h"
-#if HAS_LIB_VULKAN
-#include "renderer/vulkan/WindowRendererVulkan.h"
-#include "renderer/vulkan/GBufferRenderer.h"
-#include "renderer/vulkan/RenderPathDeferred.h"
-#include "renderer/vulkan/ShadowMapRenderer.h"
-
-#include "renderer/vulkan/RenderPathForward.h"
-#endif
 
 const bool SHOW_GBUFFER = false;
 const bool SHOW_SHADOW = false;
@@ -130,22 +116,72 @@ public:
 };
 static Config config;
 
+void vb_create_rect(nix::VertexBuffer *vb) {
+	Array<vector> p = {vector(-1,-1,0), vector(-1,1,0), vector(1,1,0),  vector(-1,-1,0), vector(1,1,0), vector(1,-1,0)};
+	Array<float> uv = {0,0, 0,1, 1,1,  0,0, 1,1, 1,0};
+	vb->update(0, p);
+	vb->update(1, p);
+	vb->update(2, uv);
+}
 
 class RenderPathGL : public RenderPath {
 public:
 	int width, height;
 	GLFWwindow* window;
+	nix::Texture *dyn_tex = nullptr;
+	nix::Shader *shader_out = nullptr;
+	float time = 0;
 	RenderPathGL(GLFWwindow* w) {
 		window = w;
 		glfwMakeContextCurrent(window);
 		glfwGetFramebufferSize(window, &width, &height);
 
 		nix::Init();
+
+		dyn_tex = new nix::DynamicTexture(width, height, "rgba:f16");
+		try {
+			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
+		} catch(Exception &e) {
+			msg_error(e.message());
+			throw e;
+		}
+
 	}
 	void draw() override {
-		glfwGetFramebufferSize(window, &width, &height);
+		time += 0.02f;
+
+		render_into_texture();
+		int w, h;
+		glfwGetFramebufferSize(window, &w, &h);
+		nix::SetViewport(w, h);
+		nix::ResetToColor(White);
+		nix::ResetZ();
+
+		nix::SetTexture(dyn_tex);
+		nix::SetShader(shader_out);
+		shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
+		//nix::SetShader(nix::default_shader_3d);
+		nix::SetProjectionMatrix(matrix::ID);
+		nix::SetViewMatrix(matrix::ID);
+		nix::SetWorldMatrix(matrix::ID);
+
+		nix::SetZ(false, false);
+
+
+
+		vb_create_rect(nix::vb_temp);
+
+		nix::DrawTriangles(nix::vb_temp);
+
+
+		glfwSwapBuffers(window);
+	}
+
+	void render_into_texture() {
+		nix::StartFrameIntoTexture(dyn_tex);
+
 		nix::SetViewport(width, height);
-		cam->set_view(1.3f);
+		cam->set_view((float)width / (float)height);
 		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 		nix::SetViewMatrix(cam->m_view);
 
@@ -183,8 +219,7 @@ public:
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
 		}
 
-
-		glfwSwapBuffers(window);
+		nix::EndFrame();
 	}
 };
 

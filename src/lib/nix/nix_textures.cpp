@@ -6,6 +6,7 @@
 |                                                                              |
 | last update: 2008.11.09 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
+#define HAS_LIB_GL 1
 #if HAS_LIB_GL
 
 #include "nix.h"
@@ -475,18 +476,46 @@ void TextureVideoMove(int texture,float elapsed)
 #endif
 }
 
+unsigned int parse_format(const string &_format, int &components, int &x) {
+	if (_format == "r:i8") {
+		components = GL_RED; x = GL_UNSIGNED_BYTE;
+		return GL_R8;
+	} else if (_format == "rgb:i8") {
+		components = GL_RGB; x = GL_UNSIGNED_BYTE;
+		return GL_RGB8;
+	} else if (_format == "rgba:i8") {
+		components = GL_RGBA; x = GL_UNSIGNED_BYTE;
+		return GL_RGBA8;
+	} else if (_format == "r:f32") {
+		components = GL_RED; x = GL_FLOAT;
+		return GL_R32F;
+	} else if (_format == "rgba:f32") {
+		components = GL_RGBA; x = GL_FLOAT;
+		return GL_RGBA32F;
+	} else if (_format == "r:f16") {
+		components = GL_RED; x = GL_HALF_FLOAT;
+		return GL_R16F;
+	} else if (_format == "rgba:f16") {
+		components = GL_RGBA; x = GL_HALF_FLOAT;
+		return GL_RGBA16F;
+	} else {
+		msg_error("unknown format: " + _format);
+	}
+	return 0;
+}
 
-DynamicTexture::DynamicTexture(int _width, int _height)
-{
-	msg_write(format("creating dynamic texture [%d x %d] ", _width, _height));
+DynamicTexture::DynamicTexture(int _width, int _height, const string &_format) {
+	msg_write(format("creating dynamic texture [%d x %d] ", _width, _height) + _format);
 	filename = "-dynamic-";
 	width = _width;
 	height = _height;
 	type = Type::DYNAMIC;
 	
 	glBindTexture(GL_TEXTURE_2D, texture);
-	internal_format = GL_RGB8;
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	int components, x;
+	internal_format = parse_format(_format, components, x);
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, components, x, 0);
+	TestGLError("DynamicTexture: aaaa 0");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	TestGLError("DynamicTexture: aaaa");
@@ -524,34 +553,22 @@ DynamicTexture::DynamicTexture(int _width, int _height)
 
 }
 
-void DynamicTexture::__init__(int width, int height)
-{
-	new(this) DynamicTexture(width, height);
+void DynamicTexture::__init__(int width, int height, const string &f) {
+	new(this) DynamicTexture(width, height, f);
 }
 
-ImageTexture::ImageTexture(int _width, int _height, const string &_format)
-{
-	msg_write(format("creating image texture [%d x %d] ", _width, _height));
+ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
+	msg_write(format("creating image texture [%d x %d] ", _width, _height) + _format);
 	filename = "-image-";
 	width = _width;
 	height = _height;
 	type = Type::IMAGE;
 
 	glBindTexture(GL_TEXTURE_2D, texture);
-	if (_format == "r:i8") {
-		internal_format = GL_R8;
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-	} else if (_format == "rgba:i8") {
-		internal_format = GL_RGBA8;
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	} else if (_format == "r:f32") {
-		internal_format = GL_R32F;
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, GL_RED, GL_FLOAT, 0);
-	} else if (_format == "rgba:f32") {
-		internal_format = GL_RGBA32F;
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, GL_RGBA, GL_FLOAT, 0);
-	} else {
-		msg_error("unknown format: " + _format);
+	int components, x;
+	internal_format = parse_format(_format, components, x);
+	if (internal_format > 0) {
+		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, components, x, 0);
 	}
 	TestGLError("ImageTexture: glTexImage2D");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -559,13 +576,11 @@ ImageTexture::ImageTexture(int _width, int _height, const string &_format)
 	TestGLError("ImageTexture: aaaa");
 }
 
-void ImageTexture::__init__(int width, int height, const string &format)
-{
+void ImageTexture::__init__(int width, int height, const string &format) {
 	new(this) ImageTexture(width, height, format);
 }
 
-DepthTexture::DepthTexture(int _width, int _height)
-{
+DepthBuffer::DepthBuffer(int _width, int _height) {
 	msg_write(format("creating depth texture [%d x %d] ", _width, _height));
 	filename = "-depth-";
 	width = _width;
@@ -603,9 +618,46 @@ DepthTexture::DepthTexture(int _width, int _height)
 	TestGLError("DepthTexture: glBindFramebuffer(0)");
 }
 
-void DepthTexture::__init__(int width, int height)
-{
-	new(this) DepthTexture(width, height);
+void DepthBuffer::__init__(int width, int height) {
+	new(this) DepthBuffer(width, height);
+}
+
+FrameBuffer::FrameBuffer(int w, int h) {
+	width = w;
+	height = h;
+	glGenFramebuffers(1, &frame_buffer);
+	TestGLError("FrameBuffer: glGenFramebuffers");
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+	TestGLError("FrameBuffer: glBindFramebuffer");
+#if 0
+	glGenRenderbuffers(1, &depth_render_buffer);
+	TestGLError("FrameBuffer: glGenRenderbuffers");
+	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
+	TestGLError("FrameBuffer: glBindRenderbuffer");
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	TestGLError("FrameBuffer: glRenderbufferStorage");
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
+	TestGLError("FrameBuffer: glFramebufferRenderbuffer");
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
+	TestGLError("FrameBuffer: glFramebufferTexture");
+	GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+	TestGLError("FrameBuffer: glDrawBuffers");
+
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		msg_error("FrameBuffer: framebuffer != complete");
+
+#endif
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	TestGLError("FrameBuffer: glBindFramebuffer(0)");
+}
+
+void BindFrameBuffer(FrameBuffer *fb) {
+	glBindFramebuffer(GL_FRAMEBUFFER, fb->frame_buffer);
+	TestGLError("BindFrameBuffer: glBindFramebuffer()");
 }
 
 static int NixCubeMapTarget[] = {

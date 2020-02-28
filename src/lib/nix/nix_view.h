@@ -14,7 +14,7 @@ namespace nix{
 
 class Texture;
 
-class FrameBuffer {
+/*class FrameBuffer {
 public:
 	FrameBuffer();
 	~FrameBuffer();
@@ -22,7 +22,7 @@ public:
 	unsigned int frame_buffer;
 	unsigned int depth_render_buffer;
 	unsigned int internal_format;
-};
+};*/
 
 void _cdecl SetProjectionPerspective();
 void _cdecl SetProjectionPerspectiveExt(float center_x, float center_y, float width_1, float height_1, float z_min, float z_max);

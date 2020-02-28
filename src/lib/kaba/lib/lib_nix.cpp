@@ -84,7 +84,7 @@ void SIAddPackageNix()
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(mf(&nix::VertexBuffer::__init__)));
 			func_add_param("format", TypeString);
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, nix_p(mf(&nix::VertexBuffer::__delete__)));
-		class_add_func("void", TypeVoid, nix_p(mf(&nix::VertexBuffer::update)));
+		class_add_func("update", TypeVoid, nix_p(mf(&nix::VertexBuffer::update)));
 			func_add_param("index", TypeInt);
 			func_add_param("data", TypeDynamicArray);
 		class_add_func("count", TypeInt, nix_p(mf(&nix::VertexBuffer::count)));
@@ -119,7 +119,7 @@ void SIAddPackageNix()
 
 	add_class(TypeDepthTexture);
 		class_derive_from(TypeTexture, false, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(mf(&nix::DepthTexture::__init__)));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(mf(&nix::DepthBuffer::__init__)));
 			func_add_param("width", TypeInt);
 			func_add_param("height", TypeInt);
 
@@ -189,9 +189,9 @@ void SIAddPackageNix()
 	add_func("NixSetWorldMatrix", TypeVoid, nix_p(&nix::SetWorldMatrix), FLAG_STATIC);
 		func_add_param("m", TypeMatrix);
 	add_func("NixDrawTriangles", TypeVoid, nix_p(&nix::DrawTriangles), FLAG_STATIC);
-		func_add_param("vb", TypeVertexBufferP);
+		func_add_param("vb", TypeVertexBuffer);
 	add_func("NixDrawLines", TypeVoid, nix_p(&nix::DrawLines), FLAG_STATIC);
-		func_add_param("vb", TypeVertexBufferP);
+		func_add_param("vb", TypeVertexBuffer);
 		func_add_param("contiguous", TypeBool);
 	add_func("NixSetAlphaM", TypeVoid, nix_p(&nix::SetAlphaM), FLAG_STATIC);
 		func_add_param("mode", TypeInt);

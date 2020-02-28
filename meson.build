@@ -47,15 +47,6 @@ else
 	add_project_arguments('-DHAS_LIB_DL=0', language : ['cpp'])
 endif
 
-# optional dependency: vulkan
-d = cc.find_library('vulkan', required : false)
-if d.found()
-	add_project_arguments('-DHAS_LIB_VULKAN=1', language : ['cpp'])
-	deps += [d]
-else
-	add_project_arguments('-DHAS_LIB_VULKAN=0', language : ['cpp'])
-endif
-
 
 sources = [
 	'src/fx/Light.cpp',
@@ -206,25 +197,8 @@ sources = [
 	'src/lib/nix/nix_view.cpp',
 	'src/lib/sound/sound.cpp',
 	'src/lib/sound/sound_al.cpp',
-	'src/lib/vulkan/CommandBuffer.cpp',
-	'src/lib/vulkan/FrameBuffer.cpp',
-	'src/lib/vulkan/helper.cpp',
-	'src/lib/vulkan/Pipeline.cpp',
-	'src/lib/vulkan/RenderPass.cpp',
-	'src/lib/vulkan/Semaphore.cpp',
-	'src/lib/vulkan/Shader.cpp',
-	'src/lib/vulkan/SwapChain.cpp',
-	'src/lib/vulkan/Texture.cpp',
-	'src/lib/vulkan/VertexBuffer.cpp',
-	'src/lib/vulkan/vulkan.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
-	'src/renderer/vulkan/GBufferRenderer.cpp',
-	'src/renderer/vulkan/RenderPathDeferred.cpp',
-	'src/renderer/vulkan/RenderPathForward.cpp',
-	'src/renderer/vulkan/ShadowMapRenderer.cpp',
-	'src/renderer/vulkan/TextureRenderer.cpp',
-	'src/renderer/vulkan/WindowRendererVulkan.cpp',
 	'src/renderer/Renderer.cpp',
 	'src/renderer/RenderPath.cpp',
 	'src/world/camera.cpp',

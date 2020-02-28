@@ -32,6 +32,7 @@ public:
 	vector pos;
 	quaternion ang;
 	float zoom;
+	float exposure;
 
 	void set_view(float aspect_ratio);
 

@@ -28,6 +28,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Camera.ang", &Camera::ang);
 	Kaba::declare_class_element("Camera.dest", &Camera::dest);
 	Kaba::declare_class_element("Camera.zoom", &Camera::zoom);
+	Kaba::declare_class_element("Camera.exposure", &Camera::exposure);
 	Kaba::declare_class_element("Camera.enabled", &Camera::enabled);
 	Kaba::declare_class_element("Camera.show", &Camera::show);
 	Kaba::declare_class_element("Camera.min_depth", &Camera::min_depth);

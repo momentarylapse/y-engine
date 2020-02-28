@@ -7,10 +7,6 @@
 
 #include "RenderPath.h"
 #include "Renderer.h"
-#if HAS_LIB_VULKAN
-#include "vulkan/ShadowMapRenderer.h"
-#include "../lib/vulkan/vulkan.h"
-#endif
 #include "../world/world.h"
 #include "../world/terrain.h"
 #include "../world/model.h"

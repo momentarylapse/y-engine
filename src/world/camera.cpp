@@ -42,6 +42,7 @@ void CameraReset() {
 void Camera::reset() {
 
 	zoom = 1.0f;
+	exposure = 1.0f;
 	//scale_x = 1;
 	//z = 0.999999f;
 	min_depth = 1.0f;
