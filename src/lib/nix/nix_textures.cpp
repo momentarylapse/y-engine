@@ -6,7 +6,6 @@
 |                                                                              |
 | last update: 2008.11.09 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
-#define HAS_LIB_GL 1
 #if HAS_LIB_GL
 
 #include "nix.h"
@@ -203,6 +202,32 @@ void ReincarnateTextures() {
 	}
 }
 
+
+struct FormatData {
+	unsigned int internal_format;
+	unsigned int components, x;
+};
+
+FormatData parse_format(const string &_format) {
+	if (_format == "r:i8")
+		return {GL_R8, GL_RED, GL_UNSIGNED_BYTE};
+	if (_format == "rgb:i8")
+		return {GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE};
+	if (_format == "rgba:i8")
+		return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+	if (_format == "r:f32")
+		return {GL_R32F, GL_RED, GL_FLOAT};
+	if (_format == "rgba:f32")
+		return {GL_RGBA32F, GL_RGBA, GL_FLOAT};
+	if (_format == "r:f16")
+		return {GL_R16F, GL_RED, GL_HALF_FLOAT};
+	if (_format == "rgba:f16")
+		return {GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT};
+
+	msg_error("unknown format: " + _format);
+	return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+}
+
 Texture::Texture() {
 	filename = "-empty-";
 	type = Type::DEFAULT;
@@ -212,19 +237,33 @@ Texture::Texture() {
 	avi_info = NULL;
 #endif
 	glGenTextures(1, &texture);
-	frame_buffer = 0;
-	depth_render_buffer = 0;
 	width = height = 0;
 
 	textures.add(this);
+}
+
+
+Texture::Texture(int w, int h, const string &_format) : Texture() {
+	msg_write(format("creating texture [%d x %d] ", w, h) + _format);
+	width = w;
+	height = h;
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+	auto d = parse_format(_format);
+	internal_format = d.internal_format;
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, d.components, d.x, 0);
+	TestGLError("Texture: glTexImage2D");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	TestGLError("Texture: parameter");
 }
 
 Texture::~Texture() {
 	unload();
 }
 
-void Texture::__init__() {
-	new(this) Texture;
+void Texture::__init__(int w, int h, const string &f) {
+	new(this) Texture(w, h, f);
 }
 
 void Texture::__delete__() {
@@ -476,86 +515,6 @@ void TextureVideoMove(int texture,float elapsed)
 #endif
 }
 
-unsigned int parse_format(const string &_format, int &components, int &x) {
-	if (_format == "r:i8") {
-		components = GL_RED; x = GL_UNSIGNED_BYTE;
-		return GL_R8;
-	} else if (_format == "rgb:i8") {
-		components = GL_RGB; x = GL_UNSIGNED_BYTE;
-		return GL_RGB8;
-	} else if (_format == "rgba:i8") {
-		components = GL_RGBA; x = GL_UNSIGNED_BYTE;
-		return GL_RGBA8;
-	} else if (_format == "r:f32") {
-		components = GL_RED; x = GL_FLOAT;
-		return GL_R32F;
-	} else if (_format == "rgba:f32") {
-		components = GL_RGBA; x = GL_FLOAT;
-		return GL_RGBA32F;
-	} else if (_format == "r:f16") {
-		components = GL_RED; x = GL_HALF_FLOAT;
-		return GL_R16F;
-	} else if (_format == "rgba:f16") {
-		components = GL_RGBA; x = GL_HALF_FLOAT;
-		return GL_RGBA16F;
-	} else {
-		msg_error("unknown format: " + _format);
-	}
-	return 0;
-}
-
-DynamicTexture::DynamicTexture(int _width, int _height, const string &_format) {
-	msg_write(format("creating dynamic texture [%d x %d] ", _width, _height) + _format);
-	filename = "-dynamic-";
-	width = _width;
-	height = _height;
-	type = Type::DYNAMIC;
-	
-	glBindTexture(GL_TEXTURE_2D, texture);
-	int components, x;
-	internal_format = parse_format(_format, components, x);
-	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, components, x, 0);
-	TestGLError("DynamicTexture: aaaa 0");
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	TestGLError("DynamicTexture: aaaa");
-
-	glGenFramebuffers(1, &frame_buffer);
-	TestGLError("DynamicTexture: glGenFramebuffers");
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-	TestGLError("DynamicTexture: glBindFramebuffer");
-	glGenRenderbuffers(1, &depth_render_buffer);
-	TestGLError("DynamicTexture: glGenRenderbuffers");
-	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
-	TestGLError("DynamicTexture: glBindRenderbuffer");
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	TestGLError("DynamicTexture: glRenderbufferStorage");
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
-	TestGLError("DynamicTexture: glFramebufferRenderbuffer");
-
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-	TestGLError("DynamicTexture: glFramebufferTexture");
-	GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-	TestGLError("DynamicTexture: glDrawBuffers");
-
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		msg_error("DynamicTexture: framebuffer != complete");
-
-	// create the actual (dynamic) texture
-	/*Image image;
-	image.create(width, height, Black);
-	overwrite(image);*/
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	TestGLError("DynamicTexture: glBindFramebuffer(0)");
-
-}
-
-void DynamicTexture::__init__(int width, int height, const string &f) {
-	new(this) DynamicTexture(width, height, f);
-}
 
 ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
 	msg_write(format("creating image texture [%d x %d] ", _width, _height) + _format);
@@ -565,11 +524,9 @@ ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
 	type = Type::IMAGE;
 
 	glBindTexture(GL_TEXTURE_2D, texture);
-	int components, x;
-	internal_format = parse_format(_format, components, x);
-	if (internal_format > 0) {
-		glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, components, x, 0);
-	}
+	auto d = parse_format(_format);
+	internal_format = d.internal_format;
+	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, d.components, d.x, 0);
 	TestGLError("ImageTexture: glTexImage2D");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -588,6 +545,16 @@ DepthBuffer::DepthBuffer(int _width, int _height) {
 	type = Type::DEPTH;
 	internal_format = GL_DEPTH_COMPONENT;
 
+
+	// as renderbuffer -> can't sample from it!
+	/*glGenRenderbuffers(1, &texture);
+	TestGLError("FrameBuffer: glGenRenderbuffers");
+	glBindRenderbuffer(GL_RENDERBUFFER, texture);
+	TestGLError("FrameBuffer: glBindRenderbuffer");
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	TestGLError("FrameBuffer: glRenderbufferStorage");*/
+
+	// as texture -> can sample!
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -597,68 +564,13 @@ DepthBuffer::DepthBuffer(int _width, int _height) {
 	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	TestGLError("DepthTexture: aaaa");
-
-	glGenFramebuffers(1, &frame_buffer);
-	TestGLError("DepthTexture: glGenFramebuffers");
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-	TestGLError("DepthTexture: glBindFramebuffer");
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
-	TestGLError("DepthTexture: glFramebufferTexture2D");
-	glDrawBuffer(GL_NONE);
-	TestGLError("DepthTexture: glDrawBuffer");
-	glReadBuffer(GL_NONE);
-	TestGLError("DepthTexture: glReadBuffer");
-
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		msg_error("DepthTexture: framebuffer != complete");
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	TestGLError("DepthTexture: glBindFramebuffer(0)");
 }
 
 void DepthBuffer::__init__(int width, int height) {
 	new(this) DepthBuffer(width, height);
 }
 
-FrameBuffer::FrameBuffer(int w, int h) {
-	width = w;
-	height = h;
-	glGenFramebuffers(1, &frame_buffer);
-	TestGLError("FrameBuffer: glGenFramebuffers");
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-	TestGLError("FrameBuffer: glBindFramebuffer");
-#if 0
-	glGenRenderbuffers(1, &depth_render_buffer);
-	TestGLError("FrameBuffer: glGenRenderbuffers");
-	glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer);
-	TestGLError("FrameBuffer: glBindRenderbuffer");
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	TestGLError("FrameBuffer: glRenderbufferStorage");
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer);
-	TestGLError("FrameBuffer: glFramebufferRenderbuffer");
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture, 0);
-	TestGLError("FrameBuffer: glFramebufferTexture");
-	GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
-	TestGLError("FrameBuffer: glDrawBuffers");
-
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		msg_error("FrameBuffer: framebuffer != complete");
-
-#endif
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	TestGLError("FrameBuffer: glBindFramebuffer(0)");
-}
-
-void BindFrameBuffer(FrameBuffer *fb) {
-	glBindFramebuffer(GL_FRAMEBUFFER, fb->frame_buffer);
-	TestGLError("BindFrameBuffer: glBindFramebuffer()");
-}
 
 static int NixCubeMapTarget[] = {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X,

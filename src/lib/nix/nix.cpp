@@ -22,7 +22,7 @@ extern unsigned int VertexArrayID;
 
 namespace nix{
 
-string version = "0.13.3.0";
+string version = "0.13.4.0";
 
 
 // libraries (in case Visual C++ is used)
@@ -130,8 +130,8 @@ void Init() {
 	msg_right();
 	msg_write("[" + version + "]");
 
-	//msg_write((char*)glGetString(GL_VERSION));
-	//msg_write((char*)glGetString(GL_VENDOR));
+	msg_write(string("OpenGL: ") + (char*)glGetString(GL_VERSION));
+	msg_write(string("Vendor: ") + (char*)glGetString(GL_VENDOR));
 	
 
 	Fullscreen = false; // before nix is started, we're hopefully not in fullscreen mode

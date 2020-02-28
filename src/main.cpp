@@ -39,6 +39,7 @@ const bool SHOW_GBUFFER = false;
 const bool SHOW_SHADOW = false;
 
 
+
 // pipeline: shader + z buffer / blending parameters
 
 // descriptor set: textures + shader uniform buffers
@@ -124,11 +125,15 @@ void vb_create_rect(nix::VertexBuffer *vb) {
 	vb->update(2, uv);
 }
 
+#define METHOD 2
+
 class RenderPathGL : public RenderPath {
 public:
 	int width, height;
 	GLFWwindow* window;
 	nix::Texture *dyn_tex = nullptr;
+	nix::DepthBuffer *depth_buffer = nullptr;
+	nix::FrameBuffer *fb = nullptr;
 	nix::Shader *shader_out = nullptr;
 	float time = 0;
 	RenderPathGL(GLFWwindow* w) {
@@ -138,7 +143,9 @@ public:
 
 		nix::Init();
 
-		dyn_tex = new nix::DynamicTexture(width, height, "rgba:f16");
+		dyn_tex = new nix::Texture(width, height, "rgba:f16");
+		depth_buffer = new nix::DepthBuffer(width, height);
+		fb = new nix::FrameBuffer({dyn_tex, depth_buffer});
 		try {
 			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
 		} catch(Exception &e) {
@@ -153,10 +160,10 @@ public:
 		render_into_texture();
 		int w, h;
 		glfwGetFramebufferSize(window, &w, &h);
-		nix::SetViewport(w, h);
-		nix::ResetToColor(White);
-		nix::ResetZ();
-
+		nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
+		//nix::SetViewport(w, h);
+		//nix::ResetToColor(White);
+		//nix::ResetZ();
 		nix::SetTexture(dyn_tex);
 		nix::SetShader(shader_out);
 		shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
@@ -178,9 +185,9 @@ public:
 	}
 
 	void render_into_texture() {
-		nix::StartFrameIntoTexture(dyn_tex);
+		nix::BindFrameBuffer(fb);
+		nix::SetViewport(fb->width, fb->height);
 
-		nix::SetViewport(width, height);
 		cam->set_view((float)width / (float)height);
 		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 		nix::SetViewMatrix(cam->m_view);
@@ -218,8 +225,6 @@ public:
 			cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
 		}
-
-		nix::EndFrame();
 	}
 };
 
