@@ -160,14 +160,13 @@ public:
 		render_into_texture();
 		int w, h;
 		glfwGetFramebufferSize(window, &w, &h);
+		nix::FrameBuffer::DEFAULT->width = w;
+		nix::FrameBuffer::DEFAULT->height = h;
+
 		nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
-		//nix::SetViewport(w, h);
-		//nix::ResetToColor(White);
-		//nix::ResetZ();
 		nix::SetTexture(dyn_tex);
 		nix::SetShader(shader_out);
 		shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
-		//nix::SetShader(nix::default_shader_3d);
 		nix::SetProjectionMatrix(matrix::ID);
 		nix::SetViewMatrix(matrix::ID);
 		nix::SetWorldMatrix(matrix::ID);
@@ -186,7 +185,6 @@ public:
 
 	void render_into_texture() {
 		nix::BindFrameBuffer(fb);
-		nix::SetViewport(fb->width, fb->height);
 
 		cam->set_view((float)width / (float)height);
 		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);

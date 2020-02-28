@@ -101,6 +101,8 @@ void FrameBuffer::__delete__() {
 void BindFrameBuffer(FrameBuffer *fb) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fb->frame_buffer);
 	TestGLError("BindFrameBuffer: glBindFramebuffer()");
+
+	SetViewport(rect(0, fb->width, 0, fb->height));
 }
 
 
@@ -111,13 +113,13 @@ matrix create_pixel_projection_matrix() {
 	return s * t;
 }
 
-void SetViewport(int width, int height) {
-	target_width = max(width, 1);
-	target_height = max(height, 1);
-	target_rect = rect(0, (float)target_width, 0, (float)target_height);
+void SetViewport(const rect &area) {
+	target_rect = area;
+	target_width = max((int)area.width(), 1);
+	target_height = max((int)area.height(), 1);
 
 	// screen
-	glViewport(0, 0, target_width, target_height);
+	glViewport(area.x1, area.y1, area.width(), area.height());
 	TestGLError("glViewport");
 }
 

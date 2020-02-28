@@ -20,7 +20,7 @@ VertexBuffer *vb_temp = NULL;
 
 // so far, map each attribute to another buffer
 VertexBuffer::VertexBuffer(const string &f) {
-	msg_write("new VertexBuffer " + f);
+	//msg_write("new VertexBuffer " + f);
 	auto xx = f.explode(",");
 	num_buffers = num_attributes = xx.num;
 	if (num_attributes > MAX_VB_ATTRIBUTES) {

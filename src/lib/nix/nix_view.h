@@ -25,7 +25,7 @@ void _cdecl SetProjectionMatrix(const matrix &mat);
 void _cdecl SetWorldMatrix(const matrix &mat);
 void _cdecl SetViewMatrix(const matrix &view_mat);
 
-void _cdecl SetViewport(int width, int height);
+void _cdecl SetViewport(const rect &area);
 
 //bool _cdecl StartFrame();
 //bool _cdecl StartFrameIntoTexture(Texture *t);

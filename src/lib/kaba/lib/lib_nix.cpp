@@ -100,23 +100,23 @@ void SIAddPackageNix()
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, nix_p(mf(&nix::Texture::__delete__)));
 		class_add_func("overwrite", TypeVoid, nix_p(mf(&nix::Texture::overwrite)));
 			func_add_param("image", TypeImage);
-			class_add_func("read", TypeVoid, nix_p(mf(&nix::Texture::read)));
-				func_add_param("image", TypeImage);
-			class_add_func("read_float", TypeVoid, nix_p(mf(&nix::Texture::read_float)));
-				func_add_param("data", TypeFloatList);
-			class_add_func("write_float", TypeVoid, nix_p(mf(&nix::Texture::write_float)));
-				func_add_param("data", TypeFloatList);
-			class_add_func("load", TypeTextureP, nix_p(&__LoadTexture), FLAG_STATIC);
-				func_add_param("filename", TypeString);
+		class_add_func("read", TypeVoid, nix_p(mf(&nix::Texture::read)));
+			func_add_param("image", TypeImage);
+		class_add_func("read_float", TypeVoid, nix_p(mf(&nix::Texture::read_float)));
+			func_add_param("data", TypeFloatList);
+		class_add_func("write_float", TypeVoid, nix_p(mf(&nix::Texture::write_float)));
+			func_add_param("data", TypeFloatList);
+		class_add_func("load", TypeTextureP, nix_p(&__LoadTexture), FLAG_STATIC);
+			func_add_param("filename", TypeString);
+		class_add_elementx("width", TypeInt, &nix::Texture::width);
+		class_add_elementx("height", TypeInt, &nix::Texture::height);
 
 	add_class(TypeImageTexture);
 		class_derive_from(TypeTexture, false, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(mf(&nix::ImageTexture::__init__)));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(mf(&nix::ImageTexture::__init__)), FLAG_OVERRIDE);
 			func_add_param("width", TypeInt);
 			func_add_param("height", TypeInt);
 			func_add_param("format", TypeString);
-		class_add_elementx("width", TypeInt, &nix::Texture::width);
-		class_add_elementx("height", TypeInt, &nix::Texture::height);
 
 	add_class(TypeDepthBuffer);
 		class_derive_from(TypeTexture, false, false);
@@ -272,8 +272,6 @@ void SIAddPackageNix()
 	add_func("NixScreenShotToImage", TypeVoid, nix_p(&nix::ScreenShotToImage), FLAG_STATIC);
 		func_add_param("im", TypeImage);
 
-	add_ext_var("target_width", TypeInt, nix_p(&nix::target_height));
-	add_ext_var("target_height", TypeInt, nix_p(&nix::target_height));
 	add_ext_var("target", TypeRect, nix_p(&nix::target_rect));
 	add_ext_var("fullscreen", TypeBool, nix_p(&nix::Fullscreen));
 
