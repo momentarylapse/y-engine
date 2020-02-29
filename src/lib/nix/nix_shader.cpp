@@ -326,6 +326,8 @@ void Shader::set_data(int location, const float *data, int size) {
 	//NixSetShader(this);
 	if (size == sizeof(float)) {
 		glUniform1f(location, *data);
+	} else if (size == sizeof(float)*2) {
+		glUniform2fv(location, 1, data);
 	} else if (size == sizeof(float)*3) {
 		glUniform3fv(location, 1, data);
 	} else if (size == sizeof(float)*4) {

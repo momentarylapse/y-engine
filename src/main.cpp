@@ -123,28 +123,39 @@ class RenderPathGL : public RenderPath {
 public:
 	int width, height;
 	GLFWwindow* window;
-	nix::Texture *dyn_tex = nullptr;
 	nix::Texture *tex_black = nullptr;
 	nix::Texture *tex_white = nullptr;
-	nix::DepthBuffer *depth_buffer = nullptr;
 	nix::FrameBuffer *fb = nullptr;
+	nix::FrameBuffer *fb2 = nullptr;
+	nix::FrameBuffer *fb3 = nullptr;
+	nix::Shader *shader_blur = nullptr;
 	nix::Shader *shader_out = nullptr;
 	nix::Shader *shader_3d = nullptr;
 
 	Array<UBOLight> lights;
 	nix::UniformBuffer *ubo_light;
+	PerformanceMonitor *perf_mon;
+	nix::VertexBuffer *vb_2d;
 
-	RenderPathGL(GLFWwindow* w) {
+	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 		window = w;
 		glfwMakeContextCurrent(window);
 		glfwGetFramebufferSize(window, &width, &height);
 
+		perf_mon = pm;
+
 		nix::Init();
 
-		dyn_tex = new nix::Texture(width, height, "rgba:f16");
-		depth_buffer = new nix::DepthBuffer(width, height);
-		fb = new nix::FrameBuffer({dyn_tex, depth_buffer});
+		fb = new nix::FrameBuffer({
+			new nix::Texture(width, height, "rgba:f16"),
+			new nix::DepthBuffer(width, height)});
+		fb2 = new nix::FrameBuffer({
+			new nix::Texture(width/2, height/2, "rgba:f16")});
+		fb3 = new nix::FrameBuffer({
+			new nix::Texture(width/2, height/2, "rgba:f16")});
+
 		try {
+			shader_blur = nix::Shader::load("Materials/forward/blur.shader");
 			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
 			shader_3d = nix::Shader::load("Materials/forward/3d.shader");
 		} catch(Exception &e) {
@@ -159,24 +170,60 @@ public:
 		tex_white->overwrite(im);
 		im.create(16, 16, Black);
 		tex_black->overwrite(im);
+
+		vb_2d = new nix::VertexBuffer("3f,3f,2f");
+		vb_create_rect(vb_2d, rect(-1,1, -1,1));
 	}
 	void draw() override {
 		prepare_lights();
 
 		render_into_texture();
+
 		int w, h;
 		glfwGetFramebufferSize(window, &w, &h);
 		nix::FrameBuffer::DEFAULT->width = w;
 		nix::FrameBuffer::DEFAULT->height = h;
 
+
+		process_blur(fb, fb2, 1.0f, true);
+		process_blur(fb2, fb3, 0.0f, false);
+
+
 		nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
 
-		render_out();
+		render_out(fb, fb3);
 
 		draw_gui();
 
 
 		glfwSwapBuffers(window);
+		perf_mon->tick(5);
+	}
+
+	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal) {
+
+		nix::SetShader(shader_blur);
+		float r = cam->bloom_radius;
+		complex ax = complex(2,0);
+		if (!horizontal) {
+			ax = complex(0,1);
+		}
+		shader_blur->set_float(shader_blur->get_location("radius"), r);
+		shader_blur->set_float(shader_blur->get_location("threshold"), threshold / cam->exposure);
+		shader_blur->set_data(shader_blur->get_location("axis"), &ax.x, 8);
+		process(source->color_attachments[0], target, shader_blur);
+	}
+
+	void process(nix::Texture *source, nix::FrameBuffer *target, nix::Shader *shader) {
+		nix::BindFrameBuffer(target);
+		nix::SetZ(false, false);
+		nix::SetProjectionOrtho(true);
+		nix::SetViewMatrix(matrix::ID);
+		nix::SetWorldMatrix(matrix::ID);
+		//nix::SetShader(shader);
+
+		nix::SetTexture(source);
+		nix::DrawTriangles(vb_2d);
 	}
 
 	void draw_gui() {
@@ -193,24 +240,25 @@ public:
 		nix::SetCull(CULL_DEFAULT);
 
 		nix::SetAlpha(ALPHA_NONE);
+		glFinish();
+		perf_mon->tick(4);
 	}
 
-	void render_out() {
+	void render_out(nix::FrameBuffer *source, nix::FrameBuffer *bloom) {
 
-		nix::SetTexture(dyn_tex);
+		nix::SetTextures({source->color_attachments[0], bloom->color_attachments[0]});
 		nix::SetShader(shader_out);
 		shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
+		shader_out->set_float(shader_out->get_location("bloom_factor"), cam->bloom_factor);
 		nix::SetProjectionMatrix(matrix::ID);
 		nix::SetViewMatrix(matrix::ID);
 		nix::SetWorldMatrix(matrix::ID);
 
 		nix::SetZ(false, false);
 
-
-
-		vb_create_rect(nix::vb_temp, rect(-1,1, -1,1));
-
-		nix::DrawTriangles(nix::vb_temp);
+		nix::DrawTriangles(vb_2d);
+		glFinish();
+		perf_mon->tick(3);
 	}
 
 	void render_into_texture() {
@@ -233,21 +281,17 @@ public:
 		for (auto *t: world.terrains) {
 			//nix::SetWorldMatrix(matrix::translation(t->pos));
 			nix::SetWorldMatrix(matrix::ID);
-			set_textures(t->material->textures);
-			//nix::SetShader(t->material->shader);
-			set_shader();
-			shader_3d->set_data(shader_3d->get_location("emission_factor"), &Black.r, 16);
+			set_material(t->material);
 			t->draw();
 			nix::DrawTriangles(t->vertex_buffer);
 		}
+		glFinish();
+		perf_mon->tick(1);
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
-			set_textures(s.material->textures);
-			//nix::SetShader(s.material->shader);
-			set_shader();
-			shader_3d->set_data(shader_3d->get_location("emission_factor"), &m->material[0]->emission.r, 16);
+			set_material(s.material);
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 
 			/*gp.model = mtr(m->pos, m->ang);
@@ -258,11 +302,17 @@ public:
 			cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
 		}
+		glFinish();
+		perf_mon->tick(2);
 	}
-	void set_shader() {
+	void set_material(Material *m) {
 		nix::SetShader(shader_3d);
 		shader_3d->set_data(shader_3d->get_location("eye_pos"), &cam->pos.x, 16);
 		shader_3d->set_int(shader_3d->get_location("num_lights"), lights.num);
+
+		set_textures(m->textures);
+		//nix::SetShader(s.material->shader);
+		shader_3d->set_data(shader_3d->get_location("emission_factor"), &m->emission.r, 16);
 	}
 	void set_textures(const Array<nix::Texture*> &tex) {
 		auto tt = tex;
@@ -327,7 +377,7 @@ public:
 #if HAS_LIB_VULKAN
 		renderer = new WindowRendererVulkan(window);
 #endif
-		render_path = new RenderPathGL(window);
+		render_path = new RenderPathGL(window, &perf_mon);
 
 		std::cout << "on init..." << "\n";
 
@@ -450,7 +500,7 @@ public:
 #if HAS_LIB_VULKAN
 		vulkan::wait_device_idle();
 #endif
-		fps_display->set_text(format("%.1f     s:%.2f  g:%.2f  c:%.2f  fx:%.2f  2d:%.2f",
+		fps_display->set_text(format("%.1f     ter:%.2f  ob:%.2f  cam:%.2f  gui:%.2f  x:%.2f",
 				1.0f / perf_mon.avg.frame_time,
 				perf_mon.avg.location[0]*1000,
 				perf_mon.avg.location[1]*1000,

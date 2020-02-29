@@ -43,6 +43,8 @@ void Camera::reset() {
 
 	zoom = 1.0f;
 	exposure = 1.0f;
+	bloom_radius = 10;
+	bloom_factor = 0.2f;
 	//scale_x = 1;
 	//z = 0.999999f;
 	min_depth = 1.0f;

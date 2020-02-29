@@ -33,6 +33,8 @@ public:
 	quaternion ang;
 	float zoom;
 	float exposure;
+	float bloom_radius;
+	float bloom_factor;
 
 	void set_view(float aspect_ratio);
 

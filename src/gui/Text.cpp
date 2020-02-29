@@ -22,7 +22,7 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 	cairo_t *cr;
 
 	// initial surface size guess
-	int w_surf = 800;
+	int w_surf = 900;
 	int h_surf = font_size * 2;
 
 	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w_surf, h_surf);
