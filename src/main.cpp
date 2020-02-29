@@ -36,7 +36,7 @@
 #include "renderer/RenderPath.h"
 
 const bool SHOW_GBUFFER = false;
-const bool SHOW_SHADOW = false;
+bool SHOW_SHADOW = false;
 
 
 
@@ -116,6 +116,12 @@ public:
 		string s = get(key, def ? "yes" : "no");
 		return s == "yes" or s == "true" or s == "1";
 	}
+	float get_float(const string &key, float def) {
+		return get(key, f2s(def, 3))._float();
+	}
+	int get_int(const string &key, int def) {
+		return get(key, i2s(def))._int();
+	}
 };
 static Config config;
 
@@ -132,15 +138,22 @@ public:
 	nix::FrameBuffer *fb3 = nullptr;
 	nix::FrameBuffer *fb4 = nullptr;
 	nix::FrameBuffer *fb5 = nullptr;
+	nix::FrameBuffer *fb_shadow = nullptr;
 	nix::Shader *shader_blur = nullptr;
 	nix::Shader *shader_depth = nullptr;
 	nix::Shader *shader_out = nullptr;
 	nix::Shader *shader_3d = nullptr;
+	nix::Shader *shader_shadow = nullptr;
 
 	Array<UBOLight> lights;
 	nix::UniformBuffer *ubo_light;
 	PerformanceMonitor *perf_mon;
 	nix::VertexBuffer *vb_2d;
+
+	//Camera *shadow_cam;
+	matrix shadow_proj;
+
+	float shadow_box_size;
 
 	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 		window = w;
@@ -148,6 +161,10 @@ public:
 		glfwGetFramebufferSize(window, &width, &height);
 
 		perf_mon = pm;
+
+		shadow_box_size = config.get_float("shadow.boxsize", 2000);
+		int shadow_resolution = config.get_int("shadow.resolution", 1024);
+		SHOW_SHADOW = config.get_bool("shadow.debug", false);
 
 		nix::Init();
 
@@ -162,12 +179,15 @@ public:
 			new nix::Texture(width, height, "rgba:f16")});
 		fb5 = new nix::FrameBuffer({
 			new nix::Texture(width, height, "rgba:f16")});
+		fb_shadow = new nix::FrameBuffer({
+			new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 
 		try {
 			shader_blur = nix::Shader::load("Materials/forward/blur.shader");
 			shader_depth = nix::Shader::load("Materials/forward/depth.shader");
 			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
 			shader_3d = nix::Shader::load("Materials/forward/3d.shader");
+			shader_shadow = nix::Shader::load("Materials/forward/3d-shadow.shader");
 		} catch(Exception &e) {
 			msg_error(e.message());
 			throw e;
@@ -183,9 +203,16 @@ public:
 
 		vb_2d = new nix::VertexBuffer("3f,3f,2f");
 		vb_create_rect(vb_2d, rect(-1,1, -1,1));
+
+		AllowXContainer = false;
+		//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
+		AllowXContainer = true;
 	}
 	void draw() override {
 		prepare_lights();
+		perf_mon->tick(0);
+
+		render_shadow_map();
 
 		render_into_texture();
 
@@ -311,39 +338,33 @@ public:
 
 		nix::SetZ(true, true);
 
-		nix::SetLightDirectional(0, world.lights[0]->dir, world.lights[0]->col, world.lights[0]->harshness);
-
 		nix::BindUniform(ubo_light, 1);
 
+
+		draw_world(true);
+
+		if (config.debug)
+			glFinish();
+		perf_mon->tick(2);
+	}
+	void draw_world(bool allow_material) {
 
 		for (auto *t: world.terrains) {
 			//nix::SetWorldMatrix(matrix::translation(t->pos));
 			nix::SetWorldMatrix(matrix::ID);
-			set_material(t->material);
+			if (allow_material)
+				set_material(t->material);
 			t->draw();
 			nix::DrawTriangles(t->vertex_buffer);
 		}
-		if (config.debug)
-			glFinish();
-		perf_mon->tick(1);
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
-			set_material(s.material);
+			if (allow_material)
+				set_material(s.material);
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-
-			/*gp.model = mtr(m->pos, m->ang);
-			gp.emission = s.material->emission;
-			gp.xxx[0] = 0.2f;
-			cb->push_constant(0, sizeof(gp), &gp);
-
-			cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
-			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
 		}
-		if (config.debug)
-			glFinish();
-		perf_mon->tick(2);
 	}
 	void set_material(Material *m) {
 		nix::SetShader(shader_3d);
@@ -362,9 +383,11 @@ public:
 			tt.add(tex_white);
 		if (tt.num == 2)
 			tt.add(tex_black);
+		tt.add(fb_shadow->depth_buffer);
 		nix::SetTextures(tt);
 	}
 	void prepare_lights() {
+
 		lights.clear();
 		for (auto *l: world.lights) {
 			if (!l->enabled)
@@ -377,9 +400,42 @@ public:
 			ll.harshness = l->harshness;
 			ll.radius = l->radius;
 			ll.theta = l->theta;
+
+			if (l->radius <= 0){
+				vector center = cam->pos + cam->ang*vector::EZ * shadow_box_size / 3;
+				float grid = shadow_box_size / 16;
+				center.x -= fmod(center.x, grid);
+				center.y -= fmod(center.y, grid);
+				center.z -= fmod(center.z, grid);
+				auto t = matrix::translation(- center);
+				auto r = matrix::rotation(l->dir.dir2ang()).transpose();
+				float f = 1 / shadow_box_size;
+				auto s = matrix::scale(f, f, f);
+				// map onto [-1,1]x[-1,1]x[0,1]
+				shadow_proj = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
+				ll.proj = shadow_proj;
+			}
 			lights.add(ll);
 		}
 		ubo_light->update(&lights[0], sizeof(UBOLight) * lights.num);
+	}
+	void render_shadow_map() {
+		nix::BindFrameBuffer(fb_shadow);
+
+		nix::SetProjectionMatrix(shadow_proj);
+		nix::SetViewMatrix(matrix::ID);
+
+		nix::ResetZ();
+
+		nix::SetZ(true, true);
+		nix::SetShader(shader_shadow);
+
+
+		draw_world(false);
+
+		if (config.debug)
+			glFinish();
+		perf_mon->tick(1);
 	}
 };
 
@@ -469,11 +525,11 @@ public:
 				gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, rpd->gbuf_ren->depth_buffer));
 			}
 		}
-		if (SHOW_SHADOW) {
-			if (auto *rpv = dynamic_cast<RenderPathVulkan*>(render_path))
-				gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, rpv->shadow_renderer->depth_buffer));
-		}
 #endif
+		if (SHOW_SHADOW) {
+			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path))
+				gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, rpv->fb_shadow->depth_buffer));
+		}
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename);
@@ -486,8 +542,8 @@ public:
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
-		int w = config.get("screen.width", "1024")._int();
-		int h = config.get("screen.height", "768")._int();
+		int w = config.get_int("screen.width", 1024);
+		int h = config.get_int("screen.height", 768);
 		auto monitor = glfwGetPrimaryMonitor();
 		if (!config.get_bool("screen.fullscreen", false))
 			monitor = nullptr;
@@ -547,7 +603,7 @@ public:
 #if HAS_LIB_VULKAN
 		vulkan::wait_device_idle();
 #endif
-		fps_display->set_text(format("%.1f     ter:%.2f  ob:%.2f  cam:%.2f  gui:%.2f  x:%.2f",
+		fps_display->set_text(format("%.1f\n\n shadow:\t%.2f\n world:\t%.2f\n cam:\t%.2f\n gui: \t%.2f\n xxx:\t%.2f",
 				1.0f / perf_mon.avg.frame_time,
 				perf_mon.avg.location[0]*1000,
 				perf_mon.avg.location[1]*1000,

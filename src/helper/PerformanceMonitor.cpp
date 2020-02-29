@@ -39,6 +39,7 @@ void PerformanceMonitor::frame() {
 	prev_frame = now;
 	frames ++;
 	just_cleared = false;
+	cur_location = -1;
 
 	if (temp.frame_time > 0.2f) {
 		avg.frame_time = temp.frame_time / frames;
