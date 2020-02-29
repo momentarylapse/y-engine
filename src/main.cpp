@@ -124,6 +124,8 @@ public:
 	int width, height;
 	GLFWwindow* window;
 	nix::Texture *dyn_tex = nullptr;
+	nix::Texture *tex_black = nullptr;
+	nix::Texture *tex_white = nullptr;
 	nix::DepthBuffer *depth_buffer = nullptr;
 	nix::FrameBuffer *fb = nullptr;
 	nix::Shader *shader_out = nullptr;
@@ -150,6 +152,13 @@ public:
 			throw e;
 		}
 		ubo_light = new nix::UniformBuffer();
+		tex_white = new nix::Texture();
+		tex_black = new nix::Texture();
+		Image im;
+		im.create(16, 16, White);
+		tex_white->overwrite(im);
+		im.create(16, 16, Black);
+		tex_black->overwrite(im);
 	}
 	void draw() override {
 		prepare_lights();
@@ -224,10 +233,10 @@ public:
 		for (auto *t: world.terrains) {
 			//nix::SetWorldMatrix(matrix::translation(t->pos));
 			nix::SetWorldMatrix(matrix::ID);
-			nix::SetMaterial(White, White, White, 20, Black);
-			nix::SetTextures(t->material->textures);
+			set_textures(t->material->textures);
 			//nix::SetShader(t->material->shader);
 			set_shader();
+			shader_3d->set_data(shader_3d->get_location("emission_factor"), &Black.r, 16);
 			t->draw();
 			nix::DrawTriangles(t->vertex_buffer);
 		}
@@ -235,10 +244,10 @@ public:
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
-			nix::SetMaterial(White, White, White, 20, Black);
-			nix::SetTextures(s.material->textures);
+			set_textures(s.material->textures);
 			//nix::SetShader(s.material->shader);
 			set_shader();
+			shader_3d->set_data(shader_3d->get_location("emission_factor"), &m->material[0]->emission.r, 16);
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 
 			/*gp.model = mtr(m->pos, m->ang);
@@ -254,6 +263,16 @@ public:
 		nix::SetShader(shader_3d);
 		shader_3d->set_data(shader_3d->get_location("eye_pos"), &cam->pos.x, 16);
 		shader_3d->set_int(shader_3d->get_location("num_lights"), lights.num);
+	}
+	void set_textures(const Array<nix::Texture*> &tex) {
+		auto tt = tex;
+		if (tt.num == 0)
+			tt.add(tex_white);
+		if (tt.num == 1)
+			tt.add(tex_white);
+		if (tt.num == 2)
+			tt.add(tex_black);
+		nix::SetTextures(tt);
 	}
 	void prepare_lights() {
 		lights.clear();
