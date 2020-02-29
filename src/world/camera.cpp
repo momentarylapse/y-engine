@@ -45,6 +45,11 @@ void Camera::reset() {
 	exposure = 1.0f;
 	bloom_radius = 10;
 	bloom_factor = 0.2f;
+
+	focus_enabled = false;
+	focal_length = 2000;
+	focal_blur = 2;
+
 	//scale_x = 1;
 	//z = 0.999999f;
 	min_depth = 1.0f;

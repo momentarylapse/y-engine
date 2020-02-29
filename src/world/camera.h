@@ -36,6 +36,10 @@ public:
 	float bloom_radius;
 	float bloom_factor;
 
+	bool focus_enabled;
+	float focal_length;
+	float focal_blur;
+
 	void set_view(float aspect_ratio);
 
 	matrix m_projection, m_view;

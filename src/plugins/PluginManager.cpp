@@ -31,6 +31,9 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Camera.exposure", &Camera::exposure);
 	Kaba::declare_class_element("Camera.bloom_radius", &Camera::bloom_radius);
 	Kaba::declare_class_element("Camera.bloom_factor", &Camera::bloom_factor);
+	Kaba::declare_class_element("Camera.focus_enabled", &Camera::focus_enabled);
+	Kaba::declare_class_element("Camera.focal_length", &Camera::focal_length);
+	Kaba::declare_class_element("Camera.focal_blur", &Camera::focal_blur);
 	Kaba::declare_class_element("Camera.enabled", &Camera::enabled);
 	Kaba::declare_class_element("Camera.show", &Camera::show);
 	Kaba::declare_class_element("Camera.min_depth", &Camera::min_depth);

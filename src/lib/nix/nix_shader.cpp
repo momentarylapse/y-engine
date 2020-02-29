@@ -332,6 +332,8 @@ void Shader::set_data(int location, const float *data, int size) {
 		glUniform3fv(location, 1, data);
 	} else if (size == sizeof(float)*4) {
 		glUniform4fv(location, 1, data);
+	} else if (size == sizeof(float)*16) {
+		glUniformMatrix4fv(location, 1, GL_FALSE, (float*)data);
 	}
 	TestGLError("SetShaderData");
 }

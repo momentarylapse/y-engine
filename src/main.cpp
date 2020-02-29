@@ -87,6 +87,7 @@ static GameIni game_ini;
 
 class Config {
 public:
+	bool debug = false;
 	Map<string,string> map;
 	void load() {
 		File *f = FileOpenText("config.txt");
@@ -104,6 +105,7 @@ public:
 		for (auto &k: map.keys())
 			msg_write("config:  " + k + " == " + map[k]);
 		delete f;
+		debug = get_bool("debug", false);
 	}
 	string get(const string &key, const string &def) {
 		if (map.find(key) >= 0)
@@ -128,7 +130,10 @@ public:
 	nix::FrameBuffer *fb = nullptr;
 	nix::FrameBuffer *fb2 = nullptr;
 	nix::FrameBuffer *fb3 = nullptr;
+	nix::FrameBuffer *fb4 = nullptr;
+	nix::FrameBuffer *fb5 = nullptr;
 	nix::Shader *shader_blur = nullptr;
+	nix::Shader *shader_depth = nullptr;
 	nix::Shader *shader_out = nullptr;
 	nix::Shader *shader_3d = nullptr;
 
@@ -153,9 +158,14 @@ public:
 			new nix::Texture(width/2, height/2, "rgba:f16")});
 		fb3 = new nix::FrameBuffer({
 			new nix::Texture(width/2, height/2, "rgba:f16")});
+		fb4 = new nix::FrameBuffer({
+			new nix::Texture(width, height, "rgba:f16")});
+		fb5 = new nix::FrameBuffer({
+			new nix::Texture(width, height, "rgba:f16")});
 
 		try {
 			shader_blur = nix::Shader::load("Materials/forward/blur.shader");
+			shader_depth = nix::Shader::load("Materials/forward/depth.shader");
 			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
 			shader_3d = nix::Shader::load("Materials/forward/3d.shader");
 		} catch(Exception &e) {
@@ -185,13 +195,19 @@ public:
 		nix::FrameBuffer::DEFAULT->height = h;
 
 
-		process_blur(fb, fb2, 1.0f, true);
+		auto *source = fb;
+		if (cam->focus_enabled) {
+			process_depth(source, fb4, fb->depth_buffer, true);
+			process_depth(fb4, fb5, fb->depth_buffer, false);
+			source = fb5;
+		}
+		process_blur(source, fb2, 1.0f, true);
 		process_blur(fb2, fb3, 0.0f, false);
 
 
 		nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
 
-		render_out(fb, fb3);
+		render_out(source, fb3);
 
 		draw_gui();
 
@@ -204,17 +220,35 @@ public:
 
 		nix::SetShader(shader_blur);
 		float r = cam->bloom_radius;
-		complex ax = complex(2,0);
-		if (!horizontal) {
+		complex ax;
+		if (horizontal) {
+			ax = complex(2,0);
+		} else {
 			ax = complex(0,1);
+			//r /= 2;
 		}
 		shader_blur->set_float(shader_blur->get_location("radius"), r);
 		shader_blur->set_float(shader_blur->get_location("threshold"), threshold / cam->exposure);
 		shader_blur->set_data(shader_blur->get_location("axis"), &ax.x, 8);
-		process(source->color_attachments[0], target, shader_blur);
+		process(source->color_attachments, target, shader_blur);
 	}
 
-	void process(nix::Texture *source, nix::FrameBuffer *target, nix::Shader *shader) {
+	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal) {
+
+		nix::SetShader(shader_depth);
+		complex ax = complex(1,0);
+		if (!horizontal) {
+			ax = complex(0,1);
+		}
+		shader_depth->set_float(shader_depth->get_location("max_radius"), 50);
+		shader_depth->set_float(shader_depth->get_location("focal_length"), cam->focal_length);
+		shader_depth->set_float(shader_depth->get_location("focal_blur"), cam->focal_blur);
+		shader_depth->set_data(shader_depth->get_location("axis"), &ax.x, 8);
+		shader_depth->set_matrix(shader_depth->get_location("invproj"), cam->m_projection.inverse());
+		process({source->color_attachments[0], depth_buffer}, target, shader_depth);
+	}
+
+	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
 		nix::BindFrameBuffer(target);
 		nix::SetZ(false, false);
 		nix::SetProjectionOrtho(true);
@@ -222,7 +256,7 @@ public:
 		nix::SetWorldMatrix(matrix::ID);
 		//nix::SetShader(shader);
 
-		nix::SetTexture(source);
+		nix::SetTextures(source);
 		nix::DrawTriangles(vb_2d);
 	}
 
@@ -240,7 +274,9 @@ public:
 		nix::SetCull(CULL_DEFAULT);
 
 		nix::SetAlpha(ALPHA_NONE);
-		glFinish();
+
+		if (config.debug)
+			glFinish();
 		perf_mon->tick(4);
 	}
 
@@ -257,7 +293,9 @@ public:
 		nix::SetZ(false, false);
 
 		nix::DrawTriangles(vb_2d);
-		glFinish();
+
+		if (config.debug)
+			glFinish();
 		perf_mon->tick(3);
 	}
 
@@ -285,7 +323,8 @@ public:
 			t->draw();
 			nix::DrawTriangles(t->vertex_buffer);
 		}
-		glFinish();
+		if (config.debug)
+			glFinish();
 		perf_mon->tick(1);
 
 		for (auto &s: world.sorted_opaque) {
@@ -302,7 +341,8 @@ public:
 			cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
 		}
-		glFinish();
+		if (config.debug)
+			glFinish();
 		perf_mon->tick(2);
 	}
 	void set_material(Material *m) {
@@ -367,13 +407,14 @@ public:
 	Text *fps_display;
 
 	void init() {
+		config.load();
+
 		window = create_window();
 #if HAS_LIB_VULKAN
 		vulkan::init(window);
 #endif
 		Kaba::init();
 
-		config.load();
 #if HAS_LIB_VULKAN
 		renderer = new WindowRendererVulkan(window);
 #endif
@@ -445,8 +486,14 @@ public:
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
-		window = glfwCreateWindow(1024, 768, "y-engine", nullptr, nullptr);
-		//window = glfwCreateWindow(1024, 768, "y-engine", glfwGetPrimaryMonitor(), nullptr);
+		int w = config.get("screen.width", "1024")._int();
+		int h = config.get("screen.height", "768")._int();
+		auto monitor = glfwGetPrimaryMonitor();
+		if (!config.get_bool("screen.fullscreen", false))
+			monitor = nullptr;
+
+		window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
+
 		glfwSetWindowUserPointer(window, this);
 		return window;
 	}
