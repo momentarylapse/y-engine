@@ -49,7 +49,7 @@ void UniformBuffer::update(void *data, int size) {
 	glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW);
 }
 
-void NixBindUniform(UniformBuffer *ub, int index) {
+void BindUniform(UniformBuffer *ub, int index) {
 	//glUniformBlockBinding(program, index, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, index, ub->buffer);
 }
@@ -381,11 +381,11 @@ void Shader::set_default_data() {
 	set_data(location[LOCATION_MATERIAL_SHININESS], &material.shininess, 4);
 	set_color(location[LOCATION_MATERIAL_EMISSION], material.emission);
 
-	set_color(location[LOCATION_LIGHT_COLOR], lights[0].col);
+	/*set_color(location[LOCATION_LIGHT_COLOR], lights[0].col);
 	set_data(location[LOCATION_LIGHT_HARSHNESS], &lights[0].harshness, 4);
 	vector dir = view_matrix.transform_normal(lights[0].pos);
 	set_data(location[LOCATION_LIGHT_POS], &dir.x, 3*4);
-	set_data(location[LOCATION_LIGHT_RADIUS], &lights[0].radius, 4);
+	set_data(location[LOCATION_LIGHT_RADIUS], &lights[0].radius, 4);*/
 
 	set_color(location[LOCATION_FOG_COLOR], fog._color);
 	set_data(location[LOCATION_FOG_DENSITY], &fog.density, 4);

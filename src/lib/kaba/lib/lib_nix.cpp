@@ -266,7 +266,7 @@ void SIAddPackageNix()
 		func_add_param("t", TypeTexture);
 	add_func("NixSetShader", TypeVoid, nix_p(&nix::SetShader), FLAG_STATIC);
 		func_add_param("s", TypeShader);
-	add_func("NixBindUniform", TypeVoid, nix_p(mf(&nix::NixBindUniform)), FLAG_STATIC);
+	add_func("NixBindUniform", TypeVoid, nix_p(mf(&nix::BindUniform)), FLAG_STATIC);
 		func_add_param("buf", TypeUniformBuffer);
 		func_add_param("index", TypeInt);
 	add_func("NixScreenShotToImage", TypeVoid, nix_p(&nix::ScreenShotToImage), FLAG_STATIC);

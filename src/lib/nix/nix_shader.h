@@ -24,7 +24,7 @@ public:
 	void update(void *data, int size);
 };
 
-void NixBindUniform(UniformBuffer *ub, int index);
+void BindUniform(UniformBuffer *ub, int index);
 
 class Shader {
 public:

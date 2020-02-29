@@ -118,7 +118,6 @@ public:
 static Config config;
 
 
-#define METHOD 2
 
 class RenderPathGL : public RenderPath {
 public:
@@ -128,6 +127,10 @@ public:
 	nix::DepthBuffer *depth_buffer = nullptr;
 	nix::FrameBuffer *fb = nullptr;
 	nix::Shader *shader_out = nullptr;
+	nix::Shader *shader_3d = nullptr;
+
+	Array<UBOLight> lights;
+	nix::UniformBuffer *ubo_light;
 
 	RenderPathGL(GLFWwindow* w) {
 		window = w;
@@ -141,13 +144,15 @@ public:
 		fb = new nix::FrameBuffer({dyn_tex, depth_buffer});
 		try {
 			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
+			shader_3d = nix::Shader::load("Materials/forward/3d.shader");
 		} catch(Exception &e) {
 			msg_error(e.message());
 			throw e;
 		}
-
+		ubo_light = new nix::UniformBuffer();
 	}
 	void draw() override {
+		prepare_lights();
 
 		render_into_texture();
 		int w, h;
@@ -213,13 +218,16 @@ public:
 
 		nix::SetLightDirectional(0, world.lights[0]->dir, world.lights[0]->col, world.lights[0]->harshness);
 
+		nix::BindUniform(ubo_light, 1);
+
 
 		for (auto *t: world.terrains) {
 			//nix::SetWorldMatrix(matrix::translation(t->pos));
 			nix::SetWorldMatrix(matrix::ID);
 			nix::SetMaterial(White, White, White, 20, Black);
 			nix::SetTextures(t->material->textures);
-			nix::SetShader(t->material->shader);
+			//nix::SetShader(t->material->shader);
+			set_shader();
 			t->draw();
 			nix::DrawTriangles(t->vertex_buffer);
 		}
@@ -229,7 +237,8 @@ public:
 			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
 			nix::SetMaterial(White, White, White, 20, Black);
 			nix::SetTextures(s.material->textures);
-			nix::SetShader(s.material->shader);
+			//nix::SetShader(s.material->shader);
+			set_shader();
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 
 			/*gp.model = mtr(m->pos, m->ang);
@@ -240,6 +249,28 @@ public:
 			cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
 			cb->draw(m->mesh[0]->sub[0].vertex_buffer);*/
 		}
+	}
+	void set_shader() {
+		nix::SetShader(shader_3d);
+		shader_3d->set_data(shader_3d->get_location("eye_pos"), &cam->pos.x, 16);
+		shader_3d->set_int(shader_3d->get_location("num_lights"), lights.num);
+	}
+	void prepare_lights() {
+		lights.clear();
+		for (auto *l: world.lights) {
+			if (!l->enabled)
+				continue;
+			UBOLight ll;
+			ll.pos = l->pos;
+			ll.col = l->col;
+			ll.dir = l->dir;
+			ll.proj = l->proj;
+			ll.harshness = l->harshness;
+			ll.radius = l->radius;
+			ll.theta = l->theta;
+			lights.add(ll);
+		}
+		ubo_light->update(&lights[0], sizeof(UBOLight) * lights.num);
 	}
 };
 
