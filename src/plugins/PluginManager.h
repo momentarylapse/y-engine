@@ -11,6 +11,7 @@
 #include "../lib/base/base.h"
 
 class Controller;
+class PerformanceMonitor;
 
 class PluginManager {
 public:
@@ -27,5 +28,6 @@ public:
 
 
 extern PluginManager plugin_manager;
+extern PerformanceMonitor *global_perf_mon;
 
 #endif /* SRC_PLUGINS_PLUGINMANAGER_H_ */

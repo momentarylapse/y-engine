@@ -23,10 +23,10 @@ struct UBOMatrices {
 	alignas(16) matrix proj;
 };
 
-Picture::Picture(const vector &p, float w, float h, nix::Texture *tex, nix::Shader *_shader) {
-	pos = p;
-	width = w;
-	height = h;
+Picture::Picture(const rect &r, float _z, nix::Texture *tex, nix::Shader *_shader) {
+	dest = r;
+	z = _z;
+	source = rect::ID;
 	texture = tex;
 	col = White;
 #if 0
@@ -41,7 +41,7 @@ Picture::Picture(const vector &p, float w, float h, nix::Texture *tex, nix::Shad
 #endif
 }
 
-Picture::Picture(const vector &p, float w, float h, nix::Texture *tex) : Picture(p, w, h, tex, nullptr) {
+Picture::Picture(const rect &r, float _z, nix::Texture *tex) : Picture(r, _z, tex, nullptr) {
 }
 
 Picture::~Picture() {
@@ -54,8 +54,16 @@ Picture::~Picture() {
 		delete user_pipeline;*/
 }
 
-void Picture::rebuild() {
+//void Picture::rebuild() {
 	//dset->set({ubo}, {texture});
+//}
+
+void Picture::__init__(const rect &r, float z, nix::Texture *tex) {
+	new(this) Picture(r, z, tex);
+}
+
+void Picture::__delete__() {
+	this->~Picture();
 }
 
 void vb_create_rect(nix::VertexBuffer *vb, const rect &s) {
@@ -109,7 +117,7 @@ void add(Picture *p) {
 
 void update() {
 	for (auto *p: pictures) {
-		p->rebuild();
+		//p->rebuild();
 	}
 }
 

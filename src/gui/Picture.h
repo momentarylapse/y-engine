@@ -13,14 +13,17 @@
 
 class Picture {
 public:
-	Picture(const vector &pos, float w, float h, nix::Texture *tex, nix::Shader *shader);
-	Picture(const vector &pos, float w, float h, nix::Texture *tex);
+	Picture(const rect &r, float z, nix::Texture *tex, nix::Shader *shader);
+	Picture(const rect &r, float z, nix::Texture *tex);
 	virtual ~Picture();
 
-	vector pos;
+	void __init__(const rect &r, float z, nix::Texture *tex);
+	virtual void __delete__();
+
+	rect dest;
+	rect source;
 	color col;
-	float height;
-	float width;
+	float z;
 
 	nix::Texture *texture;
 	/*vulkan::Texture *texture;
@@ -29,7 +32,7 @@ public:
 	vulkan::Shader *user_shader;
 	vulkan::Pipeline *user_pipeline;*/
 
-	virtual void rebuild();
+	//virtual void rebuild();
 
 	/*static vulkan::Shader *shader;
 	static vulkan::Pipeline *pipeline;

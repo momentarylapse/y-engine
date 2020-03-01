@@ -14,10 +14,14 @@
 #include "../world/camera.h"
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
+#include "../gui/Picture.h"
+#include "../gui/Text.h"
 #include "../helper/InputManager.h"
+#include "../helper/PerformanceMonitor.h"
 
 
 PluginManager plugin_manager;
+PerformanceMonitor *global_perf_mon;
 
 
 void PluginManager::link_kaba() {
@@ -131,10 +135,33 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Particle.color", &Particle::col);
 	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 
+
+	Kaba::declare_class_size("Picture", sizeof(Picture));
+	Kaba::declare_class_element("Picture.dest", &Picture::dest);
+	Kaba::declare_class_element("Picture.source", &Picture::source);
+	Kaba::declare_class_element("Picture.z", &Picture::z);
+	Kaba::declare_class_element("Picture.texture", &Picture::texture);
+	Kaba::link_external_class_func("Picture.__init__", &Picture::__init__);
+	Kaba::link_external_class_func("Picture.__delete__", &Picture::__delete__);
+
+	Kaba::declare_class_size("Text", sizeof(Text));
+	Kaba::declare_class_element("Text.font_size", &Text::font_size);
+	Kaba::declare_class_element("Text.text", &Text::text);
+	Kaba::link_external_class_func("Text.__init__", &Text::__init__);
+	Kaba::link_external_class_func("Text.__delete__", &Text::__delete__);
+	Kaba::link_external_class_func("Text.set_text", &Text::set_text);
+
 	Kaba::link_external("get_key", (void*)&InputManager::get_key);
 	Kaba::link_external("get_key_down", (void*)&InputManager::get_key_down);
 	Kaba::link_external("get_key_up", (void*)&InputManager::get_key_up);
 
+	Kaba::link_external("gui_add", (void*)&gui::add);
+
+	Kaba::declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
+	Kaba::declare_class_element("PerformanceMonitor.avg", &PerformanceMonitor::avg);
+	Kaba::declare_class_element("PerformanceMonitor.frames", &PerformanceMonitor::frames);
+	//Kaba::declare_class_element("PerformanceMonitor.location", &PerformanceMonitor::avg.location);
+	Kaba::link_external("perf_mon", &global_perf_mon);
 
 	Kaba::link_external("world", &world);
 	Kaba::link_external("cam", &cam);

@@ -58,8 +58,6 @@ using namespace std::chrono;
 
 
 
-
-
 class GameIni {
 public:
 	string main_script;
@@ -295,7 +293,7 @@ public:
 
 		for (auto *p: gui::pictures) {
 			nix::SetTexture(p->texture);
-			nix::SetWorldMatrix(matrix::translation(p->pos) * matrix::scale(p->width, p->height, 0));
+			nix::SetWorldMatrix(matrix::translation(vector(p->dest.x1, p->dest.y1, p->z)) * matrix::scale(p->dest.width(), p->dest.height(), 0));
 			nix::DrawTriangles(gui::vertex_buffer);
 		}
 		nix::SetCull(CULL_DEFAULT);
@@ -481,6 +479,7 @@ public:
 		engine.set_dirs("Textures/", "Maps/", "Objects/", "Sound", "Scripts/", "Materials/", "Fonts/");
 
 		GodInit();
+		global_perf_mon = &perf_mon;
 		PluginManager::link_kaba();
 
 
@@ -528,7 +527,7 @@ public:
 #endif
 		if (SHOW_SHADOW) {
 			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path))
-				gui::add(new Picture(vector(0, 0.8f, 0), 0.2f, 0.2f, rpv->fb_shadow->depth_buffer));
+				gui::add(new Picture(rect(0, 0.2f, 0.8f, 1.0f), 0, rpv->fb_shadow->depth_buffer));
 		}
 
 		for (auto &s: world.scripts)
@@ -590,10 +589,12 @@ public:
 	}
 
 	void iterate() {
+		perf_mon.tick(8);
 		for (auto *c: plugin_manager.controllers)
 			c->on_iterate(engine.elapsed);
 		for (auto *o: world.objects)
 			o->on_iterate(engine.elapsed);
+		perf_mon.tick(9);
 	}
 
 
@@ -606,13 +607,7 @@ public:
 #if HAS_LIB_VULKAN
 		vulkan::wait_device_idle();
 #endif
-		fps_display->set_text(format("%.1f\n\n shadow:\t%.2f\n world:\t%.2f\n cam:\t%.2f\n gui: \t%.2f\n xxx:\t%.2f",
-				1.0f / perf_mon.avg.frame_time,
-				perf_mon.avg.location[0]*1000,
-				perf_mon.avg.location[1]*1000,
-				perf_mon.avg.location[2]*1000,
-				perf_mon.avg.location[3]*1000,
-				perf_mon.avg.location[4]*1000));
+		fps_display->set_text(format("%.1f", 1.0f / perf_mon.avg.frame_time));
 	}
 
 

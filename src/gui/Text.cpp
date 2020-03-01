@@ -85,13 +85,21 @@ void render_text(const string &str, Image &im) {
 
 
 
-Text::Text(const string &t, const vector &p, float h) : Picture(p, 1, h, new nix::Texture()) {
+Text::Text(const string &t, const vector &p, float h) : Picture(rect(p.x, p.x, p.y, p.y), p.z, new nix::Texture()) {
 	font_size = h;
 	set_text(t);
 }
 
 Text::~Text() {
 	delete texture;
+}
+
+void Text::__init__(const string &t, const vector &p, float h) {
+	new(this) Text(t, p, h);
+}
+
+void Text::__delete__() {
+	this->~Text();
 }
 
 void Text::rebuild() {
@@ -101,8 +109,10 @@ void Text::rebuild() {
 	texture->overwrite(im);
 	//dset->set({ubo}, {texture});
 
-	height = font_size * text.explode("\n").num;
-	width = height * (float)im.width / (float)im.height / 1.33f;
+	float h = font_size * text.explode("\n").num;
+	float w = h * (float)im.width / (float)im.height / 1.33f;
+	dest.x2 = dest.x1 + w;
+	dest.y2 = dest.y1 + h;
 }
 
 void Text::set_text(const string &t) {

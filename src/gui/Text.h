@@ -14,8 +14,10 @@ class Text : public Picture {
 public:
 	Text(const string &t, const vector &p, float h);
 	virtual ~Text();
+	void __init__(const string &t, const vector &p, float h);
+	void __delete__() override;
 
-	void rebuild() override;
+	void rebuild();
 	void set_text(const string &t);
 
 	string text;
