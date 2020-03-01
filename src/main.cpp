@@ -542,6 +542,9 @@ public:
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+
 		int w = config.get_int("screen.width", 1024);
 		int h = config.get_int("screen.height", 768);
 		auto monitor = glfwGetPrimaryMonitor();
