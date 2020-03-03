@@ -232,7 +232,7 @@ public:
 
 		nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
 
-		render_out(source, fb3);
+		render_out(source, fb3->color_attachments[0]);
 
 		draw_gui();
 
@@ -305,9 +305,9 @@ public:
 		perf_mon->tick(4);
 	}
 
-	void render_out(nix::FrameBuffer *source, nix::FrameBuffer *bloom) {
+	void render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 
-		nix::SetTextures({source->color_attachments[0], bloom->color_attachments[0]});
+		nix::SetTextures({source->color_attachments[0], bloom});
 		nix::SetShader(shader_out);
 		shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
 		shader_out->set_float(shader_out->get_location("bloom_factor"), cam->bloom_factor);
@@ -361,6 +361,7 @@ public:
 			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
 			if (allow_material)
 				set_material(s.material);
+			//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
 	}
