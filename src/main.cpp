@@ -200,24 +200,21 @@ public:
 		tex_black->overwrite(im);
 
 		vb_2d = new nix::VertexBuffer("3f,3f,2f");
-		vb_create_rect(vb_2d, rect(-1,1, -1,1));
+		vb_2d->create_rect(rect(-1,1, -1,1));
 
 		AllowXContainer = false;
 		//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 		AllowXContainer = true;
 	}
 	void draw() override {
+		nix::StartFrameGLFW(window);
+
 		prepare_lights();
 		perf_mon->tick(0);
 
 		render_shadow_map();
 
 		render_into_texture();
-
-		int w, h;
-		glfwGetFramebufferSize(window, &w, &h);
-		nix::FrameBuffer::DEFAULT->width = w;
-		nix::FrameBuffer::DEFAULT->height = h;
 
 
 		auto *source = fb;
@@ -236,8 +233,7 @@ public:
 
 		draw_gui();
 
-
-		glfwSwapBuffers(window);
+		nix::EndFrameGLFW(window);
 		perf_mon->tick(5);
 	}
 

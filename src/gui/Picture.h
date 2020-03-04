@@ -53,6 +53,4 @@ namespace gui {
 	extern nix::VertexBuffer *vertex_buffer;
 }
 
-void vb_create_rect(nix::VertexBuffer *vb, const rect &s);
-
 #endif /* SRC_GUI_PICTURE_H_ */

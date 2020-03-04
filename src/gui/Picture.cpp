@@ -66,14 +66,6 @@ void Picture::__delete__() {
 	this->~Picture();
 }
 
-void vb_create_rect(nix::VertexBuffer *vb, const rect &s) {
-	Array<vector> p = {vector(s.x1,s.y1,0), vector(s.x1,s.y2,0), vector(s.x2,s.y2,0),  vector(s.x1,s.y1,0), vector(s.x2,s.y2,0), vector(s.x2,s.y1,0)};
-	Array<float> uv = {0,0, 0,1, 1,1,  0,0, 1,1, 1,0};
-	vb->update(0, p);
-	vb->update(1, p);
-	vb->update(2, uv);
-}
-
 namespace gui {
 
 nix::Shader *shader = nullptr;
@@ -83,7 +75,7 @@ Array<Picture*> pictures;
 
 void init() {
 	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
-	vb_create_rect(vertex_buffer, rect::ID);
+	vertex_buffer->create_rect(rect::ID);
 
 	shader = nix::Shader::load("forward/2d.shader");
 }
