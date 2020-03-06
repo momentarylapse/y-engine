@@ -31,7 +31,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Camera.pos", &Camera::pos);
 	Kaba::declare_class_element("Camera.ang", &Camera::ang);
 	Kaba::declare_class_element("Camera.dest", &Camera::dest);
-	Kaba::declare_class_element("Camera.zoom", &Camera::zoom);
+	Kaba::declare_class_element("Camera.fov", &Camera::fov);
 	Kaba::declare_class_element("Camera.exposure", &Camera::exposure);
 	Kaba::declare_class_element("Camera.bloom_radius", &Camera::bloom_radius);
 	Kaba::declare_class_element("Camera.bloom_factor", &Camera::bloom_factor);
@@ -80,7 +80,6 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("World.terrains", &World::terrains);
 	Kaba::declare_class_element("World.background", &World::background);
 	Kaba::declare_class_element("World.skyboxes", &World::skybox);
-	Kaba::declare_class_element("World.sun", &World::sun);
 	Kaba::declare_class_element("World.lights", &World::lights);
 	Kaba::declare_class_element("World.ego", &World::ego);
 	Kaba::declare_class_element("World.fog", &World::fog);
