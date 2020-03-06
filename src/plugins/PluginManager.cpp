@@ -140,6 +140,8 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Picture.source", &Picture::source);
 	Kaba::declare_class_element("Picture.z", &Picture::z);
 	Kaba::declare_class_element("Picture.texture", &Picture::texture);
+	Kaba::declare_class_element("Picture.blur", &Picture::bg_blur);
+	Kaba::declare_class_element("Picture.color", &Picture::col);
 	Kaba::link_external_class_func("Picture.__init__", &Picture::__init__);
 	Kaba::link_external_class_func("Picture.__delete__", &Picture::__delete__);
 

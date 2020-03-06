@@ -29,6 +29,7 @@ Picture::Picture(const rect &r, float _z, nix::Texture *tex, nix::Shader *_shade
 	source = rect::ID;
 	texture = tex;
 	col = White;
+	bg_blur = 0;
 #if 0
 	ubo = new vulkan::UniformBuffer(sizeof(UBOMatrices));
 	user_shader = _shader;

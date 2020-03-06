@@ -231,7 +231,7 @@ public:
 
 		render_out(source, fb3->color_attachments[0]);
 
-		draw_gui();
+		draw_gui(source);
 
 		nix::EndFrameGLFW(window);
 		perf_mon->tick(5);
@@ -281,14 +281,16 @@ public:
 		nix::DrawTriangles(vb_2d);
 	}
 
-	void draw_gui() {
+	void draw_gui(nix::FrameBuffer *source) {
 		nix::SetProjectionOrtho(true);
 		nix::SetCull(CULL_NONE);
 		nix::SetShader(gui::shader);
 		nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 
 		for (auto *p: gui::pictures) {
-			nix::SetTexture(p->texture);
+			gui::shader->set_float(gui::shader->get_location("blur"), p->bg_blur);
+			gui::shader->set_color(gui::shader->get_location("color"), p->col);
+			nix::SetTextures({p->texture, source->color_attachments[0]});
 			nix::SetWorldMatrix(matrix::translation(vector(p->dest.x1, p->dest.y1, p->z)) * matrix::scale(p->dest.width(), p->dest.height(), 0));
 			nix::DrawTriangles(gui::vertex_buffer);
 		}

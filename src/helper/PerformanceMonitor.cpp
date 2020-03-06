@@ -9,6 +9,8 @@
 
 PerformanceMonitor::PerformanceMonitor() {
 	reset();
+	just_cleared = true;
+	frame_dt = 0;
 }
 
 void PerformanceMonitor::reset() {
@@ -16,8 +18,6 @@ void PerformanceMonitor::reset() {
 	for (int i=0; i<NUM_LOCATIONS; i++)
 		temp.location[i] = 0;
 	frames = 0;
-	frame_dt = 0;
-	just_cleared = true;
 }
 
 void PerformanceMonitor::tick(int loc) {

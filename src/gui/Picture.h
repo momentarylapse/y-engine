@@ -25,6 +25,8 @@ public:
 	color col;
 	float z;
 
+	float bg_blur;
+
 	nix::Texture *texture;
 	/*vulkan::Texture *texture;
 	vulkan::UniformBuffer *ubo;
