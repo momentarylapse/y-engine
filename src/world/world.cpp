@@ -379,6 +379,8 @@ bool World::load(const LevelData &ld) {
 	return ok;
 }
 
+static Array<float> hh;
+
 Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
@@ -392,10 +394,14 @@ Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	msg_write(tt->pattern.str());
 
 	//tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
-	auto hf = new btHeightfieldTerrainShape(tt->num_x+1, tt->num_z+1, tt->height.data, 1.0f, -600, 600, 1, PHY_FLOAT, false);
+	hh.clear();
+	for (int z=0; z<tt->num_z+1; z++)
+		for (int x=0; x<tt->num_x+1; x++)
+			hh.add(tt->height[x * (tt->num_z+1) + z]);
+	auto hf = new btHeightfieldTerrainShape(tt->num_x+1, tt->num_z+1, hh.data, 1.0f, -600, 600, 1, PHY_FLOAT, false);
 	hf->setLocalScaling(bt_set_v(tt->pattern + vector(0,1,0)));
 	tt->colShape = hf;
-	btTransform startTransform = bt_set_trafo(pos + vector(tt->pattern.x * tt->num_x/2, 0, tt->pattern.z * tt->num_z/2), quaternion::ID);
+	btTransform startTransform = bt_set_trafo(pos + vector(tt->pattern.x * tt->num_x, 0, tt->pattern.z * tt->num_z)/2, quaternion::ID);
 	btScalar mass(0.f);
 	btVector3 localInertia(0, 0, 0);
 
