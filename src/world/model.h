@@ -28,8 +28,9 @@
 #include "../lib/base/base.h"
 #include "../lib/math/math.h"
 
+class btRigidBody;
+class btCollisionShape;
 
-extern string ObjectDir;
 
 class Model;
 namespace Fx {
@@ -384,8 +385,8 @@ public:
 		MetaMove *meta;
 	} anim;
 
-	/*dBodyID*/ void* body_id;
-	/*dGeomID*/ void* geom_id;
+	btRigidBody* body;
+	btCollisionShape* colShape;
 
 	virtual void _cdecl on_init(){}
 	virtual void _cdecl on_delete(){}

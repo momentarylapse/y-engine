@@ -36,11 +36,13 @@ Terrain::Terrain()
 {
 	material = NULL;
 	ubo = nullptr;
+	body = nullptr;
+	colShape = nullptr;
 //	dset = nullptr;
 	reset();
 }
 
-Terrain::Terrain(const string &_filename_, const vector &_pos_)
+Terrain::Terrain(const string &_filename_, const vector &_pos_) : Terrain()
 {
 	material = NULL;
 	load(_filename_, _pos_);

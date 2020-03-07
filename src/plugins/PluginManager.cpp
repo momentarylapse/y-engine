@@ -164,8 +164,12 @@ void PluginManager::link_kaba() {
 	//Kaba::declare_class_element("PerformanceMonitor.location", &PerformanceMonitor::avg.location);
 	Kaba::link_external("perf_mon", &global_perf_mon);
 
+	Kaba::declare_class_size("EngineData", sizeof(EngineData));
+	Kaba::declare_class_element("EngineData.physics_enabled", &EngineData::physics_enabled);
+
 	Kaba::link_external("world", &world);
 	Kaba::link_external("cam", &cam);
+	Kaba::link_external("engine", &engine);
 	Kaba::link_external("mouse", &InputManager::mouse);
 	Kaba::link_external("dmouse", &InputManager::dmouse);
 	Kaba::link_external("scroll", &InputManager::scroll);

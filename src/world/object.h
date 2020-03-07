@@ -13,8 +13,7 @@
 #include "model.h"
 
 
-class Object : public Model
-{
+class Object : public Model {
 public:
 	Object();
 //	~Object();

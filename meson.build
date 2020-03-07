@@ -20,15 +20,6 @@ gldep = dependency('GL')
 add_project_arguments('-DHAS_LIB_GL=1', language : ['cpp'])
 deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep]
 
-# optional dependency: ode
-d = cc.find_library('ode', required : false)
-if d.found()
-	add_project_arguments('-DHAS_LIB_ODE=1', language : ['cpp'])
-	deps += [d]
-else
-	add_project_arguments('-DHAS_LIB_ODE=0', language : ['cpp'])
-endif
-
 # optional dependency: unwind
 d = cc.find_library('unwind', required : false)
 if d.found()
@@ -45,6 +36,18 @@ if d.found()
 	deps += [d]
 else
 	add_project_arguments('-DHAS_LIB_DL=0', language : ['cpp'])
+endif
+
+# optional dependency: bullet
+d1 = cc.find_library('BulletSoftBody', required : false)
+d2 = cc.find_library('BulletDynamics', required : false)
+d3 = cc.find_library('BulletCollision', required : false)
+d4 = cc.find_library('LinearMath', required : false)
+if d1.found() and d2.found() and d3.found() and d4.found()
+	add_project_arguments('-DHAS_LIB_BULLET=1', language : ['cpp'])
+	deps += [d1,d2,d3,d4]
+else
+	add_project_arguments('-DHAS_LIB_BULLET=0', language : ['cpp'])
 endif
 
 

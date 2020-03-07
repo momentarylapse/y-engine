@@ -589,6 +589,7 @@ public:
 
 	void iterate() {
 		perf_mon.tick(8);
+		world.iterate(engine.elapsed);
 		for (auto *c: plugin_manager.controllers)
 			c->on_iterate(engine.elapsed);
 		for (auto *o: world.objects)

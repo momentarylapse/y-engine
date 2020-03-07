@@ -27,6 +27,9 @@
 #include "../fx/Particle.h"
 #endif
 
+#include <btBulletDynamicsCommon.h>
+
+
 #if 0
 #include "model_manager.h"
 #include "../lib/nix/nix.h"
@@ -52,37 +55,31 @@ nix::Texture *tex_black = nullptr;
 //#define _debug_matrices_
 
 
-#ifdef USE_ODE
-	#define dSINGLE
-	#include <ode/ode.h>
-	bool ode_world_created = false;
-	dWorldID world_id;
-	dSpaceID space_id;
-	dJointGroupID contactgroup;
-inline void qx2ode(quaternion *qq, dQuaternion q)
-{
-	q[0] = qq->w;
-	q[1] = qq->x;
-	q[2] = qq->y;
-	q[3] = qq->z;
+
+quaternion bt_get_q(const btQuaternion &q) {
+	quaternion r;
+	r.x = q.x();
+	r.y = q.y();
+	r.z = q.z();
+	r.w = q.w();
+	return r;
 }
-inline void qode2x(const dQuaternion q, quaternion *qq)
-{
-	qq->w = q[0];
-	qq->x = q[1];
-	qq->y = q[2];
-	qq->z = q[3];
+
+vector bt_get_v(const btVector3 &v) {
+	vector r;
+	r.x = v.x();
+	r.y = v.y();
+	r.z = v.z();
+	return r;
 }
-#endif
 
+btVector3 bt_set_v(const vector &v) {
+	return btVector3(v.x, v.y, v.z);
+}
 
-#ifdef _X_ALLOW_PHYSICS_DEBUG_
-	int PhysicsTimer;
-	float PhysicsTimeCol, PhysicsTimePhysics, PhysicsTimeLinks;
-	bool PhysicsStopOnCollision = false;
-#endif
-
-
+btQuaternion bt_set_q(const quaternion &q) {
+	return btQuaternion(q.x, q.y, q.z, q.w);
+}
 
 // game data
 World world;
@@ -165,9 +162,6 @@ void TestObjectSanity(const char *str)
 
 
 void GodInit() {
-//	world.ubo_light = new vulkan::UniformBuffer(sizeof(UBOLight), 64);
-//	world.ubo_fog = new vulkan::UniformBuffer(64);
-
 	Image im;
 	tex_white = new nix::Texture();
 	tex_black = new nix::Texture();
@@ -175,54 +169,37 @@ void GodInit() {
 	tex_white->overwrite(im);
 	im.create(16, 16, Black);
 	tex_black->overwrite(im);
-
-	world.reset();
-
-	world.terrain_object = new Object();
-	world.terrain_object->update_matrix();
-
-#if 0
-	COctree *octree = new COctree(v_0, 100);
-	sOctreeLocationData dummy_loc;
-	vector min =vector(23,31,9);
-	vector max =vector(40,50,39);
-	octree->Insert(min, max, (void*)1, &dummy_loc);
-	min =vector(23,31,9);
-	max =vector(24,32,10);
-	octree->Insert(min, max, (void*)2, &dummy_loc);
-
-	Array<void*> a;
-	vector pos = vector(24, 30, 20);
-	octree->GetPointNeighbourhood(pos, 100, a);
-
-	msg_write("---Octree-Test---");
-	msg_write(a.num);
-	for (int i=0;i<a.num;i++)
-		msg_write(p2s(a[i]));
-	//exit(0);
-	msg_write("-----------------");
-#endif
-
-	
-	
-
-#ifdef USE_ODE
-	contactgroup = dJointGroupCreate(0);
-#endif
 }
 
 void GodEnd() {
-//	delete world.ubo_light;
-//	delete world.ubo_fog;
 }
 
 World::World() {
 //	ubo_light = nullptr;
 //	ubo_fog = nullptr;
 
-	world.particle_manager = new ParticleManager();
+	particle_manager = new ParticleManager();
+
+
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	overlappingPairCache = new btDbvtBroadphase();
+	solver = new btSequentialImpulseConstraintSolver;
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+
+	terrain_object = new Object();
+	terrain_object->update_matrix();
 
 	reset();
+}
+
+World::~World() {
+	delete dynamicsWorld;
+	delete solver;
+	delete overlappingPairCache;
+	delete dispatcher;
+	delete collisionConfiguration;
 }
 
 void World::reset() {
@@ -286,24 +263,6 @@ void World::reset() {
 	// physics
 #ifdef _X_ALLOW_X_
 	//LinksReset();
-#endif
-#ifdef USE_ODE
-	if (ode_world_created){
-		dWorldDestroy(world_id);
-		dSpaceDestroy(space_id);
-	}else{
-		dInitODE();
-	}
-	world_id = dWorldCreate();
-	space_id = dSimpleSpaceCreate(0);
-	//space_id = dHashSpaceCreate(0);
-	/*int m1, m2;
-	dHashSpaceGetLevels(space_id, &m1, &m2);
-	printf("hash:    %d  %d\n", m1, m2);*/
-	ode_world_created = true;
-	world.terrain_object->body_id = 0;
-	world.terrain_object->geom_id = dCreateSphere(0, 1); // space, radius
-	dGeomSetBody((dGeomID)world.terrain_object->geom_id, (dBodyID)world.terrain_object->body_id);
 #endif
 }
 
@@ -413,8 +372,22 @@ bool World::load(const LevelData &ld) {
 Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
-//	tt->ubo = new vulkan::UniformBuffer(64*3);
-//	tt->dset = rp_create_dset(tt->material->textures, tt->ubo);
+
+	tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
+	btTransform startTransform;
+	startTransform.setIdentity();
+	btScalar mass(0.f);
+	btVector3 localInertia(0, 0, 0);
+
+	startTransform.setOrigin(bt_set_v(pos));
+
+	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, tt->colShape, localInertia);
+	tt->body = new btRigidBody(rbInfo);
+
+	dynamicsWorld->addRigidBody(tt->body);
+
 	terrains.add(tt);
 	return tt;
 }
@@ -571,25 +544,26 @@ void World::register_object(Model *o, int index) {
 
 	o->object_id = on;
 
-#ifdef USE_ODE
-	if (o->physics_data.active){
-		o->body_id = dBodyCreate(world_id);
-		dBodySetPosition((dBodyID)o->body_id, o->pos.x, o->pos.y, o->pos.z);
-		dMass m;
-		dMassSetParameters(&m, o->physics_data.mass, 0, 0, 0, o->physics_data.theta._00, o->physics_data.theta._11, o->physics_data.theta._22, o->physics_data.theta._01, o->physics_data.theta._02, o->physics_data.theta._12);
-		dBodySetMass((dBodyID)o->body_id, &m);
-		dBodySetData((dBodyID)o->body_id, o);
-		dQuaternion qq;
-		qx2ode(&o->ang, qq);
-		dBodySetQuaternion((dBodyID)o->body_id, qq);
-	}else
-		o->body_id = 0;
 
-	vector d = o->prop.max - o->prop.min;
-	o->geom_id = dCreateBox(space_id, d.x, d.y, d.z); //dCreateSphere(0, 1); // space, radius
-//	msg_write((int)o->geom_id);
-	dGeomSetBody((dGeomID)o->geom_id, (dBodyID)o->body_id);
-#endif
+	o->colShape = new btSphereShape(btScalar(1.));
+	btTransform startTransform;
+	startTransform.setIdentity();
+	btScalar mass(1.f);
+	bool isDynamic = (mass != 0.f);
+	btVector3 localInertia(0, 0, 0);
+	if (isDynamic)
+		o->colShape->calculateLocalInertia(mass, localInertia);
+
+	startTransform.setOrigin(bt_set_v(o->pos));
+	startTransform.setRotation(bt_set_q(o->ang));
+
+	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, o->colShape, localInertia);
+	o->body = new btRigidBody(rbInfo);
+
+	dynamicsWorld->addRigidBody(o->body);
+
 }
 
 
@@ -599,15 +573,14 @@ void World::unregister_object(Model *m) {
 	if (m->object_id < 0)
 		return;
 
-#ifdef USE_ODE
-	if (m->body_id != 0)
-		dBodyDestroy((dBodyID)m->body_id);
-	m->body_id = 0;
 
-	if (m->geom_id != 0)
-		dGeomDestroy((dGeomID)m->geom_id);
-	m->geom_id = 0;
-#endif
+	if (m->body) {
+		delete m->body->getMotionState();
+		delete m->body;
+		delete m->colShape;
+		m->body = nullptr;
+		m->colShape = nullptr;
+	}
 
 	// ego...
 	if (m == ego)
@@ -699,6 +672,21 @@ void World::unregister_model(Model *m) {
 	for (int i=0;i<m->bone.num;i++)
 		if (m->bone[i].model)
 			unregister_model(m->bone[i].model);
+}
+
+void World::iterate(float dt) {
+	if (!engine.physics_enabled)
+		return;
+
+	dynamicsWorld->setGravity(bt_set_v(gravity));
+	dynamicsWorld->stepSimulation(dt, 10);
+
+	for (auto *o: objects) {
+		btTransform trans;
+		o->body->getMotionState()->getWorldTransform(trans);
+		o->pos = bt_get_v(trans.getOrigin());
+		o->ang = bt_get_q(trans.getRotation());
+	}
 }
 
 void World::add_light(Light *l) {

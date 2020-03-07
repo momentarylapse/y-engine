@@ -14,6 +14,7 @@
 #include "../lib/base/base.h"
 #include "../lib/math/math.h"
 
+
 class Model;
 class Object;
 class Material;
@@ -22,6 +23,13 @@ class TemplateDataScriptVariable;
 class Light;
 class ParticleManager;
 class Particle;
+
+
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btBroadphaseInterface;
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
 
 /*namespace vulkan {
 	class UniformBuffer;
@@ -129,6 +137,7 @@ struct GodNetMessage {
 class World {
 public:
 	World();
+	~World();
 	void reset();
 	bool load(const LevelData &ld);
 	Object *create_object(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
@@ -150,6 +159,8 @@ public:
 
 	ParticleManager *particle_manager;
 	void add_particle(Particle *p);
+
+	void iterate(float dt);
 
 
 	float speed_of_sound;
@@ -188,6 +199,13 @@ public:
 
 	// esotherical (not in the world)
 	bool add_all_objects_to_lists;
+
+
+	btDefaultCollisionConfiguration* collisionConfiguration;
+	btCollisionDispatcher* dispatcher;
+	btBroadphaseInterface* overlappingPairCache;
+	btSequentialImpulseConstraintSolver* solver;
+	btDiscreteDynamicsWorld* dynamicsWorld;
 
 #if 0
 	// music fields

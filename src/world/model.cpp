@@ -708,8 +708,7 @@ void Model::load(const string &filename)
 }
 
 
-Model::Model()
-{
+Model::Model() {
 	pos = vel = rot = v_0;
 	ang = quaternion::ID;
 	object_id = -1;
@@ -739,12 +738,11 @@ Model::Model()
 	force_int = torque_int = v_0;
 	force_ext = torque_ext = v_0;
 
-	geom_id = 0;
-	body_id = 0;
+	body = nullptr;
+	colShape = nullptr;
 
 
-
-	parent = NULL;
+	parent = nullptr;
 	phys_is_reference = false;
 
 	anim.num_operations = 0;
