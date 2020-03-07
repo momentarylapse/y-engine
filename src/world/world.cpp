@@ -28,6 +28,8 @@
 #endif
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
 
 
 #if 0
@@ -79,6 +81,14 @@ btVector3 bt_set_v(const vector &v) {
 
 btQuaternion bt_set_q(const quaternion &q) {
 	return btQuaternion(q.x, q.y, q.z, q.w);
+}
+
+btTransform bt_set_trafo(const vector &p, const quaternion &q) {
+	btTransform trafo;
+	trafo.setIdentity();
+	trafo.setOrigin(bt_set_v(p));
+	trafo.setRotation(bt_set_q(q));
+	return trafo;
 }
 
 // game data
@@ -372,14 +382,22 @@ bool World::load(const LevelData &ld) {
 Terrain *World::create_terrain(const string &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
+	float a=10000, b=0;
+	for (float f: tt->height){
+		a = min(a, f);
+		b = max(b, f);
+	}
+	printf("%f   %f\n", a, b);
 
-	tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
-	btTransform startTransform;
-	startTransform.setIdentity();
+	msg_write(tt->pattern.str());
+
+	//tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
+	auto hf = new btHeightfieldTerrainShape(tt->num_x+1, tt->num_z+1, tt->height.data, 1.0f, -600, 600, 1, PHY_FLOAT, false);
+	hf->setLocalScaling(bt_set_v(tt->pattern + vector(0,1,0)));
+	tt->colShape = hf;
+	btTransform startTransform = bt_set_trafo(pos + vector(tt->pattern.x * tt->num_x/2, 0, tt->pattern.z * tt->num_z/2), quaternion::ID);
 	btScalar mass(0.f);
 	btVector3 localInertia(0, 0, 0);
-
-	startTransform.setOrigin(bt_set_v(pos));
 
 	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
@@ -544,18 +562,77 @@ void World::register_object(Model *o, int index) {
 
 	o->object_id = on;
 
+	if (o->phys->balls.num + o->phys->cylinders.num + o->phys->poly.num > 0) {
+		auto comp = new btCompoundShape(false, 0);
+		for (auto &b: o->phys->balls) {
+			vector a = o->phys->vertex[b.index];
+			auto bb = new btSphereShape(btScalar(b.radius));
+			comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb);
+		}
+		for (auto &c: o->phys->cylinders) {
+			vector a = o->phys->vertex[c.index[0]];
+			vector b = o->phys->vertex[c.index[1]];
+			auto cc = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length() / 2)));
+			auto q = quaternion::rotation((a-b).dir2ang());
+			comp->addChildShape(bt_set_trafo((a+b)/2, q), cc);
+		}
+		for (auto &p: o->phys->poly) {
+			if (false){
+				Array<btVector3> v;
+				Set<int> vv;
+				for (int i=0; i<p.num_faces; i++)
+					for (int k=0; k<p.face[i].num_vertices; k++){
+						vv.add(p.face[i].index[k]);
+					}
+				for (int i: vv) {
+					v.add(bt_set_v(o->phys->vertex[i]));
+					msg_write(o->phys->vertex[i].str());
+				}
+				msg_write(v.num);
+				auto pp = new btConvexPointCloudShape(&v[0], v.num, btVector3(1,1,1));
+				msg_write(pp->getNumEdges());
+				msg_write(pp->getNumPlanes());
+				comp->addChildShape(bt_set_trafo(v_0, quaternion::ID), pp);
+			} else {
+				// ARGH, btConvexPointCloudShape not working
+				//   let's use a crude box for now... (-_-)'
+				vector a, b;
+				a = b = o->phys->vertex[p.face[0].index[0]];
+				for (int i=0; i<p.num_faces; i++)
+					for (int k=0; k<p.face[i].num_vertices; k++){
+						auto vv = o->phys->vertex[p.face[i].index[k]];
+						a._min(vv);
+						b._max(vv);
+					}
+				auto pp = new btBoxShape(bt_set_v((b-a) / 2));
+				comp->addChildShape(bt_set_trafo((a+b)/2, quaternion::ID), pp);
 
-	o->colShape = new btSphereShape(btScalar(1.));
-	btTransform startTransform;
-	startTransform.setIdentity();
-	btScalar mass(1.f);
+			}
+		}
+		o->colShape = comp;
+	}
+
+	/*if (o->phys->balls.num > 0) {
+		auto &b = o->phys->balls[0];
+		o->colShape = new btSphereShape(btScalar(b.radius));
+	} else if (o->phys->cylinders.num > 0) {
+		auto &c = o->phys->cylinders[0];
+		vector a = o->mesh[0]->vertex[c.index[0]];
+		vector b = o->mesh[0]->vertex[c.index[1]];
+		o->colShape = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length())));
+	} else if (o->phys->poly.num > 0) {
+
+	} else {
+	}*/
+
+	btTransform startTransform = bt_set_trafo(o->pos, o->ang);
+
+	btScalar mass(o->physics_data.mass);
 	bool isDynamic = (mass != 0.f);
 	btVector3 localInertia(0, 0, 0);
-	if (isDynamic)
+	//if (isDynamic)
+	if (o->colShape)
 		o->colShape->calculateLocalInertia(mass, localInertia);
-
-	startTransform.setOrigin(bt_set_v(o->pos));
-	startTransform.setRotation(bt_set_q(o->ang));
 
 	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
