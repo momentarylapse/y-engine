@@ -136,35 +136,6 @@ inline bool TestVectorSanity(vector &v, const char *name)
 	return false;
 }
 
-void TestObjectSanity(const char *str)
-{
-#ifdef _X_ALLOW_PHYSICS_DEBUG_
-	for (int i=0;i<Objects.num;i++)
-		if (Objects[i]){
-			Object *o=Objects[i];
-			/*if (((int)o>1500000000)||((int)o<10000000)){
-				msg_write(str);
-				msg_error("Objekt-Pointer kaputt!");
-				msg_write(i);
-				msg_write((int)o);
-			}*/
-			bool e=false;
-			e|=TestVectorSanity(o->Pos,"Pos");
-			e|=TestVectorSanity(o->Vel,"Vel");
-			e|=TestVectorSanity(o->ForceExt,"ForceExt");
-			e|=TestVectorSanity(o->TorqueExt,"TorqueExt");
-			e|=TestVectorSanity(o->ForceInt,"ForceInt");
-			e|=TestVectorSanity(o->TorqueInt,"TorqueInt");
-			e|=TestVectorSanity(o->Ang,"Ang");
-			e|=TestVectorSanity(o->Rot,"Rot");
-			if (e){
-				msg_write(string2("%s:  objekt[%d] (%s) unendlich!!!!",str,i,o->Name));
-				HuiRaiseError("Physik...");
-			}
-		}
-#endif
-}
-
 
 
 
@@ -283,6 +254,7 @@ void LevelData::reset() {
 	skybox_filename.clear();
 	skybox_ang.clear();
 	scripts.clear();
+	links.clear();
 
 	ego_index = -1;
 	background_color = Gray;
@@ -373,10 +345,83 @@ bool World::load(const LevelData &ld) {
 		ok &= !tt->error;
 	}
 
+	for (auto &l: ld.links) {
+		Object *b = nullptr;
+		if (l.object[1] >= 0)
+			b = objects[l.object[1]];
+		add_link(l.type, objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang));
+	}
+
 	scripts = ld.scripts;
 
 	net_msg_enabled = true;
 	return ok;
+}
+
+Link *World::add_link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang) {
+	auto l = new Link(type, a, b, pos, ang);
+	links.add(l);
+	dynamicsWorld->addConstraint(l->con, true);
+	return l;
+}
+
+Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaternion &ang) {
+	type = t;
+	a = _a;
+	b = _b;
+	con = nullptr;
+	auto iqa = a->ang.bar();
+	auto iqb = quaternion::ID;
+	vector pa = iqa * (pos - a->pos);
+	vector pb = pos;
+	if (b) {
+		iqb = b->ang.bar();
+		pb = iqb * (pos - b->pos);
+	}
+	if (type == LinkType::SOCKET) {
+		if (b) {
+			msg_write("-----------add socket 2");
+			con = new btPoint2PointConstraint(
+				*a->body,
+				*b->body,
+				bt_set_v(pa),
+				bt_set_v(pb));
+		} else {
+			msg_write("-----------add socket 1");
+			con = new btPoint2PointConstraint(
+				*a->body,
+				bt_set_v(pa));
+		}
+	} else if (type == LinkType::HINGE) {
+		if (b) {
+			msg_write("-----------add hinge 2");
+			con = new btHingeConstraint(
+				*a->body,
+				*b->body,
+				bt_set_v(pa),
+				bt_set_v(pb),
+				bt_set_v(iqa * ang * vector::EZ),
+				bt_set_v(iqb * ang * vector::EZ),
+				true);
+		} else {
+			msg_write("-----------add hinge 1");
+			con = new btHingeConstraint(
+				*a->body,
+				bt_set_v(pa),
+				bt_set_v(iqa * ang * vector::EZ),
+				true);
+		}
+	} else {
+		throw Exception("unknown link: " + i2s((int)type));
+	}
+}
+
+Link::~Link() {
+}
+
+void Link::set_motor(float v, float max) {
+	if (type == LinkType::HINGE)
+		((btHingeConstraint*)con)->enableAngularMotor(max > 0, v, max);
 }
 
 static Array<float> hh;
@@ -501,6 +546,19 @@ bool LevelData::load(const string &filename) {
 				o.vel = v_0;
 				o.rot = v_0;
 				objects.add(o);
+			} else if (e.tag == "link") {
+				LevelDataLink l;
+				l.pos = s2v(e.value("pos"));
+				l.object[0] = e.value("a")._int();
+				l.object[1] = e.value("b")._int();
+				l.type = LinkType::SOCKET;
+				if (e.value("type") == "hinge")
+					l.type = LinkType::HINGE;
+				if (e.value("type") == "universal")
+					l.type = LinkType::UNIVERSAL;
+				if (e.value("type") == "spring")
+					l.type = LinkType::SPRING;
+				links.add(l);
 			}
 		}
 	}

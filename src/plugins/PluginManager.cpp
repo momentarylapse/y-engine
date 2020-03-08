@@ -81,6 +81,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("World.background", &World::background);
 	Kaba::declare_class_element("World.skyboxes", &World::skybox);
 	Kaba::declare_class_element("World.lights", &World::lights);
+	Kaba::declare_class_element("World.links", &World::links);
 	Kaba::declare_class_element("World.ego", &World::ego);
 	Kaba::declare_class_element("World.fog", &World::fog);
 	Kaba::declare_class_element("World.gravity", &World::gravity);
@@ -152,6 +153,11 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Text.__init__", &Text::__init__);
 	Kaba::link_external_class_func("Text.__delete__", &Text::__delete__);
 	Kaba::link_external_class_func("Text.set_text", &Text::set_text);
+
+	Kaba::declare_class_size("Link", sizeof(Link));
+	Kaba::declare_class_element("Link.a", &Link::a);
+	Kaba::declare_class_element("Link.b", &Link::b);
+	Kaba::link_external_class_func("Link.set_motor", &Link::set_motor);
 
 	Kaba::link_external("get_key", (void*)&InputManager::get_key);
 	Kaba::link_external("get_key_down", (void*)&InputManager::get_key_down);

@@ -30,20 +30,8 @@ class btCollisionDispatcher;
 class btBroadphaseInterface;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+class btTypedConstraint;
 
-/*namespace vulkan {
-	class UniformBuffer;
-	class DescriptorSet;
-}*/
-
-class GodForceField
-{
-public:
-	vector Pos,Dir;
-	int Shape,Kind;
-	float Radius,Vel,Acc,TimeToLife;
-	bool Visible;
-};
 
 class Fog {
 public:
@@ -84,6 +72,20 @@ public:
 	string filename;
 	Array<TemplateDataScriptVariable> variables;
 };
+enum class LinkType {
+	SOCKET,
+	HINGE,
+	UNIVERSAL,
+	SPRING,
+	SLIDER
+};
+
+class LevelDataLink {
+public:
+	int object[2];
+	LinkType type;
+	vector pos, ang;
+};
 
 class LevelData {
 public:
@@ -98,8 +100,8 @@ public:
 	Array<LevelDataTerrain> terrains;
 	int ego_index;
 	Array<LevelDataScript> scripts;
-	
 	Array<LevelDataLight> lights;
+	Array<LevelDataLink> links;
 
 	Array<LevelDataCamera> cameras;
 
@@ -108,11 +110,6 @@ public:
 	Fog fog;
 };
 
-struct MusicField {
-	vector PosMin,PosMax;
-	int NumMusicFiles;
-	string MusicFile[16];
-};
 
 struct PartialModel {
 	Model *model;
@@ -132,6 +129,20 @@ struct GodNetMessage {
 };
 
 
+class Link {
+public:
+	Link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang);
+	~Link();
+
+	void set_motor(float v, float max);
+
+	btTypedConstraint *con;
+	LinkType type;
+	Object *a;
+	Object *b;
+};
+
+
 
 // game data
 class World {
@@ -148,6 +159,8 @@ public:
 
 	void register_model(Model *m);
 	void unregister_model(Model *m);
+
+	Link *add_link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang);
 
 	string filename;
 	color background;
@@ -172,13 +185,6 @@ public:
 
 
 	int physics_num_steps, physics_num_link_steps;
-
-	#ifdef _X_ALLOW_PHYSICS_DEBUG_
-		int PhysicsTimer;
-		float PhysicsTimeCol, PhysicsTimePhysics, PhysicsTimeLinks;
-		sCollisionData PhysicsDebugColData;
-		bool PhysicsStopOnCollision;
-	#endif
 
 	bool net_msg_enabled;
 	Array<GodNetMessage> net_messages;
@@ -207,17 +213,7 @@ public:
 	btSequentialImpulseConstraintSolver* solver;
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
-#if 0
-	// music fields
-	int NumMusicFields;
-	MusicField MusicFieldGlobal,MusicFields[GOD_MAX_MUSICFIELDS];
-	int MusicCurrent;
-
-	// force fields
-	int NumForceFields;
-	GodForceField *ForceField[GOD_MAX_FORCEFIELDS];
-	MusicField *MusicFieldCurrent;
-#endif
+	Array<Link*> links;
 };
 extern World world;
 
