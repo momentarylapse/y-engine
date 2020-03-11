@@ -158,6 +158,8 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Link.a", &Link::a);
 	Kaba::declare_class_element("Link.b", &Link::b);
 	Kaba::link_external_class_func("Link.set_motor", &Link::set_motor);
+	Kaba::link_external_class_func("Link.set_frame", &Link::set_frame);
+	//Kaba::link_external_class_func("Link.set_axis", &Link::set_axis);
 
 	Kaba::link_external("get_key", (void*)&InputManager::get_key);
 	Kaba::link_external("get_key_down", (void*)&InputManager::get_key_down);

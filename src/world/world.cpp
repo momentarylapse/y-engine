@@ -411,6 +411,15 @@ Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaterni
 				bt_set_v(iqa * ang * vector::EZ),
 				true);
 		}
+	} else if (type == LinkType::UNIVERSAL) {
+		msg_write("-----------add universal");
+		con = new btUniversalConstraint(
+			*a->body,
+			*b->body,
+			bt_set_v(pos),
+			bt_set_v(ang * vector::EZ),
+			bt_set_v(ang * vector::EY));
+		((btUniversalConstraint*)con)->setLimit(4, 0,0.1f);
 	} else {
 		throw Exception("unknown link: " + i2s((int)type));
 	}
@@ -422,6 +431,23 @@ Link::~Link() {
 void Link::set_motor(float v, float max) {
 	if (type == LinkType::HINGE)
 		((btHingeConstraint*)con)->enableAngularMotor(max > 0, v, max);
+}
+
+/*void Link::set_axis(const vector &v) {
+	auto vv = bt_set_v(v);
+	if (type == LinkType::HINGE)
+		((btHingeConstraint*)con)->setAxis(vv);
+	btTransform f = bt_set_trafo(v_0, quaternion::ID);
+	((btHingeConstraint*)con)->setFrames(f,f);
+}*/
+
+void Link::set_frame(int n, const quaternion &q) {
+	if (type == LinkType::HINGE) {
+		if (n == 1)
+			((btHingeConstraint*)con)->getBFrame().setRotation(bt_set_q(q));
+		else
+			((btHingeConstraint*)con)->getAFrame().setRotation(bt_set_q(q));
+	}
 }
 
 static Array<float> hh;

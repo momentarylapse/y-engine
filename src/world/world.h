@@ -135,6 +135,7 @@ public:
 	~Link();
 
 	void set_motor(float v, float max);
+	void set_frame(int n, const quaternion &q);
 
 	btTypedConstraint *con;
 	LinkType type;
