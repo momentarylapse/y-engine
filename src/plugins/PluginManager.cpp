@@ -190,18 +190,18 @@ void PluginManager::reset() {
 
 void *PluginManager::create_instance(const string &filename, const string &base_class) {
 
-	try{
+	try {
 		auto *s = Kaba::Load(filename);
 		for (auto *c: s->classes()) {
 			if (c->is_derived_from_s(base_class)) {
 				return c->create_instance();
 			}
 		}
-	}catch(Kaba::Exception &e) {
+	} catch(Kaba::Exception &e) {
 		msg_error(e.message());
-		throw std::runtime_error(e.message().c_str());
+		throw Exception(e.message());
 	}
-	throw std::runtime_error(("script does not contain a class derived from " + base_class).c_str());
+	throw Exception(("script does not contain a class derived from " + base_class));
 	return nullptr;
 }
 
