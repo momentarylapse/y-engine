@@ -137,6 +137,7 @@ public:
 	nix::FrameBuffer *fb4 = nullptr;
 	nix::FrameBuffer *fb5 = nullptr;
 	nix::FrameBuffer *fb_shadow = nullptr;
+	nix::FrameBuffer *fb_shadow2 = nullptr;
 	nix::Shader *shader_blur = nullptr;
 	nix::Shader *shader_depth = nullptr;
 	nix::Shader *shader_out = nullptr;
@@ -179,6 +180,8 @@ public:
 			new nix::Texture(width, height, "rgba:f16")});
 		fb_shadow = new nix::FrameBuffer({
 			new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
+		fb_shadow2 = new nix::FrameBuffer({
+			new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 
 		try {
 			shader_blur = nix::Shader::load("Materials/forward/blur.shader");
@@ -212,7 +215,8 @@ public:
 		prepare_lights();
 		perf_mon->tick(0);
 
-		render_shadow_map();
+		render_shadow_map(fb_shadow, 4);
+		render_shadow_map(fb_shadow2, 1);
 
 		render_into_texture();
 
@@ -381,6 +385,7 @@ public:
 		if (tt.num == 2)
 			tt.add(tex_black);
 		tt.add(fb_shadow->depth_buffer);
+		tt.add(fb_shadow2->depth_buffer);
 		nix::SetTextures(tt);
 	}
 	void prepare_lights() {
@@ -416,10 +421,10 @@ public:
 		}
 		ubo_light->update(&lights[0], sizeof(UBOLight) * lights.num);
 	}
-	void render_shadow_map() {
-		nix::BindFrameBuffer(fb_shadow);
+	void render_shadow_map(nix::FrameBuffer *sfb, float scale) {
+		nix::BindFrameBuffer(sfb);
 
-		nix::SetProjectionMatrix(shadow_proj);
+		nix::SetProjectionMatrix(matrix::scale(scale, scale, 1) * shadow_proj);
 		nix::SetViewMatrix(matrix::ID);
 
 		nix::ResetZ();
