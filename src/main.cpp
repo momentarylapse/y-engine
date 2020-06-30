@@ -394,32 +394,24 @@ public:
 		for (auto *l: world.lights) {
 			if (!l->enabled)
 				continue;
-			UBOLight ll;
-			ll.pos = l->pos;
-			ll.col = l->col;
-			ll.dir = l->dir;
-			ll.proj = l->proj;
-			ll.harshness = l->harshness;
-			ll.radius = l->radius;
-			ll.theta = l->theta;
 
 			if (l->radius <= 0){
-				vector center = cam->pos + cam->ang*vector::EZ * shadow_box_size / 3;
+				vector center = cam->pos + cam->ang*vector::EZ * (shadow_box_size / 3.0f);
 				float grid = shadow_box_size / 16;
-				center.x -= fmod(center.x, grid);
-				center.y -= fmod(center.y, grid);
-				center.z -= fmod(center.z, grid);
+				center.x -= fmod(center.x, grid) - grid/2;
+				center.y -= fmod(center.y, grid) - grid/2;
+				center.z -= fmod(center.z, grid) - grid/2;
 				auto t = matrix::translation(- center);
 				auto r = matrix::rotation(l->dir.dir2ang()).transpose();
 				float f = 1 / shadow_box_size;
 				auto s = matrix::scale(f, f, f);
 				// map onto [-1,1]x[-1,1]x[0,1]
 				shadow_proj = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
-				ll.proj = shadow_proj;
+				l->proj = shadow_proj;
 			}
-			lights.add(ll);
+			lights.add(*l);
 		}
-		ubo_light->update(&lights[0], sizeof(UBOLight) * lights.num);
+		ubo_light->update_array(lights);
 	}
 	void render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 		nix::BindFrameBuffer(sfb);
