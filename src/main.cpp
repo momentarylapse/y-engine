@@ -89,7 +89,7 @@ public:
 	Map<string,string> map;
 	void load() {
 		File *f = FileOpenText("config.txt");
-		while(!f->eof()) {
+		while(!f->end()) {
 			string s = f->read_str();
 			if (s.num == 0)
 				continue;
@@ -472,7 +472,7 @@ public:
 
 		std::cout << "on init..." << "\n";
 
-		engine.set_dirs("Textures/", "Maps/", "Objects/", "Sound", "Scripts/", "Materials/", "Fonts/");
+		engine.set_dirs("Textures", "Maps", "Objects", "Sound", "Scripts", "Materials", "Fonts");
 
 		GodInit();
 		global_perf_mon = &perf_mon;

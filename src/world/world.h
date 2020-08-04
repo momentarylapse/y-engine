@@ -12,6 +12,7 @@
 
 
 #include "../lib/base/base.h"
+#include "../lib/file/path.h"
 #include "../lib/math/math.h"
 
 
@@ -43,13 +44,14 @@ public:
 
 class LevelDataTerrain {
 public:
-	string filename;
+	Path filename;
 	vector pos;
 };
 
 class LevelDataObject {
 public:
-	string filename, name;
+	Path filename;
+	string name;
 	vector pos, ang, vel, rot;
 };
 
@@ -69,7 +71,7 @@ public:
 
 class LevelDataScript {
 public:
-	string filename;
+	Path filename;
 	Array<TemplateDataScriptVariable> variables;
 };
 enum class LinkType {
@@ -90,10 +92,10 @@ public:
 class LevelData {
 public:
 	void reset();
-	bool load(const string &filename);
+	bool load(const Path &filename);
 
-	string world_filename;
-	Array<string> skybox_filename;
+	Path world_filename;
+	Array<Path> skybox_filename;
 	Array<vector> skybox_ang;
 	color background_color;
 	Array<LevelDataObject> objects;
@@ -152,8 +154,8 @@ public:
 	~World();
 	void reset();
 	bool load(const LevelData &ld);
-	Object *create_object(const string &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
-	Terrain *create_terrain(const string &filename, const vector &pos);
+	Object *create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
+	Terrain *create_terrain(const Path &filename, const vector &pos);
 
 	void register_object(Model *o, int index);
 	void unregister_object(Model *o);
@@ -163,7 +165,7 @@ public:
 
 	Link *add_link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang);
 
-	string filename;
+	Path filename;
 	color background;
 	Array<Model*> skybox;
 	Fog fog;
@@ -221,7 +223,7 @@ extern World world;
 
 void GodInit();
 void GodEnd();
-bool GodLoadWorld(const string &filename);
+bool GodLoadWorld(const Path &filename);
 
 void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
 void _cdecl WorldShiftAll(const vector &dpos);

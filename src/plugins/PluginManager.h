@@ -10,6 +10,7 @@
 
 #include "../lib/base/base.h"
 
+class Path;
 class Controller;
 class PerformanceMonitor;
 
@@ -19,9 +20,9 @@ public:
 
 	void reset();
 
-	static void *create_instance(const string &filename, const string &base_class);
+	static void *create_instance(const Path &filename, const string &base_class);
 
-	void add_controller(const string &name);
+	void add_controller(const Path &name);
 
 	Array<Controller*> controllers;
 };

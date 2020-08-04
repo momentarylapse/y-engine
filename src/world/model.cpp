@@ -302,7 +302,7 @@ void read_color(File *f, color &c)
 }
 
 // completely load an original model (all data is its own)
-void Model::load(const string &filename)
+void Model::load(const Path &filename)
 {
 	msg_right();
 

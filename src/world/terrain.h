@@ -10,6 +10,7 @@
 #define TERRAIN_H__INCLUDED_
 
 #include "../lib/base/base.h"
+#include "../lib/file/path.h"
 #include "../lib/math/math.h"
 #include "material.h"
 class Material;
@@ -54,8 +55,8 @@ public:
 class Terrain {
 public:
 	Terrain();
-	Terrain(const string &filename, const vector &pos);
-	bool load(const string &filename, const vector &pos, bool deep = true);
+	Terrain(const Path &filename, const vector &pos);
+	bool load(const Path &filename, const vector &pos, bool deep = true);
 	~Terrain();
 	void reset();
 	void _cdecl update(int x1,int x2,int z1,int z2,int mode);
@@ -70,7 +71,7 @@ public:
 	void build_vertex_buffer();
 	void draw();
 
-	string filename;
+	Path filename;
 	int type;
 	bool error;
 

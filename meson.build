@@ -1,5 +1,5 @@
-project('y', 'cpp', default_options : ['cpp_std=c++17', 'warning_level=1'])
-add_project_arguments('-O2', '-g', '-Wno-unused', '-Wstrict-aliasing=0', '-fno-omit-frame-pointer', language : ['cpp'])
+project('y', 'cpp', default_options : ['cpp_std=c++17', 'warning_level=1', 'optimization=2', 'debug=true'])
+add_project_arguments('-Wno-unused', '-Wstrict-aliasing=0', '-fno-omit-frame-pointer', language : ['cpp'])
 
 #install_data
 #meson.add_install_script('')
@@ -64,6 +64,7 @@ sources = [
 	'src/lib/file/file.cpp',
 	'src/lib/file/file_op.cpp',
 	'src/lib/file/msg.cpp',
+	'src/lib/file/path.cpp',
 	'src/lib/hui/Controls/Control.cpp',
 	'src/lib/hui/Controls/ControlButtonGtk.cpp',
 	'src/lib/hui/Controls/ControlCheckBoxGtk.cpp',
@@ -174,7 +175,6 @@ sources = [
 	'src/lib/kaba/syntax/implicit.cpp',
 	'src/lib/kaba/syntax/lexical.cpp',
 	'src/lib/kaba/syntax/Node.cpp',
-	'src/lib/kaba/syntax/parser.cpp',
 	'src/lib/kaba/syntax/Parser.cpp',
 	'src/lib/kaba/syntax/precompiler.cpp',
 	'src/lib/kaba/syntax/preprocessor.cpp',

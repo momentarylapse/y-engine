@@ -65,7 +65,7 @@ void png_unfilter(unsigned char *cur, unsigned char *prev, int num, int stride, 
 		msg_error("png: unhandled filter type: " + i2s(type));
 }
 
-void image_load_png(const string &filename, Image &image)
+void image_load_png(const Path &filename, Image &image)
 {
 	char buf[8];
 	File *f = nullptr;
@@ -79,7 +79,7 @@ void image_load_png(const string &filename, Image &image)
 
 	int bytes_per_pixel = 1;
 
-	while (!f->eof()){
+	while (!f->end()){
 		// read chunk
 		int size = read_int_big_endian(f);//endian_big_to_little(f->ReadInt());
 		f->read_buffer(buf, 4);
@@ -116,7 +116,7 @@ void image_load_png(const string &filename, Image &image)
 	}
 
 	string dest;
-	dest.resize(image.height * (image.width * bytes_per_pixel + 1) + 1024);
+	dest.resize(image.height * (image.width * bytes_per_pixel + 2) + 1024);
 	unsigned long len = dest.num;
 	int r = uncompress((unsigned char*)&dest[0], &len, (unsigned char*)&data[0], data.num);
 	if (r != 0)

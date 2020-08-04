@@ -188,8 +188,7 @@ void PluginManager::reset() {
 	controllers.clear();
 }
 
-void *PluginManager::create_instance(const string &filename, const string &base_class) {
-
+void *PluginManager::create_instance(const Path &filename, const string &base_class) {
 	try {
 		auto *s = Kaba::Load(filename);
 		for (auto *c: s->classes()) {
@@ -205,7 +204,7 @@ void *PluginManager::create_instance(const string &filename, const string &base_
 	return nullptr;
 }
 
-void PluginManager::add_controller(const string &name) {
+void PluginManager::add_controller(const Path &name) {
 	auto *c = (Controller*)create_instance(name, "Controller");
 	controllers.add(c);
 	c->on_init();
