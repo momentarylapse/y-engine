@@ -145,12 +145,23 @@ string Path::basename_no_ext() const {
 	return "";
 }
 
+Path Path::no_ext() const {
+	int pos = s.rfind(".");
+	if (pos >= 0)
+		return s.head(pos);
+	return *this;
+}
+
 string Path::extension() const {
 	string b = basename();
 	int pos = b.rfind(".");
 	if (pos >= 0)
 		return b.tail(b.num - pos - 1).lower();
 	return "";
+}
+
+Path Path::with(const string &_s) const {
+	return s + _s;
 }
 
 // ends with '/' or '\'
