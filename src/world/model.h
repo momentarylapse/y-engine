@@ -54,10 +54,15 @@ namespace Kaba {
 #define MODEL_MAX_POLY_VERTICES_PER_FACE	16
 #define MODEL_MAX_MOVE_OPS				8
 
+class Mesh;
 
 
 class SubMesh {
 public:
+	SubMesh();
+	void create_vb();
+	void update_vb(Mesh *mesh);
+
 	int num_triangles;
 
 	// vertices
@@ -78,6 +83,10 @@ public:
 // visual skin
 class Mesh {
 public:
+	void create_vb();
+	void update_vb();
+	void post_process();
+
 	Array<int> bone_index; // skeletal reference
 	Array<vector> vertex;
 
@@ -296,8 +305,8 @@ public:
 	bool _cdecl Animate(int mode, float param1, float param2, int move_no, float &time, float elapsed, float vel_param, bool loop);
 	int _cdecl GetFrames(int move_no);
 	void _cdecl BeginEditAnimation();
-	void _cdecl BeginEdit(int detail);
-	void _cdecl EndEdit(int detail);
+	void _cdecl begin_edit(int detail);
+	void _cdecl end_edit(int detail);
 
 	// drawing
 	void update_vertex_buffer(int mat_no, int detail);

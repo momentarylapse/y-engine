@@ -10,6 +10,7 @@
 #include "../lib/kaba/kaba.h"
 #include "../world/world.h"
 #include "../world/model.h"
+#include "../world/ModelManager.h"
 #include "../world/terrain.h"
 #include "../world/camera.h"
 #include "../fx/Light.h"
@@ -43,11 +44,24 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Camera.min_depth", &Camera::min_depth);
 	Kaba::declare_class_element("Camera.max_depth", &Camera::max_depth);
 	Kaba::declare_class_element("Camera.m_view", &Camera::m_view);
+	Kaba::link_external_class_func("Camera.project", &Camera::project);
+	Kaba::link_external_class_func("Camera.unproject", &Camera::unproject);
 	Kaba::link_external_virtual("Camera.__delete__", &Camera::__delete__, &_cam);
 	Kaba::link_external_virtual("Camera.on_init", &Camera::on_init, &_cam);
 	Kaba::link_external_virtual("Camera.on_delete", &Camera::on_delete, &_cam);
 	Kaba::link_external_virtual("Camera.on_iterate", &Camera::on_iterate, &_cam);
 
+
+	Kaba::declare_class_size("Model.Mesh", sizeof(Mesh));
+	Kaba::declare_class_element("Model.Mesh.bone_index", &Mesh::bone_index);
+	Kaba::declare_class_element("Model.Mesh.vertex", &Mesh::vertex);
+	Kaba::declare_class_element("Model.Mesh.sub", &Mesh::sub);
+
+	Kaba::declare_class_size("Model.Mesh.Sub", sizeof(SubMesh));
+	Kaba::declare_class_element("Model.Mesh.Sub.num_triangles", &SubMesh::num_triangles);
+	Kaba::declare_class_element("Model.Mesh.Sub.triangle_index", &SubMesh::triangle_index);
+	Kaba::declare_class_element("Model.Mesh.Sub.skin_vertex", &SubMesh::skin_vertex);
+	Kaba::declare_class_element("Model.Mesh.Sub.normal", &SubMesh::normal);
 
 	Model model;
 	Kaba::declare_class_size("Model", sizeof(Model));
@@ -59,6 +73,9 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Model.materials", &Model::material);
 	Kaba::declare_class_element("Model.bones", &Model::bone);
 	//Kaba::declare_class_element("Model.mass", &Model::physics_data.mass);
+	Kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
+	Kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
+	Kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
 	Kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
 	Kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	Kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
@@ -134,6 +151,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Particle.radius", &Particle::radius);
 	Kaba::declare_class_element("Particle.texture", &Particle::texture);
 	Kaba::declare_class_element("Particle.color", &Particle::col);
+	Kaba::declare_class_element("Particle.source", &Particle::source);
 	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 
 
@@ -182,6 +200,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external("mouse", &InputManager::mouse);
 	Kaba::link_external("dmouse", &InputManager::dmouse);
 	Kaba::link_external("scroll", &InputManager::scroll);
+	Kaba::link_external("load_model", (void*)&ModelManager::load);
 }
 
 void PluginManager::reset() {

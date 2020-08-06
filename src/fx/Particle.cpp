@@ -17,6 +17,7 @@ Particle::Particle(const vector &p, float r, nix::Texture *t) {
 	col = White;
 	radius = r;
 	texture = t;
+	source = rect::ID;
 }
 
 Particle::~Particle() {

@@ -60,8 +60,13 @@ MetaMove::MetaMove() {
 }
 
 
+SubMesh::SubMesh() {
+	vertex_buffer = nullptr;
+	force_update = true;
+	num_triangles = 0;
+}
+
 // make a copy of all the data
-#if 0
 Mesh* Mesh::copy(Model *new_owner) {
 	Mesh *s = new Mesh;
 	*s = *this;
@@ -69,13 +74,17 @@ Mesh* Mesh::copy(Model *new_owner) {
 	// subs
 	for (auto &ss: s->sub){
 		// reset the vertex buffers
-		ss.vertex_buffer = NULL;
-		ss.force_update = true;
+		ss.vertex_buffer = nullptr;
+		//ss.force_update = true;
 	}
+	s->create_vb();
+	s->update_vb();
+
 	s->owner = new_owner;
 	return s;
 }
 
+#if 0
 // update physical data in world coordinates
 void Model::_UpdatePhysAbsolute_()
 {
@@ -159,42 +168,55 @@ void AppraiseDimensions(Model *m)
 
 
 
-void create_vb(Model *m, Mesh *mesh) {
-	for (auto &s: mesh->sub) {
-		s.vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
-		Array<vector> p, n;
-		Array<float> uv;
-		for (int i=0; i<s.num_triangles; i++) {
-			for (int k=0; k<3; k++) {
-				int vi = s.triangle_index[i*3+k];
-				p.add(mesh->vertex[vi]);
-				n.add(s.normal[i*3+k]);
-				uv.add(s.skin_vertex[i*6+k*2  ]);
-				uv.add(s.skin_vertex[i*6+k*2+1]);
-			}
+void SubMesh::create_vb() {
+	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
+
+#if LIB_HAS_VULKAN
+	vertex_buffer = new vulkan::VertexBuffer();
+#endif
+}
+void Mesh::create_vb() {
+	for (auto &s: sub)
+		s.create_vb();
+}
+
+void SubMesh::update_vb(Mesh *mesh) {
+	Array<vector> p, n;
+	Array<float> uv;
+	for (int i=0; i<num_triangles; i++) {
+		for (int k=0; k<3; k++) {
+			int vi = triangle_index[i*3+k];
+			p.add(mesh->vertex[vi]);
+			n.add(normal[i*3+k]);
+			uv.add(skin_vertex[i*6+k*2  ]);
+			uv.add(skin_vertex[i*6+k*2+1]);
 		}
-		s.vertex_buffer->update(0, p);
-		s.vertex_buffer->update(1, n);
-		s.vertex_buffer->update(2, uv);
+	}
+	vertex_buffer->update(0, p);
+	vertex_buffer->update(1, n);
+	vertex_buffer->update(2, uv);
 
 
 #if LIB_HAS_VULKAN
-		s.vertex_buffer = new vulkan::VertexBuffer();
-		Array<vulkan::Vertex1> vertices;
-		for (int i=0; i<s.num_triangles; i++) {
-			vulkan::Vertex1 v;
-			for (int k=0; k<3; k++) {
-				int vi = s.triangle_index[i*3+k];
-				v.pos = mesh->vertex[vi];
-				v.normal = s.normal[i*3+k];
-				v.u = s.skin_vertex[i*6+k*2  ];
-				v.v = s.skin_vertex[i*6+k*2+1];
-				vertices.add(v);
-			}
+	Array<vulkan::Vertex1> vertices;
+	for (int i=0; i<num_triangles; i++) {
+		vulkan::Vertex1 v;
+		for (int k=0; k<3; k++) {
+			int vi = triangle_index[i*3+k];
+			v.pos = mesh->vertex[vi];
+			v.normal = normal[i*3+k];
+			v.u = skin_vertex[i*6+k*2  ];
+			v.v = skin_vertex[i*6+k*2+1];
+			vertices.add(v);
 		}
-		s.vertex_buffer->build1(vertices);
-#endif
 	}
+	vertex_buffer->build1(vertices);
+#endif
+}
+
+void Mesh::update_vb() {
+	for (auto &s: sub)
+		s.update_vb(this);
 }
 
 #if 0
@@ -211,17 +233,18 @@ void CreateVB(Model *m, Mesh *s)
 
 #endif
 
-void PostProcessSkin(Model *m, Mesh *s) {
+void Mesh::post_process() {
 
-	create_vb(m,s);
+	create_vb();
+	update_vb();
 
 	// bounding box
-	s->min = s->max = v_0;
-	if (s->vertex.num > 0){
-		s->min = s->max = s->vertex[0];
-		for (int i=0;i<s->vertex.num;i++){
-			s->min._min(s->vertex[i]);
-			s->max._max(s->vertex[i]);
+	min = max = v_0;
+	if (vertex.num > 0){
+		min = max = vertex[0];
+		for (int i=0; i<vertex.num; i++){
+			min._min(vertex[i]);
+			max._max(vertex[i]);
 		}
 	}
 }
@@ -682,8 +705,8 @@ void Model::load(const Path &filename)
 	// do some post processing...
 	AppraiseDimensions(this);
 
-	for (int i=0;i<MODEL_NUM_MESHES;i++)
-		PostProcessSkin(this, mesh[i]);
+	for (int i=0; i<MODEL_NUM_MESHES; i++)
+		mesh[i]->post_process();
 
 	PostProcessPhys(this, phys);
 
@@ -1447,38 +1470,34 @@ void Model::BeginEditAnimation()
 		bone[i].cur_pos = bone[i].pos;
 	}
 }
+#endif
 
 // make sure, the model/skin is editable and not just a reference.... (soon)
-void Model::BeginEdit(int detail)
-{
+void Model::begin_edit(int detail) {
 	make_editable();
-	if (skin_is_reference[detail]){
-		skin[detail] = skin[detail]->copy(this);
-		skin_is_reference[detail] = false;
+	if (mesh[detail]->owner != this) {
+		mesh[detail] = mesh[detail]->copy(this);
 	}
 }
 
 // force an update for this model/skin
-void Model::EndEdit(int detail)
-{
-	for (int i=0;i<material.num;i++)
-		skin[detail]->sub[i].force_update = true;
+void Model::end_edit(int detail) {
+	mesh[detail]->update_vb();
+	//for (int i=0; i<material.num; i++)
+	//	mesh[detail]->sub[i].force_update = true;
 }
-
 
 // make sure we can edit this object without destroying an original one
-void Model::make_editable()
-{
+void Model::make_editable() {
 }
 
-string Model::filename()
-{
+Path Model::filename() {
 	if (_template)
 		return _template->filename;
 	return "?";
 }
 
-
+#if 0
 void Model::draw_simple(int mat_no, int detail)
 {
 	_detail_needed_[detail] = true;

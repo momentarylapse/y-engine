@@ -35,6 +35,7 @@ public:
 	vector pos;
 	color col;
 	float radius;
+	rect source;
 	nix::Texture *texture;
 };
 
