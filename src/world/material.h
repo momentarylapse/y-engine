@@ -81,6 +81,7 @@ void MaterialInit();
 void MaterialEnd();
 void MaterialReset();
 void SetDefaultMaterial(Material *m);
+void MaterialSetDefaultShader(nix::Shader *s);
 Material *LoadMaterial(const Path &filename);
 
 #endif

@@ -141,7 +141,8 @@ public:
 	nix::Shader *shader_blur = nullptr;
 	nix::Shader *shader_depth = nullptr;
 	nix::Shader *shader_out = nullptr;
-	nix::Shader *shader_3d = nullptr;
+	//nix::Shader *shader_3d = nullptr;
+	nix::Shader *shader_skybox = nullptr;
 	nix::Shader *shader_shadow = nullptr;
 
 	Array<UBOLight> lights;
@@ -188,7 +189,9 @@ public:
 			shader_depth = nix::Shader::load("Materials/forward/depth.shader");
 			shader_out = nix::Shader::load("Materials/forward/hdr.shader");
 			shader_3d = nix::Shader::load("Materials/forward/3d.shader");
+			//nix::default_shader_3d = shader_3d;
 			shader_shadow = nix::Shader::load("Materials/forward/3d-shadow.shader");
+			shader_skybox = nix::Shader::load("Materials/forward/3d-skybox.shader");
 		} catch(Exception &e) {
 			msg_error(e.message());
 			throw e;
@@ -212,13 +215,15 @@ public:
 	void draw() override {
 		nix::StartFrameGLFW(window);
 
+		_correct_material_shaders();
+
 		prepare_lights();
 		perf_mon->tick(0);
 
 		render_shadow_map(fb_shadow, 4);
 		render_shadow_map(fb_shadow2, 1);
 
-		render_into_texture();
+		render_into_texture(fb);
 
 
 		auto *source = fb;
@@ -326,22 +331,20 @@ public:
 		perf_mon->tick(3);
 	}
 
-	void render_into_texture() {
+	void render_into_texture(nix::FrameBuffer *fb) {
 		nix::BindFrameBuffer(fb);
 
-		cam->set_view((float)width / (float)height);
+		cam->set_view((float)fb->width / (float)fb->height);
 		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 		nix::ResetToColor(world.background);
 		nix::ResetZ();
 
-		nix::SetZ(true, true);
-
-		nix::BindUniform(ubo_light, 1);
-
 		draw_skyboxes();
 
+		nix::BindUniform(ubo_light, 1);
 		nix::SetViewMatrix(cam->m_view);
+		nix::SetZ(true, true);
 
 		draw_world(true);
 
@@ -349,7 +352,22 @@ public:
 			glFinish();
 		perf_mon->tick(2);
 	}
+	void _material_set_shader(Material *m, nix::Shader *s) {
+		if (m->shader != s) {
+			msg_write("SWAP shader");
+			if (m->shader)
+				m->shader->unref();
+			m->shader = s->ref();
+		}
+	}
+	void _correct_material_shaders() {
+		for (auto *sb: world.skybox)
+			for (int i=0; i<sb->material.num; i++)
+				_material_set_shader(sb->material[i], shader_skybox);
+	}
+
 	void draw_skyboxes() {
+		nix::SetZ(false, false);
 		nix::SetViewMatrix(matrix::rotation_q(cam->ang).transpose());
 		for (auto *sb: world.skybox) {
 			sb->_matrix = matrix::rotation_q(sb->ang);
@@ -385,9 +403,10 @@ public:
 		draw_objects(allow_material);
 	}
 	void set_material(Material *m) {
-		nix::SetShader(shader_3d);
-		shader_3d->set_data(shader_3d->get_location("eye_pos"), &cam->pos.x, 16);
-		shader_3d->set_int(shader_3d->get_location("num_lights"), lights.num);
+		auto s = m->shader; //shader_3d;
+		nix::SetShader(s);
+		s->set_data(s->get_location("eye_pos"), &cam->pos.x, 16);
+		s->set_int(s->get_location("num_lights"), lights.num);
 		if (m->alpha.mode == TRANSPARENCY_FUNCTIONS)
 			nix::SetAlpha(m->alpha.source, m->alpha.destination);
 		else if (m->alpha.mode == TRANSPARENCY_COLOR_KEY_HARD)
@@ -396,8 +415,7 @@ public:
 			nix::SetAlpha(ALPHA_NONE);
 
 		set_textures(m->textures);
-		//nix::SetShader(s.material->shader);
-		shader_3d->set_data(shader_3d->get_location("emission_factor"), &m->emission.r, 16);
+		s->set_data(s->get_location("emission_factor"), &m->emission.r, 16);
 	}
 	void set_textures(const Array<nix::Texture*> &tex) {
 		auto tt = tex;
@@ -523,6 +541,7 @@ public:
 			game_ini.default_world = arg[1];
 
 		MaterialInit();
+		MaterialSetDefaultShader(render_path->shader_3d);
 	}
 
 	void load_first_world() {

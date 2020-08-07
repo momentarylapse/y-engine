@@ -31,6 +31,9 @@ class matrix;
 class vector;
 class quaternion;
 
+namespace nix {
+	class Shader;
+}
 
 matrix mtr(const vector &t, const quaternion &a);
 
@@ -53,6 +56,8 @@ public:
 	RenderPath() {}
 	virtual ~RenderPath() {}
 	virtual void draw() = 0;
+
+	nix::Shader *shader_3d = nullptr;
 };
 
 

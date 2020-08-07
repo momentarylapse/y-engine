@@ -20,6 +20,7 @@ void MaterialInit() {
 	// create the default material
 	trivial_material = new Material;
 	trivial_material->name = "-default-";
+	trivial_material->shader = nix::default_shader_3d->ref();
 
 	SetDefaultMaterial(trivial_material);
 }
@@ -39,6 +40,11 @@ void MaterialReset() {
 
 void SetDefaultMaterial(Material *m) {
 	default_material = m;
+}
+
+void MaterialSetDefaultShader(nix::Shader *s) {
+	default_material->shader->unref();
+	default_material->shader = s->ref();
 }
 
 
@@ -72,8 +78,8 @@ Material::Material() {
 
 Material::~Material() {
 	if (shader)
-		delete shader;
-	//	shader->unref();
+	//	delete shader;
+		shader->unref();
 }
 
 
@@ -94,7 +100,7 @@ Material* Material::copy() {
 		cube_map = FxCubeMapNew(m2->cube_map_size);
 		FxCubeMapCreate(cube_map, model);
 	}*/
-	m->shader = shader;
+	m->shader = shader->ref();
 	m->friction = friction;
 	return m;
 }
@@ -114,7 +120,7 @@ Material *LoadMaterial(const Path &filename) {
 	msg_write("loading material " + filename.str());
 	try {
 		msg_right();
-		f = FileOpenText(MaterialDir << (filename.str() + ".material"));
+		f = FileOpenText(MaterialDir << filename.with(".material"));
 		Material *m = new Material;
 
 		int ffv = f->ReadFileFormatVersion();
