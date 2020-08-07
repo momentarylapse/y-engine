@@ -13,6 +13,7 @@
 class Path;
 class Controller;
 class PerformanceMonitor;
+class TemplateDataScriptVariable;
 
 class PluginManager {
 public:
@@ -20,9 +21,9 @@ public:
 
 	void reset();
 
-	static void *create_instance(const Path &filename, const string &base_class);
+	static void *create_instance(const Path &filename, const string &base_class, Array<TemplateDataScriptVariable> &variables);
 
-	void add_controller(const Path &name);
+	void add_controller(const Path &name, Array<TemplateDataScriptVariable> &variables);
 
 	Array<Controller*> controllers;
 };

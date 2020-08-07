@@ -331,7 +331,6 @@ public:
 
 		cam->set_view((float)width / (float)height);
 		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
-		nix::SetViewMatrix(cam->m_view);
 
 		nix::ResetToColor(world.background);
 		nix::ResetZ();
@@ -340,6 +339,9 @@ public:
 
 		nix::BindUniform(ubo_light, 1);
 
+		draw_skyboxes();
+
+		nix::SetViewMatrix(cam->m_view);
 
 		draw_world(true);
 
@@ -347,8 +349,18 @@ public:
 			glFinish();
 		perf_mon->tick(2);
 	}
-	void draw_world(bool allow_material) {
-
+	void draw_skyboxes() {
+		nix::SetViewMatrix(matrix::rotation_q(cam->ang).transpose());
+		for (auto *sb: world.skybox) {
+			sb->_matrix = matrix::rotation_q(sb->ang);
+			nix::SetWorldMatrix(sb->_matrix * matrix::scale(10,10,10));
+			for (int i=0; i<sb->material.num; i++) {
+				set_material(sb->material[i]);
+				nix::DrawTriangles(sb->mesh[0]->sub[i].vertex_buffer);
+			}
+		}
+	}
+	void draw_terrains(bool allow_material) {
 		for (auto *t: world.terrains) {
 			//nix::SetWorldMatrix(matrix::translation(t->pos));
 			nix::SetWorldMatrix(matrix::ID);
@@ -357,7 +369,8 @@ public:
 			t->draw();
 			nix::DrawTriangles(t->vertex_buffer);
 		}
-
+	}
+	void draw_objects(bool allow_material) {
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 			nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
@@ -367,10 +380,20 @@ public:
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
 	}
+	void draw_world(bool allow_material) {
+		draw_terrains(allow_material);
+		draw_objects(allow_material);
+	}
 	void set_material(Material *m) {
 		nix::SetShader(shader_3d);
 		shader_3d->set_data(shader_3d->get_location("eye_pos"), &cam->pos.x, 16);
 		shader_3d->set_int(shader_3d->get_location("num_lights"), lights.num);
+		if (m->alpha.mode == TRANSPARENCY_FUNCTIONS)
+			nix::SetAlpha(m->alpha.source, m->alpha.destination);
+		else if (m->alpha.mode == TRANSPARENCY_COLOR_KEY_HARD)
+			nix::SetAlpha(ALPHA_COLOR_KEY_HARD);
+		else
+			nix::SetAlpha(ALPHA_NONE);
 
 		set_textures(m->textures);
 		//nix::SetShader(s.material->shader);
@@ -437,8 +460,8 @@ public:
 class YEngineApp {
 public:
 	
-	void run() {
-		init();
+	void run(const Array<string> &arg) {
+		init(arg);
 		load_first_world();
 		main_loop();
 		cleanup();
@@ -456,7 +479,7 @@ public:
 
 	Text *fps_display;
 
-	void init() {
+	void init(const Array<string> &arg) {
 		config.load();
 
 		window = create_window();
@@ -496,6 +519,8 @@ public:
 
 
 		game_ini.load();
+		if (arg.num > 1)
+			game_ini.default_world = arg[1];
 
 		MaterialInit();
 	}
@@ -527,7 +552,7 @@ public:
 		}
 
 		for (auto &s: world.scripts)
-			plugin_manager.add_controller(s.filename);
+			plugin_manager.add_controller(s.filename, s.variables);
 	}
 	
 	GLFWwindow* create_window() {
@@ -640,7 +665,7 @@ int hui_main(const Array<string> &arg) {
 	msg_init();
 
 	try {
-		app.run();
+		app.run(arg);
 	} catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;

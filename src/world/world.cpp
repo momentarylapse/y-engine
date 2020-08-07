@@ -300,7 +300,7 @@ bool World::load(const LevelData &ld) {
 
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
-	for (int i=0; i<skybox.num; i++){
+	for (int i=0; i<skybox.num; i++) {
 		skybox[i] = ModelManager::load(ld.skybox_filename[i]);
 		if (skybox[i])
 			skybox[i]->ang = quaternion::rotation_v(ld.skybox_ang[i]);
@@ -508,9 +508,12 @@ bool LevelData::load(const Path &filename) {
 		for (auto &e: meta->elements) {
 			if (e.tag == "background") {
 				background_color = s2c(e.value("color"));
-			} else if (e.tag == "skybox") {
-				skybox_filename.add(e.value("file"));
-				skybox_ang.add(v_0);
+				for (auto &ee: e.elements) {
+					if (ee.tag == "skybox") {
+						skybox_filename.add(ee.value("file"));
+						skybox_ang.add(v_0);
+					}
+				}
 			} else if (e.tag == "physics") {
 				physics_enabled = e.value("enabled")._bool();
 				gravity = s2v(e.value("gravity"));

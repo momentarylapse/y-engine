@@ -207,12 +207,31 @@ void PluginManager::reset() {
 	controllers.clear();
 }
 
-void *PluginManager::create_instance(const Path &filename, const string &base_class) {
+void assign_variables(char *p, const Kaba::Class *c, Array<TemplateDataScriptVariable> &variables) {
+	for (auto &v: variables) {
+		for (auto &e: c->elements)
+			if (v.name == e.name.lower().replace("_", "")) {
+				//msg_write("  " + e.type->long_name() + " " + e.name + " = " + v.value);
+				if (e.type == Kaba::TypeInt)
+					*(int*)(p + e.offset) = v.value._int();
+				else if (e.type == Kaba::TypeFloat32)
+					*(float*)(p + e.offset) = v.value._float();
+				else if (e.type == Kaba::TypeBool)
+					*(bool*)(p + e.offset) = v.value._bool();
+				else if (e.type == Kaba::TypeString)
+					*(string*)(p + e.offset) = v.value;
+			}
+	}
+}
+
+void *PluginManager::create_instance(const Path &filename, const string &base_class, Array<TemplateDataScriptVariable> &variables) {
 	try {
 		auto *s = Kaba::Load(filename);
 		for (auto *c: s->classes()) {
 			if (c->is_derived_from_s(base_class)) {
-				return c->create_instance();
+				void *p = c->create_instance();
+				assign_variables((char*)p, c, variables);
+				return p;
 			}
 		}
 	} catch(Kaba::Exception &e) {
@@ -223,8 +242,9 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 	return nullptr;
 }
 
-void PluginManager::add_controller(const Path &name) {
-	auto *c = (Controller*)create_instance(name, "Controller");
+void PluginManager::add_controller(const Path &name, Array<TemplateDataScriptVariable> &variables) {
+	auto *c = (Controller*)create_instance(name, "Controller", variables);
+
 	controllers.add(c);
 	c->on_init();
 }
