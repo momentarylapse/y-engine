@@ -208,6 +208,7 @@ sources = [
 	'src/plugins/PluginManager.cpp',
 	'src/renderer/Renderer.cpp',
 	'src/renderer/RenderPath.cpp',
+	'src/renderer/RenderPathGL.cpp',
 	'src/world/camera.cpp',
 	'src/world/material.cpp',
 	'src/world/model.cpp',
@@ -215,6 +216,8 @@ sources = [
 	'src/world/object.cpp',
 	'src/world/terrain.cpp',
 	'src/world/world.cpp',
+	'src/Config.cpp',
+	'src/GameIni.cpp',
 	'src/main.cpp',
 	'src/meta.cpp'
 ]
