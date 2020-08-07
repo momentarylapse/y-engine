@@ -25,6 +25,13 @@
 
 extern bool SHOW_SHADOW;
 
+void break_point() {
+	if (config.debug) {
+		glFlush();
+		glFinish();
+	}
+}
+
 RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	window = w;
 	glfwMakeContextCurrent(window);
@@ -177,8 +184,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 
 	nix::SetAlpha(ALPHA_NONE);
 
-	if (config.debug)
-		glFinish();
+	break_point();
 	perf_mon->tick(4);
 }
 
@@ -196,8 +202,7 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 
 	nix::DrawTriangles(vb_2d);
 
-	if (config.debug)
-		glFinish();
+	break_point();
 	perf_mon->tick(3);
 }
 
@@ -225,8 +230,7 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 
 	draw_world(true);
 
-	if (config.debug)
-		glFinish();
+	break_point();
 	perf_mon->tick(2);
 }
 void RenderPathGL::_material_set_shader(Material *m, nix::Shader *s) {
@@ -347,8 +351,7 @@ void RenderPathGL::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 
 	draw_world(false);
 
-	if (config.debug)
-		glFinish();
+	break_point();
 	perf_mon->tick(1);
 }
 

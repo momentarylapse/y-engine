@@ -91,7 +91,7 @@ public:
 
 class LevelData {
 public:
-	void reset();
+	LevelData();
 	bool load(const Path &filename);
 
 	Path world_filename;

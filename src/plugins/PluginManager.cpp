@@ -141,9 +141,9 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Light.harshness", &Light::harshness);
 	Kaba::declare_class_element("Light.enabled", &Light::enabled);
 
-	Kaba::link_external_class_func("LightParallel.__init__", &Light::__init_parallel__);
-	Kaba::link_external_class_func("LightSpherical.__init__", &Light::__init_spherical__);
-	Kaba::link_external_class_func("LightCone.__init__", &Light::__init_cone__);
+	Kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);
+	Kaba::link_external_class_func("Light.Spherical.__init__", &Light::__init_spherical__);
+	Kaba::link_external_class_func("Light.Cone.__init__", &Light::__init_cone__);
 
 
 	Kaba::declare_class_size("Particle", sizeof(Particle));
@@ -155,22 +155,22 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 
 
-	Kaba::declare_class_size("Picture", sizeof(Picture));
-	Kaba::declare_class_element("Picture.dest", &Picture::dest);
-	Kaba::declare_class_element("Picture.source", &Picture::source);
-	Kaba::declare_class_element("Picture.z", &Picture::z);
-	Kaba::declare_class_element("Picture.texture", &Picture::texture);
-	Kaba::declare_class_element("Picture.blur", &Picture::bg_blur);
-	Kaba::declare_class_element("Picture.color", &Picture::col);
-	Kaba::link_external_class_func("Picture.__init__", &Picture::__init__);
-	Kaba::link_external_class_func("Picture.__delete__", &Picture::__delete__);
+	Kaba::declare_class_size("ui.Picture", sizeof(Picture));
+	Kaba::declare_class_element("ui.Picture.dest", &Picture::dest);
+	Kaba::declare_class_element("ui.Picture.source", &Picture::source);
+	Kaba::declare_class_element("ui.Picture.z", &Picture::z);
+	Kaba::declare_class_element("ui.Picture.texture", &Picture::texture);
+	Kaba::declare_class_element("ui.Picture.blur", &Picture::bg_blur);
+	Kaba::declare_class_element("ui.Picture.color", &Picture::col);
+	Kaba::link_external_class_func("ui.Picture.__init__", &Picture::__init__);
+	Kaba::link_external_class_func("ui.Picture.__delete__", &Picture::__delete__);
 
-	Kaba::declare_class_size("Text", sizeof(Text));
-	Kaba::declare_class_element("Text.font_size", &Text::font_size);
-	Kaba::declare_class_element("Text.text", &Text::text);
-	Kaba::link_external_class_func("Text.__init__", &Text::__init__);
-	Kaba::link_external_class_func("Text.__delete__", &Text::__delete__);
-	Kaba::link_external_class_func("Text.set_text", &Text::set_text);
+	Kaba::declare_class_size("ui.Text", sizeof(Text));
+	Kaba::declare_class_element("ui.Text.font_size", &Text::font_size);
+	Kaba::declare_class_element("ui.Text.text", &Text::text);
+	Kaba::link_external_class_func("ui.Text.__init__", &Text::__init__);
+	Kaba::link_external_class_func("ui.Text.__delete__", &Text::__delete__);
+	Kaba::link_external_class_func("ui.Text.set_text", &Text::set_text);
 
 	Kaba::declare_class_size("Link", sizeof(Link));
 	Kaba::declare_class_element("Link.a", &Link::a);
@@ -179,11 +179,13 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Link.set_frame", &Link::set_frame);
 	//Kaba::link_external_class_func("Link.set_axis", &Link::set_axis);
 
-	Kaba::link_external("get_key", (void*)&InputManager::get_key);
-	Kaba::link_external("get_key_down", (void*)&InputManager::get_key_down);
-	Kaba::link_external("get_key_up", (void*)&InputManager::get_key_up);
-
-	Kaba::link_external("gui_add", (void*)&gui::add);
+	Kaba::link_external("ui.key", (void*)&InputManager::get_key);
+	Kaba::link_external("ui.key_down", (void*)&InputManager::get_key_down);
+	Kaba::link_external("ui.key_up", (void*)&InputManager::get_key_up);
+	Kaba::link_external("ui.add", (void*)&gui::add);
+	Kaba::link_external("ui.mouse", &InputManager::mouse);
+	Kaba::link_external("ui.dmouse", &InputManager::dmouse);
+	Kaba::link_external("ui.scroll", &InputManager::scroll);
 
 	Kaba::declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
 	Kaba::declare_class_element("PerformanceMonitor.avg", &PerformanceMonitor::avg);
@@ -197,9 +199,6 @@ void PluginManager::link_kaba() {
 	Kaba::link_external("world", &world);
 	Kaba::link_external("cam", &cam);
 	Kaba::link_external("engine", &engine);
-	Kaba::link_external("mouse", &InputManager::mouse);
-	Kaba::link_external("dmouse", &InputManager::dmouse);
-	Kaba::link_external("scroll", &InputManager::scroll);
 	Kaba::link_external("load_model", (void*)&ModelManager::load);
 }
 

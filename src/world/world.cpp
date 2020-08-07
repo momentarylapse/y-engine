@@ -247,21 +247,13 @@ void World::reset() {
 #endif
 }
 
-void LevelData::reset() {
-	world_filename = "";
-	terrains.clear();
-	objects.clear();
-	skybox_filename.clear();
-	skybox_ang.clear();
-	scripts.clear();
-	links.clear();
-
+LevelData::LevelData() {
 	ego_index = -1;
 	background_color = Gray;
-	lights.clear();
 
 	gravity = v_0;
 	fog.enabled = false;
+	physics_enabled = false;
 }
 
 color ReadColor3(File *f) {
