@@ -68,6 +68,10 @@ void InputManager::iterate() {
 }
 
 bool InputManager::get_key(int k) {
+	if (k == hui::KEY_SHIFT)
+		return state.key[hui::KEY_RSHIFT] or state.key[hui::KEY_LSHIFT];
+	if (k == hui::KEY_CONTROL)
+		return state.key[hui::KEY_RCONTROL] or state.key[hui::KEY_LCONTROL];
 	if (k < 0 or k >= 256)
 		return false;
 	return state.key[k];

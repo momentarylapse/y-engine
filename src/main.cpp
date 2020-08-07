@@ -334,6 +334,8 @@ public:
 	void render_into_texture(nix::FrameBuffer *fb) {
 		nix::BindFrameBuffer(fb);
 
+		float max_depth = cam->max_depth;
+		cam->max_depth = 2000000;
 		cam->set_view((float)fb->width / (float)fb->height);
 		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 
@@ -341,6 +343,11 @@ public:
 		nix::ResetZ();
 
 		draw_skyboxes();
+
+
+		cam->max_depth = max_depth;
+		cam->set_view((float)fb->width / (float)fb->height);
+		nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 		nix::BindUniform(ubo_light, 1);
 		nix::SetViewMatrix(cam->m_view);
@@ -368,6 +375,7 @@ public:
 
 	void draw_skyboxes() {
 		nix::SetZ(false, false);
+		nix::SetCull(CULL_NONE);
 		nix::SetViewMatrix(matrix::rotation_q(cam->ang).transpose());
 		for (auto *sb: world.skybox) {
 			sb->_matrix = matrix::rotation_q(sb->ang);
@@ -377,6 +385,7 @@ public:
 				nix::DrawTriangles(sb->mesh[0]->sub[i].vertex_buffer);
 			}
 		}
+		nix::SetCull(CULL_DEFAULT);
 	}
 	void draw_terrains(bool allow_material) {
 		for (auto *t: world.terrains) {

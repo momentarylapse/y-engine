@@ -52,7 +52,7 @@ void Camera::reset() {
 	//scale_x = 1;
 	//z = 0.999999f;
 	min_depth = 1.0f;
-	max_depth = 100000.0f;
+	max_depth = 1000000.0f;
 
 	enabled = false;
 	dest = rect::ID;
