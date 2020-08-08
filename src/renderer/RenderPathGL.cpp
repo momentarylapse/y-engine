@@ -66,6 +66,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 		shader_depth = nix::Shader::load("Materials/forward/depth.shader");
 		shader_out = nix::Shader::load("Materials/forward/hdr.shader");
 		shader_3d = nix::Shader::load("Materials/forward/3d.shader");
+		shader_fx = nix::Shader::load("Materials/forward/3d-fx.shader");
 		//nix::default_shader_3d = shader_3d;
 		shader_shadow = nix::Shader::load("Materials/forward/3d-shadow.shader");
 		shader_skybox = nix::Shader::load("Materials/forward/3d-skybox.shader");
@@ -230,12 +231,34 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 
 	draw_world(true);
 
+	draw_particles();
+
 	break_point();
 	perf_mon->tick(2);
 }
+
+void RenderPathGL::draw_particles() {
+	matrix r = matrix::rotation_q(cam->ang);
+	nix::SetShader(shader_fx);
+	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
+	nix::SetZ(false, true);
+	nix::vb_temp->create_rect(rect(-0.5,0.5, -0.5,0.5));
+	for (auto g: world.particle_manager->groups) {
+		nix::SetTexture(g->texture);
+		for (auto p: g->particles) {
+			shader_fx->set_color(shader_fx->get_location("color"), p->col);
+			shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
+			nix::SetWorldMatrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
+			nix::DrawTriangles(nix::vb_temp);
+		}
+	}
+	nix::SetZ(true, true);
+	nix::SetAlpha(ALPHA_NONE);
+}
+
 void RenderPathGL::_material_set_shader(Material *m, nix::Shader *s) {
 	if (m->shader != s) {
-		msg_write("SWAP shader");
+		msg_write("SWAP skybox shader");
 		if (m->shader)
 			m->shader->unref();
 		m->shader = s->ref();

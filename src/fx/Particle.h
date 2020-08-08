@@ -25,18 +25,23 @@ namespace nix {
 	float fog_distance;
 };*/
 
-class Particle {
+class Particle : public VirtualBase {
 public:
-	Particle(const vector &pos, float r, nix::Texture *tex);
+	Particle(const vector &pos, float r, nix::Texture *tex, float ttl);
 	virtual ~Particle();
 
-	void __init__(const vector &pos, float r, nix::Texture *tex);
+	void __init__(const vector &pos, float r, nix::Texture *tex, float ttl);
+	void __delete__() override;
+	virtual void on_iterate(float dt) {}
 
 	vector pos;
+	vector vel;
 	color col;
-	float radius;
 	rect source;
 	nix::Texture *texture;
+	float radius;
+	float time_to_live;
+	bool suicidal;
 };
 
 class ParticleGroup {
@@ -54,6 +59,7 @@ public:
 	Array<ParticleGroup*> groups;
 	void add(Particle *o);
 	void clear();
+	void iterate(float dt);
 };
 
 #endif /* SRC_FX_PARTICLE_H_ */

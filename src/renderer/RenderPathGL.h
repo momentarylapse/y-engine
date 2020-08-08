@@ -36,6 +36,7 @@ public:
 	nix::Shader *shader_blur = nullptr;
 	nix::Shader *shader_depth = nullptr;
 	nix::Shader *shader_out = nullptr;
+	nix::Shader *shader_fx = nullptr;
 	//nix::Shader *shader_3d = nullptr;
 	nix::Shader *shader_skybox = nullptr;
 	nix::Shader *shader_shadow = nullptr;
@@ -65,6 +66,7 @@ public:
 	void draw_terrains(bool allow_material);
 	void draw_objects(bool allow_material);
 	void draw_world(bool allow_material);
+	void draw_particles();
 	void set_material(Material *m);
 	void set_textures(const Array<nix::Texture*> &tex);
 	void prepare_lights();

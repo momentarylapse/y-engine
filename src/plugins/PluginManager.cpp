@@ -146,13 +146,19 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Light.Cone.__init__", &Light::__init_cone__);
 
 
+	Particle particle(vector::ZERO, 0, nullptr, -1);
 	Kaba::declare_class_size("Particle", sizeof(Particle));
 	Kaba::declare_class_element("Particle.pos", &Particle::pos);
+	Kaba::declare_class_element("Particle.vel", &Particle::vel);
 	Kaba::declare_class_element("Particle.radius", &Particle::radius);
+	Kaba::declare_class_element("Particle.time_to_live", &Particle::time_to_live);
+	Kaba::declare_class_element("Particle.suicidal", &Particle::suicidal);
 	Kaba::declare_class_element("Particle.texture", &Particle::texture);
 	Kaba::declare_class_element("Particle.color", &Particle::col);
 	Kaba::declare_class_element("Particle.source", &Particle::source);
 	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
+	Kaba::link_external_virtual("Particle.__delete__", &Particle::__delete__, &particle);
+	Kaba::link_external_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);
 
 
 	Kaba::declare_class_size("ui.Picture", sizeof(Picture));

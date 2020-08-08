@@ -224,6 +224,7 @@ public:
 			c->on_iterate(engine.elapsed);
 		for (auto *o: world.objects)
 			o->on_iterate(engine.elapsed);
+		world.particle_manager->iterate(engine.elapsed);
 		perf_mon.tick(9);
 	}
 
