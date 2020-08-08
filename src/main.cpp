@@ -271,7 +271,8 @@ vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBu
 
 
 int hui_main(const Array<string> &arg) {
-	msg_init();
+
+	hui::Application::guess_directories(arg, "y");
 
 	try {
 		app.run(arg);

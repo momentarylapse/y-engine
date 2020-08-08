@@ -62,14 +62,16 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 
 	try {
-		shader_blur = nix::Shader::load("Materials/forward/blur.shader");
-		shader_depth = nix::Shader::load("Materials/forward/depth.shader");
-		shader_out = nix::Shader::load("Materials/forward/hdr.shader");
-		shader_3d = nix::Shader::load("Materials/forward/3d.shader");
-		shader_fx = nix::Shader::load("Materials/forward/3d-fx.shader");
+		auto sd = nix::shader_dir;
+		shader_blur = nix::Shader::load(hui::Application::directory_static << "forward/blur.shader");
+		shader_depth = nix::Shader::load(hui::Application::directory_static << "forward/depth.shader");
+		shader_out = nix::Shader::load(hui::Application::directory_static << "forward/hdr.shader");
+		shader_3d = nix::Shader::load(hui::Application::directory_static << "forward/3d.shader");
+		shader_fx = nix::Shader::load(hui::Application::directory_static << "forward/3d-fx.shader");
 		//nix::default_shader_3d = shader_3d;
-		shader_shadow = nix::Shader::load("Materials/forward/3d-shadow.shader");
-		shader_skybox = nix::Shader::load("Materials/forward/3d-skybox.shader");
+		shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
+		shader_skybox = nix::Shader::load(hui::Application::directory_static << "forward/3d-skybox.shader");
+		nix::shader_dir = sd;
 	} catch(Exception &e) {
 		msg_error(e.message());
 		throw e;
