@@ -52,8 +52,10 @@ endif
 
 
 sources = [
+	'src/fx/Beam.cpp',
 	'src/fx/Light.cpp',
 	'src/fx/Particle.cpp',
+	'src/fx/ParticleManager.cpp',
 	'src/gui/Picture.cpp',
 	'src/gui/Text.cpp',
 	'src/helper/InputManager.cpp',
@@ -223,3 +225,4 @@ sources = [
 
 executable('y', sources, dependencies : deps, install : true)
 
+install_subdir('static/forward', install_dir : join_paths(get_option('datadir'), 'y'))

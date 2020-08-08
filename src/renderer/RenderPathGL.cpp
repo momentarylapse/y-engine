@@ -15,6 +15,8 @@
 #include "../gui/Text.h"
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
+#include "../fx/Beam.h"
+#include "../fx/ParticleManager.h"
 #include "../world/camera.h"
 #include "../world/material.h"
 #include "../world/world.h"
@@ -240,10 +242,12 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 }
 
 void RenderPathGL::draw_particles() {
-	matrix r = matrix::rotation_q(cam->ang);
 	nix::SetShader(shader_fx);
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 	nix::SetZ(false, true);
+
+	// particles
+	matrix r = matrix::rotation_q(cam->ang);
 	nix::vb_temp->create_rect(rect(-0.5,0.5, -0.5,0.5));
 	for (auto g: world.particle_manager->groups) {
 		nix::SetTexture(g->texture);
@@ -254,6 +258,29 @@ void RenderPathGL::draw_particles() {
 			nix::DrawTriangles(nix::vb_temp);
 		}
 	}
+
+	// beams
+	Array<vector> v;
+	v.resize(6);
+	nix::SetWorldMatrix(matrix::ID);
+	for (auto g: world.particle_manager->groups) {
+		nix::SetTexture(g->texture);
+		for (auto p: g->beams) {
+			vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
+			v[0] = p->pos - e1;
+			v[1] = p->pos - e1 + p->length;
+			v[2] = p->pos + e1 + p->length;
+			v[3] = p->pos - e1;
+			v[4] = p->pos + e1 + p->length;
+			v[5] = p->pos + e1;
+			nix::vb_temp->update(0, v);
+			shader_fx->set_color(shader_fx->get_location("color"), p->col);
+			shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
+			nix::DrawTriangles(nix::vb_temp);
+		}
+	}
+
+
 	nix::SetZ(true, true);
 	nix::SetAlpha(ALPHA_NONE);
 }

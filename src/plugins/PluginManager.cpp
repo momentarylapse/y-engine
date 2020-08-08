@@ -15,6 +15,7 @@
 #include "../world/camera.h"
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
+#include "../fx/Beam.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
 #include "../helper/InputManager.h"
@@ -159,6 +160,10 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 	Kaba::link_external_virtual("Particle.__delete__", &Particle::__delete__, &particle);
 	Kaba::link_external_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);
+
+	Kaba::declare_class_size("Beam", sizeof(Beam));
+	Kaba::declare_class_element("Beam.length", &Beam::length);
+	Kaba::link_external_class_func("Beam.__init__", &Beam::__init_beam__);
 
 
 	Kaba::declare_class_size("ui.Picture", sizeof(Picture));

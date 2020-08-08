@@ -14,7 +14,6 @@
 
 namespace nix {
 	class Texture;
-	class UniformBuffer;
 	class Shader;
 }
 
@@ -25,6 +24,11 @@ namespace nix {
 	float fog_distance;
 };*/
 
+enum ParticleType {
+	PARTICLE,
+	BEAM
+};
+
 class Particle : public VirtualBase {
 public:
 	Particle(const vector &pos, float r, nix::Texture *tex, float ttl);
@@ -34,6 +38,7 @@ public:
 	void __delete__() override;
 	virtual void on_iterate(float dt) {}
 
+	ParticleType type;
 	vector pos;
 	vector vel;
 	color col;
@@ -44,22 +49,5 @@ public:
 	bool suicidal;
 };
 
-class ParticleGroup {
-public:
-	ParticleGroup(nix::Texture *t);
-	~ParticleGroup();
-	Array<Particle*> particles;
-	nix::Texture *texture;
-	nix::UniformBuffer *ubo;
-	//DescriptorSet *dset;
-};
-
-class ParticleManager {
-public:
-	Array<ParticleGroup*> groups;
-	void add(Particle *o);
-	void clear();
-	void iterate(float dt);
-};
 
 #endif /* SRC_FX_PARTICLE_H_ */

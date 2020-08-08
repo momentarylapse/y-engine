@@ -25,6 +25,7 @@
 #ifdef _X_ALLOW_X_
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
+#include "../fx/ParticleManager.h"
 #endif
 
 #include <btBulletDynamicsCommon.h>

@@ -25,7 +25,7 @@
 #include "helper/InputManager.h"
 
 #include "fx/Light.h"
-#include "fx/Particle.h"
+#include "fx/ParticleManager.h"
 
 #include "gui/Picture.h"
 #include "gui/Text.h"
