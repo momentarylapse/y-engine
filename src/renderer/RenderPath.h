@@ -58,6 +58,7 @@ public:
 	virtual void draw() = 0;
 
 	nix::Shader *shader_3d = nullptr;
+	nix::Shader *shader_2d = nullptr;
 };
 
 

@@ -74,11 +74,11 @@ nix::VertexBuffer *vertex_buffer = nullptr;
 Array<Picture*> pictures;
 
 
-void init() {
+void init(nix::Shader *s) {
 	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
 	vertex_buffer->create_rect(rect::ID);
 
-	shader = nix::Shader::load("forward/2d.shader");
+	shader = s;
 }
 
 /*vulkan::RenderPass *rp) {

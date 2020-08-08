@@ -119,7 +119,8 @@ public:
 			render_path = new RenderPathForward(renderer, &perf_mon);
 		}
 #endif
-		gui::init();
+
+		gui::init(render_path->shader_2d);
 
 
 		InputManager::init(window);

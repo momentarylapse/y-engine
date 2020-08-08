@@ -44,7 +44,7 @@ public:
 
 namespace gui {
 	//void init(vulkan::RenderPass *rp);
-	void init();
+	void init(nix::Shader *s);
 	void reset();
 	//void render(vulkan::CommandBuffer *cb, const rect &viewport);
 	void update();

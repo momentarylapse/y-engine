@@ -73,6 +73,8 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 		//nix::default_shader_3d = shader_3d;
 		shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
 		shader_skybox = nix::Shader::load(hui::Application::directory_static << "forward/3d-skybox.shader");
+
+		shader_2d = nix::Shader::load(hui::Application::directory_static << "forward/2d.shader");
 		nix::shader_dir = sd;
 	} catch(Exception &e) {
 		msg_error(e.message());
