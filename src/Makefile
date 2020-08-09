@@ -680,7 +680,6 @@ meta.o : meta.cpp lib/file/file.h lib/base/base.h lib/base/macros.h lib/base/arr
 
 install :
 	mkdir -p $(prefix)/share/y
-	cp -rf '../static/forward' $(prefix)/share/y
 	cp $(BIN) $(prefix)/bin
 
 clean :

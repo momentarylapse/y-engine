@@ -38,7 +38,6 @@ public:
 	nix::Shader *shader_out = nullptr;
 	nix::Shader *shader_fx = nullptr;
 	//nix::Shader *shader_3d = nullptr;
-	nix::Shader *shader_skybox = nullptr;
 	nix::Shader *shader_shadow = nullptr;
 
 	Array<UBOLight> lights;
@@ -60,8 +59,6 @@ public:
 	void draw_gui(nix::FrameBuffer *source);
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
 	void render_into_texture(nix::FrameBuffer *fb);
-	void _material_set_shader(Material *m, nix::Shader *s);
-	void _correct_material_shaders();
 	void draw_skyboxes();
 	void draw_terrains(bool allow_material);
 	void draw_objects(bool allow_material);

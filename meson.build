@@ -224,4 +224,3 @@ sources = [
 
 executable('y', sources, dependencies : deps, install : true)
 
-install_subdir('static/forward', install_dir : join_paths(get_option('datadir'), 'y'))
