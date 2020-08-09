@@ -20,14 +20,11 @@ void PerformanceMonitor::reset() {
 	frames = 0;
 }
 
-void PerformanceMonitor::tick(int loc) {
-
+void PerformanceMonitor::tick(PMLabel label) {
 	auto now = std::chrono::high_resolution_clock::now();
 	float dt = std::chrono::duration<float, std::chrono::seconds::period>(now - prev).count();
-	if (cur_location >= 0)
-		temp.location[cur_location] += dt;
+	temp.location[(int)label] += dt;
 	prev = now;
-	cur_location = loc;
 }
 
 void PerformanceMonitor::frame() {
@@ -39,7 +36,6 @@ void PerformanceMonitor::frame() {
 	prev_frame = now;
 	frames ++;
 	just_cleared = false;
-	cur_location = -1;
 
 	if (temp.frame_time > 0.2f) {
 		avg.frame_time = temp.frame_time / frames;

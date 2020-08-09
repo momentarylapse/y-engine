@@ -100,12 +100,14 @@ void RenderPathGL::draw() {
 	nix::StartFrameGLFW(window);
 
 	_correct_material_shaders();
+	perf_mon->tick(PMLabel::PRE);
 
 	prepare_lights();
-	perf_mon->tick(0);
+	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
 	render_shadow_map(fb_shadow, 4);
 	render_shadow_map(fb_shadow2, 1);
+	perf_mon->tick(PMLabel::SHADOWS);
 
 	render_into_texture(fb);
 
@@ -127,7 +129,8 @@ void RenderPathGL::draw() {
 	draw_gui(source);
 
 	nix::EndFrameGLFW(window);
-	perf_mon->tick(5);
+	break_point();
+	perf_mon->tick(PMLabel::END);
 }
 
 void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal) {
@@ -192,7 +195,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	nix::SetAlpha(ALPHA_NONE);
 
 	break_point();
-	perf_mon->tick(4);
+	perf_mon->tick(PMLabel::GUI);
 }
 
 void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
@@ -210,7 +213,7 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 	nix::DrawTriangles(vb_2d);
 
 	break_point();
-	perf_mon->tick(3);
+	perf_mon->tick(PMLabel::OUT);
 }
 
 void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
@@ -225,6 +228,7 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 	nix::ResetZ();
 
 	draw_skyboxes();
+	perf_mon->tick(PMLabel::SKYBOXES);
 
 
 	cam->max_depth = max_depth;
@@ -236,11 +240,11 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 	nix::SetZ(true, true);
 
 	draw_world(true);
+	break_point();
+	perf_mon->tick(PMLabel::WORLD);
 
 	draw_particles();
-
-	break_point();
-	perf_mon->tick(2);
+	perf_mon->tick(PMLabel::PARTICLES);
 }
 
 void RenderPathGL::draw_particles() {
@@ -285,6 +289,7 @@ void RenderPathGL::draw_particles() {
 
 	nix::SetZ(true, true);
 	nix::SetAlpha(ALPHA_NONE);
+	break_point();
 }
 
 void RenderPathGL::_material_set_shader(Material *m, nix::Shader *s) {
@@ -406,7 +411,6 @@ void RenderPathGL::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	draw_world(false);
 
 	break_point();
-	perf_mon->tick(1);
 }
 
 

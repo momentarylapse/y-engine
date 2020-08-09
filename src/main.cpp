@@ -219,14 +219,14 @@ public:
 	}
 
 	void iterate() {
-		perf_mon.tick(8);
+		perf_mon.tick(PMLabel::UNKNOWN);
 		world.iterate(engine.elapsed);
 		for (auto *c: plugin_manager.controllers)
 			c->on_iterate(engine.elapsed);
 		for (auto *o: world.objects)
 			o->on_iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
-		perf_mon.tick(9);
+		perf_mon.tick(PMLabel::ITERATE);
 	}
 
 

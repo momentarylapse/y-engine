@@ -10,6 +10,20 @@
 
 #include <chrono>
 
+enum class PMLabel {
+	UNKNOWN,
+	PRE,
+	OUT,
+	END,
+	PREPARE_LIGHTS,
+	SHADOWS,
+	WORLD,
+	PARTICLES,
+	SKYBOXES,
+	GUI,
+	ITERATE,
+};
+
 class PerformanceMonitor {
 public:
 	PerformanceMonitor();
@@ -18,7 +32,6 @@ public:
 	static const int NUM_LOCATIONS = 16;
 
 	int frames = -1;
-	int cur_location = -1;
 	bool just_cleared = true;
 	std::chrono::high_resolution_clock::time_point prev;
 	std::chrono::high_resolution_clock::time_point prev_frame;
@@ -37,7 +50,7 @@ public:
 
 
 	void frame();
-	void tick(int location);
+	void tick(PMLabel label);
 };
 
 #endif /* SRC_HELPER_PERFORMANCEMONITOR_H_ */
