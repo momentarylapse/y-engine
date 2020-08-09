@@ -6,21 +6,16 @@
  */
 
 #include "GameIni.h"
-#include "lib/file/file.h"
+#include "lib/hui/Config.h"
 
 GameIni game_ini;
 
 void GameIni::load() {
-	File *f = FileOpenText("game.ini");
-	f->read_comment();
-	main_script = f->read_str();
-	f->read_comment();
-	default_world = f->read_str();
-	f->read_comment();
-	second_world = f->read_str();
-	f->read_comment();
-	default_material = f->read_str();
-	f->read_comment();
-	default_font = f->read_str();
-	delete f;
+	hui::Configuration conf("game.ini");
+	conf.load();
+	default_world = conf.get_str("default-world", "");
+	second_world = conf.get_str("second-world", "");
+	main_script = conf.get_str("main-script", "");
+	default_font = conf.get_str("default-font", "");
+	default_material = conf.get_str("default-material", "");
 }

@@ -10,17 +10,14 @@
 
 
 #include "lib/base/base.h"
-#include "lib/base/map.h"
+#include "lib/hui/Config.h"
 
-class Config {
+class Config : public hui::Configuration {
 public:
 	bool debug = false;
-	Map<string,string> map;
+
+	Config();
 	void load();
-	string get(const string &key, const string &def);
-	bool get_bool(const string &key, bool def);
-	float get_float(const string &key, float def);
-	int get_int(const string &key, int def);
 };
 extern Config config;
 
