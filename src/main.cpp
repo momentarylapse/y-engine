@@ -36,7 +36,6 @@
 #include "renderer/RenderPath.h"
 #include "renderer/RenderPathGL.h"
 
-#include "GameIni.h"
 #include "Config.h"
 
 const bool SHOW_GBUFFER = false;
@@ -126,21 +125,20 @@ public:
 		InputManager::init(window);
 
 
-		game_ini.load();
 		if (arg.num > 1)
-			game_ini.default_world = arg[1];
+			config.default_world = arg[1];
 
 		MaterialInit();
 		MaterialSetDefaultShader(render_path->shader_3d);
 	}
 
 	void load_first_world() {
-		if (game_ini.default_world == "")
+		if (config.default_world == "")
 			throw std::runtime_error("no default world defined in game.ini");
 
 		world.reset();
 		CameraReset();
-		GodLoadWorld(game_ini.default_world);
+		GodLoadWorld(config.default_world);
 
 		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.02f,0.02f,0), 0.03f);
 		gui::add(fps_display);

@@ -15,6 +15,11 @@
 class Config : public hui::Configuration {
 public:
 	bool debug = false;
+	string main_script;
+	string default_world;
+	string second_world;
+	string default_material;
+	string default_font;
 
 	Config();
 	void load();

@@ -217,7 +217,6 @@ sources = [
 	'src/world/terrain.cpp',
 	'src/world/world.cpp',
 	'src/Config.cpp',
-	'src/GameIni.cpp',
 	'src/main.cpp',
 	'src/meta.cpp'
 ]
