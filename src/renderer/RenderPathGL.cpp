@@ -315,6 +315,7 @@ void RenderPathGL::draw_skyboxes() {
 		}
 	}
 	nix::SetCull(CULL_DEFAULT);
+	break_point();
 }
 void RenderPathGL::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
