@@ -13,7 +13,7 @@ namespace gui {
 Node::Node(const rect &r) {
 	type = Type::NODE;
 	area = r;
-	dz = 0.001f;
+	dz = 1;
 	col = White;
 	visible = true;
 	margin = rect::EMPTY;

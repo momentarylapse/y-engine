@@ -86,9 +86,8 @@ void render_text(const string &str, Image &im) {
 namespace gui {
 
 
-Text::Text(const string &t, const vector &p, float h) : Picture(rect(p.x, p.x, p.y, p.y), new nix::Texture()) {
+Text::Text(const string &t, float h) : Picture(rect::ID, new nix::Texture()) {
 	type = Type::TEXT;
-	dz = p.z;
 	margin = rect(h/6, h/6, h/6, h/6);
 	font_size = h;
 	set_text(t);
@@ -98,8 +97,8 @@ Text::~Text() {
 	delete texture;
 }
 
-void Text::__init__(const string &t, const vector &p, float h) {
-	new(this) Text(t, p, h);
+void Text::__init__(const string &t, float h) {
+	new(this) Text(t, h);
 }
 
 void Text::__delete__() {

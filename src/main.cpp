@@ -140,7 +140,8 @@ public:
 		CameraReset();
 		GodLoadWorld(config.default_world);
 
-		fps_display = new gui::Text("Hallo, kleiner Test äöü", vector(0.02f,0.02f,0), 0.03f);
+		fps_display = new gui::Text("Hallo, kleiner Test äöü", 0.03f);
+		fps_display->margin = rect(0.02f, 0, 0.02f, 0);
 		gui::toplevel->add(fps_display);
 #if HAS_LIB_VULKAN
 		if (SHOW_GBUFFER) {

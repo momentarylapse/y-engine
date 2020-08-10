@@ -84,17 +84,30 @@ public:
 	void __init__();
 };
 
-	//void init(vulkan::RenderPass *rp);
-	void init(nix::Shader *s);
-	void reset();
-	//void render(vulkan::CommandBuffer *cb, const rect &viewport);
-	void update();
+/*class Spacer : public Node {
+public:
+	Spacer(float w, float h);
+	void __init__(float w, float h);
+};
 
-	extern Node* toplevel;
-	extern Array<Node*> all_nodes;
-	extern Array<Node*> sorted_nodes;
-	extern nix::Shader *shader;
-	extern nix::VertexBuffer *vertex_buffer;
+
+class Layer : public Node {
+public:
+	Layer(const rect &r);
+	void __init__(const rect &r);
+};*/
+
+//void init(vulkan::RenderPass *rp);
+void init(nix::Shader *s);
+void reset();
+//void render(vulkan::CommandBuffer *cb, const rect &viewport);
+void update();
+
+extern Node* toplevel;
+extern Array<Node*> all_nodes;
+extern Array<Node*> sorted_nodes;
+extern nix::Shader *shader;
+extern nix::VertexBuffer *vertex_buffer;
 }
 
 #endif /* SRC_GUI_NODE_H_ */

@@ -14,9 +14,9 @@ namespace gui {
 
 class Text : public Picture {
 public:
-	Text(const string &t, const vector &p, float h);
+	Text(const string &t, float h);
 	virtual ~Text();
-	void __init__(const string &t, const vector &p, float h);
+	void __init__(const string &t, float h);
 	void __delete__() override;
 
 	void rebuild();
