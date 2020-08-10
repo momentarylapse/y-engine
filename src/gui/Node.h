@@ -8,9 +8,8 @@
 #ifndef SRC_GUI_NODE_H_
 #define SRC_GUI_NODE_H_
 
-//#include "../lib/vulkan/vulkan.h"
+#include "../lib/base/base.h"
 #include "../lib/nix/nix.h"
-#include <functional>
 
 namespace gui {
 
@@ -100,19 +99,6 @@ public:
 	void __init__(const rect &r);
 };*/
 
-//void init(vulkan::RenderPass *rp);
-void init(nix::Shader *s);
-void reset();
-//void render(vulkan::CommandBuffer *cb, const rect &viewport);
-void update();
-void handle_input(float mx, float my, std::function<bool(Node *n)> f);
-void iterate(float dt);
-
-extern Node* toplevel;
-extern Array<Node*> all_nodes;
-extern Array<Node*> sorted_nodes;
-extern nix::Shader *shader;
-extern nix::VertexBuffer *vertex_buffer;
 }
 
 #endif /* SRC_GUI_NODE_H_ */

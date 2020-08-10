@@ -9,6 +9,7 @@
 #include "../plugins/PluginManager.h"
 #include "../plugins/Controller.h"
 #include "../gui/Node.h"
+#include "../gui/gui.h"
 #include "../lib/hui/hui.h"
 #include "../lib/math/math.h"
 #include <iostream>
@@ -64,6 +65,8 @@ void InputManager::iterate() {
 
 	glfwPollEvents();
 
+	auto mouse_prev = mouse;
+
 	//mouse = vector(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
 	dmouse = vector(state.dx, state.dy, 0) / 1000.0f;
 	mouse += dmouse;
@@ -76,6 +79,9 @@ void InputManager::iterate() {
 		dmouse = v_0;
 		ignore_velocity = false;
 	}
+
+	// FIXME might be handled after a click event...!
+	gui::handle_mouse_move(mouse_prev, mouse);
 }
 
 bool InputManager::get_key(int k) {
@@ -162,7 +168,7 @@ int mods_decode(int mods) {
 #define SEND_EVENT(NAME) \
 	for (auto *c: plugin_manager.controllers) \
 		c->NAME(); \
-	gui::handle_input(mouse.x, mouse.y, [=](gui::Node *n) { return n->NAME(); });
+	gui::handle_input(mouse, [=](gui::Node *n) { return n->NAME(); });
 
 #define SEND_EVENT_P(NAME, k) \
 	for (auto *c: plugin_manager.controllers) \

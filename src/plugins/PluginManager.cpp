@@ -16,6 +16,7 @@
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
+#include "../gui/gui.h"
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"

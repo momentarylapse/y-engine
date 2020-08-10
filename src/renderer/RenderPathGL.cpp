@@ -11,6 +11,7 @@
 #include "../lib/nix/nix.h"
 
 #include "../helper/PerformanceMonitor.h"
+#include "../gui/gui.h"
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"

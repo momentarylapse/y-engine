@@ -27,6 +27,7 @@
 #include "fx/Light.h"
 #include "fx/ParticleManager.h"
 
+#include "gui/gui.h"
 #include "gui/Picture.h"
 #include "gui/Text.h"
 
