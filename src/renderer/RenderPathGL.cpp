@@ -28,6 +28,8 @@
 
 extern bool SHOW_SHADOW;
 
+nix::Texture *_tex_white;
+
 void break_point() {
 	if (config.debug) {
 		glFlush();
@@ -88,6 +90,8 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	tex_white->overwrite(im);
 	im.create(16, 16, Black);
 	tex_black->overwrite(im);
+
+	_tex_white = tex_white;
 
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_rect(rect(-1,1, -1,1));
@@ -177,21 +181,25 @@ void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer 
 }
 
 void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
+	gui::update();
+
 	nix::SetProjectionOrtho(true);
 	nix::SetCull(CULL_NONE);
 	nix::SetShader(gui::shader);
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
+	nix::SetZ(false, false);
 
 	for (auto *n: gui::all_nodes) {
-		if (n->type == gui::Type::PICTURE or n->type == gui::Type::TEXT) {
+		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 			gui::shader->set_float(gui::shader->get_location("blur"), p->bg_blur);
-			gui::shader->set_color(gui::shader->get_location("color"), p->col);
+			gui::shader->set_color(gui::shader->get_location("color"), p->eff_col);
 			nix::SetTextures({p->texture, source->color_attachments[0]});
-			nix::SetWorldMatrix(matrix::translation(vector(p->area.x1, p->area.y1, p->dz)) * matrix::scale(p->area.width(), p->area.height(), 0));
+			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, 0.999f - p->eff_z)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
 			nix::DrawTriangles(gui::vertex_buffer);
 		}
 	}
+	nix::SetZ(true, true);
 	nix::SetCull(CULL_DEFAULT);
 
 	nix::SetAlpha(ALPHA_NONE);

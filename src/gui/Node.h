@@ -13,15 +13,6 @@
 
 namespace gui {
 
-enum class Type {
-	NODE,
-	HBOX,
-	VBOX,
-	PICTURE,
-	TEXT,
-	MODEL
-};
-
 class Node : public VirtualBase {
 public:
 	Node(const rect &r);
@@ -30,13 +21,26 @@ public:
 	void __init__(const rect &r);
 	virtual void __delete__();
 
-	enum class Align {
+
+	enum class Type {
+		NODE,
+		HBOX,
+		VBOX,
+		PICTURE,
+		TEXT,
+		MODEL
+	};
+
+	enum Align {
 		NONE,
-		FILL,
-		TOP,
-		BOTTOM,
-		LEFT = TOP,
-		RIGHT = BOTTOM
+		FILL_X = 1<<0,
+		FILL_Y = 1<<1,
+		TOP = 1<<2,
+		BOTTOM = 1<<3,
+		LEFT = 1<<4,
+		RIGHT = 1<<5,
+		_FILL_XY = FILL_X | FILL_Y,
+		_TOP_LEFT = TOP | LEFT,
 	};
 
 	Type type;
@@ -44,8 +48,9 @@ public:
 	rect area;
 	rect margin;
 	//rect padding;
-	Align content_align_x, content_align_y;
+	Align align;
 	color col;
+	//float group_alpha;
 	float dz;
 
 	color eff_col;
@@ -55,6 +60,7 @@ public:
 	Node *parent;
 	Array<Node*> children;
 	void add(Node *);
+	void update_geometry(const rect &target);
 
 	virtual void on_iterate(float dt) {}
 	virtual void on_left_button_down() {}
@@ -68,14 +74,14 @@ public:
 
 class HBox : public Node {
 public:
-	HBox(const rect &r);
-	void __init__(const rect &r);
+	HBox();
+	void __init__();
 };
 
 class VBox : public Node {
 public:
-	VBox(const rect &r);
-	void __init__(const rect &r);
+	VBox();
+	void __init__();
 };
 
 	//void init(vulkan::RenderPass *rp);
@@ -86,6 +92,7 @@ public:
 
 	extern Node* toplevel;
 	extern Array<Node*> all_nodes;
+	extern Array<Node*> sorted_nodes;
 	extern nix::Shader *shader;
 	extern nix::VertexBuffer *vertex_buffer;
 }

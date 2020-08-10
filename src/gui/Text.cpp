@@ -89,7 +89,7 @@ namespace gui {
 Text::Text(const string &t, const vector &p, float h) : Picture(rect(p.x, p.x, p.y, p.y), new nix::Texture()) {
 	type = Type::TEXT;
 	dz = p.z;
-	margin = rect(h/4, h/4, h/4, h/4);
+	margin = rect(h/6, h/6, h/6, h/6);
 	font_size = h;
 	set_text(t);
 }

@@ -27,6 +27,9 @@ PluginManager plugin_manager;
 PerformanceMonitor *global_perf_mon;
 
 
+extern nix::Texture *_tex_white;
+
+
 void PluginManager::link_kaba() {
 
 	Camera _cam(v_0, quaternion::ID, rect::ID);
@@ -170,6 +173,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_size("ui.Node", sizeof(gui::Node));
 	Kaba::declare_class_element("ui.Node.area", &gui::Node::area);
 	Kaba::declare_class_element("ui.Node.margin", &gui::Node::margin);
+	Kaba::declare_class_element("ui.Node.align", &gui::Node::align);
 	Kaba::declare_class_element("ui.Node.dz", &gui::Node::dz);
 	Kaba::declare_class_element("ui.Node.color", &gui::Node::col);
 	Kaba::declare_class_element("ui.Node.visible", &gui::Node::visible);
@@ -225,6 +229,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_size("EngineData", sizeof(EngineData));
 	Kaba::declare_class_element("EngineData.physics_enabled", &EngineData::physics_enabled);
 
+	Kaba::link_external("tex_white", &_tex_white);
 	Kaba::link_external("world", &world);
 	Kaba::link_external("cam", &cam);
 	Kaba::link_external("engine", &engine);
