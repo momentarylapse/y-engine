@@ -186,6 +186,21 @@ void update() {
 	}
 }
 
+void handle_input(float mx, float my, std::function<bool(Node *n)> f) {
+	foreachb(Node *n, sorted_nodes) {
+		if (n->eff_area.inside(mx, my)) {
+			if (f(n))
+				return;
+		}
+	}
+}
+
+void iterate(float dt) {
+	for (auto n: all_nodes) {
+		n->on_iterate(dt);
+	}
+}
+
 #if 0
 void render(vulkan::CommandBuffer *cb, const rect &viewport) {
 	cb->set_pipeline(Picture::pipeline);

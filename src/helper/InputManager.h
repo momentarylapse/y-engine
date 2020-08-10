@@ -32,6 +32,7 @@ public:
 	static vector mouse;
 	static vector dmouse;
 	static vector scroll;
+	static bool ignore_velocity;
 
 	static void iterate();
 

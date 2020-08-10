@@ -185,6 +185,8 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("ui.Node.on_leave", &gui::Picture::on_leave, &node);
 	Kaba::link_external_virtual("ui.Node.on_left_button_down", &gui::Picture::on_left_button_down, &node);
 	Kaba::link_external_virtual("ui.Node.on_left_button_up", &gui::Picture::on_left_button_up, &node);
+	Kaba::link_external_virtual("ui.Node.on_middle_button_down", &gui::Picture::on_middle_button_down, &node);
+	Kaba::link_external_virtual("ui.Node.on_middle_button_up", &gui::Picture::on_middle_button_up, &node);
 	Kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Picture::on_right_button_down, &node);
 	Kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Picture::on_right_button_up, &node);
 

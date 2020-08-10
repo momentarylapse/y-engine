@@ -8,12 +8,14 @@
 #include "InputManager.h"
 #include "../plugins/PluginManager.h"
 #include "../plugins/Controller.h"
+#include "../gui/Node.h"
 #include "../lib/hui/hui.h"
 #include "../lib/math/math.h"
 #include <iostream>
 
 InputManager::State InputManager::state;
 InputManager::State InputManager::state_prev;
+bool InputManager::ignore_velocity;
 vector InputManager::mouse;
 vector InputManager::dmouse;
 vector InputManager::scroll;
@@ -34,6 +36,7 @@ void InputManager::init(GLFWwindow *window) {
 	state.reset();
 	state_prev.reset();
 	mouse = dmouse = scroll = v_0;
+	ignore_velocity = true;
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -42,6 +45,7 @@ void InputManager::init(GLFWwindow *window) {
 
 	// init with current position (to avoid dmouse jumps)
 	double xpos, ypos;
+	glfwPollEvents();
 	glfwGetCursorPos(window, &xpos, &ypos);
 	state_prev.mx = state.mx = xpos;
 	state_prev.my = state.my = ypos;
@@ -60,11 +64,18 @@ void InputManager::iterate() {
 
 	glfwPollEvents();
 
-	mouse = vector(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
+	//mouse = vector(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
 	dmouse = vector(state.dx, state.dy, 0) / 1000.0f;
+	mouse += dmouse;
+	mouse.x = clampf(mouse.x, 0, 1);
+	mouse.y = clampf(mouse.y, 0, 1);
 	scroll = vector(state.scroll_x, state.scroll_y, 0);
 
 	state.scroll_x = state.scroll_y = 0;
+	if (ignore_velocity) {
+		dmouse = v_0;
+		ignore_velocity = false;
+	}
 }
 
 bool InputManager::get_key(int k) {
@@ -150,7 +161,8 @@ int mods_decode(int mods) {
 
 #define SEND_EVENT(NAME) \
 	for (auto *c: plugin_manager.controllers) \
-		c->NAME();
+		c->NAME(); \
+	gui::handle_input(mouse.x, mouse.y, [=](gui::Node *n) { return n->NAME(); });
 
 #define SEND_EVENT_P(NAME, k) \
 	for (auto *c: plugin_manager.controllers) \

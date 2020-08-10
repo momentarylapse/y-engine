@@ -225,6 +225,7 @@ public:
 		for (auto *o: world.objects)
 			o->on_iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
+		gui::iterate(engine.elapsed);
 		perf_mon.tick(PMLabel::ITERATE);
 	}
 

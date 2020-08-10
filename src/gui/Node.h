@@ -10,6 +10,7 @@
 
 //#include "../lib/vulkan/vulkan.h"
 #include "../lib/nix/nix.h"
+#include <functional>
 
 namespace gui {
 
@@ -63,10 +64,12 @@ public:
 	void update_geometry(const rect &target);
 
 	virtual void on_iterate(float dt) {}
-	virtual void on_left_button_down() {}
-	virtual void on_left_button_up() {}
-	virtual void on_right_button_down() {}
-	virtual void on_right_button_up() {}
+	virtual bool on_left_button_down() { return false; }
+	virtual bool on_left_button_up() { return false; }
+	virtual bool on_middle_button_down() { return false; }
+	virtual bool on_middle_button_up() { return false; }
+	virtual bool on_right_button_down() { return false; }
+	virtual bool on_right_button_up() { return false; }
 
 	virtual void on_enter() {}
 	virtual void on_leave() {}
@@ -102,6 +105,8 @@ void init(nix::Shader *s);
 void reset();
 //void render(vulkan::CommandBuffer *cb, const rect &viewport);
 void update();
+void handle_input(float mx, float my, std::function<bool(Node *n)> f);
+void iterate(float dt);
 
 extern Node* toplevel;
 extern Array<Node*> all_nodes;
