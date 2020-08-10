@@ -8,22 +8,20 @@
 #ifndef SRC_GUI_PICTURE_H_
 #define SRC_GUI_PICTURE_H_
 
-//#include "../lib/vulkan/vulkan.h"
-#include "../lib/nix/nix.h"
+#include "Node.h"
 
-class Picture {
+namespace gui {
+
+class Picture : public Node {
 public:
-	Picture(const rect &r, float z, nix::Texture *tex, nix::Shader *shader);
-	Picture(const rect &r, float z, nix::Texture *tex);
+	Picture(const rect &r, nix::Texture *tex, nix::Shader *shader);
+	Picture(const rect &r, nix::Texture *tex);
 	virtual ~Picture();
 
-	void __init__(const rect &r, float z, nix::Texture *tex);
+	void __init__(const rect &r, nix::Texture *tex);
 	virtual void __delete__();
 
-	rect dest;
 	rect source;
-	color col;
-	float z;
 
 	float bg_blur;
 
@@ -42,17 +40,6 @@ public:
 	static vulkan::RenderPass *render_pass;*/
 };
 
-namespace gui {
-	//void init(vulkan::RenderPass *rp);
-	void init(nix::Shader *s);
-	void reset();
-	//void render(vulkan::CommandBuffer *cb, const rect &viewport);
-	void update();
-	void add(Picture *p);
-
-	extern Array<Picture*> pictures;
-	extern nix::Shader *shader;
-	extern nix::VertexBuffer *vertex_buffer;
 }
 
 #endif /* SRC_GUI_PICTURE_H_ */

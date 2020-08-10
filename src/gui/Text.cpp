@@ -83,9 +83,13 @@ void render_text(const string &str, Image &im) {
 	cairo_render_text(font_name, font_size, str, im);
 }
 
+namespace gui {
 
 
-Text::Text(const string &t, const vector &p, float h) : Picture(rect(p.x, p.x, p.y, p.y), p.z, new nix::Texture()) {
+Text::Text(const string &t, const vector &p, float h) : Picture(rect(p.x, p.x, p.y, p.y), new nix::Texture()) {
+	type = Type::TEXT;
+	dz = p.z;
+	margin = rect(h/4, h/4, h/4, h/4);
 	font_size = h;
 	set_text(t);
 }
@@ -111,11 +115,13 @@ void Text::rebuild() {
 
 	float h = font_size * text.explode("\n").num;
 	float w = h * (float)im.width / (float)im.height / 1.33f;
-	dest.x2 = dest.x1 + w;
-	dest.y2 = dest.y1 + h;
+	area.x2 = area.x1 + w;
+	area.y2 = area.y1 + h;
 }
 
 void Text::set_text(const string &t) {
 	text = t;
 	rebuild();
+}
+
 }

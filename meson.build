@@ -56,6 +56,7 @@ sources = [
 	'src/fx/Light.cpp',
 	'src/fx/Particle.cpp',
 	'src/fx/ParticleManager.cpp',
+	'src/gui/Node.cpp',
 	'src/gui/Picture.cpp',
 	'src/gui/Text.cpp',
 	'src/helper/InputManager.cpp',

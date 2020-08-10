@@ -23,12 +23,15 @@ struct UBOMatrices {
 	alignas(16) matrix proj;
 };
 
-Picture::Picture(const rect &r, float _z, nix::Texture *tex, nix::Shader *_shader) {
-	dest = r;
-	z = _z;
+
+namespace gui {
+
+Picture::Picture(const rect &r, nix::Texture *tex, nix::Shader *_shader) :
+	Node(r)
+{
+	type = Type::PICTURE;
 	source = rect::ID;
 	texture = tex;
-	col = White;
 	bg_blur = 0;
 #if 0
 	ubo = new vulkan::UniformBuffer(sizeof(UBOMatrices));
@@ -42,7 +45,7 @@ Picture::Picture(const rect &r, float _z, nix::Texture *tex, nix::Shader *_shade
 #endif
 }
 
-Picture::Picture(const rect &r, float _z, nix::Texture *tex) : Picture(r, _z, tex, nullptr) {
+Picture::Picture(const rect &r, nix::Texture *tex) : Picture(r, tex, nullptr) {
 }
 
 Picture::~Picture() {
@@ -59,96 +62,13 @@ Picture::~Picture() {
 	//dset->set({ubo}, {texture});
 //}
 
-void Picture::__init__(const rect &r, float z, nix::Texture *tex) {
-	new(this) Picture(r, z, tex);
+void Picture::__init__(const rect &r, nix::Texture *tex) {
+	new(this) Picture(r, tex);
 }
 
 void Picture::__delete__() {
 	this->~Picture();
 }
 
-namespace gui {
-
-nix::Shader *shader = nullptr;
-nix::VertexBuffer *vertex_buffer = nullptr;
-Array<Picture*> pictures;
-
-
-void init(nix::Shader *s) {
-	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
-	vertex_buffer->create_rect(rect::ID);
-
-	shader = s;
-}
-
-/*vulkan::RenderPass *rp) {
-	Picture::render_pass = rp;
-	Picture::shader = vulkan::Shader::load("2d.shader");
-	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 0, 1);
-	Picture::pipeline->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-	Picture::pipeline->set_z(false, false);
-	Picture::pipeline->rebuild();
-
-	Picture::vertex_buffer = new vulkan::VertexBuffer();
-	Array<vulkan::Vertex1> vertices;
-	vertices.add({vector(0,0,0), vector::EZ, 0,0});
-	vertices.add({vector(0,1,0), vector::EZ, 0,1});
-	vertices.add({vector(1,0,0), vector::EZ, 1,0});
-	vertices.add({vector(1,1,0), vector::EZ, 1,1});
-	Picture::vertex_buffer->build1i(vertices, {0,2,1, 1,2,3});
-}*/
-
-void reset() {
-	for (auto *p: pictures)
-		delete p;
-	pictures.clear();
-}
-
-void add(Picture *p) {
-	pictures.add(p);
-}
-
-void update() {
-	for (auto *p: pictures) {
-		//p->rebuild();
-	}
-}
-
-#if 0
-void render(vulkan::CommandBuffer *cb, const rect &viewport) {
-	cb->set_pipeline(Picture::pipeline);
-	cb->set_viewport(viewport);
-
-	for (auto *p: pictures) {
-		if (p->user_shader)
-			continue;
-
-		UBOMatrices u;
-		u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
-		u.view = matrix::ID;
-		u.model = matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1);
-		p->ubo->update(&u);
-
-		cb->bind_descriptor_set(0, p->dset);
-		cb->draw(Picture::vertex_buffer);
-	}
-
-	for (auto *p: pictures) {
-		if (!p->user_shader)
-			continue;
-		cb->set_pipeline(p->user_pipeline);
-		cb->set_viewport(viewport);
-
-		UBOMatrices u;
-		u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
-		u.view = matrix::ID;
-		u.model = matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1);
-		p->ubo->update(&u);
-
-		cb->bind_descriptor_set(0, p->dset);
-		cb->draw(Picture::vertex_buffer);
-	}
-}
-#endif
 
 }

@@ -83,7 +83,7 @@ public:
 
 	PerformanceMonitor perf_mon;
 
-	Text *fps_display;
+	gui::Text *fps_display;
 
 	void init(const Array<string> &arg) {
 		config.load();
@@ -140,8 +140,8 @@ public:
 		CameraReset();
 		GodLoadWorld(config.default_world);
 
-		fps_display = new Text("Hallo, kleiner Test äöü", vector(0.02f,0.02f,0), 0.03f);
-		gui::add(fps_display);
+		fps_display = new gui::Text("Hallo, kleiner Test äöü", vector(0.02f,0.02f,0), 0.03f);
+		gui::toplevel->add(fps_display);
 #if HAS_LIB_VULKAN
 		if (SHOW_GBUFFER) {
 			if (auto *rpd = dynamic_cast<RenderPathDeferred*>(render_path)) {
@@ -155,7 +155,7 @@ public:
 #endif
 		if (SHOW_SHADOW) {
 			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path))
-				gui::add(new Picture(rect(0, 0.2f, 0.8f, 1.0f), 0, rpv->fb_shadow->depth_buffer));
+				gui::toplevel->add(new gui::Picture(rect(0, 0.2f, 0.8f, 1.0f), rpv->fb_shadow->depth_buffer));
 		}
 
 		for (auto &s: world.scripts)

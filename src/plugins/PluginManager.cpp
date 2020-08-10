@@ -16,6 +16,7 @@
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
+#include "../gui/Node.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
 #include "../helper/InputManager.h"
@@ -165,23 +166,40 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Beam.length", &Beam::length);
 	Kaba::link_external_class_func("Beam.__init__", &Beam::__init_beam__);
 
+	gui::Node node(rect::ID);
+	Kaba::declare_class_size("ui.Node", sizeof(gui::Node));
+	Kaba::declare_class_element("ui.Node.area", &gui::Node::area);
+	Kaba::declare_class_element("ui.Node.margin", &gui::Node::margin);
+	Kaba::declare_class_element("ui.Node.dz", &gui::Node::dz);
+	Kaba::declare_class_element("ui.Node.color", &gui::Node::col);
+	Kaba::declare_class_element("ui.Node.visible", &gui::Node::visible);
+	Kaba::link_external_class_func("ui.Node.__init__", &gui::Picture::__init__);
+	Kaba::link_external_virtual("ui.Node.__delete__", &gui::Picture::__delete__, &node);
+	Kaba::link_external_class_func("ui.Node.add", &gui::Picture::add);
+	Kaba::link_external_virtual("ui.Node.on_iterate", &gui::Picture::on_iterate, &node);
+	Kaba::link_external_virtual("ui.Node.on_enter", &gui::Picture::on_enter, &node);
+	Kaba::link_external_virtual("ui.Node.on_leave", &gui::Picture::on_leave, &node);
+	Kaba::link_external_virtual("ui.Node.on_left_button_down", &gui::Picture::on_left_button_down, &node);
+	Kaba::link_external_virtual("ui.Node.on_left_button_up", &gui::Picture::on_left_button_up, &node);
+	Kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Picture::on_right_button_down, &node);
+	Kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Picture::on_right_button_up, &node);
 
-	Kaba::declare_class_size("ui.Picture", sizeof(Picture));
-	Kaba::declare_class_element("ui.Picture.dest", &Picture::dest);
-	Kaba::declare_class_element("ui.Picture.source", &Picture::source);
-	Kaba::declare_class_element("ui.Picture.z", &Picture::z);
-	Kaba::declare_class_element("ui.Picture.texture", &Picture::texture);
-	Kaba::declare_class_element("ui.Picture.blur", &Picture::bg_blur);
-	Kaba::declare_class_element("ui.Picture.color", &Picture::col);
-	Kaba::link_external_class_func("ui.Picture.__init__", &Picture::__init__);
-	Kaba::link_external_class_func("ui.Picture.__delete__", &Picture::__delete__);
+	Kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
+	Kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
+	Kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
+	Kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
+	Kaba::link_external_class_func("ui.Picture.__init__", &gui::Picture::__init__);
+	Kaba::link_external_class_func("ui.Picture.__delete__", &gui::Picture::__delete__);
 
-	Kaba::declare_class_size("ui.Text", sizeof(Text));
-	Kaba::declare_class_element("ui.Text.font_size", &Text::font_size);
-	Kaba::declare_class_element("ui.Text.text", &Text::text);
-	Kaba::link_external_class_func("ui.Text.__init__", &Text::__init__);
-	Kaba::link_external_class_func("ui.Text.__delete__", &Text::__delete__);
-	Kaba::link_external_class_func("ui.Text.set_text", &Text::set_text);
+	Kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
+	Kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
+
+	Kaba::declare_class_size("ui.Text", sizeof(gui::Text));
+	Kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
+	Kaba::declare_class_element("ui.Text.text", &gui::Text::text);
+	Kaba::link_external_class_func("ui.Text.__init__", &gui::Text::__init__);
+	Kaba::link_external_class_func("ui.Text.__delete__", &gui::Text::__delete__);
+	Kaba::link_external_class_func("ui.Text.set_text", &gui::Text::set_text);
 
 	Kaba::declare_class_size("Link", sizeof(Link));
 	Kaba::declare_class_element("Link.a", &Link::a);
@@ -193,7 +211,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external("ui.key", (void*)&InputManager::get_key);
 	Kaba::link_external("ui.key_down", (void*)&InputManager::get_key_down);
 	Kaba::link_external("ui.key_up", (void*)&InputManager::get_key_up);
-	Kaba::link_external("ui.add", (void*)&gui::add);
+	Kaba::link_external("ui.toplevel", &gui::toplevel);
 	Kaba::link_external("ui.mouse", &InputManager::mouse);
 	Kaba::link_external("ui.dmouse", &InputManager::dmouse);
 	Kaba::link_external("ui.scroll", &InputManager::scroll);

@@ -11,6 +11,7 @@
 #include "../lib/nix/nix.h"
 
 #include "../helper/PerformanceMonitor.h"
+#include "../gui/Node.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
 #include "../fx/Light.h"
@@ -181,12 +182,15 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	nix::SetShader(gui::shader);
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 
-	for (auto *p: gui::pictures) {
-		gui::shader->set_float(gui::shader->get_location("blur"), p->bg_blur);
-		gui::shader->set_color(gui::shader->get_location("color"), p->col);
-		nix::SetTextures({p->texture, source->color_attachments[0]});
-		nix::SetWorldMatrix(matrix::translation(vector(p->dest.x1, p->dest.y1, p->z)) * matrix::scale(p->dest.width(), p->dest.height(), 0));
-		nix::DrawTriangles(gui::vertex_buffer);
+	for (auto *n: gui::all_nodes) {
+		if (n->type == gui::Type::PICTURE or n->type == gui::Type::TEXT) {
+			auto *p = (gui::Picture*)n;
+			gui::shader->set_float(gui::shader->get_location("blur"), p->bg_blur);
+			gui::shader->set_color(gui::shader->get_location("color"), p->col);
+			nix::SetTextures({p->texture, source->color_attachments[0]});
+			nix::SetWorldMatrix(matrix::translation(vector(p->area.x1, p->area.y1, p->dz)) * matrix::scale(p->area.width(), p->area.height(), 0));
+			nix::DrawTriangles(gui::vertex_buffer);
+		}
 	}
 	nix::SetCull(CULL_DEFAULT);
 
@@ -341,7 +345,7 @@ void RenderPathGL::set_material(Material *m) {
 		nix::SetAlpha(ALPHA_NONE);
 
 	set_textures(m->textures);
-	s->set_data(s->get_location("emission_factor"), &m->emission.r, 16);
+	s->set_color(s->get_location("emission_factor"), m->emission);
 }
 void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 	auto tt = tex;
