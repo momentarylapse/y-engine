@@ -92,7 +92,7 @@ void Camera::__init__(const vector &_pos, const quaternion &_ang, const rect &_d
 }
 
 void Camera::__delete__() {
-	this->~Camera();
+	this->Camera::~Camera();
 }
 
 

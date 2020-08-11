@@ -86,15 +86,17 @@ void render_text(const string &str, Image &im) {
 namespace gui {
 
 
-Text::Text(const string &t, float h) : Picture(rect::ID, new nix::Texture()) {
+Text::Text(const string &t, float h) : Picture(rect::ID, nullptr) {
 	type = Type::TEXT;
 	margin = rect(h/6, h/6, h/6, h/6);
 	font_size = h;
-	set_text(t);
+	if (t != ":::fake:::")
+		set_text(t);
 }
 
 Text::~Text() {
-	delete texture;
+	if (texture)
+		delete texture;
 }
 
 void Text::__init__(const string &t, float h) {
@@ -102,12 +104,13 @@ void Text::__init__(const string &t, float h) {
 }
 
 void Text::__delete__() {
-	this->~Text();
+	this->Text::~Text();
 }
 
 void Text::rebuild() {
 	Image im;
 	render_text(text, im);
+	texture = new nix::Texture();
 
 	texture->overwrite(im);
 	//dset->set({ubo}, {texture});

@@ -33,6 +33,6 @@ void Particle::__init__(const vector &p, float r, nix::Texture *t, float ttl) {
 }
 
 void Particle::__delete__() {
-	this->~Particle();
+	this->Particle::~Particle();
 }
 

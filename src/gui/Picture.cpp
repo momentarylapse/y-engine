@@ -67,7 +67,7 @@ void Picture::__init__(const rect &r, nix::Texture *tex) {
 }
 
 void Picture::__delete__() {
-	this->~Picture();
+	this->Picture::~Picture();
 }
 
 

@@ -16,6 +16,6 @@ void Controller::__init__() {
 }
 
 void Controller::__delete__() {
-	this->~Controller();
+	this->Controller::~Controller();
 }
 

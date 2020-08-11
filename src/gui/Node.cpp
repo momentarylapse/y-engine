@@ -35,7 +35,7 @@ void Node::__init__(const rect &r) {
 }
 
 void Node::__delete__() {
-	this->~Node();
+	this->Node::~Node();
 }
 
 void Node::add(Node *n) {

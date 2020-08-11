@@ -12,9 +12,6 @@ Beam::Beam(const vector &_pos, const vector &_length, float _r, nix::Texture *_t
 	length = _length;
 }
 
-Beam::~Beam() {
-}
-
 void Beam::__init_beam__(const vector &pos, const vector &length, float r, nix::Texture *tex, float ttl) {
 	new(this) Beam(pos, length, r, tex, ttl);
 }

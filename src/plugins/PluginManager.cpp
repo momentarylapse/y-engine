@@ -191,21 +191,23 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Picture::on_right_button_down, &node);
 	Kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Picture::on_right_button_up, &node);
 
+	gui::Picture picture(rect::ID, nullptr);
 	Kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
 	Kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
 	Kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
 	Kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
 	Kaba::link_external_class_func("ui.Picture.__init__", &gui::Picture::__init__);
-	Kaba::link_external_class_func("ui.Picture.__delete__", &gui::Picture::__delete__);
+	Kaba::link_external_virtual("ui.Picture.__delete__", &gui::Picture::__delete__, &picture);
 
 	Kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
 	Kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
 
+	gui::Text text(":::fake:::", 0);
 	Kaba::declare_class_size("ui.Text", sizeof(gui::Text));
 	Kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
 	Kaba::declare_class_element("ui.Text.text", &gui::Text::text);
 	Kaba::link_external_class_func("ui.Text.__init__", &gui::Text::__init__);
-	Kaba::link_external_class_func("ui.Text.__delete__", &gui::Text::__delete__);
+	Kaba::link_external_virtual("ui.Text.__delete__", &gui::Text::__delete__, &text);
 	Kaba::link_external_class_func("ui.Text.set_text", &gui::Text::set_text);
 
 	Kaba::declare_class_size("Link", sizeof(Link));

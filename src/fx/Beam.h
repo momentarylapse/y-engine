@@ -13,7 +13,6 @@
 class Beam : public Particle{
 public:
 	Beam(const vector &pos, const vector &length, float r, nix::Texture *tex, float ttl);
-	virtual ~Beam();
 
 	void __init_beam__(const vector &pos, const vector &length, float r, nix::Texture *tex, float ttl);
 

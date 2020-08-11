@@ -919,8 +919,7 @@ Model::~Model()
 		delete(_template);
 }
 
-void Model::__delete__()
-{
+void Model::__delete__() {
 	this->Model::~Model();
 }
 
