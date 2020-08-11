@@ -166,9 +166,11 @@ int mods_decode(int mods) {
 }
 
 #define SEND_EVENT(NAME) \
+	{ \
 	for (auto *c: plugin_manager.controllers) \
 		c->NAME(); \
-	gui::handle_input(mouse, [=](gui::Node *n) { return n->NAME(); });
+	gui::handle_input(mouse, [=](gui::Node *n) { return n->NAME(); }); \
+	}
 
 #define SEND_EVENT_P(NAME, k) \
 	for (auto *c: plugin_manager.controllers) \
