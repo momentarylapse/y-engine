@@ -69,6 +69,14 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Model.Mesh.Sub.skin_vertex", &SubMesh::skin_vertex);
 	Kaba::declare_class_element("Model.Mesh.Sub.normal", &SubMesh::normal);
 
+	Kaba::declare_class_size("Model.Bone", sizeof(Bone));
+	Kaba::declare_class_element("Model.Bone.parent", &Bone::parent);
+	Kaba::declare_class_element("Model.Bone.pos", &Bone::pos);
+	Kaba::declare_class_element("Model.Bone.model", &Bone::model);
+	Kaba::declare_class_element("Model.Bone.dmatrix", &Bone::dmatrix);
+	Kaba::declare_class_element("Model.Bone.cur_ang", &Bone::cur_ang);
+	Kaba::declare_class_element("Model.Bone.cur_pos", &Bone::cur_pos);
+
 	Model model;
 	Kaba::declare_class_size("Model", sizeof(Model));
 	Kaba::declare_class_element("Model.pos", &Model::pos);
@@ -78,7 +86,10 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Model.mesh", &Model::mesh);
 	Kaba::declare_class_element("Model.materials", &Model::material);
 	Kaba::declare_class_element("Model.bones", &Model::bone);
-	//Kaba::declare_class_element("Model.mass", &Model::physics_data.mass);
+	Kaba::declare_class_element("Model.matrix", &Model::_matrix);
+	Kaba::declare_class_element("Model.var", (char*)&model.script_data.var - (char*)&model);
+	Kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
+	Kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
 	Kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
 	Kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	Kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
@@ -125,6 +136,8 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("Controller.on_init", &Controller::on_init, &con);
 	Kaba::link_external_virtual("Controller.on_delete", &Controller::on_delete, &con);
 	Kaba::link_external_virtual("Controller.on_iterate", &Controller::on_iterate, &con);
+	Kaba::link_external_virtual("Controller.on_iterate_pre", &Controller::on_iterate_pre, &con);
+	Kaba::link_external_virtual("Controller.on_draw_pre", &Controller::on_draw_pre, &con);
 	Kaba::link_external_virtual("Controller.on_input", &Controller::on_input, &con);
 	Kaba::link_external_virtual("Controller.on_key", &Controller::on_key, &con);
 	Kaba::link_external_virtual("Controller.on_key_down", &Controller::on_key_down, &con);
@@ -135,7 +148,6 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("Controller.on_middle_button_up", &Controller::on_middle_button_up, &con);
 	Kaba::link_external_virtual("Controller.on_right_button_down", &Controller::on_right_button_down, &con);
 	Kaba::link_external_virtual("Controller.on_right_button_up", &Controller::on_right_button_up, &con);
-	Kaba::link_external_virtual("Controller.before_draw", &Controller::before_draw, &con);
 
 
 	Kaba::declare_class_size("Light", sizeof(Light));
@@ -196,17 +208,19 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
 	Kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
 	Kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
-	Kaba::link_external_class_func("ui.Picture.__init__", &gui::Picture::__init__);
+	Kaba::link_external_class_func("ui.Picture.__init__:2", &gui::Picture::__init2__);
+	Kaba::link_external_class_func("ui.Picture.__init__:3", &gui::Picture::__init3__);
 	Kaba::link_external_virtual("ui.Picture.__delete__", &gui::Picture::__delete__, &picture);
 
 	Kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
 	Kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
 
-	gui::Text text(":::fake:::", 0);
+	gui::Text text(":::fake:::", 0, 0, 0);
 	Kaba::declare_class_size("ui.Text", sizeof(gui::Text));
 	Kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
 	Kaba::declare_class_element("ui.Text.text", &gui::Text::text);
-	Kaba::link_external_class_func("ui.Text.__init__", &gui::Text::__init__);
+	Kaba::link_external_class_func("ui.Text.__init__:2", &gui::Text::__init2__);
+	Kaba::link_external_class_func("ui.Text.__init__:4", &gui::Text::__init4__);
 	Kaba::link_external_virtual("ui.Text.__delete__", &gui::Text::__delete__, &text);
 	Kaba::link_external_class_func("ui.Text.set_text", &gui::Text::set_text);
 

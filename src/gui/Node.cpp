@@ -75,8 +75,8 @@ void Node::update_geometry(const rect &target) {
 			eff_area.x1 = target.x1 + area.x1 + margin.x1;
 			eff_area.x2 = target.x1 + area.x2 + margin.x1;
 		} else if (align & Align::RIGHT) {
-			eff_area.x1 = target.x2 + area.x1 - margin.x2;
-			eff_area.x2 = target.x2 + area.x2 - margin.x2;
+			eff_area.x1 = target.x2 - area.x2 - margin.x2;
+			eff_area.x2 = target.x2 - area.x1 - margin.x2;
 		}
 
 		if (align & Align::FILL_Y) {
@@ -86,8 +86,8 @@ void Node::update_geometry(const rect &target) {
 			eff_area.y1 = target.y1 + area.y1 + margin.y1;
 			eff_area.y2 = target.y1 + area.y2 + margin.y1;
 		} else if (align & Align::BOTTOM) {
-			eff_area.y1 = target.y2 + area.y1 - margin.y2;
-			eff_area.y2 = target.y2 + area.y2 - margin.y2;
+			eff_area.y1 = target.y2 - area.y2 - margin.y2;
+			eff_area.y2 = target.y2 - area.y1 - margin.y2;
 		}
 
 		//eff_area = rect_sub_margin(eff_area, margin);

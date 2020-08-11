@@ -18,7 +18,6 @@ public:
 	void __init__();
 	void __delete__() override;
 
-	virtual void _cdecl before_draw() {}
 	virtual void _cdecl on_input() {}
 	virtual void _cdecl on_key_down(int k) {}
 	virtual void _cdecl on_key_up(int k) {}
@@ -29,6 +28,8 @@ public:
 	virtual void _cdecl on_middle_button_up() {}
 	virtual void _cdecl on_right_button_down() {}
 	virtual void _cdecl on_right_button_up() {}
+	virtual void _cdecl on_iterate_pre(float dt) {}
+	virtual void _cdecl on_draw_pre() {}
 };
 
 #endif /* SRC_PLUGINS_CONTROLLER_H_ */

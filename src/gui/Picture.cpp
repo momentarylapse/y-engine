@@ -26,11 +26,11 @@ struct UBOMatrices {
 
 namespace gui {
 
-Picture::Picture(const rect &r, nix::Texture *tex, nix::Shader *_shader) :
+Picture::Picture(const rect &r, nix::Texture *tex, const rect &s, nix::Shader *_shader) :
 	Node(r)
 {
 	type = Type::PICTURE;
-	source = rect::ID;
+	source = s;
 	texture = tex;
 	bg_blur = 0;
 #if 0
@@ -45,7 +45,7 @@ Picture::Picture(const rect &r, nix::Texture *tex, nix::Shader *_shader) :
 #endif
 }
 
-Picture::Picture(const rect &r, nix::Texture *tex) : Picture(r, tex, nullptr) {
+Picture::Picture(const rect &r, nix::Texture *tex, const rect &s) : Picture(r, tex, s, nullptr) {
 }
 
 Picture::~Picture() {
@@ -62,8 +62,13 @@ Picture::~Picture() {
 	//dset->set({ubo}, {texture});
 //}
 
-void Picture::__init__(const rect &r, nix::Texture *tex) {
+void Picture::__init2__(const rect &r, nix::Texture *tex) {
 	new(this) Picture(r, tex);
+}
+
+void Picture::__init3__(const rect &r, nix::Texture *tex, const rect &s) {
+	new(this) Picture(r, tex, s);
+	source = s;
 }
 
 void Picture::__delete__() {

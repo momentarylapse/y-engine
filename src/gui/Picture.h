@@ -14,11 +14,12 @@ namespace gui {
 
 class Picture : public Node {
 public:
-	Picture(const rect &r, nix::Texture *tex, nix::Shader *shader);
-	Picture(const rect &r, nix::Texture *tex);
+	Picture(const rect &r, nix::Texture *tex, const rect &source, nix::Shader *shader);
+	Picture(const rect &r, nix::Texture *tex, const rect &source = rect::ID);
 	virtual ~Picture();
 
-	void __init__(const rect &r, nix::Texture *tex);
+	void __init2__(const rect &r, nix::Texture *tex);
+	void __init3__(const rect &r, nix::Texture *tex, const rect &source);
 	virtual void __delete__();
 
 	rect source;

@@ -86,9 +86,9 @@ void render_text(const string &str, Image &im) {
 namespace gui {
 
 
-Text::Text(const string &t, float h) : Picture(rect::ID, nullptr) {
+Text::Text(const string &t, float h, float x, float y) : Picture(rect::ID, nullptr) {
 	type = Type::TEXT;
-	margin = rect(h/6, h/6, h/6, h/6);
+	margin = rect(x, h/6, y, h/6);
 	font_size = h;
 	if (t != ":::fake:::")
 		set_text(t);
@@ -99,8 +99,12 @@ Text::~Text() {
 		delete texture;
 }
 
-void Text::__init__(const string &t, float h) {
-	new(this) Text(t, h);
+void Text::__init2__(const string &t, float h) {
+	new(this) Text(t, h, h/6, h/6);
+}
+
+void Text::__init4__(const string &t, float h, float x, float y) {
+	new(this) Text(t, h, x, y);
 }
 
 void Text::__delete__() {
