@@ -34,8 +34,6 @@ public:
 	float detail_factor_inv;
 	int shadow_level;
 	bool shadow_lower_detail;
-	Light *shadow_light;
-	color shadow_color;
 	
 	int multisampling;
 	bool CullingEnabled, SortingEnabled, ZBufferEnabled;
@@ -49,6 +47,9 @@ public:
 	
 	float fps_max, fps_min;
 	float time_scale, elapsed, elapsed_rt;
+
+	// the "real world" aspect ratio of the output image (screen or window)
+	float physical_aspect_ratio;
 
 	bool first_frame;
 	bool game_running;

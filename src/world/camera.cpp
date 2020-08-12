@@ -117,6 +117,7 @@ void Camera::set_view(float aspect_ratio) {
 	im_all = m_all.inverse();
 }
 
+// into [0:R]x[0:1] system!
 vector Camera::project(const vector &v) {
 	//auto vv = m_all.project(v);
 	float x = m_all._00 * v.x + m_all._01 * v.y + m_all._02 * v.z + m_all._03;
@@ -125,12 +126,12 @@ vector Camera::project(const vector &v) {
 	float w = m_all._30 * v.x + m_all._31 * v.y + m_all._32 * v.z + m_all._33;
 	if (w == 0)
 		return vector(0, 0, -1);
-	return vector(x/w * 0.5f + 0.5f, 0.5f - y/w * 0.5f, z/w * 0.5f + 0.5f);
+	return vector((x/w * 0.5f + 0.5f) * engine.physical_aspect_ratio, 0.5f + y/w * 0.5f, z/w * 0.5f + 0.5f);
 }
 
 vector Camera::unproject(const vector &v) {
-	float xx = (v.x - 0.5f) * 2;
-	float yy = (0.5f - v.y) * 2;
+	float xx = (v.x/engine.physical_aspect_ratio - 0.5f) * 2;
+	float yy = (v.y - 0.5f) * 2;
 	float zz = (v.z - 0.5f) * 2;
 	float x = im_all._00 * xx + im_all._01 * yy + im_all._02 * zz + im_all._03;
 	float y = im_all._10 * xx + im_all._11 * yy + im_all._12 * zz + im_all._13;

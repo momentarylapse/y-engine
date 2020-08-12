@@ -600,7 +600,7 @@ Object *World::create_object(const Path &filename, const string &name, const vec
 	if (engine.resetting_game)
 		throw Exception("CreateObject during game reset");
 
-	if (filename == "")
+	if (filename.is_empty())
 		throw Exception("CreateObject: empty filename");
 
 	//msg_write(on);
@@ -858,5 +858,17 @@ void World::add_light(Light *l) {
 
 void World::add_particle(Particle *p) {
 	particle_manager->add(p);
+}
+
+
+void World::shift_all(const vector &dpos) {
+	for (auto *t: terrains)
+		t->pos += dpos;
+	for (auto *o: objects)
+		o->pos += dpos;
+}
+
+vector World::get_g(const vector &pos) const {
+	return gravity;
 }
 

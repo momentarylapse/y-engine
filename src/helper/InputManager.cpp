@@ -12,12 +12,14 @@
 #include "../gui/gui.h"
 #include "../lib/hui/hui.h"
 #include "../lib/math/math.h"
+#include "../meta.h"
 #include <iostream>
 
 InputManager::State InputManager::state;
 InputManager::State InputManager::state_prev;
 bool InputManager::ignore_velocity;
 vector InputManager::mouse;
+vector InputManager::mouse01;
 vector InputManager::dmouse;
 vector InputManager::scroll;
 
@@ -36,7 +38,7 @@ void InputManager::State::reset() {
 void InputManager::init(GLFWwindow *window) {
 	state.reset();
 	state_prev.reset();
-	mouse = dmouse = scroll = v_0;
+	mouse = mouse01 = dmouse = scroll = v_0;
 	ignore_velocity = true;
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -65,13 +67,14 @@ void InputManager::iterate() {
 
 	glfwPollEvents();
 
-	auto mouse_prev = mouse;
+	auto mouse01_prev = mouse01;
 
 	//mouse = vector(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
-	dmouse = vector(state.dx, state.dy, 0) / 1000.0f;
+	dmouse = vector(state.dx, state.dy, 0) / 500.0f;
 	mouse += dmouse;
-	mouse.x = clampf(mouse.x, 0, 1);
+	mouse.x = clampf(mouse.x, 0, engine.physical_aspect_ratio);
 	mouse.y = clampf(mouse.y, 0, 1);
+	mouse01 = vector(mouse.x / engine.physical_aspect_ratio, mouse.y, 0);
 	scroll = vector(state.scroll_x, state.scroll_y, 0);
 
 	state.scroll_x = state.scroll_y = 0;
@@ -81,7 +84,7 @@ void InputManager::iterate() {
 	}
 
 	// FIXME might be handled after a click event...!
-	gui::handle_mouse_move(mouse_prev, mouse);
+	gui::handle_mouse_move(mouse01_prev, mouse01);
 }
 
 bool InputManager::get_key(int k) {
@@ -113,6 +116,9 @@ int key_decode(int key) {
 	for (int i=0; i<26; i++)
 		if (key == GLFW_KEY_A + i)
 			return hui::KEY_A + i;
+	for (int i=0; i<12; i++)
+		if (key == GLFW_KEY_F1 + i)
+			return hui::KEY_F1 + i;
 	if (key == GLFW_KEY_ENTER)
 				return hui::KEY_RETURN;
 	if (key == GLFW_KEY_SPACE)
@@ -167,9 +173,9 @@ int mods_decode(int mods) {
 
 #define SEND_EVENT(NAME) \
 	{ \
-	for (auto *c: plugin_manager.controllers) \
-		c->NAME(); \
-	gui::handle_input(mouse, [=](gui::Node *n) { return n->NAME(); }); \
+		for (auto *c: plugin_manager.controllers) \
+			c->NAME(); \
+		gui::handle_input(mouse01, [=](gui::Node *n) { return n->NAME(); }); \
 	}
 
 #define SEND_EVENT_P(NAME, k) \

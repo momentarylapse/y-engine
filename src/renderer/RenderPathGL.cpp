@@ -190,13 +190,15 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 	nix::SetZ(false, false);
 
-	for (auto *n: gui::all_nodes) {
+	for (auto *n: gui::sorted_nodes) {
+		if (!n->visible)
+			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 			gui::shader->set_float(gui::shader->get_location("blur"), p->bg_blur);
 			gui::shader->set_color(gui::shader->get_location("color"), p->eff_col);
 			nix::SetTextures({p->texture, source->color_attachments[0]});
-			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, 0.999f - p->eff_z/1000)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
+			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
 			nix::DrawTriangles(gui::vertex_buffer);
 		}
 	}

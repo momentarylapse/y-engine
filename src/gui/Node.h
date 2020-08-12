@@ -39,13 +39,18 @@ public:
 		BOTTOM = 1<<3,
 		LEFT = 1<<4,
 		RIGHT = 1<<5,
+		OFFSET = 1<<6,
+		NONSQUARE = 1<<7,
+		CENTER_H = 1<<8,
+		CENTER_V = 1<<9,
 		_FILL_XY = FILL_X | FILL_Y,
 		_TOP_LEFT = TOP | LEFT,
+		_TOP_LEFT_OFFSET = TOP | LEFT | OFFSET,
 	};
 
 	Type type;
 	bool visible;
-	rect area;
+	rect area; // coord system depends on align!
 	rect margin;
 	//rect padding;
 	Align align;
@@ -54,7 +59,7 @@ public:
 	float dz;
 
 	color eff_col;
-	rect eff_area;
+	rect eff_area; // [0:1]x[0:1] system!
 	float eff_z;
 
 	Node *parent;

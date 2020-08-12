@@ -178,6 +178,9 @@ public:
 
 	void iterate(float dt);
 
+	void shift_all(const vector &dpos);
+	vector get_g(const vector &pos) const;
+
 
 	float speed_of_sound;
 
@@ -226,15 +229,12 @@ void GodEnd();
 bool GodLoadWorld(const Path &filename);
 
 void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
-void _cdecl WorldShiftAll(const vector &dpos);
 //void DoSounds();
 void SetSoundState(bool paused,float scale,bool kill,bool restart);
-vector _cdecl GetG(vector &pos);
 void GodCalcMove(float dt);
 void GodDoAnimation(float dt); // debug
 void GodIterateObjects(float dt);
 void GodDoCollisionDetection();
-void GodDraw();
 Object *_cdecl GetObjectByName(const string &name);
 bool _cdecl NextObject(Object **o);
 void _cdecl GodObjectEnsureExistence(int id);

@@ -7,6 +7,8 @@
 
 #include "gui.h"
 #include "Node.h"
+#include "../meta.h"
+#include <stdio.h>
 
 namespace gui {
 
@@ -60,14 +62,16 @@ void update() {
 	//std::sort(sorted_nodes.begin(), sorted_nodes.end(), [](Node *a, Node *b) { return a->eff_z < b->eff_z; });
 	for (int i=0; i<sorted_nodes.num; i++)
 		for (int j=i+1; j<sorted_nodes.num; j++)
-			if (sorted_nodes[i]->eff_z < sorted_nodes[j]->eff_z)
+			if (sorted_nodes[i]->eff_z > sorted_nodes[j]->eff_z)
 				sorted_nodes.swap(i, j);
+
 
 	for (auto *p: all_nodes) {
 		//p->rebuild();
 	}
 }
 
+// input: [0:1]x[0:1]
 void handle_input(const vector &m, std::function<bool(Node *n)> f) {
 	foreachb(Node *n, sorted_nodes) {
 		if (n->eff_area.inside(m.x, m.y)) {
@@ -77,6 +81,7 @@ void handle_input(const vector &m, std::function<bool(Node *n)> f) {
 	}
 }
 
+// input: [0:1]x[0:1]
 void handle_mouse_move(const vector &m_prev, const vector &m) {
 	for (auto n: all_nodes) {
 		if (n->eff_area.inside(m.x, m.y) and !n->eff_area.inside(m_prev.x, m_prev.y))

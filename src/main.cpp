@@ -141,7 +141,8 @@ public:
 		CameraReset();
 		GodLoadWorld(config.default_world);
 
-		fps_display = new gui::Text("", 0.020f, 0.01f, 0.017f);
+		fps_display = new gui::Text("", 0.020f, 0.01f, 0.01f);
+		fps_display->dz = 900;
 		gui::toplevel->add(fps_display);
 #if HAS_LIB_VULKAN
 		if (SHOW_GBUFFER) {
@@ -178,6 +179,7 @@ public:
 		auto monitor = glfwGetPrimaryMonitor();
 		if (!config.get_bool("screen.fullscreen", false))
 			monitor = nullptr;
+		engine.physical_aspect_ratio = (float)w / (float)h;
 
 		window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
 
@@ -191,6 +193,8 @@ public:
 			perf_mon.frame();
 			engine.elapsed_rt = perf_mon.frame_dt;
 			engine.elapsed = perf_mon.frame_dt;
+
+			plugin_manager.handle_input();
 
 			iterate();
 			draw_frame();
@@ -219,11 +223,11 @@ public:
 
 	void iterate() {
 		perf_mon.tick(PMLabel::UNKNOWN);
+		plugin_manager.handle_iterate_pre(engine.elapsed);
 		world.iterate(engine.elapsed);
-		for (auto *c: plugin_manager.controllers)
-			c->on_iterate(engine.elapsed);
 		for (auto *o: world.objects)
 			o->on_iterate(engine.elapsed);
+		plugin_manager.handle_iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
 		perf_mon.tick(PMLabel::ITERATE);
@@ -249,6 +253,7 @@ public:
 		if (perf_mon.frames == 0)
 			update_statistics();
 
+		plugin_manager.handle_draw_pre();
 		render_path->draw();
 	}
 
@@ -278,7 +283,10 @@ int hui_main(const Array<string> &arg) {
 	try {
 		app.run(arg);
 	} catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
+		msg_error(e.what());
+		return EXIT_FAILURE;
+	} catch (const Exception& e) {
+		msg_error(e.message());
 		return EXIT_FAILURE;
 	}
 

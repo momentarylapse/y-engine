@@ -26,6 +26,11 @@ public:
 	void add_controller(const Path &name, Array<TemplateDataScriptVariable> &variables);
 
 	Array<Controller*> controllers;
+
+	void handle_iterate_pre(float dt);
+	void handle_iterate(float dt);
+	void handle_input();
+	void handle_draw_pre();
 };
 
 

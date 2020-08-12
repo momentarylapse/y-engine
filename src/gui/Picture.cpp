@@ -33,6 +33,7 @@ Picture::Picture(const rect &r, nix::Texture *tex, const rect &s, nix::Shader *_
 	source = s;
 	texture = tex;
 	bg_blur = 0;
+	visible = true;
 #if 0
 	ubo = new vulkan::UniformBuffer(sizeof(UBOMatrices));
 	user_shader = _shader;

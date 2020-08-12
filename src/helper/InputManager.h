@@ -29,7 +29,8 @@ public:
 	static State state;
 	static State state_prev;
 
-	static vector mouse;
+	static vector mouse; //   [0:R]x[0:1] coord system
+	static vector mouse01; // [0:1]x[0:1] coord system
 	static vector dmouse;
 	static vector scroll;
 	static bool ignore_velocity;

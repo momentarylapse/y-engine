@@ -9,6 +9,7 @@
 
 //#include "../lib/hui/hui.h"
 #include "../lib/image/image.h"
+#include "../meta.h"
 #include <cairo/cairo.h>
 #include <iostream>
 
@@ -79,7 +80,7 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 
 void render_text(const string &str, Image &im) {
 	string font_name = "CAC Champagne";
-	float font_size = 23;
+	float font_size = 32;
 	cairo_render_text(font_name, font_size, str, im);
 }
 
@@ -120,7 +121,9 @@ void Text::rebuild() {
 	//dset->set({ubo}, {texture});
 
 	float h = font_size * text.explode("\n").num;
-	float w = h * (float)im.width / (float)im.height / 1.33f;
+	float w = h * (float)im.width / (float)im.height;
+	if (align & Align::NONSQUARE)
+		 w /= engine.physical_aspect_ratio;
 	area.x2 = area.x1 + w;
 	area.y2 = area.y1 + h;
 }

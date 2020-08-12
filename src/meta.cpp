@@ -72,9 +72,7 @@ EngineData::EngineData() {
 	show_timings = false;
 	debug = false;
 
-	shadow_light = 0;
 	shadow_lower_detail = false;
-	shadow_color = color(0.5f, 0, 0, 0);
 	shadow_level = 0;
 
 	fps_max = 60;
@@ -92,6 +90,7 @@ EngineData::EngineData() {
 
 	time_scale = 1.0f;
 	file_errors_are_critical = false;
+	physical_aspect_ratio = 1.333f;
 
 	num_real_col_tests = 0;
 	resetting_game = false;
@@ -107,9 +106,7 @@ void MetaReset() {
 	if (Gui::Fonts.num > 0)
 		Engine.DefaultFont = Gui::Fonts[0];
 #endif
-	engine.shadow_light = 0;
 	engine.shadow_lower_detail = false;
-	engine.shadow_color = color(0.5f, 0, 0, 0);
 }
 
 void EngineData::set_dirs(const Path &texture_dir, const Path &_map_dir, const Path &_object_dir, const Path &_sound_dir, const Path &_script_dir, const Path &material_dir, const Path &font_dir) {

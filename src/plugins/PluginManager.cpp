@@ -93,6 +93,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
 	Kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	Kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
+	Kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	Kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
 	Kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	Kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
@@ -123,6 +124,8 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	Kaba::link_external_class_func("World.add_light", &World::add_light);
 	Kaba::link_external_class_func("World.add_particle", &World::add_particle);
+	Kaba::link_external_class_func("World.shift_all", &World::shift_all);
+	Kaba::link_external_class_func("World.get_g", &World::get_g);
 
 	Kaba::declare_class_element("Fog.color", &Fog::_color);
 	Kaba::declare_class_element("Fog.enabled", &Fog::enabled);
@@ -185,6 +188,7 @@ void PluginManager::link_kaba() {
 	gui::Node node(rect::ID);
 	Kaba::declare_class_size("ui.Node", sizeof(gui::Node));
 	Kaba::declare_class_element("ui.Node.area", &gui::Node::area);
+	Kaba::declare_class_element("ui.Node._eff_area", &gui::Node::eff_area);
 	Kaba::declare_class_element("ui.Node.margin", &gui::Node::margin);
 	Kaba::declare_class_element("ui.Node.align", &gui::Node::align);
 	Kaba::declare_class_element("ui.Node.dz", &gui::Node::dz);
@@ -246,7 +250,27 @@ void PluginManager::link_kaba() {
 	Kaba::link_external("perf_mon", &global_perf_mon);
 
 	Kaba::declare_class_size("EngineData", sizeof(EngineData));
+	Kaba::declare_class_element("EngineData.app_name", &EngineData::app_name);
+	Kaba::declare_class_element("EngineData.version", &EngineData::version);
 	Kaba::declare_class_element("EngineData.physics_enabled", &EngineData::physics_enabled);
+	Kaba::declare_class_element("EngineData.collisions_enabled", &EngineData::collisions_enabled);
+	Kaba::declare_class_element("EngineData.elapsed", &EngineData::elapsed);
+	Kaba::declare_class_element("EngineData.elapsed_rt", &EngineData::elapsed_rt);
+	Kaba::declare_class_element("EngineData.time_scale", &EngineData::time_scale);
+	Kaba::declare_class_element("EngineData.fps_min", &EngineData::fps_min);
+	Kaba::declare_class_element("EngineData.fps_max", &EngineData::fps_max);
+	Kaba::declare_class_element("EngineData.debug", &EngineData::debug);
+	Kaba::declare_class_element("EngineData.console_enabled", &EngineData::console_enabled);
+	Kaba::declare_class_element("EngineData.wire_mode", &EngineData::wire_mode);
+	Kaba::declare_class_element("EngineData.show_timings", &EngineData::show_timings);
+	Kaba::declare_class_element("EngineData.first_frame", &EngineData::first_frame);
+	Kaba::declare_class_element("EngineData.resetting_game", &EngineData::resetting_game);
+	Kaba::declare_class_element("EngineData.game_running", &EngineData::game_running);
+	Kaba::declare_class_element("EngineData.default_font", &EngineData::default_font);
+	Kaba::declare_class_element("EngineData.detail_level", &EngineData::detail_level);
+	Kaba::declare_class_element("EngineData.initial_world_file", &EngineData::initial_world_file);
+	Kaba::declare_class_element("EngineData.second_world_file", &EngineData::second_world_file);
+	Kaba::declare_class_element("EngineData.physical_aspect_ratio", &EngineData::physical_aspect_ratio);
 
 	Kaba::link_external("tex_white", &_tex_white);
 	Kaba::link_external("world", &world);
@@ -277,6 +301,7 @@ void assign_variables(char *p, const Kaba::Class *c, Array<TemplateDataScriptVar
 }
 
 void *PluginManager::create_instance(const Path &filename, const string &base_class, Array<TemplateDataScriptVariable> &variables) {
+	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	try {
 		auto *s = Kaba::Load(filename);
 		for (auto *c: s->classes()) {
@@ -290,7 +315,7 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 		msg_error(e.message());
 		throw Exception(e.message());
 	}
-	throw Exception(("script does not contain a class derived from " + base_class));
+	throw Exception(format("script does not contain a class derived from '%s'", base_class));
 	return nullptr;
 }
 
@@ -299,5 +324,25 @@ void PluginManager::add_controller(const Path &name, Array<TemplateDataScriptVar
 
 	controllers.add(c);
 	c->on_init();
+}
+
+void PluginManager::handle_iterate(float dt) {
+	for (auto *c: controllers)
+		c->on_iterate(dt);
+}
+
+void PluginManager::handle_iterate_pre(float dt) {
+	for (auto *c: controllers)
+		c->on_iterate_pre(dt);
+}
+
+void PluginManager::handle_input() {
+	for (auto *c: controllers)
+		c->on_input();
+}
+
+void PluginManager::handle_draw_pre() {
+	for (auto *c: controllers)
+		c->on_draw_pre();
 }
 
