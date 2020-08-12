@@ -199,6 +199,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 			gui::shader->set_color(gui::shader->get_location("color"), p->eff_col);
 			nix::SetTextures({p->texture, source->color_attachments[0]});
 			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
+			gui::vertex_buffer->create_rect(rect::ID, p->source);
 			nix::DrawTriangles(gui::vertex_buffer);
 		}
 	}
