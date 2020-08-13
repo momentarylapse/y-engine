@@ -235,7 +235,7 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->set_view((float)fb->width / (float)fb->height);
+	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 	nix::ResetToColor(world.background);
@@ -246,7 +246,7 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 
 
 	cam->max_depth = max_depth;
-	cam->set_view((float)fb->width / (float)fb->height);
+	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 	nix::BindUniform(ubo_light, 1);

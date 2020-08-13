@@ -50,6 +50,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Camera.min_depth", &Camera::min_depth);
 	Kaba::declare_class_element("Camera.max_depth", &Camera::max_depth);
 	Kaba::declare_class_element("Camera.m_view", &Camera::m_view);
+	Kaba::link_external_class_func("Camera.update_matrices", &Camera::update_matrices);
 	Kaba::link_external_class_func("Camera.project", &Camera::project);
 	Kaba::link_external_class_func("Camera.unproject", &Camera::unproject);
 	Kaba::link_external_virtual("Camera.__delete__", &Camera::__delete__, &_cam);
@@ -90,9 +91,11 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Model.var", (char*)&model.script_data.var - (char*)&model);
 	Kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
 	Kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
+	Kaba::declare_class_element("Model.parent", &Model::parent);
 	Kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
 	Kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	Kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
+	Kaba::link_external_class_func("Model.edit_motion", &Model::edit_motion);
 	Kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	Kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
 	Kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
@@ -120,6 +123,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("World.ego", &World::ego);
 	Kaba::declare_class_element("World.fog", &World::fog);
 	Kaba::declare_class_element("World.gravity", &World::gravity);
+	Kaba::declare_class_element("World.physics_mode", &World::physics_mode);
 	Kaba::link_external_class_func("World.create_object", &World::create_object);
 	Kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	Kaba::link_external_class_func("World.add_light", &World::add_light);

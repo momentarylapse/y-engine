@@ -163,6 +163,7 @@ World::World() {
 	particle_manager = new ParticleManager();
 
 
+	physics_mode = PhysicsMode::FULL_EXTERNAL;
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
 	overlappingPairCache = new btDbvtBroadphase();
@@ -235,7 +236,8 @@ void World::reset() {
 	fog.start = 0;
 	fog.end = 100000;
 	speed_of_sound = 1000;
-	
+
+	physics_mode = PhysicsMode::FULL_EXTERNAL;
 	engine.physics_enabled = false;
 	engine.collisions_enabled = true;
 	physics_num_steps = 10;
@@ -841,14 +843,31 @@ void World::iterate(float dt) {
 	if (!engine.physics_enabled)
 		return;
 
-	dynamicsWorld->setGravity(bt_set_v(gravity));
-	dynamicsWorld->stepSimulation(dt, 10);
-
-	for (auto *o: objects) {
+	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
 		btTransform trans;
-		o->body->getMotionState()->getWorldTransform(trans);
-		o->pos = bt_get_v(trans.getOrigin());
-		o->ang = bt_get_q(trans.getRotation());
+		for (auto *o: objects) {
+			if (o->motion_updated_by_script) {
+				o->body->setLinearVelocity(bt_set_v(o->vel));
+				o->body->setAngularVelocity(bt_set_v(o->rot));
+				trans.setRotation(bt_set_q(o->ang));
+				trans.setOrigin(bt_set_v(o->pos));
+				o->body->getMotionState()->setWorldTransform(trans);
+				o->motion_updated_by_script = false;
+			}
+		}
+		dynamicsWorld->setGravity(bt_set_v(gravity));
+		dynamicsWorld->stepSimulation(dt, 10);
+
+		for (auto *o: objects) {
+			o->body->getMotionState()->getWorldTransform(trans);
+			o->pos = bt_get_v(trans.getOrigin());
+			o->ang = bt_get_q(trans.getRotation());
+			o->vel = bt_get_v(o->body->getLinearVelocity());
+			o->rot = bt_get_v(o->body->getAngularVelocity());
+		}
+	} else if (physics_mode == PhysicsMode::SIMPLE) {
+		for (auto *o: objects)
+			o->do_physics(dt);
 	}
 }
 

@@ -285,26 +285,26 @@ public:
 	// animate me
 	void do_animation(float elapsed);
 
-	// skeleton
-	vector _cdecl _GetBonePos(int index);
-	void _cdecl SetBoneModel(int index, Model *sub);
-
 	// animation
-	vector _cdecl GetVertex(int index,int mesh);
+	vector _cdecl get_vertex(int index,int mesh);
+
+	// skeleton
+	vector _cdecl _get_bone_pos(int index) const;
+	void _cdecl set_bone_model(int index, Model *sub);
 
 	// helper functions for collision detection
 	void _UpdatePhysAbsolute_();
 	void _ResetPhysAbsolute_();
 
-	bool _cdecl Trace(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
-	bool _cdecl TraceMesh(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
+	bool _cdecl trace(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
+	bool _cdecl trace_mesh(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
 
 	// animation
-	void _cdecl ResetAnimation();
-	bool _cdecl IsAnimationDone(int operation_no);
-	bool _cdecl Animate(int mode, float param1, float param2, int move_no, float &time, float elapsed, float vel_param, bool loop);
-	int _cdecl GetFrames(int move_no);
-	void _cdecl BeginEditAnimation();
+	void _cdecl reset_animation();
+	bool _cdecl is_animation_done(int operation_no);
+	bool _cdecl animate(int mode, float param1, float param2, int move_no, float &time, float elapsed, float vel_param, bool loop);
+	int _cdecl get_frames(int move_no);
+	void _cdecl begin_edit_animation();
 	void _cdecl begin_edit(int detail);
 	void _cdecl end_edit(int detail);
 
@@ -365,6 +365,8 @@ public:
 
 
 	vector pos, vel, vel_surf, /*pos_old,*/ acc;
+	bool motion_updated_by_script;
+	void edit_motion();
 	quaternion ang /*,ang_old*/;
 	vector rot;
 	matrix _matrix, matrix_old;

@@ -714,11 +714,11 @@ void Model::load(const Path &filename)
 
 
 	// skeleton
-	if (bone.num>0){
+	if (bone.num > 0) {
 		bone_pos_0.resize(bone.num);
-		for (int i=0;i<bone.num;i++){
-			bone_pos_0[i] = _GetBonePos(i);
-			bone[i].dmatrix = matrix::translation( bone_pos_0[i]);
+		for (int i=0; i<bone.num; i++) {
+			bone_pos_0[i] = _get_bone_pos(i);
+			bone[i].dmatrix = matrix::translation(bone_pos_0[i]);
 		}
 	}
 	
@@ -734,6 +734,7 @@ void Model::load(const Path &filename)
 Model::Model() {
 	pos = vel = rot = v_0;
 	ang = quaternion::ID;
+	motion_updated_by_script = false;
 	object_id = -1;
 	registered = false;
 	on_ground = false;
@@ -924,16 +925,14 @@ void Model::__delete__() {
 }
 
 // non-animated state
-vector Model::_GetBonePos(int index)
-{
-	int r = bone[index].parent;
-	if (r < 0)
-		return bone[index].pos;
-	return bone[index].pos + _GetBonePos(r);
+vector Model::_get_bone_pos(int index) const {
+	auto &b = bone[index];
+	if (b.parent >= 0)
+		return b.pos + _get_bone_pos(b.parent);
+	return b.pos;
 }
 
-#if 0
-int get_num_trias(Skin *s)
+int get_num_trias(Mesh *s)
 {
 	int n = 0;
 	for (int i=0;i<s->sub.num;i++)
@@ -941,37 +940,33 @@ int get_num_trias(Skin *s)
 	return n;
 }
 
-void Model::SetBoneModel(int index, Model *sub)
-{
-	if ((index < 0) or (index >= bone.num)){
-		msg_error(format("Model::SetBoneModel: (%s) invalid bone index %d", filename().c_str(), index));
-		return;
-	}
+/*void Model::set_bone_model(int index, Model *sub) {
+	auto &b = bone[index];
 	
 	// remove the old one
-	if (bone[index].model){
-		bone[index].model->parent = NULL;
+	if (b.model) {
 		if (registered)
-			GodUnregisterModel(bone[index].model);
+			GodUnregisterModel(b.model);
+		b.model->parent = nullptr;
 	}
 
 	// add the new one
-	bone[index].model = sub;
-	if (sub){
+	b.model = sub;
+	if (sub) {
 		sub->parent = this;
 		if (registered)
 			GodRegisterModel(sub);
 	}
-}
+}*/
 
-Model *Model::root()
-{
+Model *Model::root() {
 	Model *next = this;
-	while(next->parent)
+	while (next->parent)
 		next = next->parent;
 	return next;
 }
 
+#if 0
 void Model::do_animation(float elapsed)
 {
 	if (anim.meta){
@@ -1488,6 +1483,10 @@ void Model::end_edit(int detail) {
 
 // make sure we can edit this object without destroying an original one
 void Model::make_editable() {
+}
+
+void Model::edit_motion() {
+	motion_updated_by_script = true;
 }
 
 Path Model::filename() {

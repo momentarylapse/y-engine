@@ -220,6 +220,14 @@ public:
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
 	Array<Link*> links;
+
+	enum class PhysicsMode {
+		NONE,
+		SIMPLE,
+		FULL_INTERNAL,
+		FULL_EXTERNAL,
+	};
+	PhysicsMode physics_mode;
 };
 extern World world;
 
