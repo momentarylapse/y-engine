@@ -12,6 +12,14 @@
 #include "material.h"
 #include "../meta.h"
 #include "../lib/file/file.h"
+#include "world.h"
+
+#include <btBulletDynamicsCommon.h>
+
+
+btVector3 bt_set_v(const vector &v);
+//btQuaternion bt_set_q(const quaternion &q);
+
 
 static int num_insane=0;
 
@@ -75,17 +83,36 @@ Object::Object()
 	//msg_left();
 }
 
+
 void Object::add_force(const vector &f, const vector &rho) {
 	if (engine.elapsed<=0)
 		return;
 	if (!physics_data.active)
 		return;
-	force_ext += f;
-	torque_ext += vector::cross(rho, f);
-	//TestVectorSanity(f, "f addf");
-	//TestVectorSanity(rho, "rho addf");
-	//TestVectorSanity(torque, "Torque addf");
-	unfreeze(this);
+	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->applyForce(bt_set_v(f), bt_set_v(rho));
+	} else {
+		force_ext += f;
+		torque_ext += vector::cross(rho, f);
+		//TestVectorSanity(f, "f addf");
+		//TestVectorSanity(rho, "rho addf");
+		//TestVectorSanity(torque, "Torque addf");
+		unfreeze(this);
+	}
+}
+
+void Object::add_impulse(const vector &p, const vector &rho) {
+	if (engine.elapsed<=0)
+		return;
+	if (!physics_data.active)
+		return;
+	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->applyImpulse(bt_set_v(p), bt_set_v(rho));
+	} else {
+		vel += p / physics_data.mass;
+		//rot += ...;
+		unfreeze(this);
+	}
 }
 
 void Object::add_torque(const vector &t) {
@@ -93,9 +120,27 @@ void Object::add_torque(const vector &t) {
 		return;
 	if (!physics_data.active)
 		return;
-	torque_ext += t;
-	//TestVectorSanity(Torque,"Torque addt");
-	unfreeze(this);
+	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->applyTorque(bt_set_v(t));
+	} else {
+		torque_ext += t;
+		//TestVectorSanity(Torque,"Torque addt");
+		unfreeze(this);
+	}
+}
+
+void Object::add_torque_impulse(const vector &l) {
+	if (engine.elapsed <= 0)
+		return;
+	if (!physics_data.active)
+		return;
+	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->applyTorqueImpulse(bt_set_v(l));
+	} else {
+		//rot += ...
+		//TestVectorSanity(Torque,"Torque addt");
+		unfreeze(this);
+	}
 }
 
 void Object::make_visible(bool _visible_) {

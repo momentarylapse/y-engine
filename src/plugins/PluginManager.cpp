@@ -10,6 +10,7 @@
 #include "../lib/kaba/kaba.h"
 #include "../world/world.h"
 #include "../world/model.h"
+#include "../world/object.h"
 #include "../world/ModelManager.h"
 #include "../world/terrain.h"
 #include "../world/camera.h"
@@ -92,12 +93,20 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
 	Kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
 	Kaba::declare_class_element("Model.parent", &Model::parent);
+	Kaba::link_external_class_func("Model.__init__", &Model::__init__);
+	Kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
 	Kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
 	Kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	Kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
 	Kaba::link_external_class_func("Model.edit_motion", &Model::edit_motion);
-	Kaba::link_external_class_func("Model.__init__", &Model::__init__);
-	Kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
+	Kaba::link_external_class_func("Model.get_vertex", &Model::get_vertex);
+//	Kaba::link_external_class_func("Model.set_bone_model", &Model::set_bone_model);
+	Kaba::link_external_class_func("Model.reset_animation", &Model::reset_animation);
+
+	Kaba::link_external_class_func("Model.add_force", &Object::add_force);
+	Kaba::link_external_class_func("Model.add_impulse", &Object::add_impulse);
+	Kaba::link_external_class_func("Model.add_torque", &Object::add_torque);
+	Kaba::link_external_class_func("Model.add_torque_impulse", &Object::add_torque_impulse);
 	Kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	Kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
 	Kaba::link_external_virtual("Model.on_collide_m", &Model::on_collide_m, &model);

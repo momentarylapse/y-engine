@@ -25,7 +25,9 @@ public:
 	void do_physics(float dt);
 
 	void _cdecl add_force(const vector &f, const vector &rho);
+	void _cdecl add_impulse(const vector &p, const vector &rho);
 	void _cdecl add_torque(const vector &t);
+	void _cdecl add_torque_impulse(const vector &l);
 
 	void _cdecl make_visible(bool visible);
 };

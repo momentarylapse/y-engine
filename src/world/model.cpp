@@ -1357,31 +1357,31 @@ bool Model::TraceMesh(const vector &p1, const vector &p2, const vector &dir, flo
 {
 	return false;
 }
+#endif
 
 
-vector _cdecl Model::GetVertex(int index, int skin_no)
-{
-	Skin *s = skin[skin_no];
+vector _cdecl Model::get_vertex(int index) {
+	auto s = mesh[MESH_HIGH];
 	vector v;
-	if (anim.meta){ // animated
+	if (anim.meta) { // animated
 		int b = s->bone_index[index];
 		v = s->vertex[index] - bone_pos_0[b];//Move(b);
 		v = bone[b].dmatrix * v;
 		v = _matrix * v;
-	}else{ // static
+	} else { // static
 		v = _matrix * s->vertex[index];
 	}
 	return v;
 }
 
 // reset all animation data for a model (needed in each frame before applying animations!)
-void Model::ResetAnimation()
-{
+void Model::reset_animation() {
 	anim.num_operations = 0;
 	/*for (int i=0;i<NumSkelettonPoints;i++)
 		if (sub_model[i])
 			ModelMoveReset(sub_model[i]);*/
 }
+#if 0
 
 // did the animation reach its end?
 bool Model::IsAnimationDone(int operation_no)

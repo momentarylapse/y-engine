@@ -16,6 +16,7 @@ namespace nix {
 }
 class Particle;
 class Beam;
+class vector;
 
 class ParticleGroup {
 public:
@@ -33,8 +34,10 @@ class ParticleManager {
 public:
 	Array<ParticleGroup*> groups;
 	void add(Particle *o);
+	void remove(Particle *o);
 	void clear();
 	void iterate(float dt);
+	void shift_all(const vector &dpos);
 };
 
 

@@ -156,6 +156,29 @@ void GodInit() {
 void GodEnd() {
 }
 
+
+void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
+	auto dispatcher = world->getDispatcher();
+	int n = dispatcher->getNumManifolds();
+	for (int i=0; i<n; i++) {
+		auto contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		auto obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
+		auto obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
+		auto a = static_cast<Object*>(obA->getUserPointer());
+		auto b = static_cast<Object*>(obB->getUserPointer());
+		int np = contactManifold->getNumContacts();
+		for (int j=0; j<np; j++) {
+			auto &pt = contactManifold->getContactPoint(j);
+			//if (pt.getDistance() < 0) {
+				if (a->physics_data.active)
+					a->on_collide_m(b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB));
+				if (b->physics_data.active)
+					b->on_collide_m(a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB));
+			//}
+		}
+	}
+}
+
 World::World() {
 //	ubo_light = nullptr;
 //	ubo_fog = nullptr;
@@ -169,6 +192,8 @@ World::World() {
 	overlappingPairCache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+
+	dynamicsWorld->setInternalTickCallback(myTickCallback);
 
 
 	terrain_object = new Object();
@@ -715,8 +740,8 @@ void World::register_object(Model *o, int index) {
 
 	btTransform startTransform = bt_set_trafo(o->pos, o->ang);
 
-	btScalar mass(o->physics_data.mass);
-	bool isDynamic = (mass != 0.f);
+	btScalar mass(o->physics_data.active ? o->physics_data.mass : 0);
+	//bool isDynamic = (mass != 0.f);
 	btVector3 localInertia(0, 0, 0);
 	//if (isDynamic)
 	if (o->colShape)
@@ -726,6 +751,7 @@ void World::register_object(Model *o, int index) {
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, o->colShape, localInertia);
 	o->body = new btRigidBody(rbInfo);
+	o->body->setUserPointer(o);
 
 	dynamicsWorld->addRigidBody(o->body);
 
@@ -865,6 +891,7 @@ void World::iterate(float dt) {
 			o->vel = bt_get_v(o->body->getLinearVelocity());
 			o->rot = bt_get_v(o->body->getAngularVelocity());
 		}
+
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
 		for (auto *o: objects)
 			o->do_physics(dt);
@@ -885,6 +912,7 @@ void World::shift_all(const vector &dpos) {
 		t->pos += dpos;
 	for (auto *o: objects)
 		o->pos += dpos;
+	particle_manager->shift_all(dpos);
 }
 
 vector World::get_g(const vector &pos) const {

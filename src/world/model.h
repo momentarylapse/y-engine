@@ -286,7 +286,7 @@ public:
 	void do_animation(float elapsed);
 
 	// animation
-	vector _cdecl get_vertex(int index,int mesh);
+	vector _cdecl get_vertex(int index);
 
 	// skeleton
 	vector _cdecl _get_bone_pos(int index) const;
@@ -400,11 +400,11 @@ public:
 	btRigidBody* body;
 	btCollisionShape* colShape;
 
-	virtual void _cdecl on_init(){}
-	virtual void _cdecl on_delete(){}
-	virtual void _cdecl on_collide_m(Model *o){}
-	virtual void _cdecl on_collide_t(Terrain *t){}
-	virtual void _cdecl on_iterate(float dt){}
+	virtual void _cdecl on_init() {}
+	virtual void _cdecl on_delete() {}
+	virtual void _cdecl on_collide_m(Model *o, const vector &p, const vector &n) {}
+	virtual void _cdecl on_collide_t(Terrain *t, const vector &p, const vector &n) {}
+	virtual void _cdecl on_iterate(float dt) {}
 };
 
 
