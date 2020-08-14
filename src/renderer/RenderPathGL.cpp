@@ -268,7 +268,7 @@ void RenderPathGL::draw_particles() {
 
 	// particles
 	matrix r = matrix::rotation_q(cam->ang);
-	nix::vb_temp->create_rect(rect(-0.5,0.5, -0.5,0.5));
+	nix::vb_temp->create_rect(rect(-1,1, -1,1));
 	for (auto g: world.particle_manager->groups) {
 		nix::SetTexture(g->texture);
 		for (auto p: g->particles) {
@@ -286,13 +286,21 @@ void RenderPathGL::draw_particles() {
 	for (auto g: world.particle_manager->groups) {
 		nix::SetTexture(g->texture);
 		for (auto p: g->beams) {
-			vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
-			v[0] = p->pos - e1;
-			v[1] = p->pos - e1 + p->length;
-			v[2] = p->pos + e1 + p->length;
-			v[3] = p->pos - e1;
-			v[4] = p->pos + e1 + p->length;
-			v[5] = p->pos + e1;
+			// TODO geometry shader!
+			auto pa = cam->project(p->pos);
+			auto pb = cam->project(p->pos + p->length);
+			auto pe = vector::cross(pb - pa, vector::EZ).normalized();
+			auto uae = cam->unproject(pa + pe * 0.1f);
+			auto ube = cam->unproject(pb + pe * 0.1f);
+			auto _e1 = (p->pos - uae).normalized() * p->radius;
+			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
+			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
+			v[0] = p->pos - _e1;
+			v[1] = p->pos - _e2 + p->length;
+			v[2] = p->pos + _e2 + p->length;
+			v[3] = p->pos - _e1;
+			v[4] = p->pos + _e2 + p->length;
+			v[5] = p->pos + _e1;
 			nix::vb_temp->update(0, v);
 			shader_fx->set_color(shader_fx->get_location("color"), p->col);
 			shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
