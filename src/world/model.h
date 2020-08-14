@@ -365,8 +365,6 @@ public:
 
 
 	vector pos, vel, vel_surf, /*pos_old,*/ acc;
-	bool motion_updated_by_script;
-	void edit_motion();
 	quaternion ang /*,ang_old*/;
 	vector rot;
 	matrix _matrix, matrix_old;

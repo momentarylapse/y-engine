@@ -30,6 +30,8 @@ public:
 	void _cdecl add_torque_impulse(const vector &l);
 
 	void _cdecl make_visible(bool visible);
+	void update_motion();
+	void update_mass();
 };
 
 

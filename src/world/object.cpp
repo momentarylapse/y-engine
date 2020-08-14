@@ -18,7 +18,8 @@
 
 
 btVector3 bt_set_v(const vector &v);
-//btQuaternion bt_set_q(const quaternion &q);
+btQuaternion bt_set_q(const quaternion &q);
+vector bt_get_v(const btVector3 &v);
 
 
 static int num_insane=0;
@@ -267,4 +268,30 @@ void Object::update_data() {
 	}
 
 	// set ode data..
+}
+
+
+void Object::update_motion() {
+	btTransform trans;
+	body->setLinearVelocity(bt_set_v(vel));
+	body->setAngularVelocity(bt_set_v(rot));
+	trans.setRotation(bt_set_q(ang));
+	trans.setOrigin(bt_set_v(pos));
+	body->getMotionState()->setWorldTransform(trans);
+}
+
+void Object::update_mass() {
+	if (physics_data.active) {
+		btScalar mass(physics_data.active);
+		btVector3 localInertia(physics_data.theta_0._00, physics_data.theta_0._11, physics_data.theta_0._22);
+		msg_write(bt_get_v(localInertia).str());
+		//if (colShape)
+		//	colShape->calculateLocalInertia(mass, localInertia);
+		body->setMassProps(physics_data.mass, localInertia);
+	} else {
+		btScalar mass(0);
+		btVector3 localInertia(0, 0, 0);
+		//body->setMassProps(physics_data.mass, localInertia);
+	}
+
 }

@@ -169,12 +169,12 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 		int np = contactManifold->getNumContacts();
 		for (int j=0; j<np; j++) {
 			auto &pt = contactManifold->getContactPoint(j);
-			//if (pt.getDistance() < 0) {
+			if (pt.getDistance() <= 0) {
 				if (a->physics_data.active)
 					a->on_collide_m(b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB));
 				if (b->physics_data.active)
 					b->on_collide_m(a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB));
-			//}
+			}
 		}
 	}
 }
@@ -500,6 +500,7 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, tt->colShape, localInertia);
 	tt->body = new btRigidBody(rbInfo);
+	tt->body->setUserPointer(terrain_object);
 
 	dynamicsWorld->addRigidBody(tt->body);
 
@@ -598,6 +599,7 @@ bool LevelData::load(const Path &filename) {
 			} else if (e.tag == "link") {
 				LevelDataLink l;
 				l.pos = s2v(e.value("pos"));
+				l.ang = s2v(e.value("ang"));
 				l.object[0] = e.value("a")._int();
 				l.object[1] = e.value("b")._int();
 				l.type = LinkType::SOCKET;
@@ -631,26 +633,25 @@ Object *World::create_object(const Path &filename, const string &name, const vec
 		throw Exception("CreateObject: empty filename");
 
 	//msg_write(on);
-	Model *m = ModelManager::load(filename);
+	auto *o = static_cast<Object*>(ModelManager::load(filename));
 
-	Object *o = (Object*)m;
-	m->script_data.name = name;
-	m->pos = pos;
-	m->ang = ang;
+	o->script_data.name = name;
+	o->pos = pos;
+	o->ang = ang;
 	o->update_matrix();
 	o->update_theta();
 
 
-	register_object(m, w_index);
+	register_object(o, w_index);
 
-	m->on_init();
+	o->on_init();
 
-	AddNetMsg(NET_MSG_CREATE_OBJECT, m->object_id, filename.str());
+	AddNetMsg(NET_MSG_CREATE_OBJECT, o->object_id, filename.str());
 
 	return o;
 }
 
-void World::register_object(Model *o, int index) {
+void World::register_object(Object *o, int index) {
 	int on = index;
 	if (on < 0){
 		// ..... better use a list of "empty" objects???
@@ -741,26 +742,32 @@ void World::register_object(Model *o, int index) {
 	btTransform startTransform = bt_set_trafo(o->pos, o->ang);
 
 	btScalar mass(o->physics_data.active ? o->physics_data.mass : 0);
-	//bool isDynamic = (mass != 0.f);
 	btVector3 localInertia(0, 0, 0);
 	//if (isDynamic)
-	if (o->colShape)
+	if (o->colShape) {
 		o->colShape->calculateLocalInertia(mass, localInertia);
+		o->physics_data.theta_0._00 = localInertia.x();
+		o->physics_data.theta_0._11 = localInertia.y();
+		o->physics_data.theta_0._22 = localInertia.z();
+	}
 
 	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, o->colShape, localInertia);
 	o->body = new btRigidBody(rbInfo);
-	o->body->setUserPointer(o);
 
-	dynamicsWorld->addRigidBody(o->body);
+	o->body->setUserPointer(o);
+	o->update_mass();
+
+	if (o->physics_data.active or o->physics_data.passive)
+		dynamicsWorld->addRigidBody(o->body);
 
 }
 
 
 
 // un-object a model
-void World::unregister_object(Model *m) {
+void World::unregister_object(Object *m) {
 	if (m->object_id < 0)
 		return;
 
@@ -870,27 +877,18 @@ void World::iterate(float dt) {
 		return;
 
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
-		btTransform trans;
-		for (auto *o: objects) {
-			if (o->motion_updated_by_script) {
-				o->body->setLinearVelocity(bt_set_v(o->vel));
-				o->body->setAngularVelocity(bt_set_v(o->rot));
-				trans.setRotation(bt_set_q(o->ang));
-				trans.setOrigin(bt_set_v(o->pos));
-				o->body->getMotionState()->setWorldTransform(trans);
-				o->motion_updated_by_script = false;
-			}
-		}
 		dynamicsWorld->setGravity(bt_set_v(gravity));
 		dynamicsWorld->stepSimulation(dt, 10);
 
-		for (auto *o: objects) {
-			o->body->getMotionState()->getWorldTransform(trans);
-			o->pos = bt_get_v(trans.getOrigin());
-			o->ang = bt_get_q(trans.getRotation());
-			o->vel = bt_get_v(o->body->getLinearVelocity());
-			o->rot = bt_get_v(o->body->getAngularVelocity());
-		}
+		btTransform trans;
+		for (auto *o: objects)
+			if (o->physics_data.active) {
+				o->body->getMotionState()->getWorldTransform(trans);
+				o->pos = bt_get_v(trans.getOrigin());
+				o->ang = bt_get_q(trans.getRotation());
+				o->vel = bt_get_v(o->body->getLinearVelocity());
+				o->rot = bt_get_v(o->body->getAngularVelocity());
+			}
 
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
 		for (auto *o: objects)

@@ -734,7 +734,6 @@ void Model::load(const Path &filename)
 Model::Model() {
 	pos = vel = rot = v_0;
 	ang = quaternion::ID;
-	motion_updated_by_script = false;
 	object_id = -1;
 	registered = false;
 	on_ground = false;
@@ -1483,10 +1482,6 @@ void Model::end_edit(int detail) {
 
 // make sure we can edit this object without destroying an original one
 void Model::make_editable() {
-}
-
-void Model::edit_motion() {
-	motion_updated_by_script = true;
 }
 
 Path Model::filename() {

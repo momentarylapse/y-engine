@@ -157,8 +157,8 @@ public:
 	Object *create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
 
-	void register_object(Model *o, int index);
-	void unregister_object(Model *o);
+	void register_object(Object *o, int index);
+	void unregister_object(Object *o);
 
 	void register_model(Model *m);
 	void unregister_model(Model *m);
@@ -244,7 +244,6 @@ void GodDoAnimation(float dt); // debug
 void GodIterateObjects(float dt);
 void GodDoCollisionDetection();
 Object *_cdecl GetObjectByName(const string &name);
-bool _cdecl NextObject(Object **o);
 void _cdecl GodObjectEnsureExistence(int id);
 int _cdecl GodFindObjects(vector &pos, float radius, int mode, Array<Object*> &a);
 

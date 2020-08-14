@@ -98,7 +98,8 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
 	Kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	Kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
-	Kaba::link_external_class_func("Model.edit_motion", &Model::edit_motion);
+	Kaba::link_external_class_func("Model.update_motion", &Object::update_motion);
+	Kaba::link_external_class_func("Model.update_mass", &Object::update_mass);
 	Kaba::link_external_class_func("Model.get_vertex", &Model::get_vertex);
 //	Kaba::link_external_class_func("Model.set_bone_model", &Model::set_bone_model);
 	Kaba::link_external_class_func("Model.reset_animation", &Model::reset_animation);
