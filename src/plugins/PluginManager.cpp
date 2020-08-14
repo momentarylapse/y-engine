@@ -92,6 +92,7 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Model.var", (char*)&model.script_data.var - (char*)&model);
 	Kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
 	Kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
+	Kaba::declare_class_element("Model.theta", (char*)&model.physics_data.theta_0 - (char*)&model);
 	Kaba::declare_class_element("Model.parent", &Model::parent);
 	Kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	Kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);

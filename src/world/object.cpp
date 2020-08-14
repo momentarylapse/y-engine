@@ -284,7 +284,6 @@ void Object::update_mass() {
 	if (physics_data.active) {
 		btScalar mass(physics_data.active);
 		btVector3 localInertia(physics_data.theta_0._00, physics_data.theta_0._11, physics_data.theta_0._22);
-		msg_write(bt_get_v(localInertia).str());
 		//if (colShape)
 		//	colShape->calculateLocalInertia(mass, localInertia);
 		body->setMassProps(physics_data.mass, localInertia);

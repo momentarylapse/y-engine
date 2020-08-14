@@ -689,6 +689,12 @@ void World::register_object(Object *o, int index) {
 			auto cc = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length() / 2)));
 			auto q = quaternion::rotation((a-b).dir2ang());
 			comp->addChildShape(bt_set_trafo((a+b)/2, q), cc);
+			if (c.round) {
+				auto bb1 = new btSphereShape(btScalar(c.radius));
+				comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb1);
+				auto bb2 = new btSphereShape(btScalar(c.radius));
+				comp->addChildShape(bt_set_trafo(b, quaternion::ID), bb2);
+			}
 		}
 		for (auto &p: o->phys->poly) {
 			if (false){
