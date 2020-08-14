@@ -91,6 +91,7 @@ void Object::add_force(const vector &f, const vector &rho) {
 	if (!physics_data.active)
 		return;
 	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->activate(); // why doesn't this happen automatically?!? bug in bullet?
 		body->applyForce(bt_set_v(f), bt_set_v(rho));
 	} else {
 		force_ext += f;
@@ -108,6 +109,7 @@ void Object::add_impulse(const vector &p, const vector &rho) {
 	if (!physics_data.active)
 		return;
 	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->activate();
 		body->applyImpulse(bt_set_v(p), bt_set_v(rho));
 	} else {
 		vel += p / physics_data.mass;
@@ -122,6 +124,7 @@ void Object::add_torque(const vector &t) {
 	if (!physics_data.active)
 		return;
 	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->activate();
 		body->applyTorque(bt_set_v(t));
 	} else {
 		torque_ext += t;
@@ -136,6 +139,7 @@ void Object::add_torque_impulse(const vector &l) {
 	if (!physics_data.active)
 		return;
 	if (world.physics_mode == world.PhysicsMode::FULL_EXTERNAL) {
+		body->activate();
 		body->applyTorqueImpulse(bt_set_v(l));
 	} else {
 		//rot += ...
