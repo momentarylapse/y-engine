@@ -30,7 +30,8 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
+//#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
+#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 
 
 #if 0
@@ -705,21 +706,16 @@ void World::register_object(Object *o, int index) {
 			}
 		}
 		for (auto &p: o->phys->poly) {
-			if (false){
-				Array<btVector3> v;
+			if (true){
 				Set<int> vv;
 				for (int i=0; i<p.num_faces; i++)
 					for (int k=0; k<p.face[i].num_vertices; k++){
 						vv.add(p.face[i].index[k]);
 					}
-				for (int i: vv) {
-					v.add(bt_set_v(o->phys->vertex[i]));
-					msg_write(o->phys->vertex[i].str());
-				}
-				msg_write(v.num);
-				auto pp = new btConvexPointCloudShape(&v[0], v.num, btVector3(1,1,1));
-				msg_write(pp->getNumEdges());
-				msg_write(pp->getNumPlanes());
+				// btConvexPointCloudShape not working!
+				auto pp = new btConvexHullShape();
+				for (int i: vv)
+					pp->addPoint(bt_set_v(o->phys->vertex[i]));
 				comp->addChildShape(bt_set_trafo(v_0, quaternion::ID), pp);
 			} else {
 				// ARGH, btConvexPointCloudShape not working
