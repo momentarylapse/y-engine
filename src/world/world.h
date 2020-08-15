@@ -42,38 +42,6 @@ public:
 	color _color;
 };
 
-class LevelDataTerrain {
-public:
-	Path filename;
-	vector pos;
-};
-
-class LevelDataObject {
-public:
-	Path filename;
-	string name;
-	vector pos, ang, vel, rot;
-};
-
-class LevelDataLight {
-public:
-	bool enabled;
-	vector pos, ang;
-	color _color;
-	float radius, harshness;
-};
-
-class LevelDataCamera {
-public:
-	vector pos, ang;
-	float fov, min_depth, max_depth, exposure;
-};
-
-class LevelDataScript {
-public:
-	Path filename;
-	Array<TemplateDataScriptVariable> variables;
-};
 enum class LinkType {
 	SOCKET,
 	HINGE,
@@ -82,11 +50,11 @@ enum class LinkType {
 	SLIDER
 };
 
-class LevelDataLink {
-public:
-	int object[2];
-	LinkType type;
-	vector pos, ang;
+enum class PhysicsMode {
+	NONE,
+	SIMPLE,
+	FULL_INTERNAL,
+	FULL_EXTERNAL,
 };
 
 class LevelData {
@@ -94,20 +62,62 @@ public:
 	LevelData();
 	bool load(const Path &filename);
 
+
+	class Terrain {
+	public:
+		Path filename;
+		vector pos;
+	};
+
+	class Object {
+	public:
+		Path filename;
+		string name;
+		vector pos, ang, vel, rot;
+	};
+
+	class Light {
+	public:
+		bool enabled;
+		vector pos, ang;
+		color _color;
+		float radius, harshness;
+	};
+
+	class Camera {
+	public:
+		vector pos, ang;
+		float fov, min_depth, max_depth, exposure;
+	};
+
+	class Script {
+	public:
+		Path filename;
+		Array<TemplateDataScriptVariable> variables;
+	};
+
+	class Link {
+	public:
+		int object[2];
+		LinkType type;
+		vector pos, ang;
+	};
+
 	Path world_filename;
 	Array<Path> skybox_filename;
 	Array<vector> skybox_ang;
 	color background_color;
-	Array<LevelDataObject> objects;
-	Array<LevelDataTerrain> terrains;
+	Array<Object> objects;
+	Array<Terrain> terrains;
 	int ego_index;
-	Array<LevelDataScript> scripts;
-	Array<LevelDataLight> lights;
-	Array<LevelDataLink> links;
+	Array<Script> scripts;
+	Array<Light> lights;
+	Array<Link> links;
 
-	Array<LevelDataCamera> cameras;
+	Array<Camera> cameras;
 
 	bool physics_enabled;
+	PhysicsMode physics_mode;
 	vector gravity;
 	Fog fog;
 };
@@ -206,7 +216,7 @@ public:
 	Array<PartialModel> sorted_opaque, sorted_trans;
 
 
-	Array<LevelDataScript> scripts;
+	Array<LevelData::Script> scripts;
 
 
 	// esotherical (not in the world)
@@ -221,12 +231,6 @@ public:
 
 	Array<Link*> links;
 
-	enum class PhysicsMode {
-		NONE,
-		SIMPLE,
-		FULL_INTERNAL,
-		FULL_EXTERNAL,
-	};
 	PhysicsMode physics_mode;
 };
 extern World world;

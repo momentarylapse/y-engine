@@ -282,6 +282,7 @@ LevelData::LevelData() {
 	gravity = v_0;
 	fog.enabled = false;
 	physics_enabled = false;
+	physics_mode = PhysicsMode::FULL_EXTERNAL;
 }
 
 color ReadColor3(File *f) {
@@ -305,6 +306,7 @@ bool World::load(const LevelData &ld) {
 
 
 	engine.physics_enabled = ld.physics_enabled;
+	world.physics_mode = ld.physics_mode;
 	engine.collisions_enabled = true;//LevelData.physics_enabled;
 	gravity = ld.gravity;
 	fog = ld.fog;
@@ -523,7 +525,7 @@ bool LevelData::load(const Path &filename) {
 	world_filename = filename;
 
 	xml::Parser p;
-	p.load(engine.map_dir << (filename.str() + ".world"));
+	p.load(engine.map_dir << filename.with(".world"));
 	auto *meta = p.elements[0].find("meta");
 	if (meta) {
 		for (auto &e: meta->elements) {
@@ -537,6 +539,10 @@ bool LevelData::load(const Path &filename) {
 				}
 			} else if (e.tag == "physics") {
 				physics_enabled = e.value("enabled")._bool();
+				if (e.value("mode") == "simple")
+					physics_mode = PhysicsMode::SIMPLE;
+				else if (e.value("mode") == "full")
+					physics_mode = PhysicsMode::FULL_EXTERNAL;
 				gravity = s2v(e.value("gravity"));
 			} else if (e.tag == "fog") {
 				fog.enabled = e.value("enabled")._bool();
@@ -546,7 +552,7 @@ bool LevelData::load(const Path &filename) {
 				fog.distance = 1.0f / e.value("density")._float();
 				fog._color = s2c(e.value("color"));
 			} else if (e.tag == "script") {
-				LevelDataScript s;
+				Script s;
 				s.filename = e.value("file");
 				for (auto &ee: e.elements) {
 					TemplateDataScriptVariable v;
@@ -564,7 +570,7 @@ bool LevelData::load(const Path &filename) {
 	if (cont) {
 		for (auto &e: cont->elements) {
 			if (e.tag == "camera") {
-				LevelDataCamera c;
+				Camera c;
 				c.pos = s2v(e.value("pos"));
 				c.ang = s2v(e.value("ang"));
 				c.fov = e.value("fov", f2s(pi/4, 3))._float();
@@ -573,7 +579,7 @@ bool LevelData::load(const Path &filename) {
 				c.exposure = e.value("exposure", "1")._float();
 				cameras.add(c);
 			} else if (e.tag == "light") {
-				LevelDataLight l;
+				Light l;
 				l.radius = e.value("radius")._float();
 				l.harshness = e.value("harshness")._float();
 				l._color = s2c(e.value("color"));
@@ -583,21 +589,23 @@ bool LevelData::load(const Path &filename) {
 				l.enabled = e.value("enabled", "true")._bool();
 				lights.add(l);
 			} else if (e.tag == "terrain") {
-				LevelDataTerrain t;
+				Terrain t;
 				t.filename = e.value("file");
 				t.pos = s2v(e.value("pos"));
 				terrains.add(t);
 			} else if (e.tag == "object") {
-				LevelDataObject o;
+				Object o;
 				o.filename = e.value("file");
 				o.name = e.value("name");
 				o.pos = s2v(e.value("pos"));
 				o.ang = s2v(e.value("ang"));
 				o.vel = v_0;
 				o.rot = v_0;
+				if (e.value("role") == "ego")
+					ego_index = objects.num;
 				objects.add(o);
 			} else if (e.tag == "link") {
-				LevelDataLink l;
+				Link l;
 				l.pos = s2v(e.value("pos"));
 				l.ang = s2v(e.value("ang"));
 				l.object[0] = e.value("a")._int();
