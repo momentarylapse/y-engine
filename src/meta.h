@@ -76,8 +76,6 @@ public:
 };
 
 
-typedef void str_float_func(const string&,float);
-
 
 void MetaReset();
 void MetaCalcMove();

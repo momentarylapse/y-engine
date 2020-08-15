@@ -187,6 +187,8 @@ public:
 	void add_particle(Particle *p);
 
 	void iterate(float dt);
+	void iterate_physics(float dt);
+	void iterate_animations(float dt);
 
 	void shift_all(const vector &dpos);
 	vector get_g(const vector &pos) const;

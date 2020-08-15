@@ -246,12 +246,6 @@ enum {
 	MESH_LOW,
 	MODEL_NUM_MESHES
 };
-#define MESH_DYNAMIC					8
-#define MESH_DYNAMIC_VIEW_HIGH			(MESH_DYNAMIC | MESH_HIGH)
-#define MESH_DYNAMIC_VIEW_MEDIUM		(MESH_DYNAMIC | MESH_MEDIUM)
-#define MESH_DYNAMIC_VIEW_LOW			(MESH_DYNAMIC | MESH_LOW)
-#define MESH_PHYSICAL					42
-#define MESH_DYNAMIC_PHYSICAL			43
 
 class ModelTemplate {
 public:
@@ -282,9 +276,6 @@ public:
 
 	static bool AllowDeleteRecursive;
 
-	// animate me
-	void do_animation(float elapsed);
-
 	// animation
 	vector _cdecl get_vertex(int index);
 
@@ -307,22 +298,16 @@ public:
 	void _cdecl begin_edit_animation();
 	void _cdecl begin_edit(int detail);
 	void _cdecl end_edit(int detail);
+	void do_animation(float elapsed);
 
 	// drawing
-	void update_vertex_buffer(int mat_no, int detail);
-	void draw(int detail, bool set_fx, bool allow_shadow);
-	void draw_simple(int material, int detail);
+	//void update_vertex_buffer(int mat_no, int detail);
 
 	// visible skins (shared)
 	Mesh *mesh[MODEL_NUM_MESHES];
-	bool mesh_is_reference[MODEL_NUM_MESHES];
 
 	// material (own)
 	Array<Material*> material;
-
-	// dynamical data (own)
-	Array<vector> vertex_dyn[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
-	Array<vector> normal_dyn[MODEL_NUM_MESHES];
 	
 	// physical skin (shared)
 	PhysicalMesh *phys;
@@ -392,7 +377,13 @@ public:
 	struct AnimationData {
 		int num_operations;
 		MoveOperation operation[MODEL_MAX_MOVE_OPS];
-		MetaMove *meta;
+		MetaMove *meta; // shared
+
+		// dynamical data (own)
+		Mesh *mesh[MODEL_NUM_MESHES];
+		//Array<vector> vertex[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
+		//Array<vector> normal[MODEL_NUM_MESHES];
+		//nix::VertexBuffer* vb[MODEL_NUM_MESHES];
 	} anim;
 
 	btRigidBody* body;

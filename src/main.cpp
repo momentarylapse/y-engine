@@ -231,6 +231,9 @@ public:
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
 		perf_mon.tick(PMLabel::ITERATE);
+
+		world.iterate_animations(engine.elapsed);
+		perf_mon.tick(PMLabel::ANIMATION);
 	}
 
 

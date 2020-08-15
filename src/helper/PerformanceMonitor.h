@@ -22,6 +22,7 @@ enum class PMLabel {
 	SKYBOXES,
 	GUI,
 	ITERATE,
+	ANIMATION,
 };
 
 class PerformanceMonitor {

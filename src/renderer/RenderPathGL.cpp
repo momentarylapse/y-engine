@@ -346,13 +346,19 @@ void RenderPathGL::draw_objects(bool allow_material) {
 		if (allow_material)
 			set_material(s.material);
 		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
-		nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		if (m->anim.meta) {
+			m->anim.mesh[0]->update_vb();
+			nix::DrawTriangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+		} else {
+			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		}
 	}
 }
 void RenderPathGL::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
 	draw_objects(allow_material);
 }
+
 void RenderPathGL::set_material(Material *m) {
 	auto s = m->shader; //shader_3d;
 	nix::SetShader(s);
@@ -368,6 +374,7 @@ void RenderPathGL::set_material(Material *m) {
 	set_textures(m->textures);
 	s->set_color(s->get_location("emission_factor"), m->emission);
 }
+
 void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
@@ -380,6 +387,7 @@ void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 	tt.add(fb_shadow2->depth_buffer);
 	nix::SetTextures(tt);
 }
+
 void RenderPathGL::prepare_lights() {
 
 	lights.clear();
@@ -405,6 +413,7 @@ void RenderPathGL::prepare_lights() {
 	}
 	ubo_light->update_array(lights);
 }
+
 void RenderPathGL::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::BindFrameBuffer(sfb);
 

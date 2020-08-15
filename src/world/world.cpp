@@ -886,10 +886,7 @@ void World::unregister_model(Model *m) {
 			unregister_model(m->bone[i].model);
 }
 
-void World::iterate(float dt) {
-	if (!engine.physics_enabled)
-		return;
-
+void World::iterate_physics(float dt) {
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
 		dynamicsWorld->setGravity(bt_set_v(gravity));
 		dynamicsWorld->stepSimulation(dt, 10);
@@ -908,6 +905,19 @@ void World::iterate(float dt) {
 		for (auto *o: objects)
 			o->do_physics(dt);
 	}
+}
+
+void World::iterate_animations(float dt) {
+	for (auto *o: objects)
+		if (o->anim.meta)
+			o->do_animation(dt);
+}
+
+void World::iterate(float dt) {
+	if (dt == 0)
+		return;
+	if (engine.physics_enabled)
+		iterate_physics(dt);
 }
 
 void World::add_light(Light *l) {
