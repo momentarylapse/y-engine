@@ -14,7 +14,7 @@
 #include "../lib/math/math.h"
 #include "material.h"
 class Material;
-class TraceData;
+class CollisionData;
 namespace nix {
 	class VertexBuffer;
 	class UniformBuffer;
@@ -65,7 +65,7 @@ public:
 
 	void get_triangle_hull(TriangleHull *hull, vector &pos, float radius);
 
-	bool _cdecl trace(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
+	bool _cdecl trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test);
 
 	void calc_detail();
 	void build_vertex_buffer();

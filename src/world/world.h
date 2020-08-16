@@ -162,7 +162,21 @@ public:
 	vector p, n;
 };
 
+// what is hit (TraceData.type)
+/*enum {
+	TRACE_TYPE_NONE = -1,
+	TRACE_TYPE_TERRAIN,
+	TRACE_TYPE_MODEL
+};
 
+class TraceData {
+public:
+	int type;
+	vector point;
+	Terrain *terrain;
+	Model *model;
+	Model *object;
+};*/
 
 // game data
 class World {
@@ -241,6 +255,9 @@ public:
 	Array<Link*> links;
 
 	PhysicsMode physics_mode;
+
+
+	bool _cdecl trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Model *o_ignore = NULL);
 };
 extern World world;
 
@@ -249,37 +266,23 @@ void GodInit();
 void GodEnd();
 bool GodLoadWorld(const Path &filename);
 
-void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
+//void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
 //void DoSounds();
-void SetSoundState(bool paused,float scale,bool kill,bool restart);
-void GodCalcMove(float dt);
-void GodDoAnimation(float dt); // debug
-void GodIterateObjects(float dt);
-void GodDoCollisionDetection();
-Object *_cdecl GetObjectByName(const string &name);
-void _cdecl GodObjectEnsureExistence(int id);
-int _cdecl GodFindObjects(vector &pos, float radius, int mode, Array<Object*> &a);
+//void SetSoundState(bool paused,float scale,bool kill,bool restart);
+//void GodCalcMove(float dt);
+//void GodDoAnimation(float dt); // debug
+//void GodIterateObjects(float dt);
+//void GodDoCollisionDetection();
+//Object *_cdecl GetObjectByName(const string &name);
+//void _cdecl GodObjectEnsureExistence(int id);
+//int _cdecl GodFindObjects(vector &pos, float radius, int mode, Array<Object*> &a);
 
-void Test4Ground(Object *o);
-void Test4Object(Object *o1,Object *o2);
+//void Test4Ground(Object *o);
+//void Test4Object(Object *o1,Object *o2);
 
 
-// what is hit (TraceData.type)
-enum {
-	TRACE_TYPE_NONE = -1,
-	TRACE_TYPE_TERRAIN,
-	TRACE_TYPE_MODEL
-};
 
-class TraceData {
-public:
-	int type;
-	vector point;
-	Terrain *terrain;
-	Model *model;
-	Model *object;
-};
-bool _cdecl GodTrace(const vector &p1, const vector &p2, TraceData &d, bool simple_test, Model *o_ignore = NULL);
+//bool _cdecl GodTrace(const vector &p1, const vector &p2, TraceData &d, bool simple_test, Model *o_ignore = NULL);
 
 
 

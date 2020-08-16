@@ -330,7 +330,7 @@ void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 		}
 }
 
-inline bool TracePattern(Terrain *t, const vector &p1,const vector &p2, TraceData &data, int x, int z, float y_min, int dir, float range)
+inline bool TracePattern(Terrain *t, const vector &p1,const vector &p2, CollisionData &data, int x, int z, float y_min, int dir, float range)
 {
 	// trace beam too high above this pattern?
 	if ( (t->height[Index2(t,x,z)]<y_min) && (t->height[Index2(t,x,z+1)]<y_min) && (t->height[Index2(t,x+1,z)]<y_min) && (t->height[Index2(t,x+1,z+1)]<y_min) )
@@ -366,22 +366,21 @@ inline bool TracePattern(Terrain *t, const vector &p1,const vector &p2, TraceDat
 	if ((dir==2)&&(tp.x>p1.x))	return false;
 	if ((dir==3)&&(tp.z>p1.z))	return false;
 
-	data.point = tp;
-	data.terrain = t;
-	data.type = TRACE_TYPE_TERRAIN;
+	data.p= tp;
+	data.t = t;
 	return true;
 }
 
-bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test)
+bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test)
 {
 	float dmin = range + 1;
 	vector c;
 
 	if ((p2.x==p1.x)&&(p2.z==p1.z)&&(p2.y<p1.y)){
 		float h=gimme_height(p1);
-		if (p2.y<h){
-			data.point = vector(p1.x,h,p1.z);
-			data.terrain = this;
+		if (p2.y < h){
+			data.p = vector(p1.x,h,p1.z);
+			data.t = this;
 			return true;
 		}
 	}

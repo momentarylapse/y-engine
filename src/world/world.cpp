@@ -938,3 +938,24 @@ vector World::get_g(const vector &pos) const {
 	return gravity;
 }
 
+bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Model *o_ignore) {
+	btCollisionWorld::ClosestRayResultCallback ray_callback(bt_set_v(p1), bt_set_v(p2));
+	//ray_callback.m_collisionFilterMask = FILTER_CAMERA;
+
+// Perform raycast
+	this->dynamicsWorld->getCollisionWorld()->rayTest(bt_set_v(p1), bt_set_v(p2), ray_callback);
+	if (ray_callback.hasHit()) {
+		d.p = bt_get_v(ray_callback.m_hitPointWorld);
+		d.n = bt_get_v(ray_callback.m_hitNormalWorld);
+		d.m = static_cast<Object*>(ray_callback.m_collisionObject->getUserPointer());
+
+		// ignore...
+		if (d.m and d.m == o_ignore) {
+			vector dir = (p2 - p1).normalized();
+			return trace(d.p + dir * 2, p2, d, simple_test, o_ignore);
+		}
+		return true;
+	}
+	return false;
+}
+
