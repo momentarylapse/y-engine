@@ -6,6 +6,8 @@
  */
 
 #include "Entity.h"
+#include "../world/World.h"
+#include "../lib/file/msg.h"
 
 
 bool EntityManager::enabled = true;
@@ -18,6 +20,12 @@ Entity::Entity(Type t) {
 }
 
 Entity::~Entity() {
+	//msg_write("~Entity " + i2s((int)type));
+	if (EntityManager::enabled) {
+		//msg_write("auto unreg...");
+		world.unregister(this);
+	}
+	//msg_write("/~Entity " + i2s((int)type));
 }
 
 

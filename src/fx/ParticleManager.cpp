@@ -39,21 +39,22 @@ void ParticleGroup::add(Particle *p) {
 		beams.add((Beam*)p);
 }
 
-bool ParticleGroup::try_delete(Particle *p) {
-	foreachi (auto *pp, particles, i)
-		if (pp == p) {
-			//msg_write("  -> PARTICLE");
-			particles.erase(i);
-			delete pp;
-			return true;
-		}
-	foreachi (auto *pp, beams, i)
-		if (pp == p) {
-			//msg_write("  -> BEAM");
-			beams.erase(i);
-			delete pp;
-			return true;
-		}
+bool ParticleGroup::unregister(Particle *p) {
+	if (p->type == Entity::Type::PARTICLE) {
+		foreachi (auto *pp, particles, i)
+			if (pp == p) {
+				//msg_write("  -> PARTICLE");
+				particles.erase(i);
+				return true;
+			}
+	} else if (p->type == Entity::Type::BEAM) {
+		foreachi (auto *pp, beams, i)
+			if (pp == p) {
+				//msg_write("  -> BEAM");
+				beams.erase(i);
+				return true;
+			}
+	}
 	return false;
 }
 
@@ -69,9 +70,9 @@ void ParticleManager::add(Particle *p) {
 	groups.add(gg);
 }
 
-bool ParticleManager::try_delete(Particle *p) {
+bool ParticleManager::unregister(Particle *p) {
 	for (auto *g: groups)
-		if (g->try_delete(p))
+		if (g->unregister(p))
 			return true;
 	return false;
 }
@@ -88,8 +89,11 @@ static void iterate_particles(Array<Particle*> *particles, float dt) {
 		if (p->suicidal) {
 			p->time_to_live -= dt;
 			if (p->time_to_live < 0) {
+				//msg_write("PARTICLE SUICIDE");
 				particles->erase(i);
+				EntityManager::enabled = false;
 				delete p;
+				EntityManager::enabled = true;
 				i --;
 				continue;
 			}

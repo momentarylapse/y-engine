@@ -560,6 +560,7 @@ void World::unregister_object(Object *m) {
 
 
 	if (m->body) {
+		dynamicsWorld->removeRigidBody(m->body);
 		delete m->body->getMotionState();
 		delete m->body;
 		delete m->colShape;
@@ -578,34 +579,42 @@ void World::unregister_object(Object *m) {
 	m->object_id = -1;
 }
 
-void World::remove(void* x) {
-	//msg_error("World.remove");
-	foreachi(auto *o, objects, i)
-		if (o == x) {
-			//msg_write(" -> OBJECT");
-			o->on_delete();
-			unregister_model(o);
-			unregister_object(o);
-			objects.erase(i);
-			delete o;
-			return;
-		}
-	foreachi(auto *l, lights, i)
-		if (l == x) {
-			//msg_write(" -> LIGHT");
-			lights.erase(i);
-			delete l;
-			return;
-		}
-	foreachi(auto *l, links, i)
-		if (l == x) {
-			//msg_write(" -> LINK");
-			links.erase(i);
-			delete l;
-			return;
-		}
-	if (particle_manager->try_delete((Particle*)x))
-		return;
+void World::remove(Entity* x) {
+	if (unregister(x))
+		delete x;
+}
+
+
+bool World::unregister(Entity* x) {
+	//msg_error("World.unregister  " + i2s((int)x->type));
+	if (x->type == Entity::Type::MODEL) {
+		foreachi(auto *o, objects, i)
+			if (o == x) {
+				//msg_write(" -> OBJECT");
+				o->on_delete();
+				unregister_model(o);
+				unregister_object(o);
+				return true;
+			}
+	} else if (x->type == Entity::Type::LIGHT) {
+		foreachi(auto *l, lights, i)
+			if (l == x) {
+				//msg_write(" -> LIGHT");
+				lights.erase(i);
+				return true;
+			}
+	} else if (x->type == Entity::Type::LINK) {
+		foreachi(auto *l, links, i)
+			if (l == x) {
+				//msg_write(" -> LINK");
+				links.erase(i);
+				return true;
+			}
+	} else if (x->type == Entity::Type::PARTICLE or x->type == Entity::Type::BEAM) {
+		if (particle_manager->unregister((Particle*)x))
+			return true;
+	}
+	return false;
 }
 
 void PartialModel::clear() {
@@ -696,7 +705,7 @@ void World::iterate_physics(float dt) {
 
 		btTransform trans;
 		for (auto *o: objects)
-			if (o->physics_data.active) {
+			if (o and o->physics_data.active) {
 				o->body->getMotionState()->getWorldTransform(trans);
 				o->pos = bt_get_v(trans.getOrigin());
 				o->ang = bt_get_q(trans.getRotation());
@@ -706,13 +715,14 @@ void World::iterate_physics(float dt) {
 
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
 		for (auto *o: objects)
-			o->do_physics(dt);
+			if (o)
+				o->do_physics(dt);
 	}
 }
 
 void World::iterate_animations(float dt) {
 	for (auto *o: objects)
-		if (o->anim.meta)
+		if (o and o->anim.meta)
 			o->do_animation(dt);
 }
 
@@ -736,7 +746,8 @@ void World::shift_all(const vector &dpos) {
 	for (auto *t: terrains)
 		t->pos += dpos;
 	for (auto *o: objects)
-		o->pos += dpos;
+		if (o)
+			o->pos += dpos;
 	particle_manager->shift_all(dpos);
 }
 

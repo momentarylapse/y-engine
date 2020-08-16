@@ -208,10 +208,16 @@ public:
 #endif
 	}
 
-	void cleanup() {
+	void reset_game() {
+		EntityManager::enabled = false;
 		world.reset();
-		GodEnd();
 		gui::reset();
+		EntityManager::enabled = true;
+	}
+
+	void cleanup() {
+		reset_game();
+		GodEnd();
 
 		delete render_path;
 #if HAS_LIB_VULKAN
@@ -229,7 +235,8 @@ public:
 		plugin_manager.handle_iterate_pre(engine.elapsed);
 		world.iterate(engine.elapsed);
 		for (auto *o: world.objects)
-			o->on_iterate(engine.elapsed);
+			if (o)
+				o->on_iterate(engine.elapsed);
 		plugin_manager.handle_iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);

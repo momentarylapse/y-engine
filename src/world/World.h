@@ -85,7 +85,8 @@ public:
 	void register_object(Object *o, int index);
 	void unregister_object(Object *o);
 
-	void remove(void *o);
+	bool unregister(Entity *o);
+	void remove(Entity *o);
 
 	void register_model(Model *m);
 	void unregister_model(Model *m);

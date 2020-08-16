@@ -6,7 +6,6 @@
  */
 
 #include "Particle.h"
-#include <iostream>
 
 nix::Shader *shader_fx;
 

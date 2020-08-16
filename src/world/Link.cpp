@@ -43,14 +43,14 @@ LinkSocket::LinkSocket(Object *_a, Object *_b, const vector &pos) : Link(LinkTyp
 	quaternion iqa, iqb;
 	_create_link_data(pa, pb, iqa, iqb, pos);
 	if (b) {
-		msg_write("-----------add socket 2");
+		//msg_write("-----------add socket 2");
 		con = new btPoint2PointConstraint(
 			*a->body,
 			*b->body,
 			bt_set_v(pa),
 			bt_set_v(pb));
 	} else {
-		msg_write("-----------add socket 1");
+		//msg_write("-----------add socket 1");
 		con = new btPoint2PointConstraint(
 			*a->body,
 			bt_set_v(pa));
@@ -62,7 +62,7 @@ LinkHinge::LinkHinge(Object *_a, Object *_b, const vector &pos, const quaternion
 	quaternion iqa, iqb;
 	_create_link_data(pa, pb, iqa, iqb, pos);
 	if (b) {
-		msg_write("-----------add hinge 2");
+		//msg_write("-----------add hinge 2");
 		con = new btHingeConstraint(
 			*a->body,
 			*b->body,
@@ -72,7 +72,7 @@ LinkHinge::LinkHinge(Object *_a, Object *_b, const vector &pos, const quaternion
 			bt_set_v(iqb * ang * vector::EZ),
 			true);
 	} else {
-		msg_write("-----------add hinge 1");
+		//msg_write("-----------add hinge 1");
 		con = new btHingeConstraint(
 			*a->body,
 			bt_set_v(pa),
@@ -85,7 +85,7 @@ LinkUniversal::LinkUniversal(Object *_a, Object *_b, const vector &pos, const qu
 	vector pa, pb;
 	quaternion iqa, iqb;
 	_create_link_data(pa, pb, iqa, iqb, pos);
-	msg_write("-----------add universal");
+	//msg_write("-----------add universal");
 	con = new btUniversalConstraint(
 		*a->body,
 		*b->body,
