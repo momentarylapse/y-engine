@@ -212,6 +212,8 @@ sources = [
 	'src/renderer/RenderPath.cpp',
 	'src/renderer/RenderPathGL.cpp',
 	'src/world/camera.cpp',
+	'src/world/LevelData.cpp',
+	'src/world/Link.cpp',
 	'src/world/material.cpp',
 	'src/world/model.cpp',
 	'src/world/ModelManager.cpp',

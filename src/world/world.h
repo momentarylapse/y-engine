@@ -25,6 +25,8 @@ class TemplateDataScriptVariable;
 class Light;
 class ParticleManager;
 class Particle;
+class Link;
+enum class LinkType;
 
 
 class btDefaultCollisionConfiguration;
@@ -32,7 +34,6 @@ class btCollisionDispatcher;
 class btBroadphaseInterface;
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
-class btTypedConstraint;
 
 
 class Fog {
@@ -41,14 +42,6 @@ public:
 	int mode;
 	float start, end, distance;
 	color _color;
-};
-
-enum class LinkType {
-	SOCKET,
-	HINGE,
-	UNIVERSAL,
-	SPRING,
-	SLIDER
 };
 
 enum class PhysicsMode {
@@ -139,21 +132,6 @@ struct PartialModel {
 struct GodNetMessage {
 	int msg, arg_i[4];
 	string arg_s;
-};
-
-
-class Link : public Entity {
-public:
-	Link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang);
-	~Link();
-
-	void set_motor(float v, float max);
-	void set_frame(int n, const quaternion &q);
-
-	btTypedConstraint *con;
-	LinkType type;
-	Object *a;
-	Object *b;
 };
 
 class CollisionData {

@@ -14,6 +14,7 @@
 #include "../world/ModelManager.h"
 #include "../world/terrain.h"
 #include "../world/camera.h"
+#include "../world/Link.h"
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
