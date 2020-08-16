@@ -46,57 +46,19 @@
 #include "x/model_manager.h"
 #include "x/font.h"
 #endif
+#include "y/EngineData.h"
 
 
 
 
 // game configuration
 
-EngineData engine;
 
 
 Array<XContainer*> meta_delete_stuff_list;
 
 bool AllowXContainer = true;
 
-
-
-
-EngineData::EngineData() {
-	default_font = NULL;
-
-	ZBufferEnabled = true;
-	CullingEnabled = false;
-	SortingEnabled = false;
-	console_enabled = false;
-	show_timings = false;
-	debug = false;
-
-	shadow_lower_detail = false;
-	shadow_level = 0;
-
-	fps_max = 60;
-	fps_min = 15;
-
-	detail_level = 100;
-	detail_factor_inv = 1.0f;
-	mirror_level_max = 1;
-	multisampling = 1;
-
-	wire_mode = false;
-	physics_enabled = false;
-	collisions_enabled = false;
-	elapsed = elapsed_rt = 0;
-
-	time_scale = 1.0f;
-	file_errors_are_critical = false;
-	physical_aspect_ratio = 1.333f;
-
-	num_real_col_tests = 0;
-	resetting_game = false;
-	first_frame = false;
-	game_running = false;
-}
 
 
 void MetaReset() {
@@ -107,25 +69,6 @@ void MetaReset() {
 		Engine.DefaultFont = Gui::Fonts[0];
 #endif
 	engine.shadow_lower_detail = false;
-}
-
-void EngineData::set_dirs(const Path &texture_dir, const Path &_map_dir, const Path &_object_dir, const Path &_sound_dir, const Path &_script_dir, const Path &material_dir, const Path &font_dir) {
-#if LIB_HAS_VULKAN
-	vulkan::Texture::directory = texture_dir;
-	vulkan::Shader::directory = material_dir;
-#endif
-	nix::texture_dir = texture_dir;
-	nix::shader_dir = material_dir;
-
-	map_dir = _map_dir;
-	object_dir = _object_dir;
-	sound_dir = _sound_dir;
-	script_dir = _script_dir;
-	MaterialDir = material_dir;
-#if 0
-	Gui::FontDir = font_dir;
-#endif
-	Kaba::config.directory = script_dir;
 }
 
 void MetaCalcMove() {

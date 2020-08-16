@@ -10,7 +10,7 @@
 #include "object.h"
 #include "world.h"
 #include "material.h"
-#include "../meta.h"
+#include "../y/EngineData.h"
 #include "../lib/file/file.h"
 #include "world.h"
 

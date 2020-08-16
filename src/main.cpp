@@ -22,7 +22,8 @@
 #include "world/terrain.h"
 
 #include "helper/PerformanceMonitor.h"
-#include "helper/InputManager.h"
+
+#include "input/InputManager.h"
 
 #include "fx/Light.h"
 #include "fx/ParticleManager.h"
@@ -30,6 +31,9 @@
 #include "gui/gui.h"
 #include "gui/Picture.h"
 #include "gui/Text.h"
+
+#include "y/EngineData.h"
+
 
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"

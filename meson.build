@@ -60,8 +60,8 @@ sources = [
 	'src/gui/Node.cpp',
 	'src/gui/Picture.cpp',
 	'src/gui/Text.cpp',
-	'src/helper/InputManager.cpp',
 	'src/helper/PerformanceMonitor.cpp',
+	'src/input/InputManager.cpp',
 	'src/lib/any/any.cpp',
 	'src/lib/base/array.cpp',
 	'src/lib/base/strings.cpp',
@@ -218,6 +218,7 @@ sources = [
 	'src/world/object.cpp',
 	'src/world/terrain.cpp',
 	'src/world/world.cpp',
+	'src/y/EngineData.cpp',
 	'src/Config.cpp',
 	'src/main.cpp',
 	'src/meta.cpp'

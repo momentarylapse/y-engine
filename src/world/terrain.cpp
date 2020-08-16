@@ -14,7 +14,7 @@
 #include "world.h"
 #include "camera.h"
 #ifdef _X_ALLOW_X_
-#include "../meta.h"
+#include "../y/EngineData.h"
 //#include "../fx/light.h"
 #endif
 

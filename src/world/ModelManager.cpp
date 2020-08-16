@@ -7,7 +7,7 @@
 
 #include "ModelManager.h"
 #include "model.h"
-#include "../meta.h"
+#include "../y/EngineData.h"
 #include "../lib/kaba/kaba.h"
 #include "../plugins/PluginManager.h"
 
@@ -24,7 +24,7 @@ Model* fancy_copy(Model *m) {
 }
 
 Model* ModelManager::load(const Path &_filename) {
-	auto filename = engine.object_dir << (_filename.with(".model"));
+	auto filename = engine.object_dir << _filename.with(".model");
 	for (auto *o: originals)
 		if (o->_template->filename == filename) {
 			return fancy_copy(o);
