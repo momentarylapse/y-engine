@@ -19,7 +19,7 @@ btQuaternion bt_set_q(const quaternion &q);
 
 
 Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaternion &ang) : Entity(Type::LINK) {
-	type = t;
+	link_type = t;
 	a = _a;
 	b = _b;
 	con = nullptr;
@@ -31,7 +31,7 @@ Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaterni
 		iqb = b->ang.bar();
 		pb = iqb * (pos - b->pos);
 	}
-	if (type == LinkType::SOCKET) {
+	if (link_type == LinkType::SOCKET) {
 		if (b) {
 			msg_write("-----------add socket 2");
 			con = new btPoint2PointConstraint(
@@ -45,7 +45,7 @@ Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaterni
 				*a->body,
 				bt_set_v(pa));
 		}
-	} else if (type == LinkType::HINGE) {
+	} else if (link_type == LinkType::HINGE) {
 		if (b) {
 			msg_write("-----------add hinge 2");
 			con = new btHingeConstraint(
@@ -64,7 +64,7 @@ Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaterni
 				bt_set_v(iqa * ang * vector::EZ),
 				true);
 		}
-	} else if (type == LinkType::UNIVERSAL) {
+	} else if (link_type == LinkType::UNIVERSAL) {
 		msg_write("-----------add universal");
 		con = new btUniversalConstraint(
 			*a->body,
@@ -82,7 +82,7 @@ Link::~Link() {
 }
 
 void Link::set_motor(float v, float max) {
-	if (type == LinkType::HINGE)
+	if (link_type == LinkType::HINGE)
 		((btHingeConstraint*)con)->enableAngularMotor(max > 0, v, max);
 }
 
@@ -95,7 +95,7 @@ void Link::set_motor(float v, float max) {
 }*/
 
 void Link::set_frame(int n, const quaternion &q) {
-	if (type == LinkType::HINGE) {
+	if (link_type == LinkType::HINGE) {
 		if (n == 1)
 			((btHingeConstraint*)con)->getBFrame().setRotation(bt_set_q(q));
 		else

@@ -27,6 +27,17 @@ class ParticleManager;
 class Particle;
 
 
+enum class PhysicsMode;
+enum class LinkType;
+
+class Fog {
+public:
+	bool enabled;
+	int mode;
+	float start, end, distance;
+	color _color;
+};
+
 
 class LevelData {
 public:

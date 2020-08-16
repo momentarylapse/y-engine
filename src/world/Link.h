@@ -35,7 +35,7 @@ public:
 	void set_frame(int n, const quaternion &q);
 
 	btTypedConstraint *con;
-	LinkType type;
+	LinkType link_type;
 	Object *a;
 	Object *b;
 };

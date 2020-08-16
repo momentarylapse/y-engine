@@ -15,6 +15,7 @@
 #include "../lib/file/path.h"
 #include "../lib/math/math.h"
 #include "../y/Entity.h"
+#include "LevelData.h"
 
 
 class Model;
@@ -26,6 +27,7 @@ class Light;
 class ParticleManager;
 class Particle;
 class Link;
+class LevelData;
 enum class LinkType;
 
 
@@ -36,84 +38,12 @@ class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
 
 
-class Fog {
-public:
-	bool enabled;
-	int mode;
-	float start, end, distance;
-	color _color;
-};
 
 enum class PhysicsMode {
 	NONE,
 	SIMPLE,
 	FULL_INTERNAL,
 	FULL_EXTERNAL,
-};
-
-class LevelData {
-public:
-	LevelData();
-	bool load(const Path &filename);
-
-
-	class Terrain {
-	public:
-		Path filename;
-		vector pos;
-	};
-
-	class Object {
-	public:
-		Path filename;
-		string name;
-		vector pos, ang, vel, rot;
-	};
-
-	class Light {
-	public:
-		bool enabled;
-		vector pos, ang;
-		color _color;
-		float radius, harshness;
-	};
-
-	class Camera {
-	public:
-		vector pos, ang;
-		float fov, min_depth, max_depth, exposure;
-	};
-
-	class Script {
-	public:
-		Path filename;
-		Array<TemplateDataScriptVariable> variables;
-	};
-
-	class Link {
-	public:
-		int object[2];
-		LinkType type;
-		vector pos, ang;
-	};
-
-	Path world_filename;
-	Array<Path> skybox_filename;
-	Array<vector> skybox_ang;
-	color background_color;
-	Array<Object> objects;
-	Array<Terrain> terrains;
-	int ego_index;
-	Array<Script> scripts;
-	Array<Light> lights;
-	Array<Link> links;
-
-	Array<Camera> cameras;
-
-	bool physics_enabled;
-	PhysicsMode physics_mode;
-	vector gravity;
-	Fog fog;
 };
 
 
@@ -141,21 +71,6 @@ public:
 	vector p, n;
 };
 
-// what is hit (TraceData.type)
-/*enum {
-	TRACE_TYPE_NONE = -1,
-	TRACE_TYPE_TERRAIN,
-	TRACE_TYPE_MODEL
-};
-
-class TraceData {
-public:
-	int type;
-	vector point;
-	Terrain *terrain;
-	Model *model;
-	Model *object;
-};*/
 
 // game data
 class World {
@@ -247,32 +162,6 @@ void GodInit();
 void GodEnd();
 bool GodLoadWorld(const Path &filename);
 
-//void AddNewForceField(vector pos,vector dir,int kind,int shape,float r,float v,float a,bool visible,float t);
-//void DoSounds();
-//void SetSoundState(bool paused,float scale,bool kill,bool restart);
-//void GodCalcMove(float dt);
-//void GodDoAnimation(float dt); // debug
-//void GodIterateObjects(float dt);
-//void GodDoCollisionDetection();
-//Object *_cdecl GetObjectByName(const string &name);
-//void _cdecl GodObjectEnsureExistence(int id);
-//int _cdecl GodFindObjects(vector &pos, float radius, int mode, Array<Object*> &a);
-
-//void Test4Ground(Object *o);
-//void Test4Object(Object *o1,Object *o2);
-
-
-
-//bool _cdecl GodTrace(const vector &p1, const vector &p2, TraceData &d, bool simple_test, Model *o_ignore = NULL);
-
-
-
-/*#define FFKindRadialConst		0
-#define FFKindRadialLinear		1
-#define FFKindRadialQuad		2
-#define FFKindDirectionalConst	10
-#define FFKindDirectionalLinear	11
-#define FFKindDirectionalQuad	12*/
 
 enum {
 	NET_MSG_CREATE_OBJECT = 1000,
