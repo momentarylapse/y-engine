@@ -174,7 +174,14 @@ public:
 // single animation
 class Move {
 public:
-	int type; // skeletal/vertex
+
+	enum class Type {
+		NONE,
+		VERTEX,
+		SKELETAL
+	};
+
+	Type type;
 	int num_frames;
 	int frame0;
 
@@ -206,17 +213,20 @@ public:
 	} mesh[4];
 };
 
-// types of animation
-enum {
-	MOVE_TYPE_NONE,
-	MOVE_TYPE_VERTEX,
-	MOVE_TYPE_SKELETAL
-};
-
 // commands for animation (move operations)
 class MoveOperation {
 public:
-	int move, operation;
+	// move operations
+	enum class Command {
+		SET,			// overwrite
+		SET_NEW_KEYED,	// overwrite, if current doesn't equal 0
+		SET_OLD_KEYED,	// overwrite, if last equals 0
+		ADD_1_FACTOR,	// w = w_old         + w_new * f
+		MIX_1_FACTOR,	// w = w_old * (1-f) + w_new * f
+		MIX_2_FACTOR	// w = w_old * a     + w_new * b
+	};
+	int move;
+	Command command;
 	float time, param1, param2;
 };
 
@@ -294,7 +304,8 @@ public:
 	// animation
 	void _cdecl reset_animation();
 	bool _cdecl is_animation_done(int operation_no);
-	bool _cdecl animate(int mode, float param1, float param2, int move_no, float &time, float elapsed, float vel_param, bool loop);
+	bool _cdecl animate_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop);
+	bool _cdecl animate(MoveOperation::Command cmd, int move_no, float &time, float dt, bool loop);
 	int _cdecl get_frames(int move_no);
 	void _cdecl begin_edit_animation();
 	void _cdecl begin_edit(int detail);
@@ -365,7 +376,6 @@ public:
 	// engine data
 	bool registered;
 	bool _detail_needed_[MODEL_NUM_MESHES]; // per frame
-	int _detail_; // per view (more than once a frame...)
 
 	// effects (own)
 	Array<Fx::Effect*> fx;
@@ -381,10 +391,7 @@ public:
 		MetaMove *meta; // shared
 
 		// dynamical data (own)
-		Mesh *mesh[MODEL_NUM_MESHES];
-		//Array<vector> vertex[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
-		//Array<vector> normal[MODEL_NUM_MESHES];
-		//nix::VertexBuffer* vb[MODEL_NUM_MESHES];
+		Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
 	} anim;
 
 	btRigidBody* body;
@@ -407,16 +414,6 @@ enum {
 	NORMAL_MODE_PRE = 16,
 };
 
-
-// move operations
-enum {
-	MOVE_OP_SET,			// overwrite
-	MOVE_OP_SET_NEW_KEYED,	// overwrite, if current doesn't equal 0
-	MOVE_OP_SET_OLD_KEYED,	// overwrite, if last equals 0
-	MOVE_OP_ADD_1_FACTOR,	// w = w_old         + w_new * f
-	MOVE_OP_MIX_1_FACTOR,	// w = w_old * (1-f) + w_new * f
-	MOVE_OP_MIX_2_FACTOR	// w = w_old * a     + w_new * b
-};
 
 enum {
 	FX_TYPE_SCRIPT,

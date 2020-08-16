@@ -105,6 +105,7 @@ void PluginManager::link_kaba() {
 //	Kaba::link_external_class_func("Model.set_bone_model", &Model::set_bone_model);
 	Kaba::link_external_class_func("Model.reset_animation", &Model::reset_animation);
 	Kaba::link_external_class_func("Model.animate", &Model::animate);
+	Kaba::link_external_class_func("Model.animate_x", &Model::animate_x);
 	Kaba::link_external_class_func("Model.is_animation_done", &Model::is_animation_done);
 	Kaba::link_external_class_func("Model.begin_edit_animation", &Model::begin_edit_animation);
 

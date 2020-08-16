@@ -272,7 +272,7 @@ void Model::reset_data() {
 	anim.num_operations = -1;
 	anim.operation[0].move = 0;
 	anim.operation[0].time = 0;
-	anim.operation[0].operation = MOVE_OP_SET;
+	anim.operation[0].command = MoveOperation::Command::SET;
 	anim.operation[0].param1 = 0;
 	anim.operation[0].param2 = 0;
 	if (anim.meta) {
@@ -524,12 +524,12 @@ void Model::load(const Path &filename)
 			
 			Move *m = &anim.meta->move[index];
 			f->read_str(); // name is irrelevant
-			m->type = f->read_int();
+			m->type = (Move::Type)f->read_int();
 			m->num_frames = f->read_int();
 			m->frames_per_sec_const = f->read_float();
 			m->frames_per_sec_factor = f->read_float();
 			
-			if (m->type == MOVE_TYPE_VERTEX){
+			if (m->type == Move::Type::VERTEX){
 				m->frame0 = frame_v;
 				for (int fr=0;fr<m->num_frames;fr++){
 					for (int s=0;s<4;s++){
@@ -545,7 +545,7 @@ void Model::load(const Path &filename)
 					}
 					frame_v ++;
 				}
-			}else if (m->type == MOVE_TYPE_SKELETAL){
+			}else if (m->type == Move::Type::SKELETAL){
 				m->frame0 = frame_s;
 				bool *free_pos = new bool[bone.num];
 				for (int j=0;j<bone.num;j++)
@@ -712,7 +712,6 @@ Model::Model() {
 	time_till_freeze = 0;
 	ground_id = -1;
 	ground_normal = v_0;
-	_detail_ = -1;
 
 	is_copy = false;
 	_template = NULL;
@@ -988,7 +987,7 @@ void Model::do_animation(float elapsed) {
 			continue;
 
 
-		if (m->type == MOVE_TYPE_VERTEX){
+		if (m->type == Move::Type::VERTEX){
 			vertex_animated=true;
 
 			// frame data
@@ -1032,7 +1031,7 @@ void Model::do_animation(float elapsed) {
 			Move *m = &anim.meta->move[op->move];
 			if (m->num_frames == 0)
 				continue;
-			if (m->type != MOVE_TYPE_SKELETAL)
+			if (m->type != Move::Type::SKELETAL)
 				continue;
 			quaternion w,w0,w1,w2,w3;
 			vector p,p1,p2;
@@ -1063,37 +1062,37 @@ void Model::do_animation(float elapsed) {
 		// execute the operations
 
 			// overwrite
-			if (op->operation == MOVE_OP_SET){
+			if (op->command == op->Command::SET){
 				b->cur_ang = w;
 				b->cur_pos = p;
 
 			// overwrite, if current doesn't equal 0
-			}else if (op->operation == MOVE_OP_SET_NEW_KEYED){
+			}else if (op->command == op->Command::SET_NEW_KEYED){
 				if (w.w!=1)
 					b->cur_ang=w;
 				if (p!=v_0)
 					b->cur_pos=p;
 
 			// overwrite, if last equals 0
-			}else if (op->operation == MOVE_OP_SET_OLD_KEYED){
+			}else if (op->command == op->Command::SET_OLD_KEYED){
 				if (b->cur_ang.w==1)
 					b->cur_ang=w;
 				if (b->cur_pos==v_0)
 					b->cur_pos=p;
 
 			// w = w_old         + w_new * f
-			}else if (op->operation == MOVE_OP_ADD_1_FACTOR){
+			}else if (op->command == op->Command::ADD_1_FACTOR){
 				w = w.scale_angle(op->param1);
 				b->cur_ang = w * b->cur_ang;
 				b->cur_pos += op->param1 * p;
 
 			// w = w_old * (1-f) + w_new * f
-			}else if (op->operation == MOVE_OP_MIX_1_FACTOR){
+			}else if (op->command == op->Command::MIX_1_FACTOR){
 				b->cur_ang = quaternion::interpolate( b->cur_ang, w, op->param1);
 				b->cur_pos = (1 - op->param1) * b->cur_pos + op->param1 * p;
 
 			// w = w_old * a     + w_new * b
-			}else if (op->operation == MOVE_OP_MIX_2_FACTOR){
+			}else if (op->command == op->Command::MIX_2_FACTOR){
 				b->cur_ang = b->cur_ang.scale_angle(op->param1);
 				w = w.scale_angle(op->param2);
 				b->cur_ang = quaternion::interpolate( b->cur_ang, w, 0.5f);
@@ -1389,7 +1388,7 @@ void MoveTimeAdd(Model *m, int operation_no, float elapsed, float v, bool loop) 
 // apply an animate to a model
 //   a new animation "layer" is being added for mixing several animations
 //   the variable <time> is being increased
-bool Model::animate(int mode, float param1, float param2, int move_no, float &time, float elapsed, float vel_param, bool loop) {
+bool Model::animate_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop) {
 	if (!anim.meta)
 		return false;
 	if (anim.num_operations < 0){
@@ -1400,14 +1399,19 @@ bool Model::animate(int mode, float param1, float param2, int move_no, float &ti
 	}
 	int n = anim.num_operations ++;
 	anim.operation[n].move = move_no;
-	anim.operation[n].operation = mode;
+	anim.operation[n].command = cmd;
 	anim.operation[n].param1 = param1;
 	anim.operation[n].param2 = param2;
 	anim.operation[n].time = time;
 
-	MoveTimeAdd(this, n, elapsed, vel_param, loop);
+	MoveTimeAdd(this, n, dt, vel_param, loop);
 	time = anim.operation[n].time;
 	return is_animation_done(n);
+}
+
+bool Model::animate(MoveOperation::Command cmd, int move_no, float &time, float dt, bool loop) {
+	return animate_x(cmd, 0, 0, move_no, time, dt, 0, loop);
+
 }
 
 // get the number of frames for a particular animation
