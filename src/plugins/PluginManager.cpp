@@ -34,6 +34,13 @@ PerformanceMonitor *global_perf_mon;
 
 extern nix::Texture *_tex_white;
 
+void global_delete(Entity *e) {
+	//msg_error("global delete...");
+	world.unregister(e);
+	e->on_delete();
+	delete e;
+}
+
 
 void PluginManager::link_kaba() {
 
@@ -156,7 +163,8 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("World.shift_all", &World::shift_all);
 	Kaba::link_external_class_func("World.get_g", &World::get_g);
 	Kaba::link_external_class_func("World.trace", &World::trace);
-	Kaba::link_external_class_func("World.remove", &World::remove);
+	Kaba::link_external_class_func("World.delete", &World::_delete);
+	Kaba::link_external_class_func("World.unregister", &World::unregister);
 
 	Kaba::declare_class_element("Fog.color", &Fog::_color);
 	Kaba::declare_class_element("Fog.enabled", &Fog::enabled);
@@ -200,6 +208,14 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Light.Spherical.__init__", &Light::__init_spherical__);
 	Kaba::link_external_class_func("Light.Cone.__init__", &Light::__init_cone__);
 
+	Entity entity(Entity::Type::NONE);
+	Kaba::declare_class_size("Entity", sizeof(Entity));
+//	Kaba::link_external_class_func("Entity.__init__", &Entity::__init__);
+	Kaba::link_external_virtual("Entity.__delete__", &Entity::__delete__, &entity);
+	Kaba::link_external_virtual("Entity.on_init", &Entity::on_init, &entity);
+	Kaba::link_external_virtual("Entity.on_delete", &Entity::on_delete, &entity);
+	Kaba::link_external_virtual("Entity.on_iterate", &Entity::on_iterate, &entity);
+	Kaba::link_external_class_func("Entity.__del_override__", &global_delete);
 
 	Particle particle(vector::ZERO, 0, nullptr, -1);
 	Kaba::declare_class_size("Particle", sizeof(Particle));
@@ -213,7 +229,8 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Particle.source", &Particle::source);
 	Kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 	Kaba::link_external_virtual("Particle.__delete__", &Particle::__delete__, &particle);
-	Kaba::link_external_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);
+	//Kaba::link_external_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);
+	//Kaba::link_external_class_func("Particle.__del_override__", &global_delete);
 
 	Kaba::declare_class_size("Beam", sizeof(Beam));
 	Kaba::declare_class_element("Beam.length", &Beam::length);

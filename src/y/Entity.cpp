@@ -6,8 +6,6 @@
  */
 
 #include "Entity.h"
-#include "../world/World.h"
-#include "../lib/file/msg.h"
 
 
 bool EntityManager::enabled = true;
@@ -19,13 +17,16 @@ Entity::Entity(Type t) {
 	type = t;
 }
 
+// hmm, no, let's not do too much here...
+//   one might expect to call on_delete() here, but that's not possible,
+//   since all outer destructors have been called at this point already
 Entity::~Entity() {
-	//msg_write("~Entity " + i2s((int)type));
+/*	//msg_write("~Entity " + i2s((int)type));
 	if (EntityManager::enabled) {
 		//msg_write("auto unreg...");
 		world.unregister(this);
 	}
-	//msg_write("/~Entity " + i2s((int)type));
+	//msg_write("/~Entity " + i2s((int)type));*/
 }
 
 

@@ -579,9 +579,11 @@ void World::unregister_object(Object *m) {
 	m->object_id = -1;
 }
 
-void World::remove(Entity* x) {
-	if (unregister(x))
+void World::_delete(Entity* x) {
+	if (unregister(x)) {
+		x->on_delete();
 		delete x;
+	}
 }
 
 
@@ -591,7 +593,6 @@ bool World::unregister(Entity* x) {
 		foreachi(auto *o, objects, i)
 			if (o == x) {
 				//msg_write(" -> OBJECT");
-				o->on_delete();
 				unregister_model(o);
 				unregister_object(o);
 				return true;

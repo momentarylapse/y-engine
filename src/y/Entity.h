@@ -14,6 +14,7 @@
 class Entity : public VirtualBase {
 public:
 	enum class Type {
+		NONE,
 		CONTROLLER,
 		MODEL,
 		TERRAIN,
