@@ -7,8 +7,8 @@
 |                                                                              |
 | last update: 2009.11.22 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
-#if !defined(CAMERA_H__INCLUDED_)
-#define CAMERA_H__INCLUDED_
+#if !defined(SRC_WORLD_CAMERA_H_)
+#define SRC_WORLD_CAMERA_H_
 
 
 #include "../lib/base/base.h"

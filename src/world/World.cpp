@@ -9,18 +9,18 @@
 \*----------------------------------------------------------------------------*/
 
 #include <algorithm>
-#include "world.h"
 #include "../lib/file/file.h"
 //#include "../lib/vulkan/vulkan.h"
 #include "../lib/nix/nix.h"
 #include "../y/EngineData.h"
 #include "../meta.h"
-#include "object.h"
-#include "model.h"
 #include "ModelManager.h"
-#include "material.h"
-#include "terrain.h"
 #include "Link.h"
+#include "Material.h"
+#include "Model.h"
+#include "Object.h"
+#include "Terrain.h"
+#include "World.h"
 
 #ifdef _X_ALLOW_X_
 #include "../fx/Light.h"
@@ -45,7 +45,7 @@
 #endif
 #include "../networking.h"
 #endif
-#include "camera.h"
+#include "Camera.h"
 
 
 nix::Texture *tex_white = nullptr;
@@ -350,7 +350,7 @@ bool World::load(const LevelData &ld) {
 		Object *b = nullptr;
 		if (l.object[1] >= 0)
 			b = objects[l.object[1]];
-		add_link(l.type, objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang));
+		add_link(Link::create(l.type, objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang)));
 	}
 
 	scripts = ld.scripts;
@@ -359,11 +359,9 @@ bool World::load(const LevelData &ld) {
 	return ok;
 }
 
-Link *World::add_link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang) {
-	auto l = new Link(type, a, b, pos, ang);
+void World::add_link(Link *l) {
 	links.add(l);
 	dynamicsWorld->addConstraint(l->con, true);
-	return l;
 }
 
 

@@ -8,7 +8,7 @@
 | last update: 2007.12.23 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
 
-#include "camera.h"
+#include "Camera.h"
 #include "../y/EngineData.h"
 
 

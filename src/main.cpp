@@ -14,13 +14,6 @@
 #include "lib/image/image.h"
 #include "lib/kaba/kaba.h"
 
-#include "world/material.h"
-#include "world/model.h"
-#include "world/camera.h"
-#include "world/world.h"
-#include "world/object.h"
-#include "world/terrain.h"
-
 #include "helper/PerformanceMonitor.h"
 
 #include "input/InputManager.h"
@@ -42,6 +35,12 @@
 #include "renderer/RenderPathGL.h"
 
 #include "Config.h"
+#include "world/Camera.h"
+#include "world/Material.h"
+#include "world/Model.h"
+#include "world/Object.h"
+#include "world/Terrain.h"
+#include "world/World.h"
 
 const bool SHOW_GBUFFER = false;
 bool SHOW_SHADOW = false;

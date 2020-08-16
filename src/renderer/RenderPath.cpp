@@ -7,13 +7,13 @@
 
 #include "RenderPath.h"
 #include "Renderer.h"
-#include "../world/world.h"
-#include "../world/terrain.h"
-#include "../world/model.h"
-#include "../world/camera.h"
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../gui/Picture.h"
+#include "../world/Camera.h"
+#include "../world/Model.h"
+#include "../world/Terrain.h"
+#include "../world/World.h"
 
 #if HAS_LIB_VULKAN
 extern vulkan::Shader *shader_fx;

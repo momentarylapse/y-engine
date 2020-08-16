@@ -6,7 +6,7 @@
  */
 
 #include "Link.h"
-#include "object.h"
+#include "Object.h"
 #include "../lib/file/msg.h"
 
 
@@ -18,64 +18,94 @@ btQuaternion bt_set_q(const quaternion &q);
 
 
 
-Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaternion &ang) : Entity(Type::LINK) {
+Link::Link(LinkType t, Object *_a, Object *_b) : Entity(Type::LINK) {
 	link_type = t;
 	a = _a;
 	b = _b;
 	con = nullptr;
-	auto iqa = a->ang.bar();
-	auto iqb = quaternion::ID;
-	vector pa = iqa * (pos - a->pos);
-	vector pb = pos;
+}
+
+
+void Link::_create_link_data(vector &pa, vector &pb, quaternion &iqa, quaternion &iqb, const vector &pos) {
+	iqa = a->ang.bar();
+	iqb = quaternion::ID;
+	pa = iqa * (pos - a->pos);
+	pb = pos;
 	if (b) {
 		iqb = b->ang.bar();
 		pb = iqb * (pos - b->pos);
 	}
-	if (link_type == LinkType::SOCKET) {
-		if (b) {
-			msg_write("-----------add socket 2");
-			con = new btPoint2PointConstraint(
-				*a->body,
-				*b->body,
-				bt_set_v(pa),
-				bt_set_v(pb));
-		} else {
-			msg_write("-----------add socket 1");
-			con = new btPoint2PointConstraint(
-				*a->body,
-				bt_set_v(pa));
-		}
-	} else if (link_type == LinkType::HINGE) {
-		if (b) {
-			msg_write("-----------add hinge 2");
-			con = new btHingeConstraint(
-				*a->body,
-				*b->body,
-				bt_set_v(pa),
-				bt_set_v(pb),
-				bt_set_v(iqa * ang * vector::EZ),
-				bt_set_v(iqb * ang * vector::EZ),
-				true);
-		} else {
-			msg_write("-----------add hinge 1");
-			con = new btHingeConstraint(
-				*a->body,
-				bt_set_v(pa),
-				bt_set_v(iqa * ang * vector::EZ),
-				true);
-		}
-	} else if (link_type == LinkType::UNIVERSAL) {
-		msg_write("-----------add universal");
-		con = new btUniversalConstraint(
+}
+
+
+LinkSocket::LinkSocket(Object *_a, Object *_b, const vector &pos) : Link(LinkType::SOCKET, _a, _b) {
+	vector pa, pb;
+	quaternion iqa, iqb;
+	_create_link_data(pa, pb, iqa, iqb, pos);
+	if (b) {
+		msg_write("-----------add socket 2");
+		con = new btPoint2PointConstraint(
 			*a->body,
 			*b->body,
-			bt_set_v(pos),
-			bt_set_v(ang * vector::EZ),
-			bt_set_v(ang * vector::EY));
-		((btUniversalConstraint*)con)->setLimit(4, 0,0.1f);
+			bt_set_v(pa),
+			bt_set_v(pb));
+	} else {
+		msg_write("-----------add socket 1");
+		con = new btPoint2PointConstraint(
+			*a->body,
+			bt_set_v(pa));
+	}
+}
+
+LinkHinge::LinkHinge(Object *_a, Object *_b, const vector &pos, const quaternion &ang) : Link(LinkType::HINGE, _a, _b) {
+	vector pa, pb;
+	quaternion iqa, iqb;
+	_create_link_data(pa, pb, iqa, iqb, pos);
+	if (b) {
+		msg_write("-----------add hinge 2");
+		con = new btHingeConstraint(
+			*a->body,
+			*b->body,
+			bt_set_v(pa),
+			bt_set_v(pb),
+			bt_set_v(iqa * ang * vector::EZ),
+			bt_set_v(iqb * ang * vector::EZ),
+			true);
+	} else {
+		msg_write("-----------add hinge 1");
+		con = new btHingeConstraint(
+			*a->body,
+			bt_set_v(pa),
+			bt_set_v(iqa * ang * vector::EZ),
+			true);
+	}
+}
+
+LinkUniversal::LinkUniversal(Object *_a, Object *_b, const vector &pos, const quaternion &ang) : Link(LinkType::UNIVERSAL, _a, _b) {
+	vector pa, pb;
+	quaternion iqa, iqb;
+	_create_link_data(pa, pb, iqa, iqb, pos);
+	msg_write("-----------add universal");
+	con = new btUniversalConstraint(
+		*a->body,
+		*b->body,
+		bt_set_v(pos),
+		bt_set_v(ang * vector::EZ),
+		bt_set_v(ang * vector::EY));
+	((btUniversalConstraint*)con)->setLimit(4, 0,0.1f);
+}
+
+Link *Link::create(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang) {
+	if (type == LinkType::SOCKET) {
+		return new LinkSocket(a, b, pos);
+	} else if (type == LinkType::HINGE) {
+		return new LinkHinge(a, b, pos, ang);
+	} else if (type == LinkType::UNIVERSAL) {
+		return new LinkUniversal(a, b, pos, ang);
 	} else {
 		throw Exception("unknown link: " + i2s((int)type));
 	}
+	return nullptr;
 }
 
 Link::~Link() {

@@ -20,9 +20,10 @@
 |                                                                              |
 | last update: 2008.10.26 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
-#include "model.h"
-#include "material.h"
-#include "world.h"
+
+#include "Model.h"
+#include "Material.h"
+#include "World.h"
 #include "../meta.h"
 #if HAS_LIB_VULKAN
 #include "../lib/vulkan/vulkan.h"

@@ -11,8 +11,8 @@
 //#include "../lib/vulkan/vulkan.h"
 #include "../lib/kaba/kaba.h"
 #ifdef _X_ALLOW_X_
-#include "../world/model.h"
-#include "../world/material.h"
+#include "../world/Model.h"
+#include "../world/Material.h"
 #endif
 
 EngineData engine;

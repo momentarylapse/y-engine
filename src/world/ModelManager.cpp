@@ -6,7 +6,7 @@
  */
 
 #include "ModelManager.h"
-#include "model.h"
+#include "Model.h"
 #include "../y/EngineData.h"
 #include "../lib/kaba/kaba.h"
 #include "../plugins/PluginManager.h"

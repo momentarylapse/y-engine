@@ -7,8 +7,8 @@
 |                                                                              |
 | last updated: 2008.12.06 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(GOD_H__INCLUDED_)
-#define GOD_H__INCLUDED_
+#if !defined(SRC_WORLD_WORLD_H_)
+#define SRC_WORLD_WORLD_H_
 
 
 #include "../lib/base/base.h"
@@ -90,7 +90,7 @@ public:
 	void register_model(Model *m);
 	void unregister_model(Model *m);
 
-	Link *add_link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang);
+	void add_link(Link *l);
 
 	Path filename;
 	color background;

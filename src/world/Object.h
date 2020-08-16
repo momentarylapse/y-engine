@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*\
-| CObject                                                                      |
+| Object                                                                       |
 | -> physical entities of a model in the game                                  |
 | -> manages physics on its own                                                |
 |                                                                              |
@@ -7,10 +7,10 @@
 |                                                                              |
 | last updated: 2009.12.03 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(OBJECT_H__INCLUDED_)
-#define OBJECT_H__INCLUDED_
+#if !defined(SRC_WORLD_OBJECT_H_)
+#define SRC_WORLD_OBJECT_H_
 
-#include "model.h"
+#include "Model.h"
 
 
 class Object : public Model {

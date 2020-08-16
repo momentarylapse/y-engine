@@ -1,10 +1,8 @@
-#include "material.h"
-#include "model.h"
+
+#include "Material.h"
+#include "Model.h"
 #include "../lib/file/file.h"
 #include "../lib/nix/nix.h"
-#ifdef _X_ALLOW_X_
-#include "../meta.h"
-#endif
 
 color file_read_color4i(File *f); // -> model.cpp
 

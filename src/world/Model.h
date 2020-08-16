@@ -21,8 +21,8 @@
 |                                                                              |
 | last update: 2008.01.22 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
-#if !defined(MODEL_H__INCLUDED_)
-#define MODEL_H__INCLUDED_
+#if !defined(SRC_WORLD_MODEL_H_)
+#define SRC_WORLD_MODEL_H_
 
 
 #include "../lib/base/base.h"

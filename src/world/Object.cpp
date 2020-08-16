@@ -7,12 +7,11 @@
 |                                                                              |
 | last updated: 2008.10.26 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#include "object.h"
-#include "world.h"
-#include "material.h"
+#include "Object.h"
+#include "Material.h"
+#include "World.h"
 #include "../y/EngineData.h"
 #include "../lib/file/file.h"
-#include "world.h"
 
 #include <btBulletDynamicsCommon.h>
 

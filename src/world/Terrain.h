@@ -6,14 +6,14 @@
 |                                                                              |
 | last updated: 2008.06.23 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(TERRAIN_H__INCLUDED_)
-#define TERRAIN_H__INCLUDED_
+#if !defined(SRC_WORLD_TERRAIN_H_)
+#define SRC_WORLD_TERRAIN_H_
 
 #include "../lib/base/base.h"
 #include "../lib/file/path.h"
 #include "../lib/math/math.h"
-#include "material.h"
 #include "../y/Entity.h"
+#include "Material.h"
 class Material;
 class CollisionData;
 namespace nix {

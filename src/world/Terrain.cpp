@@ -7,12 +7,11 @@
 | last updated: 2008.11.02 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
 
-#include "terrain.h"
-//#include "../lib/vulkan/vulkan.h"
+#include "Terrain.h"
+#include "Camera.h"
+#include "Material.h"
+#include "World.h"
 #include "../lib/nix/nix.h"
-#include "material.h"
-#include "world.h"
-#include "camera.h"
 #ifdef _X_ALLOW_X_
 #include "../y/EngineData.h"
 //#include "../fx/light.h"
