@@ -14,6 +14,7 @@
 #include "../lib/base/base.h"
 #include "../lib/file/path.h"
 #include "../lib/math/math.h"
+#include "../y/Entity.h"
 
 
 class Model;
@@ -141,7 +142,7 @@ struct GodNetMessage {
 };
 
 
-class Link {
+class Link : public Entity {
 public:
 	Link(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang);
 	~Link();

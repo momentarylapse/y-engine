@@ -8,12 +8,12 @@
 #ifndef SRC_PLUGINS_CONTROLLER_H_
 #define SRC_PLUGINS_CONTROLLER_H_
 
-#include "../meta.h"
+#include "../y/Entity.h"
 
-class Controller : public XContainer {
+class Controller : public Entity {
 public:
 	Controller();
-	~Controller() override;
+	~Controller() override {};
 
 	void __init__();
 	void __delete__() override;

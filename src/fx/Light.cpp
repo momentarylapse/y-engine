@@ -9,15 +9,15 @@
 //#include "../lib/vulkan/vulkan.h"
 #include <stdio.h>
 
-Light::Light(const vector &p, const vector &d, const color &c, float r, float t) {
-	pos = p;
-	dir = d;
-	col = c;
-	radius = r;
-	theta = t;
-	harshness = 0.8f;
-	if (radius >= 0)
-		harshness = 1;
+Light::Light(const vector &p, const vector &d, const color &c, float r, float t) : Entity(Type::LIGHT) {
+	light.pos = p;
+	light.dir = d;
+	light.col = c;
+	light.radius = r;
+	light.theta = t;
+	light.harshness = 0.8f;
+	if (light.radius >= 0)
+		light.harshness = 1;
 	enabled = true;
 
 //	ubo = new vulkan::UniformBuffer(sizeof(UBOLight));

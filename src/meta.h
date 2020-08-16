@@ -65,34 +65,5 @@ enum {
 
 
 
-class XContainer : public hui::EventHandler {
-public:
-	virtual ~XContainer(){}
-	virtual void _cdecl on_iterate(float dt){}
-	virtual void _cdecl on_init(){}
-	virtual void _cdecl on_delete(){}
-};
-
-
-void _cdecl MetaDeleteLater(XContainer *p);
-void _cdecl MetaDeleteSelection();
-
-extern bool AllowXContainer;
-
-#define xcon_reg(var, array) \
-	if (AllowXContainer) \
-		(array).add(var);
-
-#define xcon_unreg(var, array) \
-	if (AllowXContainer) \
-		for (int i=0;i<(array).num;i++) \
-			if ((array)[i] == var) \
-				(array).erase(i);
-
-#define xcon_del(array) \
-	for (int i=(array).num-1; i>=0; i--) \
-		delete((array)[i]); \
-	(array).clear();
-
 #endif
 

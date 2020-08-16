@@ -12,6 +12,7 @@
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
+#include "../y/Entity.h"
 
 /*namespace vulkan {
 	class DescriptorSet;
@@ -27,17 +28,15 @@ struct UBOLight {
 	float theta, harshness;
 };
 
-class Light : public UBOLight {
+class Light : public Entity {
 public:
 	Light(const vector &p, const vector &d, const color &c, float r, float t);
 	~Light();
 	void __init_parallel__(const vector &d, const color &c);
 	void __init_spherical__(const vector &p, const color &c, float r);
 	void __init_cone__(const vector &p, const vector &d, const color &c, float r, float t);
-	//vector pos, dir;
-	//color col;
+	UBOLight light;
 	bool enabled;
-	//float radius, theta, harshness;
 //	vulkan::UniformBuffer *ubo;
 //	vulkan::DescriptorSet *dset;
 };

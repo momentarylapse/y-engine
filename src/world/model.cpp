@@ -699,7 +699,7 @@ void Model::load(const Path &filename)
 }
 
 
-Model::Model() {
+Model::Model() : Entity(Type::MODEL) {
 	pos = vel = rot = v_0;
 	ang = quaternion::ID;
 	object_id = -1;

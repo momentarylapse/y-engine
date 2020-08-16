@@ -32,7 +32,7 @@ void CameraInit() {
 }
 
 void CameraReset() {
-	xcon_del(cameras);
+	entity_del(cameras);
 
 	// create the main-view ("cam")
 	cam = new Camera(v_0, quaternion::ID, rect::ID);
@@ -68,13 +68,13 @@ void Camera::reset() {
 	im_all = matrix::ID;
 }
 
-Camera::Camera(const vector &_pos, const quaternion &_ang, const rect &_dest) {
+Camera::Camera(const vector &_pos, const quaternion &_ang, const rect &_dest) : Entity(Entity::Type::CAMERA) {
 	reset();
 	enabled = true;
 	show = true;
 
 	// register
-	xcon_reg(this, cameras);
+	entity_reg(this, cameras);
 
 	pos = _pos;
 	ang = _ang;
@@ -83,7 +83,7 @@ Camera::Camera(const vector &_pos, const quaternion &_ang, const rect &_dest) {
 
 Camera::~Camera() {
 	// unregister
-	xcon_unreg(this, cameras);
+	entity_unreg(this, cameras);
 }
 
 

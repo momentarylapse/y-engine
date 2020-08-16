@@ -13,6 +13,7 @@
 #include "../lib/file/path.h"
 #include "../lib/math/math.h"
 #include "material.h"
+#include "../y/Entity.h"
 class Material;
 class CollisionData;
 namespace nix {
@@ -52,7 +53,7 @@ public:
 	int *edge_index;
 };
 
-class Terrain {
+class Terrain : public Entity {
 public:
 	Terrain();
 	Terrain(const Path &filename, const vector &pos);

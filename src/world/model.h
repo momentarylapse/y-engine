@@ -28,6 +28,7 @@
 #include "../lib/base/base.h"
 #include "../lib/file/path.h"
 #include "../lib/math/math.h"
+#include "../y/Entity.h"
 
 class btRigidBody;
 class btCollisionShape;
@@ -271,7 +272,7 @@ public:
 	ModelTemplate(Model *m);
 };
 
-class Model : public VirtualBase {
+class Model : public Entity {
 public:
 	Model();
 	~Model() override;

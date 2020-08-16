@@ -98,9 +98,9 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_rect(rect(-1,1, -1,1));
 
-	AllowXContainer = false;
+	EntityManager::enabled = false;
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
-	AllowXContainer = true;
+	EntityManager::enabled = true;
 }
 void RenderPathGL::draw() {
 	nix::StartFrameGLFW(window);
@@ -397,21 +397,21 @@ void RenderPathGL::prepare_lights() {
 		if (!l->enabled)
 			continue;
 
-		if (l->radius <= 0){
+		if (l->light.radius <= 0){
 			vector center = cam->pos + cam->ang*vector::EZ * (shadow_box_size / 3.0f);
 			float grid = shadow_box_size / 16;
 			center.x -= fmod(center.x, grid) - grid/2;
 			center.y -= fmod(center.y, grid) - grid/2;
 			center.z -= fmod(center.z, grid) - grid/2;
 			auto t = matrix::translation(- center);
-			auto r = matrix::rotation(l->dir.dir2ang()).transpose();
+			auto r = matrix::rotation(l->light.dir.dir2ang()).transpose();
 			float f = 1 / shadow_box_size;
 			auto s = matrix::scale(f, f, f);
 			// map onto [-1,1]x[-1,1]x[0,1]
 			shadow_proj = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
-			l->proj = shadow_proj;
+			l->light.proj = shadow_proj;
 		}
-		lights.add(*l);
+		lights.add(l->light);
 	}
 	ubo_light->update_array(lights);
 }

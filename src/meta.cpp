@@ -24,26 +24,8 @@
 \*----------------------------------------------------------------------------*/
 #include "lib/file/file.h"
 #include "meta.h"
-//#include "lib/vulkan/vulkan.h"
-#include "lib/nix/nix.h"
-#include "lib/kaba/kaba.h"
 #ifdef _X_ALLOW_X_
-#include "world/model.h"
-#if 0
-#include "world/model_manager.h"
-#endif
-#include "world/material.h"
-#include "world/world.h"
-#include "world/camera.h"
-#if 0
-#include "gui/gui.h"
-#include "gui/font.h"
-#include "fx/fx.h"
-#endif
 #else // for use in Edward
-#include "x/material.h"
-#include "x/model.h"
-#include "x/model_manager.h"
 #include "x/font.h"
 #endif
 #include "y/EngineData.h"
@@ -55,15 +37,8 @@
 
 
 
-Array<XContainer*> meta_delete_stuff_list;
-
-bool AllowXContainer = true;
-
-
 
 void MetaReset() {
-	meta_delete_stuff_list.clear();
-
 #if 0
 	if (Gui::Fonts.num > 0)
 		Engine.DefaultFont = Gui::Fonts[0];
@@ -80,12 +55,3 @@ void MetaCalcMove() {
 }
 
 
-void MetaDeleteLater(XContainer *p) {
-	meta_delete_stuff_list.add(p);
-}
-
-void MetaDeleteSelection() {
-	for (auto *p: meta_delete_stuff_list)
-		delete p;
-	meta_delete_stuff_list.clear();
-}

@@ -24,6 +24,7 @@
 #include "../y/EngineData.h"
 #include "../input/InputManager.h"
 #include "../helper/PerformanceMonitor.h"
+#include "../meta.h"
 
 
 PluginManager plugin_manager;
@@ -182,14 +183,16 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("Controller.on_right_button_up", &Controller::on_right_button_up, &con);
 	Kaba::link_external_virtual("Controller.on_render_inject", &Controller::on_render_inject, &con);
 
+#define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
 
+	Light light(v_0, v_0, Black, 0, 0);
 	Kaba::declare_class_size("Light", sizeof(Light));
-	Kaba::declare_class_element("Light.pos", &Light::pos);
-	Kaba::declare_class_element("Light.dir", &Light::dir);
-	Kaba::declare_class_element("Light.color", &Light::col);
-	Kaba::declare_class_element("Light.radius", &Light::radius);
-	Kaba::declare_class_element("Light.theta", &Light::theta);
-	Kaba::declare_class_element("Light.harshness", &Light::harshness);
+	Kaba::declare_class_element("Light.pos", _OFFSET(light, light.pos));
+	Kaba::declare_class_element("Light.dir", _OFFSET(light, light.dir));
+	Kaba::declare_class_element("Light.color", _OFFSET(light, light.col));
+	Kaba::declare_class_element("Light.radius", _OFFSET(light, light.radius));
+	Kaba::declare_class_element("Light.theta", _OFFSET(light, light.theta));
+	Kaba::declare_class_element("Light.harshness", _OFFSET(light, light.harshness));
 	Kaba::declare_class_element("Light.enabled", &Light::enabled);
 
 	Kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);

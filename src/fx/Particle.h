@@ -10,6 +10,7 @@
 
 #include "../lib/base/base.h"
 #include "../lib/math/math.h"
+#include "../y/Entity.h"
 
 
 namespace nix {
@@ -24,13 +25,8 @@ namespace nix {
 	float fog_distance;
 };*/
 
-class Particle : public VirtualBase {
+class Particle : public Entity {
 public:
-
-	enum class Type {
-		PARTICLE,
-		BEAM
-	};
 
 	Particle(const vector &pos, float r, nix::Texture *tex, float ttl);
 	virtual ~Particle();
@@ -39,7 +35,6 @@ public:
 	void __delete__() override;
 	virtual void on_iterate(float dt) {}
 
-	Type type;
 	vector pos;
 	vector vel;
 	color col;

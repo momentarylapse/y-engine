@@ -14,6 +14,7 @@
 //#include "../lib/vulkan/vulkan.h"
 #include "../lib/nix/nix.h"
 #include "../y/EngineData.h"
+#include "../meta.h"
 #include "object.h"
 #include "model.h"
 #include "ModelManager.h"
@@ -316,7 +317,7 @@ bool World::load(const LevelData &ld) {
 #ifdef _X_ALLOW_X_
 	for (auto &l: ld.lights) {
 		auto *ll = new Light(l.pos, l.ang.ang2dir(), l._color, l.radius, -1);
-		ll->harshness = l.harshness;
+		ll->light.harshness = l.harshness;
 		ll->enabled = l.enabled;
 		add_light(ll);
 	}
@@ -389,7 +390,7 @@ Link *World::add_link(LinkType type, Object *a, Object *b, const vector &pos, co
 	return l;
 }
 
-Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaternion &ang) {
+Link::Link(LinkType t, Object *_a, Object *_b, const vector &pos, const quaternion &ang) : Entity(Type::LINK) {
 	type = t;
 	a = _a;
 	b = _b;

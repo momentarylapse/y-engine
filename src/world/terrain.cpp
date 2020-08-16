@@ -23,8 +23,7 @@
 //#define max(a,b)		(((a)>(b))?(a):(b))
 //#define min(a,b)		(((a)<(b))?(a):(b))
 
-void Terrain::reset()
-{
+void Terrain::reset() {
 	filename = "";
 	error = false;
 	num_x = num_z = 0;
@@ -32,8 +31,7 @@ void Terrain::reset()
 	vertex_buffer = NULL;
 }
 
-Terrain::Terrain()
-{
+Terrain::Terrain() : Entity(Type::TERRAIN) {
 	material = NULL;
 	ubo = nullptr;
 	body = nullptr;
@@ -42,8 +40,7 @@ Terrain::Terrain()
 	reset();
 }
 
-Terrain::Terrain(const Path &_filename_, const vector &_pos_) : Terrain()
-{
+Terrain::Terrain(const Path &_filename_, const vector &_pos_) : Terrain() {
 	material = NULL;
 	load(_filename_, _pos_);
 }
@@ -56,7 +53,7 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 	reset();
 
 	filename = _filename_;
-	File *f = FileOpen(engine.map_dir << (filename.str() + ".map"));
+	File *f = FileOpen(engine.map_dir << filename.with(".map"));
 	if (f){
 
 		int ffv = f->ReadFileFormatVersion();

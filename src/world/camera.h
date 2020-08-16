@@ -13,10 +13,10 @@
 
 #include "../lib/base/base.h"
 #include "../lib/math/math.h"
-#include "../meta.h"
+#include "../y/Entity.h"
 
 
-class Camera : public XContainer {
+class Camera : public Entity {
 public:
 	Camera(const vector &pos, const quaternion &ang, const rect &dest);
 	~Camera() override;
