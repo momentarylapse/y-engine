@@ -176,6 +176,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_virtual("Controller.on_middle_button_up", &Controller::on_middle_button_up, &con);
 	Kaba::link_external_virtual("Controller.on_right_button_down", &Controller::on_right_button_down, &con);
 	Kaba::link_external_virtual("Controller.on_right_button_up", &Controller::on_right_button_up, &con);
+	Kaba::link_external_virtual("Controller.on_render_inject", &Controller::on_render_inject, &con);
 
 
 	Kaba::declare_class_size("Light", sizeof(Light));
@@ -369,5 +370,15 @@ void PluginManager::handle_input() {
 void PluginManager::handle_draw_pre() {
 	for (auto *c: controllers)
 		c->on_draw_pre();
+}
+
+void PluginManager::handle_render_inject() {
+	for (auto *c: controllers)
+		c->on_render_inject();
+}
+
+void PluginManager::handle_render_inject2() {
+	for (auto *c: controllers)
+		c->on_render_inject2();
 }
 

@@ -31,6 +31,8 @@ public:
 	void handle_iterate(float dt);
 	void handle_input();
 	void handle_draw_pre();
+	void handle_render_inject();
+	void handle_render_inject2();
 };
 
 

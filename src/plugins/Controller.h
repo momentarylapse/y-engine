@@ -30,6 +30,9 @@ public:
 	virtual void _cdecl on_right_button_up() {}
 	virtual void _cdecl on_iterate_pre(float dt) {}
 	virtual void _cdecl on_draw_pre() {}
+
+	virtual void _cdecl on_render_inject() {}
+	virtual void _cdecl on_render_inject2() {}
 };
 
 #endif /* SRC_PLUGINS_CONTROLLER_H_ */

@@ -11,6 +11,7 @@
 #include "../lib/nix/nix.h"
 
 #include "../helper/PerformanceMonitor.h"
+#include "../plugins/PluginManager.h"
 #include "../gui/gui.h"
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
@@ -254,6 +255,7 @@ void RenderPathGL::render_into_texture(nix::FrameBuffer *fb) {
 	nix::SetZ(true, true);
 
 	draw_world(true);
+	plugin_manager.handle_render_inject();
 	break_point();
 	perf_mon->tick(PMLabel::WORLD);
 
