@@ -9,6 +9,7 @@
 #include "ParticleManager.h"
 #include "Particle.h"
 #include "Beam.h"
+#include "../lib/file/msg.h"
 
 
 ParticleGroup::ParticleGroup(nix::Texture *t) {
@@ -32,12 +33,29 @@ ParticleGroup::~ParticleGroup() {
 }
 
 void ParticleGroup::add(Particle *p) {
-	if (p->type == ParticleType::PARTICLE)
+	if (p->type == Particle::Type::PARTICLE)
 		particles.add(p);
-	else if (p->type == ParticleType::BEAM)
+	else if (p->type == Particle::Type::BEAM)
 		beams.add((Beam*)p);
 }
 
+bool ParticleGroup::try_delete(Particle *p) {
+	foreachi (auto *pp, particles, i)
+		if (pp == p) {
+			//msg_write("  -> PARTICLE");
+			particles.erase(i);
+			delete pp;
+			return true;
+		}
+	foreachi (auto *pp, beams, i)
+		if (pp == p) {
+			//msg_write("  -> BEAM");
+			beams.erase(i);
+			delete pp;
+			return true;
+		}
+	return false;
+}
 
 
 void ParticleManager::add(Particle *p) {
@@ -49,6 +67,13 @@ void ParticleManager::add(Particle *p) {
 	auto *gg = new ParticleGroup(p->texture);
 	gg->add(p);
 	groups.add(gg);
+}
+
+bool ParticleManager::try_delete(Particle *p) {
+	for (auto *g: groups)
+		if (g->try_delete(p))
+			return true;
+	return false;
 }
 
 void ParticleManager::clear() {

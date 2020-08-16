@@ -24,13 +24,14 @@ namespace nix {
 	float fog_distance;
 };*/
 
-enum ParticleType {
-	PARTICLE,
-	BEAM
-};
-
 class Particle : public VirtualBase {
 public:
+
+	enum class Type {
+		PARTICLE,
+		BEAM
+	};
+
 	Particle(const vector &pos, float r, nix::Texture *tex, float ttl);
 	virtual ~Particle();
 
@@ -38,7 +39,7 @@ public:
 	void __delete__() override;
 	virtual void on_iterate(float dt) {}
 
-	ParticleType type;
+	Type type;
 	vector pos;
 	vector vel;
 	color col;

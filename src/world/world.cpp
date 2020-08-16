@@ -802,6 +802,36 @@ void World::unregister_object(Object *m) {
 	m->object_id = -1;
 }
 
+void World::remove(void* x) {
+	//msg_error("World.remove");
+	foreachi(auto *o, objects, i)
+		if (o == x) {
+			//msg_write(" -> OBJECT");
+			o->on_delete();
+			unregister_model(o);
+			unregister_object(o);
+			objects.erase(i);
+			delete o;
+			return;
+		}
+	foreachi(auto *l, lights, i)
+		if (l == x) {
+			//msg_write(" -> LIGHT");
+			lights.erase(i);
+			delete l;
+			return;
+		}
+	foreachi(auto *l, links, i)
+		if (l == x) {
+			//msg_write(" -> LINK");
+			links.erase(i);
+			delete l;
+			return;
+		}
+	if (particle_manager->try_delete((Particle*)x))
+		return;
+}
+
 void PartialModel::clear() {
 //	delete ubo;
 //	delete dset;

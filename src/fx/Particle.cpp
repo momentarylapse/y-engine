@@ -13,7 +13,7 @@ nix::Shader *shader_fx;
 //DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
 
 Particle::Particle(const vector &p, float r, nix::Texture *t, float ttl) {
-	type = ParticleType::PARTICLE;
+	type = Type::PARTICLE;
 	pos = p;
 	vel = vector::ZERO;
 	col = White;

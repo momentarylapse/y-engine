@@ -153,6 +153,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("World.shift_all", &World::shift_all);
 	Kaba::link_external_class_func("World.get_g", &World::get_g);
 	Kaba::link_external_class_func("World.trace", &World::trace);
+	Kaba::link_external_class_func("World.remove", &World::remove);
 
 	Kaba::declare_class_element("Fog.color", &Fog::_color);
 	Kaba::declare_class_element("Fog.enabled", &Fog::enabled);

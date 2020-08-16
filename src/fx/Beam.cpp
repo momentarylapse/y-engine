@@ -8,7 +8,7 @@
 #include "Beam.h"
 
 Beam::Beam(const vector &_pos, const vector &_length, float _r, nix::Texture *_tex, float _ttl) : Particle(_pos, _r, _tex, _ttl) {
-	type = ParticleType::BEAM;
+	type = Type::BEAM;
 	length = _length;
 }
 

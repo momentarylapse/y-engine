@@ -25,6 +25,7 @@ public:
 	Array<Particle*> particles;
 	Array<Beam*> beams;
 	void add(Particle *p);
+	bool try_delete(Particle *p);
 	nix::Texture *texture;
 	nix::UniformBuffer *ubo;
 	//DescriptorSet *dset;
@@ -34,7 +35,7 @@ class ParticleManager {
 public:
 	Array<ParticleGroup*> groups;
 	void add(Particle *o);
-	void remove(Particle *o);
+	bool try_delete(Particle *o);
 	void clear();
 	void iterate(float dt);
 	void shift_all(const vector &dpos);
