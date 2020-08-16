@@ -161,6 +161,7 @@ void GodEnd() {
 void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 	auto dispatcher = world->getDispatcher();
 	int n = dispatcher->getNumManifolds();
+	//CollisionData col;
 	for (int i=0; i<n; i++) {
 		auto contactManifold = dispatcher->getManifoldByIndexInternal(i);
 		auto obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
@@ -172,9 +173,9 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 			auto &pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() <= 0) {
 				if (a->physics_data.active)
-					a->on_collide_m(b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB));
+					a->on_collide({b, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
 				if (b->physics_data.active)
-					b->on_collide_m(a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB));
+					a->on_collide({a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}

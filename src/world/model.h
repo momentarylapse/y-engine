@@ -41,6 +41,7 @@ class Material;
 class TraceData;
 class Terrain;
 class TemplateDataScriptVariable;
+class CollisionData;
 namespace nix {
 	class VertexBuffer;
 }
@@ -391,8 +392,7 @@ public:
 
 	virtual void _cdecl on_init() {}
 	virtual void _cdecl on_delete() {}
-	virtual void _cdecl on_collide_m(Model *o, const vector &p, const vector &n) {}
-	virtual void _cdecl on_collide_t(Terrain *t, const vector &p, const vector &n) {}
+	virtual void _cdecl on_collide(const CollisionData &col) {}
 	virtual void _cdecl on_iterate(float dt) {}
 };
 

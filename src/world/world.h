@@ -155,6 +155,13 @@ public:
 	Object *b;
 };
 
+class CollisionData {
+public:
+	Model *m, *sub;
+	Terrain *t;
+	vector p, n;
+};
+
 
 
 // game data

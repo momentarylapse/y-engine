@@ -114,11 +114,18 @@ void PluginManager::link_kaba() {
 	Kaba::link_external_class_func("Model.add_torque_impulse", &Object::add_torque_impulse);
 	Kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	Kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
-	Kaba::link_external_virtual("Model.on_collide_m", &Model::on_collide_m, &model);
-	Kaba::link_external_virtual("Model.on_collide_t", &Model::on_collide_t, &model);
+	Kaba::link_external_virtual("Model.on_collide", &Model::on_collide, &model);
 	Kaba::link_external_virtual("Model.on_iterate", &Model::on_iterate, &model);
 
 
+	Kaba::declare_class_size("CollisionData", sizeof(CollisionData));
+	Kaba::declare_class_element("CollisionData.m", &CollisionData::m);
+	Kaba::declare_class_element("CollisionData.sub", &CollisionData::sub);
+	Kaba::declare_class_element("CollisionData.t", &CollisionData::t);
+	Kaba::declare_class_element("CollisionData.p", &CollisionData::p);
+	Kaba::declare_class_element("CollisionData.n", &CollisionData::n);
+
+	Kaba::declare_class_size("Material", sizeof(Material));
 	Kaba::declare_class_element("Material.textures", &Material::textures);
 	Kaba::declare_class_element("Material.shader", &Material::shader);
 	Kaba::declare_class_element("Material.ambient", &Material::ambient);
