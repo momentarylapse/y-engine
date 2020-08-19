@@ -160,13 +160,13 @@ int key_decode(int key) {
 
 int mods_decode(int mods) {
 	int r = 0;
-	if (mods == 1)
+	if (mods == GLFW_MOD_SHIFT)
 		r += hui::KEY_SHIFT;
-	if (mods == 2)
-		r += hui::KEY_SHIFT;
-	if (mods == 4)
+	if (mods == GLFW_MOD_CONTROL)
+		r += hui::KEY_CONTROL;
+	if (mods == GLFW_MOD_ALT)
 		r += hui::KEY_ALT;
-	//if (mods == 8)
+	//if (mods == GLFW_MOD_SUPER)
 	//	r += hui::KEY_SUPER;
 	return r;
 }

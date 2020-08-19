@@ -334,7 +334,7 @@ void PluginManager::reset() {
 	controllers.clear();
 }
 
-void assign_variables(char *p, const Kaba::Class *c, Array<TemplateDataScriptVariable> &variables) {
+void assign_variables(char *p, const Kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
 	for (auto &v: variables) {
 		for (auto &e: c->elements)
 			if (v.name == e.name.lower().replace("_", "")) {
@@ -351,7 +351,7 @@ void assign_variables(char *p, const Kaba::Class *c, Array<TemplateDataScriptVar
 	}
 }
 
-void *PluginManager::create_instance(const Path &filename, const string &base_class, Array<TemplateDataScriptVariable> &variables) {
+void *PluginManager::create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	try {
 		auto *s = Kaba::Load(filename);
@@ -370,7 +370,7 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 	return nullptr;
 }
 
-void PluginManager::add_controller(const Path &name, Array<TemplateDataScriptVariable> &variables) {
+void PluginManager::add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables) {
 	auto *c = (Controller*)create_instance(name, "y.Controller", variables);
 
 	controllers.add(c);

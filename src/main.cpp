@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
+#include <csignal>
 
 
 #include "lib/math/math.h"
@@ -26,6 +27,7 @@
 #include "gui/Text.h"
 
 #include "y/EngineData.h"
+#include "meta.h"
 
 
 #include "plugins/PluginManager.h"
@@ -165,6 +167,8 @@ public:
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename, s.variables);
+		for (auto &s: config.get_str("additional-scripts", "").explode(","))
+			plugin_manager.add_controller(s, {});
 	}
 	
 	GLFWwindow* create_window() {
@@ -288,10 +292,55 @@ vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBu
 }
 #endif
 
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
+
+namespace Kaba {
+	//class StackFrameInfo;
+	struct StackFrameInfo {
+		void *rip;
+		void *rsp;
+		void *rbp;
+		Script *s;
+		Function *f;
+		int64 offset;
+		string str() const;
+	};
+	StackFrameInfo get_func_from_rip(void *rip);
+}
+
+void show_backtrace (void) {
+	unw_cursor_t cursor;
+	unw_context_t uc;
+	unw_word_t ip, sp;
+
+	unw_getcontext(&uc);
+	unw_init_local(&cursor, &uc);
+	while (unw_step(&cursor) > 0) {
+		unw_get_reg(&cursor, UNW_REG_IP, &ip);
+		unw_get_reg(&cursor, UNW_REG_SP, &sp);
+		printf ("ip = %lx, sp = %lx\n", (long) ip, (long) sp);
+		auto r = Kaba::get_func_from_rip((void*)(int_p)ip);
+		msg_write(r.str());
+	}
+}
+
+void signal_handler(int signum) {
+   std::cout << "Interrupt signal (" << signum << ") received.\n";
+
+   show_backtrace();
+
+   // cleanup and close up stuff here
+   // terminate program
+
+   exit(signum);
+}
 
 int hui_main(const Array<string> &arg) {
 
 	hui::Application::guess_directories(arg, "y");
+
+	signal(SIGSEGV, signal_handler);
 
 	try {
 		app.run(arg);

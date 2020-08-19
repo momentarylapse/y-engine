@@ -21,9 +21,9 @@ public:
 
 	void reset();
 
-	static void *create_instance(const Path &filename, const string &base_class, Array<TemplateDataScriptVariable> &variables);
+	static void *create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables);
 
-	void add_controller(const Path &name, Array<TemplateDataScriptVariable> &variables);
+	void add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables);
 
 	Array<Controller*> controllers;
 
