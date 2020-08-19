@@ -16,7 +16,7 @@
 
 
 
-void cairo_render_text(const string &font_name, float font_size, const string &text, Image &im) {
+void cairo_render_text(const string &font_name, float font_size, const string &text, gui::Node::Align align, Image &im) {
 
 	// initial surface size guess
 	int w_surf = 200;
@@ -40,6 +40,12 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 		pango_layout_set_font_description(layout, desc);
 		pango_font_description_free(desc);
 
+		if (align & gui::Node::Align::RIGHT)
+			pango_layout_set_alignment(layout, PANGO_ALIGN_RIGHT);
+		else if (align & gui::Node::Align::CENTER_H)
+			pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
+		else
+			pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
 		pango_layout_set_text(layout, (char*)text.data, text.num);
 		//int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 		int w_used, h_used;
@@ -78,10 +84,10 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 	}
 }
 
-void render_text(const string &str, Image &im) {
+void render_text(const string &str, gui::Node::Align align, Image &im) {
 	string font_name = "CAC Champagne";
 	float font_size = 32;
-	cairo_render_text(font_name, font_size, str, im);
+	cairo_render_text(font_name, font_size, str, align, im);
 }
 
 namespace gui {
@@ -114,7 +120,7 @@ void Text::__delete__() {
 
 void Text::rebuild() {
 	Image im;
-	render_text(text, im);
+	render_text(text, align, im);
 	texture = new nix::Texture();
 
 	texture->overwrite(im);
