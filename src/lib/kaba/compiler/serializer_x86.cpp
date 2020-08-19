@@ -431,6 +431,7 @@ void SerializerX86::serialize_inline_function(Node *com, const Array<SerialNodeP
 		case InlineID::COLOR_SET:
 			for (int i=0; i<ret.type->size/4; i++)
 				add_cmd(Asm::INST_MOV, param_shift(ret, i*4, TypeFloat32), param[i]);
+			break;
 		case InlineID::INT_ASSIGN:
 		case InlineID::INT64_ASSIGN:
 		case InlineID::FLOAT_ASSIGN:

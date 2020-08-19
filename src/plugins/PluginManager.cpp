@@ -35,7 +35,7 @@ PerformanceMonitor *global_perf_mon;
 extern nix::Texture *_tex_white;
 
 void global_delete(Entity *e) {
-	//msg_error("global delete...");
+	//msg_error("global delete... " + p2s(e));
 	world.unregister(e);
 	e->on_delete();
 	delete e;
