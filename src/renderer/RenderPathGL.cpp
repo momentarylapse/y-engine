@@ -192,7 +192,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	nix::SetZ(false, false);
 
 	for (auto *n: gui::sorted_nodes) {
-		if (!n->visible)
+		if (!n->eff_visible)
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;

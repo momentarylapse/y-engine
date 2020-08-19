@@ -24,6 +24,7 @@ Node::Node(const rect &r) {
 	eff_col = White;
 	eff_area = r;
 	eff_z = 0;
+	eff_visible = true;
 
 	parent = nullptr;
 }
@@ -61,10 +62,12 @@ void Node::update_geometry(const rect &target) {
 	if (parent) {
 		eff_z = parent->eff_z + dz;
 		eff_col = col;//parent->eff_col * col;
+		eff_visible = parent->eff_visible and visible;
 	} else {
 		// toplevel
 		eff_col = col;
 		eff_z = 0;
+		eff_visible = visible;
 	}
 
 	if (parent) {

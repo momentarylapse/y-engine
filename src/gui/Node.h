@@ -61,6 +61,7 @@ public:
 	color eff_col;
 	rect eff_area; // [0:1]x[0:1] system!
 	float eff_z;
+	bool eff_visible;
 
 	Node *parent;
 	Array<Node*> children;
