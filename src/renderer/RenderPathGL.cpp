@@ -344,7 +344,7 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 void RenderPathGL::draw_objects(bool allow_material) {
 	for (auto &s: world.sorted_opaque) {
 		Model *m = s.model;
-		nix::SetWorldMatrix(mtr(m->pos, m->ang));//m->_matrix);
+		nix::SetWorldMatrix(m->_matrix);
 		if (allow_material)
 			set_material(s.material);
 		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
@@ -354,6 +354,22 @@ void RenderPathGL::draw_objects(bool allow_material) {
 		} else {
 			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
+	}
+
+	if (allow_material)
+	for (auto &s: world.sorted_trans) {
+		Model *m = s.model;
+		nix::SetWorldMatrix(m->_matrix);
+		set_material(s.material);
+		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
+		nix::SetCull(CULL_NONE);
+		if (m->anim.meta) {
+			m->anim.mesh[0]->update_vb();
+			nix::DrawTriangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+		} else {
+			nix::DrawTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		}
+		nix::SetCull(CULL_DEFAULT);
 	}
 }
 void RenderPathGL::draw_world(bool allow_material) {

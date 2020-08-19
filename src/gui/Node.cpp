@@ -17,7 +17,7 @@ Node::Node(const rect &r) {
 	area = r;
 	dz = 1;
 	col = White;
-	visible = false;
+	visible = true;
 	margin = rect::EMPTY;
 	align = Align::_TOP_LEFT_OFFSET;
 

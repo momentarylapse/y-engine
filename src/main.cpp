@@ -309,31 +309,43 @@ namespace Kaba {
 	StackFrameInfo get_func_from_rip(void *rip);
 }
 
-void show_backtrace (void) {
+void show_backtrace() {
 	unw_cursor_t cursor;
 	unw_context_t uc;
-	unw_word_t ip, sp;
+	unw_word_t ip, sp, offp;
 
 	unw_getcontext(&uc);
 	unw_init_local(&cursor, &uc);
 	while (unw_step(&cursor) > 0) {
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
 		unw_get_reg(&cursor, UNW_REG_SP, &sp);
-		printf ("ip = %lx, sp = %lx\n", (long) ip, (long) sp);
-		auto r = Kaba::get_func_from_rip((void*)(int_p)ip);
-		msg_write(r.str());
+		//printf("frame      ----   ip = %lx, sp = %lx\n", (long) ip, (long) sp);
+		char _name[256];
+		int n = unw_get_proc_name(&cursor, _name, sizeof(_name), &offp);
+		if (n == 0) {
+			string name = _name;
+			if (name.match("*signal_handler*") or name == "killpg")
+				continue;
+			msg_write(" -> " + name + "()");
+			if (name == "main")
+				break;
+		} else {
+			auto r = Kaba::get_func_from_rip((void*)(int_p)ip);
+			msg_write(" -> " + r.str());
+		}
 	}
 }
 
 void signal_handler(int signum) {
-   std::cout << "Interrupt signal (" << signum << ") received.\n";
+	//std::cout << "Interrupt signal (" << signum << ") received.\n";
+	msg_error("segfault");
 
-   show_backtrace();
+	show_backtrace();
 
-   // cleanup and close up stuff here
-   // terminate program
+	// cleanup and close up stuff here
+	// terminate program
 
-   exit(signum);
+	exit(signum);
 }
 
 int hui_main(const Array<string> &arg) {

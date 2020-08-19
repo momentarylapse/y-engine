@@ -671,14 +671,16 @@ void World::unregister_model(Model *m) {
 	if (!m->registered)
 		return;
 	//printf("%p   %s\n", m, MetaGetModelFilename(m));
+	msg_write("unreg model " + m->filename().str());
 
-	foreachi (auto &s, sorted_trans, i)
+	foreachib (auto &s, sorted_trans, i)
 		if (s.model == m) {
 			s.clear();
 			sorted_trans.erase(i);
 		}
-	foreachi (auto &s, sorted_opaque, i)
+	foreachib (auto &s, sorted_opaque, i)
 		if (s.model == m) {
+			msg_write("R");
 			s.clear();
 			sorted_opaque.erase(i);
 		}
@@ -719,6 +721,10 @@ void World::iterate_physics(float dt) {
 			if (o)
 				o->do_physics(dt);
 	}
+
+	for (auto *o: objects)
+		if (o)
+			o->_matrix = matrix::translation(o->pos) * matrix::rotation(o->ang);
 }
 
 void World::iterate_animations(float dt) {
