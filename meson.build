@@ -60,6 +60,7 @@ sources = [
 	'src/gui/Node.cpp',
 	'src/gui/Picture.cpp',
 	'src/gui/Text.cpp',
+	'src/helper/ErrorHandler.cpp',
 	'src/helper/PerformanceMonitor.cpp',
 	'src/input/InputManager.cpp',
 	'src/lib/any/any.cpp',

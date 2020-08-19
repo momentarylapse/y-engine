@@ -7,7 +7,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
-#include <csignal>
 
 
 #include "lib/math/math.h"
@@ -16,6 +15,7 @@
 #include "lib/kaba/kaba.h"
 
 #include "helper/PerformanceMonitor.h"
+#include "helper/ErrorHandler.h"
 
 #include "input/InputManager.h"
 
@@ -112,6 +112,8 @@ public:
 		GodInit();
 		global_perf_mon = &perf_mon;
 		PluginManager::link_kaba();
+
+		ErrorHandler::init();
 
 
 
@@ -292,67 +294,10 @@ vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBu
 }
 #endif
 
-#define UNW_LOCAL_ONLY
-#include <libunwind.h>
-
-namespace Kaba {
-	//class StackFrameInfo;
-	struct StackFrameInfo {
-		void *rip;
-		void *rsp;
-		void *rbp;
-		Script *s;
-		Function *f;
-		int64 offset;
-		string str() const;
-	};
-	StackFrameInfo get_func_from_rip(void *rip);
-}
-
-void show_backtrace() {
-	unw_cursor_t cursor;
-	unw_context_t uc;
-	unw_word_t ip, sp, offp;
-
-	unw_getcontext(&uc);
-	unw_init_local(&cursor, &uc);
-	while (unw_step(&cursor) > 0) {
-		unw_get_reg(&cursor, UNW_REG_IP, &ip);
-		unw_get_reg(&cursor, UNW_REG_SP, &sp);
-		//printf("frame      ----   ip = %lx, sp = %lx\n", (long) ip, (long) sp);
-		char _name[256];
-		int n = unw_get_proc_name(&cursor, _name, sizeof(_name), &offp);
-		if (n == 0) {
-			string name = _name;
-			if (name.match("*signal_handler*") or name == "killpg")
-				continue;
-			msg_write(" -> " + name + "()");
-			if (name == "main")
-				break;
-		} else {
-			auto r = Kaba::get_func_from_rip((void*)(int_p)ip);
-			msg_write(" -> " + r.str());
-		}
-	}
-}
-
-void signal_handler(int signum) {
-	//std::cout << "Interrupt signal (" << signum << ") received.\n";
-	msg_error("segfault");
-
-	show_backtrace();
-
-	// cleanup and close up stuff here
-	// terminate program
-
-	exit(signum);
-}
 
 int hui_main(const Array<string> &arg) {
 
 	hui::Application::guess_directories(arg, "y");
-
-	signal(SIGSEGV, signal_handler);
 
 	try {
 		app.run(arg);
