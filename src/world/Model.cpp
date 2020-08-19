@@ -366,8 +366,9 @@ void Model::load(const Path &filename)
 		if (nt > m->textures.num)
 			m->textures.resize(nt);
 		for (int t=0;t<nt;t++){
-			string fn = f->read_str();
-			m->textures[t] = nix::LoadTexture(fn);
+			Path fn = f->read_str();
+			if (!fn.is_empty())
+				m->textures[t] = nix::LoadTexture(fn);
 		}
 	}
 	

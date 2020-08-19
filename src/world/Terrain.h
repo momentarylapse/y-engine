@@ -87,9 +87,9 @@ public:
 	int partition[128][128], partition_old[128][128];
 	vector pattern, min, max;
 	Material *material;
-	string material_file;
+	Path material_file;
 
-	string texture_file[MATERIAL_MAX_TEXTURES];
+	Path texture_file[MATERIAL_MAX_TEXTURES];
 	vector texture_scale[MATERIAL_MAX_TEXTURES];
 
 	float dhx, dhz;

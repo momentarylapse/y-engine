@@ -43,6 +43,8 @@ void SetDefaultMaterial(Material *m) {
 void MaterialSetDefaultShader(nix::Shader *s) {
 	default_material->shader->unref();
 	default_material->shader = s->ref();
+
+	nix::default_shader_3d = s;
 }
 
 

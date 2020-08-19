@@ -362,7 +362,7 @@ void RenderPathGL::draw_world(bool allow_material) {
 }
 
 void RenderPathGL::set_material(Material *m) {
-	auto s = m->shader; //shader_3d;
+	auto s = m->shader;
 	nix::SetShader(s);
 	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 16);
 	s->set_int(s->get_location("num_lights"), lights.num);
