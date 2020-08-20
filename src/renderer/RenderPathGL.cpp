@@ -105,8 +105,6 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 void RenderPathGL::draw() {
 	nix::StartFrameGLFW(window);
 
-
-#if 1
 	perf_mon->tick(PMLabel::PRE);
 
 	prepare_lights();
@@ -135,34 +133,6 @@ void RenderPathGL::draw() {
 
 	draw_gui(source);
 
-#else
-
-	float w = 800;
-	float h = 600;
-
-	float max_depth = cam->max_depth;
-	cam->max_depth = 2000000;
-	cam->update_matrices(w / h);
-	nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
-
-	nix::ResetToColor(world.background);
-	nix::ResetZ();
-
-	//draw_skyboxes();
-	perf_mon->tick(PMLabel::SKYBOXES);
-
-
-	cam->max_depth = max_depth;
-	cam->update_matrices(w / h);
-	nix::SetProjectionMatrix(matrix::scale(1,-1,1) * cam->m_projection);
-
-	prepare_lights();
-	nix::BindUniform(ubo_light, 1);
-	nix::SetViewMatrix(cam->m_view);
-	nix::SetZ(true, true);
-
-	draw_world(true);
-#endif
 
 	nix::EndFrameGLFW(window);
 	break_point();
@@ -421,7 +391,9 @@ void RenderPathGL::set_material(Material *m) {
 		nix::SetAlpha(ALPHA_NONE);
 
 	set_textures(m->textures);
-	nix::SetMaterial(m->diffuse, 0.5f, 0.1f, m->shininess, White);//m->emission);
+
+	//msg_write(format("%.3f  %.3f", m->specular.r, m->shininess));
+	nix::SetMaterial(m->diffuse, m->ambient, m->specular, m->shininess, m->emission);
 	//s->set_color(s->get_location("emission_factor"), m->emission);
 }
 

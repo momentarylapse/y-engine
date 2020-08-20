@@ -54,10 +54,10 @@ Material::Material() {
 	reflection.cube_map = NULL;
 	shader = NULL;
 
-	ambient = White;
+	ambient = 0.5f;
 	diffuse = White;
-	specular = Black;
-	shininess = 0;
+	specular = 0;
+	shininess = 10;
 	emission = Black;
 
 	alpha.mode = TRANSPARENCY_NONE;
@@ -105,6 +105,10 @@ Material* Material::copy() {
 	return m;
 }
 
+float col_frac(const color &a, const color &b) {
+	return (a.r+a.g+a.b) / (b.r+b.g+b.b);
+}
+
 
 Material *LoadMaterial(const Path &filename) {
 	// an empty name loads the default material
@@ -135,11 +139,13 @@ Material *LoadMaterial(const Path &filename) {
 			m->textures[i] = nix::LoadTexture(f->read_str());
 		// Colors
 		f->read_comment();
-		m->ambient = file_read_color4i(f);
+		color am = file_read_color4i(f);
 		m->diffuse = file_read_color4i(f);
-		m->specular = file_read_color4i(f);
+		color sp = file_read_color4i(f);
 		m->shininess = (float)f->read_int();
 		m->emission = file_read_color4i(f);
+		m->ambient = col_frac(am, m->diffuse) / 2;
+		m->specular = col_frac(sp, White);
 		// Transparency
 		f->read_comment();
 		m->alpha.mode = f->read_int();

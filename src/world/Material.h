@@ -26,8 +26,8 @@ public:
 	nix::Shader *shader;
 
 	// light
-	color ambient, diffuse, specular, emission;
-	float shininess;
+	color diffuse, emission;
+	float ambient, specular, shininess;
 
 	struct Transparency {
 		int mode;

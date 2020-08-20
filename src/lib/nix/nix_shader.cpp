@@ -209,8 +209,8 @@ void Shader::find_locations() {
 	location[LOCATION_MATRIX_V] = get_location("matrix.view");
 	location[LOCATION_MATRIX_P] = get_location("matrix.project");
 
-	location[LOCATION_MATRIX_MVP] = get_location("mat_mvp");
 	if (location[LOCATION_MATRIX_M] < 0 and location[LOCATION_MATRIX_V] < 0 and location[LOCATION_MATRIX_P] < 0) {
+		location[LOCATION_MATRIX_MVP] = get_location("mat_mvp");
 		location[LOCATION_MATRIX_M] = get_location("mat_m");
 		location[LOCATION_MATRIX_V] = get_location("mat_v");
 		location[LOCATION_MATRIX_P] = get_location("mat_p");
@@ -325,7 +325,6 @@ bool Shader::link_uniform_block(const string &name, int binding) {
 	int index = glGetUniformBlockIndex(program, name.c_str());
 	if (index < 0)
 		return false;
-	msg_write(format("link %s %d   %s", name, binding, filename));
 	glUniformBlockBinding(program, index, binding);
 	return true;
 }
