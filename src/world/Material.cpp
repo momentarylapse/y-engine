@@ -82,6 +82,10 @@ Material::~Material() {
 		shader->unref();
 }
 
+void Material::add_uniform(const string &name, float *p, int size) {
+	int loc = shader->get_location(name);
+	uniforms.add({loc, p, size});
+}
 
 Material* Material::copy() {
 	Material *m = new Material;

@@ -383,6 +383,9 @@ void RenderPathGL::set_material(Material *m) {
 	nix::SetShader(s);
 	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 16);
 	s->set_int(s->get_location("num_lights"), lights.num);
+	for (auto &u: m->uniforms)
+		s->set_data(u.location, u.p, u.size);
+
 	if (m->alpha.mode == TRANSPARENCY_FUNCTIONS)
 		nix::SetAlpha(m->alpha.source, m->alpha.destination);
 	else if (m->alpha.mode == TRANSPARENCY_COLOR_KEY_HARD)
