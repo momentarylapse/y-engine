@@ -56,6 +56,8 @@ public:
 	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
 	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal);
 	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
+	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
+
 	void draw_gui(nix::FrameBuffer *source);
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
 	void render_into_texture(nix::FrameBuffer *fb);

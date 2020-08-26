@@ -39,6 +39,8 @@ void break_point() {
 	}
 }
 
+Array<Material*> post_processors;
+
 RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	window = w;
 	glfwMakeContextCurrent(window);
@@ -102,6 +104,33 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 	EntityManager::enabled = true;
 }
+
+nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
+	auto cur = source;
+	auto next = fb4;
+	for (auto *m: post_processors) {
+		nix::SetShader(m->shader);
+		for (auto &u: m->uniforms)
+			m->shader->set_data(u.location, u.p, u.size);
+		process({cur->color_attachments[0], source->depth_buffer}, next, m->shader);
+		cur = next;
+		next = (next == fb4) ? fb5 : fb4;
+	}
+
+	if (cam->focus_enabled) {
+		process_depth(cur, next, fb->depth_buffer, true);
+		cur = next;
+		next = (next == fb4) ? fb5 : fb4;
+		process_depth(fb4, fb5, fb->depth_buffer, false);
+		cur = next;
+		next = (next == fb4) ? fb5 : fb4;
+	}
+
+	process_blur(cur, fb2, 1.0f, true);
+	process_blur(fb2, fb3, 0.0f, false);
+	return cur;
+}
+
 void RenderPathGL::draw() {
 	nix::StartFrameGLFW(window);
 
@@ -116,16 +145,7 @@ void RenderPathGL::draw() {
 
 	render_into_texture(fb);
 
-
-	auto *source = fb;
-	if (cam->focus_enabled) {
-		process_depth(source, fb4, fb->depth_buffer, true);
-		process_depth(fb4, fb5, fb->depth_buffer, false);
-		source = fb5;
-	}
-	process_blur(source, fb2, 1.0f, true);
-	process_blur(fb2, fb3, 0.0f, false);
-
+	auto source = do_post_processing(fb);
 
 	nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
 

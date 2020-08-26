@@ -33,6 +33,7 @@ PerformanceMonitor *global_perf_mon;
 
 
 extern nix::Texture *_tex_white;
+extern Array<Material*> post_processors;
 
 void global_delete(Entity *e) {
 	//msg_error("global delete... " + p2s(e));
@@ -145,6 +146,9 @@ void PluginManager::link_kaba() {
 	Kaba::declare_class_element("Material.shininess", &Material::shininess);
 	Kaba::declare_class_element("Material.emission", &Material::emission);
 	Kaba::link_external_class_func("Material.add_uniform", &Material::add_uniform);
+
+
+	Kaba::link_external("Material.load", (void*)&LoadMaterial);
 
 
 	Kaba::declare_class_element("World.objects", &World::objects);
@@ -328,6 +332,7 @@ void PluginManager::link_kaba() {
 	Kaba::link_external("world", &world);
 	Kaba::link_external("cam", &cam);
 	Kaba::link_external("engine", &engine);
+	Kaba::link_external("post_processors", &post_processors);
 	Kaba::link_external("load_model", (void*)&ModelManager::load);
 }
 
