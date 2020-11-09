@@ -72,8 +72,8 @@ void InputManager::iterate() {
 	//mouse = vector(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
 	dmouse = vector(state.dx, state.dy, 0) / 500.0f;
 	mouse += dmouse;
-	mouse.x = clampf(mouse.x, 0, engine.physical_aspect_ratio);
-	mouse.y = clampf(mouse.y, 0, 1);
+	mouse.x = clamp(mouse.x, 0.0f, engine.physical_aspect_ratio);
+	mouse.y = clamp(mouse.y, 0.0f, 1.0f);
 	mouse01 = vector(mouse.x / engine.physical_aspect_ratio, mouse.y, 0);
 	scroll = vector(state.scroll_x, state.scroll_y, 0);
 
@@ -142,9 +142,9 @@ int key_decode(int key) {
 	if (key == GLFW_KEY_RIGHT_CONTROL)
 				return hui::KEY_RCONTROL;
 	if (key == GLFW_KEY_PAGE_UP)
-				return hui::KEY_PRIOR;
+				return hui::KEY_PAGE_UP;
 	if (key == GLFW_KEY_PAGE_DOWN)
-				return hui::KEY_NEXT;
+				return hui::KEY_PAGE_DOWN;
 	if (key == GLFW_KEY_HOME)
 				return hui::KEY_HOME;
 	if (key == GLFW_KEY_END)

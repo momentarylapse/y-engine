@@ -98,7 +98,7 @@ public:
 #if HAS_LIB_VULKAN
 		vulkan::init(window);
 #endif
-		Kaba::init();
+		kaba::init();
 
 #if HAS_LIB_VULKAN
 		renderer = new WindowRendererVulkan(window);

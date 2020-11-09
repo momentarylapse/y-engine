@@ -46,7 +46,7 @@ class CollisionData;
 namespace nix {
 	class VertexBuffer;
 }
-namespace Kaba {
+namespace kaba {
 	class Script;
 }
 
@@ -267,7 +267,7 @@ public:
 	Array<ModelEffectData> fx;
 	Array<Path> bone_model_filename;
 	Array<Path> inventory_filename;
-	Kaba::Script *script;
+	kaba::Script *script;
 
 	ModelTemplate(Model *m);
 };

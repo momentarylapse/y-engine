@@ -19,7 +19,7 @@ void ErrorHandler::init() {
 	signal(SIGSEGV, signal_handler);
 }
 
-namespace Kaba {
+namespace kaba {
 	//class StackFrameInfo;
 	struct StackFrameInfo {
 		void *rip;
@@ -75,7 +75,7 @@ string unmangle(const string &name) {
 	return name;
 }
 
-void show_kaba_local_vars(const Kaba::Function *f, void *bp) {
+void show_kaba_local_vars(const kaba::Function *f, void *bp) {
 	msg_write(f->long_name());
 	for (auto &v: f->var) {
 		auto pp = (char*)bp + v->_offset;
@@ -84,9 +84,9 @@ void show_kaba_local_vars(const Kaba::Function *f, void *bp) {
 		if (v->type->is_pointer()) {
 			s += p2s(*(void**)pp);
 //			if (*(void**)pp)
-//				s += "   ->  " + Kaba::var_repr(pp, v->type);
+//				s += "   ->  " + kaba::var_repr(pp, v->type);
 		} else if (v->type->is_simple_class()) {
-			s += Kaba::var_repr(pp, v->type);
+			s += kaba::var_repr(pp, v->type);
 		} else if (v->type->is_simple_class()) {
 			s += "...";
 		}
@@ -105,7 +105,7 @@ void ErrorHandler::show_backtrace() {
 
 	unw_getcontext(&uc);
 	unw_init_local(&cursor, &uc);
-	Kaba::Function *first_kaba = nullptr;
+	kaba::Function *first_kaba = nullptr;
 	void* first_kaba_bp = nullptr;
 	while (unw_step(&cursor) > 0) {
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
@@ -122,7 +122,7 @@ void ErrorHandler::show_backtrace() {
 			if (name == "main")
 				break;
 		} else {
-			auto r = Kaba::get_func_from_rip((void*)(int_p)ip);
+			auto r = kaba::get_func_from_rip((void*)(int_p)ip);
 			msg_write(" -> " + r.str());
 			if (!first_kaba) {
 				first_kaba_bp = (void*)(int_p)bp;

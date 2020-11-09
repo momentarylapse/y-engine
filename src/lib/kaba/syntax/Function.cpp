@@ -10,7 +10,7 @@
 #include "../../file/file.h"
 #include <stdio.h>
 
-namespace Kaba{
+namespace kaba {
 
 string namespacify_rel(const string &name, const Class *name_space, const Class *observer_ns);
 
@@ -64,24 +64,21 @@ Function::Function(const string &_name, const Class *_return_type, const Class *
 #include "../../base/set.h"
 #include "SyntaxTree.h"
 
-void test_node_recursion(Node *root, const Class *ns, const string &message) {
+void test_node_recursion(shared<Node> root, const Class *ns, const string &message) {
 	Set<Node*> nodes;
-	SyntaxTree::transform_node(root, [&](Node *n){
-		if (nodes.contains(n)){
+	SyntaxTree::transform_node(root, [&](shared<Node> n) {
+		if (nodes.contains(n.get())) {
 			msg_error("node double..." + message);
 			//msg_write(f->long_name);
 			msg_write(n->str(ns));
-		}else
-			nodes.add(n);
+		} else {
+			nodes.add(n.get());
+		}
 		return n; });
 }
 
 Function::~Function() {
 	//test_node_recursion(block, long_name());
-	if (block)
-		delete block;
-	for (Variable* v: var)
-		delete v;
 }
 
 SyntaxTree *Function::owner() const {
@@ -130,22 +127,13 @@ string Function::signature(const Class *ns) const {
 
 void blocks_add_recursive(Array<Block*> &blocks, Block *block) {
 	blocks.add(block);
-	for (Node* n: block->params) {
+	for (auto n: weak(block->params)) {
 		if (n->kind == NodeKind::BLOCK)
 			blocks_add_recursive(blocks, n->as_block());
 		if (n->kind == NodeKind::STATEMENT) {
-			auto id = n->as_statement()->id;
-			if (id == StatementID::FOR_DIGEST) {
-				blocks_add_recursive(blocks, n->params[2]->as_block());
-			} else if (id == StatementID::TRY) {
-				blocks_add_recursive(blocks, n->params[0]->as_block());
-				blocks_add_recursive(blocks, n->params[2]->as_block());
-			} else if (id == StatementID::IF) {
-				blocks_add_recursive(blocks, n->params[1]->as_block());
-			} else if (id == StatementID::IF_ELSE) {
-				blocks_add_recursive(blocks, n->params[1]->as_block());
-				blocks_add_recursive(blocks, n->params[2]->as_block());
-			}
+			for (auto p: weak(n->params))
+				if (p->kind == NodeKind::BLOCK)
+					blocks_add_recursive(blocks, p->as_block());
 		}
 	}
 }
@@ -153,7 +141,7 @@ void blocks_add_recursive(Array<Block*> &blocks, Block *block) {
 Array<Block*> Function::all_blocks() {
 	Array<Block*> blocks;
 	if (block)
-		blocks_add_recursive(blocks, block);
+		blocks_add_recursive(blocks, block.get());
 	return blocks;
 }
 
@@ -171,7 +159,7 @@ void Function::update_parameters_after_parsing() {
 	// class function
 	if (!is_static()) {
 		if (!__get_var(IDENTIFIER_SELF))
-			block->add_var(IDENTIFIER_SELF, name_space);
+			block->add_var(IDENTIFIER_SELF, name_space, is_const());
 	}
 }
 

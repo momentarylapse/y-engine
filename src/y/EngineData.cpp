@@ -71,7 +71,7 @@ void EngineData::set_dirs(const Path &texture_dir, const Path &_map_dir, const P
 #if 0
 	Gui::FontDir = font_dir;
 #endif
-	Kaba::config.directory = script_dir;
+	kaba::config.directory = script_dir;
 }
 
 

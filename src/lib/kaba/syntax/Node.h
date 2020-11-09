@@ -11,7 +11,7 @@
 
 #include "../../base/base.h"
 
-namespace Kaba {
+namespace kaba {
 
 class Class;
 class Block;
@@ -79,12 +79,12 @@ enum class NodeKind {
 class Node;
 
 // single operand/command
-class Node {
+class Node : public Sharable<Empty> {
 public:
 	NodeKind kind;
 	int64 link_no;
 	// parameters
-	Array<Node*> params;
+	shared_array<Node> params;
 	// linking of class function instances
 	// return value
 	const Class *type;
@@ -94,7 +94,7 @@ public:
 	/*Node(const Class *c);
 	Node(const Block *b);
 	Node(const Constant *c);*/
-	virtual ~Node();
+	~Node();
 	Node *modifiable();
 	Node *make_const();
 	Block *as_block() const;
@@ -110,8 +110,8 @@ public:
 	Variable *as_global() const;
 	Variable *as_local() const;
 	void set_num_params(int n);
-	void set_param(int index, Node *p);
-	void set_instance(Node *p);
+	void set_param(int index, shared<Node> p);
+	void set_instance(shared<Node> p);
 	string sig(const Class *ns) const;
 	string str(const Class *ns) const;
 	void show(const Class *ns) const;
@@ -127,20 +127,19 @@ string node2str(SyntaxTree *s, Node *n);
 class Block : public Node {
 public:
 	Block(Function *f, Block *parent);
-	virtual ~Block();
 	Array<Variable*> vars;
 	Function *function;
 	Block *parent;
 	void *_start, *_end; // opcode range
 	int _label_start, _label_end;
 	int level;
-	void add(Node *c);
-	void set(int index, Node *c);
+	void add(shared<Node> c);
+	void set(int index, shared<Node> c);
 	
 	const Class *name_space() const;
 
-	Variable *get_var(const string &name);
-	Variable *add_var(const string &name, const Class *type);
+	Variable *get_var(const string &name) const;
+	Variable *add_var(const string &name, const Class *type, bool is_const = false);
 };
 
 }
