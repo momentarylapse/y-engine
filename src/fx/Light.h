@@ -14,10 +14,6 @@
 #include "../lib/image/color.h"
 #include "../y/Entity.h"
 
-/*namespace vulkan {
-	class DescriptorSet;
-	class UniformBuffer;
-}*/
 
 struct UBOLight {
 	alignas(16) matrix proj;
@@ -31,14 +27,11 @@ struct UBOLight {
 class Light : public Entity {
 public:
 	Light(const vector &p, const vector &d, const color &c, float r, float t);
-	~Light();
 	void __init_parallel__(const vector &d, const color &c);
 	void __init_spherical__(const vector &p, const color &c, float r);
 	void __init_cone__(const vector &p, const vector &d, const color &c, float r, float t);
 	UBOLight light;
 	bool enabled;
-//	vulkan::UniformBuffer *ubo;
-//	vulkan::DescriptorSet *dset;
 };
 
 

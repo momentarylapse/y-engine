@@ -63,7 +63,7 @@ public:
 		bool enabled;
 		vector pos, ang;
 		color _color;
-		float radius, harshness;
+		float radius, theta, harshness;
 	};
 
 	class Camera {

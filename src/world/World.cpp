@@ -292,7 +292,7 @@ bool World::load(const LevelData &ld) {
 
 #ifdef _X_ALLOW_X_
 	for (auto &l: ld.lights) {
-		auto *ll = new Light(l.pos, l.ang.ang2dir(), l._color, l.radius, -1);
+		auto *ll = new Light(l.pos, l.ang.ang2dir(), l._color, l.radius, l.theta);
 		ll->light.harshness = l.harshness;
 		ll->enabled = l.enabled;
 		add_light(ll);

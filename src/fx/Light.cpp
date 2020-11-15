@@ -6,7 +6,6 @@
  */
 
 #include "Light.h"
-//#include "../lib/vulkan/vulkan.h"
 #include <stdio.h>
 
 Light::Light(const vector &p, const vector &d, const color &c, float r, float t) : Entity(Type::LIGHT) {
@@ -19,16 +18,6 @@ Light::Light(const vector &p, const vector &d, const color &c, float r, float t)
 	if (light.radius >= 0)
 		light.harshness = 1;
 	enabled = true;
-
-//	ubo = new vulkan::UniformBuffer(sizeof(UBOLight));
-//	dset = nullptr;
-}
-
-Light::~Light() {
-/*	if (ubo)
-		delete ubo;
-	if (dset)
-		delete dset;*/
 }
 
 void Light::__init_parallel__(const vector &d, const color &c) {

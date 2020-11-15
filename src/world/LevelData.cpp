@@ -110,12 +110,23 @@ bool LevelData::load(const Path &filename) {
 				cameras.add(c);
 			} else if (e.tag == "light") {
 				Light l;
-				l.radius = e.value("radius")._float();
 				l.harshness = e.value("harshness")._float();
 				l._color = s2c(e.value("color"));
-				l.ang = s2v(e.value("ang"));
-				if (e.value("type") == "directional")
-					l.radius = -1;
+				l.radius = -1;
+				l.theta = -1;
+				if (e.value("type") == "directional") {
+					l.ang = s2v(e.value("ang"));
+				} else if (e.value("type") == "point") {
+					l.pos= s2v(e.value("pos"));
+					l.radius = e.value("radius")._float();
+					l._color *= l.radius * l.radius / 100;
+				} else if (e.value("type") == "cone") {
+					l.pos= s2v(e.value("pos"));
+					l.ang = s2v(e.value("ang"));
+					l.radius = e.value("radius")._float();
+					l.theta = e.value("theta")._float();
+					l._color *= l.radius * l.radius / 100;
+				}
 				l.enabled = e.value("enabled", "true")._bool();
 				lights.add(l);
 			} else if (e.tag == "terrain") {
