@@ -24,6 +24,12 @@ struct UBOLight {
 	float theta, harshness;
 };
 
+enum class LightType {
+	DIRECTIONAL,
+	POINT,
+	CONE
+};
+
 class Light : public Entity {
 public:
 	Light(const vector &p, const vector &d, const color &c, float r, float t);
@@ -32,6 +38,11 @@ public:
 	void __init_cone__(const vector &p, const vector &d, const color &c, float r, float t);
 	UBOLight light;
 	bool enabled;
+	bool allow_shadow;
+	bool user_shadow_control;
+	float user_shadow_theta;
+
+	LightType type;
 };
 
 

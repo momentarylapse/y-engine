@@ -295,6 +295,8 @@ bool World::load(const LevelData &ld) {
 		auto *ll = new Light(l.pos, l.ang.ang2dir(), l._color, l.radius, l.theta);
 		ll->light.harshness = l.harshness;
 		ll->enabled = l.enabled;
+		if (ll->light.radius < 0)
+			ll->allow_shadow = true;
 		add_light(ll);
 	}
 #endif

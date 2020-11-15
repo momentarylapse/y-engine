@@ -18,6 +18,16 @@ Light::Light(const vector &p, const vector &d, const color &c, float r, float t)
 	if (light.radius >= 0)
 		light.harshness = 1;
 	enabled = true;
+	allow_shadow = false;
+	user_shadow_control = false;
+	user_shadow_theta = -1;
+	type = LightType::DIRECTIONAL;
+	if (light.radius > 0) {
+		if (light.theta > 0)
+			type = LightType::CONE;
+		else
+			type = LightType::POINT;
+	}
 }
 
 void Light::__init_parallel__(const vector &d, const color &c) {

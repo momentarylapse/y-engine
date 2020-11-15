@@ -163,8 +163,10 @@ public:
 		}
 #endif
 		if (SHOW_SHADOW) {
-			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path))
+			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path)) {
 				gui::toplevel->add(new gui::Picture(rect(0, 0.2f, 0.8f, 1.0f), rpv->fb_shadow->depth_buffer));
+				gui::toplevel->add(new gui::Picture(rect(0.2f, 0.4f, 0.8f, 1.0f), rpv->fb_shadow2->depth_buffer));
+			}
 		}
 
 		for (auto &s: world.scripts)

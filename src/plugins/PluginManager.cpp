@@ -208,6 +208,9 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Light.theta", _OFFSET(light, light.theta));
 	kaba::declare_class_element("Light.harshness", _OFFSET(light, light.harshness));
 	kaba::declare_class_element("Light.enabled", &Light::enabled);
+	kaba::declare_class_element("Light.allow_shadow", &Light::allow_shadow);
+	kaba::declare_class_element("Light.user_shadow_control", &Light::user_shadow_control);
+	kaba::declare_class_element("Light.user_shadow_theta", &Light::user_shadow_theta);
 
 	kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);
 	kaba::link_external_class_func("Light.Spherical.__init__", &Light::__init_spherical__);

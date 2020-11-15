@@ -47,6 +47,7 @@ public:
 
 	//Camera *shadow_cam;
 	matrix shadow_proj;
+	int shadow_index;
 
 	float shadow_box_size;
 
