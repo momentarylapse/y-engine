@@ -37,6 +37,8 @@ public:
 	color diffuse, emission;
 	float ambient, specular, shininess;
 
+	bool cast_shadow;
+
 	struct Transparency {
 		int mode;
 		int source, destination;

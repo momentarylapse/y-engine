@@ -373,6 +373,8 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 }
 void RenderPathGL::draw_objects(bool allow_material) {
 	for (auto &s: world.sorted_opaque) {
+		if (!s.material->cast_shadow and !allow_material)
+			continue;
 		Model *m = s.model;
 		nix::SetWorldMatrix(m->_matrix);
 		if (allow_material)
@@ -437,7 +439,7 @@ void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 	if (tt.num == 1)
 		tt.add(tex_white);
 	if (tt.num == 2)
-		tt.add(tex_black);
+		tt.add(tex_white);
 	tt.add(fb_shadow->depth_buffer);
 	tt.add(fb_shadow2->depth_buffer);
 	nix::SetTextures(tt);
@@ -470,7 +472,7 @@ void RenderPathGL::prepare_lights() {
 					dir = -l->light.dir;
 				auto r = matrix::rotation(dir.dir2ang()).transpose();
 				//auto r = matrix::rotation(l->light.dir.dir2ang()).transpose();
-				float theta = 2.35f;
+				float theta = 1.35f;
 				if (l->type == LightType::CONE)
 					theta = l->light.theta;
 				if (l->user_shadow_control)

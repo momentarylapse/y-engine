@@ -59,6 +59,8 @@ Material::Material() {
 	shininess = 10;
 	emission = Black;
 
+	cast_shadow = true;
+
 	alpha.mode = TRANSPARENCY_NONE;
 	alpha.source = 0;
 	alpha.destination = 0;
@@ -95,6 +97,7 @@ Material* Material::copy() {
 	m->shininess = shininess;
 
 	m->textures = textures;
+	m->cast_shadow = cast_shadow;
 
 	m->alpha = alpha;
 	m->reflection = reflection;

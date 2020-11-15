@@ -738,8 +738,13 @@ void World::iterate_animations(float dt) {
 void World::iterate(float dt) {
 	if (dt == 0)
 		return;
-	if (engine.physics_enabled)
+	if (engine.physics_enabled) {
 		iterate_physics(dt);
+	} else {
+		for (auto *o: objects)
+			if (o)
+				o->update_matrix();
+	}
 }
 
 void World::add_light(Light *l) {

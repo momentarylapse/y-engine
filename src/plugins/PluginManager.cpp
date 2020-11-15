@@ -145,6 +145,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Material.specular", &Material::specular);
 	kaba::declare_class_element("Material.shininess", &Material::shininess);
 	kaba::declare_class_element("Material.emission", &Material::emission);
+	kaba::declare_class_element("Material.cast_shadow", &Material::cast_shadow);
 	kaba::link_external_class_func("Material.add_uniform", &Material::add_uniform);
 
 
