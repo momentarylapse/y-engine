@@ -52,6 +52,16 @@ public:
 	int shadow_resolution;
 
 	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm);
+
+
+	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
+	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal);
+	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
+	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
+	void set_material(Material *m);
+	void set_textures(const Array<nix::Texture*> &tex);
+	void draw_gui(nix::FrameBuffer *source);
+	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
 };
 
 class RenderPathGLForward : public RenderPathGL {
@@ -60,21 +70,12 @@ public:
 	RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm);
 	void draw() override;
 
-	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
-	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal);
-	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
-	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
-
-	void draw_gui(nix::FrameBuffer *source);
-	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
 	void render_into_texture(nix::FrameBuffer *fb);
 	void draw_skyboxes();
 	void draw_terrains(bool allow_material);
 	void draw_objects(bool allow_material);
 	void draw_world(bool allow_material);
 	void draw_particles();
-	void set_material(Material *m);
-	void set_textures(const Array<nix::Texture*> &tex);
 	void prepare_lights();
 	void render_shadow_map(nix::FrameBuffer *sfb, float scale);
 };

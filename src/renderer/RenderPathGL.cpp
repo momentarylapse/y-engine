@@ -108,7 +108,7 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm) 
 	//nix::shader_dir = sd;
 }
 
-nix::FrameBuffer* RenderPathGLForward::do_post_processing(nix::FrameBuffer *source) {
+nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	auto cur = source;
 	auto next = fb4;
 	for (auto *m: post_processors) {
@@ -164,7 +164,7 @@ void RenderPathGLForward::draw() {
 	perf_mon->tick(PMLabel::END);
 }
 
-void RenderPathGLForward::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal) {
+void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal) {
 
 	nix::SetShader(shader_blur);
 	float r = cam->bloom_radius;
@@ -181,7 +181,7 @@ void RenderPathGLForward::process_blur(nix::FrameBuffer *source, nix::FrameBuffe
 	process(source->color_attachments, target, shader_blur);
 }
 
-void RenderPathGLForward::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal) {
+void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal) {
 
 	nix::SetShader(shader_depth);
 	complex ax = complex(1,0);
@@ -196,7 +196,7 @@ void RenderPathGLForward::process_depth(nix::FrameBuffer *source, nix::FrameBuff
 	process({source->color_attachments[0], depth_buffer}, target, shader_depth);
 }
 
-void RenderPathGLForward::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
+void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
 	nix::BindFrameBuffer(target);
 	nix::SetZ(false, false);
 	nix::SetProjectionOrtho(true);
@@ -208,7 +208,7 @@ void RenderPathGLForward::process(const Array<nix::Texture*> &source, nix::Frame
 	nix::DrawTriangles(vb_2d);
 }
 
-void RenderPathGLForward::draw_gui(nix::FrameBuffer *source) {
+void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	gui::update();
 
 	nix::SetProjectionOrtho(true);
@@ -239,7 +239,7 @@ void RenderPathGLForward::draw_gui(nix::FrameBuffer *source) {
 	perf_mon->tick(PMLabel::GUI);
 }
 
-void RenderPathGLForward::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
+void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 
 	nix::SetTextures({source->color_attachments[0], bloom});
 	nix::SetShader(shader_out);
@@ -405,7 +405,7 @@ void RenderPathGLForward::draw_world(bool allow_material) {
 	draw_objects(allow_material);
 }
 
-void RenderPathGLForward::set_material(Material *m) {
+void RenderPathGL::set_material(Material *m) {
 	auto s = m->shader;
 	nix::SetShader(s);
 	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 16);
@@ -428,7 +428,7 @@ void RenderPathGLForward::set_material(Material *m) {
 	//s->set_color(s->get_location("emission_factor"), m->emission);
 }
 
-void RenderPathGLForward::set_textures(const Array<nix::Texture*> &tex) {
+void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
 		tt.add(tex_white);
