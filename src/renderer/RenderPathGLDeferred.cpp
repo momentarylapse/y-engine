@@ -147,8 +147,8 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	s->set_int(s->get_location("shadow_index"), shadow_index);
 	nix::BindUniform(ubo_light, 1);
 	auto tex = source->color_attachments;
-	//tex.add(fb_shadow->color_attachments[0]);
-	//tex.add(fb_shadow2->color_attachments[0]);
+	tex.add(fb_shadow2->depth_buffer);
+	tex.add(fb_shadow->depth_buffer);
 	process(tex, target, s);
 }
 
