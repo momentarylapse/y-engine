@@ -35,6 +35,7 @@
 
 #include "renderer/RenderPath.h"
 #include "renderer/RenderPathGL.h"
+#include "renderer/RenderPathGLDeferred.h"
 
 #include "Config.h"
 #include "world/Camera.h"
@@ -44,7 +45,7 @@
 #include "world/Terrain.h"
 #include "world/World.h"
 
-const bool SHOW_GBUFFER = false;
+bool SHOW_GBUFFER = false;
 bool SHOW_SHADOW = false;
 
 
@@ -103,7 +104,16 @@ public:
 #if HAS_LIB_VULKAN
 		renderer = new WindowRendererVulkan(window);
 #endif
-		render_path = new RenderPathGL(window, &perf_mon);
+
+		try {
+			if (config.get_str("renderer.path", "forward") == "deferred")
+				render_path = new RenderPathGLDeferred(window, &perf_mon);
+			else
+				render_path = new RenderPathGLForward(window, &perf_mon);
+		} catch(Exception &e) {
+			msg_error(e.message());
+			throw e;
+		}
 
 		std::cout << "on init..." << "\n";
 
@@ -147,21 +157,21 @@ public:
 		world.reset();
 		CameraReset();
 		GodLoadWorld(config.default_world);
+		SHOW_SHADOW = config.get_bool("shadow.debug", false);
+		SHOW_GBUFFER = config.get_bool("gbuffer.debug", false);
 
 		fps_display = new gui::Text("", 0.020f, 0.01f, 0.01f);
 		fps_display->dz = 900;
 		gui::toplevel->add(fps_display);
-#if HAS_LIB_VULKAN
 		if (SHOW_GBUFFER) {
-			if (auto *rpd = dynamic_cast<RenderPathDeferred*>(render_path)) {
-				gui::add(new Picture(vector(0.8f, 0.0f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_color));
-				gui::add(new Picture(vector(0.8f, 0.2f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_emission));
-				gui::add(new Picture(vector(0.8f, 0.4f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_pos));
-				gui::add(new Picture(vector(0.8f, 0.6f, 0), 0.2f, 0.2f, rpd->gbuf_ren->tex_normal));
-				gui::add(new Picture(vector(0.8f, 0.8f, 0), 0.2f, 0.2f, rpd->gbuf_ren->depth_buffer));
+			if (auto *rpd = dynamic_cast<RenderPathGLDeferred*>(render_path)) {
+				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.0f, 0.2f), rpd->gbuffer->color_attachments[0]));
+				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.2f, 0.4f), rpd->gbuffer->color_attachments[1]));
+				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.4f, 0.6f), rpd->gbuffer->color_attachments[2]));
+				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.6f, 0.8f), rpd->gbuffer->color_attachments[3]));
+				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.8f, 1.0f), rpd->gbuffer->depth_buffer));
 			}
 		}
-#endif
 		if (SHOW_SHADOW) {
 			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path)) {
 				gui::toplevel->add(new gui::Picture(rect(0, 0.2f, 0.8f, 1.0f), rpv->fb_shadow->depth_buffer));

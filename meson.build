@@ -213,6 +213,7 @@ sources = [
 	'src/renderer/Renderer.cpp',
 	'src/renderer/RenderPath.cpp',
 	'src/renderer/RenderPathGL.cpp',
+	'src/renderer/RenderPathGLDeferred.cpp',
 	'src/world/Camera.cpp',
 	'src/world/LevelData.cpp',
 	'src/world/Link.cpp',

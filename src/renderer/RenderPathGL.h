@@ -5,8 +5,7 @@
  *      Author: michi
  */
 
-#ifndef SRC_RENDERER_RENDERPATHGL_H_
-#define SRC_RENDERER_RENDERPATHGL_H_
+#pragma once
 
 #include "RenderPath.h"
 namespace nix {
@@ -50,8 +49,15 @@ public:
 	int shadow_index;
 
 	float shadow_box_size;
+	int shadow_resolution;
 
 	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm);
+};
+
+class RenderPathGLForward : public RenderPathGL {
+public:
+
+	RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm);
 	void draw() override;
 
 	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
@@ -75,5 +81,3 @@ public:
 
 
 
-
-#endif /* SRC_RENDERER_RENDERPATHGL_H_ */
