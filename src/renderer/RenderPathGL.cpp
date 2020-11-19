@@ -95,11 +95,13 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm) 
 	fb4->color_attachments[0]->set_options("wrap=clamp");
 	fb5->color_attachments[0]->set_options("wrap=clamp");
 
+	nix::Shader::load("Materials/forward/module-surface.shader");
+
 	//auto sd = nix::shader_dir;
 	shader_blur = nix::Shader::load("Materials/forward/blur.shader");
 	shader_depth = nix::Shader::load("Materials/forward/depth.shader");
 	shader_out = nix::Shader::load("Materials/forward/hdr.shader");
-	shader_3d = nix::Shader::load("Materials/forward/3d.shader");
+	shader_3d = nix::Shader::load("Materials/forward/3d-new.shader");
 	shader_fx = nix::Shader::load("Materials/forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
 	shader_shadow = nix::Shader::load("Materials/forward/3d-shadow.shader");
