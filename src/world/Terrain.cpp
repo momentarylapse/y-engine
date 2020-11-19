@@ -74,8 +74,8 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 			int num_textures = f->read_int();
 			for (int i=0;i<num_textures;i++){
 				texture_file[i] = f->read_str();
-				texture_scale[i].x = f->read_float();
-				texture_scale[i].y = 0;
+				texture_scale[i].x = num_x * f->read_float();
+				texture_scale[i].y = 0.107f + i * 0.231f; // rotation
 				texture_scale[i].z = f->read_float();
 			}
 			// Material
@@ -455,7 +455,7 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 void Terrain::build_vertex_buffer() {
 	//Array<vulkan::Vertex1> vertices;
 	Array<vector> p,n;
-	Array<float> uv[3];
+	Array<float> uv;
 
 	// number of 32-blocks (including the partially filled ones)
 	int nx = ( num_x - 1 ) / 32 + 1;
@@ -546,21 +546,17 @@ void Terrain::build_vertex_buffer() {
 						}
 					}}
 
-					// multitexturing
-					float ta[8],tb[8],tc[8],td[8];
-					for (int i=0;i<material->textures.num;i++){
-						ta[i*2]=(float) x   *texture_scale[i].x,	ta[i*2+1]=(float) z   *texture_scale[i].z;
-						tb[i*2]=(float)(x+e)*texture_scale[i].x,	tb[i*2+1]=(float) z   *texture_scale[i].z;
-						tc[i*2]=(float) x   *texture_scale[i].x,	tc[i*2+1]=(float)(z+e)*texture_scale[i].z;
-						td[i*2]=(float)(x+e)*texture_scale[i].x,	td[i*2+1]=(float)(z+e)*texture_scale[i].z;
+					float u1 = (float) x    / (float)num_x;//*texture_scale[i].x;
+					float u2 = (float)(x+e) / (float)num_x;//*texture_scale[i].x;
+					float v1 = (float) z    / (float)num_z;//*texture_scale[i].z;
+					float v2 = (float)(z+e) / (float)num_z;//*texture_scale[i].z;
 
-						uv[i].add(ta[i*2]);	uv[i].add(ta[i*2+1]);
-						uv[i].add(tc[i*2]);	uv[i].add(tc[i*2+1]);
-						uv[i].add(td[i*2]);	uv[i].add(td[i*2+1]);
-						uv[i].add(ta[i*2]);	uv[i].add(ta[i*2+1]);
-						uv[i].add(td[i*2]);	uv[i].add(td[i*2+1]);
-						uv[i].add(tb[i*2]);	uv[i].add(tb[i*2+1]);
-					}
+					uv.add(u1);	uv.add(v1);
+					uv.add(u1);	uv.add(v2);
+					uv.add(u2);	uv.add(v2);
+					uv.add(u1);	uv.add(v1);
+					uv.add(u2);	uv.add(v2);
+					uv.add(u2);	uv.add(v1);
 
 					/*vertices.add({va,na,ta[0],ta[1]});
 					vertices.add({vc,nc,tc[0],tc[1]});
@@ -598,8 +594,7 @@ void Terrain::build_vertex_buffer() {
 //	vertex_buffer->build1(vertices);
 	vertex_buffer->update(0, p);
 	vertex_buffer->update(1, n);
-	for (int i=0;i<material->textures.num;i++)
-		vertex_buffer->update(2+i, uv[i]);
+	vertex_buffer->update(2, uv);
 }
 
 void Terrain::draw() {

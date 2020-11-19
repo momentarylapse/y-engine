@@ -230,8 +230,11 @@ void RenderPathGLDeferred::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
 		//nix::SetWorldMatrix(matrix::translation(t->pos));
 		nix::SetWorldMatrix(matrix::ID);
-		if (allow_material)
+		if (allow_material) {
 			set_material(t->material);
+			t->material->shader->set_data(t->material->shader->get_location("pattern0"), &t->texture_scale[0].x, 12);
+			t->material->shader->set_data(t->material->shader->get_location("pattern1"), &t->texture_scale[1].x, 12);
+		}
 		t->draw();
 		nix::DrawTriangles(t->vertex_buffer);
 	}
