@@ -236,6 +236,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Particle.texture", &Particle::texture);
 	kaba::declare_class_element("Particle.color", &Particle::col);
 	kaba::declare_class_element("Particle.source", &Particle::source);
+	kaba::declare_class_element("Particle.enabled", &Particle::enabled);
 	kaba::link_external_class_func("Particle.__init__", &Particle::__init__);
 	kaba::link_external_virtual("Particle.__delete__", &Particle::__delete__, &particle);
 	//kaba::link_external_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);

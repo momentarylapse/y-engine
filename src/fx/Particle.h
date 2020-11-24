@@ -43,6 +43,7 @@ public:
 	float radius;
 	float time_to_live;
 	bool suicidal;
+	bool enabled;
 };
 
 

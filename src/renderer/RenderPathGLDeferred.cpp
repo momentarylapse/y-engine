@@ -168,12 +168,13 @@ void RenderPathGLDeferred::draw_particles() {
 	nix::vb_temp->create_rect(rect(-1,1, -1,1));
 	for (auto g: world.particle_manager->groups) {
 		nix::SetTexture(g->texture);
-		for (auto p: g->particles) {
-			shader_fx->set_color(shader_fx->get_location("color"), p->col);
-			shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
-			nix::SetWorldMatrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
-			nix::DrawTriangles(nix::vb_temp);
-		}
+		for (auto p: g->particles)
+			if (p->enabled) {
+				shader_fx->set_color(shader_fx->get_location("color"), p->col);
+				shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
+				nix::SetWorldMatrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
+				nix::DrawTriangles(nix::vb_temp);
+			}
 	}
 
 	// beams

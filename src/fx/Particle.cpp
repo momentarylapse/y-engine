@@ -21,6 +21,7 @@ Particle::Particle(const vector &p, float r, nix::Texture *t, float ttl) : Entit
 	source = rect::ID;
 	time_to_live = ttl;
 	suicidal = ttl > 0;
+	enabled = true;
 }
 
 Particle::~Particle() {
