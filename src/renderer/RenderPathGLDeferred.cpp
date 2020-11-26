@@ -68,6 +68,8 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* w, PerformanceMonitor *pm
 	fb5->color_attachments[0]->set_options("wrap=clamp");
 
 	//auto sd = nix::shader_dir;
+	nix::Shader::load("Materials/deferred/module-surface.shader");
+
 	shader_blur = nix::Shader::load("Materials/forward/blur.shader");
 	shader_depth = nix::Shader::load("Materials/forward/depth.shader");
 	shader_out = nix::Shader::load("Materials/forward/hdr.shader");
