@@ -382,6 +382,7 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 }
 
 void PluginManager::add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables) {
+	msg_write("add controller: " + name.str());
 	auto *c = (Controller*)create_instance(name, "y.Controller", variables);
 
 	controllers.add(c);
