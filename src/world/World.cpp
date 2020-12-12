@@ -554,6 +554,18 @@ void World::register_object(Object *o, int index) {
 }
 
 
+void World::set_active_physics(Object *o, bool active) {
+	o->physics_data.active = active;
+	btScalar mass(o->physics_data.active ? o->physics_data.mass : 0);
+	btVector3 localInertia(0, 0, 0);
+	if (o->colShape) {
+		o->colShape->calculateLocalInertia(mass, localInertia);
+		o->physics_data.theta_0._00 = localInertia.x();
+		o->physics_data.theta_0._11 = localInertia.y();
+		o->physics_data.theta_0._22 = localInertia.z();
+	}
+	o->body->setMassProps(mass, localInertia);
+}
 
 // un-object a model
 void World::unregister_object(Object *m) {

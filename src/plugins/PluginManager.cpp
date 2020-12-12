@@ -164,6 +164,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("World.physics_mode", &World::physics_mode);
 	kaba::link_external_class_func("World.create_object", &World::create_object);
 	kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
+	kaba::link_external_class_func("World.set_active_physics", &World::set_active_physics);
 	kaba::link_external_class_func("World.add_light", &World::add_light);
 	kaba::link_external_class_func("World.add_particle", &World::add_particle);
 	kaba::link_external_class_func("World.shift_all", &World::shift_all);

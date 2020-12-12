@@ -84,6 +84,7 @@ public:
 
 	void register_object(Object *o, int index);
 	void unregister_object(Object *o);
+	void set_active_physics(Object *o, bool active);
 
 	bool unregister(Entity *o);
 	void _delete(Entity *o);
