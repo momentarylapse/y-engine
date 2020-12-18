@@ -23,12 +23,15 @@
 #include "../world/Camera.h"
 #include "../world/Material.h"
 #include "../world/Model.h"
+#include "../world/Object.h" // meh
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../Config.h"
 #include "../meta.h"
 
 nix::Texture *_tex_white;
+
+const int CUBE_SIZE = 128;
 
 void break_point() {
 	if (config.debug) {
@@ -66,9 +69,38 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_rect(rect(-1,1, -1,1));
 
+	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE);
+	fb_cube = new nix::FrameBuffer({depth_cube});
+	cube_map = new nix::CubeMap(CUBE_SIZE);
+
+	im.create(CUBE_SIZE, CUBE_SIZE, Red);
+	for (int i=0; i<6; i++)
+		cube_map->overwrite_side(i, im);
+
 	EntityManager::enabled = false;
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 	EntityManager::enabled = true;
+}
+
+void RenderPathGL::render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube, const vector &pos) {
+	Camera cam(pos, quaternion::ID, rect::ID);
+	cam.fov = pi/2;
+	for (int i=0; i<6; i++) {
+		fb->update_x({cube, depth_cube}, i);
+		if (i == 0)
+			cam.ang = quaternion::rotation(vector(0,-pi/2,0));
+		if (i == 1)
+			cam.ang = quaternion::rotation(vector(0,pi/2,0));
+		if (i == 2)
+			cam.ang = quaternion::rotation(vector(pi/2,0,pi));
+		if (i == 3)
+			cam.ang = quaternion::rotation(vector(-pi/2,0,pi));
+		if (i == 4)
+			cam.ang = quaternion::rotation(vector(0,pi,0));
+		if (i == 5)
+			cam.ang = quaternion::rotation(vector(0,0,0));
+		render_into_texture(fb, &cam);
+	}
 }
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm) : RenderPathGL(w, pm) {
@@ -136,8 +168,20 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	return cur;
 }
 
+static int _frame = 0;
+
 void RenderPathGLForward::draw() {
 	nix::StartFrameGLFW(window);
+
+
+	_frame ++;
+	if (_frame > 10) {
+		if (world.ego)
+			render_into_cubemap(fb_cube, cube_map, world.ego->pos);
+		_frame = 0;
+	}
+
+
 
 	perf_mon->tick(PMLabel::PRE);
 
@@ -150,7 +194,7 @@ void RenderPathGLForward::draw() {
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	render_into_texture(fb);
+	render_into_texture(fb, cam);
 
 	auto source = do_post_processing(fb);
 
@@ -259,7 +303,7 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 	perf_mon->tick(PMLabel::OUT);
 }
 
-void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb) {
+void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {
 	nix::BindFrameBuffer(fb);
 
 	float max_depth = cam->max_depth;
@@ -270,7 +314,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb) {
 	nix::ResetToColor(world.background);
 	nix::ResetZ();
 
-	draw_skyboxes();
+	draw_skyboxes(cam);
 	perf_mon->tick(PMLabel::SKYBOXES);
 
 
@@ -345,7 +389,7 @@ void RenderPathGLForward::draw_particles() {
 	break_point();
 }
 
-void RenderPathGLForward::draw_skyboxes() {
+void RenderPathGLForward::draw_skyboxes(Camera *cam) {
 	nix::SetZ(false, false);
 	nix::SetCull(CULL_NONE);
 	nix::SetViewMatrix(matrix::rotation_q(cam->ang).transpose());
@@ -444,6 +488,7 @@ void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 		tt.add(tex_white);
 	tt.add(fb_shadow->depth_buffer);
 	tt.add(fb_shadow2->depth_buffer);
+	tt.add(cube_map);
 	nix::SetTextures(tt);
 }
 

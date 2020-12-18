@@ -11,6 +11,8 @@
 namespace nix {
 	class FrameBuffer;
 	class Texture;
+	class DepthBuffer;
+	class CubeMap;
 	class VertexBuffer;
 	class UniformBuffer;
 }
@@ -44,6 +46,10 @@ public:
 	PerformanceMonitor *perf_mon;
 	nix::VertexBuffer *vb_2d;
 
+	nix::DepthBuffer *depth_cube;
+	nix::FrameBuffer *fb_cube;
+	nix::CubeMap *cube_map;
+
 	//Camera *shadow_cam;
 	matrix shadow_proj;
 	int shadow_index;
@@ -52,6 +58,9 @@ public:
 	int shadow_resolution;
 
 	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm);
+
+	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam) = 0;
+	void render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube, const vector &pos);
 
 
 	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
@@ -70,8 +79,8 @@ public:
 	RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm);
 	void draw() override;
 
-	void render_into_texture(nix::FrameBuffer *fb);
-	void draw_skyboxes();
+	void render_into_texture(nix::FrameBuffer *fb, Camera *cam) override;
+	void draw_skyboxes(Camera *cam);
 	void draw_terrains(bool allow_material);
 	void draw_objects(bool allow_material);
 	void draw_world(bool allow_material);
