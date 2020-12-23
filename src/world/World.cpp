@@ -28,6 +28,8 @@
 #include "../fx/ParticleManager.h"
 #endif
 
+#include "../audio/Sound.h"
+
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
@@ -246,6 +248,9 @@ void World::reset() {
 
 
 	// music
+	for (auto *s: sounds)
+		delete s;
+	sounds.clear();
 	/*if (meta->MusicEnabled){
 		NixSoundStop(MusicCurrent);
 	}*/
@@ -625,6 +630,13 @@ bool World::unregister(Entity* x) {
 				links.erase(i);
 				return true;
 			}
+	} else if (x->type == Entity::Type::SOUND) {
+		foreachi(auto *s, sounds, i)
+			if (s == x) {
+				//msg_write(" -> SOUND");
+				sounds.erase(i);
+				return true;
+			}
 	} else if (x->type == Entity::Type::PARTICLE or x->type == Entity::Type::BEAM) {
 		if (particle_manager->unregister((Particle*)x))
 			return true;
@@ -757,6 +769,14 @@ void World::iterate(float dt) {
 			if (o)
 				o->update_matrix();
 	}
+
+	foreachi (auto *s, sounds, i) {
+		if (s->suicidal and s->has_ended()) {
+			sounds.erase(i);
+			delete s;
+		}
+	}
+	audio::set_listener(cam->pos, cam->ang, v_0, 100000);
 }
 
 void World::add_light(Light *l) {
@@ -767,6 +787,10 @@ void World::add_particle(Particle *p) {
 	particle_manager->add(p);
 }
 
+void World::add_sound(audio::Sound *s) {
+	sounds.add(s);
+}
+
 
 void World::shift_all(const vector &dpos) {
 	for (auto *t: terrains)
@@ -774,6 +798,8 @@ void World::shift_all(const vector &dpos) {
 	for (auto *o: objects)
 		if (o)
 			o->pos += dpos;
+	for (auto *s: sounds)
+		s->pos += dpos;
 	particle_manager->shift_all(dpos);
 }
 

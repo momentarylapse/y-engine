@@ -7,23 +7,25 @@
 | last update: 2007.11.19 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
 
- #include "../math/math.h"
- #include "sound.h"
+#include "Sound.h"
+#include "../y/EngineData.h"
+ #include "../lib/math/math.h"
+ 
 
-
-#ifdef SOUND_ALLOW_OGG
+#ifdef HAS_LIB_OGG
 	#include <vorbis/codec.h>
 	#include <vorbis/vorbisfile.h>
 	#include <vorbis/vorbisenc.h>
 #endif
 
-Path SoundDir;
+namespace audio {
 
-Array<Sound*> Sounds;
-Array<Music*> Musics;
+//Array<Sound*> Sounds;
+//Array<Music*> Musics;
 
 float VolumeMusic = 1.0f, VolumeSound = 1.0f;
 
+#if 0
 void SoundCalcMove()
 {
 	for (int i=Sounds.num-1;i>=0;i--)
@@ -33,49 +35,46 @@ void SoundCalcMove()
 	for (int i=0;i<Musics.num;i++)
 		Musics[i]->Iterate();
 }
+#endif
 
-void SoundReset()
-{
-	for (int i=Sounds.num-1;i>=0;i--)
+void reset() {
+	/*for (int i=Sounds.num-1;i>=0;i--)
 		delete(Sounds[i]);
 	Sounds.clear();
 	for (int i=Musics.num-1;i>=0;i--)
 		delete(Musics[i]);
-	Musics.clear();
-	SoundClearSmallCache();
+	Musics.clear();*/
+	clear_small_cache();
 }
 
-sAudioFile EmptyAudioFile = {0, 0, 0, 0, NULL};
-sAudioStream EmptyAudioStream = {0, 0, 0, 0, NULL, 0, NULL, 0, 0};
+AudioFile EmptyAudioFile = {0, 0, 0, 0, nullptr};
+AudioStream EmptyAudioStream = {0, 0, 0, 0, nullptr, 0, nullptr, 0, AudioStream::State::READY};
 
-sAudioFile load_wave_file(const Path &filename);
-sAudioFile load_ogg_file(const Path &filename);
-sAudioStream load_ogg_start(const Path &filename);
-void load_ogg_step(sAudioStream *as);
-void load_ogg_end(sAudioStream *as);
+AudioFile load_wave_file(const Path &filename);
+AudioFile load_ogg_file(const Path &filename);
+AudioStream load_ogg_start(const Path &filename);
+void load_ogg_step(AudioStream *as);
+void load_ogg_end(AudioStream *as);
 
-enum
-{
+enum {
 	AudioStreamWave,
 	AudioStreamOgg,
 	AudioStreamFlac,
 };
 
-sAudioFile load_sound_file(const Path &filename)
-{
+AudioFile load_sound_file(const Path &filename) {
 	msg_write("loading sound: " + filename.str());
 	string ext = filename.extension();
 	if (ext == "wav")
 		return load_wave_file(filename);
-#ifdef SOUND_ALLOW_OGG
+#ifdef HAS_LIB_OGG
 	else if (ext == "ogg")
 		return load_ogg_file(filename);
 #endif
 	return EmptyAudioFile;
 }
 
-sAudioStream load_sound_start(const Path &filename)
-{
+AudioStream load_sound_start(const Path &filename) {
 	string ext = filename.extension();
 	/*if (ext == "wav")
 		return load_wave_start(filename);
@@ -84,16 +83,14 @@ sAudioStream load_sound_start(const Path &filename)
 	return EmptyAudioStream;
 }
 
-void load_sound_step(sAudioStream *as)
-{
+void load_sound_step(AudioStream *as) {
 	/*if (as->type == AudioStreamWave)
 		load_ogg_step(as);
 	else*/ if (as->type == AudioStreamOgg)
 		load_ogg_step(as);
 }
 
-void load_sound_end(sAudioStream *as)
-{
+void load_sound_end(AudioStream *as) {
 	/*if (as->type == AudioStreamWave)
 		load_ogg_end(as);
 	else*/ if (as->type == AudioStreamOgg)
@@ -101,9 +98,8 @@ void load_sound_end(sAudioStream *as)
 }
 
 
-sAudioFile load_wave_file(const Path &filename)
-{
-	sAudioFile r;
+AudioFile load_wave_file(const Path &filename) {
+	AudioFile r;
 	r.buffer = NULL;
 //	ProgressStatus(_("lade wave"), 0);
 	File *f = FileOpen(filename);
@@ -144,7 +140,7 @@ sAudioFile load_wave_file(const Path &filename)
 
 	int read = 0;
 	int nn = 0;
-	while (read < size){
+	while (read < size) {
 		int toread = 65536;
 		if (toread > size - read)
 			toread = size - read;
@@ -154,9 +150,9 @@ sAudioFile load_wave_file(const Path &filename)
 			ProgressStatus(_("lade wave"), perc_read + dperc_read * (float)read / (float)size);
 			nn = 0;
 		}*/
-		if (rr > 0)
+		if (rr > 0) {
 			read += rr;
-		else{
+		} else {
 			msg_error("could not read in wave file...");
 			break;
 		}
@@ -169,16 +165,15 @@ sAudioFile load_wave_file(const Path &filename)
 }
 
 
-#ifdef SOUND_ALLOW_OGG
+#ifdef HAS_LIB_OGG
 
 char ogg_buffer[4096];
 
-sAudioFile load_ogg_file(const string &filename)
-{
-	sAudioFile r = EmptyAudioFile;
+AudioFile load_ogg_file(const Path &filename) {
+	AudioFile r = EmptyAudioFile;
 	OggVorbis_File vf;
 	
-	if (ov_fopen((char*)filename.c_str(), &vf)){
+	if (ov_fopen((char*)filename.c_str(), &vf)) {
 		msg_error("ogg: ov_fopen failed");
 		return r;
 	}
@@ -211,17 +206,16 @@ sAudioFile load_ogg_file(const string &filename)
 	return r;
 }
 
-sAudioStream load_ogg_start(const string &filename)
-{
-	sAudioStream r;
+AudioStream load_ogg_start(const Path &filename) {
+	AudioStream r;
 	r.type = AudioStreamOgg;
 	r.vf = new OggVorbis_File;
-	r.state = StreamStateReady;
+	r.state = AudioStream::State::READY;
 	r.buffer = NULL;
 	r.buf_samples = 0;
 	
 	if (ov_fopen((char*)filename.c_str(), (OggVorbis_File*)r.vf)){
-		r.state = StreamStateError;
+		r.state = AudioStream::State::ERROR;
 		msg_error("ogg: ov_fopen failed");
 		return r;
 	}
@@ -236,9 +230,8 @@ sAudioStream load_ogg_start(const string &filename)
 	return r;
 }
 
-void load_ogg_step(sAudioStream *as)
-{
-	if (as->state != StreamStateReady)
+void load_ogg_step(AudioStream *as) {
+	if (as->state != AudioStream::State::READY)
 		return;
 	int current_section;
 	int bytes_per_sample = (as->bits / 8) * as->channels;
@@ -249,10 +242,10 @@ void load_ogg_step(sAudioStream *as)
 		int toread = min(wanted - read, 4096);
 		int rr = ov_read((OggVorbis_File*)as->vf, &as->buffer[read], toread, 0, 2, 1, &current_section); // 0,2,1 = little endian, 16bit, signed
 		if (rr == 0){
-			as->state = StreamStateEnd;
+			as->state = AudioStream::State::END;
 			break;
 		}else if (rr < 0){
-			as->state = StreamStateError;
+			as->state = AudioStream::State::ERROR;
 			msg_error("ogg: ov_read failed");
 			break;
 		}else{
@@ -262,8 +255,7 @@ void load_ogg_step(sAudioStream *as)
 	as->buf_samples = read / bytes_per_sample;
 }
 
-void load_ogg_end(sAudioStream *as)
-{
+void load_ogg_end(AudioStream *as) {
 	ov_clear((OggVorbis_File*)as->vf);
 	if (as->vf)
 		delete((OggVorbis_File*)as->vf);
@@ -273,60 +265,11 @@ void load_ogg_end(sAudioStream *as)
 
 #else
 
-sAudioFile load_ogg_file(const Path &filename){ sAudioFile r; return r; }
-sAudioStream load_ogg_start(const Path &filename){ sAudioStream r; return r; }
-void load_ogg_step(sAudioStream *as){}
-void load_ogg_end(sAudioStream *as){}
+AudioFile load_ogg_file(const string &filename){ AudioFile r; return r; }
+AudioStream load_ogg_start(const string &filename){ AudioStream r; return r; }
+void load_ogg_step(AudioStream *as){}
+void load_ogg_end(AudioStream *as){}
 
 #endif
 
-void save_wave_file(const Path &filename, const Array<float> &data_r, const Array<float> &data_l, int freq, int channels, int bits)
-{
-//	channels = 1;
-	bits = 16;
-	
-	int bytes_per_sample = (bits / 8) * channels;
-	int samples = min(data_r.num, data_l.num);
-	
-	File *f = FileCreate(filename);
-	f->write_buffer("RIFF", 4);
-	f->write_int(44 + bytes_per_sample * samples); // file size (bytes)
-	f->write_buffer("WAVEfmt ", 8);
-	f->write_int(16); // fmt size (bytes)
-	f->write_word(1); // version
-	f->write_word(channels);
-	f->write_int(freq);
-	f->write_int(freq * bytes_per_sample); // bytes per second
-	f->write_word(bytes_per_sample); // byte align
-	f->write_word(bits);
-	f->write_buffer("data", 4);
-	f->write_int(samples * bytes_per_sample); // data size (bytes)
-	if (channels == 1){
-		for (int i=0;i<samples;i++){
-			float br = clamp(data_r[i], -1.0f, 1.0f);
-			short sr = (int)(br * 32767.0f);
-			int aa = sr;
-			f->write_word(aa);
-		}
-	}else if (channels == 2){
-		for (int i=0;i<samples;i++){
-			float br = clamp(data_r[i], -1.0f, 1.0f);
-			short sr = (int)(br * 32767.0f);
-			float bl = clamp(data_l[i], -1.0f, 1.0f);
-			short sl = (int)(bl * 32767.0f);
-			unsigned int aa = (unsigned int)sr + (((unsigned int)sl) << 16);
-			f->write_int(aa);
-		}
-	}else
-		msg_error("save_wave_file... channels != 1,2");
-	FileClose(f);
-}
-
-void SoundSaveFile(const Path &filename, const Array<float> &data_r, const Array<float> &data_l, int freq, int channels, int bits)
-{
-	string ext = filename.extension();
-	if (ext == "wav")
-		save_wave_file(filename, data_r, data_l, freq, channels, bits);
-	else
-		msg_error("unhandled file extension: " + ext);
 }

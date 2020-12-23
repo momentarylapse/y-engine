@@ -29,6 +29,9 @@ class Particle;
 class Link;
 class LevelData;
 enum class LinkType;
+namespace audio {
+	class Sound;
+}
 
 
 class btDefaultCollisionConfiguration;
@@ -156,6 +159,9 @@ public:
 
 
 	bool _cdecl trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Model *o_ignore = NULL);
+
+	Array<audio::Sound*> sounds;
+	void add_sound(audio::Sound *s);
 };
 extern World world;
 

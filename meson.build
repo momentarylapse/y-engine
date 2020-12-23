@@ -50,8 +50,31 @@ else
 	add_project_arguments('-DHAS_LIB_BULLET=0', language : ['cpp'])
 endif
 
+# optional dependency: openal
+d = cc.find_library('openal', required : false)
+if d.found()
+	add_project_arguments('-DHAS_LIB_OPENAL=1', language : ['cpp'])
+	deps += [d]
+else
+	add_project_arguments('-DHAS_LIB_OPENAL=0', language : ['cpp'])
+endif
+
+# optional dependency: ogg
+d1 = cc.find_library('ogg', required : false)
+d2 = cc.find_library('vorbis', required : false)
+d3 = cc.find_library('vorbisfile', required : false)
+d4 = cc.find_library('vorbisenc', required : false)
+if d1.found() and d2.found() and d3.found() and d4.found()
+	add_project_arguments('-DHAS_LIB_OGG=1', language : ['cpp'])
+	deps += [d1,d2,d3,d4]
+else
+	add_project_arguments('-DHAS_LIB_OGG=0', language : ['cpp'])
+endif
+
 
 sources = [
+	'src/audio/Sound.cpp',
+	'src/audio/SoundAL.cpp',
 	'src/fx/Beam.cpp',
 	'src/fx/Light.cpp',
 	'src/fx/Particle.cpp',
@@ -207,8 +230,6 @@ sources = [
 	'src/lib/nix/nix_textures.cpp',
 	'src/lib/nix/nix_vertexbuffer.cpp',
 	'src/lib/nix/nix_view.cpp',
-	'src/lib/sound/sound.cpp',
-	'src/lib/sound/sound_al.cpp',
 	'src/lib/xfile/chunked.cpp',
 	'src/lib/xfile/pdf.cpp',
 	'src/lib/xfile/xml.cpp',

@@ -1,11 +1,13 @@
 BIN = ../y
 CPP = g++
-GLOBALFLAGS = -O2 -g -O2 -g -std=c++17  -DHAS_LIB_GTK3=1 -DHAS_LIB_ZLIB=1 -DHAS_LIB_GLFW=1 -DHAS_LIB_GL=1 -DHAS_LIB_UNWIND=1 -DHAS_LIB_DL=1 -DHAS_LIB_BULLET=0
+GLOBALFLAGS = -O2 -g -O2 -g -std=c++17  -DHAS_LIB_GTK3=1 -DHAS_LIB_ZLIB=1 -DHAS_LIB_GLFW=1 -DHAS_LIB_GL=1 -DHAS_LIB_UNWIND=1 -DHAS_LIB_DL=1 -DHAS_LIB_BULLET=0 -DHAS_LIB_OPENAL=0 -DHAS_LIB_OGG=0
 CXXFLAGS =   `pkg-config --cflags gtk+-3.0` $(GLOBALFLAGS)
 CXXFLAGSLINKING =   `pkg-config --cflags --libs gtk+-3.0` -lz -lglfw -lGL -lunwind -ldl $(GLOBALFLAGS)
 prefix = /usr/local
 
-OBJ = fx/Beam.o \
+OBJ = audio/Sound.o \
+ audio/SoundAL.o \
+ fx/Beam.o \
  fx/Light.o \
  fx/Particle.o \
  fx/ParticleManager.o \
@@ -160,8 +162,6 @@ OBJ = fx/Beam.o \
  lib/nix/nix_textures.o \
  lib/nix/nix_vertexbuffer.o \
  lib/nix/nix_view.o \
- lib/sound/sound.o \
- lib/sound/sound_al.o \
  lib/xfile/chunked.o \
  lib/xfile/pdf.o \
  lib/xfile/xml.o \
@@ -189,6 +189,12 @@ $(BIN) : $(OBJ) main.o
 	$(CPP) $(OBJ) main.o -o $(BIN) $(CXXFLAGSLINKING)
 
 all : $(BIN)
+
+audio/Sound.o : audio/Sound.cpp audio/Sound.h
+	$(CPP) -c audio/Sound.cpp -o $@ $(CXXFLAGS)
+
+audio/SoundAL.o : audio/SoundAL.cpp audio/Sound.h
+	$(CPP) -c audio/SoundAL.cpp -o $@ $(CXXFLAGS)
 
 fx/Beam.o : fx/Beam.cpp fx/Beam.h fx/Particle.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/math/math.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h y/Entity.h
 	$(CPP) -c fx/Beam.cpp -o $@ $(CXXFLAGS)
@@ -655,12 +661,6 @@ lib/nix/nix_vertexbuffer.o : lib/nix/nix_vertexbuffer.cpp lib/nix/nix.h lib/conf
 lib/nix/nix_view.o : lib/nix/nix_view.cpp lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/image/color.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/math/math.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h lib/nix/nix_common.h
 	$(CPP) -c lib/nix/nix_view.cpp -o $@ $(CXXFLAGS)
 
-lib/sound/sound.o : lib/sound/sound.cpp lib/math/math.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/sound/sound.h lib/config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h
-	$(CPP) -c lib/sound/sound.cpp -o $@ $(CXXFLAGS)
-
-lib/sound/sound_al.o : lib/sound/sound_al.cpp lib/math/math.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/sound/sound.h lib/config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h
-	$(CPP) -c lib/sound/sound_al.cpp -o $@ $(CXXFLAGS)
-
 lib/xfile/chunked.o : lib/xfile/chunked.cpp lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/xfile/chunked.h
 	$(CPP) -c lib/xfile/chunked.cpp -o $@ $(CXXFLAGS)
 
@@ -682,7 +682,7 @@ renderer/Renderer.o : renderer/Renderer.cpp renderer/Renderer.h lib/math/rect.h 
 renderer/RenderPath.o : renderer/RenderPath.cpp renderer/RenderPath.h lib/math/math.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h renderer/Renderer.h fx/Light.h y/Entity.h fx/Particle.h gui/Picture.h gui/Node.h lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h world/Camera.h world/Model.h world/Terrain.h world/Material.h world/World.h world/LevelData.h
 	$(CPP) -c renderer/RenderPath.cpp -o $@ $(CXXFLAGS)
 
-renderer/RenderPathGL.o : renderer/RenderPathGL.cpp renderer/RenderPathGL.h renderer/RenderPath.h lib/math/math.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h helper/PerformanceMonitor.h plugins/PluginManager.h gui/gui.h gui/Node.h gui/Picture.h gui/Text.h fx/Light.h y/Entity.h fx/Particle.h fx/Beam.h fx/ParticleManager.h world/Camera.h world/Material.h world/Model.h world/Terrain.h world/World.h world/LevelData.h Config.h meta.h
+renderer/RenderPathGL.o : renderer/RenderPathGL.cpp renderer/RenderPathGL.h renderer/RenderPath.h lib/math/math.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h helper/PerformanceMonitor.h plugins/PluginManager.h gui/gui.h gui/Node.h gui/Picture.h gui/Text.h fx/Light.h y/Entity.h fx/Particle.h fx/Beam.h fx/ParticleManager.h world/Camera.h world/Material.h world/Model.h world/Object.h world/Terrain.h world/World.h world/LevelData.h Config.h meta.h
 	$(CPP) -c renderer/RenderPathGL.cpp -o $@ $(CXXFLAGS)
 
 renderer/RenderPathGLDeferred.o : renderer/RenderPathGLDeferred.cpp renderer/RenderPathGLDeferred.h renderer/RenderPathGL.h renderer/RenderPath.h lib/math/math.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h helper/PerformanceMonitor.h plugins/PluginManager.h gui/gui.h gui/Node.h gui/Picture.h gui/Text.h fx/Light.h y/Entity.h fx/Particle.h fx/Beam.h fx/ParticleManager.h world/Camera.h world/Material.h world/Model.h world/Terrain.h world/World.h world/LevelData.h Config.h meta.h

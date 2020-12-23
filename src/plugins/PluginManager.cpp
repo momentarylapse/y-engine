@@ -8,6 +8,7 @@
 #include "PluginManager.h"
 #include "Controller.h"
 #include "../lib/kaba/kaba.h"
+#include "../audio/Sound.h"
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
@@ -167,6 +168,7 @@ void PluginManager::link_kaba() {
 	kaba::link_external_class_func("World.set_active_physics", &World::set_active_physics);
 	kaba::link_external_class_func("World.add_light", &World::add_light);
 	kaba::link_external_class_func("World.add_particle", &World::add_particle);
+	kaba::link_external_class_func("World.add_sound", &World::add_sound);
 	kaba::link_external_class_func("World.shift_all", &World::shift_all);
 	kaba::link_external_class_func("World.get_g", &World::get_g);
 	kaba::link_external_class_func("World.trace", &World::trace);
@@ -246,6 +248,17 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_size("Beam", sizeof(Beam));
 	kaba::declare_class_element("Beam.length", &Beam::length);
 	kaba::link_external_class_func("Beam.__init__", &Beam::__init_beam__);
+
+
+	kaba::declare_class_size("audio.Sound", sizeof(audio::Sound));
+	kaba::link_external_class_func("audio.Sound.play", &audio::Sound::play);
+	kaba::link_external_class_func("audio.Sound.stop", &audio::Sound::stop);
+	kaba::link_external_class_func("audio.Sound.pause", &audio::Sound::pause);
+	kaba::link_external_class_func("audio.Sound.has_ended", &audio::Sound::has_ended);
+	kaba::link_external_class_func("audio.Sound.set", &audio::Sound::set_data);
+	kaba::link_external_class_func("audio.Sound.load", &audio::Sound::load);
+	kaba::link_external_class_func("audio.Sound.emit", &audio::Sound::emit);
+	kaba::link_external_class_func("audio.Sound.__del_override__", &global_delete);
 
 	gui::Node node(rect::ID);
 	kaba::declare_class_size("ui.Node", sizeof(gui::Node));

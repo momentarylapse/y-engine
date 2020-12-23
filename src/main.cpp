@@ -17,6 +17,8 @@
 #include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
 
+#include "audio/Sound.h"
+
 #include "input/InputManager.h"
 
 #include "fx/Light.h"
@@ -117,7 +119,9 @@ public:
 
 		std::cout << "on init..." << "\n";
 
-		engine.set_dirs("Textures", "Maps", "Objects", "Sound", "Scripts", "Materials", "Fonts");
+		engine.set_dirs("Textures", "Maps", "Objects", "Sounds", "Scripts", "Materials", "Fonts");
+
+		audio::init();
 
 		GodInit();
 		global_perf_mon = &perf_mon;

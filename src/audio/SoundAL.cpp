@@ -9,10 +9,11 @@
 
 // TODO: cache small buffers...
 
- #include "../math/math.h"
- #include "sound.h"
-
-#ifdef SOUND_ALLOW_OPENAL
+#include "Sound.h"
+#include "../y/EngineData.h"
+#include "../lib/math/math.h"
+ 
+#ifdef HAS_LIB_OPENAL
 
 
 #ifdef OS_WINDOWS
@@ -30,49 +31,49 @@
 	#include <AL/alc.h>
 #endif
 
-extern Array<Sound*> Sounds;
-extern Array<Music*> Musics;
+namespace audio {
+
+//extern Array<Sound*> Sounds;
+//extern Array<Music*> Musics;
 
 
-struct sSmallAudio
-{
+struct SmallAudio {
 	unsigned int al_buffer;
-	string filename;
+	Path filename;
 	int ref_count;
 };
-Array<sSmallAudio> SmallAudioCache;
+Array<SmallAudio> small_audio_cache;
 
-sAudioFile load_sound_file(const string &filename);
-sAudioStream load_sound_start(const string &filename);
-void load_sound_step(sAudioStream *as);
-void load_sound_end(sAudioStream *as);
+AudioFile load_sound_file(const Path &filename);
+AudioStream load_sound_start(const Path &filename);
+void load_sound_step(AudioStream *as);
+void load_sound_end(AudioStream *as);
 
 
 ALCdevice *al_dev = NULL;
 ALCcontext *al_context = NULL;
 
-void SoundInit()
-{
+void init() {
 	al_dev = alcOpenDevice(NULL);
-	if (al_dev){
+	if (al_dev) {
 		al_context = alcCreateContext(al_dev, NULL);
 		if (al_context)
 			alcMakeContextCurrent(al_context);
 		else
-			msg_error("could not create openal context");
-	}else
-		msg_error("could not open openal device");
+			throw Exception("could not create openal context");
+	} else {
+		throw Exception("could not open openal device");
+	}
 	bool ok = (al_context);
 
 	
 	//bool ok = alutInit(NULL, 0);
 	if (!ok)
-		msg_error("sound init (openal)");
+		throw Exception("sound init (openal)");
 }
 
-void SoundExit()
-{
-	SoundReset();
+void exit() {
+	reset();
 	if (al_context)
 		alcDestroyContext(al_context);
 	al_context = NULL;
@@ -82,31 +83,30 @@ void SoundExit()
 //	alutExit();
 }
 
-Sound *SoundLoad(const string &filename)
-{
+Sound *Sound::load(const Path &filename) {
 	int id = -1;
 
 	// cached?
 	int cached = -1;
-	for (int i=0;i<SmallAudioCache.num;i++)
-		if (SmallAudioCache[i].filename == filename){
-			SmallAudioCache[i].ref_count ++;
+	for (int i=0;i<small_audio_cache.num;i++)
+		if (small_audio_cache[i].filename == filename){
+			small_audio_cache[i].ref_count ++;
 			cached = i;
 			break;
 		}
 
 	// no -> load from file
-	sAudioFile af;
+	AudioFile af;
 	if (cached < 0)
-		af = load_sound_file(SoundDir + filename);
+		af = load_sound_file(engine.sound_dir << filename);
 
 	Sound *s = new Sound;
 	
-	if (((af.channels == 1) && (af.buffer)) || (cached >= 0)){
+	if (((af.channels == 1) and af.buffer) or (cached >= 0)){
 		
 		alGenSources(1, &s->al_source);
 		if (cached >= 0){
-			s->al_buffer = SmallAudioCache[cached].al_buffer;
+			s->al_buffer = small_audio_cache[cached].al_buffer;
 		}else{
 
 			// fill data into al-buffer
@@ -117,132 +117,114 @@ Sound *SoundLoad(const string &filename)
 				alBufferData(s->al_buffer, AL_FORMAT_MONO16, af.buffer, af.samples * 2, af.freq);
 
 			// put into small audio cache
-			sSmallAudio sa;
+			SmallAudio sa;
 			sa.filename = filename;
 			sa.al_buffer = s->al_buffer;
 			sa.ref_count = 1;
-			SmallAudioCache.add(sa);
+			small_audio_cache.add(sa);
 		}
 
 		// set up al-source
 		alSourcei (s->al_source, AL_BUFFER,   s->al_buffer);
-		alSourcef (s->al_source, AL_PITCH,    s->Speed);
-		alSourcef (s->al_source, AL_GAIN,     s->Volume * VolumeSound);
-		alSource3f(s->al_source, AL_POSITION, s->Pos.x, s->Pos.y, s->Pos.z);
-		alSource3f(s->al_source, AL_VELOCITY, s->Vel.x, s->Vel.y, s->Vel.z);
+		alSourcef (s->al_source, AL_PITCH,    s->speed);
+		alSourcef (s->al_source, AL_GAIN,     s->volume * VolumeSound);
+		alSource3f(s->al_source, AL_POSITION, s->pos.x, s->pos.y, s->pos.z);
+		alSource3f(s->al_source, AL_VELOCITY, s->vel.x, s->vel.y, s->vel.z);
 		alSourcei (s->al_source, AL_LOOPING,  false);
 	}
-	if ((af.buffer) && (cached < 0))
+	if (af.buffer and (cached < 0))
 	    delete[](af.buffer);
 	return s;
 }
 
 
-Sound *SoundEmit(const string &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop)
-{
-	Sound *s = SoundLoad(filename);
-	s->Suicidal = true;
-	s->SetData(pos, v_0, min_dist, max_dist, speed, volume);
-	s->Play(loop);
+Sound *Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
+	Sound *s = Sound::load(filename);
+	s->suicidal = true;
+	s->set_data(pos, v_0, min_dist, max_dist, speed, volume);
+	s->play(loop);
 	return s;
 }
 
-Sound::Sound()
-{
-	Suicidal = false;
-	Pos = v_0;
-	Vel = v_0;
-	Volume = 1;
-	Speed = 1;
+Sound::Sound() : Entity(Entity::Type::SOUND) {
+	suicidal = false;
+	pos = v_0;
+	vel = v_0;
+	volume = 1;
+	speed = 1;
 	al_source = 0;
 	al_buffer = 0;
-	Sounds.add(this);
+	loop = false;
 }
 
-Sound::~Sound()
-{
-	Stop();
-	for (int i=0;i<SmallAudioCache.num;i++)
-		if (al_buffer == SmallAudioCache[i].al_buffer)
-			SmallAudioCache[i].ref_count --;
+Sound::~Sound() {
+	stop();
+	for (int i=0;i<small_audio_cache.num;i++)
+		if (al_buffer == small_audio_cache[i].al_buffer)
+			small_audio_cache[i].ref_count --;
 	//alDeleteBuffers(1, &al_buffer);
 	alDeleteSources(1, &al_source);
-	for (int i=0;i<Sounds.num;i++)
-		if (Sounds[i] == this)
-			Sounds.erase(i);
 }
 
-void Sound::__delete__()
-{
+void Sound::__delete__() {
 	this->~Sound();
 }
 
-void SoundClearSmallCache()
-{
-	for (int i=0;i<SmallAudioCache.num;i++)
-		alDeleteBuffers(1, &SmallAudioCache[i].al_buffer);
-	SmallAudioCache.clear();
+void clear_small_cache() {
+	for (int i=0; i<small_audio_cache.num; i++)
+		alDeleteBuffers(1, &small_audio_cache[i].al_buffer);
+	small_audio_cache.clear();
 }
 
-void Sound::Play(bool loop)
-{
+void Sound::play(bool loop) {
 	alSourcei(al_source, AL_LOOPING, loop);
 	alSourcePlay(al_source);
 }
 
-void Sound::Stop()
-{
+void Sound::stop() {
 	alSourceStop(al_source);
 }
 
-void Sound::Pause(bool pause)
-{
+void Sound::pause(bool pause) {
 	int state;
 	alGetSourcei(al_source, AL_SOURCE_STATE, &state);
-	if ((pause) && (state == AL_PLAYING))
+	if (pause and (state == AL_PLAYING))
 		alSourcePause(al_source);
-	else if ((!pause) && (state == AL_PAUSED))
+	else if (!pause and (state == AL_PAUSED))
 		alSourcePlay(al_source);
 }
 
-bool Sound::IsPlaying()
-{
+bool Sound::is_playing() {
 	int state;
 	alGetSourcei(al_source, AL_SOURCE_STATE, &state);
 	return (state == AL_PLAYING);
 }
 
-bool Sound::Ended()
-{
-	return !IsPlaying(); // TODO... (paused...)
+bool Sound::has_ended() {
+	return !is_playing(); // TODO... (paused...)
 }
 
-void Sound::SetData(const vector &pos, const vector &vel, float min_dist, float max_dist, float speed, float volume)
-{
-	Pos = pos;
-	Vel = vel;
-	Volume = volume;
-	Speed = speed;
-	alSourcef (al_source, AL_PITCH,    Speed);
-	alSourcef (al_source, AL_GAIN,     Volume * VolumeSound);
-	alSource3f(al_source, AL_POSITION, Pos.x, Pos.y, Pos.z);
-	alSource3f(al_source, AL_VELOCITY, Vel.x, Vel.y, Vel.z);
+void Sound::set_data(const vector &_pos, const vector &_vel, float min_dist, float max_dist, float _speed, float _volume) {
+	pos = _pos;
+	vel = _vel;
+	volume = _volume;
+	speed = _speed;
+	alSourcef (al_source, AL_PITCH,    speed);
+	alSourcef (al_source, AL_GAIN,     volume * VolumeSound);
+	alSource3f(al_source, AL_POSITION, pos.x, pos.y, pos.z);
+	alSource3f(al_source, AL_VELOCITY, vel.x, vel.y, vel.z);
 	//alSourcei (al_source, AL_LOOPING,  false);
 	alSourcef (al_source, AL_REFERENCE_DISTANCE, min_dist);
 	alSourcef (al_source, AL_MAX_DISTANCE, max_dist);
 }
 
-void SoundSetListener(const vector &pos, const vector &ang, const vector &vel, float v_sound)
-{
+void set_listener(const vector &pos, const quaternion &ang, const vector &vel, float v_sound) {
 	ALfloat ListenerOri[6];
-	vector dir = ang.ang2dir();
+	vector dir = ang * vector::EZ;
 	ListenerOri[0] = dir.x;
 	ListenerOri[1] = dir.y;
 	ListenerOri[2] = dir.z;
-	vector up;
-	matrix rot;
-	rot = matrix::rotation(ang);
-	up = rot.transform_normal(vector::EY);
+	vector up = ang * vector::EY;
 	ListenerOri[3] = up.x;
 	ListenerOri[4] = up.y;
 	ListenerOri[5] = up.z;
@@ -252,17 +234,16 @@ void SoundSetListener(const vector &pos, const vector &ang, const vector &vel, f
 	alSpeedOfSound(v_sound);
 }
 
-bool sAudioStream::stream(int buf)
-{
-	if (state != StreamStateReady)
+bool AudioStream::stream(int buf) {
+	if (state != AudioStream::State::READY)
 		return false;
 	load_sound_step(this);
-	if (channels == 2){
+	if (channels == 2) {
 		if (bits == 8)
 			alBufferData(buf, AL_FORMAT_STEREO8, buffer, buf_samples * 2, freq);
 		else if (bits == 16)
 			alBufferData(buf, AL_FORMAT_STEREO16, buffer, buf_samples * 4, freq);
-	}else{
+	} else {
 		if (bits == 8)
 			alBufferData(buf, AL_FORMAT_MONO8, buffer, buf_samples, freq);
 		else if (bits == 16)
@@ -271,15 +252,14 @@ bool sAudioStream::stream(int buf)
 	return true;
 }
 
-Music *MusicLoad(const string &filename)
-{
-	msg_write(SoundDir + filename);
+Music *Music::load(const Path &filename) {
+	msg_write("loading sound " + filename.str());
 	int id = -1;
-	sAudioStream as = load_sound_start(SoundDir + filename);
+	auto as = load_sound_start(engine.sound_dir << filename);
 
 	Music *m = new Music();
 
-	if (as.state == StreamStateReady){
+	if (as.state == AudioStream::State::READY) {
 
 		alGenSources(1, &m->al_source);
 		alGenBuffers(2, m->al_buffer);
@@ -294,85 +274,71 @@ Music *MusicLoad(const string &filename)
 		alSourceQueueBuffers(m->al_source, num_buffers, m->al_buffer);
 
 
-		alSourcef(m->al_source, AL_PITCH,           m->Speed);
-		alSourcef(m->al_source, AL_GAIN,            m->Volume * VolumeMusic);
+		alSourcef(m->al_source, AL_PITCH,           m->speed);
+		alSourcef(m->al_source, AL_GAIN,            m->volume * VolumeMusic);
 		alSourcei(m->al_source, AL_LOOPING,         false);
 		alSourcei(m->al_source, AL_SOURCE_RELATIVE, AL_TRUE);
 	}
 	return m;
 }
 
-Music::Music()
-{
-	Volume = 1;
-	Speed = 1;
+Music::Music() {
+	volume = 1;
+	speed = 1;
 	al_source = 0;
 	al_buffer[0] = 0;
 	al_buffer[1] = 0;
-	Musics.add(this);
 }
 
-Music::~Music()
-{
-	Stop();
+Music::~Music() {
+	stop();
 	alSourceUnqueueBuffers(al_source, 2, al_buffer);
 	load_sound_end(&stream);
 	alDeleteBuffers(2, al_buffer);
 	alDeleteSources(1, &al_source);
-	for (int i=0;i<Musics.num;i++)
-		if (Musics[i] == this)
-			Musics.erase(i);
 }
 
-void Music::__delete__()
-{
+void Music::__delete__() {
 	this->~Music();
 }
 
-void Music::Play(bool loop)
-{
+void Music::play(bool loop) {
 	//alSourcei   (al_source, AL_LOOPING, loop);
 	alSourcePlay(al_source);
-	alSourcef(al_source, AL_GAIN, Volume * VolumeMusic);
+	alSourcef(al_source, AL_GAIN, volume * VolumeMusic);
 }
 
-void Music::SetRate(float rate)
-{
+void Music::set_rate(float rate) {
 }
 
-void Music::Stop()
-{
+void Music::stop() {
 	alSourceStop(al_source);
 }
 
-void Music::Pause(bool pause)
-{
+void Music::pause(bool pause) {
 	int state;
 	alGetSourcei(al_source, AL_SOURCE_STATE, &state);
-	if ((pause) && (state == AL_PLAYING))
+	if (pause and (state == AL_PLAYING))
 		alSourcePause(al_source);
-	else if ((!pause) && (state == AL_PAUSED))
+	else if (!pause and (state == AL_PAUSED))
 		alSourcePlay(al_source);
 }
 
-bool Music::IsPlaying()
-{
+bool Music::is_playing() {
 	int state;
 	alGetSourcei(al_source, AL_SOURCE_STATE, &state);
 	return (state == AL_PLAYING);
 }
 
-bool Music::Ended()
-{
-	return !IsPlaying();
+bool Music::has_ended() {
+	return !is_playing();
 }
 
-void Music::Iterate()
-{
-	alSourcef(al_source, AL_GAIN, Volume * VolumeMusic);
+void Music::iterate() {
+	alSourcef(al_source, AL_GAIN, volume * VolumeMusic);
 	int processed;
 	alGetSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
-	while(processed --){
+	while (processed --) {
 		ALuint buf;
 		alSourceUnqueueBuffers(al_source, 1, &buf);
 		if (stream.stream(buf))
@@ -408,4 +374,6 @@ bool Music::Ended(){ return false; }
 void Music::Iterate(){}
 
 #endif
+
+}
 
