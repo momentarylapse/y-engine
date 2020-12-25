@@ -1,6 +1,6 @@
 BIN = ../y
 CPP = g++
-GLOBALFLAGS = -O2 -g -O2 -g -std=c++17  -DHAS_LIB_GTK3=1 -DHAS_LIB_ZLIB=1 -DHAS_LIB_GLFW=1 -DHAS_LIB_GL=1 -DHAS_LIB_UNWIND=1 -DHAS_LIB_DL=1 -DHAS_LIB_BULLET=1 -DHAS_LIB_OPENAL=1 -DHAS_LIB_OGG=1
+GLOBALFLAGS = -fno-omit-frame-pointer -O2 -g -std=c++17  -DHAS_LIB_GTK3=1 -DHAS_LIB_ZLIB=1 -DHAS_LIB_GLFW=1 -DHAS_LIB_GL=1 -DHAS_LIB_UNWIND=1 -DHAS_LIB_DL=1 -DHAS_LIB_BULLET=1 -DHAS_LIB_OPENAL=1 -DHAS_LIB_OGG=1
 CXXFLAGS =   `pkg-config --cflags gtk+-3.0` `pkg-config --cflags bullet` -I/usr/include/AL $(GLOBALFLAGS)
 CXXFLAGSLINKING =   `pkg-config --cflags --libs gtk+-3.0` -lz -lglfw -lGL -lunwind -ldl -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath -lopenal -logg -lvorbis -lvorbisfile -lvorbisenc $(GLOBALFLAGS)
 prefix = /usr/local
