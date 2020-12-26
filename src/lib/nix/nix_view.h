@@ -10,6 +10,8 @@
 #ifndef _NIX_VIEW_EXISTS_
 #define _NIX_VIEW_EXISTS_
 
+class Image;
+
 namespace nix{
 
 class Texture;

@@ -10,6 +10,9 @@
 
 #include "nix.h"
 #include "nix_common.h"
+#ifdef _X_USE_HUI_
+#include "../hui/hui.h"
+#endif
 #ifdef _X_USE_IMAGE_
 #include "../image/image.h"
 #endif
@@ -384,6 +387,8 @@ void ScreenShotToImage(Image &image) {
 					GL_RGBA, GL_UNSIGNED_BYTE, &image.data[0]);
 }
 
+#ifdef _X_USE_HUI_
+
 void StartFrameHui() {
 	int fb;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb);
@@ -392,9 +397,12 @@ void StartFrameHui() {
 	FrameBuffer::DEFAULT->height = hui::GetEvent()->row;
 	SetViewport(FrameBuffer::DEFAULT->area());
 }
+
 void EndFrameHui() {
 	FrameBuffer::DEFAULT->frame_buffer = 0;
 }
+
+#endif
 
 
 #if HAS_LIB_GLFW
