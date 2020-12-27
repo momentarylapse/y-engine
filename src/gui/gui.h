@@ -10,6 +10,7 @@
 
 
 //#include "../lib/vulkan/vulkan.h"
+#include "../lib/base/pointer.h"
 #include "../lib/nix/nix.h"
 #include <functional>
 
@@ -26,9 +27,13 @@ void handle_input(const vector &m, std::function<bool(Node *n)> f);
 void handle_mouse_move(const vector &m_prev, const vector &m);
 void iterate(float dt);
 
-extern Node* toplevel;
+extern shared<Node> toplevel;
 extern Array<Node*> all_nodes;
 extern Array<Node*> sorted_nodes;
+void update_tree();
+
+void delete_node(Node *n);
+
 extern nix::Shader *shader;
 extern nix::VertexBuffer *vertex_buffer;
 }

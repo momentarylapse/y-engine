@@ -9,11 +9,12 @@
 #define SRC_GUI_NODE_H_
 
 #include "../lib/base/base.h"
+#include "../lib/base/pointer.h"
 #include "../lib/nix/nix.h"
 
 namespace gui {
 
-class Node : public VirtualBase {
+class Node : public Sharable<VirtualBase> {
 public:
 	Node(const rect &r);
 	virtual ~Node();
@@ -64,7 +65,7 @@ public:
 	bool eff_visible;
 
 	Node *parent;
-	Array<Node*> children;
+	shared_array<Node> children;
 	void add(Node *);
 	void update_geometry(const rect &target);
 

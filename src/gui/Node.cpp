@@ -43,7 +43,7 @@ void Node::__delete__() {
 void Node::add(Node *n) {
 	children.add(n);
 	n->parent = this;
-	all_nodes.add(n);
+	update_tree();
 }
 
 rect rect_move_x(const rect &r, float dx) {

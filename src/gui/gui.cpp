@@ -16,7 +16,7 @@ nix::Shader *shader = nullptr;
 nix::VertexBuffer *vertex_buffer = nullptr;
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;
-Node *toplevel = nullptr;
+shared<Node> toplevel;
 
 
 void init(nix::Shader *s) {
@@ -45,18 +45,25 @@ void init(nix::Shader *s) {
 }*/
 
 void reset() {
-	for (auto *n: all_nodes) {
-		n->children.clear();
-		n->parent = nullptr;
-		delete n;
-	}
-	all_nodes.clear();
-
 	toplevel = new Node(rect::ID);
 }
 
+void add_to_node_list(Node *n) {
+	all_nodes.append(weak(n->children));
+	for (auto c: weak(n->children))
+		add_to_node_list(c);
+}
+
+void update_tree() {
+	all_nodes.clear();
+	if (toplevel)
+		add_to_node_list(toplevel.get());
+	update();
+}
+
 void update() {
-	toplevel->update_geometry(rect::ID);
+	if (toplevel)
+		toplevel->update_geometry(rect::ID);
 
 	sorted_nodes = all_nodes;
 	//std::sort(sorted_nodes.begin(), sorted_nodes.end(), [](Node *a, Node *b) { return a->eff_z < b->eff_z; });
@@ -95,6 +102,19 @@ void iterate(float dt) {
 	for (auto n: all_nodes) {
 		n->on_iterate(dt);
 	}
+}
+
+void delete_node(Node *n) {
+	msg_write("del node");
+
+	if (n->parent) {
+		for (int i=0; i<n->parent->children.num; i++)
+			if (n == n->parent->children[i])
+				n->parent->children.erase(i);
+	}
+	msg_write("del node b");
+	update_tree();
+	msg_write("del node c");
 }
 
 #if 0

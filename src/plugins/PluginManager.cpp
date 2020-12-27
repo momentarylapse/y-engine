@@ -101,10 +101,13 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Model.materials", &Model::material);
 	kaba::declare_class_element("Model.bones", &Model::bone);
 	kaba::declare_class_element("Model.matrix", &Model::_matrix);
+	kaba::declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
 	kaba::declare_class_element("Model.var", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
 	kaba::declare_class_element("Model.theta", (char*)&model.physics_data.theta_0 - (char*)&model);
+	kaba::declare_class_element("Model.physics_active", (char*)&model.physics_data.active - (char*)&model);
+	kaba::declare_class_element("Model.physics_passive", (char*)&model.physics_data.passive - (char*)&model);
 	kaba::declare_class_element("Model.parent", &Model::parent);
 	kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
@@ -269,8 +272,9 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("ui.Node.dz", &gui::Node::dz);
 	kaba::declare_class_element("ui.Node.color", &gui::Node::col);
 	kaba::declare_class_element("ui.Node.visible", &gui::Node::visible);
-	kaba::link_external_class_func("ui.Node.__init__", &gui::Picture::__init__);
-	kaba::link_external_virtual("ui.Node.__delete__", &gui::Picture::__delete__, &node);
+	kaba::link_external_class_func("ui.Node.__init__", &gui::Picture::__init__); // argh
+	kaba::link_external_virtual("ui.Node.__delete__", &gui::Node::__delete__, &node);
+	kaba::link_external_class_func("ui.Node.__del_override__", &gui::delete_node);
 	kaba::link_external_class_func("ui.Node.add", &gui::Picture::add);
 	kaba::link_external_virtual("ui.Node.on_iterate", &gui::Picture::on_iterate, &node);
 	kaba::link_external_virtual("ui.Node.on_enter", &gui::Picture::on_enter, &node);
