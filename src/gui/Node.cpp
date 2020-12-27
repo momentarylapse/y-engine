@@ -14,12 +14,12 @@ namespace gui {
 
 Node::Node(const rect &r) {
 	type = Type::NODE;
-	area = r;
+	set_area(r);
 	dz = 1;
 	col = White;
 	visible = true;
 	margin = rect::EMPTY;
-	align = Align::_TOP_LEFT_OFFSET;
+	align = Align::_TOP_LEFT;
 
 	eff_col = White;
 	eff_area = r;
@@ -58,6 +58,13 @@ rect rect_sub_margin(const rect &r, const rect &m) {
 	return rect(r.x1 + m.x1, r.x2 - m.x2, r.y1 + m.y1, r.y2 - m.y2);
 }
 
+void Node::set_area(const rect &r) {
+	x = r.x1;
+	y = r.y1;
+	width = r.width();
+	height = r.height();
+}
+
 void Node::update_geometry(const rect &target) {
 	if (parent) {
 		eff_z = parent->eff_z + dz;
@@ -80,59 +87,28 @@ void Node::update_geometry(const rect &target) {
 			eff_area.x1 = target.x1 + margin.x1 * fx;
 			eff_area.x2 = target.x2 - margin.x2 * fx;
 		} else if (align & Align::LEFT) {
-			if (align & Align::OFFSET) {
-				//fx = 2;
-				eff_area.x1 = target.x1 + (margin.x1 + area.x1) * fx;
-				eff_area.x2 = target.x1 + (margin.x1 + area.x2) * fx;
-			} else {
-				eff_area.x1 = target.x1 +  margin.x1 * fx;
-				eff_area.x2 = target.x1 + (margin.x1 + area.width()) * fx;
-			}
+			eff_area.x1 = target.x1 + (margin.x1 + x) * fx;
+			eff_area.x2 = target.x1 + (margin.x1 + x + width) * fx;
 		} else if (align & Align::CENTER_H) {
-			if (align & Align::OFFSET) {
-				eff_area.x1 = target.mx() + area.x1 * fx;
-				eff_area.x2 = target.mx() + area.x2 * fx;
-			} else {
-				eff_area.x1 = target.mx() - area.width() / 2 * fx;
-				eff_area.x2 = target.mx() + area.width() / 2 * fx;
-			}
+			eff_area.x1 = target.mx() + (x - width / 2) * fx;
+			eff_area.x2 = target.mx() + (x + width / 2) * fx;
 		} else if (align & Align::RIGHT) {
-			if (align & Align::OFFSET) {
-				eff_area.x1 = target.x2 - (margin.x2 + area.x1) * fx;
-				eff_area.x2 = target.x2 - (margin.x2 + area.x2) * fx;
-			} else {
-				eff_area.x1 = target.x2 - (margin.x2 + area.width()) * fx;
-				eff_area.x2 = target.x2 -  margin.x2 * fx;
-			}
+			eff_area.x1 = target.x2 + (x - margin.x2 - width) * fx;
+			eff_area.x2 = target.x2 + (x - margin.x2) * fx;
 		}
 
 		if (align & Align::FILL_Y) {
 			eff_area.y1 = target.y1 + margin.y1;
 			eff_area.y2 = target.y2 - margin.y2;
 		} else if (align & Align::TOP) {
-			if (align & Align::OFFSET) {
-				eff_area.y1 = target.y1 + margin.y1 + area.y1;
-				eff_area.y2 = target.y1 + margin.y1 + area.y2;
-			} else {
-				eff_area.y1 = target.y1 + margin.y1;
-				eff_area.y2 = target.y1 + margin.y1 + area.height();
-			}
+			eff_area.y1 = target.y1 + margin.y1 + y;
+			eff_area.y2 = target.y1 + margin.y1 + y + height;
 		} else if (align & Align::CENTER_V) {
-			if (align & Align::OFFSET) {
-				eff_area.y1 = target.my() + area.y1;
-				eff_area.y2 = target.my() + area.y2;
-			} else {
-				eff_area.y1 = target.my() - area.height() / 2;
-				eff_area.y2 = target.my() + area.height() / 2;
-			}
+			eff_area.y1 = target.my() + y - height / 2;
+			eff_area.y2 = target.my() + y + height / 2;
 		} else if (align & Align::BOTTOM) {
-			if (align & Align::OFFSET) {
-				eff_area.y1 = target.y2 - margin.y2 + area.y1;
-				eff_area.y2 = target.y2 - margin.y2 + area.y2;
-			} else {
-				eff_area.y1 = target.y2 - margin.y2 - area.height();
-				eff_area.y2 = target.y2 - margin.y2;
-			}
+			eff_area.y1 = target.y2 + (y - margin.y2 - height);
+			eff_area.y2 = target.y2 + (y - margin.y2);
 		}
 
 		//eff_area = rect_sub_margin(eff_area, margin);

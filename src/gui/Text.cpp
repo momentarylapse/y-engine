@@ -126,12 +126,10 @@ void Text::rebuild() {
 	texture->overwrite(im);
 	//dset->set({ubo}, {texture});
 
-	float h = font_size * text.explode("\n").num;
-	float w = h * (float)im.width / (float)im.height;
+	height = font_size * text.explode("\n").num;
+	width = height * (float)im.width / (float)im.height;
 	if (align & Align::NONSQUARE)
-		 w /= engine.physical_aspect_ratio;
-	area.x2 = area.x1 + w;
-	area.y2 = area.y1 + h;
+		 width /= engine.physical_aspect_ratio;
 }
 
 void Text::set_text(const string &t) {

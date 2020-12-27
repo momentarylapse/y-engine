@@ -101,6 +101,9 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Model.materials", &Model::material);
 	kaba::declare_class_element("Model.bones", &Model::bone);
 	kaba::declare_class_element("Model.matrix", &Model::_matrix);
+	kaba::declare_class_element("Model.radius", (char*)&model.prop.radius - (char*)&model);
+	kaba::declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
+	kaba::declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
 	kaba::declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
 	kaba::declare_class_element("Model.var", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
@@ -265,7 +268,10 @@ void PluginManager::link_kaba() {
 
 	gui::Node node(rect::ID);
 	kaba::declare_class_size("ui.Node", sizeof(gui::Node));
-	kaba::declare_class_element("ui.Node.area", &gui::Node::area);
+	kaba::declare_class_element("ui.Node.x", &gui::Node::x);
+	kaba::declare_class_element("ui.Node.y", &gui::Node::y);
+	kaba::declare_class_element("ui.Node.width", &gui::Node::width);
+	kaba::declare_class_element("ui.Node.height", &gui::Node::height);
 	kaba::declare_class_element("ui.Node._eff_area", &gui::Node::eff_area);
 	kaba::declare_class_element("ui.Node.margin", &gui::Node::margin);
 	kaba::declare_class_element("ui.Node.align", &gui::Node::align);
@@ -276,6 +282,7 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("ui.Node.__delete__", &gui::Node::__delete__, &node);
 	kaba::link_external_class_func("ui.Node.__del_override__", &gui::delete_node);
 	kaba::link_external_class_func("ui.Node.add", &gui::Picture::add);
+	kaba::link_external_class_func("ui.Node.set_area", &gui::Picture::set_area);
 	kaba::link_external_virtual("ui.Node.on_iterate", &gui::Picture::on_iterate, &node);
 	kaba::link_external_virtual("ui.Node.on_enter", &gui::Picture::on_enter, &node);
 	kaba::link_external_virtual("ui.Node.on_leave", &gui::Picture::on_leave, &node);

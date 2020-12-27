@@ -105,16 +105,12 @@ void iterate(float dt) {
 }
 
 void delete_node(Node *n) {
-	msg_write("del node");
-
 	if (n->parent) {
 		for (int i=0; i<n->parent->children.num; i++)
 			if (n == n->parent->children[i])
 				n->parent->children.erase(i);
 	}
-	msg_write("del node b");
 	update_tree();
-	msg_write("del node c");
 }
 
 #if 0

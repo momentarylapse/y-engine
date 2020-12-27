@@ -40,18 +40,16 @@ public:
 		BOTTOM = 1<<3,
 		LEFT = 1<<4,
 		RIGHT = 1<<5,
-		OFFSET = 1<<6,
 		NONSQUARE = 1<<7,
 		CENTER_H = 1<<8,
 		CENTER_V = 1<<9,
 		_FILL_XY = FILL_X | FILL_Y,
 		_TOP_LEFT = TOP | LEFT,
-		_TOP_LEFT_OFFSET = TOP | LEFT | OFFSET,
 	};
 
 	Type type;
 	bool visible;
-	rect area; // coord system depends on align!
+	float x, y, width, height; // coord system depends on align!
 	rect margin;
 	//rect padding;
 	Align align;
@@ -68,6 +66,7 @@ public:
 	shared_array<Node> children;
 	void add(Node *);
 	void update_geometry(const rect &target);
+	void set_area(const rect &r);
 
 	virtual void on_iterate(float dt) {}
 	virtual bool on_left_button_down() { return false; }
