@@ -410,12 +410,13 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 		auto s = kaba::load(filename);
 		for (auto c: s->classes()) {
 			if (c->is_derived_from_s(base_class)) {
+				msg_write(format("creating instance  %s", c->long_name()));
 				void *p = c->create_instance();
 				assign_variables((char*)p, c, variables);
 				return p;
 			}
 		}
-	} catch(kaba::Exception &e) {
+	} catch (kaba::Exception &e) {
 		msg_error(e.message());
 		throw Exception(e.message());
 	}
