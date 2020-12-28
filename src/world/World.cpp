@@ -333,7 +333,7 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()){
 			auto q = quaternion::rotation(o.ang);
-			Object *oo = create_object(o.filename, o.name, o.pos, q, i);
+			Object *oo = create_object_x(o.filename, o.name, o.pos, q, o.script, i);
 			ok &= (oo >= 0);
 			if (oo){
 				oo->vel = o.vel;
@@ -417,8 +417,11 @@ bool GodLoadWorld(const Path &filename) {
 	return ok;
 }
 
+Object *World::create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang) {
+	return create_object_x(filename, name, pos, ang, "");
+}
 
-Object *World::create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang, int w_index) {
+Object *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Path &script, int w_index) {
 	if (engine.resetting_game)
 		throw Exception("CreateObject during game reset");
 
@@ -426,7 +429,7 @@ Object *World::create_object(const Path &filename, const string &name, const vec
 		throw Exception("CreateObject: empty filename");
 
 	//msg_write(on);
-	auto *o = static_cast<Object*>(ModelManager::load(filename));
+	auto *o = static_cast<Object*>(ModelManager::loadx(filename, script));
 
 	o->script_data.name = name;
 	o->pos = pos;

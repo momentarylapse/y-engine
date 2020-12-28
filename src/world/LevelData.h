@@ -54,6 +54,7 @@ public:
 	class Object {
 	public:
 		Path filename;
+		Path script;
 		string name;
 		vector pos, ang, vel, rot;
 	};

@@ -137,6 +137,7 @@ bool LevelData::load(const Path &filename) {
 			} else if (e.tag == "object") {
 				Object o;
 				o.filename = e.value("file");
+				o.script = e.value("script");
 				o.name = e.value("name");
 				o.pos = s2v(e.value("pos"));
 				o.ang = s2v(e.value("ang"));

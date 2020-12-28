@@ -82,7 +82,8 @@ public:
 	~World();
 	void reset();
 	bool load(const LevelData &ld);
-	Object *create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang, int w_index = -1);
+	Object *create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang);
+	Object *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Path &script, int w_index = -1);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
 
 	void register_object(Object *o, int index);
