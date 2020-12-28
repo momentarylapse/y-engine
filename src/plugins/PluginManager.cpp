@@ -18,6 +18,7 @@
 #include "../gui/Text.h"
 #include "../helper/PerformanceMonitor.h"
 #include "../input/InputManager.h"
+#include "../renderer/RenderPathGL.h"
 #include "../y/EngineData.h"
 #include "../world/Camera.h"
 #include "../world/Link.h"
@@ -293,6 +294,16 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Picture::on_right_button_down, &node);
 	kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Picture::on_right_button_up, &node);
 
+	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
+	kaba::declare_class_element("ui.Picture.shader", &gui::Picture::shader);
+	kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
+	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
+	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
+
+	kaba::declare_class_size("ui.Text", sizeof(gui::Text));
+	kaba::declare_class_element("ui.Text.text", &gui::Text::text);
+	kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
+
 	gui::Picture picture(rect::ID, nullptr);
 	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
 	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
@@ -357,6 +368,11 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("EngineData.initial_world_file", &EngineData::initial_world_file);
 	kaba::declare_class_element("EngineData.second_world_file", &EngineData::second_world_file);
 	kaba::declare_class_element("EngineData.physical_aspect_ratio", &EngineData::physical_aspect_ratio);
+	kaba::declare_class_element("EngineData.renderer", &EngineData::renderer);
+
+	kaba::declare_class_size("RenderPath", sizeof(RenderPathGL));
+	kaba::link_external_virtual("RenderPath.render_into_texture", &RenderPathGLForward::render_into_texture, engine.renderer);
+	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RenderPathGLForward::render_into_cubemap);
 
 	kaba::link_external("tex_white", &_tex_white);
 	kaba::link_external("world", &world);

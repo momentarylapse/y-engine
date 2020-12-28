@@ -84,8 +84,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* w, PerformanceMonitor *pm
 }
 
 void RenderPathGLDeferred::draw() {
-	nix::StartFrameGLFW(window);
-
 	perf_mon->tick(PMLabel::PRE);
 
 	prepare_lights();
@@ -107,11 +105,6 @@ void RenderPathGLDeferred::draw() {
 	render_out(source, fb3->color_attachments[0]);
 
 	draw_gui(source);
-
-
-	nix::EndFrameGLFW(window);
-	break_point();
-	perf_mon->tick(PMLabel::END);
 }
 
 

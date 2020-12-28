@@ -112,6 +112,7 @@ public:
 				render_path = new RenderPathGLDeferred(window, &perf_mon);
 			else
 				render_path = new RenderPathGLForward(window, &perf_mon);
+			engine.renderer = render_path;
 		} catch(Exception &e) {
 			msg_error(e.message());
 			throw e;
@@ -288,8 +289,10 @@ public:
 		if (perf_mon.frames == 0)
 			update_statistics();
 
+		render_path->start_frame();
 		plugin_manager.handle_draw_pre();
 		render_path->draw();
+		render_path->end_frame();
 	}
 
 

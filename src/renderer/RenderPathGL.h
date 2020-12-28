@@ -62,6 +62,8 @@ public:
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam) = 0;
 	void render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube, const vector &pos);
 
+	void start_frame() override;
+	void end_frame() override;
 
 	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
 	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal);

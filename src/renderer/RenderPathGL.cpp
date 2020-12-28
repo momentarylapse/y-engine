@@ -73,20 +73,22 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	fb_cube = new nix::FrameBuffer({depth_cube});
 	cube_map = new nix::CubeMap(CUBE_SIZE);
 
-	im.create(CUBE_SIZE, CUBE_SIZE, Red);
-	for (int i=0; i<6; i++)
-		cube_map->overwrite_side(i, im);
-
 	EntityManager::enabled = false;
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 	EntityManager::enabled = true;
 }
 
 void RenderPathGL::render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube, const vector &pos) {
+	msg_write("render cube map");
 	Camera cam(pos, quaternion::ID, rect::ID);
 	cam.fov = pi/2;
 	for (int i=0; i<6; i++) {
-		fb->update_x({cube, depth_cube}, i);
+		try{
+			fb->update_x({cube, depth_cube}, i);
+		}catch(Exception &e){
+			msg_error(e.message());
+			return;
+		}
 		if (i == 0)
 			cam.ang = quaternion::rotation(vector(0,-pi/2,0));
 		if (i == 1)
@@ -170,9 +172,17 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 
 static int _frame = 0;
 
-void RenderPathGLForward::draw() {
+void RenderPathGL::start_frame() {
 	nix::StartFrameGLFW(window);
+}
 
+void RenderPathGL::end_frame() {
+	nix::EndFrameGLFW(window);
+	break_point();
+	perf_mon->tick(PMLabel::END);
+}
+
+void RenderPathGLForward::draw() {
 
 	_frame ++;
 	if (_frame > 10) {
@@ -203,11 +213,6 @@ void RenderPathGLForward::draw() {
 	render_out(source, fb3->color_attachments[0]);
 
 	draw_gui(source);
-
-
-	nix::EndFrameGLFW(window);
-	break_point();
-	perf_mon->tick(PMLabel::END);
 }
 
 void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal) {
@@ -259,7 +264,6 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 
 	nix::SetProjectionOrtho(true);
 	nix::SetCull(CULL_NONE);
-	nix::SetShader(gui::shader);
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 	nix::SetZ(false, false);
 
@@ -268,8 +272,12 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
-			gui::shader->set_float(gui::shader->get_location("blur"), p->bg_blur);
-			gui::shader->set_color(gui::shader->get_location("color"), p->eff_col);
+			auto shader = gui::shader;
+			if (p->shader)
+				shader = p->shader;
+			nix::SetShader(shader);
+			gui::shader->set_float(shader->get_location("blur"), p->bg_blur);
+			gui::shader->set_color(shader->get_location("color"), p->eff_col);
 			nix::SetTextures({p->texture, source->color_attachments[0]});
 			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
 			gui::vertex_buffer->create_rect(rect::ID, p->source);

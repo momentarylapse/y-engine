@@ -56,6 +56,8 @@ public:
 	RenderPath() {}
 	virtual ~RenderPath() {}
 	virtual void draw() = 0;
+	virtual void start_frame() = 0;
+	virtual void end_frame() = 0;
 
 	nix::Shader *shader_3d = nullptr;
 	nix::Shader *shader_2d = nullptr;
