@@ -70,7 +70,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	vb_2d->create_rect(rect(-1,1, -1,1));
 
 	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE);
-	fb_cube = new nix::FrameBuffer({depth_cube});
+	fb_cube = nullptr;
 	cube_map = new nix::CubeMap(CUBE_SIZE);
 
 	EntityManager::enabled = false;
@@ -78,13 +78,14 @@ RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
 	EntityManager::enabled = true;
 }
 
-void RenderPathGL::render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube, const vector &pos) {
-	msg_write("render cube map");
+void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cube, const vector &pos) {
+	if (!fb_cube)
+		fb_cube = new nix::FrameBuffer({depth});
 	Camera cam(pos, quaternion::ID, rect::ID);
 	cam.fov = pi/2;
 	for (int i=0; i<6; i++) {
 		try{
-			fb->update_x({cube, depth_cube}, i);
+			fb_cube->update_x({cube, depth}, i);
 		}catch(Exception &e){
 			msg_error(e.message());
 			return;
@@ -101,7 +102,7 @@ void RenderPathGL::render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube,
 			cam.ang = quaternion::rotation(vector(0,pi,0));
 		if (i == 5)
 			cam.ang = quaternion::rotation(vector(0,0,0));
-		render_into_texture(fb, &cam);
+		render_into_texture(fb_cube, &cam);
 	}
 }
 
@@ -187,7 +188,7 @@ void RenderPathGLForward::draw() {
 	_frame ++;
 	if (_frame > 10) {
 		if (world.ego)
-			render_into_cubemap(fb_cube, cube_map, world.ego->pos);
+			render_into_cubemap(depth_cube, cube_map, world.ego->pos);
 		_frame = 0;
 	}
 

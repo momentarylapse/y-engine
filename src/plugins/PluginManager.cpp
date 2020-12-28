@@ -371,6 +371,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("EngineData.renderer", &EngineData::renderer);
 
 	kaba::declare_class_size("RenderPath", sizeof(RenderPathGL));
+	kaba::declare_class_element("RenderPath.cube_map", &RenderPathGL::cube_map);
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RenderPathGLForward::render_into_texture, engine.renderer);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RenderPathGLForward::render_into_cubemap);
 

@@ -60,7 +60,7 @@ public:
 	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm);
 
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam) = 0;
-	void render_into_cubemap(nix::FrameBuffer *fb, nix::CubeMap *cube, const vector &pos);
+	void render_into_cubemap(nix::DepthBuffer *fb, nix::CubeMap *cube, const vector &pos);
 
 	void start_frame() override;
 	void end_frame() override;

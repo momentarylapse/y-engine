@@ -640,7 +640,7 @@ CubeMap::CubeMap(int size) {
 
 
 	Image im;
-	im.create(size, size, Red);
+	im.create(size, size, Blue);
 	for (int i=0; i<6; i++)
 		overwrite_side(i, im);
 }
