@@ -42,10 +42,12 @@ void break_point() {
 
 Array<Material*> post_processors;
 
-RenderPathGL::RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm) {
-	window = w;
+RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) {
+	window = win;
 	glfwMakeContextCurrent(window);
-	glfwGetFramebufferSize(window, &width, &height);
+	//glfwGetFramebufferSize(window, &width, &height);
+	width = w;
+	height = h;
 
 	perf_mon = pm;
 
@@ -106,7 +108,7 @@ void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cu
 	}
 }
 
-RenderPathGLForward::RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm) : RenderPathGL(w, pm) {
+RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 
 	fb = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"),

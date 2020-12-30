@@ -34,7 +34,7 @@ void break_point();
 
 extern Array<Material*> post_processors;
 
-RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* w, PerformanceMonitor *pm) : RenderPathGL(w, pm) {
+RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 
 	nix::Init();
 

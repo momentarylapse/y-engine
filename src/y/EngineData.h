@@ -44,6 +44,9 @@ public:
 	float fps_max, fps_min;
 	float time_scale, elapsed, elapsed_rt;
 
+	// output rendering/frame buffer resolution (might be smaller than the physical screen resolution)
+	int width, height;
+
 	// the "real world" aspect ratio of the output image (screen or window)
 	float physical_aspect_ratio;
 

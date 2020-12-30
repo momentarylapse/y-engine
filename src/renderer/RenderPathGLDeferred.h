@@ -17,7 +17,7 @@ public:
 	nix::FrameBuffer *gbuffer = nullptr;
 	nix::Shader *shader_gbuffer_out = nullptr;
 
-	RenderPathGLDeferred(GLFWwindow* w, PerformanceMonitor *pm);
+	RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 	void draw() override;
 
 	void render_into_texture(nix::FrameBuffer *fb, Camera *cam) override;

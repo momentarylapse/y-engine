@@ -109,9 +109,9 @@ public:
 
 		try {
 			if (config.get_str("renderer.path", "forward") == "deferred")
-				render_path = new RenderPathGLDeferred(window, &perf_mon);
+				render_path = new RenderPathGLDeferred(window, engine.width, engine.height, &perf_mon);
 			else
-				render_path = new RenderPathGLForward(window, &perf_mon);
+				render_path = new RenderPathGLForward(window, engine.width, engine.height, &perf_mon);
 			engine.renderer = render_path;
 		} catch(Exception &e) {
 			msg_error(e.message());
@@ -202,11 +202,27 @@ public:
 
 		int w = config.get_int("screen.width", 1024);
 		int h = config.get_int("screen.height", 768);
+		engine.width = w;
+		engine.height = h;
 		auto monitor = glfwGetPrimaryMonitor();
-		if (!config.get_bool("screen.fullscreen", false))
-			monitor = nullptr;
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		bool fullscreen = config.get_bool("screen.fullscreen", false);
+		bool windowed_fullscreen = config.get_bool("screen.windowed-fullscreen", false);
 		engine.physical_aspect_ratio = (float)w / (float)h;
 
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+		if (!fullscreen and !windowed_fullscreen)
+			monitor = nullptr;
+
+		if (windowed_fullscreen) {
+			w = mode->width;
+			h = mode->height;
+		}
 		window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
 
 		glfwSetWindowUserPointer(window, this);

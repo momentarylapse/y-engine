@@ -57,7 +57,7 @@ public:
 	float shadow_box_size;
 	int shadow_resolution;
 
-	RenderPathGL(GLFWwindow* w, PerformanceMonitor *pm);
+	RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam) = 0;
 	void render_into_cubemap(nix::DepthBuffer *fb, nix::CubeMap *cube, const vector &pos);
@@ -78,7 +78,7 @@ public:
 class RenderPathGLForward : public RenderPathGL {
 public:
 
-	RenderPathGLForward(GLFWwindow* w, PerformanceMonitor *pm);
+	RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 	void draw() override;
 
 	void render_into_texture(nix::FrameBuffer *fb, Camera *cam) override;
