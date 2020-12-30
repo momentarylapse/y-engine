@@ -166,7 +166,7 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 				if (a->physics_data.active)
 					a->on_collide({b, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
 				if (b->physics_data.active)
-					a->on_collide({a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
+					b->on_collide({a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}

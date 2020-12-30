@@ -280,6 +280,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("ui.Node.dz", &gui::Node::dz);
 	kaba::declare_class_element("ui.Node.color", &gui::Node::col);
 	kaba::declare_class_element("ui.Node.visible", &gui::Node::visible);
+	kaba::declare_class_element("ui.Node.children", &gui::Node::children);
 	kaba::link_external_class_func("ui.Node.__init__", &gui::Picture::__init__); // argh
 	kaba::link_external_virtual("ui.Node.__delete__", &gui::Node::__delete__, &node);
 	kaba::link_external_class_func("ui.Node.__del_override__", &gui::delete_node);
