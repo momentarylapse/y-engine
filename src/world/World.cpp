@@ -50,10 +50,6 @@
 #include "Camera.h"
 
 
-nix::Texture *tex_white = nullptr;
-nix::Texture *tex_black = nullptr;
-
-
 //vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo);
 
 
@@ -147,13 +143,6 @@ inline bool TestVectorSanity(vector &v, const char *name)
 
 
 void GodInit() {
-	Image im;
-	tex_white = new nix::Texture();
-	tex_black = new nix::Texture();
-	im.create(16, 16, White);
-	tex_white->overwrite(im);
-	im.create(16, 16, Black);
-	tex_black->overwrite(im);
 }
 
 void GodEnd() {
@@ -558,13 +547,14 @@ void World::register_object(Object *o, int index) {
 
 	if (o->physics_data.active or o->physics_data.passive)
 		dynamicsWorld->addRigidBody(o->body);
+	//else if (o->physics_data.test_collisions)
+	//	dynamicsWorld->addCollisionObject(o->body);
 
 }
 
 
-void World::set_active_physics(Object *o, bool active) {
-	o->physics_data.active = active;
-	btScalar mass(o->physics_data.active ? o->physics_data.mass : 0);
+void World::set_active_physics(Object *o, bool active, bool passive, bool test_collisions) {
+	btScalar mass(active ? o->physics_data.mass : 0);
 	btVector3 localInertia(0, 0, 0);
 	if (o->colShape) {
 		o->colShape->calculateLocalInertia(mass, localInertia);
@@ -573,6 +563,20 @@ void World::set_active_physics(Object *o, bool active) {
 		o->physics_data.theta_0._22 = localInertia.z();
 	}
 	o->body->setMassProps(mass, localInertia);
+	if (passive and !o->physics_data.passive)
+		dynamicsWorld->addRigidBody(o->body);
+	if (!passive and o->physics_data.passive)
+		dynamicsWorld->removeRigidBody(o->body);
+
+	/*if (!passive and test_collisions) {
+		msg_error("FIXME pure collision");
+		dynamicsWorld->addCollisionObject(o->body);
+	}*/
+
+
+	o->physics_data.active = active;
+	o->physics_data.passive = passive;
+	o->physics_data.test_collisions = test_collisions;
 }
 
 // un-object a model
@@ -743,6 +747,10 @@ void World::iterate_physics(float dt) {
 				o->ang = bt_get_q(trans.getRotation());
 				o->vel = bt_get_v(o->body->getLinearVelocity());
 				o->rot = bt_get_v(o->body->getAngularVelocity());
+
+			} else {
+
+				//dynamicsWorld->contactTest(o->body, myTickCallback);
 			}
 
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
