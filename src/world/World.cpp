@@ -553,7 +553,7 @@ void World::register_object(Object *o, int index) {
 }
 
 
-void World::set_active_physics(Object *o, bool active, bool passive, bool test_collisions) {
+void World::set_active_physics(Object *o, bool active, bool passive) { //, bool test_collisions) {
 	btScalar mass(active ? o->physics_data.mass : 0);
 	btVector3 localInertia(0, 0, 0);
 	if (o->colShape) {
@@ -576,7 +576,7 @@ void World::set_active_physics(Object *o, bool active, bool passive, bool test_c
 
 	o->physics_data.active = active;
 	o->physics_data.passive = passive;
-	o->physics_data.test_collisions = test_collisions;
+	//o->physics_data.test_collisions = test_collisions;
 }
 
 // un-object a model

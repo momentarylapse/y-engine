@@ -110,6 +110,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
 	kaba::declare_class_element("Model.theta", (char*)&model.physics_data.theta_0 - (char*)&model);
+	kaba::declare_class_element("Model.g_factor", (char*)&model.physics_data.g_factor - (char*)&model);
 	kaba::declare_class_element("Model.physics_active", (char*)&model.physics_data.active - (char*)&model);
 	kaba::declare_class_element("Model.physics_passive", (char*)&model.physics_data.passive - (char*)&model);
 	kaba::declare_class_element("Model.parent", &Model::parent);
