@@ -149,10 +149,9 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_size("Material", sizeof(Material));
 	kaba::declare_class_element("Material.textures", &Material::textures);
 	kaba::declare_class_element("Material.shader", &Material::shader);
-	kaba::declare_class_element("Material.ambient", &Material::ambient);
-	kaba::declare_class_element("Material.diffuse", &Material::diffuse);
-	kaba::declare_class_element("Material.specular", &Material::specular);
-	kaba::declare_class_element("Material.shininess", &Material::shininess);
+	kaba::declare_class_element("Material.albedo", &Material::albedo);
+	kaba::declare_class_element("Material.roughness", &Material::roughness);
+	kaba::declare_class_element("Material.metal", &Material::metal);
 	kaba::declare_class_element("Material.emission", &Material::emission);
 	kaba::declare_class_element("Material.cast_shadow", &Material::cast_shadow);
 	kaba::link_external_class_func("Material.add_uniform", &Material::add_uniform);

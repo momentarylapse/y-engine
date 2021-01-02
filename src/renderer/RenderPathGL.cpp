@@ -484,9 +484,7 @@ void RenderPathGL::set_material(Material *m) {
 
 	set_textures(m->textures);
 
-	//msg_write(format("%.3f  %.3f", m->specular.r, m->shininess));
-	nix::SetMaterial(m->diffuse, m->ambient, m->specular, m->shininess, m->emission);
-	//s->set_color(s->get_location("emission_factor"), m->emission);
+	nix::SetMaterial(m->albedo, m->roughness, m->metal, m->emission);
 }
 
 void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {

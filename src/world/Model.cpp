@@ -339,13 +339,14 @@ void Model::load(const Path &filename)
 		material[i] = m;
 		bool user_colors = f->read_bool();
 		if (user_colors){
-			color am = file_read_color4i(f);
-			m->diffuse = file_read_color4i(f);
-			color sp = file_read_color4i(f);
+			color am, di, sp;
+			am = file_read_color4i(f);
+			m->albedo = file_read_color4i(f);
+			sp = file_read_color4i(f);
 			m->emission = file_read_color4i(f);
-			m->shininess = (float)f->read_int();
-			m->ambient = col_frac(am, m->diffuse) / 2;
-			m->specular = col_frac(sp, White);
+			float shininess = (float)f->read_int();
+			m->roughness = col_frac(am, m->albedo) / 2;
+			m->metal = 0;
 		}else{
 			file_read_color4i(f);
 			file_read_color4i(f);
