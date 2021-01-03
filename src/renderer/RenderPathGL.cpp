@@ -132,19 +132,21 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	fb4->color_attachments[0]->set_options("wrap=clamp");
 	fb5->color_attachments[0]->set_options("wrap=clamp");
 
-	nix::Shader::load("Materials/forward/module-surface.shader");
+	auto sd = nix::shader_dir;
+	nix::shader_dir = "";
 
-	//auto sd = nix::shader_dir;
-	shader_blur = nix::Shader::load("Materials/forward/blur.shader");
-	shader_depth = nix::Shader::load("Materials/forward/depth.shader");
-	shader_out = nix::Shader::load("Materials/forward/hdr.shader");
-	shader_3d = nix::Shader::load("Materials/forward/3d-new.shader");
-	shader_fx = nix::Shader::load("Materials/forward/3d-fx.shader");
+	nix::Shader::load(hui::Application::directory_static << "forward/module-surface.shader");
+
+	shader_blur = nix::Shader::load(hui::Application::directory_static << "forward/blur.shader");
+	shader_depth = nix::Shader::load(hui::Application::directory_static << "forward/depth.shader");
+	shader_out = nix::Shader::load(hui::Application::directory_static << "forward/hdr.shader");
+	shader_3d = nix::Shader::load(hui::Application::directory_static << "forward/3d-new.shader");
+	shader_fx = nix::Shader::load(hui::Application::directory_static << "forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
-	shader_shadow = nix::Shader::load("Materials/forward/3d-shadow.shader");
+	shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
 
-	shader_2d = nix::Shader::load("Materials/forward/2d.shader");
-	//nix::shader_dir = sd;
+	shader_2d = nix::Shader::load(hui::Application::directory_static << "forward/2d.shader");
+	nix::shader_dir = sd;
 }
 
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
