@@ -53,8 +53,8 @@ Material::Material() {
 	shader = NULL;
 
 	albedo = White;
-	roughness = 0.5f;
-	metal = 0;
+	roughness = 0.6f;
+	metal = 0.0f;
 	emission = Black;
 
 	cast_shadow = true;

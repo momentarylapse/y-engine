@@ -5,7 +5,7 @@
 <Module>
 
 
-uniform vec4 eye_pos;
+uniform vec3 eye_pos;
 
 
 struct Light {
@@ -73,7 +73,7 @@ float _surf_brightness(Light l, vec3 p, vec3 n) {
 
 // blinn phong
 float _surf_specular(Light l, vec3 p, vec3 n, float shininess) {
-	vec3 view_dir = normalize(p - eye_pos.xyz);
+	vec3 view_dir = normalize(p - eye_pos);
 	vec3 half_dir = normalize(_surf_light_dir(l, p) + view_dir);
 
 	float spec_angle = max(-dot(half_dir, n), 0.0);
@@ -152,7 +152,7 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float roughness, float meta
 	for (int i=0; i<num_lights; i++)
 		out_color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, roughness, metal, i == shadow_index).rgb;
 	
-/*	float distance = length(p - eye_pos.xyz);
+/*	float distance = length(p - eye_pos);
 	float f = exp(-distance / fog.distance);
 	out_color.rgb = f * out_color.rgb + (1-f) * fog.color.rgb;
 	

@@ -135,12 +135,16 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	auto sd = nix::shader_dir;
 	nix::shader_dir = "";
 
-	nix::Shader::load(hui::Application::directory_static << "forward/module-surface.shader");
+	if (config.get_str("renderer.shader-quality", "") == "pbr")
+		nix::Shader::load(hui::Application::directory_static << "forward/module-surface-pbr.shader");
+	else
+		nix::Shader::load(hui::Application::directory_static << "forward/module-surface.shader");
 
 	shader_blur = nix::Shader::load(hui::Application::directory_static << "forward/blur.shader");
 	shader_depth = nix::Shader::load(hui::Application::directory_static << "forward/depth.shader");
 	shader_out = nix::Shader::load(hui::Application::directory_static << "forward/hdr.shader");
-	shader_3d = nix::Shader::load(hui::Application::directory_static << "forward/3d-new.shader");
+	//shader_3d = nix::Shader::load(hui::Application::directory_static << "forward/3d-new.shader");
+	shader_3d = nix::Shader::load(hui::Application::directory_static << "default.shader");
 	shader_fx = nix::Shader::load(hui::Application::directory_static << "forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
 	shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
@@ -471,7 +475,7 @@ void RenderPathGLForward::draw_world(bool allow_material) {
 void RenderPathGL::set_material(Material *m) {
 	auto s = m->shader;
 	nix::SetShader(s);
-	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 16);
+	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 12);
 	s->set_int(s->get_location("num_lights"), lights.num);
 	s->set_int(s->get_location("shadow_index"), shadow_index);
 	for (auto &u: m->uniforms)

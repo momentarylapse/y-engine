@@ -111,7 +111,7 @@ void RenderPathGLDeferred::draw() {
 void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
 	auto s = shader_gbuffer_out;
 	nix::SetShader(s);
-	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 16);
+	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 12);
 	s->set_int(s->get_location("num_lights"), lights.num);
 	s->set_int(s->get_location("shadow_index"), shadow_index);
 	nix::BindUniform(ubo_light, 1);
