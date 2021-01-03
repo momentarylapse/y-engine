@@ -102,8 +102,6 @@ Text::Text(const string &t, float h, float x, float y) : Picture(rect::ID, nullp
 }
 
 Text::~Text() {
-	if (texture)
-		delete texture;
 }
 
 void Text::__init2__(const string &t, float h) {
@@ -121,7 +119,8 @@ void Text::__delete__() {
 void Text::rebuild() {
 	Image im;
 	render_text(text, align, im);
-	texture = new nix::Texture();
+	if (texture == nullptr)
+		texture = new nix::Texture();
 
 	texture->overwrite(im);
 	//dset->set({ubo}, {texture});

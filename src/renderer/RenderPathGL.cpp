@@ -66,7 +66,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 	im.create(16, 16, Black);
 	tex_black->overwrite(im);
 
-	_tex_white = tex_white;
+	_tex_white = tex_white.get();
 
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_rect(rect(-1,1, -1,1));
@@ -104,7 +104,7 @@ void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cu
 			cam.ang = quaternion::rotation(vector(0,pi,0));
 		if (i == 5)
 			cam.ang = quaternion::rotation(vector(0,0,0));
-		render_into_texture(fb_cube, &cam);
+		render_into_texture(fb_cube.get(), &cam);
 	}
 }
 
@@ -155,27 +155,27 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	auto cur = source;
-	auto next = fb4;
+	auto next = fb4.get();
 	for (auto *m: post_processors) {
-		nix::SetShader(m->shader);
+		nix::SetShader(m->shader.get());
 		for (auto &u: m->uniforms)
 			m->shader->set_data(u.location, u.p, u.size);
-		process({cur->color_attachments[0], source->depth_buffer}, next, m->shader);
+		process({cur->color_attachments[0], source->depth_buffer}, next, m->shader.get());
 		cur = next;
-		next = (next == fb4) ? fb5 : fb4;
+		next = (next == fb4) ? fb5.get() : fb4.get();
 	}
 
 	if (cam->focus_enabled) {
 		process_depth(cur, next, fb->depth_buffer, true);
 		cur = next;
-		next = (next == fb4) ? fb5 : fb4;
-		process_depth(fb4, fb5, fb->depth_buffer, false);
+		next = (next == fb4.get()) ? fb5.get() : fb4.get();
+		process_depth(fb4.get(), fb5.get(), fb->depth_buffer, false);
 		cur = next;
-		next = (next == fb4) ? fb5 : fb4;
+		next = (next == fb4) ? fb5.get() : fb4.get();
 	}
 
-	process_blur(cur, fb2, 1.0f, true);
-	process_blur(fb2, fb3, 0.0f, false);
+	process_blur(cur, fb2.get(), 1.0f, true);
+	process_blur(fb2.get(), fb3.get(), 0.0f, false);
 	return cur;
 }
 
@@ -196,7 +196,7 @@ void RenderPathGLForward::draw() {
 	_frame ++;
 	if (_frame > 10) {
 		if (world.ego)
-			render_into_cubemap(depth_cube, cube_map, world.ego->pos);
+			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
 
@@ -208,14 +208,14 @@ void RenderPathGLForward::draw() {
 	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
 	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow, 4);
-		render_shadow_map(fb_shadow2, 1);
+		render_shadow_map(fb_shadow.get(), 4);
+		render_shadow_map(fb_shadow2.get(), 1);
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	render_into_texture(fb, cam);
+	render_into_texture(fb.get(), cam);
 
-	auto source = do_post_processing(fb);
+	auto source = do_post_processing(fb.get());
 
 	nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
 
@@ -226,7 +226,7 @@ void RenderPathGLForward::draw() {
 
 void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal) {
 
-	nix::SetShader(shader_blur);
+	nix::SetShader(shader_blur.get());
 	float r = cam->bloom_radius;
 	complex ax;
 	if (horizontal) {
@@ -238,12 +238,12 @@ void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *targ
 	shader_blur->set_float(shader_blur->get_location("radius"), r);
 	shader_blur->set_float(shader_blur->get_location("threshold"), threshold / cam->exposure);
 	shader_blur->set_data(shader_blur->get_location("axis"), &ax.x, 8);
-	process(source->color_attachments, target, shader_blur);
+	process(source->color_attachments, target, shader_blur.get());
 }
 
 void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal) {
 
-	nix::SetShader(shader_depth);
+	nix::SetShader(shader_depth.get());
 	complex ax = complex(1,0);
 	if (!horizontal) {
 		ax = complex(0,1);
@@ -253,7 +253,7 @@ void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *tar
 	shader_depth->set_float(shader_depth->get_location("focal_blur"), cam->focal_blur);
 	shader_depth->set_data(shader_depth->get_location("axis"), &ax.x, 8);
 	shader_depth->set_matrix(shader_depth->get_location("invproj"), cam->m_projection.inverse());
-	process({source->color_attachments[0], depth_buffer}, target, shader_depth);
+	process({source->color_attachments[0], depth_buffer}, target, shader_depth.get());
 }
 
 void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
@@ -281,13 +281,13 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
-			auto shader = gui::shader;
+			auto shader = gui::shader.get();
 			if (p->shader)
-				shader = p->shader;
+				shader = p->shader.get();
 			nix::SetShader(shader);
 			gui::shader->set_float(shader->get_location("blur"), p->bg_blur);
 			gui::shader->set_color(shader->get_location("color"), p->eff_col);
-			nix::SetTextures({p->texture, source->color_attachments[0]});
+			nix::SetTextures({p->texture.get(), source->color_attachments[0]});
 			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
 			gui::vertex_buffer->create_rect(rect::ID, p->source);
 			nix::DrawTriangles(gui::vertex_buffer);
@@ -305,7 +305,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 
 	nix::SetTextures({source->color_attachments[0], bloom});
-	nix::SetShader(shader_out);
+	nix::SetShader(shader_out.get());
 	shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
 	shader_out->set_float(shader_out->get_location("bloom_factor"), cam->bloom_factor);
 	nix::SetProjectionMatrix(matrix::ID);
@@ -353,7 +353,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 }
 
 void RenderPathGLForward::draw_particles() {
-	nix::SetShader(shader_fx);
+	nix::SetShader(shader_fx.get());
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 	nix::SetZ(false, true);
 
@@ -473,7 +473,7 @@ void RenderPathGLForward::draw_world(bool allow_material) {
 }
 
 void RenderPathGL::set_material(Material *m) {
-	auto s = m->shader;
+	auto s = m->shader.get();
 	nix::SetShader(s);
 	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 12);
 	s->set_int(s->get_location("num_lights"), lights.num);
@@ -488,7 +488,7 @@ void RenderPathGL::set_material(Material *m) {
 	else
 		nix::SetAlpha(ALPHA_NONE);
 
-	set_textures(m->textures);
+	set_textures(weak(m->textures));
 
 	nix::SetMaterial(m->albedo, m->roughness, m->metal, m->emission);
 }
@@ -496,14 +496,14 @@ void RenderPathGL::set_material(Material *m) {
 void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
-		tt.add(tex_white);
+		tt.add(tex_white.get());
 	if (tt.num == 1)
-		tt.add(tex_white);
+		tt.add(tex_white.get());
 	if (tt.num == 2)
-		tt.add(tex_white);
+		tt.add(tex_white.get());
 	tt.add(fb_shadow->depth_buffer);
 	tt.add(fb_shadow2->depth_buffer);
-	tt.add(cube_map);
+	tt.add(cube_map.get());
 	nix::SetTextures(tt);
 }
 
@@ -559,7 +559,7 @@ void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) 
 	nix::ResetZ();
 
 	nix::SetZ(true, true);
-	nix::SetShader(shader_shadow);
+	nix::SetShader(shader_shadow.get());
 
 
 	draw_world(false);

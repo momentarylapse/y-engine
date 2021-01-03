@@ -26,8 +26,8 @@ public:
 
 	float bg_blur;
 
-	nix::Shader *shader;
-	nix::Texture *texture;
+	shared<nix::Shader> shader;
+	shared<nix::Texture> texture;
 	/*vulkan::Texture *texture;
 	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;

@@ -69,6 +69,9 @@ string ObjectDir;
 using namespace std::chrono;
 
 
+namespace nix {
+void TextureClear();
+}
 
 
 

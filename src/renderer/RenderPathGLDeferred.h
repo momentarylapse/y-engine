@@ -14,8 +14,8 @@ class RenderPathGLDeferred : public RenderPathGL {
 public:
 
 
-	nix::FrameBuffer *gbuffer = nullptr;
-	nix::Shader *shader_gbuffer_out = nullptr;
+	shared<nix::FrameBuffer> gbuffer;
+	shared<nix::Shader> shader_gbuffer_out;
 
 	RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 	void draw() override;

@@ -8,6 +8,8 @@
 #pragma once
 
 #include "RenderPath.h"
+#include "../lib/base/pointer.h"
+
 namespace nix {
 	class FrameBuffer;
 	class Texture;
@@ -25,30 +27,30 @@ class RenderPathGL : public RenderPath {
 public:
 	int width, height;
 	GLFWwindow* window;
-	nix::Texture *tex_black = nullptr;
-	nix::Texture *tex_white = nullptr;
-	nix::FrameBuffer *fb = nullptr;
-	nix::FrameBuffer *fb2 = nullptr;
-	nix::FrameBuffer *fb3 = nullptr;
-	nix::FrameBuffer *fb4 = nullptr;
-	nix::FrameBuffer *fb5 = nullptr;
-	nix::FrameBuffer *fb_shadow = nullptr;
-	nix::FrameBuffer *fb_shadow2 = nullptr;
-	nix::Shader *shader_blur = nullptr;
-	nix::Shader *shader_depth = nullptr;
-	nix::Shader *shader_out = nullptr;
-	nix::Shader *shader_fx = nullptr;
-	//nix::Shader *shader_3d = nullptr;
-	nix::Shader *shader_shadow = nullptr;
+	shared<nix::Texture> tex_black;
+	shared<nix::Texture> tex_white;
+	shared<nix::FrameBuffer> fb;
+	shared<nix::FrameBuffer> fb2;
+	shared<nix::FrameBuffer> fb3;
+	shared<nix::FrameBuffer> fb4;
+	shared<nix::FrameBuffer> fb5;
+	shared<nix::FrameBuffer> fb_shadow;
+	shared<nix::FrameBuffer> fb_shadow2;
+	shared<nix::Shader> shader_blur;
+	shared<nix::Shader> shader_depth;
+	shared<nix::Shader> shader_out;
+	shared<nix::Shader> shader_fx;
+	//shared<nix::Shader> shader_3d;
+	shared<nix::Shader> shader_shadow;
 
 	Array<UBOLight> lights;
 	nix::UniformBuffer *ubo_light;
 	PerformanceMonitor *perf_mon;
 	nix::VertexBuffer *vb_2d;
 
-	nix::DepthBuffer *depth_cube;
-	nix::FrameBuffer *fb_cube;
-	nix::CubeMap *cube_map;
+	shared<nix::DepthBuffer> depth_cube;
+	shared<nix::FrameBuffer> fb_cube;
+	shared<nix::CubeMap> cube_map;
 
 	//Camera *shadow_cam;
 	matrix shadow_proj;

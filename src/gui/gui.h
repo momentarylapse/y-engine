@@ -34,7 +34,7 @@ void update_tree();
 
 void delete_node(Node *n);
 
-extern nix::Shader *shader;
+extern shared<nix::Shader> shader;
 extern nix::VertexBuffer *vertex_buffer;
 }
 

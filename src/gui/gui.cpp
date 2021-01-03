@@ -12,7 +12,7 @@
 
 namespace gui {
 
-nix::Shader *shader = nullptr;
+shared<nix::Shader> shader;
 nix::VertexBuffer *vertex_buffer = nullptr;
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;

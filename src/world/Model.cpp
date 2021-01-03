@@ -374,7 +374,7 @@ void Model::load(const Path &filename)
 		for (int t=0;t<nt;t++){
 			Path fn = f->read_str();
 			if (!fn.is_empty())
-				m->textures[t] = nix::LoadTexture(fn);
+				m->textures[t] = nix::Texture::load(fn);
 		}
 	}
 	

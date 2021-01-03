@@ -90,15 +90,15 @@ void RenderPathGLDeferred::draw() {
 	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
 	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow, 4);
-		render_shadow_map(fb_shadow2, 1);
+		render_shadow_map(fb_shadow.get(), 4);
+		render_shadow_map(fb_shadow2.get(), 1);
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	render_into_texture(gbuffer, cam);
-	render_from_gbuffer(gbuffer, fb);
+	render_into_texture(gbuffer.get(), cam);
+	render_from_gbuffer(gbuffer.get(), fb.get());
 
-	auto source = do_post_processing(fb);
+	auto source = do_post_processing(fb.get());
 
 	nix::BindFrameBuffer(nix::FrameBuffer::DEFAULT);
 
@@ -109,7 +109,7 @@ void RenderPathGLDeferred::draw() {
 
 
 void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
-	auto s = shader_gbuffer_out;
+	auto s = shader_gbuffer_out.get();
 	nix::SetShader(s);
 	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 12);
 	s->set_int(s->get_location("num_lights"), lights.num);
@@ -154,7 +154,7 @@ void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam
 }
 
 void RenderPathGLDeferred::draw_particles() {
-	nix::SetShader(shader_fx);
+	nix::SetShader(shader_fx.get());
 	nix::SetAlpha(ALPHA_SOURCE_ALPHA, ALPHA_SOURCE_INV_ALPHA);
 	nix::SetZ(false, true);
 
@@ -325,7 +325,7 @@ void RenderPathGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale)
 	nix::ResetZ();
 
 	nix::SetZ(true, true);
-	nix::SetShader(shader_shadow);
+	nix::SetShader(shader_shadow.get());
 
 
 	draw_world(false);

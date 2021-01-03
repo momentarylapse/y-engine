@@ -15,7 +15,7 @@ namespace gui {
 class Text : public Picture {
 public:
 	Text(const string &t, float h, float x, float y);
-	virtual ~Text();
+	~Text() override;
 	void __init2__(const string &t, float h);
 	void __init4__(const string &t, float h, float x, float y);
 	void __delete__() override;

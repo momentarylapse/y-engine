@@ -16,7 +16,7 @@ struct Light {
 	float radius, theta, harshness;
 };
 uniform int num_lights;
-uniform int shadow_index = 0;
+uniform int shadow_index = -1;
 
 /*layout(binding = 1)*/ uniform LightData {
 	Light light[32];
@@ -205,11 +205,14 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	
 ///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
 
-	if (metal > 0.01 && false) {
+	//if (metal > 0.01 && false) {
+	if (metal > 0.99 && roughness < 0.1) {
 		vec3 L = reflect(view_dir, n);
 		//for (int i=0; i<30; i++) {
 		//vec3 L = normalize(L0 + vec3(_surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5) / 50);
-		vec4 r = texture(tex_cube, L);
+		vec4 r = texture(tex_cube, -L);
+		out_color = r;
+		return;
 		/*if (roughness > 0.1) {
 			r += texture(tex_cube, reflect(view_dir, normalize(n + vec3(_surf_rand3d(p),0,1) * roughness/10)));
 			r += texture(tex_cube, reflect(view_dir, normalize(n + vec3(1,_surf_rand3d(p),0) * roughness/10)));
