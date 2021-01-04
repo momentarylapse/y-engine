@@ -28,6 +28,7 @@
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../meta.h"
+#include "../lib/kaba/lib/exception.h"
 
 
 PluginManager plugin_manager;
@@ -43,6 +44,19 @@ void global_delete(Entity *e) {
 	e->on_delete();
 	delete e;
 }
+
+
+#pragma GCC push_options
+#pragma GCC optimize("no-omit-frame-pointer")
+#pragma GCC optimize("no-inline")
+#pragma GCC optimize("0")
+
+Model* _create_object(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+	KABA_EXCEPTION_WRAPPER( return w->create_object(filename, pos, ang); );
+	return nullptr;
+}
+
+#pragma GCC pop_options
 
 
 void PluginManager::link_kaba() {
@@ -139,6 +153,10 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("Model.on_iterate", &Model::on_iterate, &model);
 
 
+	kaba::declare_class_size("Terrain", sizeof(Terrain));
+	kaba::declare_class_element("Terrain.pos", &Terrain::pos);
+	kaba::link_external_class_func("Terrain.get_height", &Terrain::gimme_height);
+
 	kaba::declare_class_size("CollisionData", sizeof(CollisionData));
 	kaba::declare_class_element("CollisionData.m", &CollisionData::m);
 	kaba::declare_class_element("CollisionData.sub", &CollisionData::sub);
@@ -170,7 +188,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("World.fog", &World::fog);
 	kaba::declare_class_element("World.gravity", &World::gravity);
 	kaba::declare_class_element("World.physics_mode", &World::physics_mode);
-	kaba::link_external_class_func("World.create_object", &World::create_object);
+	kaba::link_external_class_func("World.create_object", &_create_object);
 	kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	kaba::link_external_class_func("World.set_active_physics", &World::set_active_physics);
 	kaba::link_external_class_func("World.add_light", &World::add_light);

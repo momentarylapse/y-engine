@@ -406,8 +406,8 @@ bool GodLoadWorld(const Path &filename) {
 	return ok;
 }
 
-Object *World::create_object(const Path &filename, const string &name, const vector &pos, const quaternion &ang) {
-	return create_object_x(filename, name, pos, ang, "");
+Object *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
+	return create_object_x(filename, "", pos, ang, "");
 }
 
 Object *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Path &script, int w_index) {
