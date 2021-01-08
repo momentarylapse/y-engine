@@ -21,6 +21,8 @@
 
 #include "input/InputManager.h"
 
+#include "net/NetworkManager.h"
+
 #include "fx/Light.h"
 #include "fx/ParticleManager.h"
 
@@ -49,6 +51,9 @@
 
 bool SHOW_GBUFFER = false;
 bool SHOW_SHADOW = false;
+
+const string app_name = "y";
+const string app_version = "0.1.0";
 
 
 
@@ -101,14 +106,11 @@ public:
 		config.load();
 
 		window = create_window();
-#if HAS_LIB_VULKAN
-		vulkan::init(window);
-#endif
 		kaba::init();
+		NetworkManager::init();
 
-#if HAS_LIB_VULKAN
-		renderer = new WindowRendererVulkan(window);
-#endif
+		engine.app_name = app_name;
+		engine.version = app_version;
 
 		try {
 			if (config.get_str("renderer.path", "forward") == "deferred")

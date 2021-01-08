@@ -18,6 +18,7 @@
 #include "../gui/Text.h"
 #include "../helper/PerformanceMonitor.h"
 #include "../input/InputManager.h"
+#include "../net/NetworkManager.h"
 #include "../renderer/RenderPathGL.h"
 #include "../y/EngineData.h"
 #include "../world/Camera.h"
@@ -358,6 +359,20 @@ void PluginManager::link_kaba() {
 	kaba::link_external("ui.mouse", &InputManager::mouse);
 	kaba::link_external("ui.dmouse", &InputManager::dmouse);
 	kaba::link_external("ui.scroll", &InputManager::scroll);
+
+	kaba::declare_class_size("NetworkManager", sizeof(NetworkManager));
+	kaba::declare_class_element("NewtorkManager.cur_con", &NetworkManager::cur_con);
+	kaba::link_external_class_func("NetworkManager.connect_to_host", &NetworkManager::connect_to_host);
+	kaba::link_external_class_func("NetworkManager.event", &NetworkManager::event);
+
+
+	kaba::declare_class_size("NetworkManager.Connection", sizeof(NetworkManager::Connection));
+	kaba::declare_class_element("NewtorkManager.Connection.s", &NetworkManager::Connection::s);
+	kaba::declare_class_element("NewtorkManager.Connection.buffer", &NetworkManager::Connection::buffer);
+	kaba::link_external_class_func("NewtorkManager.Connection.start_block", &NetworkManager::Connection::start_block);
+	kaba::link_external_class_func("NewtorkManager.Connection.end_block", &NetworkManager::Connection::end_block);
+
+	kaba::link_external("network", &network_manager);
 
 	kaba::declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
 	kaba::declare_class_element("PerformanceMonitor.avg", &PerformanceMonitor::avg);

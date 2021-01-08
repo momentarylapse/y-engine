@@ -224,7 +224,9 @@ sources = [
 	'src/lib/math/ray.cpp',
 	'src/lib/math/rect.cpp',
 	'src/lib/math/vector.cpp',
+	'src/lib/net/BinaryBuffer.cpp',
 	'src/lib/net/net.cpp',
+	'src/lib/net/Socket.cpp',
 	'src/lib/nix/nix.cpp',
 	'src/lib/nix/nix_draw.cpp',
 	'src/lib/nix/nix_light.cpp',
@@ -235,6 +237,7 @@ sources = [
 	'src/lib/xfile/chunked.cpp',
 	'src/lib/xfile/pdf.cpp',
 	'src/lib/xfile/xml.cpp',
+	'src/net/NetworkManager.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
 	'src/renderer/Renderer.cpp',
@@ -260,3 +263,7 @@ sources = [
 
 executable('y', sources, dependencies : deps, install : true)
 
+install_subdir('static/deferred', install_dir : join_paths(get_option('datadir'), 'y'))
+install_subdir('static/forward', install_dir : join_paths(get_option('datadir'), 'y'))
+install_data('static/default.shader', install_dir : join_paths(get_option('datadir'), 'y'))
+install_data('static/default.shader.graph', install_dir : join_paths(get_option('datadir'), 'y'))
