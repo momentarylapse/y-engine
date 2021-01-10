@@ -14,6 +14,9 @@
 
 class Socket;
 class BinaryBuffer;
+namespace kaba {
+	class Function;
+}
 
 class NetworkManager {
 public:
@@ -28,6 +31,7 @@ public:
 
 		void start_block(const string &id);
 		void end_block();
+		void send();
 		bool read_block();
 	};
 	Array<Connection*> connections;
@@ -52,6 +56,7 @@ public:
 	};
 	Array<Observer> observers;
 	void event(const string &message, VirtualBase *ob, Callback *cb);
+	void event_kaba(const string &message, VirtualBase *ob, kaba::Function *f);
 };
 
 extern NetworkManager network_manager;

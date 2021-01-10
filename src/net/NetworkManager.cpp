@@ -8,6 +8,7 @@
 #include "NetworkManager.h"
 #include "../lib/file/msg.h"
 #include "../lib/net/net.h"
+#include "../lib/kaba/kaba.h"
 
 const int PORT = 2184;
 
@@ -22,10 +23,9 @@ NetworkManager::NetworkManager() {
 }
 
 void NetworkManager::send_connect(Connection *c) {
-	*c->buffer << string("y.connect").hash();
-	c->buffer->start_block();
-	c->buffer->end_block();
-	c->s->write(c->buffer->data);
+	c->start_block("y.connect");
+	c->end_block();
+	c->send();
 }
 
 NetworkManager::Connection *NetworkManager::connect_to_host(const string &host) {
@@ -67,12 +67,16 @@ void NetworkManager::Connection::start_block(const string &id) {
 
 void NetworkManager::Connection::end_block() {
 	buffer->end_block();
+}
+
+void NetworkManager::Connection::send() {
+	//msg_write("sending " + buffer->data.hex());
 	s->write(buffer->data);
 	buffer->clear();
 }
 
 bool NetworkManager::Connection::read_block() {
-	msg_write("NM rb");
+	//msg_write("NM rb");
 	const int FRAME = 8;
 
 	// 8b frame
@@ -80,7 +84,7 @@ bool NetworkManager::Connection::read_block() {
 		buffer->data += s->read(FRAME - buffer->data.num);
 	if (buffer->data.num < FRAME)
 		return false;
-	msg_write("NM rb2");
+	//msg_write("NM rb2");
 	buffer->set_pos(0);
 	int hash, size;
 	*buffer >> hash;
@@ -90,13 +94,13 @@ bool NetworkManager::Connection::read_block() {
 		buffer->data += s->read(FRAME + size - buffer->data.num);
 	if (buffer->data.num < FRAME + size)
 		return false;
-	msg_write("NM rb3");
+	//msg_write("NM rb3");
 	return true;
 
 }
 
 void NetworkManager::handle_block(Connection *con) {
-	msg_write("NM handle block");
+	//msg_write("NM handle block");
 	cur_con = con;
 
 	int hash, size;
@@ -107,7 +111,7 @@ void NetworkManager::handle_block(Connection *con) {
 
 	for (auto &o: observers)
 		if (o.hash == hash) {
-			msg_error("JAAAAAA");
+			//msg_error("JAAAAAA");
 			o.callback(o.object);
 			break;
 		}
@@ -115,8 +119,12 @@ void NetworkManager::handle_block(Connection *con) {
 	con->buffer->set_pos(pos0 + size);
 }
 
+void NetworkManager::event_kaba(const string &message, VirtualBase *ob, kaba::Function *f) {
+	event(message, ob, (Callback*)f->address);
+}
+
 void NetworkManager::event(const string &message, VirtualBase *ob, Callback *cb) {
-	msg_write("NM event " + p2s((void*)cb));
+	//msg_write("NM event " + p2s((void*)cb));
 	observers.add({message.hash(), ob, cb});
 }
 

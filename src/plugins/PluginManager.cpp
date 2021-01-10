@@ -363,14 +363,15 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_size("NetworkManager", sizeof(NetworkManager));
 	kaba::declare_class_element("NewtorkManager.cur_con", &NetworkManager::cur_con);
 	kaba::link_external_class_func("NetworkManager.connect_to_host", &NetworkManager::connect_to_host);
-	kaba::link_external_class_func("NetworkManager.event", &NetworkManager::event);
+	kaba::link_external_class_func("NetworkManager.event", &NetworkManager::event_kaba);
 
 
 	kaba::declare_class_size("NetworkManager.Connection", sizeof(NetworkManager::Connection));
-	kaba::declare_class_element("NewtorkManager.Connection.s", &NetworkManager::Connection::s);
-	kaba::declare_class_element("NewtorkManager.Connection.buffer", &NetworkManager::Connection::buffer);
-	kaba::link_external_class_func("NewtorkManager.Connection.start_block", &NetworkManager::Connection::start_block);
-	kaba::link_external_class_func("NewtorkManager.Connection.end_block", &NetworkManager::Connection::end_block);
+	kaba::declare_class_element("NetworkManager.Connection.s", &NetworkManager::Connection::s);
+	kaba::declare_class_element("NetworkManager.Connection.buffer", &NetworkManager::Connection::buffer);
+	kaba::link_external_class_func("NetworkManager.Connection.start_block", &NetworkManager::Connection::start_block);
+	kaba::link_external_class_func("NetworkManager.Connection.end_block", &NetworkManager::Connection::end_block);
+	kaba::link_external_class_func("NetworkManager.Connection.send", &NetworkManager::Connection::send);
 
 	kaba::link_external("network", &network_manager);
 

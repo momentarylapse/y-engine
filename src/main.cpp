@@ -277,6 +277,7 @@ public:
 	void iterate() {
 		perf_mon.tick(PMLabel::UNKNOWN);
 		plugin_manager.handle_iterate_pre(engine.elapsed);
+		network_manager.iterate();
 		world.iterate(engine.elapsed);
 		for (auto *o: world.objects)
 			if (o)
