@@ -47,6 +47,27 @@ void MoveTimeAdd(Model *m,int operation_no,float elapsed,float v,bool loop);
 bool Model::AllowDeleteRecursive = true;
 
 
+
+File *load_file_x(const Path &filename, int &version) {
+
+	File *f = FileOpen(filename);
+	char c = f->read_char();
+	if (c == 'b') {
+		version = f->read_word();
+		return f;
+	} else if (c == 't') {
+		delete f;
+		f = FileOpenText(filename);
+		f->read_char();
+		version = f->read_word();
+		return f;
+	} else {
+		throw Exception(_("File format unreadable!"));
+	}
+	return nullptr;
+}
+
+
 ModelTemplate::ModelTemplate(Model *m) {
 	script = NULL;
 	model = m;
@@ -305,9 +326,9 @@ void Model::load(const Path &filename)
 	msg_right();
 
 	// load model from file
-	File *f = FileOpenText(filename);
-	int ffv = f->ReadFileFormatVersion();
-	if (ffv != 11){
+	int ffv;
+	auto f = load_file_x(filename, ffv);
+	if (ffv != 11) {
 		FileClose(f);
 		msg_left();
 		throw Exception(format("wrong file format: %d (11 expected)", ffv));
@@ -476,7 +497,7 @@ void Model::load(const Path &filename)
 			}
 			// normals
 			for (int i=0;i<sub->num_triangles * 3;i++)
-				sub->normal[i] = get_normal_by_index(f->read_int());
+				sub->normal[i] = get_normal_by_index(f->read_word());
 
 			f->read_int();
 			sub->force_update = true;
@@ -652,6 +673,7 @@ void Model::load(const Path &filename)
 
 	while (true){
 		string s = f->read_str();
+		//msg_write("OPTIONAL " + s);
 		if (s == "// Cylinders"){
 			int nc = f->read_int();
 			phys->cylinders.resize(nc);
