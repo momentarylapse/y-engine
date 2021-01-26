@@ -85,9 +85,9 @@ void show_kaba_local_vars(const kaba::Function *f, void *bp) {
 			s += p2s(*(void**)pp);
 //			if (*(void**)pp)
 //				s += "   ->  " + kaba::var_repr(pp, v->type);
-		} else if (v->type->is_simple_class()) {
+		} else if (v->type->can_memcpy()) {
 			s += kaba::var_repr(pp, v->type);
-		} else if (v->type->is_simple_class()) {
+		} else if (v->type->can_memcpy()) {
 			s += "...";
 		}
 		msg_write(s);

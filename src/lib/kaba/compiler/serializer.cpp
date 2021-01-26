@@ -8,6 +8,7 @@
 #include "SerializerX.h"
 #include "BackendAmd64.h"
 #include "BackendX86.h"
+#include "../Interpreter.h"
 
 
 namespace kaba {
@@ -132,9 +133,12 @@ string SerialNodeParam::str(Serializer *ser) const {
 			n = ((Variable*)p)->name;
 		else if (kind == NodeKind::CONSTANT)
 			n = ((Constant*)p)->str();
-		else if (kind == NodeKind::CONSTANT_BY_ADDRESS)
-			n = var_repr((void*)(int_p)p, type) + " @" + p2s((void*)(int_p)p);
-		else if (kind == NodeKind::FUNCTION)
+		else if (kind == NodeKind::CONSTANT_BY_ADDRESS) {
+			if (config.compile_os)
+				n = "@" + p2s((void*)(int_p)p);
+			else
+				n = var_repr((void*)(int_p)p, type) + " @" + p2s((void*)(int_p)p);
+		} else if (kind == NodeKind::FUNCTION)
 			n = ((Function*)p)->signature(TypeVoid);
 		str = "(" + type_name_safe(type) + ") <" + kind2str(kind) + "> " + n;
 		if (shift > 0)
@@ -1870,6 +1874,16 @@ void Script::assemble_function(int index, Function *f, Asm::InstructionWithParam
 	if (config.verbose and config.allow_output(f, "ser:0"))
 		f->block->show(TypeVoid);
 
+	if (config.interpreted) {
+		auto x = new SerializerX(this, list);
+		x->cur_func_index = index;
+		x->serialize_function(f);
+		x->fix_return_by_ref();
+		if (!syntax->script->interpreter)
+			syntax->script->interpreter = new Interpreter(syntax->script);
+		syntax->script->interpreter->add_function(f, x);
+		return;
+	}
 
 	if (config.use_new_serializer) {
 
@@ -1971,7 +1985,8 @@ void Script::compile_functions(char *oc, int &ocs) {
 			}
 		}
 
-	delete(list);
+	if (!config.interpreted)
+		delete list;
 }
 
 };
