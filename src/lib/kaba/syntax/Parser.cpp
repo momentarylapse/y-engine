@@ -1188,6 +1188,16 @@ shared<Node> Parser::parse_operand(Block *block, const Class *ns, bool prefer_cl
 		}
 	} else if (Exp.cur == "{") {
 		operands = {parse_dict(block)};
+	} else if (Exp.cur == IDENTIFIER_FUNC) {
+		// local function definition
+		auto f = parse_function_header_new(tree->_base_class.get(), Flags::STATIC);
+		skip_parsing_function_body(f); // we're still working through the list of all functions and parsing!
+
+		// not sure why, but is necessary:
+		Exp.cur_exp = Exp.cur_line->exp.num - 1;
+		Exp.cur = Exp.cur_line->exp[Exp.cur_exp].name;
+
+		operands = {tree->add_node_func_name(f)};
 	} else if (Exp.cur == IDENTIFIER_SHARED or Exp.cur == IDENTIFIER_OWNED) {
 		string pre = Exp.cur;
 		Exp.next();
@@ -3001,8 +3011,8 @@ bool Parser::parse_class(Class *_namespace) {
 			//msg_write(">>");
 			continue;
 		} else if (Exp.cur == IDENTIFIER_FUNC) {
-			parse_function_header_new(_class, Flags::NONE);
-			skip_parsing_function_body();
+			auto f = parse_function_header_new(_class, Flags::NONE);
+			skip_parsing_function_body(f);
 			continue;
 		}
 
@@ -3021,8 +3031,8 @@ bool Parser::parse_class(Class *_namespace) {
 			    is_function = true;
 			if (is_function) {
 				Exp.set(ie);
-				parse_function_header(_class, flags);
-				skip_parsing_function_body();
+				auto f = parse_function_header(_class, flags);
+				skip_parsing_function_body(f);
 				break;
 			}
 
@@ -3323,14 +3333,20 @@ Function *Parser::parse_function_header_new(Class *name_space, Flags flags) {
 	// TODO better to split/mask flags into return- and function-flags...
 	flags = parse_flags(flags);
 
-	Function *f = tree->add_function(Exp.cur, TypeVoid, name_space, flags);
+	string name = Exp.cur;
+	if (Exp.cur == "(") {
+		name = "-lambda-";
+	} else {
+		Exp.next();
+	}
+
+	Function *f = tree->add_function(name, TypeVoid, name_space, flags);
 	//if (config.verbose)
 	//	msg_write("PARSE HEAD  " + f->signature());
 	f->_logical_line_no = Exp.get_line_no();
 	f->_exp_no = Exp.cur_exp;
 	cur_func = f;
 
-	Exp.next();
 	if (Exp.cur != "(")
 		do_error("'(' expected after function name");
 	Exp.next(); // '('
@@ -3380,13 +3396,14 @@ Function *Parser::parse_function_header_new(Class *name_space, Flags flags) {
 	return f;
 }
 
-void Parser::skip_parsing_function_body() {
+void Parser::skip_parsing_function_body(Function *f) {
 	int indent0 = Exp.cur_line->indent;
 	while (!Exp.end_of_file()) {
 		if (Exp.cur_line[1].indent <= indent0)
 			break;
 		Exp.next_line();
 	}
+	function_needs_parsing.add(f);
 }
 
 void Parser::parse_function_body(Function *f) {
@@ -3444,19 +3461,13 @@ void Parser::parse_all_class_names(Class *ns, int indent0) {
 	}
 }
 
-void Parser::parse_all_function_bodies(const Class *name_space) {
-	//for (auto *f: name_space->functions)   might add lambda functions...
-	for (int i=0; i<name_space->functions.num; i++) {
-		auto f = name_space->functions[i].get();
-		if ((!f->is_extern()) and (f->_logical_line_no >= 0) and (f->name_space == name_space))
+void Parser::parse_all_function_bodies() {
+	//for (auto *f: function_needs_parsing)   might add lambda functions...
+	for (int i=0; i<function_needs_parsing.num; i++) {
+		auto f = function_needs_parsing[i];
+		if ((!f->is_extern()) and (f->_logical_line_no >= 0))
 			parse_function_body(f);
 	}
-
-	// recursion
-	//for (auto *c: name_space->classes)   NO... might encounter new classes creating new functions!
-	for (int i=0; i<name_space->classes.num; i++)
-		if (name_space->classes[i]->name_space == name_space)
-			parse_all_function_bodies(name_space->classes[i].get());
 }
 
 Flags Parser::parse_flags(Flags initial) {
@@ -3519,8 +3530,8 @@ void Parser::parse_top_level() {
 
 		// func
 		} else if (Exp.cur == IDENTIFIER_FUNC) {
-			parse_function_header_new(tree->base_class, Flags::STATIC);
-			skip_parsing_function_body();
+			auto f = parse_function_header_new(tree->base_class, Flags::STATIC);
+			skip_parsing_function_body(f);
 
 		} else {
 
@@ -3532,8 +3543,8 @@ void Parser::parse_top_level() {
 
 			// function?
 			if (is_function) {
-				parse_function_header(tree->base_class, Flags::STATIC);
-				skip_parsing_function_body();
+				auto f = parse_function_header(tree->base_class, Flags::STATIC);
+				skip_parsing_function_body(f);
 
 			// global variables/consts
 			} else {
@@ -3552,7 +3563,7 @@ void Parser::parse() {
 
 	parse_top_level();
 
-	parse_all_function_bodies(tree->base_class);
+	parse_all_function_bodies();
 	
 	tree->show("aaa");
 
