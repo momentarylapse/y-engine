@@ -10,11 +10,30 @@
 #include "../lib/hui/hui.h"
 #include "../lib/image/image.h"
 #include "../y/EngineData.h"
-#include <cairo/cairo.h>
+
 #include <iostream>
 
+//#define USE_CAIRO 1
 
 
+#ifdef USE_CAIRO
+
+#include <cairo/cairo.h>
+
+#else
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+FT_Library ft2 = nullptr;
+FT_Face face = nullptr;
+
+#endif
+
+const int SOME_MARGIN = 4;
+
+
+#ifdef USE_CAIRO
 
 void cairo_render_text(const string &font_name, float font_size, const string &text, gui::Node::Align align, Image &im) {
 
@@ -84,10 +103,126 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 	}
 }
 
+#else
+
+
+string find_system_font_file(const string &font_name) {
+	//return "/usr/share/fonts/TTF/DejaVuSansMono.ttf";
+	return "/usr/share/fonts/noto/NotoSans-Regular.ttf";
+}
+
+void ft_set_font(const string &font_name, float font_size) {
+
+	if (!ft2) {
+		auto error = FT_Init_FreeType(&ft2);
+		if (error) {
+			throw Exception("can not initialize freetype2 library");
+		}
+	}
+	if (!face) {
+		auto error = FT_New_Face(ft2, find_system_font_file(font_name).c_str(), 0, &face);
+		if (error == FT_Err_Unknown_File_Format) {
+			throw Exception("font unsupported");
+		} else if (error) {
+			throw Exception("font can not be loaded");
+		}
+	}
+
+	int dpi = 72;
+	FT_Set_Char_Size(face, 0, int(font_size*64.0f), dpi, dpi);
+	//FT_Set_Pixel_Sizes(face, (int)font_size, 0);
+}
+
+float ft_get_text_width(const string &font_name, float font_size, const string &text) {
+	auto utf32 = text.utf8_to_utf32();
+
+	ft_set_font(font_name, font_size);
+
+	//auto glyph_index = FT_Get_Char_Index(face, 'A');
+	//msg_write(glyph_index);
+	//errpr = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT); //load_flags);
+	//error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL); //render_mode);
+
+	int wmax = 0;
+	int x = 0;
+
+	foreachi (int u, utf32, i) {
+		if (u == '\n') {
+			wmax = max(wmax, x);
+			x = 0;
+			continue;
+		}
+		if (i == utf32.num - 1 or utf32[i+1] == '\n') {
+			int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
+			if (error) {
+				msg_error(i2s(error));
+				continue;
+			}
+			x += face->glyph->bitmap_left + face->glyph->bitmap.width;
+		} else {
+			int error = FT_Load_Glyph(face, u, FT_LOAD_DEFAULT); //load_flags);
+			if (error) {
+				msg_error(i2s(error));
+				continue;
+			}
+			//wmax = max(wmax, x + face->glyph->width);
+			x += face->glyph->advance.x >> 6;
+		}
+	}
+	return max(x, wmax)+4;// + font_size*0.4f;
+}
+
+void ft_render_text(const string &font_name, float font_size, const string &text, gui::Node::Align align, Image &im) {
+	auto utf32 = text.utf8_to_utf32();
+
+	ft_set_font(font_name, font_size);
+
+	//auto glyph_index = FT_Get_Char_Index(face, 'A');
+	//msg_write(glyph_index);
+	//errpr = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT); //load_flags);
+	//error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL); //render_mode);
+
+	int h_per_line = font_size * 1.2f;
+	int w = ft_get_text_width(font_name, font_size, text);
+
+	int nn = 1;
+	for (int u: utf32)
+		if (u == '\n')
+			nn ++;
+
+	im.create(w + SOME_MARGIN*2 , h_per_line * nn + SOME_MARGIN*2, color(0,0,0,0));
+
+	int x=SOME_MARGIN, y = font_size * 0.8f + SOME_MARGIN;
+
+	for (int u: utf32) {
+		if (u == '\n') {
+			x = 0;
+			y += h_per_line;
+			continue;
+		}
+		int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
+		if (error)
+			continue;
+
+		for (int i=0; i<face->glyph->bitmap.width; i++)
+			for (int j=0; j<face->glyph->bitmap.rows; j++) {
+				float f = (float)face->glyph->bitmap.buffer[i + j*face->glyph->bitmap.width] / 255.0f;
+				im.set_pixel(x+face->glyph->bitmap_left+i,y-face->glyph->bitmap_top+j, color(f, 1,1,1));
+			}
+		x += face->glyph->advance.x >> 6;
+	}
+}
+
+#endif
+
 void render_text(const string &str, gui::Node::Align align, Image &im) {
 	string font_name = "CAC Champagne";
 	float font_size = 32;
+#ifdef USE_CAIRO
 	cairo_render_text(font_name, font_size, str, align, im);
+#else
+	ft_render_text(font_name, font_size, str, align, im);
+#endif
 }
 
 namespace gui {
@@ -95,7 +230,7 @@ namespace gui {
 
 Text::Text(const string &t, float h, float x, float y) : Picture(rect::ID, nullptr) {
 	type = Type::TEXT;
-	margin = rect(x, h/6, y, h/6);
+	margin = rect(x, h/6, y, h/10);
 	font_size = h;
 	if (t != ":::fake:::")
 		set_text(t);
@@ -125,8 +260,11 @@ void Text::rebuild() {
 	texture->overwrite(im);
 	//dset->set({ubo}, {texture});
 
+	float dx = (float)SOME_MARGIN/(float)im.width;
+	float dy = (float)SOME_MARGIN/(float)im.height;
+	source = rect(dx, 1.0f - dx, dy, 1.0f - dy);
 	height = font_size * text.explode("\n").num;
-	width = height * (float)im.width / (float)im.height;
+	width = height * (float)(im.width - SOME_MARGIN*2) / (float)(im.height - SOME_MARGIN*2);
 	if (align & Align::NONSQUARE)
 		 width /= engine.physical_aspect_ratio;
 }

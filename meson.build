@@ -18,7 +18,9 @@ glfwdep = dependency('glfw')
 add_project_arguments('-DHAS_LIB_GLFW=1', language : ['cpp'])
 gldep = dependency('GL')
 add_project_arguments('-DHAS_LIB_GL=1', language : ['cpp'])
-deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep]
+freetype2dep = dependency('freetype2')
+add_project_arguments('-DHAS_LIB_FREETYPE2=1', language : ['cpp'])
+deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep, freetype2dep]
 
 # optional dependency: unwind
 d = cc.find_library('unwind', required : false)
