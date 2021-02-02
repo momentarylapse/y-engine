@@ -19,7 +19,7 @@ namespace gui {
 Text::Text(const string &t, float h, float x, float y) : Picture(rect::ID, nullptr) {
 	type = Type::TEXT;
 	margin = rect(x, h/6, y, h/10);
-	font = nullptr;//default_font;
+	font = Font::_default;
 	font_size = h;
 	if (t != ":::fake:::")
 		set_text(t);
@@ -42,7 +42,7 @@ void Text::__delete__() {
 
 void Text::rebuild() {
 	Image im;
-	Font::render_text(text, align, im);
+	font->render_text(text, align, im);
 	if (texture == nullptr)
 		texture = new nix::Texture();
 
@@ -52,7 +52,7 @@ void Text::rebuild() {
 	float dx = (float)Font::SOME_MARGIN/(float)im.width;
 	float dy = (float)Font::SOME_MARGIN/(float)im.height;
 	source = rect(dx, 1.0f - dx, dy, 1.0f - dy);
-	height = font_size * text.explode("\n").num;
+	height = font_size * Font::LINE_FACTOR * text.explode("\n").num;
 	width = height * (float)(im.width - Font::SOME_MARGIN*2) / (float)(im.height - Font::SOME_MARGIN*2);
 	if (align & Align::NONSQUARE)
 		 width /= engine.physical_aspect_ratio;

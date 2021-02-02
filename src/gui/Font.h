@@ -19,13 +19,17 @@ class Font {
 public:
 	void *face = nullptr;
 	string name;
+	int line_height;
 
 	static Font *load(const string &name);
 	static void init_fonts();
 
-	static void render_text(const string &str, Node::Align align, Image &im);
+	void render_text(const string &str, Node::Align align, Image &im);
+	float get_width(const string &str);
 
 	static const int SOME_MARGIN;
+	static const float LINE_FACTOR;
+	static Font *_default;
 };
 
 }

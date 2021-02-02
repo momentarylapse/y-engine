@@ -7,6 +7,7 @@
 
 #include "Font.h"
 #include "gui.h"
+#include "../Config.h"
 #include "../lib/image/image.h"
 
 //#define USE_CAIRO 1
@@ -30,26 +31,38 @@ namespace gui {
 #ifdef USE_FREETYPE
 
 FT_Library ft2 = nullptr;
-FT_Face face = nullptr;
+//FT_Face face = nullptr;
 
 #endif
+
+const float FONT_SIZE = 32.0f;
+const float Font::LINE_FACTOR = 1.2f;
+const int Font::SOME_MARGIN = 2;
 
 
 
 Array<Font*> fonts;
-Font *default_font = nullptr;
+Font *Font::_default = nullptr;
 
-Font *load_font(const string &name) {
+
+void *ft_load_font(const string &name, float font_size);
+
+Font *Font::load(const string &name) {
+	if (name == "" and Font::_default)
+		return Font::_default;
+
 	for (auto f: fonts)
 		if (f->name == name)
 			return f;
+
+	msg_write("loading font " + name);
 	auto f = new Font;
 	f->name = name;
+	f->face = ft_load_font(name, FONT_SIZE);
+	f->line_height = FONT_SIZE * LINE_FACTOR;
 	fonts.add(f);
 	return f;
 }
-
-const int Font::SOME_MARGIN = 4;
 
 
 #ifdef USE_CAIRO
@@ -125,9 +138,33 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 #else
 
 
-string find_system_font_file(const string &font_name) {
+Path find_system_font_file(const string &name) {
+	Path base = "/usr/share/fonts";
+	auto list = dir_search(base, "*.ttf", "fr");
+	for (auto &f: list)
+		if (f.basename_no_ext() == name or f.basename_no_ext() == name + "-Regular")
+			return base << f;
 	//return "/usr/share/fonts/TTF/DejaVuSansMono.ttf";
 	return "/usr/share/fonts/noto/NotoSans-Regular.ttf";
+}
+
+
+void *ft_load_font(const string &name, float font_size) {
+	FT_Face face = nullptr;
+
+	//msg_write(">>> " + find_system_font_file(name).str());
+	auto error = FT_New_Face(ft2, find_system_font_file(name).c_str(), 0, &face);
+	if (error == FT_Err_Unknown_File_Format) {
+		throw Exception("font unsupported");
+	} else if (error) {
+		throw Exception("font can not be loaded");
+	}
+
+	int dpi = 72;
+	FT_Set_Char_Size(face, 0, int(font_size*64.0f), dpi, dpi);
+	//FT_Set_Pixel_Sizes(face, (int)font_size, 0);
+
+	return face;
 }
 
 void Font::init_fonts() {
@@ -136,45 +173,22 @@ void Font::init_fonts() {
 	if (error) {
 		throw Exception("can not initialize freetype2 library");
 	}
+	_default = Font::load(config.get_str("default-font", "NotoSans"));
 #endif
 }
 
-void ft_set_font(const string &font_name, float font_size) {
-
-	if (!face) {
-		auto error = FT_New_Face(ft2, find_system_font_file(font_name).c_str(), 0, &face);
-		if (error == FT_Err_Unknown_File_Format) {
-			throw Exception("font unsupported");
-		} else if (error) {
-			throw Exception("font can not be loaded");
-		}
-	}
-
-	int dpi = 72;
-	FT_Set_Char_Size(face, 0, int(font_size*64.0f), dpi, dpi);
-	//FT_Set_Pixel_Sizes(face, (int)font_size, 0);
-}
-
-float ft_get_text_width(const string &font_name, float font_size, const string &text) {
+int ft_get_text_width_single_line(FT_Face face, const string &text) {
 	auto utf32 = text.utf8_to_utf32();
-
-	ft_set_font(font_name, font_size);
 
 	//auto glyph_index = FT_Get_Char_Index(face, 'A');
 	//msg_write(glyph_index);
 	//errpr = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT); //load_flags);
 	//error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL); //render_mode);
 
-	int wmax = 0;
 	int x = 0;
 
 	foreachi (int u, utf32, i) {
-		if (u == '\n') {
-			wmax = max(wmax, x);
-			x = 0;
-			continue;
-		}
-		if (i == utf32.num - 1 or utf32[i+1] == '\n') {
+		if (i == utf32.num - 1) {
 			int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
 			if (error) {
 				msg_error(i2s(error));
@@ -191,60 +205,76 @@ float ft_get_text_width(const string &font_name, float font_size, const string &
 			x += face->glyph->advance.x >> 6;
 		}
 	}
-	return max(x, wmax)+4;// + font_size*0.4f;
+	return x;
 }
 
-void ft_render_text(const string &font_name, float font_size, const string &text, gui::Node::Align align, Image &im) {
-	auto utf32 = text.utf8_to_utf32();
+float ft_get_text_width(FT_Face face, const string &text) {
+	auto lines = text.explode("\n");
 
-	ft_set_font(font_name, font_size);
+	int wmax = 0;
+	for (auto &l: lines) {
+		wmax = max(wmax, ft_get_text_width_single_line(face, l));
+	}
 
-	//auto glyph_index = FT_Get_Char_Index(face, 'A');
-	//msg_write(glyph_index);
-	//errpr = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT); //load_flags);
-	//error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL); //render_mode);
+	return wmax;// + font_size*0.4f;
+}
 
-	int h_per_line = font_size * 1.2f;
-	int w = ft_get_text_width(font_name, font_size, text);
+void ft_render_text(FT_Face face, const string &text, gui::Node::Align align, Image &im) {
 
-	int nn = 1;
-	for (int u: utf32)
-		if (u == '\n')
-			nn ++;
+	auto lines = text.explode("\n");
 
-	im.create(w + Font::SOME_MARGIN*2 , h_per_line * nn + Font::SOME_MARGIN*2, color(0,0,0,0));
+	Array<int> line_width;
+	int wmax = 0;
+	for (auto &l: lines) {
+		int w = ft_get_text_width_single_line(face, l);
+		line_width.add(w);
+		wmax = max(wmax, w);
+	}
 
-	int x = Font::SOME_MARGIN, y = font_size * 0.8f + Font::SOME_MARGIN;
 
-	for (int u: utf32) {
-		if (u == '\n') {
-			x = 0;
-			y += h_per_line;
-			continue;
+	int h_per_line = FONT_SIZE * Font::LINE_FACTOR;
+	im.create(wmax + Font::SOME_MARGIN*2 , h_per_line * lines.num + Font::SOME_MARGIN*2, color(0,0,0,0));
+
+
+	float y = FONT_SIZE * 0.8f + Font::SOME_MARGIN;
+
+	foreachi (auto &l, lines, line_no) {
+
+		auto utf32 = l.utf8_to_utf32();
+
+		int x = Font::SOME_MARGIN;
+		if (align & Node::Align::RIGHT)
+			x = Font::SOME_MARGIN + wmax - line_width[line_no];
+
+		for (int u: utf32) {
+			int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
+			if (error)
+				continue;
+
+			for (int i=0; i<face->glyph->bitmap.width; i++)
+				for (int j=0; j<face->glyph->bitmap.rows; j++) {
+					float f = (float)face->glyph->bitmap.buffer[i + j*face->glyph->bitmap.width] / 255.0f;
+					im.set_pixel(x+face->glyph->bitmap_left+i,y-face->glyph->bitmap_top+j, color(f, 1,1,1));
+				}
+			x += face->glyph->advance.x >> 6;
 		}
-		int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
-		if (error)
-			continue;
-
-		for (int i=0; i<face->glyph->bitmap.width; i++)
-			for (int j=0; j<face->glyph->bitmap.rows; j++) {
-				float f = (float)face->glyph->bitmap.buffer[i + j*face->glyph->bitmap.width] / 255.0f;
-				im.set_pixel(x+face->glyph->bitmap_left+i,y-face->glyph->bitmap_top+j, color(f, 1,1,1));
-			}
-		x += face->glyph->advance.x >> 6;
+		y += h_per_line;
 	}
 }
 
 #endif
 
 void Font::render_text(const string &str, Node::Align align, Image &im) {
-	string font_name = "CAC Champagne";
-	float font_size = 32;
 #ifdef USE_CAIRO
-	cairo_render_text(font_name, font_size, str, align, im);
+	string font_name = "CAC Champagne";
+	cairo_render_text(font_name, FONT_SIZE, str, align, im);
 #else
-	ft_render_text(font_name, font_size, str, align, im);
+	ft_render_text((FT_Face)face, str, align, im);
 #endif
+}
+
+float Font::get_width(const string &str) {
+	return ft_get_text_width((FT_Face)face, str);
 }
 
 }
