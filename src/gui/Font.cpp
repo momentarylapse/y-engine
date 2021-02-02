@@ -35,9 +35,9 @@ FT_Library ft2 = nullptr;
 
 #endif
 
-const float FONT_SIZE = 32.0f;
-const float Font::LINE_FACTOR = 1.2f;
-const int Font::SOME_MARGIN = 2;
+const float Font::FONT_SIZE = 40.0f;
+//const float Font::LINE_GAP = 0;//.3f;
+//const float Font::LINE_Y_OFFSET = 1;//0.84f;
 
 
 
@@ -59,7 +59,8 @@ Font *Font::load(const string &name) {
 	auto f = new Font;
 	f->name = name;
 	f->face = ft_load_font(name, FONT_SIZE);
-	f->line_height = FONT_SIZE * LINE_FACTOR;
+	f->line_height = (((FT_Face)f->face)->size->metrics.height >> 6);//FONT_SIZE * (1.0f + LINE_GAP);
+	f->line_y_offset = (float)(((FT_Face)f->face)->size->metrics.ascender >> 6) / (float)(((FT_Face)f->face)->size->metrics.height >> 6);
 	fonts.add(f);
 	return f;
 }
@@ -187,6 +188,23 @@ int ft_get_text_width_single_line(FT_Face face, const string &text) {
 
 	int x = 0;
 
+#if 1
+	foreachi (int u, utf32, i) {
+		int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
+		if (error) {
+			msg_error(i2s(error));
+			continue;
+		}
+		if (i == utf32.num - 1) {
+			x += max(int(face->glyph->advance.x >> 6), int(face->glyph->bitmap_left + face->glyph->bitmap.width));
+		} else {
+			x += face->glyph->advance.x >> 6;
+		}
+	}
+	return x;
+#else
+	// less reliable
+
 	foreachi (int u, utf32, i) {
 		if (i == utf32.num - 1) {
 			int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
@@ -194,7 +212,7 @@ int ft_get_text_width_single_line(FT_Face face, const string &text) {
 				msg_error(i2s(error));
 				continue;
 			}
-			x += face->glyph->bitmap_left + face->glyph->bitmap.width;
+			x += max(int(face->glyph->advance.x >> 6), int(face->glyph->bitmap_left + face->glyph->bitmap.width));
 		} else {
 			int error = FT_Load_Glyph(face, u, FT_LOAD_DEFAULT); //load_flags);
 			if (error) {
@@ -206,6 +224,7 @@ int ft_get_text_width_single_line(FT_Face face, const string &text) {
 		}
 	}
 	return x;
+#endif
 }
 
 float ft_get_text_width(FT_Face face, const string &text) {
@@ -216,10 +235,10 @@ float ft_get_text_width(FT_Face face, const string &text) {
 		wmax = max(wmax, ft_get_text_width_single_line(face, l));
 	}
 
-	return wmax;// + font_size*0.4f;
+	return wmax;
 }
 
-void ft_render_text(FT_Face face, const string &text, gui::Node::Align align, Image &im) {
+void ft_render_text(Font *font, FT_Face face, const string &text, gui::Node::Align align, Image &im) {
 
 	auto lines = text.explode("\n");
 
@@ -232,19 +251,18 @@ void ft_render_text(FT_Face face, const string &text, gui::Node::Align align, Im
 	}
 
 
-	int h_per_line = FONT_SIZE * Font::LINE_FACTOR;
-	im.create(wmax + Font::SOME_MARGIN*2 , h_per_line * lines.num + Font::SOME_MARGIN*2, color(0,0,0,0));
+	im.create(wmax, font->get_height(text), color(0,1,1,1));
 
 
-	float y = FONT_SIZE * 0.8f + Font::SOME_MARGIN;
+	float y = face->size->metrics.ascender >> 6;//Font::FONT_SIZE * Font::LINE_Y_OFFSET;
 
 	foreachi (auto &l, lines, line_no) {
 
 		auto utf32 = l.utf8_to_utf32();
 
-		int x = Font::SOME_MARGIN;
+		int x = 0;
 		if (align & Node::Align::RIGHT)
-			x = Font::SOME_MARGIN + wmax - line_width[line_no];
+			x = wmax - line_width[line_no];
 
 		for (int u: utf32) {
 			int error = FT_Load_Char(face, u, FT_LOAD_RENDER);
@@ -258,7 +276,7 @@ void ft_render_text(FT_Face face, const string &text, gui::Node::Align align, Im
 				}
 			x += face->glyph->advance.x >> 6;
 		}
-		y += h_per_line;
+		y += font->line_height;
 	}
 }
 
@@ -269,12 +287,22 @@ void Font::render_text(const string &str, Node::Align align, Image &im) {
 	string font_name = "CAC Champagne";
 	cairo_render_text(font_name, FONT_SIZE, str, align, im);
 #else
-	ft_render_text((FT_Face)face, str, align, im);
+	ft_render_text(this, (FT_Face)face, str, align, im);
 #endif
 }
 
-float Font::get_width(const string &str) {
+int Font::get_width(const string &str) {
 	return ft_get_text_width((FT_Face)face, str);
+}
+
+int Font::get_height(const string &str) {
+	auto lines = str.explode("\n");
+	return line_height * lines.num;
+	return FONT_SIZE + max(lines.num - 1, 0) * line_height;
+}
+
+float Font::get_height_rel(const string &str) {
+	return (float)get_height(str) / (float)line_height;//FONT_SIZE;
 }
 
 }

@@ -16,9 +16,9 @@
 namespace gui {
 
 
-Text::Text(const string &t, float h, float x, float y) : Picture(rect::ID, nullptr) {
+Text::Text(const string &t, float h, float x, float y) : Picture(rect(x,x,y,y), nullptr) {//rect::ID
 	type = Type::TEXT;
-	margin = rect(x, h/6, y, h/10);
+	//margin = rect(x, h/6, y, h/10);
 	font = Font::_default;
 	font_size = h;
 	if (t != ":::fake:::")
@@ -29,7 +29,7 @@ Text::~Text() {
 }
 
 void Text::__init2__(const string &t, float h) {
-	new(this) Text(t, h, h/6, h/6);
+	new(this) Text(t, h, 0,0);//h/6, h/6);
 }
 
 void Text::__init4__(const string &t, float h, float x, float y) {
@@ -47,13 +47,11 @@ void Text::rebuild() {
 		texture = new nix::Texture();
 
 	texture->overwrite(im);
-	//dset->set({ubo}, {texture});
+	//texture->set_options("magfilter=nearest,wrap=clamp");
+	texture->set_options("magfilter=linear,wrap=clamp");
 
-	float dx = (float)Font::SOME_MARGIN/(float)im.width;
-	float dy = (float)Font::SOME_MARGIN/(float)im.height;
-	source = rect(dx, 1.0f - dx, dy, 1.0f - dy);
-	height = font_size * Font::LINE_FACTOR * text.explode("\n").num;
-	width = height * (float)(im.width - Font::SOME_MARGIN*2) / (float)(im.height - Font::SOME_MARGIN*2);
+	height = font_size * font->get_height_rel(text);
+	width = height * (float)im.width / (float)im.height;
 	if (align & Align::NONSQUARE)
 		 width /= engine.physical_aspect_ratio;
 }

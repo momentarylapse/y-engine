@@ -20,15 +20,19 @@ public:
 	void *face = nullptr;
 	string name;
 	int line_height;
+	float line_y_offset;
 
 	static Font *load(const string &name);
 	static void init_fonts();
 
 	void render_text(const string &str, Node::Align align, Image &im);
-	float get_width(const string &str);
+	int get_width(const string &str);
+	int get_height(const string &str);
+	float get_height_rel(const string &str);
 
-	static const int SOME_MARGIN;
-	static const float LINE_FACTOR;
+	static const float FONT_SIZE;
+	//static const float LINE_GAP;
+	//static const float LINE_Y_OFFSET;
 	static Font *_default;
 };
 
