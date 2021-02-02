@@ -12,6 +12,8 @@
 
 namespace gui {
 
+class Font;
+
 class Text : public Picture {
 public:
 	Text(const string &t, float h, float x, float y);
@@ -25,6 +27,7 @@ public:
 
 	string text;
 	float font_size;
+	Font *font;
 };
 
 }

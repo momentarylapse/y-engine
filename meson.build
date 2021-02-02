@@ -81,6 +81,7 @@ sources = [
 	'src/fx/Light.cpp',
 	'src/fx/Particle.cpp',
 	'src/fx/ParticleManager.cpp',
+	'src/gui/Font.cpp',
 	'src/gui/gui.cpp',
 	'src/gui/Node.cpp',
 	'src/gui/Picture.cpp',

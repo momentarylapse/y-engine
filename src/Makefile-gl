@@ -11,6 +11,7 @@ OBJ = audio/Sound.o \
  fx/Light.o \
  fx/Particle.o \
  fx/ParticleManager.o \
+ gui/Font.o \
  gui/gui.o \
  gui/Node.o \
  gui/Picture.o \
@@ -213,6 +214,9 @@ fx/Particle.o : fx/Particle.cpp fx/Particle.h lib/base/base.h lib/base/macros.h 
 
 fx/ParticleManager.o : fx/ParticleManager.cpp fx/ParticleManager.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h fx/Particle.h lib/math/math.h lib/image/color.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h y/Entity.h fx/Beam.h lib/file/msg.h
 	$(CPP) -c fx/ParticleManager.cpp -o $@ $(CXXFLAGS)
+
+gui/Font.o : gui/Font.cpp gui/Font.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h gui/gui.h lib/base/pointer.h lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/image/color.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/math/math.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h
+	$(CPP) -c gui/Font.cpp -o $@ $(CXXFLAGS)
 
 gui/gui.o : gui/gui.cpp gui/gui.h lib/base/pointer.h lib/base/base.h lib/base/macros.h lib/base/array.h lib/base/strings.h lib/nix/nix.h lib/config.h lib/nix/nix_config.h lib/file/file.h lib/file/msg.h lib/file/file_op.h lib/file/path.h lib/hui/hui.h lib/hui/common.h lib/image/image.h lib/image/color.h lib/hui/Callback.h lib/hui/Application.h lib/base/map.h lib/base/set.h lib/hui/main.h lib/hui/Event.h lib/hui/Menu.h lib/hui/Panel.h lib/hui/Window.h lib/hui/common_dlg.h lib/hui/language.h lib/hui/Config.h lib/hui/Resource.h lib/hui/utility.h lib/hui/Painter.h lib/image/Painter.h lib/hui/Timer.h lib/hui/Toolbar.h lib/hui/error.h lib/hui/Clipboard.h lib/math/math.h lib/math/vector.h lib/math/matrix.h lib/math/matrix3.h lib/math/quaternion.h lib/math/plane.h lib/math/rect.h lib/math/complex.h lib/math/interpolation.h lib/math/random.h lib/math/ray.h lib/nix/nix_draw.h lib/nix/nix_light.h lib/nix/nix_vertexbuffer.h lib/nix/nix_shader.h lib/nix/nix_view.h lib/nix/nix_textures.h gui/Node.h meta.h
 	$(CPP) -c gui/gui.cpp -o $@ $(CXXFLAGS)

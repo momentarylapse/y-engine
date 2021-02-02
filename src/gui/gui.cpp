@@ -7,6 +7,7 @@
 
 #include "gui.h"
 #include "Node.h"
+#include "Font.h"
 #include "../meta.h"
 #include <stdio.h>
 
@@ -22,6 +23,8 @@ shared<Node> toplevel;
 void init(nix::Shader *s) {
 	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
 	vertex_buffer->create_rect(rect::ID);
+
+	Font::init_fonts();
 
 	shader = s;
 	toplevel = new Node(rect::ID);
