@@ -302,27 +302,29 @@ void PluginManager::link_kaba() {
 	kaba::link_external_class_func("ui.Node.__init__", &gui::Picture::__init__); // argh
 	kaba::link_external_virtual("ui.Node.__delete__", &gui::Node::__delete__, &node);
 	kaba::link_external_class_func("ui.Node.__del_override__", &gui::delete_node);
-	kaba::link_external_class_func("ui.Node.add", &gui::Picture::add);
-	kaba::link_external_class_func("ui.Node.set_area", &gui::Picture::set_area);
-	kaba::link_external_virtual("ui.Node.on_iterate", &gui::Picture::on_iterate, &node);
-	kaba::link_external_virtual("ui.Node.on_enter", &gui::Picture::on_enter, &node);
-	kaba::link_external_virtual("ui.Node.on_leave", &gui::Picture::on_leave, &node);
-	kaba::link_external_virtual("ui.Node.on_left_button_down", &gui::Picture::on_left_button_down, &node);
-	kaba::link_external_virtual("ui.Node.on_left_button_up", &gui::Picture::on_left_button_up, &node);
-	kaba::link_external_virtual("ui.Node.on_middle_button_down", &gui::Picture::on_middle_button_down, &node);
-	kaba::link_external_virtual("ui.Node.on_middle_button_up", &gui::Picture::on_middle_button_up, &node);
-	kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Picture::on_right_button_down, &node);
-	kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Picture::on_right_button_up, &node);
+	kaba::link_external_class_func("ui.Node.add", &gui::Node::add);
+	kaba::link_external_class_func("ui.Node.set_area", &gui::Node::set_area);
+	kaba::link_external_virtual("ui.Node.on_iterate", &gui::Node::on_iterate, &node);
+	kaba::link_external_virtual("ui.Node.on_enter", &gui::Node::on_enter, &node);
+	kaba::link_external_virtual("ui.Node.on_leave", &gui::Node::on_leave, &node);
+	kaba::link_external_virtual("ui.Node.on_left_button_down", &gui::Node::on_left_button_down, &node);
+	kaba::link_external_virtual("ui.Node.on_left_button_up", &gui::Node::on_left_button_up, &node);
+	kaba::link_external_virtual("ui.Node.on_middle_button_down", &gui::Node::on_middle_button_down, &node);
+	kaba::link_external_virtual("ui.Node.on_middle_button_up", &gui::Node::on_middle_button_up, &node);
+	kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Node::on_right_button_down, &node);
+	kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Node::on_right_button_up, &node);
 
 	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
 	kaba::declare_class_element("ui.Picture.shader", &gui::Picture::shader);
 	kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
 	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
 	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
+	kaba::declare_class_element("ui.Picture.angle", &gui::Picture::angle);
 
 	kaba::declare_class_size("ui.Text", sizeof(gui::Text));
 	kaba::declare_class_element("ui.Text.text", &gui::Text::text);
 	kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
+	kaba::declare_class_element("ui.Text.angle", &gui::Text::angle);
 
 	gui::Picture picture(rect::ID, nullptr);
 	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));

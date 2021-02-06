@@ -25,6 +25,7 @@ public:
 	rect source;
 
 	float bg_blur;
+	float angle;
 
 	shared<nix::Shader> shader;
 	shared<nix::Texture> texture;

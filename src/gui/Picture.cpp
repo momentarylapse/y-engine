@@ -33,6 +33,7 @@ Picture::Picture(const rect &r, nix::Texture *tex, const rect &s, nix::Shader *_
 	source = s;
 	texture = tex;
 	bg_blur = 0;
+	angle = 0;
 	visible = true;
 	shader = nullptr;
 }

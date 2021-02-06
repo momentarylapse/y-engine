@@ -288,7 +288,13 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 			gui::shader->set_float(shader->get_location("blur"), p->bg_blur);
 			gui::shader->set_color(shader->get_location("color"), p->eff_col);
 			nix::SetTextures({p->texture.get(), source->color_attachments[0]});
-			nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
+			if (p->angle == 0) {
+				nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
+			} else {
+				// TODO this should use the physical ratio
+				float r = (float)width / (float)height;
+				nix::SetWorldMatrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0));
+			}
 			gui::vertex_buffer->create_rect(rect::ID, p->source);
 			nix::DrawTriangles(gui::vertex_buffer);
 		}
