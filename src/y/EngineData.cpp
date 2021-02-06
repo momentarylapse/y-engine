@@ -18,7 +18,7 @@
 EngineData engine;
 
 EngineData::EngineData() {
-	default_font = NULL;
+	default_font = nullptr;
 
 	ZBufferEnabled = true;
 	CullingEnabled = false;
@@ -32,6 +32,10 @@ EngineData::EngineData() {
 
 	fps_max = 60;
 	fps_min = 15;
+
+	width = 0;
+	height = 0;
+	renderer = nullptr;
 
 	detail_level = 100;
 	detail_factor_inv = 1.0f;

@@ -246,6 +246,13 @@ void PluginManager::link_kaba() {
 	kaba::link_external_class_func("Light.Spherical.__init__", &Light::__init_spherical__);
 	kaba::link_external_class_func("Light.Cone.__init__", &Light::__init_cone__);
 
+	kaba::declare_class_size("Link", sizeof(Link));
+	kaba::declare_class_element("Link.a", &Link::a);
+	kaba::declare_class_element("Link.b", &Link::b);
+	kaba::link_external_class_func("Link.set_motor", &Link::set_motor);
+	kaba::link_external_class_func("Link.set_frame", &Link::set_frame);
+	//kaba::link_external_class_func("Link.set_axis", &Link::set_axis);
+
 	Entity entity(Entity::Type::NONE);
 	kaba::declare_class_size("Entity", sizeof(Entity));
 //	kaba::link_external_class_func("Entity.__init__", &Entity::__init__);
@@ -314,29 +321,16 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Node::on_right_button_down, &node);
 	kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Node::on_right_button_up, &node);
 
-	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
-	kaba::declare_class_element("ui.Picture.shader", &gui::Picture::shader);
-	kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
-	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
-	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
-	kaba::declare_class_element("ui.Picture.angle", &gui::Picture::angle);
-
-	kaba::declare_class_size("ui.Text", sizeof(gui::Text));
-	kaba::declare_class_element("ui.Text.text", &gui::Text::text);
-	kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
-	kaba::declare_class_element("ui.Text.angle", &gui::Text::angle);
-
 	gui::Picture picture(rect::ID, nullptr);
 	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
 	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
 	kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
+	kaba::declare_class_element("ui.Picture.shader", &gui::Picture::shader);
 	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
+	kaba::declare_class_element("ui.Picture.angle", &gui::Picture::angle);
 	kaba::link_external_class_func("ui.Picture.__init__:2", &gui::Picture::__init2__);
 	kaba::link_external_class_func("ui.Picture.__init__:3", &gui::Picture::__init3__);
 	kaba::link_external_virtual("ui.Picture.__delete__", &gui::Picture::__delete__, &picture);
-
-	kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
-	kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
 
 	gui::Text text(":::fake:::", 0, 0, 0);
 	kaba::declare_class_size("ui.Text", sizeof(gui::Text));
@@ -347,12 +341,8 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("ui.Text.__delete__", &gui::Text::__delete__, &text);
 	kaba::link_external_class_func("ui.Text.set_text", &gui::Text::set_text);
 
-	kaba::declare_class_size("Link", sizeof(Link));
-	kaba::declare_class_element("Link.a", &Link::a);
-	kaba::declare_class_element("Link.b", &Link::b);
-	kaba::link_external_class_func("Link.set_motor", &Link::set_motor);
-	kaba::link_external_class_func("Link.set_frame", &Link::set_frame);
-	//kaba::link_external_class_func("Link.set_axis", &Link::set_axis);
+	kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
+	kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
 
 	kaba::link_external("ui.key", (void*)&InputManager::get_key);
 	kaba::link_external("ui.key_down", (void*)&InputManager::get_key_down);
