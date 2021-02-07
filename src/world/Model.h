@@ -282,7 +282,6 @@ public:
 	void _cdecl __init__();
 	void _cdecl __delete__() override;
 
-	void load(const Path &filename);
 	Model *copy(Model *pre_allocated = NULL);
 	void reset_data();
 	void _cdecl make_editable();
