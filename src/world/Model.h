@@ -99,7 +99,7 @@ public:
 
 	Model *owner;
 
-	Mesh* copy(Model *new_owner);
+	Mesh *copy(Model *new_owner);
 };
 
 // the face of a polyhedron (=> a polygon)
@@ -117,16 +117,15 @@ public:
 	ConvexPolyhedronFace face[MODEL_MAX_POLY_FACES];
 
 	// non redundant vertex list!
-	int num_vertices;
-	int *vertex;
+	Array<int> vertex;
 
 	// non redundant edge list!
 	int num_edges;
-	int *edge_index;
+	Array<int> edge_index;
 
 	// "topology"
-	bool *edge_on_face; // [edge * num_faces + face]
-	int *faces_joining_edge; // [face1 * num_faces + face2]
+	Array<bool> edge_on_face; // [edge * num_faces + face]
+	Array<int> faces_joining_edge; // [face1 * num_faces + face2]
 };
 
 // a ball (for the physical skin)
@@ -182,6 +181,8 @@ public:
 		SKELETAL
 	};
 
+	string name;
+	int id;
 	Type type;
 	int num_frames;
 	int frame0;
@@ -204,13 +205,13 @@ public:
 	// skeletal animation data
 	//Array<Array<vector>> skel_dpos; //   [frame,bone]
 	//Array<Array<quaternion>> skel_ang; //   [frame,bone]
-	vector *skel_dpos;
-	quaternion *skel_ang;
+	Array<vector> skel_dpos;
+	Array<quaternion> skel_ang;
 
 	// vertex animation data
 	struct {
 		//Array<Array<vector>> dpos; // vertex animation data   [frame,vertex]
-		vector* dpos;
+		Array<vector> dpos;
 	} mesh[4];
 };
 
@@ -244,7 +245,8 @@ public:
 class Bone {
 public:
 	int parent;
-	vector pos;
+	vector delta_pos;
+	vector rest_pos;
 	Model *model;
 	// current skeletal data
 	matrix dmatrix;
@@ -292,7 +294,7 @@ public:
 	vector _cdecl get_vertex(int index);
 
 	// skeleton
-	vector _cdecl _get_bone_pos(int index) const;
+	vector _cdecl get_bone_rest_pos(int index) const;
 	void _cdecl set_bone_model(int index, Model *sub);
 
 	// helper functions for collision detection
@@ -383,7 +385,6 @@ public:
 
 	// skeleton (own)
 	Array<Bone> bone;
-	Array<vector> bone_pos_0;
 
 	// move operations
 	struct AnimationData {

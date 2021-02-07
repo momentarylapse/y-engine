@@ -76,12 +76,6 @@ ModelTemplate::ModelTemplate(Model *m) {
 MetaMove::MetaMove() {
 	num_frames_skeleton = 0;
 	num_frames_vertex = 0;
-	this->skel_ang = NULL;
-	this->skel_dpos = NULL;
-	this->mesh[0].dpos = NULL;
-	this->mesh[1].dpos = NULL;
-	this->mesh[2].dpos = NULL;
-	this->mesh[3].dpos = NULL;
 }
 
 
@@ -227,7 +221,7 @@ void SubMesh::update_vb(Mesh *mesh) {
 		vulkan::Vertex1 v;
 		for (int k=0; k<3; k++) {
 			int vi = triangle_index[i*3+k];
-			v.pos = mesh->vertex[vi];
+			v.delta_pos = mesh->vertex[vi];
 			v.normal = normal[i*3+k];
 			v.u = skin_vertex[i*6+k*2  ];
 			v.v = skin_vertex[i*6+k*2+1];
@@ -436,22 +430,22 @@ void Model::load(const Path &filename)
 			p->face[j].pl.d = f->read_float();
 		}
 		// non redundand stuff
-		p->num_vertices = f->read_int();
-		p->vertex = new int[p->num_vertices];
-		for (int k=0;k<p->num_vertices;k++)
+		int num_vertices = f->read_int();
+		p->vertex.resize(num_vertices);
+		for (int k=0; k<num_vertices; k++)
 			p->vertex[k] = f->read_int();
 		p->num_edges = f->read_int();
-		p->edge_index = new int[p->num_edges * 2];
-		for (int k=0;k<p->num_edges*2;k++)
+		p->edge_index.resize(p->num_edges * 2);
+		for (int k=0; k<p->num_edges*2; k++)
 			p->edge_index[k] = f->read_int();
 		// topology
-		p->faces_joining_edge = new int[p->num_faces * p->num_faces];
-		for (int k=0;k<p->num_faces;k++)
-			for (int l=0;l<p->num_faces;l++)
+		p->faces_joining_edge.resize(p->num_faces * p->num_faces);
+		for (int k=0; k<p->num_faces; k++)
+			for (int l=0; l<p->num_faces; l++)
 				p->faces_joining_edge[k * p->num_faces + l] = f->read_int();
-		p->edge_on_face = new bool[p->num_edges * p->num_faces];
-		for (int k=0;k<p->num_edges;k++)
-			for (int l=0;l<p->num_faces;l++)
+		p->edge_on_face.resize(p->num_edges * p->num_faces);
+		for (int k=0; k<p->num_edges; k++)
+			for (int l=0; l<p->num_faces; l++)
 			    p->edge_on_face[k * p->num_faces + l] = f->read_bool();
 	}
 
@@ -510,7 +504,7 @@ void Model::load(const Path &filename)
 	f->read_comment();
 	bone.resize(f->read_int());
 	for (int i=0;i<bone.num;i++){
-		f->read_vector(&bone[i].pos);
+		f->read_vector(&bone[i].delta_pos);
 		bone[i].parent = f->read_int();
 		_template->bone_model_filename.add(f->read_str());
 		bone[i].model = NULL; //LoadModel(...);
@@ -538,12 +532,11 @@ void Model::load(const Path &filename)
 					n_vert = phys->vertex.num;
 				if (i > 0)
 					n_vert = mesh[i - 1]->vertex.num;
-				anim.meta->mesh[i].dpos = new vector[num_frames_vert * n_vert];
-				memset(anim.meta->mesh[i].dpos, 0, sizeof(vector) * num_frames_vert * n_vert);
+				anim.meta->mesh[i].dpos.resize(num_frames_vert * n_vert);
 			}
 		if (num_frames_skel > 0){
-			anim.meta->skel_dpos = new vector[num_frames_skel * bone.num];
-			anim.meta->skel_ang = new quaternion[num_frames_skel * bone.num];
+			anim.meta->skel_dpos.resize(num_frames_skel * bone.num);
+			anim.meta->skel_ang.resize(num_frames_skel * bone.num);
 		}
 		int frame_s = 0, frame_v = 0;
 
@@ -713,10 +706,9 @@ void Model::load(const Path &filename)
 
 	// skeleton
 	if (bone.num > 0) {
-		bone_pos_0.resize(bone.num);
 		for (int i=0; i<bone.num; i++) {
-			bone_pos_0[i] = _get_bone_pos(i);
-			bone[i].dmatrix = matrix::translation(bone_pos_0[i]);
+			bone[i].rest_pos = get_bone_rest_pos(i);
+			bone[i].dmatrix = matrix::translation(bone[i].rest_pos);
 		}
 	}
 	
@@ -823,13 +815,9 @@ Model *Model::copy(Model *pre_allocated) {
 
 	// skeleton
 	m->bone = bone;
-	if (bone.num > 0) {
-		m->bone_pos_0 = bone_pos_0;
-
-		for (int i=0;i<bone.num;i++)
-			if (bone[i].model)
-				m->bone[i].model = NULL;//CopyModel(bone[i].model, allow_script_init);
-	}
+	for (int i=0;i<bone.num;i++)
+		if (bone[i].model)
+			m->bone[i].model = NULL;//CopyModel(bone[i].model, allow_script_init);
 
 	// effects
 	// loaded by ResetData()
@@ -855,36 +843,21 @@ Model::~Model() {
 		// delete sub models
 		for (Bone &b: bone)
 			if (b.model)
-				delete(b.model);
+				delete b.model;
 
 		// delete inventary
 		for (Model *i: script_data.inventary)
 			if (i)
-				delete(i);
+				delete i;
 	}
 
 	// animation
-	if (anim.meta and !is_copy) {
-		if (anim.meta->skel_dpos)
-			delete[](anim.meta->skel_dpos);
-		if (anim.meta->skel_ang)
-			delete[](anim.meta->skel_ang);
-		for (int i=0;i<4;i++)
-			if (anim.meta->mesh[i].dpos)
-				delete[](anim.meta->mesh[i].dpos);
-		delete(anim.meta);
-	}
+	if (anim.meta and !is_copy)
+		delete anim.meta;
 
 	// physical
-	if (phys and !phys_is_reference) {
-		for (auto &p: phys->poly) {
-			delete[](p.vertex);
-			delete[](p.edge_index);
-			delete[](p.edge_on_face);
-			delete[](p.faces_joining_edge);
-		}
-		delete(phys);
-	}
+	if (phys and !phys_is_reference)
+		delete phys;
 
 	// skin
 	for (int i=0;i<MODEL_NUM_MESHES;i++)
@@ -896,18 +869,18 @@ Model::~Model() {
 			// vertex buffer
 			for (int t=0;t<s->sub.num;t++)
 				if (s->sub[t].vertex_buffer)
-					delete(s->sub[t].vertex_buffer);
+					delete s->sub[t].vertex_buffer;
 
 			// own / own data
-			delete(mesh[i]);
+			delete mesh[i];
 		}
 
 	for (Material* m: material)
-		delete(m);
+		delete m;
 
 	// template
 	if (!is_copy)
-		delete(_template);
+		delete _template;
 }
 
 void Model::__delete__() {
@@ -915,11 +888,11 @@ void Model::__delete__() {
 }
 
 // non-animated state
-vector Model::_get_bone_pos(int index) const {
+vector Model::get_bone_rest_pos(int index) const {
 	auto &b = bone[index];
 	if (b.parent >= 0)
-		return b.pos + _get_bone_pos(b.parent);
-	return b.pos;
+		return b.delta_pos + get_bone_rest_pos(b.parent);
+	return b.delta_pos;
 }
 
 int get_num_trias(Mesh *s) {
@@ -1085,7 +1058,7 @@ void Model::do_animation(float elapsed) {
 			}else*/{
 				// interpolate the current alignment
 				w = quaternion::interpolate(w1,w2,df);
-				p=(1.0f-df)*p1+df*p2 + b->pos;
+				p=(1.0f-df)*p1+df*p2 + b->delta_pos;
 			}
 
 
@@ -1132,11 +1105,11 @@ void Model::do_animation(float elapsed) {
 
 		// bone has root -> align to root
 		if (b->parent >= 0)
-			b->cur_pos = bone[b->parent].dmatrix * b->pos;
+			b->cur_pos = bone[b->parent].dmatrix * b->delta_pos;
 
 		// create matrices (model -> skeleton)
-		auto t = matrix::translation( b->cur_pos);
-		auto r = matrix::rotation_q( b->cur_ang);
+		auto t = matrix::translation(b->cur_pos);
+		auto r = matrix::rotation_q(b->cur_ang);
 		b->dmatrix = t * r;
 	}
 
@@ -1149,7 +1122,7 @@ void Model::do_animation(float elapsed) {
 			// transform vertices
 			for (int p=0;p<sk->vertex.num;p++){
 				int b = sk->bone_index[p];
-				vector pp = sk->vertex[p] - bone_pos_0[b];
+				vector pp = sk->vertex[p] - bone[b].rest_pos;
 				// interpolate vertex
 				anim.mesh[s]->vertex[p] = bone[b].dmatrix * pp;
 				//anim.vertex[s][p]=pp;
@@ -1257,13 +1230,13 @@ bool Model::Trace(const vector &p1, const vector &p2, const vector &dir, float r
 	plane pl;
 	vector tm = (p1+p2)/2; // Mittelpunkt des Trace-Strahles
 	// Wuerfel um Modell und Trace-Mittelpunkt berschneiden sich?
-	if (!pos.bounding_cube(tm, prop.radius + range / 2))
+	if (!delta_pos.bounding_cube(tm, prop.radius + range / 2))
 		return false;
 	// Strahl schneidet Ebene mit Modell (senkrecht zum Strahl)
-	pl = plane::from_point_normal( pos, dir);
+	pl = plane::from_point_normal( delta_pos, dir);
 	_plane_intersect_line_(c,pl,p1,p2);
 	// Schnitt nah genau an Modell?
-	if (!pos.bounding_cube(c, prop.radius * 2))
+	if (!delta_pos.bounding_cube(c, prop.radius * 2))
 		return false;
 
 	// sich selbst absolut ausrichten
@@ -1364,7 +1337,7 @@ vector _cdecl Model::get_vertex(int index) {
 	vector v;
 	if (anim.meta) { // animated
 		int b = s->bone_index[index];
-		v = s->vertex[index] - bone_pos_0[b];//Move(b);
+		v = s->vertex[index] - bone[b].rest_pos;
 		v = bone[b].dmatrix * v;
 		v = _matrix * v;
 	} else { // static
@@ -1427,8 +1400,16 @@ bool Model::animate_x(MoveOperation::Command cmd, float param1, float param2, in
 		msg_error("Model.Animate(): no more than " + i2s(MODEL_MAX_MOVE_OPS) + " animation layers allowed");
 		return false;
 	}
+	int index = -1;
+	foreachi (auto &m, anim.meta->move, i)
+		if (m.id == move_no)
+			index = i;
+	if (index < 0) {
+		msg_error("move id not existing: " + i2s(move_no));
+		return false;
+	}
 	int n = anim.num_operations ++;
-	anim.operation[n].move = move_no;
+	anim.operation[n].move = index;
 	anim.operation[n].command = cmd;
 	anim.operation[n].param1 = param1;
 	anim.operation[n].param2 = param2;
@@ -1458,7 +1439,7 @@ void Model::begin_edit_animation() {
 	anim.num_operations = -2;
 	for (int i=0;i<bone.num;i++){
 		bone[i].cur_ang = quaternion::ID;
-		bone[i].cur_pos = bone[i].pos;
+		bone[i].cur_pos = bone[i].delta_pos;
 	}
 }
 
@@ -1488,7 +1469,7 @@ Path Model::filename() {
 }
 
 #if 0
-void Model::SortingTest(vector &pos,const vector &dpos,matrix *mat,bool allow_shadow)
+void Model::SortingTest(vector &delta_pos,const vector &dpos,matrix *mat,bool allow_shadow)
 {
 	for (int i=0;i<bone.num;i++)
 		if (boneModel[i]){
@@ -1522,7 +1503,7 @@ void Model::SortingTest(vector &pos,const vector &dpos,matrix *mat,bool allow_sh
 	}
 
 	// send for sorting
-	MetaAddSorted(this,pos,mat,_Detail_,ld,trans,allow_shadow);
+	MetaAddSorted(this,delta_pos,mat,_Detail_,ld,trans,allow_shadow);
 }
 #endif
 

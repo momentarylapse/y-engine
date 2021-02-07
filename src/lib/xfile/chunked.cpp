@@ -175,7 +175,7 @@ string FileChunkBasic::read_header() {
 
 
 	context->push(cname, pos0, size);
-	msg_write("CHUNK " + context->str());
+	//msg_write("CHUNK " + context->str());
 	return cname;
 }
 

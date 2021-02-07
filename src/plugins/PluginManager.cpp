@@ -101,7 +101,7 @@ void PluginManager::link_kaba() {
 
 	kaba::declare_class_size("Model.Bone", sizeof(Bone));
 	kaba::declare_class_element("Model.Bone.parent", &Bone::parent);
-	kaba::declare_class_element("Model.Bone.pos", &Bone::pos);
+	kaba::declare_class_element("Model.Bone.pos", &Bone::delta_pos);
 	kaba::declare_class_element("Model.Bone.model", &Bone::model);
 	kaba::declare_class_element("Model.Bone.dmatrix", &Bone::dmatrix);
 	kaba::declare_class_element("Model.Bone.cur_ang", &Bone::cur_ang);
