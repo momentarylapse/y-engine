@@ -274,7 +274,7 @@ color file_read_color4i(File *f) {
 }
 
 
-static vector get_normal_by_index(int index) {
+vector get_normal_by_index(int index) {
 	float wz = (float)(index >> 8) * pi / 255.0f;
 	float wxy = (float)(index & 255) * 2 * pi / 255.0f;
 	float swz = sin(wz);
