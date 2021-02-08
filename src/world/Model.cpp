@@ -62,7 +62,7 @@ File *load_file_x(const Path &filename, int &version) {
 		version = f->read_word();
 		return f;
 	} else {
-		throw Exception(_("File format unreadable!"));
+		throw Exception("File format unreadable!");
 	}
 	return nullptr;
 }

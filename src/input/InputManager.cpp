@@ -10,10 +10,10 @@
 #include "../plugins/Controller.h"
 #include "../gui/Node.h"
 #include "../gui/gui.h"
-#include "../lib/hui/hui.h"
 #include "../lib/math/math.h"
 #include "../y/EngineData.h"
 #include <iostream>
+#include "../lib/hui_minimal/hui.h"
 
 InputManager::State InputManager::state;
 InputManager::State InputManager::state_prev;

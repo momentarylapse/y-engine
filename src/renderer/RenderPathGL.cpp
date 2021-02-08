@@ -9,6 +9,7 @@
 
 #include "RenderPathGL.h"
 #include "../lib/nix/nix.h"
+#include "../lib/image/image.h"
 
 #include "../helper/PerformanceMonitor.h"
 #include "../plugins/PluginManager.h"

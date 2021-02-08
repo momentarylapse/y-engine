@@ -9,8 +9,13 @@
 #define META_H__INCLUDED_
 
 #include "lib/base/base.h"
+#include "lib/config.h"
+#ifdef _X_USE_HUI_
+	#include "lib/hui/hui.h"
+#elif defined(_X_USE_HUI_MINIMAL_)
+	#include "lib/hui_minimal/hui.h"
+#endif
 #include "lib/image/color.h"
-#include "lib/hui/hui.h"
 
 class Model;
 class Object;

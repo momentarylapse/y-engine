@@ -9,8 +9,9 @@
 #define SRC_CONFIG_H_
 
 
+#include "lib/hui_minimal/Config.h"
+
 #include "lib/base/base.h"
-#include "lib/hui/Config.h"
 
 class Config : public hui::Configuration {
 public:

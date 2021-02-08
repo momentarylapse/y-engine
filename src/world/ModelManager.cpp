@@ -59,7 +59,6 @@ public:
 		me->script_data.description = f->read_str();
 
 		// Inventary
-		f->read_comment();
 		me->script_data.inventary.resize(f->read_int());
 		for (int i=0;i<me->script_data.inventary.num;i++)
 			me->script_data.inventary[i] = ModelManager::load(f->read_str());

@@ -2,9 +2,9 @@
 #include "../lib/common.h"
 #include "../asm/asm.h"
 #include "../../file/file.h"
-#include "../../hui/Application.h"
 #include "Parser.h"
 #include <stdio.h>
+#include "../../hui_minimal/Application.h"
 
 
 #define NEW_NEW_PARSING 0
@@ -24,6 +24,8 @@ extern const Class *TypeAnyList;
 extern const Class *TypeAnyDict;
 extern const Class *TypeDynamicArray;
 extern const Class *TypeIntDict;
+extern const Class *TypeStringAutoCast;
+extern const Class *TypePath;
 
 const int TYPE_CAST_NONE = -1;
 const int TYPE_CAST_DEREFERENCE = -2;
@@ -451,7 +453,7 @@ shared<Node> check_const_params(SyntaxTree *tree, shared<Node> n) {
 			}
 		}
 		for (int i=0; i<f->num_params; i++)
-			if (n->params[i+offset]->is_const and !f->var[i]->is_const)
+			if (n->params[i+offset]->is_const and !f->var[i]->is_const())
 				tree->do_error(format("%s: function parameter %d ('%s') is 'out' and does not accept a constant value", f->long_name(), i+1, f->var[i]->name));
 	}
 	return n;
@@ -1041,7 +1043,7 @@ shared<Node> Parser::try_parse_format_string(Block *block, Value &v) {
 			if (fmt != "") {
 				n = apply_format(n, fmt);
 			} else {
-				n = check_param_link(n, TypeString, "", 0);
+				n = check_param_link(n, TypeStringAutoCast, "", 0);
 			}
 			//n->show();
 			parts.add(n);
@@ -1288,6 +1290,10 @@ bool type_match_with_cast(shared<Node> node, bool is_modifiable, const Class *wa
 	cast = TYPE_CAST_NONE;
 	if (type_match(given, wanted))
 		return true;
+	if (wanted == TypeStringAutoCast and given == TypeString)
+		return true;
+	if (wanted == TypeString and given == TypePath)
+		return true;
 	if (is_modifiable) // is a variable getting assigned.... better not cast
 		return false;
 	if (given->is_pointer()) {
@@ -1347,13 +1353,13 @@ bool type_match_with_cast(shared<Node> node, bool is_modifiable, const Class *wa
 			return true;
 		}
 	}
-	if (wanted == TypeString) {
-		Function *cf = given->get_func(IDENTIFIER_FUNC_STR, TypeString, {});
-		if (cf) {
+	if (wanted == TypeStringAutoCast) {
+		//Function *cf = given->get_func(IDENTIFIER_FUNC_STR, TypeString, {});
+		//if (cf) {
 			penalty = 50;
 			cast = TYPE_CAST_OWN_STRING;
 			return true;
-		}
+		//}
 	}
 	foreachi(auto &c, TypeCasts, i)
 		if ((type_match(given, c.source)) and (type_match(c.dest, wanted))) {
@@ -1372,11 +1378,12 @@ shared<Node> Parser::apply_type_cast(int tc, shared<Node> node, const Class *wan
 	if (tc == TYPE_CAST_REFERENCE)
 		return node->ref();
 	if (tc == TYPE_CAST_OWN_STRING) {
-		Function *cf = node->type->get_func(IDENTIFIER_FUNC_STR, TypeString, {});
+		return add_converter_str(node, false);
+		/*Function *cf = node->type->get_func(IDENTIFIER_FUNC_STR, TypeString, {});
 		if (cf)
 			return tree->add_node_member_call(cf, node);
 		do_error("automatic .str() not implemented yet");
-		return node;
+		return node;*/
 	}
 	if (tc == TYPE_CAST_ABSTRACT_LIST) {
 		if (wanted == TypeDynamicArray)
@@ -1777,7 +1784,8 @@ shared<Node> Parser::parse_for_header(Block *block) {
 		// variable...
 		const Class *var_type = for_array->type->get_array_element();
 		auto *var = block->add_var(var_name, var_type);
-		var->is_const = for_array->is_const;
+		if (for_array->is_const)
+			flags_set(var->flags, Flags::CONST);
 
 		// for index
 		auto *index = block->add_var(index_name, TypeInt);
@@ -2411,16 +2419,13 @@ shared<Node> Parser::parse_statement_lambda(Block *block) {
 		for (int k=0;;k++) {
 			// like variable definitions
 
-			bool rw = false;
-			if (Exp.cur == IDENTIFIER_OUT) {
-				rw = true;
-				Exp.next();
-			}
+			Flags flags = parse_flags();
 
 			// type of parameter variable
 			const Class *param_type = parse_type(tree->base_class); // force
 			auto v = f->block->add_var(Exp.cur, param_type);
-			v->is_const = !rw;
+			if (!flags_has(flags, Flags::OUT))
+				flags_set(v->flags, Flags::CONST);
 			f->literal_param_type.add(param_type);
 			Exp.next();
 			f->num_params ++;
@@ -2925,7 +2930,7 @@ void parser_class_add_element(Parser *p, Class *_class, const string &name, cons
 	// add element
 	if (flags_has(flags, Flags::STATIC)) {
 		auto v = new Variable(name, type);
-		v->is_extern = flags_has(flags, Flags::EXTERN);
+		flags_set(v->flags, flags);
 		_class->static_variables.add(v);
 	} else {
 		if (type_needs_alignment(type))
@@ -3191,7 +3196,7 @@ void Parser::parse_global_variable_def(bool single, Block *block, Flags flags0) 
 			parse_named_const(name, type, tree->base_class, block);
 		} else {
 			auto *v = new Variable(name, type);
-			v->is_extern = flags_has(flags, Flags::EXTERN);
+			flags_set(v->flags, flags);
 			tree->base_class->static_variables.add(v);
 		}
 
@@ -3301,7 +3306,8 @@ Function *Parser::parse_function_header(Class *name_space, Flags flags) {
 			// type of parameter variable
 			const Class *param_type = parse_type(name_space); // force
 			auto v = f->block->add_var(Exp.cur, param_type);
-			v->is_const = !flags_has(pflags, Flags::OUT);
+			if (!flags_has(pflags, Flags::OUT))
+				flags_set(v->flags, Flags::CONST);
 			f->literal_param_type.add(param_type);
 			Exp.next();
 			f->num_params ++;
@@ -3362,7 +3368,8 @@ Function *Parser::parse_function_header_new(Class *name_space, Flags flags) {
 			// type of parameter variable
 			const Class *param_type = parse_type(name_space); // force
 			auto v = f->block->add_var(Exp.cur, param_type);
-			v->is_const = !flags_has(pflags, Flags::OUT);
+			if (!flags_has(pflags, Flags::OUT))
+				flags_set(v->flags, Flags::CONST);
 			f->literal_param_type.add(param_type);
 			Exp.next();
 			f->num_params ++;

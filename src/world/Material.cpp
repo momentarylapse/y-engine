@@ -1,8 +1,8 @@
 #include "Material.h"
 #include "Model.h"
 #include "../lib/file/file.h"
+#include "../lib/hui_minimal/Config.h"
 #include "../lib/nix/nix.h"
-#include "../lib/hui/Config.h"
 
 
 Path MaterialDir;
