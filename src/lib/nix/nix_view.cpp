@@ -11,7 +11,7 @@
 #include "nix.h"
 #include "nix_common.h"
 #ifdef _X_USE_HUI_
-#include "../hui_minimal/hui.h"
+#include "../hui/hui.h"
 #endif
 #ifdef _X_USE_IMAGE_
 #include "../image/image.h"

@@ -9,9 +9,6 @@
 #include <algorithm>
 #include <string.h>
 
-#ifdef WIN32
-	#include "windows.h"
-#endif
 #include "../kaba.h"
 #include "common.h"
 #include "exception.h"
@@ -23,7 +20,7 @@
 
 
 #ifdef _X_USE_HUI_
-#include "../../hui_minimal/hui.h"
+#include "../../hui/hui.h"
 #endif
 
 
