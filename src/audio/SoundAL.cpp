@@ -96,7 +96,7 @@ Sound *Sound::load(const Path &filename) {
 		}
 
 	// no -> load from file
-	AudioFile af;
+	AudioFile af = {0,0,0,0, nullptr};
 	if (cached < 0)
 		af = load_sound_file(engine.sound_dir << filename);
 

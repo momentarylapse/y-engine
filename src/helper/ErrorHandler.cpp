@@ -42,12 +42,20 @@ string unmangle(const string &name) {
 	string r;
 	int i = 2;
 
-	while (true) {
+	while (i < name.num) {
+
+		if (name[i] == 'E')
+			break;
+		if (name[i] == 'R')
+			break;
 
 		bool is_namespace = false;
 		if (name[i] == 'N') {
 			is_namespace = true;
 			i ++;
+			if (name[i] == 'K') {
+				i ++;
+			}
 		}
 
 		int n = 0;
@@ -55,6 +63,7 @@ string unmangle(const string &name) {
 			n += n*10 + name[i] - '0';
 			i ++;
 		} else {
+			r += ">" + name.substr(i, -1);
 			break;
 		}
 		if (name[i] >= '0' and name[i] <= '9') {
@@ -62,10 +71,12 @@ string unmangle(const string &name) {
 			i ++;
 		}
 
+		if (r.num > 0)
+			r += ".";
 		r += name.substr(i, n);
 		i += n;
-		if (is_namespace)
-			r += "::";
+		//if (is_namespace)
+		//	r += "::";
 
 
 	}
@@ -108,6 +119,10 @@ void ErrorHandler::show_backtrace() {
 	kaba::Function *first_kaba = nullptr;
 	void* first_kaba_bp = nullptr;
 	while (unw_step(&cursor) > 0) {
+		/*if (ip < 0x1000) {
+			msg_write(" -> CLOSE-TO-NULL");
+			continue;
+		}*/
 		unw_get_reg(&cursor, UNW_REG_IP, &ip);
 		unw_get_reg(&cursor, UNW_REG_SP, &sp);
 		unw_get_reg(&cursor, UNW_X86_64_RBP, &bp);
@@ -118,12 +133,12 @@ void ErrorHandler::show_backtrace() {
 			string name = unmangle(_name);
 			if (name.match("*signal_handler*") or name == "killpg")
 				continue;
-			msg_write(" -> " + name + "()");
+			msg_write(">>  " + name + "()");
 			if (name == "main")
 				break;
 		} else {
 			auto r = kaba::get_func_from_rip((void*)(int_p)ip);
-			msg_write(" -> " + r.str());
+			msg_write(r.str());
 			if (!first_kaba) {
 				first_kaba_bp = (void*)(int_p)bp;
 				first_kaba = r.f;
