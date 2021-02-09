@@ -26,6 +26,7 @@ EngineData::EngineData() {
 	console_enabled = false;
 	show_timings = false;
 	debug = false;
+	ignore_missing_files = false;
 
 	shadow_lower_detail = false;
 	shadow_level = 0;

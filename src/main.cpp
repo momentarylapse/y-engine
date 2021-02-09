@@ -111,6 +111,8 @@ public:
 
 		engine.app_name = app_name;
 		engine.version = app_version;
+		if (config.get_str("error.missing-files", "ignore") == "ignore")
+			engine.ignore_missing_files = true;
 
 		try {
 			if (config.get_str("renderer.path", "forward") == "deferred")

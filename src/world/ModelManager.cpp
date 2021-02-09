@@ -19,6 +19,22 @@
 Array<Model*> ModelManager::originals;
 
 
+
+nix::Texture *load_texture(const Path &file) {
+	if (file.is_empty())
+		return nullptr;
+	try {
+		return nix::Texture::load(file);
+	} catch (Exception &e) {
+		if (engine.ignore_missing_files)
+			msg_error("texture missing: " + file.str());
+		else
+			throw;
+	}
+	return nullptr;
+}
+
+
 color file_read_color4i(File *f);
 vector get_normal_by_index(int index);
 void AppraiseDimensions(Model *m);
@@ -108,7 +124,7 @@ public:
 		for (int t=0;t<nt;t++) {
 			Path fn = f->read_str();
 			if (!fn.is_empty())
-				me->textures[t] = nix::Texture::load(fn);
+				me->textures[t] = load_texture(fn);
 		}
 	}
 	void write(File *f) override {}

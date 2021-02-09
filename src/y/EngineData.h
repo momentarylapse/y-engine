@@ -31,6 +31,8 @@ public:
 	int shadow_level;
 	bool shadow_lower_detail;
 
+	bool ignore_missing_files;
+
 	int multisampling;
 	bool CullingEnabled, SortingEnabled, ZBufferEnabled;
 	bool resetting_game;
