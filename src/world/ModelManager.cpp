@@ -410,7 +410,7 @@ public:
 		int n = f->read_int();
 		for (int i=0; i<n; i++) {
 			TemplateDataScriptVariable v;
-			v.name = f->read_str();
+			v.name = f->read_str().lower().replace("_", "");
 			v.value = f->read_str();
 			me->_template->variables.add(v);
 		}

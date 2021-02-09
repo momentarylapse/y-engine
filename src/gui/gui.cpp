@@ -30,23 +30,6 @@ void init(nix::Shader *s) {
 	toplevel = new Node(rect::ID);
 }
 
-/*vulkan::RenderPass *rp) {
-	Picture::render_pass = rp;
-	Picture::shader = vulkan::Shader::load("2d.shader");
-	Picture::pipeline = new vulkan::Pipeline(Picture::shader, rp, 0, 1);
-	Picture::pipeline->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-	Picture::pipeline->set_z(false, false);
-	Picture::pipeline->rebuild();
-
-	Picture::vertex_buffer = new vulkan::VertexBuffer();
-	Array<vulkan::Vertex1> vertices;
-	vertices.add({vector(0,0,0), vector::EZ, 0,0});
-	vertices.add({vector(0,1,0), vector::EZ, 0,1});
-	vertices.add({vector(1,0,0), vector::EZ, 1,0});
-	vertices.add({vector(1,1,0), vector::EZ, 1,1});
-	Picture::vertex_buffer->build1i(vertices, {0,2,1, 1,2,3});
-}*/
-
 void reset() {
 	toplevel = new Node(rect::ID);
 }
@@ -102,7 +85,9 @@ void handle_mouse_move(const vector &m_prev, const vector &m) {
 }
 
 void iterate(float dt) {
-	for (auto n: all_nodes) {
+	auto nodes = all_nodes;
+	// tree might change...
+	for (auto n: nodes) {
 		n->on_iterate(dt);
 	}
 }
@@ -115,44 +100,6 @@ void delete_node(Node *n) {
 	}
 	update_tree();
 }
-
-#if 0
-void render(vulkan::CommandBuffer *cb, const rect &viewport) {
-	cb->set_pipeline(Picture::pipeline);
-	cb->set_viewport(viewport);
-
-	for (auto *p: pictures) {
-		if (p->user_shader)
-			continue;
-
-		UBOMatrices u;
-		u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
-		u.view = matrix::ID;
-		u.model = matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1);
-		p->ubo->update(&u);
-
-		cb->bind_descriptor_set(0, p->dset);
-		cb->draw(Picture::vertex_buffer);
-	}
-
-	for (auto *p: pictures) {
-		if (!p->user_shader)
-			continue;
-		cb->set_pipeline(p->user_pipeline);
-		cb->set_viewport(viewport);
-
-		UBOMatrices u;
-		u.proj = matrix::translation(vector(-1,-1,0)) * matrix::scale(2,2,1);
-		u.view = matrix::ID;
-		u.model = matrix::translation(p->pos) * matrix::scale(p->width, p->height, 1);
-		p->ubo->update(&u);
-
-		cb->bind_descriptor_set(0, p->dset);
-		cb->draw(Picture::vertex_buffer);
-	}
-}
-#endif
-
 
 
 }

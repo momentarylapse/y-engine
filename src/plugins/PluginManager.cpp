@@ -416,7 +416,7 @@ void PluginManager::reset() {
 
 void assign_variables(char *p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
 	for (auto &v: variables) {
-		for (auto &e: c->elements)
+		for (auto &e: c->elements) {
 			if (v.name == e.name.lower().replace("_", "")) {
 				//msg_write("  " + e.type->long_name() + " " + e.name + " = " + v.value);
 				if (e.type == kaba::TypeInt)
@@ -428,6 +428,7 @@ void assign_variables(char *p, const kaba::Class *c, const Array<TemplateDataScr
 				else if (e.type == kaba::TypeString)
 					*(string*)(p + e.offset) = v.value;
 			}
+		}
 	}
 }
 
