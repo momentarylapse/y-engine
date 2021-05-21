@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{7AE0C478-4F71-A3CD-23B9-E06984899C71}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);HAS_LIB_GTK3=1;HAS_LIB_ZLIB=1;HAS_LIB_GLFW=1;HAS_LIB_GL=1;HAS_LIB_FREETYPE2=1;HAS_LIB_UNWIND=0;HAS_LIB_DL=0;HAS_LIB_BULLET=0;HAS_LIB_OPENAL=0;HAS_LIB_OGG=1</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)\%(Filename).obj</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);HAS_LIB_GTK3=1;HAS_LIB_ZLIB=1;HAS_LIB_GLFW=1;HAS_LIB_GL=1;HAS_LIB_FREETYPE2=1;HAS_LIB_UNWIND=0;HAS_LIB_DL=0;HAS_LIB_BULLET=0;HAS_LIB_OPENAL=0;HAS_LIB_OGG=1</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)\%(Filename).obj</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN64;_DEBUG;_WINDOWS;%(PreprocessorDefinitions);HAS_LIB_GTK3=1;HAS_LIB_ZLIB=1;HAS_LIB_GLFW=1;HAS_LIB_GL=1;HAS_LIB_FREETYPE2=1;HAS_LIB_UNWIND=0;HAS_LIB_DL=0;HAS_LIB_BULLET=0;HAS_LIB_OPENAL=0;HAS_LIB_OGG=1</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)\%(Filename).obj</ObjectFileName>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN64;NDEBUG;_WINDOWS;%(PreprocessorDefinitions);HAS_LIB_GTK3=1;HAS_LIB_ZLIB=1;HAS_LIB_GLFW=1;HAS_LIB_GL=1;HAS_LIB_FREETYPE2=1;HAS_LIB_UNWIND=0;HAS_LIB_DL=0;HAS_LIB_BULLET=0;HAS_LIB_OPENAL=0;HAS_LIB_OGG=1</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)\%(Filename).obj</ObjectFileName>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\audio\Sound.cpp" />
+    <ClCompile Include="src\audio\SoundAL.cpp" />
+    <ClCompile Include="src\fx\Beam.cpp" />
+    <ClCompile Include="src\fx\Light.cpp" />
+    <ClCompile Include="src\fx\Particle.cpp" />
+    <ClCompile Include="src\fx\ParticleManager.cpp" />
+    <ClCompile Include="src\gui\Font.cpp" />
+    <ClCompile Include="src\gui\gui.cpp" />
+    <ClCompile Include="src\gui\Node.cpp" />
+    <ClCompile Include="src\gui\Picture.cpp" />
+    <ClCompile Include="src\gui\Text.cpp" />
+    <ClCompile Include="src\helper\ErrorHandler.cpp" />
+    <ClCompile Include="src\helper\PerformanceMonitor.cpp" />
+    <ClCompile Include="src\input\InputManager.cpp" />
+    <ClCompile Include="src\lib\any\any.cpp" />
+    <ClCompile Include="src\lib\base\array.cpp" />
+    <ClCompile Include="src\lib\base\pointer.cpp" />
+    <ClCompile Include="src\lib\base\strings.cpp" />
+    <ClCompile Include="src\lib\file\file.cpp" />
+    <ClCompile Include="src\lib\file\file_op.cpp" />
+    <ClCompile Include="src\lib\file\msg.cpp" />
+    <ClCompile Include="src\lib\file\path.cpp" />
+    <ClCompile Include="src\lib\hui_minimal\Application.cpp" />
+    <ClCompile Include="src\lib\hui_minimal\Callback.cpp" />
+    <ClCompile Include="src\lib\hui_minimal\Config.cpp" />
+    <ClCompile Include="src\lib\hui_minimal\error.cpp" />
+    <ClCompile Include="src\lib\hui_minimal\hui.cpp" />
+    <ClCompile Include="src\lib\hui_minimal\Timer.cpp" />
+    <ClCompile Include="src\lib\image\color.cpp" />
+    <ClCompile Include="src\lib\image\image.cpp" />
+    <ClCompile Include="src\lib\image\image_bmp.cpp" />
+    <ClCompile Include="src\lib\image\image_jpg.cpp" />
+    <ClCompile Include="src\lib\image\image_png.cpp" />
+    <ClCompile Include="src\lib\image\image_tga.cpp" />
+    <ClCompile Include="src\lib\image\ImagePainter.cpp" />
+    <ClCompile Include="src\lib\kaba\asm\asm.cpp" />
+    <ClCompile Include="src\lib\kaba\asm\asm_arm.cpp" />
+    <ClCompile Include="src\lib\kaba\asm\asm_x86.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\Backend.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\BackendAmd64.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\BackendARM.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\BackendX86.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\CommandList.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\compiler.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\mapper.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\serializer.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\SerializerX.cpp" />
+    <ClCompile Include="src\lib\kaba\compiler\SerialNode.cpp" />
+    <ClCompile Include="src\lib\kaba\dynamic\call.cpp" />
+    <ClCompile Include="src\lib\kaba\dynamic\dynamic.cpp" />
+    <ClCompile Include="src\lib\kaba\dynamic\exception.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\dict.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\extern.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_base.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_doc.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_hui.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_image.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_kaba.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_math.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_net.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_nix.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_os.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_threads.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_time.cpp" />
+    <ClCompile Include="src\lib\kaba\lib\lib_vulkan.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Block.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Class.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Constant.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Function.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Identifier.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\implicit.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\lexical.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Node.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Operator.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Parser.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\precompiler.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\preprocessor.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Statement.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\SyntaxTree.cpp" />
+    <ClCompile Include="src\lib\kaba\syntax\Variable.cpp" />
+    <ClCompile Include="src\lib\kaba\CompilerConfiguration.cpp" />
+    <ClCompile Include="src\lib\kaba\Interpreter.cpp" />
+    <ClCompile Include="src\lib\kaba\kaba.cpp" />
+    <ClCompile Include="src\lib\math\complex.cpp" />
+    <ClCompile Include="src\lib\math\interpolation.cpp" />
+    <ClCompile Include="src\lib\math\math.cpp" />
+    <ClCompile Include="src\lib\math\matrix.cpp" />
+    <ClCompile Include="src\lib\math\matrix3.cpp" />
+    <ClCompile Include="src\lib\math\plane.cpp" />
+    <ClCompile Include="src\lib\math\quaternion.cpp" />
+    <ClCompile Include="src\lib\math\random.cpp" />
+    <ClCompile Include="src\lib\math\ray.cpp" />
+    <ClCompile Include="src\lib\math\rect.cpp" />
+    <ClCompile Include="src\lib\math\vector.cpp" />
+    <ClCompile Include="src\lib\net\BinaryBuffer.cpp" />
+    <ClCompile Include="src\lib\net\net.cpp" />
+    <ClCompile Include="src\lib\net\Socket.cpp" />
+    <ClCompile Include="src\lib\nix\nix.cpp" />
+    <ClCompile Include="src\lib\nix\nix_draw.cpp" />
+    <ClCompile Include="src\lib\nix\nix_light.cpp" />
+    <ClCompile Include="src\lib\nix\nix_shader.cpp" />
+    <ClCompile Include="src\lib\nix\nix_textures.cpp" />
+    <ClCompile Include="src\lib\nix\nix_vertexbuffer.cpp" />
+    <ClCompile Include="src\lib\nix\nix_view.cpp" />
+    <ClCompile Include="src\lib\xfile\chunked.cpp" />
+    <ClCompile Include="src\lib\xfile\pdf.cpp" />
+    <ClCompile Include="src\lib\xfile\xml.cpp" />
+    <ClCompile Include="src\net\NetworkManager.cpp" />
+    <ClCompile Include="src\plugins\Controller.cpp" />
+    <ClCompile Include="src\plugins\PluginManager.cpp" />
+    <ClCompile Include="src\renderer\Renderer.cpp" />
+    <ClCompile Include="src\renderer\RenderPath.cpp" />
+    <ClCompile Include="src\renderer\RenderPathGL.cpp" />
+    <ClCompile Include="src\renderer\RenderPathGLDeferred.cpp" />
+    <ClCompile Include="src\world\Camera.cpp" />
+    <ClCompile Include="src\world\LevelData.cpp" />
+    <ClCompile Include="src\world\Link.cpp" />
+    <ClCompile Include="src\world\Material.cpp" />
+    <ClCompile Include="src\world\Model.cpp" />
+    <ClCompile Include="src\world\ModelManager.cpp" />
+    <ClCompile Include="src\world\Object.cpp" />
+    <ClCompile Include="src\world\Terrain.cpp" />
+    <ClCompile Include="src\world\World.cpp" />
+    <ClCompile Include="src\y\EngineData.cpp" />
+    <ClCompile Include="src\y\Entity.cpp" />
+    <ClCompile Include="src\Config.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\meta.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\audio\Sound.h" />
+    <ClInclude Include="src\fx\Beam.h" />
+    <ClInclude Include="src\fx\Light.h" />
+    <ClInclude Include="src\fx\Particle.h" />
+    <ClInclude Include="src\fx\ParticleManager.h" />
+    <ClInclude Include="src\gui\Font.h" />
+    <ClInclude Include="src\gui\gui.h" />
+    <ClInclude Include="src\gui\Node.h" />
+    <ClInclude Include="src\gui\Picture.h" />
+    <ClInclude Include="src\gui\Text.h" />
+    <ClInclude Include="src\helper\ErrorHandler.h" />
+    <ClInclude Include="src\helper\PerformanceMonitor.h" />
+    <ClInclude Include="src\input\InputManager.h" />
+    <ClInclude Include="src\lib\any\any.h" />
+    <ClInclude Include="src\lib\base\array.h" />
+    <ClInclude Include="src\lib\base\base.h" />
+    <ClInclude Include="src\lib\base\macros.h" />
+    <ClInclude Include="src\lib\base\map.h" />
+    <ClInclude Include="src\lib\base\pointer.h" />
+    <ClInclude Include="src\lib\base\set.h" />
+    <ClInclude Include="src\lib\base\strings.h" />
+    <ClInclude Include="src\lib\file\file.h" />
+    <ClInclude Include="src\lib\file\file_op.h" />
+    <ClInclude Include="src\lib\file\msg.h" />
+    <ClInclude Include="src\lib\file\path.h" />
+    <ClInclude Include="src\lib\hui_minimal\Application.h" />
+    <ClInclude Include="src\lib\hui_minimal\Callback.h" />
+    <ClInclude Include="src\lib\hui_minimal\Config.h" />
+    <ClInclude Include="src\lib\hui_minimal\error.h" />
+    <ClInclude Include="src\lib\hui_minimal\Event.h" />
+    <ClInclude Include="src\lib\hui_minimal\hui.h" />
+    <ClInclude Include="src\lib\hui_minimal\Timer.h" />
+    <ClInclude Include="src\lib\image\color.h" />
+    <ClInclude Include="src\lib\image\image.h" />
+    <ClInclude Include="src\lib\image\image_bmp.h" />
+    <ClInclude Include="src\lib\image\image_jpg.h" />
+    <ClInclude Include="src\lib\image\image_png.h" />
+    <ClInclude Include="src\lib\image\image_tga.h" />
+    <ClInclude Include="src\lib\image\ImagePainter.h" />
+    <ClInclude Include="src\lib\image\Painter.h" />
+    <ClInclude Include="src\lib\kaba\asm\asm.h" />
+    <ClInclude Include="src\lib\kaba\asm\internal.h" />
+    <ClInclude Include="src\lib\kaba\compiler\Backend.h" />
+    <ClInclude Include="src\lib\kaba\compiler\BackendAmd64.h" />
+    <ClInclude Include="src\lib\kaba\compiler\BackendARM.h" />
+    <ClInclude Include="src\lib\kaba\compiler\BackendX86.h" />
+    <ClInclude Include="src\lib\kaba\compiler\CommandList.h" />
+    <ClInclude Include="src\lib\kaba\compiler\serializer.h" />
+    <ClInclude Include="src\lib\kaba\compiler\SerializerX.h" />
+    <ClInclude Include="src\lib\kaba\compiler\SerialNode.h" />
+    <ClInclude Include="src\lib\kaba\dynamic\call.h" />
+    <ClInclude Include="src\lib\kaba\dynamic\dynamic.h" />
+    <ClInclude Include="src\lib\kaba\dynamic\exception.h" />
+    <ClInclude Include="src\lib\kaba\lib\dict.h" />
+    <ClInclude Include="src\lib\kaba\lib\extern.h" />
+    <ClInclude Include="src\lib\kaba\lib\lib.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Block.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Class.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Constant.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Flags.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Function.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Identifier.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Inline.h" />
+    <ClInclude Include="src\lib\kaba\syntax\lexical.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Node.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Operator.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Parser.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Statement.h" />
+    <ClInclude Include="src\lib\kaba\syntax\SyntaxTree.h" />
+    <ClInclude Include="src\lib\kaba\syntax\Variable.h" />
+    <ClInclude Include="src\lib\kaba\CompilerConfiguration.h" />
+    <ClInclude Include="src\lib\kaba\Interpreter.h" />
+    <ClInclude Include="src\lib\kaba\kaba.h" />
+    <ClInclude Include="src\lib\math\complex.h" />
+    <ClInclude Include="src\lib\math\interpolation.h" />
+    <ClInclude Include="src\lib\math\math.h" />
+    <ClInclude Include="src\lib\math\matrix.h" />
+    <ClInclude Include="src\lib\math\matrix3.h" />
+    <ClInclude Include="src\lib\math\plane.h" />
+    <ClInclude Include="src\lib\math\quaternion.h" />
+    <ClInclude Include="src\lib\math\random.h" />
+    <ClInclude Include="src\lib\math\ray.h" />
+    <ClInclude Include="src\lib\math\rect.h" />
+    <ClInclude Include="src\lib\math\vector.h" />
+    <ClInclude Include="src\lib\net\BinaryBuffer.h" />
+    <ClInclude Include="src\lib\net\net.h" />
+    <ClInclude Include="src\lib\net\Socket.h" />
+    <ClInclude Include="src\lib\nix\nix.h" />
+    <ClInclude Include="src\lib\nix\nix_common.h" />
+    <ClInclude Include="src\lib\nix\nix_config.h" />
+    <ClInclude Include="src\lib\nix\nix_draw.h" />
+    <ClInclude Include="src\lib\nix\nix_light.h" />
+    <ClInclude Include="src\lib\nix\nix_shader.h" />
+    <ClInclude Include="src\lib\nix\nix_textures.h" />
+    <ClInclude Include="src\lib\nix\nix_vertexbuffer.h" />
+    <ClInclude Include="src\lib\nix\nix_view.h" />
+    <ClInclude Include="src\lib\xfile\chunked.h" />
+    <ClInclude Include="src\lib\xfile\pdf.h" />
+    <ClInclude Include="src\lib\xfile\xml.h" />
+    <ClInclude Include="src\lib\config.h" />
+    <ClInclude Include="src\net\NetworkManager.h" />
+    <ClInclude Include="src\plugins\Controller.h" />
+    <ClInclude Include="src\plugins\PluginManager.h" />
+    <ClInclude Include="src\renderer\Renderer.h" />
+    <ClInclude Include="src\renderer\RenderPath.h" />
+    <ClInclude Include="src\renderer\RenderPathGL.h" />
+    <ClInclude Include="src\renderer\RenderPathGLDeferred.h" />
+    <ClInclude Include="src\world\Camera.h" />
+    <ClInclude Include="src\world\LevelData.h" />
+    <ClInclude Include="src\world\Link.h" />
+    <ClInclude Include="src\world\Material.h" />
+    <ClInclude Include="src\world\Model.h" />
+    <ClInclude Include="src\world\ModelManager.h" />
+    <ClInclude Include="src\world\Object.h" />
+    <ClInclude Include="src\world\Terrain.h" />
+    <ClInclude Include="src\world\World.h" />
+    <ClInclude Include="src\y\EngineData.h" />
+    <ClInclude Include="src\y\Entity.h" />
+    <ClInclude Include="src\Config.h" />
+    <ClInclude Include="src\meta.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

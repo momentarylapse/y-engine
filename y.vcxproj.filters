@@ -1,0 +1,837 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\audio\Sound.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\SoundAL.cpp">
+      <Filter>src\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fx\Beam.cpp">
+      <Filter>src\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fx\Light.cpp">
+      <Filter>src\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fx\Particle.cpp">
+      <Filter>src\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fx\ParticleManager.cpp">
+      <Filter>src\fx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Font.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\gui.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Node.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Picture.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Text.cpp">
+      <Filter>src\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helper\ErrorHandler.cpp">
+      <Filter>src\helper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helper\PerformanceMonitor.cpp">
+      <Filter>src\helper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\InputManager.cpp">
+      <Filter>src\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\any\any.cpp">
+      <Filter>src\lib\any</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\base\array.cpp">
+      <Filter>src\lib\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\base\pointer.cpp">
+      <Filter>src\lib\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\base\strings.cpp">
+      <Filter>src\lib\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\file\file.cpp">
+      <Filter>src\lib\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\file\file_op.cpp">
+      <Filter>src\lib\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\file\msg.cpp">
+      <Filter>src\lib\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\file\path.cpp">
+      <Filter>src\lib\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\hui_minimal\Application.cpp">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\hui_minimal\Callback.cpp">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\hui_minimal\Config.cpp">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\hui_minimal\error.cpp">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\hui_minimal\hui.cpp">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\hui_minimal\Timer.cpp">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\color.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\image.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\image_bmp.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\image_jpg.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\image_png.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\image_tga.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\image\ImagePainter.cpp">
+      <Filter>src\lib\image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\asm\asm.cpp">
+      <Filter>src\lib\kaba\asm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\asm\asm_arm.cpp">
+      <Filter>src\lib\kaba\asm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\asm\asm_x86.cpp">
+      <Filter>src\lib\kaba\asm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\Backend.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\BackendAmd64.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\BackendARM.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\BackendX86.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\CommandList.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\compiler.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\mapper.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\serializer.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\SerializerX.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\compiler\SerialNode.cpp">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\dynamic\call.cpp">
+      <Filter>src\lib\kaba\dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\dynamic\dynamic.cpp">
+      <Filter>src\lib\kaba\dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\dynamic\exception.cpp">
+      <Filter>src\lib\kaba\dynamic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\dict.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\extern.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_base.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_doc.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_hui.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_image.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_kaba.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_math.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_net.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_nix.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_os.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_threads.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_time.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\lib\lib_vulkan.cpp">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Block.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Class.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Constant.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Function.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Identifier.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\implicit.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\lexical.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Node.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Operator.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Parser.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\precompiler.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\preprocessor.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Statement.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\SyntaxTree.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\syntax\Variable.cpp">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\CompilerConfiguration.cpp">
+      <Filter>src\lib\kaba</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\Interpreter.cpp">
+      <Filter>src\lib\kaba</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\kaba\kaba.cpp">
+      <Filter>src\lib\kaba</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\complex.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\interpolation.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\math.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\matrix.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\matrix3.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\plane.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\quaternion.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\random.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\ray.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\rect.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\math\vector.cpp">
+      <Filter>src\lib\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\net\BinaryBuffer.cpp">
+      <Filter>src\lib\net</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\net\net.cpp">
+      <Filter>src\lib\net</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\net\Socket.cpp">
+      <Filter>src\lib\net</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_draw.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_light.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_shader.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_textures.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_vertexbuffer.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_view.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\xfile\chunked.cpp">
+      <Filter>src\lib\xfile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\xfile\pdf.cpp">
+      <Filter>src\lib\xfile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\xfile\xml.cpp">
+      <Filter>src\lib\xfile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\net\NetworkManager.cpp">
+      <Filter>src\net</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\Controller.cpp">
+      <Filter>src\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\PluginManager.cpp">
+      <Filter>src\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\Renderer.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\RenderPath.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\RenderPathGL.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\RenderPathGLDeferred.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\Camera.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\LevelData.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\Link.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\Material.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\Model.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\ModelManager.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\Object.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\Terrain.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world\World.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\y\EngineData.cpp">
+      <Filter>src\y</Filter>
+    </ClCompile>
+    <ClCompile Include="src\y\Entity.cpp">
+      <Filter>src\y</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Config.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meta.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\audio\Sound.h">
+      <Filter>src\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fx\Beam.h">
+      <Filter>src\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fx\Light.h">
+      <Filter>src\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fx\Particle.h">
+      <Filter>src\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fx\ParticleManager.h">
+      <Filter>src\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\Font.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\gui.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\Node.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\Picture.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\Text.h">
+      <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\ErrorHandler.h">
+      <Filter>src\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\PerformanceMonitor.h">
+      <Filter>src\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\InputManager.h">
+      <Filter>src\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\any\any.h">
+      <Filter>src\lib\any</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\array.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\base.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\macros.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\map.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\pointer.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\set.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\base\strings.h">
+      <Filter>src\lib\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\file\file.h">
+      <Filter>src\lib\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\file\file_op.h">
+      <Filter>src\lib\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\file\msg.h">
+      <Filter>src\lib\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\file\path.h">
+      <Filter>src\lib\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\Application.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\Callback.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\Config.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\error.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\Event.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\hui.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\hui_minimal\Timer.h">
+      <Filter>src\lib\hui_minimal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\color.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\image.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\image_bmp.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\image_jpg.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\image_png.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\image_tga.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\ImagePainter.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\image\Painter.h">
+      <Filter>src\lib\image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\asm\asm.h">
+      <Filter>src\lib\kaba\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\asm\internal.h">
+      <Filter>src\lib\kaba\asm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\Backend.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\BackendAmd64.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\BackendARM.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\BackendX86.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\CommandList.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\serializer.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\SerializerX.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\compiler\SerialNode.h">
+      <Filter>src\lib\kaba\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\dynamic\call.h">
+      <Filter>src\lib\kaba\dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\dynamic\dynamic.h">
+      <Filter>src\lib\kaba\dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\dynamic\exception.h">
+      <Filter>src\lib\kaba\dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\lib\dict.h">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\lib\extern.h">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\lib\lib.h">
+      <Filter>src\lib\kaba\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Block.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Class.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Constant.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Flags.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Function.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Identifier.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Inline.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\lexical.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Node.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Operator.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Parser.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Statement.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\SyntaxTree.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\syntax\Variable.h">
+      <Filter>src\lib\kaba\syntax</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\CompilerConfiguration.h">
+      <Filter>src\lib\kaba</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\Interpreter.h">
+      <Filter>src\lib\kaba</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\kaba\kaba.h">
+      <Filter>src\lib\kaba</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\complex.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\interpolation.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\math.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\matrix.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\matrix3.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\plane.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\quaternion.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\random.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\ray.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\rect.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\math\vector.h">
+      <Filter>src\lib\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\net\BinaryBuffer.h">
+      <Filter>src\lib\net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\net\net.h">
+      <Filter>src\lib\net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\net\Socket.h">
+      <Filter>src\lib\net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_common.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_config.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_draw.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_light.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_shader.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_textures.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_vertexbuffer.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_view.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\xfile\chunked.h">
+      <Filter>src\lib\xfile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\xfile\pdf.h">
+      <Filter>src\lib\xfile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\xfile\xml.h">
+      <Filter>src\lib\xfile</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\config.h">
+      <Filter>src\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\net\NetworkManager.h">
+      <Filter>src\net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\Controller.h">
+      <Filter>src\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\PluginManager.h">
+      <Filter>src\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\Renderer.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderPath.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderPathGL.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderPathGLDeferred.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Camera.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\LevelData.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Link.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Material.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Model.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\ModelManager.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Object.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Terrain.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\World.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\y\EngineData.h">
+      <Filter>src\y</Filter>
+    </ClInclude>
+    <ClInclude Include="src\y\Entity.h">
+      <Filter>src\y</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Config.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\meta.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{F12EA729-9762-4175-D211-F4CA3BE60BD0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\audio">
+      <UniqueIdentifier>{12B8A947-8406-5F05-F6C3-EBAE4ED5F0A1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\fx">
+      <UniqueIdentifier>{AB38BCB7-30CD-FADC-87D0-EC4AEC507F32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gui">
+      <UniqueIdentifier>{C6CECFEA-ED07-240E-6D50-39262FF4F14C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\helper">
+      <UniqueIdentifier>{31ED1856-3429-E478-D5BE-822EACE478DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\input">
+      <UniqueIdentifier>{964E51C1-CA1E-4877-E1F0-4F05483D492E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib">
+      <UniqueIdentifier>{78C09F83-C1B9-0A6A-D375-DF41AB8FB723}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\any">
+      <UniqueIdentifier>{079B46C0-D05E-DDC6-4C92-F5156BF31271}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\base">
+      <UniqueIdentifier>{3195EB06-4A31-4984-003C-A18F0D580394}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\file">
+      <UniqueIdentifier>{596C5346-3ACF-8974-B6F3-FC96F58AE493}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\hui_minimal">
+      <UniqueIdentifier>{26A0171C-9ACA-4892-FFB9-D80DAE15A8DC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\image">
+      <UniqueIdentifier>{D16B202D-81A6-5766-C70A-40015CB0AF67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\kaba">
+      <UniqueIdentifier>{06B4C3FB-BAE3-C25A-153D-C8467EFAE23E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\kaba\asm">
+      <UniqueIdentifier>{50FFB05E-2DAE-B2F1-895C-BE7514537EBD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\kaba\compiler">
+      <UniqueIdentifier>{2795D202-161C-0419-D346-8569E4D95E57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\kaba\dynamic">
+      <UniqueIdentifier>{57F01CD5-E9EB-9DD0-1F5D-1F9E9491573A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\kaba\lib">
+      <UniqueIdentifier>{AEA39F5A-0E05-8B32-D482-BF3D1D6108BB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\kaba\syntax">
+      <UniqueIdentifier>{0B82F8E6-4772-9B6E-BB6D-E1D33F81BFBC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\math">
+      <UniqueIdentifier>{1F081DC5-6D76-2F90-38B0-1976FCE40371}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\net">
+      <UniqueIdentifier>{789414E1-20C9-D031-336D-CA070FB00B98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\nix">
+      <UniqueIdentifier>{F2B28380-C7CD-DA9A-3F74-DD2903EC2A01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\xfile">
+      <UniqueIdentifier>{87F43273-B0B1-C1EC-F4A8-E622B9C0AE32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\net">
+      <UniqueIdentifier>{66E926A0-FD87-C258-F308-E8C5C2062F99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\plugins">
+      <UniqueIdentifier>{1AA3C70F-BED1-597B-819E-4E9F87FB5BB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer">
+      <UniqueIdentifier>{F7955C4E-263A-2E0D-736E-3A991B494B94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\world">
+      <UniqueIdentifier>{E9411D56-C9E9-1A0A-845C-CF6F8BB58006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\y">
+      <UniqueIdentifier>{B4C155E0-F4CA-9BCF-C13C-B164BBA71B0C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
