@@ -63,7 +63,7 @@ string unmangle(const string &name) {
 			n += n*10 + name[i] - '0';
 			i ++;
 		} else {
-			r += ">" + name.substr(i, -1);
+			r += ">" + name.sub(i);
 			break;
 		}
 		if (name[i] >= '0' and name[i] <= '9') {
@@ -73,7 +73,7 @@ string unmangle(const string &name) {
 
 		if (r.num > 0)
 			r += ".";
-		r += name.substr(i, n);
+		r += name.sub(i, i+n);
 		i += n;
 		//if (is_namespace)
 		//	r += "::";

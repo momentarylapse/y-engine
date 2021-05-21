@@ -29,7 +29,7 @@
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../meta.h"
-#include "../lib/kaba/lib/exception.h"
+#include "../lib/kaba/dynamic/exception.h"
 
 
 PluginManager plugin_manager;

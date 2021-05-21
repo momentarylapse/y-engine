@@ -1,5 +1,4 @@
 #include "../kaba.h"
-#include "../lib/common.h"
 #include "../asm/asm.h"
 #include "Parser.h"
 #include "SyntaxTree.h"
@@ -724,7 +723,7 @@ bool can_fully_construct(const Class *t) {
 		return false;
 	for (auto &e: t->elements)
 		if (!e.type->get_assign() and e.type->uses_call_by_reference()) {
-			msg_write(e.type->name);
+			msg_write(format("class %s auto constructor prevented by element %s %s", t->name, e.name, e.type->name));
 			return false;
 		}
 	return true;
