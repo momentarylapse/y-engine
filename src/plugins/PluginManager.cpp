@@ -121,8 +121,8 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
 	kaba::declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
 	kaba::declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
-	kaba::declare_class_element("Model.var", (char*)&model.script_data.var - (char*)&model);
-	kaba::declare_class_element("Model.var_i", (char*)&model.script_data.var - (char*)&model);
+	kaba::declare_class_element("Model.vars", (char*)&model.script_data.var - (char*)&model);
+	kaba::declare_class_element("Model.vars_i", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
 	kaba::declare_class_element("Model.theta", (char*)&model.physics_data.theta_0 - (char*)&model);
 	kaba::declare_class_element("Model.g_factor", (char*)&model.physics_data.g_factor - (char*)&model);

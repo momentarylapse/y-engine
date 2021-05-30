@@ -43,6 +43,22 @@ void break_point() {
 
 Array<Material*> post_processors;
 
+
+const float HALTON2[] = {1/2.0f, 1/4.0f, 3/4.0f, 1/8.0f, 5/8.0f, 3/8.0f, 7/8.0f, 1/16.0f, 9/16.0f, 3/16.0f, 11/16.0f, 5/16.0f, 13/16.0f};
+const float HALTON3[] = {1/3.0f, 2/3.0f, 1/9.0f, 4/9.0f, 7/9.0f, 2/9.0f, 5/9.0f, 8/9.0f, 1/27.0f, 10/27.0f, 19/27.0f, 2/27.0f, 11/27.0f, 20/27.0f};
+
+static int jitter_frame = 0;
+
+matrix jitter(float w, float h, int uid) {
+	int u = (jitter_frame + uid * 2) % 13;
+	int v = (jitter_frame + uid * 5) % 14;
+	return matrix::translation(vector((HALTON2[u] - 0.5f) / w, (HALTON3[v] - 0.5f) / h, 0));
+}
+
+void jitter_iterate() {
+	jitter_frame ++;
+}
+
 RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) {
 	window = win;
 	glfwMakeContextCurrent(window);
@@ -183,6 +199,7 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 
 void RenderPathGL::start_frame() {
 	nix::start_frame_glfw(window);
+	jitter_iterate();
 }
 
 void RenderPathGL::end_frame() {
@@ -320,7 +337,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::set_projection_matrix(matrix::scale(1,-1,1) * jitter(fb->width, fb->height, 0) * cam->m_projection);
 
 	nix::clear_color(world.background);
 	nix::clear_z();
@@ -331,7 +348,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::set_projection_matrix(matrix::scale(1,-1,1) * jitter(fb->width, fb->height, 0) * cam->m_projection);
 
 	nix::bind_uniform(ubo_light, 1);
 	nix::set_view_matrix(cam->m_view);
@@ -547,7 +564,7 @@ void RenderPathGLForward::prepare_lights() {
 void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
-	nix::set_projection_matrix(matrix::scale(scale, scale, 1) * shadow_proj);
+	nix::set_projection_matrix(matrix::scale(scale, scale, 1) * jitter(sfb->width*8, sfb->height*8, 1) * shadow_proj);
 	nix::set_view_matrix(matrix::ID);
 
 	nix::clear_z();
