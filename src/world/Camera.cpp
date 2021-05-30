@@ -105,7 +105,6 @@ void CameraCalcMove(float dt) {
 }
 
 void Camera::on_iterate(float dt) {
-
 }
 
 void Camera::update_matrices(float aspect_ratio) {

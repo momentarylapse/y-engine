@@ -67,8 +67,8 @@ public:
 	void start_frame() override;
 	void end_frame() override;
 
-	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, bool horizontal);
-	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, bool horizontal);
+	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, const complex &axis);
+	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, const complex &axis);
 	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
 	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
 	void set_material(Material *m);

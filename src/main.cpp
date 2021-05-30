@@ -247,6 +247,9 @@ public:
 
 			iterate();
 			draw_frame();
+
+			if (InputManager::get_key(hui::KEY_CONTROL) and InputManager::get_key(hui::KEY_Q))
+				break;
 		}
 
 #if HAS_LIB_VULKAN

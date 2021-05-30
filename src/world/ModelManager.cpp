@@ -105,11 +105,11 @@ public:
 			f->read_float();
 		}
 
-		int alpha_mode = f->read_int();
-		if (alpha_mode != TRANSPARENCY_DEFAULT) {
+		auto alpha_mode = (TransparencyMode)f->read_int();
+		if (alpha_mode != TransparencyMode::DEFAULT) {
 			me->alpha.mode = alpha_mode;
-			me->alpha.source = f->read_int();
-			me->alpha.destination = f->read_int();
+			me->alpha.source = (nix::Alpha)f->read_int();
+			me->alpha.destination = (nix::Alpha)f->read_int();
 			me->alpha.factor = f->read_float();
 			me->alpha.z_buffer = f->read_bool();
 		} else {

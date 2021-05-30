@@ -14,8 +14,30 @@ namespace nix {
 	class Texture;
 	//class CubeMap;
 	class Shader;
+	enum class Alpha;
+	enum class AlphaMode;
 }
 
+
+
+// types of transparency
+enum class TransparencyMode {
+	NONE,
+	FUNCTIONS,
+	COLOR_KEY_HARD,
+	COLOR_KEY_SMOOTH,
+	FACTOR,
+	DEFAULT = -1,
+};
+
+// types of reflection
+enum class ReflectionMode {
+	NONE,
+	METAL,
+	MIRROR,
+	CUBE_MAP_STATIC,
+	CUBE_MAP_DYNAMIC
+};
 
 // visual and physical properties
 class Material {
@@ -41,14 +63,14 @@ public:
 	bool cast_shadow;
 
 	struct Transparency {
-		int mode;
-		int source, destination;
+		TransparencyMode mode;
+		nix::Alpha source, destination;
 		float factor;
 		bool z_buffer;
 	} alpha;
 
 	struct Reflection {
-		int mode;
+		ReflectionMode mode;
 		float density;
 		//CubeMap *cube_map;
 		nix::Texture *cube_map;
@@ -64,25 +86,6 @@ public:
 	Material *copy();
 };
 
-
-// types of transparency
-enum {
-	TRANSPARENCY_NONE,
-	TRANSPARENCY_FUNCTIONS,
-	TRANSPARENCY_COLOR_KEY_HARD,
-	TRANSPARENCY_COLOR_KEY_SMOOTH,
-	TRANSPARENCY_FACTOR,
-	TRANSPARENCY_DEFAULT = -1,
-};
-
-// types of reflection
-enum {
-	REFLECTION_NONE,
-	REFLECTION_METAL,
-	REFLECTION_MIRROR,
-	REFLECTION_CUBE_MAP_STATIC,
-	REFLECTION_CUBE_MAP_DYNAMIC
-};
 
 
 

@@ -23,7 +23,7 @@ void TestGLError(const char*);
 
 
 matrix view_matrix, projection_matrix;
-matrix world_matrix, world_view_projection_matrix;
+matrix model_matrix, model_view_projection_matrix;
 
 Texture *RenderingToTexture = NULL;
 
@@ -125,11 +125,11 @@ rect FrameBuffer::area() const {
 	return rect(0, width, 0, height);
 }
 
-void BindFrameBuffer(FrameBuffer *fb) {
+void bind_frame_buffer(FrameBuffer *fb) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fb->frame_buffer);
 	TestGLError("BindFrameBuffer: glBindFramebuffer()");
 
-	SetViewport(fb->area());
+	set_viewport(fb->area());
 }
 
 
@@ -141,7 +141,7 @@ matrix create_pixel_projection_matrix() {
 }
 
 
-void SetViewport(const rect &area) {
+void set_viewport(const rect &area) {
 	target_rect = area;
 	target_width = max((int)area.width(), 1);
 	target_height = max((int)area.height(), 1);
@@ -151,9 +151,9 @@ void SetViewport(const rect &area) {
 	TestGLError("glViewport");
 }
 
-void SetWorldMatrix(const matrix &mat) {
-	world_matrix = mat;
-	world_view_projection_matrix = projection_matrix * view_matrix * world_matrix;
+void set_model_matrix(const matrix &mat) {
+	model_matrix = mat;
+	model_view_projection_matrix = projection_matrix * view_matrix * model_matrix;
 }
 
 
@@ -162,13 +162,13 @@ void SetWorldMatrix(const matrix &mat) {
 //           false -> Pixel-Angaben~~~
 // beide Bilder sind um View3DCenterX,View3DCenterY (3D als Fluchtpunkt) verschoben
 
-void SetProjectionPerspective() {
-	SetProjectionPerspectiveExt((float)target_width / 2, (float)target_height / 2, (float)target_height, (float)target_height, 0.001f, 10000);
+void set_projection_perspective() {
+	set_projection_perspective_ext((float)target_width / 2, (float)target_height / 2, (float)target_height, (float)target_height, 0.001f, 10000);
 }
 
 // center_x/y: pixel coordinates of perspective center
 // height_1/width_1: pixel sizes of 45° frustrum
-void SetProjectionPerspectiveExt(float center_x, float center_y, float width_1, float height_1, float z_min, float z_max) {
+void set_projection_perspective_ext(float center_x, float center_y, float width_1, float height_1, float z_min, float z_max) {
 	// perspective projection
 	auto t = matrix::translation(
 		vector(center_x / float(target_width) * 2.0f - 1,
@@ -179,39 +179,35 @@ void SetProjectionPerspectiveExt(float center_x, float center_y, float width_1, 
 			2 * height_1 / target_height,
 			- 1); // z reflection: right/left handedness
 
-	SetProjectionMatrix(t * p * s);
+	set_projection_matrix(t * p * s);
 }
 
 // center_x/y: pixel coordinates of (0,0,0)
 // map_width/height: pixel sizes of projected base vectors
-void SetProjectionOrthoExt(float center_x, float center_y, float map_width, float map_height, float z_min, float z_max) {
+void set_projection_ortho_ext(float center_x, float center_y, float map_width, float map_height, float z_min, float z_max) {
 	auto scale = matrix::scale(2.0f / float(target_width) * map_width, -2.0f / float(target_height) * map_height, 2 / (z_max - z_min));
 	auto trans = matrix::translation(vector(2 * center_x / target_width - 1, 1 - 2 * center_y / target_height, -(z_max + z_min) / (z_max - z_min)));
-	SetProjectionMatrix(trans * scale);
+	set_projection_matrix(trans * scale);
 }
 
-void SetProjectionOrtho(bool relative) {
-	matrix m;
-	if (relative) {
-		// orthogonal projection (relative [0,1]x[0x1] coordinates)
-		auto t = matrix::translation(vector(-0.5f, -0.5f, 0));
-		auto s = matrix::scale(2.0f, -2.0f, 1);
-		m = s * t;
-	} else {
-		// orthogonal projection (pixel coordinates)
-		//NixSetProjectionOrthoExt(0, 0, 1, 1, )
-		m = create_pixel_projection_matrix();
-	}
-
-	SetProjectionMatrix(m);
+void set_projection_ortho_relative() {
+	// orthogonal projection (relative [0,1]x[0x1] coordinates)
+	auto t = matrix::translation(vector(-0.5f, -0.5f, 0));
+	auto s = matrix::scale(2.0f, -2.0f, 1);
+	set_projection_matrix(s * t);
 }
 
-void SetProjectionMatrix(const matrix &m) {
+// orthogonal projection (pixel coordinates)
+void set_projection_ortho_pixel() {
+	set_projection_matrix(create_pixel_projection_matrix());
+}
+
+void set_projection_matrix(const matrix &m) {
 	projection_matrix = m;
-	world_view_projection_matrix = projection_matrix * view_matrix * world_matrix;
+	model_view_projection_matrix = projection_matrix * view_matrix * model_matrix;
 }
 
-void SetViewMatrix(const matrix &m) {
+void set_view_matrix(const matrix &m) {
 	view_matrix = m;
 }
 
@@ -319,10 +315,10 @@ bool StartFrameIntoTexture(Texture *texture) {
 	// adjust target size
 	if (!texture){
 		auto *e = hui::GetEvent();
-		SetViewport(e->column, e->row);
+		set_viewport(e->column, e->row);
 	}else{
 		// texture
-		SetViewport(texture->width, texture->height);
+		set_viewport(texture->width, texture->height);
 	}
 
 	/*if (texture < 0)
@@ -334,7 +330,7 @@ bool StartFrameIntoTexture(Texture *texture) {
 }
 #endif
 
-void SetScissor(const rect &_r)
+void set_scissor(const rect &_r)
 {
 	bool enable_scissors = true;
 	rect r = _r;
@@ -377,7 +373,7 @@ void EndFrame() {
 
 
 
-void ScreenShotToImage(Image &image) {
+void screen_shot_to_image(Image &image) {
 	image.create(target_width, target_height, Black);
 	glReadBuffer(GL_FRONT);
 	glReadPixels(	0,
@@ -389,16 +385,16 @@ void ScreenShotToImage(Image &image) {
 
 #ifdef _X_USE_HUI_
 
-void StartFrameHui() {
+void start_frame_hui() {
 	int fb;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb);
 	FrameBuffer::DEFAULT->frame_buffer = fb;
 	FrameBuffer::DEFAULT->width = hui::GetEvent()->column;
 	FrameBuffer::DEFAULT->height = hui::GetEvent()->row;
-	SetViewport(FrameBuffer::DEFAULT->area());
+	set_viewport(FrameBuffer::DEFAULT->area());
 }
 
-void EndFrameHui() {
+void end_frame_hui() {
 	FrameBuffer::DEFAULT->frame_buffer = 0;
 }
 
@@ -410,7 +406,7 @@ void EndFrameHui() {
 #endif
 
 #if HAS_LIB_GLFW
-void StartFrameGLFW(void *win) {
+void start_frame_glfw(void *win) {
 	GLFWwindow* window = (GLFWwindow*)win;
 	glfwMakeContextCurrent(window);
 	int w, h;
@@ -418,10 +414,10 @@ void StartFrameGLFW(void *win) {
 	FrameBuffer::DEFAULT->width = w;
 	FrameBuffer::DEFAULT->height = h;
 
-	SetViewport(FrameBuffer::DEFAULT->area());
+	set_viewport(FrameBuffer::DEFAULT->area());
 }
 
-void EndFrameGLFW(void *win) {
+void end_frame_glfw(void *win) {
 	GLFWwindow* window = (GLFWwindow*)win;
 	glfwSwapBuffers(window);
 }

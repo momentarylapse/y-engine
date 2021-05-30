@@ -194,14 +194,14 @@ void init_textures() {
 	tex_text = new Texture;
 }
 
-void ReleaseTextures() {
+void release_textures() {
 	for (Texture *t: weak(textures)) {
 		glBindTexture(GL_TEXTURE_2D, t->texture);
 		glDeleteTextures(1, &t->texture);
 	}
 }
 
-void ReincarnateTextures() {
+void reincarnate_textures() {
 	for (Texture *t: weak(textures)) {
 		glGenTextures(1, &t->texture);
 		t->reload();
@@ -473,13 +473,13 @@ void Texture::overwrite(const Image &image) {
 }
 
 void Texture::read(Image &image) {
-	SetTexture(this);
+	set_texture(this);
 	image.create(width, height, Black);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
 }
 
 void Texture::read_float(Array<float> &data) {
-	SetTexture(this);
+	set_texture(this);
 	if ((internal_format == GL_R8) or (internal_format == GL_R32F)) {
 		data.resize(width * height);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, data.data); // 1 channel
@@ -490,7 +490,7 @@ void Texture::read_float(Array<float> &data) {
 }
 
 void Texture::write_float(Array<float> &data, int nx, int ny, int nz) {
-	SetTexture(this);
+	set_texture(this);
 	if (type == Type::VOLUME) {
 		if ((internal_format == GL_R8) or (internal_format == GL_R32F)) {
 			glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, nx, ny, nz, 0, GL_RED, GL_FLOAT, &data[0]);
@@ -514,7 +514,7 @@ void Texture::unload() {
 	glDeleteTextures(1, (unsigned int*)&texture);
 }
 
-void SetTexture(Texture *t) {
+void set_texture(Texture *t) {
 	//refresh_texture(t);
 	if (!t)
 		t = default_texture;
@@ -540,7 +540,7 @@ void SetTexture(Texture *t) {
 	}
 }
 
-void SetTextures(const Array<Texture*> &textures) {
+void set_textures(const Array<Texture*> &textures) {
 	/*for (int i=0;i<num_textures;i++)
 		if (texture[i] >= 0)
 			refresh_texture(texture[i]);*/

@@ -18,8 +18,8 @@ namespace nix{
 
 // textures
 void init_textures();
-void ReleaseTextures();
-void ReincarnateTextures();
+void release_textures();
+void reincarnate_textures();
 
 
 
@@ -84,8 +84,8 @@ public:
 };
 
 
-void _cdecl SetTexture(Texture *texture);
-void _cdecl SetTextures(const Array<Texture*> &textures);
+void _cdecl set_texture(Texture *texture);
+void _cdecl set_textures(const Array<Texture*> &textures);
 
 //extern Array<Texture*> textures;
 extern int tex_cube_level;
