@@ -30,6 +30,13 @@
 #include "../Config.h"
 #include "../meta.h"
 
+// https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
+
+namespace nix {
+	int total_mem();
+	int available_mem();
+}
+
 nix::Texture *_tex_white;
 
 const int CUBE_SIZE = 128;
@@ -127,9 +134,16 @@ void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cu
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 
-	fb = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16"),
-		new nix::DepthBuffer(width, height)});
+	if (config.get_str("antialiasing", "") == "MSAA") {
+		fb = new nix::FrameBuffer({
+			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
+			new nix::RenderBuffer(width, height, 4)});
+	} else {
+		fb = new nix::FrameBuffer({
+			new nix::Texture(width, height, "rgba:f16"),
+			//new nix::DepthBuffer(width, height)
+			new nix::RenderBuffer(width, height)});
+	}
 	fb2 = new nix::FrameBuffer({
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb3 = new nix::FrameBuffer({
@@ -168,6 +182,11 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 
 	shader_2d = nix::Shader::load(hui::Application::directory_static << "forward/2d.shader");
 	nix::shader_dir = sd;
+
+
+	if (nix::total_mem() > 0) {
+		msg_write(format("VRAM: %d mb  of  %d mb available", nix::available_mem() / 1024, nix::total_mem() / 1024));
+	}
 }
 
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
@@ -334,10 +353,14 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {
 	nix::bind_frame_buffer(fb);
 
+	auto m = matrix::scale(1,-1,1);
+	if (config.get_str("antialiasing", "") == "TAA")
+		 m *= jitter(fb->width, fb->height, 0);
+
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * jitter(fb->width, fb->height, 0) * cam->m_projection);
+	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::clear_color(world.background);
 	nix::clear_z();
@@ -348,7 +371,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * jitter(fb->width, fb->height, 0) * cam->m_projection);
+	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::bind_uniform(ubo_light, 1);
 	nix::set_view_matrix(cam->m_view);

@@ -46,7 +46,10 @@ public:
 	DepthBuffer *depth_buffer;
 	unsigned int frame_buffer;
 	int width, height;
+	int multi_samples;
 	rect area() const;
+
+	void _check();
 
 	static FrameBuffer *DEFAULT;
 };
