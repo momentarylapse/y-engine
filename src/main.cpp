@@ -39,6 +39,7 @@
 
 #include "renderer/RenderPath.h"
 #include "renderer/RenderPathGL.h"
+#include "renderer/RenderPathGLForward.h"
 #include "renderer/RenderPathGLDeferred.h"
 
 #include "Config.h"

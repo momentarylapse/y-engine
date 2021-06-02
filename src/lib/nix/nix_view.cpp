@@ -149,6 +149,11 @@ void bind_frame_buffer(FrameBuffer *fb) {
 	set_viewport(fb->area());
 }
 
+void resolve_multisampling(FrameBuffer *target, FrameBuffer *source) {
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target->frame_buffer);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, source->frame_buffer);
+	glBlitFramebuffer(0, 0, source->width, source->height, 0, 0, target->width, target->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+}
 
 
 matrix create_pixel_projection_matrix() {
@@ -253,30 +258,6 @@ void set_scissor(const rect &_r) {
 	glScissor((int)r.x1, target_height - (int)r.y2, (int)r.width(), (int)r.height());
 	glClearDepth(1.0f);
 	TestGLError("Scissor");
-}
-
-void EndFrame() {
-	TestGLError("End prae");
-	glDisable(GL_SCISSOR_TEST);
-	if (!RenderingToTexture){
-		// auf den Bildschirm
-		#ifdef OS_WINDOWS
-			if (RenderingToTexture<0)
-				SwapBuffers(hDC);
-		#endif
-		#ifdef OS_LINUX
-			#ifdef NIX_ALLOW_FULLSCREEN
-				if (NixFullscreen)
-					XF86VidModeSetViewPort(x_display,screen,0,NixDesktopHeight-NixScreenHeight);
-			#endif
-			//glutSwapBuffers();
-			/*if (GLDoubleBuffered){
-			}*/
-		#endif
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	TestGLError("End post");
 }
 
 

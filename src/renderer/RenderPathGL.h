@@ -42,6 +42,7 @@ public:
 	shared<nix::Shader> shader_fx;
 	//shared<nix::Shader> shader_3d;
 	shared<nix::Shader> shader_shadow;
+	shared<nix::Shader> shader_resolve_multisample;
 
 	Array<UBOLight> lights;
 	nix::UniformBuffer *ubo_light;
@@ -71,26 +72,13 @@ public:
 	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, const complex &axis);
 	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
 	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
+	nix::FrameBuffer* resolve_multisampling(nix::FrameBuffer *source);
 	void set_material(Material *m);
 	void set_textures(const Array<nix::Texture*> &tex);
 	void draw_gui(nix::FrameBuffer *source);
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
-};
 
-class RenderPathGLForward : public RenderPathGL {
-public:
-
-	RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
-	void draw() override;
-
-	void render_into_texture(nix::FrameBuffer *fb, Camera *cam) override;
-	void draw_skyboxes(Camera *cam);
-	void draw_terrains(bool allow_material);
-	void draw_objects(bool allow_material);
-	void draw_world(bool allow_material);
-	void draw_particles();
-	void prepare_lights();
-	void render_shadow_map(nix::FrameBuffer *sfb, float scale);
+	nix::FrameBuffer *next_fb(nix::FrameBuffer *cur);
 };
 
 

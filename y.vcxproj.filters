@@ -346,6 +346,9 @@
     <ClCompile Include="src\renderer\RenderPathGLDeferred.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\RenderPathGLForward.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\Camera.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
@@ -709,6 +712,9 @@
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RenderPathGLDeferred.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderPathGLForward.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\world\Camera.h">

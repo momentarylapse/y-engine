@@ -20,6 +20,7 @@
 #include "../input/InputManager.h"
 #include "../net/NetworkManager.h"
 #include "../renderer/RenderPathGL.h"
+#include "../renderer/RenderPathGLForward.h"
 #include "../y/EngineData.h"
 #include "../world/Camera.h"
 #include "../world/Link.h"
