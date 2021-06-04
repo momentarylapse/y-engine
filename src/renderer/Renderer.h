@@ -14,6 +14,7 @@
 
 class rect;
 
+
 class Renderer {
 public:
 	Renderer();

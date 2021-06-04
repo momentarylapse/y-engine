@@ -50,7 +50,6 @@ struct UBOFog {
 	alignas(16) float distance;
 };
 
-
 class RenderPath {
 public:
 	RenderPath() {}

@@ -40,7 +40,7 @@ void break_point();
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 
-	if (config.get_str("antialiasing", "") == "MSAA") {
+	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		fb = new nix::FrameBuffer({
 			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
 			new nix::RenderBuffer(width, height, 4)});
@@ -120,10 +120,12 @@ void RenderPathGLForward::draw() {
 	perf_mon->tick(PMLabel::SHADOWS);
 
 	render_into_texture(fb.get(), cam);
-	auto source = resolve_multisampling(fb.get());
+
+	auto source = fb.get();
+	if (config.antialiasing_method == AntialiasingMethod::MSAA)
+		source = resolve_multisampling(fb.get());
 
 	source = do_post_processing(source);
-	//auto source = fb.get();
 
 	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
 	render_out(source, fb3->color_attachments[0]);
@@ -135,7 +137,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 	nix::bind_frame_buffer(fb);
 
 	auto m = matrix::scale(1,-1,1);
-	if (config.get_str("antialiasing", "") == "TAA")
+	if (config.antialiasing_method == AntialiasingMethod::TAA)
 		 m *= jitter(fb->width, fb->height, 0);
 
 	float max_depth = cam->max_depth;
@@ -334,7 +336,9 @@ void RenderPathGLForward::prepare_lights() {
 void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
-	nix::set_projection_matrix(matrix::scale(scale, scale, 1) * jitter(sfb->width*8, sfb->height*8, 1) * shadow_proj);
+	auto m = matrix::scale(scale, scale, 1);
+	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
+	nix::set_projection_matrix(m * shadow_proj);
 	nix::set_view_matrix(matrix::ID);
 
 	nix::clear_z();

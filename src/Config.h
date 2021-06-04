@@ -13,6 +13,12 @@
 
 #include "lib/base/base.h"
 
+enum class AntialiasingMethod {
+	NONE,
+	MSAA,
+	TAA
+};
+
 class Config : public hui::Configuration {
 public:
 	bool debug = false;
@@ -21,6 +27,7 @@ public:
 	string second_world;
 	string default_material;
 	string default_font;
+	AntialiasingMethod antialiasing_method = AntialiasingMethod::NONE;
 
 	Config();
 	void load();
