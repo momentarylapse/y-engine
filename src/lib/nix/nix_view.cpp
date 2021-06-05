@@ -290,6 +290,7 @@ void start_frame_glfw(void *win) {
 }
 
 void end_frame_glfw(void *win) {
+	glFlush();
 	GLFWwindow* window = (GLFWwindow*)win;
 	glfwSwapBuffers(window);
 }

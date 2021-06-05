@@ -234,6 +234,8 @@ public:
 		window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
 
 		glfwSetWindowUserPointer(window, this);
+		glfwMakeContextCurrent(window);
+		glfwSwapInterval(0);
 		return window;
 	}
 
@@ -327,9 +329,9 @@ public:
 			float target_dt = 1.0f / config.target_framerate;
 			//msg_write(format("%s  ---  %f", fa2s(render_times), target_dt));
 			// TODO measure render time better... even when rendering faster than 60Hz OpenGL will wait...
-			if (dt > target_dt * 1.08f) {
+			if (dt > target_dt * 1.05f) {
 				render_path->resolution_scale_x /= 1.20f;
-			} else if (dt < target_dt * 1.02f) {
+			} else if (dt < target_dt * 0.82f) {
 				render_path->resolution_scale_x *= 1.20f;
 			}
 			render_path->resolution_scale_x = clamp(render_path->resolution_scale_x, config.resolution_scale_min, config.resolution_scale_max);
