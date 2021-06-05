@@ -21,8 +21,7 @@
 |                                                                              |
 | last update: 2008.01.22 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
-#if !defined(SRC_WORLD_MODEL_H_)
-#define SRC_WORLD_MODEL_H_
+#pragma once
 
 
 #include "../lib/base/base.h"
@@ -171,19 +170,18 @@ public:
 	Array<plane> pl;
 };
 
+enum class AnimationType {
+	NONE,
+	VERTEX,
+	SKELETAL
+};
+
 // single animation
 class Move {
 public:
-
-	enum class Type {
-		NONE,
-		VERTEX,
-		SKELETAL
-	};
-
 	string name;
 	int id;
-	Type type;
+	AnimationType type;
 	int num_frames;
 	int frame0;
 
@@ -258,7 +256,9 @@ enum {
 	MESH_HIGH,
 	MESH_MEDIUM,
 	MESH_LOW,
-	MODEL_NUM_MESHES
+	MODEL_NUM_MESHES,
+
+	MESH_PHYSICAL = 42 // for edward
 };
 
 class ModelTemplate {
@@ -434,6 +434,4 @@ extern int NumObservers;
 #define SET_MATERIAL_TRANSPARENCY		4
 #define SET_MATERIAL_APPEARANCE			6
 
-
-#endif
 

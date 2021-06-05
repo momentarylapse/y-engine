@@ -5,8 +5,7 @@
  *      Author: michi
  */
 
-#ifndef SRC_Y_ENGINEDATA_H_
-#define SRC_Y_ENGINEDATA_H_
+#pragma once
 
 
 #include "../lib/base/base.h"
@@ -67,4 +66,3 @@ extern EngineData engine;
 
 
 
-#endif /* SRC_Y_ENGINEDATA_H_ */

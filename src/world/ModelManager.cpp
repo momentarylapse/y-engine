@@ -9,7 +9,10 @@
 #include "Model.h"
 #include "../y/EngineData.h"
 #include "../lib/kaba/kaba.h"
+#include "../lib/config.h"
+#ifdef _X_ALLOW_X_
 #include "../plugins/PluginManager.h"
+#endif
 #include "../lib/file/file.h"
 #include "../lib/xfile/chunked.h"
 #include "../lib/nix/nix.h"
@@ -39,6 +42,8 @@ color file_read_color4i(File *f);
 vector get_normal_by_index(int index);
 void AppraiseDimensions(Model *m);
 void PostProcessPhys(Model *m, PhysicalMesh *s);
+
+namespace modelmanager {
 
 class ChunkMeta : public FileChunk<Model, Model> {
 public:
@@ -307,7 +312,7 @@ public:
 		for (auto &m: meta->move) {
 			m.name = f->read_str();
 			m.id = f->read_int();
-			m.type = (Move::Type)f->read_char();
+			m.type = (AnimationType)f->read_char();
 			m.frame0 = f->read_int();
 			m.num_frames = f->read_int();
 			m.frames_per_sec_const = f->read_float();
@@ -470,17 +475,20 @@ public:
 	void on_info(const string &message) override {}
 };
 
+}
 
 
 
 Model* fancy_copy(Model *m, const Path &_script) {
 	Model *c = nullptr;
+#ifdef _X_ALLOW_X_
 	Path script = m->_template->script_filename;
 	if (!_script.is_empty())
 		script = _script;
 	//msg_write(format("MODEL  %s   %s", m->_template->filename, script));
 	if (!script.is_empty())
 		c = (Model*)plugin_manager.create_instance(script, "y.Model", m->_template->variables);
+#endif
 	if (!c)
 		c = new Model();
 	return m->copy(c);
@@ -503,7 +511,7 @@ Model* ModelManager::loadx(const Path &_filename, const Path &_script) {
 	m->_template = new ModelTemplate(m);
 	m->_template->filename = filename;
 	msg_write("loading " + filename.str());
-	ModelParser p;
+	modelmanager::ModelParser p;
 	p.read(filename, m);
 
 

@@ -13,6 +13,9 @@
 #ifdef _X_ALLOW_X_
 #include "../world/Model.h"
 #include "../world/Material.h"
+#else
+#include "Model.h"
+#include "Material.h"
 #endif
 
 EngineData engine;
@@ -61,7 +64,7 @@ EngineData::EngineData() {
 
 
 void EngineData::set_dirs(const Path &texture_dir, const Path &_map_dir, const Path &_object_dir, const Path &_sound_dir, const Path &_script_dir, const Path &material_dir, const Path &font_dir) {
-#if LIB_HAS_VULKAN
+#if HAS_LIB_VULKAN
 	vulkan::Texture::directory = texture_dir;
 	vulkan::Shader::directory = material_dir;
 #endif

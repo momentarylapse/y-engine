@@ -7,8 +7,7 @@
 |                                                                              |
 | last updated: 2009.12.03 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(SRC_WORLD_OBJECT_H_)
-#define SRC_WORLD_OBJECT_H_
+#pragma once
 
 #include "Model.h"
 
@@ -34,6 +33,4 @@ public:
 	void update_mass();
 };
 
-
-#endif
 

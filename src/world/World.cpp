@@ -28,25 +28,17 @@
 #include "../fx/ParticleManager.h"
 #endif
 
+#ifdef _X_ALLOW_X_
 #include "../audio/Sound.h"
+#endif
 
+#if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
-
-
-#if 0
-#include "model_manager.h"
-#include "../lib/nix/nix.h"
-#ifdef _X_ALLOW_X_
-#include "../physics/physics.h"
-#include "../physics/links.h"
-#include "../physics/collision.h"
-#include "../fx/fx.h"
 #endif
-#include "../networking.h"
-#endif
+
 #include "Camera.h"
 
 
@@ -57,7 +49,7 @@
 //#define _debug_matrices_
 
 
-
+#if HAS_LIB_BULLET
 quaternion bt_get_q(const btQuaternion &q) {
 	quaternion r;
 	r.x = q.x();
@@ -90,6 +82,7 @@ btTransform bt_set_trafo(const vector &p, const quaternion &q) {
 	trafo.setRotation(bt_set_q(q));
 	return trafo;
 }
+#endif
 
 // game data
 World world;
@@ -148,7 +141,7 @@ void GodInit() {
 void GodEnd() {
 }
 
-
+#if HAS_LIB_BULLET
 void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 	auto dispatcher = world->getDispatcher();
 	int n = dispatcher->getNumManifolds();
@@ -171,22 +164,26 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 		}
 	}
 }
+#endif
 
 World::World() {
 //	ubo_light = nullptr;
 //	ubo_fog = nullptr;
 
+#ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager();
+#endif
 
 
 	physics_mode = PhysicsMode::FULL_EXTERNAL;
+#if HAS_LIB_BULLET
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
 	overlappingPairCache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-
 	dynamicsWorld->setInternalTickCallback(myTickCallback);
+#endif
 
 
 	terrain_object = new Object();
@@ -196,11 +193,13 @@ World::World() {
 }
 
 World::~World() {
+#if HAS_LIB_BULLET
 	delete dynamicsWorld;
 	delete solver;
 	delete overlappingPairCache;
 	delete dispatcher;
 	delete collisionConfiguration;
+#endif
 }
 
 void World::reset() {
@@ -228,14 +227,16 @@ void World::reset() {
 		s.clear();
 	sorted_opaque.clear();
 
+#ifdef _X_ALLOW_X_
 	for (auto *l: lights)
 		delete l;
 	lights.clear();
 
 	particle_manager->clear();
+#endif
 
 
-
+#ifdef _X_ALLOW_X_
 	// music
 	for (auto *s: sounds)
 		delete s;
@@ -243,6 +244,7 @@ void World::reset() {
 	/*if (meta->MusicEnabled){
 		NixSoundStop(MusicCurrent);
 	}*/
+#endif
 
 	// skybox
 	//   (models deleted by meta)
@@ -357,7 +359,9 @@ bool World::load(const LevelData &ld) {
 
 void World::add_link(Link *l) {
 	links.add(l);
+#if HAS_LIB_BULLET
 	dynamicsWorld->addConstraint(l->con, true);
+#endif
 }
 
 
@@ -380,6 +384,7 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	for (int z=0; z<tt->num_z+1; z++)
 		for (int x=0; x<tt->num_x+1; x++)
 			hh.add(tt->height[x * (tt->num_z+1) + z]);
+#if HAS_LIB_BULLET
 	auto hf = new btHeightfieldTerrainShape(tt->num_x+1, tt->num_z+1, hh.data, 1.0f, -600, 600, 1, PHY_FLOAT, false);
 	hf->setLocalScaling(bt_set_v(tt->pattern + vector(0,1,0)));
 	tt->colShape = hf;
@@ -394,6 +399,7 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	tt->body->setUserPointer(terrain_object);
 
 	dynamicsWorld->addRigidBody(tt->body);
+#endif
 
 	terrains.add(tt);
 	return tt;
@@ -461,6 +467,7 @@ void World::register_object(Object *o, int index) {
 
 	o->object_id = on;
 
+#if HAS_LIB_BULLET
 	if (o->phys->balls.num + o->phys->cylinders.num + o->phys->poly.num > 0) {
 		auto comp = new btCompoundShape(false, 0);
 		for (auto &b: o->phys->balls) {
@@ -549,11 +556,13 @@ void World::register_object(Object *o, int index) {
 		dynamicsWorld->addRigidBody(o->body);
 	//else if (o->physics_data.test_collisions)
 	//	dynamicsWorld->addCollisionObject(o->body);
+#endif
 
 }
 
 
 void World::set_active_physics(Object *o, bool active, bool passive) { //, bool test_collisions) {
+#if HAS_LIB_BULLET
 	btScalar mass(active ? o->physics_data.mass : 0);
 	btVector3 localInertia(0, 0, 0);
 	if (o->colShape) {
@@ -572,6 +581,7 @@ void World::set_active_physics(Object *o, bool active, bool passive) { //, bool 
 		msg_error("FIXME pure collision");
 		dynamicsWorld->addCollisionObject(o->body);
 	}*/
+#endif
 
 
 	o->physics_data.active = active;
@@ -584,7 +594,7 @@ void World::unregister_object(Object *m) {
 	if (m->object_id < 0)
 		return;
 
-
+#if HAS_LIB_BULLET
 	if (m->body) {
 		dynamicsWorld->removeRigidBody(m->body);
 		delete m->body->getMotionState();
@@ -593,6 +603,7 @@ void World::unregister_object(Object *m) {
 		m->body = nullptr;
 		m->colShape = nullptr;
 	}
+#endif
 
 	// ego...
 	if (m == ego)
@@ -624,12 +635,14 @@ bool World::unregister(Entity* x) {
 				return true;
 			}
 	} else if (x->type == Entity::Type::LIGHT) {
+#ifdef _X_ALLOW_X_
 		foreachi(auto *l, lights, i)
 			if (l == x) {
 				//msg_write(" -> LIGHT");
 				lights.erase(i);
 				return true;
 			}
+#endif
 	} else if (x->type == Entity::Type::LINK) {
 		foreachi(auto *l, links, i)
 			if (l == x) {
@@ -638,15 +651,19 @@ bool World::unregister(Entity* x) {
 				return true;
 			}
 	} else if (x->type == Entity::Type::SOUND) {
+#ifdef _X_ALLOW_X_
 		foreachi(auto *s, sounds, i)
 			if (s == x) {
 				//msg_write(" -> SOUND");
 				sounds.erase(i);
 				return true;
 			}
+#endif
 	} else if (x->type == Entity::Type::PARTICLE or x->type == Entity::Type::BEAM) {
+#ifdef _X_ALLOW_X_
 		if (particle_manager->unregister((Particle*)x))
 			return true;
+#endif
 	}
 	return false;
 }
@@ -736,6 +753,7 @@ void World::unregister_model(Model *m) {
 
 void World::iterate_physics(float dt) {
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
+#if HAS_LIB_BULLET
 		dynamicsWorld->setGravity(bt_set_v(gravity));
 		dynamicsWorld->stepSimulation(dt, 10);
 
@@ -752,7 +770,7 @@ void World::iterate_physics(float dt) {
 
 				//dynamicsWorld->contactTest(o->body, myTickCallback);
 			}
-
+#endif
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
 		for (auto *o: objects)
 			if (o)
@@ -781,6 +799,7 @@ void World::iterate(float dt) {
 				o->update_matrix();
 	}
 
+#ifdef _X_ALLOW_X_
 	foreachi (auto *s, sounds, i) {
 		if (s->suicidal and s->has_ended()) {
 			sounds.erase(i);
@@ -788,6 +807,7 @@ void World::iterate(float dt) {
 		}
 	}
 	audio::set_listener(cam->pos, cam->ang, v_0, 100000);
+#endif
 }
 
 void World::add_light(Light *l) {
@@ -795,7 +815,9 @@ void World::add_light(Light *l) {
 }
 
 void World::add_particle(Particle *p) {
+#ifdef _X_ALLOW_X_
 	particle_manager->add(p);
+#endif
 }
 
 void World::add_sound(audio::Sound *s) {
@@ -809,9 +831,11 @@ void World::shift_all(const vector &dpos) {
 	for (auto *o: objects)
 		if (o)
 			o->pos += dpos;
+#ifdef _X_ALLOW_X_
 	for (auto *s: sounds)
 		s->pos += dpos;
 	particle_manager->shift_all(dpos);
+#endif
 }
 
 vector World::get_g(const vector &pos) const {
@@ -819,6 +843,7 @@ vector World::get_g(const vector &pos) const {
 }
 
 bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Model *o_ignore) {
+#if HAS_LIB_BULLET
 	btCollisionWorld::ClosestRayResultCallback ray_callback(bt_set_v(p1), bt_set_v(p2));
 	//ray_callback.m_collisionFilterMask = FILTER_CAMERA;
 
@@ -836,6 +861,7 @@ bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool sim
 		}
 		return true;
 	}
+#endif
 	return false;
 }
 

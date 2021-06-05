@@ -5,8 +5,7 @@
 |                                                                              |
 | last updated: 2009.11.22 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(META_H__INCLUDED_)
-#define META_H__INCLUDED_
+#pragma once
 
 #include "lib/base/base.h"
 #include "lib/config.h"
@@ -34,7 +33,7 @@ public:
 
 class TemplateDataScript {
 public:
-	string Path;
+	Path filename;
 	Array<TemplateDataScriptVariable> variables;
 };
 
@@ -70,5 +69,4 @@ enum {
 
 
 
-#endif
 

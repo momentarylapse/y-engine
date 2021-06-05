@@ -7,8 +7,7 @@
 |                                                                              |
 | last updated: 2008.12.06 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(SRC_WORLD_WORLD_H_)
-#define SRC_WORLD_WORLD_H_
+#pragma once
 
 
 #include "../lib/base/base.h"
@@ -178,4 +177,3 @@ enum {
 	NET_MSG_SCTEXT = 2000
 };
 
-#endif

@@ -189,7 +189,7 @@ void AppraiseDimensions(Model *m) {
 void SubMesh::create_vb() {
 	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
 
-#if LIB_HAS_VULKAN
+#if HAS_LIB_VULKAN
 	vertex_buffer = new vulkan::VertexBuffer();
 #endif
 }
@@ -215,7 +215,7 @@ void SubMesh::update_vb(Mesh *mesh) {
 	vertex_buffer->update(2, uv);
 
 
-#if LIB_HAS_VULKAN
+#if HAS_LIB_VULKAN
 	Array<vulkan::Vertex1> vertices;
 	for (int i=0; i<num_triangles; i++) {
 		vulkan::Vertex1 v;
@@ -584,7 +584,7 @@ void Model::do_animation(float elapsed) {
 			continue;
 
 
-		if (m->type == Move::Type::VERTEX){
+		if (m->type == AnimationType::VERTEX){
 			vertex_animated=true;
 
 			// frame data
@@ -628,7 +628,7 @@ void Model::do_animation(float elapsed) {
 			Move *m = &anim.meta->move[op->move];
 			if (m->num_frames == 0)
 				continue;
-			if (m->type != Move::Type::SKELETAL)
+			if (m->type != AnimationType::SKELETAL)
 				continue;
 			quaternion w,w0,w1,w2,w3;
 			vector p,p1,p2;

@@ -7,8 +7,7 @@
 |                                                                              |
 | last update: 2009.11.22 (c) by MichiSoft TM                                  |
 \*----------------------------------------------------------------------------*/
-#if !defined(SRC_WORLD_CAMERA_H_)
-#define SRC_WORLD_CAMERA_H_
+#pragma once
 
 
 #include "../lib/base/base.h"
@@ -62,5 +61,4 @@ extern Array<Camera*> cameras;
 extern Camera *cam; // "camera"
 extern Camera *cur_cam; // currently rendering
 
-#endif
 

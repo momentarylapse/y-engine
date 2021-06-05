@@ -11,11 +11,11 @@
 #include "Camera.h"
 #include "Material.h"
 #include "World.h"
-#include "../lib/nix/nix.h"
-#ifdef _X_ALLOW_X_
 #include "../y/EngineData.h"
+#ifdef _X_ALLOW_X_
 //#include "../fx/light.h"
 #endif
+#include "../lib/nix/nix.h"
 
 nix::Texture *load_texture(const Path &file);
 
@@ -629,7 +629,7 @@ void Terrain::draw() {
 	material->apply();
 
 	// the actual drawing
-	nix::SetWorldMatrix(matrix::ID);
+	nix::set_model_matrix(matrix::ID);
 	nix::Draw3D(vertex_buffer);
 #endif
 

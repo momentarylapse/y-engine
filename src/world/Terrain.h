@@ -6,8 +6,7 @@
 |                                                                              |
 | last updated: 2008.06.23 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
-#if !defined(SRC_WORLD_TERRAIN_H_)
-#define SRC_WORLD_TERRAIN_H_
+#pragma once
 
 #include "../lib/base/base.h"
 #include "../lib/file/path.h"
@@ -105,5 +104,4 @@ public:
 };
 
 
-#endif
 

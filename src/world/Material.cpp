@@ -1,8 +1,13 @@
 #include "Material.h"
 #include "Model.h"
 #include "../lib/file/file.h"
-#include "../lib/hui_minimal/Config.h"
 #include "../lib/nix/nix.h"
+#include "../lib/config.h"
+#ifdef _X_USE_HUI_
+	#include "../lib/hui/hui.h"
+#elif defined(_X_USE_HUI_MINIMAL_)
+	#include "../lib/hui_minimal/hui.h"
+#endif
 
 
 Path MaterialDir;
