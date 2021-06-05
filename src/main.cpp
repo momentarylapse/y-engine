@@ -310,21 +310,58 @@ public:
 		fps_display->set_text(format("%.1f", 1.0f / perf_mon.avg.frame_time));
 	}
 
+	static Array<float> render_times;
+	hui::Timer timer_render;
 
+	void update_dynamic_resolution() {
+		static float drt_time = 0;
+		static int drt_frames = 0;
+		drt_time += engine.elapsed;
+		drt_frames ++;
+		if ((drt_time > 0.2f) and (drt_frames > 10)) {
+			for (int i=0; i<render_times.num; i++)
+				for (int k=i+1; k<render_times.num; k++)
+					if (render_times[i] < render_times[k])
+						render_times.swap(i, k);
+			float dt = render_times[render_times.num / 5];
+			float target_dt = 1.0f / config.target_framerate;
+			//msg_write(format("%s  ---  %f", fa2s(render_times), target_dt));
+			// TODO measure render time better... even when rendering faster than 60Hz OpenGL will wait...
+			if (dt > target_dt * 1.08f) {
+				render_path->resolution_scale_x /= 1.20f;
+			} else if (dt < target_dt * 1.02f) {
+				render_path->resolution_scale_x *= 1.20f;
+			}
+			render_path->resolution_scale_x = clamp(render_path->resolution_scale_x, config.resolution_scale_min, config.resolution_scale_max);
+			if (render_path->resolution_scale_x != render_path->resolution_scale_y)
+				msg_write(format("dyn res   %.0f %%", render_path->resolution_scale_x * 100));
+			render_path->resolution_scale_y = render_path->resolution_scale_x;
+			drt_time = 0;
+			drt_frames = 0;
+			render_times.clear();
+		}
+	}
 
 
 	void draw_frame() {
 		if (perf_mon.frames == 0)
 			update_statistics();
 
+		update_dynamic_resolution();
+
 		render_path->start_frame();
 		plugin_manager.handle_draw_pre();
+		timer_render.peek();
 		render_path->draw();
+		render_times.add(timer_render.get());
 		render_path->end_frame();
 	}
 
 
 };
+
+
+Array<float> YEngineApp::render_times;
 
 
 YEngineApp app;

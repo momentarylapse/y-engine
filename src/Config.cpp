@@ -32,4 +32,8 @@ void Config::load() {
 	} else {
 		msg_error("unknown antialiasing method: " + aa);
 	}
+
+	resolution_scale_min = get_float("renderer.resolution-scale-min", 0.5f);
+	resolution_scale_max = get_float("renderer.resolution-scale-max", 1.0f);
+	target_framerate = get_float("renderer.target-framerate", 60.0f);
 }

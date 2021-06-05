@@ -22,11 +22,11 @@ namespace nix {
 
 // types of transparency
 enum class TransparencyMode {
-	NONE,
-	FUNCTIONS,
-	COLOR_KEY_HARD,
-	COLOR_KEY_SMOOTH,
-	FACTOR,
+	NONE = 0,
+	FUNCTIONS = 1,
+	COLOR_KEY_HARD = 2,
+	COLOR_KEY_SMOOTH = 3,
+	FACTOR = 4,
 	DEFAULT = -1,
 };
 

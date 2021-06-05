@@ -60,6 +60,11 @@ public:
 
 	nix::Shader *shader_3d = nullptr;
 	nix::Shader *shader_2d = nullptr;
+
+	// dynamic resolution scaling
+	float resolution_scale_x = 1.0f;
+	float resolution_scale_y = 1.0f;
+	rect cur_fb_area;
 };
 
 

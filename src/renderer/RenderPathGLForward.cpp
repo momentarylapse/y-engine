@@ -38,6 +38,7 @@ namespace nix {
 matrix jitter(float w, float h, int uid);
 void break_point();
 
+
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -119,6 +120,7 @@ void RenderPathGLForward::draw() {
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
+	cur_fb_area = rect(0, fb->width * resolution_scale_x, 0, fb->height * resolution_scale_y);
 	render_into_texture(fb.get(), cam);
 
 	auto source = fb.get();
@@ -126,6 +128,7 @@ void RenderPathGLForward::draw() {
 		source = resolve_multisampling(fb.get());
 
 	source = do_post_processing(source);
+
 
 	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
 	render_out(source, fb3->color_attachments[0]);
@@ -135,11 +138,14 @@ void RenderPathGLForward::draw() {
 
 void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {
 	nix::bind_frame_buffer(fb);
+	nix::set_viewport(cur_fb_area);
+	nix::set_scissor(cur_fb_area);
 
 	auto m = matrix::scale(1,-1,1);
 	if (config.antialiasing_method == AntialiasingMethod::TAA)
 		 m *= jitter(fb->width, fb->height, 0);
 
+	// skyboxes
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	cam->update_matrices((float)fb->width / (float)fb->height);
@@ -152,6 +158,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 	perf_mon->tick(PMLabel::SKYBOXES);
 
 
+	// world
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
@@ -167,6 +174,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam)
 
 	draw_particles();
 	perf_mon->tick(PMLabel::PARTICLES);
+	nix::set_scissor(rect::EMPTY);
 }
 
 void RenderPathGLForward::draw_particles() {

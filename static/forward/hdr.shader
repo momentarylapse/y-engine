@@ -25,6 +25,8 @@ void main() {
 uniform float exposure = 1.0;
 uniform float bloom_factor = 0.2;
 uniform float gamma = 2.2;
+uniform float scale_x = 1.0;
+uniform float scale_y = 1.0;
 
 layout(binding = 1) uniform sampler2D tex0;
 layout(binding = 1) uniform sampler2D tex1;
@@ -40,8 +42,11 @@ vec3 tone_map(vec3 c) {
 }
 
 void main() {
-	out_color.rgb = texture(tex0, in_tex_coord).rgb;
-	vec3 bloom = texture(tex1, in_tex_coord).rgb;
+	// hmmm, texture() is faster than texelFetch()...???
+	vec2 uv = in_tex_coord * vec2(scale_x, scale_y);
+	uv.y += 1 - scale_y;
+	out_color.rgb = textureLod(tex0, uv, 0).rgb;
+	vec3 bloom = textureLod(tex1, uv, 0).rgb;
 	out_color.rgb += bloom * bloom_factor;
 	out_color.rgb = tone_map(out_color.rgb);
 	

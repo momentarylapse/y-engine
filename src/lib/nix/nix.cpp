@@ -92,7 +92,7 @@ int FontGlyphWidth[256];
 
 
 //int device_width, device_height;
-int target_width, target_height;						// render target size (window/texture)
+int target_width, target_height; // render target size (window/texture) but relative to viewport!
 rect target_rect;
 bool Fullscreen;
 callback_function *RefillAllVertexBuffers = NULL;

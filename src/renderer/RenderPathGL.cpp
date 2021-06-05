@@ -124,25 +124,28 @@ nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
 	return (cur == fb4) ? fb5.get() : fb4.get();
 }
 
+
+// GTX750: 1920x1080 0.277 ms per trivial step
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
+	auto depth_buffer = source->depth_buffer;
 	auto cur = source;
-	auto next = next_fb(cur);
+
 	for (auto *m: post_processors) {
+		auto next = next_fb(cur);
 		nix::set_shader(m->shader.get());
 		for (auto &u: m->uniforms)
 			m->shader->set_data(u.location, u.p, u.size);
 		process({cur->color_attachments[0], source->depth_buffer}, next, m->shader.get());
 		cur = next;
-		next = next_fb(cur);
 	}
 
 	if (cam->focus_enabled) {
+		auto next = next_fb(cur);
 		process_depth(cur, next, fb->depth_buffer, complex(1,0));
 		cur = next;
 		next = next_fb(cur);
 		process_depth(cur, next, fb->depth_buffer, complex(0,1));
 		cur = next;
-		next = next_fb(cur);
 	}
 
 	// render blur into fb3!
@@ -180,7 +183,7 @@ void RenderPathGL::end_frame() {
 
 void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, const complex &axis) {
 	nix::set_shader(shader_blur.get());
-	float r = cam->bloom_radius;
+	float r = cam->bloom_radius * resolution_scale_x;
 	shader_blur->set_float(shader_blur->get_location("radius"), r);
 	shader_blur->set_float(shader_blur->get_location("threshold"), threshold / cam->exposure);
 	shader_blur->set_data(shader_blur->get_location("axis"), &axis.x, sizeof(axis));
@@ -199,14 +202,16 @@ void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *tar
 
 void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
 	nix::bind_frame_buffer(target);
+	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
 	nix::set_z(false, false);
 	nix::set_projection_ortho_relative();
 	nix::set_view_matrix(matrix::ID);
 	nix::set_model_matrix(matrix::ID);
-	//nix::SetShader(shader);
+	//nix::set_shader(shader);
 
 	nix::set_textures(source);
 	nix::draw_triangles(vb_2d);
+	nix::set_scissor(rect::EMPTY);
 }
 
 void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
@@ -255,6 +260,8 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 	nix::set_shader(shader_out.get());
 	shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
 	shader_out->set_float(shader_out->get_location("bloom_factor"), cam->bloom_factor);
+	shader_out->set_float(shader_out->get_location("scale_x"), resolution_scale_x);
+	shader_out->set_float(shader_out->get_location("scale_y"), resolution_scale_y);
 	nix::set_projection_matrix(matrix::ID);
 	nix::set_view_matrix(matrix::ID);
 	nix::set_model_matrix(matrix::ID);

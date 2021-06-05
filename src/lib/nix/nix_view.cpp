@@ -24,13 +24,7 @@ void TestGLError(const char*);
 
 matrix view_matrix, projection_matrix;
 matrix model_matrix, model_view_projection_matrix;
-
-Texture *RenderingToTexture = NULL;
-
-#ifdef OS_WINDOWS
-	extern HDC hDC;
-	extern HGLRC hRC;
-#endif
+FrameBuffer *cur_framebuffer = nullptr;
 
 
 FrameBuffer *FrameBuffer::DEFAULT = new FrameBuffer();
@@ -145,6 +139,7 @@ rect FrameBuffer::area() const {
 void bind_frame_buffer(FrameBuffer *fb) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fb->frame_buffer);
 	TestGLError("BindFrameBuffer: glBindFramebuffer()");
+	cur_framebuffer = fb;
 
 	set_viewport(fb->area());
 }
@@ -168,8 +163,7 @@ void set_viewport(const rect &area) {
 	target_width = max((int)area.width(), 1);
 	target_height = max((int)area.height(), 1);
 
-	// screen
-	glViewport(area.x1, area.y1, area.width(), area.height());
+	glViewport(area.x1, cur_framebuffer->height - area.height() + area.y1, area.width(), area.height());
 	TestGLError("glViewport");
 }
 
@@ -234,30 +228,17 @@ void set_view_matrix(const matrix &m) {
 }
 
 
-#ifdef OS_WINDOWS
-	#ifdef HUI_API_GTK
-		#include <gdk/gdkwin32.h>
-	#endif
-	extern HWND hWndSubWindow;
-	extern bool nixDevNeedsUpdate;
-#endif
 
 
-
-void set_scissor(const rect &_r) {
-	bool enable_scissors = true;
-	rect r = _r;
-	if (r.x1 < 0){
-		enable_scissors=false;
-		r = target_rect;
-	}
-	if (enable_scissors)
+void set_scissor(const rect &r) {
+	if (r.width() > 0) {
 		glEnable(GL_SCISSOR_TEST);
-	else
+		glScissor((int)r.x1, cur_framebuffer->height - (int)r.y2, (int)r.width(), (int)r.height());
+		TestGLError("Scissor");
+	} else {
 		glDisable(GL_SCISSOR_TEST);
-	glScissor((int)r.x1, target_height - (int)r.y2, (int)r.width(), (int)r.height());
-	glClearDepth(1.0f);
-	TestGLError("Scissor");
+	}
+	//glClearDepth(1.0f);
 }
 
 
@@ -280,6 +261,7 @@ void start_frame_hui() {
 	FrameBuffer::DEFAULT->frame_buffer = fb;
 	FrameBuffer::DEFAULT->width = hui::GetEvent()->column;
 	FrameBuffer::DEFAULT->height = hui::GetEvent()->row;
+	cur_framebuffer = FrameBuffer::DEFAULT;
 	set_viewport(FrameBuffer::DEFAULT->area());
 }
 
@@ -302,6 +284,7 @@ void start_frame_glfw(void *win) {
 	glfwGetFramebufferSize(window, &w, &h);
 	FrameBuffer::DEFAULT->width = w;
 	FrameBuffer::DEFAULT->height = h;
+	cur_framebuffer = FrameBuffer::DEFAULT;
 
 	set_viewport(FrameBuffer::DEFAULT->area());
 }
