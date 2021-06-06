@@ -442,6 +442,42 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 	return o;
 }
 
+Object* World::create_object_multi(const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang) {
+
+
+	//msg_write(on);
+	auto *o = static_cast<Object*>(ModelManager::load(filename));
+
+	Array<matrix> matrices;
+	for (int i=0; i<pos.num; i++) {
+		matrices.add(matrix::translation(pos[i]) * matrix::rotation(ang[i]));
+	}
+	register_model_multi(o, matrices);
+
+	return o;
+}
+
+void World::register_model_multi(Model *m, const Array<matrix> &matrices) {
+
+	if (m->registered)
+		return;
+
+	for (int i=0;i<m->material.num;i++){
+		Material *mat = m->material[i];
+
+		PartialModelMulti p;
+		p.model = m;
+		p.material = mat;
+		p.matrices = matrices;
+		p.mat_index = i;
+		p.transparent = false;
+		p.shadow = false;
+		sorted_multi.add(p);
+	}
+
+	m->registered = true;
+}
+
 void World::register_object(Object *o, int index) {
 	int on = index;
 	if (on < 0){

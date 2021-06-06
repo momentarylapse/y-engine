@@ -59,6 +59,7 @@ public:
 	virtual void end_frame() = 0;
 
 	nix::Shader *shader_3d = nullptr;
+	nix::Shader *shader_3d_multi = nullptr;
 	nix::Shader *shader_2d = nullptr;
 
 	// dynamic resolution scaling

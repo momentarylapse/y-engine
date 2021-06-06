@@ -24,5 +24,7 @@ public:
 	void draw_particles();
 	void prepare_lights();
 	void render_shadow_map(nix::FrameBuffer *sfb, float scale);
+
+	void prepare_xxx();
 };
 

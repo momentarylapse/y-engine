@@ -38,6 +38,8 @@ namespace nix {
 matrix jitter(float w, float h, int uid);
 void break_point();
 
+nix::UniformBuffer *ubo_multi_matrix = nullptr;
+
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 	depth_buffer = new nix::DepthBuffer(width, height);
@@ -85,6 +87,9 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	shader_out = nix::Shader::load(hui::Application::directory_static << "forward/hdr.shader");
 	//shader_3d = nix::Shader::load(hui::Application::directory_static << "forward/3d-new.shader");
 	shader_3d = nix::Shader::load(hui::Application::directory_static << "default.shader");
+	shader_3d_multi = nix::Shader::load(hui::Application::directory_static << "default-multi.shader");
+	if (!shader_3d_multi->link_uniform_block("Multi", 5))
+		msg_error("Multi not found...");
 	shader_fx = nix::Shader::load(hui::Application::directory_static << "forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
 	shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
@@ -92,6 +97,8 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	shader_2d = nix::Shader::load(hui::Application::directory_static << "forward/2d.shader");
 	shader_resolve_multisample = nix::Shader::load(hui::Application::directory_static << "forward/resolve-multisample.shader");
 	nix::shader_dir = sd;
+
+	ubo_multi_matrix = new nix::UniformBuffer();
 
 
 	if (nix::total_mem() > 0) {
@@ -110,6 +117,7 @@ void RenderPathGLForward::draw() {
 	}
 
 
+	prepare_xxx();
 
 	perf_mon->tick(PMLabel::PRE);
 
@@ -261,7 +269,29 @@ void RenderPathGLForward::draw_terrains(bool allow_material) {
 		nix::draw_triangles(t->vertex_buffer);
 	}
 }
+
+void RenderPathGLForward::prepare_xxx() {
+	for (auto &s: world.sorted_multi) {
+		ubo_multi_matrix->update_array(s.matrices);
+	}
+}
+
 void RenderPathGLForward::draw_objects(bool allow_material) {
+	for (auto &s: world.sorted_multi) {
+		if (!s.material->cast_shadow and !allow_material)
+			continue;
+		Model *m = s.model;
+		nix::set_model_matrix(s.matrices[0]);//m->_matrix);
+		//if (allow_material)
+		auto ss = s.material->shader;
+		s.material->shader = shader_3d_multi;
+		set_material(s.material);
+		nix::bind_uniform(ubo_multi_matrix, 5);
+		//msg_write(s.matrices.num);
+		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
+		s.material->shader = ss;
+	}
+
 	for (auto &s: world.sorted_opaque) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
@@ -269,7 +299,6 @@ void RenderPathGLForward::draw_objects(bool allow_material) {
 		nix::set_model_matrix(m->_matrix);
 		if (allow_material)
 			set_material(s.material);
-		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
 		if (m->anim.meta) {
 			m->anim.mesh[0]->update_vb();
 			nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
@@ -283,7 +312,6 @@ void RenderPathGLForward::draw_objects(bool allow_material) {
 		Model *m = s.model;
 		nix::set_model_matrix(m->_matrix);
 		set_material(s.material);
-		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
 		nix::set_cull(nix::CullMode::NONE);
 		if (m->anim.meta) {
 			m->anim.mesh[0]->update_vb();
