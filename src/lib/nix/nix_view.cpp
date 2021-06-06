@@ -19,8 +19,6 @@
 
 namespace nix{
 
-void TestGLError(const char*);
-
 
 matrix view_matrix, projection_matrix;
 matrix model_matrix, model_view_projection_matrix;
@@ -39,7 +37,6 @@ FrameBuffer::FrameBuffer() {
 
 FrameBuffer::FrameBuffer(const Array<Texture*> &attachments) {
 	glGenFramebuffers(1, &frame_buffer);
-	TestGLError("FrameBuffer: glGenFramebuffers");
 	update(attachments);
 }
 
@@ -78,22 +75,17 @@ void FrameBuffer::update_x(const Array<Texture*> &attachments, int cube_face) {
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-	TestGLError("FrameBuffer: glBindFramebuffer");
 
 
 
 	if (depth_buffer) {
 		if (depth_buffer->type == Texture::Type::RENDERBUFFER) {
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_buffer->texture);
-			TestGLError("FrameBuffer: glFramebufferRenderbuffer");
 		} else {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_buffer->texture, 0);
-			TestGLError("FrameBuffer: glFramebufferTexture2D (depth)");
 		}
 		glDrawBuffer(GL_NONE);
-		TestGLError("DepthTexture: glDrawBuffer");
 		glReadBuffer(GL_NONE);
-		TestGLError("DepthTexture: glReadBuffer");
 	}
 
 	Array<GLenum> draw_buffers;
@@ -104,17 +96,14 @@ void FrameBuffer::update_x(const Array<Texture*> &attachments, int cube_face) {
 		target = GL_TEXTURE_2D_MULTISAMPLE;
 	foreachi (auto *t, color_attachments, i) {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, target, t->texture, 0);
-		TestGLError("FrameBuffer: glFramebufferTexture2D (color)");
 		draw_buffers.add(GL_COLOR_ATTACHMENT0 + (unsigned)i);
 	}
 	glDrawBuffers(draw_buffers.num, &draw_buffers[0]);
-	TestGLError("FrameBuffer: glDrawBuffers");
 
 
 	_check();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	TestGLError("FrameBuffer: glBindFramebuffer(0)");
 }
 
 void FrameBuffer::_check() {
@@ -123,7 +112,7 @@ void FrameBuffer::_check() {
 		msg_error("FrameBuffer: framebuffer != complete");
 		if (status == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)
 			msg_write("incomplete att");
-		//if (r == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS)
+		//if (status == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS)
 		//	msg_write("incomplete dim");
 		if (status == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT)
 			msg_write("missing att");
@@ -138,16 +127,16 @@ rect FrameBuffer::area() const {
 
 void bind_frame_buffer(FrameBuffer *fb) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fb->frame_buffer);
-	TestGLError("BindFrameBuffer: glBindFramebuffer()");
 	cur_framebuffer = fb;
 
 	set_viewport(fb->area());
 }
 
 void resolve_multisampling(FrameBuffer *target, FrameBuffer *source) {
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target->frame_buffer);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, source->frame_buffer);
-	glBlitFramebuffer(0, 0, source->width, source->height, 0, 0, target->width, target->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, target->frame_buffer);
+	//glBindFramebuffer(GL_READ_FRAMEBUFFER, source->frame_buffer);
+	//glBlitFramebuffer(0, 0, source->width, source->height, 0, 0, target->width, target->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBlitNamedFramebuffer(source->frame_buffer, target->frame_buffer, 0, 0, source->width, source->height, 0, 0, target->width, target->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
 
@@ -164,7 +153,6 @@ void set_viewport(const rect &area) {
 	target_height = max((int)area.height(), 1);
 
 	glViewport(area.x1, cur_framebuffer->height - area.height() + area.y1, area.width(), area.height());
-	TestGLError("glViewport");
 }
 
 void set_model_matrix(const matrix &mat) {
@@ -234,7 +222,6 @@ void set_scissor(const rect &r) {
 	if (r.width() > 0) {
 		glEnable(GL_SCISSOR_TEST);
 		glScissor((int)r.x1, cur_framebuffer->height - (int)r.y2, (int)r.width(), (int)r.height());
-		TestGLError("Scissor");
 	} else {
 		glDisable(GL_SCISSOR_TEST);
 	}

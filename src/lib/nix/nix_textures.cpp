@@ -102,10 +102,8 @@ Texture::Texture(int w, int h, const string &_format) : Texture() {
 	auto d = parse_format(_format);
 	internal_format = d.internal_format;
 	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, d.components, d.x, 0);
-	TestGLError("Texture: glTexImage2D");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	TestGLError("Texture: parameter");
 }
 
 Texture::Texture(int w, int h, int _nz, const string &_format) : Texture() {
@@ -119,10 +117,8 @@ Texture::Texture(int w, int h, int _nz, const string &_format) : Texture() {
 	auto d = parse_format(_format);
 	internal_format = d.internal_format;
 	glTexImage3D(GL_TEXTURE_3D, 0, internal_format, width, height, nz, 0, d.components, d.x, 0);
-	TestGLError("Texture: glTexImage3D");
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	TestGLError("Texture: parameter");
 }
 
 Texture::~Texture() {
@@ -197,10 +193,8 @@ void OverwriteTexture__(Texture *t, int target, int subtarget, const Image &imag
 	if (!image.error){
 		//glEnable(target);
 		glBindTexture(target, t->texture);
-		TestGLError("OverwriteTexture a");
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		TestGLError("OverwriteTexture b");
 		if (t->type == t->Type::CUBE) {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -215,7 +209,6 @@ void OverwriteTexture__(Texture *t, int target, int subtarget, const Image &imag
 			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
-		TestGLError("OverwriteTexture c");
 #ifdef GL_GENERATE_MIPMAP
 		//if (image.alpha_used) {
 			t->internal_format = GL_RGBA8;
@@ -224,10 +217,8 @@ void OverwriteTexture__(Texture *t, int target, int subtarget, const Image &imag
 		//	t->internal_format = GL_RGB8;
 		//	glTexImage2D(subtarget, 0, GL_RGB8, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
 		//}
-		TestGLError("OverwriteTexture d");
 		if (t->type == t->Type::DEFAULT)
 			glGenerateMipmap(GL_TEXTURE_2D);
-		TestGLError("OverwriteTexture e");
 #else
 		if (image.alpha_used)
 			gluBuild2DMipmaps(subtarget,4,image.width,image.height,GL_RGBA,GL_UNSIGNED_BYTE, image.data.data);
@@ -284,7 +275,6 @@ void Texture::set_options(const string &options) const {
 		} else {
 			throw Exception("unknown key: " + key);
 		}
-		TestGLError("Texture.set_options");
 	}
 }
 
@@ -341,25 +331,19 @@ void set_texture(Texture *t) {
 
 	tex_cube_level = -1;
 	glActiveTexture(GL_TEXTURE0);
-	TestGLError("SetTex .a");
 	if (t->type == Texture::Type::CUBE){
 		glEnable(GL_TEXTURE_CUBE_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, t->texture);
 		tex_cube_level = 0;
-		TestGLError("SetTex b cm");
 	} else if (t->type == Texture::Type::IMAGE){
 		glBindTexture(GL_TEXTURE_2D, t->texture);
 		glBindImageTexture(0, t->texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, t->internal_format);
-		TestGLError("SetTex b");
 	} else if (t->type == Texture::Type::VOLUME){
 		glBindTexture(GL_TEXTURE_3D, t->texture);
-		TestGLError("SetTex b");
 	} else if (t->type == Texture::Type::MULTISAMPLE){
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, t->texture);
-		TestGLError("SetTex b");
 	} else {
 		glBindTexture(GL_TEXTURE_2D, t->texture);
-		TestGLError("SetTex b");
 	}
 }
 
@@ -387,9 +371,7 @@ void set_textures(const Array<Texture*> &textures) {
 		} else {
 			glBindTexture(GL_TEXTURE_2D, t->texture);
 		}
-		//TestGLError("SetTex"+i2s(i));
 	}
-	TestGLError("SetTextures");
 }
 
 
@@ -406,10 +388,8 @@ TextureMultiSample::TextureMultiSample(int w, int h, int _samples, const string 
 	internal_format = d.internal_format;
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internal_format, width, height, GL_TRUE);
 	//glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, d.components, d.x, 0);
-	TestGLError("Texture: glTexImage2D");
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//TestGLError("Texture: parameter");
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
 
@@ -424,10 +404,8 @@ ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
 	auto d = parse_format(_format);
 	internal_format = d.internal_format;
 	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, d.components, d.x, 0);
-	TestGLError("ImageTexture: glTexImage2D");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	TestGLError("ImageTexture: aaaa");
 }
 
 void ImageTexture::__init__(int width, int height, const string &format) {
@@ -446,11 +424,8 @@ DepthBuffer::DepthBuffer(int _width, int _height) {
 
 	// as renderbuffer -> can't sample from it!
 	/*glGenRenderbuffers(1, &texture);
-	TestGLError("FrameBuffer: glGenRenderbuffers");
 	glBindRenderbuffer(GL_RENDERBUFFER, texture);
-	TestGLError("FrameBuffer: glBindRenderbuffer");
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	TestGLError("FrameBuffer: glRenderbufferStorage");*/
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);*/
 
 	// as texture -> can sample!
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -461,7 +436,6 @@ DepthBuffer::DepthBuffer(int _width, int _height) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	TestGLError("DepthTexture: aaaa");
 }
 
 void DepthBuffer::__init__(int width, int height) {
@@ -484,7 +458,6 @@ RenderBuffer::RenderBuffer(int w, int h, int _samples) {
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, internal_format, width, height);
 	else
 		glRenderbufferStorage(GL_RENDERBUFFER, internal_format, width, height);
-	TestGLError("glRenderbufferStorage");
 }
 
 

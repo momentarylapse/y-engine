@@ -29,13 +29,14 @@ public:
 	GLFWwindow* window;
 	shared<nix::Texture> tex_black;
 	shared<nix::Texture> tex_white;
-	shared<nix::FrameBuffer> fb;
+	shared<nix::FrameBuffer> fb_main;
+	shared<nix::FrameBuffer> fb_small1;
+	shared<nix::FrameBuffer> fb_small2;
 	shared<nix::FrameBuffer> fb2;
 	shared<nix::FrameBuffer> fb3;
-	shared<nix::FrameBuffer> fb4;
-	shared<nix::FrameBuffer> fb5;
 	shared<nix::FrameBuffer> fb_shadow;
 	shared<nix::FrameBuffer> fb_shadow2;
+	nix::DepthBuffer *depth_buffer = nullptr;
 	shared<nix::Shader> shader_blur;
 	shared<nix::Shader> shader_depth;
 	shared<nix::Shader> shader_out;
@@ -69,7 +70,7 @@ public:
 	void end_frame() override;
 
 	void process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, const complex &axis);
-	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, const complex &axis);
+	void process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, const complex &axis);
 	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
 	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
 	nix::FrameBuffer* resolve_multisampling(nix::FrameBuffer *source);

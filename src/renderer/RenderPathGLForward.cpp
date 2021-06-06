@@ -40,35 +40,37 @@ void break_point();
 
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
-
+	depth_buffer = new nix::DepthBuffer(width, height);
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		fb = new nix::FrameBuffer({
+		depth_buffer = new nix::DepthBuffer(width, height);
+		fb_main = new nix::FrameBuffer({
 			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
+			//depth_buffer});
 			new nix::RenderBuffer(width, height, 4)});
 	} else {
-		fb = new nix::FrameBuffer({
+		fb_main = new nix::FrameBuffer({
 			new nix::Texture(width, height, "rgba:f16"),
-			//new nix::DepthBuffer(width, height)
-			new nix::RenderBuffer(width, height)});
+			depth_buffer});
+			//new nix::RenderBuffer(width, height)});
 	}
+	fb_small1 = new nix::FrameBuffer({
+		new nix::Texture(width/2, height/2, "rgba:f16")});
+	fb_small2 = new nix::FrameBuffer({
+		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb2 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb3 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb4 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
-	fb5 = new nix::FrameBuffer({
+	fb3 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 
-	fb->color_attachments[0]->set_options("wrap=clamp");
+	fb_main->color_attachments[0]->set_options("wrap=clamp");
+	fb_small1->color_attachments[0]->set_options("wrap=clamp");
+	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
-	fb4->color_attachments[0]->set_options("wrap=clamp");
-	fb5->color_attachments[0]->set_options("wrap=clamp");
 
 	auto sd = nix::shader_dir;
 	nix::shader_dir = "";
@@ -120,18 +122,18 @@ void RenderPathGLForward::draw() {
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	cur_fb_area = rect(0, fb->width * resolution_scale_x, 0, fb->height * resolution_scale_y);
-	render_into_texture(fb.get(), cam);
+	cur_fb_area = rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
+	render_into_texture(fb_main.get(), cam);
 
-	auto source = fb.get();
+	auto source = fb_main.get();
 	if (config.antialiasing_method == AntialiasingMethod::MSAA)
-		source = resolve_multisampling(fb.get());
+		source = resolve_multisampling(source);
 
 	source = do_post_processing(source);
 
 
 	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
-	render_out(source, fb3->color_attachments[0]);
+	render_out(source, fb_small2->color_attachments[0]);
 
 	draw_gui(source);
 }

@@ -121,13 +121,12 @@ void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cu
 }
 
 nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
-	return (cur == fb4) ? fb5.get() : fb4.get();
+	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
 
 // GTX750: 1920x1080 0.277 ms per trivial step
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
-	auto depth_buffer = source->depth_buffer;
 	auto cur = source;
 
 	for (auto *m: post_processors) {
@@ -135,32 +134,32 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 		nix::set_shader(m->shader.get());
 		for (auto &u: m->uniforms)
 			m->shader->set_data(u.location, u.p, u.size);
-		process({cur->color_attachments[0], source->depth_buffer}, next, m->shader.get());
+		process({cur->color_attachments[0], depth_buffer}, next, m->shader.get());
 		cur = next;
 	}
 
 	if (cam->focus_enabled) {
 		auto next = next_fb(cur);
-		process_depth(cur, next, fb->depth_buffer, complex(1,0));
+		process_depth(cur, next, complex(1,0));
 		cur = next;
 		next = next_fb(cur);
-		process_depth(cur, next, fb->depth_buffer, complex(0,1));
+		process_depth(cur, next, complex(0,1));
 		cur = next;
 	}
 
 	// render blur into fb3!
-	process_blur(cur, fb2.get(), 1.0f, complex(2,0));
-	process_blur(fb2.get(), fb3.get(), 0.0f, complex(0,1));
+	process_blur(cur, fb_small1.get(), 1.0f, complex(2,0));
+	process_blur(fb_small1.get(), fb_small2.get(), 0.0f, complex(0,1));
 	return cur;
 }
 
 nix::FrameBuffer* RenderPathGL::resolve_multisampling(nix::FrameBuffer *source) {
-	auto next = fb4.get();
+	auto next = next_fb(source);
 	if (true) {
 		nix::set_shader(shader_resolve_multisample.get());
 		shader_resolve_multisample->set_float(shader_resolve_multisample->get_location("width"), source->width);
 		shader_resolve_multisample->set_float(shader_resolve_multisample->get_location("height"), source->height);
-		process({source->color_attachments[0], source->depth_buffer}, next, shader_resolve_multisample.get());
+		process({source->color_attachments[0], depth_buffer}, next, shader_resolve_multisample.get());
 	} else {
 		// not sure, why this does not work... :(
 		nix::resolve_multisampling(next, source);
@@ -190,7 +189,7 @@ void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *targ
 	process(source->color_attachments, target, shader_blur.get());
 }
 
-void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, nix::Texture *depth_buffer, const complex &axis) {
+void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, const complex &axis) {
 	nix::set_shader(shader_depth.get());
 	shader_depth->set_float(shader_depth->get_location("max_radius"), 50);
 	shader_depth->set_float(shader_depth->get_location("focal_length"), cam->focal_length);

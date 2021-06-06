@@ -64,7 +64,6 @@ void bind_uniform(UniformBuffer *ub, int index) {
 
 int create_empty_shader_program() {
 	int gl_p = glCreateProgram();
-	TestGLError("CreateProgram");
 	if (gl_p <= 0)
 		throw Exception("could not create gl shader program");
 	return gl_p;
@@ -178,7 +177,6 @@ int create_gl_shader(const string &_source, int type, ShaderMetaData &meta) {
 	if (source.num == 0)
 		return -1;
 	int gl_shader = glCreateShader(type);
-	TestGLError("CreateShader create");
 	if (gl_shader <= 0)
 		throw Exception("could not create gl shader object");
 	
@@ -186,14 +184,11 @@ int create_gl_shader(const string &_source, int type, ShaderMetaData &meta) {
 
 	pbuf[0] = source.c_str();
 	glShaderSource(gl_shader, 1, pbuf, NULL);
-	TestGLError("CreateShader source");
 
 	glCompileShader(gl_shader);
-	TestGLError("CreateShader compile");
 
 	int status;
 	glGetShaderiv(gl_shader, GL_COMPILE_STATUS, &status);
-	TestGLError("CreateShader status");
 	//msg_write(status);
 	if (status != GL_TRUE) {
 		shader_error.resize(16384);
@@ -246,15 +241,12 @@ void Shader::update(const string &source) {
 			shaders.add(shader);
 			if (shader >= 0)
 				glAttachShader(prog, shader);
-			TestGLError("AddShader attach");
 		}
 	}
 
 	int status;
 	glLinkProgram(prog);
-	TestGLError("AddShader link");
 	glGetProgramiv(prog, GL_LINK_STATUS, &status);
-	TestGLError("AddShader status");
 	if (status != GL_TRUE) {
 		shader_error.resize(16384);
 		int size;
@@ -265,14 +257,11 @@ void Shader::update(const string &source) {
 
 	for (int shader: shaders)
 		glDeleteShader(shader);
-	TestGLError("DeleteShader");
 
 	program = prog;
 	shader_error = "";
 
 	find_locations();
-
-	TestGLError("CreateShader");
 }
 Shader *Shader::create(const string &source) {
 	shared<Shader> s = new Shader;
@@ -346,7 +335,6 @@ Shader::~Shader() {
 	msg_write("delete shader: " + filename.str());
 	if (program >= 0)
 		glDeleteProgram(program);
-	TestGLError("glDeleteProgram");
 	program = -1;
 }
 
@@ -362,7 +350,6 @@ void set_shader(Shader *s) {
 	Shader::_current_ = s;
 	current_program = s->program;
 	glUseProgram(current_program);
-	TestGLError("glUseProgram");
 
 	//s->set_default_data();
 }
@@ -394,35 +381,30 @@ void Shader::set_data(int location, const float *data, int size) {
 	} else if (size == sizeof(float)*16) {
 		glUniformMatrix4fv(location, 1, GL_FALSE, (float*)data);
 	}
-	TestGLError("SetShaderData");
 }
 
 void Shader::set_int(int location, int i) {
 	if (location < 0)
 		return;
 	glUniform1i(location, i);
-	TestGLError("SetShaderInt");
 }
 
 void Shader::set_float(int location, float f) {
 	if (location < 0)
 		return;
 	glUniform1f(location, f);
-	TestGLError("SetShaderFloat");
 }
 
 void Shader::set_color(int location, const color &c) {
 	if (location < 0)
 		return;
 	glUniform4fv(location, 1, (float*)&c);
-	TestGLError("SetShaderData");
 }
 
 void Shader::set_matrix(int location, const matrix &m) {
 	if (location < 0)
 		return;
 	glUniformMatrix4fv(location, 1, GL_FALSE, (float*)&m);
-	TestGLError("SetShaderData");
 }
 
 void Shader::set_default_data() {
@@ -443,8 +425,6 @@ void Shader::set_default_data() {
 void Shader::dispatch(int nx, int ny, int nz) {
 	glUseProgram(program);
 	glDispatchCompute(nx, ny, nz);
-	
-	TestGLError("Shader.dispatch");
 }
 
 

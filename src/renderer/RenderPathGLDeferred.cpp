@@ -45,27 +45,27 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height)});
 
-	fb = new nix::FrameBuffer({
+	fb_main = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"),
 		new nix::DepthBuffer(width, height)});
+	fb_small1 = new nix::FrameBuffer({
+		new nix::Texture(width/2, height/2, "rgba:f16")});
+	fb_small2 = new nix::FrameBuffer({
+		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb2 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb3 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb4 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
-	fb5 = new nix::FrameBuffer({
+	fb3 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 
-	fb->color_attachments[0]->set_options("wrap=clamp");
+	fb_main->color_attachments[0]->set_options("wrap=clamp");
+	fb_small1->color_attachments[0]->set_options("wrap=clamp");
+	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
-	fb4->color_attachments[0]->set_options("wrap=clamp");
-	fb5->color_attachments[0]->set_options("wrap=clamp");
 
 	auto sd = nix::shader_dir;
 	nix::Shader::load(hui::Application::directory_static << "deferred/module-surface.shader");
@@ -96,13 +96,13 @@ void RenderPathGLDeferred::draw() {
 	perf_mon->tick(PMLabel::SHADOWS);
 
 	render_into_texture(gbuffer.get(), cam);
-	render_from_gbuffer(gbuffer.get(), fb.get());
+	render_from_gbuffer(gbuffer.get(), fb_main.get());
 
-	auto source = do_post_processing(fb.get());
+	auto source = do_post_processing(fb_main.get());
 
 	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
 
-	render_out(source, fb3->color_attachments[0]);
+	render_out(source, fb_small2->color_attachments[0]);
 
 	draw_gui(source);
 }
