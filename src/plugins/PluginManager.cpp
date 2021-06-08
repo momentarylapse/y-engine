@@ -38,7 +38,6 @@ PerformanceMonitor *global_perf_mon;
 
 
 extern nix::Texture *_tex_white;
-extern Array<Material*> post_processors;
 
 void global_delete(Entity *e) {
 	//msg_error("global delete... " + p2s(e));
@@ -404,15 +403,23 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("EngineData.renderer", &EngineData::renderer);
 
 	kaba::declare_class_size("RenderPath", sizeof(RenderPathGL));
+	kaba::declare_class_element("RenderPath.depth_buffer", &RenderPathGL::depth_buffer);
 	kaba::declare_class_element("RenderPath.cube_map", &RenderPathGL::cube_map);
+	kaba::declare_class_element("RenderPath.fb_main", &RenderPathGL::fb_main);
+	kaba::declare_class_element("RenderPath.fb2", &RenderPathGL::fb2);
+	kaba::declare_class_element("RenderPath.fb3", &RenderPathGL::fb3);
+	kaba::declare_class_element("RenderPath.fb_small1", &RenderPathGL::fb_small1);
+	kaba::declare_class_element("RenderPath.fb_small2", &RenderPathGL::fb_small2);
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RenderPathGLForward::render_into_texture, engine.renderer);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RenderPathGLForward::render_into_cubemap);
+	kaba::link_external_class_func("RenderPath.next_fb", &RenderPathGL::next_fb);
+	kaba::link_external_class_func("RenderPath.process", &RenderPathGL::process);
+	kaba::link_external_class_func("RenderPath.add_post_processor", &RenderPathGL::kaba_add_post_processor);
 
 	kaba::link_external("tex_white", &_tex_white);
 	kaba::link_external("world", &world);
 	kaba::link_external("cam", &cam);
 	kaba::link_external("engine", &engine);
-	kaba::link_external("post_processors", &post_processors);
 	kaba::link_external("load_model", (void*)&ModelManager::load);
 }
 

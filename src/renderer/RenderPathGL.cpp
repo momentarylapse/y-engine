@@ -10,6 +10,7 @@
 #include "RenderPathGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
+#include "../lib/kaba/syntax/Function.h"
 
 #include "../helper/PerformanceMonitor.h"
 #include "../plugins/PluginManager.h"
@@ -35,8 +36,6 @@ void break_point() {
 		glFinish();
 	}
 }
-
-Array<Material*> post_processors;
 
 
 const float HALTON2[] = {1/2.0f, 1/4.0f, 3/4.0f, 1/8.0f, 5/8.0f, 3/8.0f, 7/8.0f, 1/16.0f, 9/16.0f, 3/16.0f, 11/16.0f, 5/16.0f, 13/16.0f};
@@ -124,19 +123,19 @@ nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
 	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
+void RenderPathGL::kaba_add_post_processor(kaba::Function *f) {
+	post_processors.add({(post_process_func_t*)(int_p)f->address});
+}
+
 
 // GTX750: 1920x1080 0.277 ms per trivial step
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	auto cur = source;
 
-	for (auto *m: post_processors) {
-		auto next = next_fb(cur);
-		nix::set_shader(m->shader.get());
-		for (auto &u: m->uniforms)
-			m->shader->set_data(u.location, u.p, u.size);
-		process({cur->color_attachments[0], depth_buffer}, next, m->shader.get());
-		cur = next;
-	}
+	// scripts
+	for (auto &p: post_processors)
+		cur = p.func(cur);
+
 
 	if (cam->focus_enabled) {
 		auto next = next_fb(cur);

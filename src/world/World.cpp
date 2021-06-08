@@ -325,7 +325,7 @@ bool World::load(const LevelData &ld) {
 		if (!o.filename.is_empty()){
 			auto q = quaternion::rotation(o.ang);
 			Object *oo = create_object_x(o.filename, o.name, o.pos, q, o.script, i);
-			ok &= (oo >= 0);
+			ok &= (oo != nullptr);
 			if (oo){
 				oo->vel = o.vel;
 				oo->rot = o.rot;

@@ -22,6 +22,15 @@ class Material;
 class UBOLight;
 class GLFWwindow;
 
+namespace kaba {
+	class Function;
+}
+
+typedef nix::FrameBuffer* post_process_func_t(nix::FrameBuffer* cur);
+struct PostProcessor {
+	post_process_func_t *func;
+};
+
 
 class RenderPathGL : public RenderPath {
 public:
@@ -80,6 +89,10 @@ public:
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
 
 	nix::FrameBuffer *next_fb(nix::FrameBuffer *cur);
+
+
+	Array<PostProcessor> post_processors;
+	void kaba_add_post_processor(kaba::Function *f);
 };
 
 
