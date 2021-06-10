@@ -96,7 +96,7 @@ void Application::guess_directories(const Array<string> &arg, const string &app_
 	char *ttt = nullptr;
 	int r = _get_pgmptr(&ttt);
 	filename = ttt;
-	hui_win_instance = (void*)GetModuleHandle(nullptr);
+	//hui_win_instance = (void*)GetModuleHandle(nullptr);
 #endif
 
 

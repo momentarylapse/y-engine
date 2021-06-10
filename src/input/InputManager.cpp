@@ -15,6 +15,9 @@
 #include <iostream>
 #include "../lib/hui_minimal/hui.h"
 
+#include <GLFW/glfw3.h>
+
+
 InputManager::State InputManager::state;
 InputManager::State InputManager::state_prev;
 bool InputManager::ignore_velocity;

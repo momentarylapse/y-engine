@@ -157,6 +157,7 @@ int RunLater(float time, const Callback &c)
 		//msg_write(r->hui_id);
 		return r->hui_id;
 	#endif
+	return -1;
 }
 
 int RunRepeated(float time, const Callback &c)
@@ -181,6 +182,7 @@ int RunRepeated(float time, const Callback &c)
 		//msg_write("rr lock z");
 		return r->hui_id;
 	#endif
+		return -1;
 }
 
 void CancelRunner(int id)

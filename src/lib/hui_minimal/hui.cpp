@@ -18,6 +18,10 @@
 #include <stdio.h>
 #include <signal.h>
 
+#ifdef OS_WINDOWS
+#include <windows.h>
+#endif
+
 
 namespace hui
 {
@@ -40,7 +44,7 @@ Array<string> make_args(int num_args, char *args[])
 }
 
 
-int hui_main(const Array<string> &);
+int hui_main(const Array<string>&);
 
 // for a system independent usage of this library
 
@@ -48,26 +52,61 @@ int hui_main(const Array<string> &);
 
 #ifdef _CONSOLE
 
-int _tmain(int NumArgs, _TCHAR *Args[]) {
-	return hui_main(hui::make_args(NumArgs, Args));
+int _tmain(int num_args, _TCHAR* args[]) {
+	return hui_main(hui::make_args(num_args, args));
 }
 
 #else
 
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPTSTR    lpCmdLine,
-                     int       nCmdShow)
-{
+// split by space... but parts might be in quotes "a b"
+Array<string> parse_command_line(const string& s) {
 	Array<string> a;
 	a.add("-dummy-");
-	string s = lpCmdLine;
-	if (s.num > 0){
-		if ((s[0] == '\"') and (s.back() == '\"'))
-			s = s.substr(1, -2);
-		a.add(s);
+
+	for (int i = 0; i < s.num; i++) {
+		if (s[i] == '\"') {
+			string t;
+			bool escape = false;
+			i++;
+			for (int j = i; j < s.num; j++) {
+				i = j;
+				if (escape) {
+					escape = false;
+				}
+				else {
+					if (s[j] == '\\')
+						escape = true;
+					else if (s[j] == '\"')
+						break;
+				}
+				t.add(s[j]);
+			}
+			a.add(t.unescape());
+			i++;
+		}
+		else if (s[i] == ' ') {
+			continue;
+		}
+		else {
+			string t;
+			for (int j = i; j < s.num; j++) {
+				i = j;
+				if (s[j] == ' ')
+					break;
+				t.add(s[j]);
+			}
+			a.add(t);
+		}
 	}
-	return hui_main(a);
+	return a;
+}
+
+int APIENTRY WinMain(HINSTANCE hInstance,
+	HINSTANCE hPrevInstance,
+	LPTSTR    lpCmdLine,
+	int       nCmdShow)
+{
+	return hui_main(parse_command_line(lpCmdLine));
 }
 
 #endif
@@ -75,14 +114,11 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 #endif
 #if  defined(OS_LINUX) || defined(OS_MINGW)
 
-int main(int NumArgs, char *Args[])
-{
-	return hui_main(hui::make_args(NumArgs, Args));
+int main(int num_args, char* args[]) {
+	return hui_main(hui::make_args(num_args, args));
 }
 
 #endif
-
-
 
 
 // usage:

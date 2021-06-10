@@ -10,8 +10,10 @@
 #include "../lib/file/msg.h"
 #include "../lib/kaba/kaba.h"
 
+#if HAS_LIB_UNWIND
 #define UNW_LOCAL_ONLY
 #include <libunwind.h>
+#endif
 #include <csignal>
 #include <stdio.h>
 
@@ -109,6 +111,7 @@ void show_kaba_local_vars(const kaba::Function *f, void *bp) {
 
 
 void ErrorHandler::show_backtrace() {
+#if HAS_LIB_UNWIND
 
 	unw_cursor_t cursor;
 	unw_context_t uc;
@@ -150,6 +153,7 @@ void ErrorHandler::show_backtrace() {
 		msg_write("\n\n------  local variables  ------");
 		show_kaba_local_vars(first_kaba, first_kaba_bp);
 	}
+#endif
 }
 
 void ErrorHandler::signal_handler(int signum) {

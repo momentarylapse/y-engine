@@ -13,13 +13,13 @@
 #include "../y/EngineData.h"
 #include "../lib/math/math.h"
  
-#ifdef HAS_LIB_OPENAL
+#if HAS_LIB_OPENAL
 
 
 #ifdef OS_WINDOWS
-	#include <al.h>
+	#include <AL/al.h>
 	//#include <alut.h>
-	#include <alc.h>
+	#include <AL/alc.h>
 	//#pragma comment(lib,"alut.lib")
 	#pragma comment(lib,"OpenAL32.lib")
 	/*#pragma comment(lib,"libogg.lib")
@@ -346,32 +346,37 @@ void Music::iterate() {
 	}
 }
 
+}
+
 #else
 
-void SoundInit(){}
-void SoundExit(){}
-Sound* SoundLoad(const string &filename){ return NULL; }
-Sound* SoundEmit(const string &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return NULL; }
-Sound::Sound(){}
+
+namespace audio {
+
+void init(){}
+void exit(){}
+Sound* Sound::load(const Path &filename){ return NULL; }
+Sound* Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return NULL; }
+Sound::Sound() : Entity(Entity::Type::SOUND) {}
 Sound::~Sound(){}
 void Sound::__delete__(){}
 void SoundClearSmallCache(){}
-void Sound::Play(bool repeat){}
-void Sound::Stop(){}
-void Sound::Pause(bool pause){}
-bool Sound::IsPlaying(){ return false; }
-bool Sound::Ended(){ return false; }
-void Sound::SetData(const vector &pos, const vector &vel, float min_dist, float max_dist, float speed, float volume){}
+void Sound::play(bool repeat){}
+void Sound::stop(){}
+void Sound::pause(bool pause){}
+bool Sound::is_playing(){ return false; }
+bool Sound::has_ended(){ return false; }
+void Sound::set_data(const vector &pos, const vector &vel, float min_dist, float max_dist, float speed, float volume){}
 void SoundSetListener(const vector &pos, const vector &ang, const vector &vel, float v_sound){}
-Music *MusicLoad(const string &filename){ return NULL; }
+Music *Music::load(const Path &filename){ return NULL; }
 Music::~Music(){}
-void Music::Play(bool repeat){}
-void Music::SetRate(float rate){}
-void Music::Stop(){}
-void Music::Pause(bool pause){}
-bool Music::IsPlaying(){ return false; }
-bool Music::Ended(){ return false; }
-void Music::Iterate(){}
+void Music::play(bool repeat){}
+void Music::set_rate(float rate){}
+void Music::stop(){}
+void Music::pause(bool pause){}
+bool Music::is_playing(){ return false; }
+bool Music::has_ended(){ return false; }
+void Music::iterate(){}
 
 #endif
 

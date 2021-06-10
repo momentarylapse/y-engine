@@ -8,9 +8,9 @@
 #ifndef SRC_HELPER_INPUTMANAGER_H_
 #define SRC_HELPER_INPUTMANAGER_H_
 
-#include <GLFW/glfw3.h>
 
 class vector;
+struct GLFWwindow;
 
 class InputManager {
 public:
