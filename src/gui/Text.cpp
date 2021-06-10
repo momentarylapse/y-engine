@@ -41,6 +41,8 @@ void Text::__delete__() {
 }
 
 void Text::rebuild() {
+	if (!font)
+		return;
 	Image im;
 	font->render_text(text, align, im);
 	if (texture == nullptr)

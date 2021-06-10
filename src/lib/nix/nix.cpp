@@ -133,6 +133,14 @@ void init() {
 	msg_write(string("Renderer: ") + (char*)glGetString(GL_RENDERER));
 	msg_write(string("GLSL: ") + (char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+#ifdef OS_WINDOWS
+	GLenum err = glewInit();
+	if (GLEW_OK != err) {
+		/* Problem: glewInit failed, something is seriously wrong. */
+		msg_error((const char*)glewGetErrorString(err));
+	}
+#endif
+
 
 	// default values of the engine
 	model_matrix = matrix::ID;
@@ -212,7 +220,7 @@ int available_mem() {
 // shoot down windows
 void KillWindows()
 {
-#ifdef OS_WINDOWS
+/*#ifdef OS_WINDOWS
 	HANDLE t;
 	OpenProcessToken(	GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,&t);
 	_TOKEN_PRIVILEGES tp;
@@ -222,7 +230,7 @@ void KillWindows()
 	AdjustTokenPrivileges(t,FALSE,&tp,0,NULL,0);
 	InitiateSystemShutdown(NULL,(win_str)hui_tchar_str("Resistance is futile!"),10,TRUE,FALSE);
 	//ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCE,0);
-#endif
+#endif*/
 }
 
 

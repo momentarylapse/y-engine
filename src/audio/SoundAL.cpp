@@ -355,8 +355,8 @@ namespace audio {
 
 void init(){}
 void exit(){}
-Sound* Sound::load(const Path &filename){ return NULL; }
-Sound* Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return NULL; }
+Sound* Sound::load(const Path &filename){ return nullptr; }
+Sound* Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
 Sound::Sound() : Entity(Entity::Type::SOUND) {}
 Sound::~Sound(){}
 void Sound::__delete__(){}
@@ -367,8 +367,8 @@ void Sound::pause(bool pause){}
 bool Sound::is_playing(){ return false; }
 bool Sound::has_ended(){ return false; }
 void Sound::set_data(const vector &pos, const vector &vel, float min_dist, float max_dist, float speed, float volume){}
-void SoundSetListener(const vector &pos, const vector &ang, const vector &vel, float v_sound){}
-Music *Music::load(const Path &filename){ return NULL; }
+void set_listener(const vector& pos, const quaternion& ang, const vector& vel, float v_sound) {}
+Music *Music::load(const Path &filename){ return nullptr; }
 Music::~Music(){}
 void Music::play(bool repeat){}
 void Music::set_rate(float rate){}
@@ -377,6 +377,8 @@ void Music::pause(bool pause){}
 bool Music::is_playing(){ return false; }
 bool Music::has_ended(){ return false; }
 void Music::iterate(){}
+
+void clear_small_cache() {}
 
 #endif
 
