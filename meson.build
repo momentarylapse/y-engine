@@ -212,5 +212,7 @@ executable('y', sources, dependencies : deps, install : true)
 
 install_subdir('static/deferred', install_dir : join_paths(get_option('datadir'), 'y'))
 install_subdir('static/forward', install_dir : join_paths(get_option('datadir'), 'y'))
+install_data('static/convolution.shader', install_dir : join_paths(get_option('datadir'), 'y'))
+install_data('static/default-multi.shader', install_dir : join_paths(get_option('datadir'), 'y'))
 install_data('static/default.shader', install_dir : join_paths(get_option('datadir'), 'y'))
 install_data('static/default.shader.graph', install_dir : join_paths(get_option('datadir'), 'y'))
