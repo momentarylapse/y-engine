@@ -20,8 +20,6 @@
 
 namespace nix{
 
-Path texture_dir;
-
 shared_array<Texture> textures;
 Texture *default_texture = nullptr;
 Texture *tex_text = nullptr;
@@ -151,32 +149,32 @@ void TextureClear() {
 Texture *Texture::load(const Path &filename) {
 	if (filename.is_empty())
 		return nullptr;
-	for (Texture *t: weak(textures))
-		if (filename == t->filename)
-			return t->valid ? t : nullptr;
 
 	// test existence
-	if (!file_exists(texture_dir << filename))
+	if (!file_exists(filename))
 		throw Exception("texture file does not exist: " + filename.str());
 
 	Texture *t = new Texture;
-	t->filename = filename;
-	t->reload();
-	textures.add(t);
-	return t;
+	try {
+		t->filename = filename;
+		t->reload();
+		textures.add(t);
+		return t;
+	} catch (...) {
+		delete t;
+	}
+	return nullptr;
 }
 
 void Texture::reload() {
 	msg_write("loading texture: " + filename.str());
 
-	Path _filename = texture_dir << filename;
-
 	// test the file's existence
-	if (!file_exists(_filename))
+	if (!file_exists(filename))
 		throw Exception("texture file does not exist!");
 
 	string extension = filename.extension();
-	auto image = Image::load(_filename);
+	auto image = Image::load(filename);
 	overwrite(*image);
 	delete image;
 }
@@ -494,7 +492,7 @@ void CubeMap::fill_side(int side, Texture *source) {
 	if (source->type == Type::CUBE)
 		return;
 	Image image;
-	image.load(texture_dir << source->filename);
+	image.load(source->filename);
 	overwrite_side(side, image);
 }
 

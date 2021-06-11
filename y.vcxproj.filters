@@ -40,6 +40,9 @@
     <ClCompile Include="src\helper\PerformanceMonitor.cpp">
       <Filter>src\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\helper\ResourceManager.cpp">
+      <Filter>src\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\input\InputManager.cpp">
       <Filter>src\input</Filter>
     </ClCompile>
@@ -391,9 +394,6 @@
     <ClCompile Include="src\meta.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\helper\ResourceManager.cpp">
-      <Filter>src\helper</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\audio\Sound.h">
@@ -430,6 +430,9 @@
       <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\helper\PerformanceMonitor.h">
+      <Filter>src\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\ResourceManager.h">
       <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\input\InputManager.h">
@@ -758,9 +761,6 @@
     </ClInclude>
     <ClInclude Include="src\meta.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\helper\ResourceManager.h">
-      <Filter>src\helper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

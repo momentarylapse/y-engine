@@ -69,8 +69,8 @@ void EngineData::set_dirs(const Path &texture_dir, const Path &_map_dir, const P
 	vulkan::Texture::directory = texture_dir;
 	vulkan::Shader::directory = material_dir;
 #endif
-	nix::texture_dir = texture_dir;
 #ifdef _X_ALLOW_X_
+	ResourceManager::texture_dir = texture_dir;
 	ResourceManager::shader_dir = material_dir;
 #endif
 

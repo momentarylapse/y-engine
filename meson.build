@@ -88,6 +88,7 @@ sources = [
 	'src/gui/Text.cpp',
 	'src/helper/ErrorHandler.cpp',
 	'src/helper/PerformanceMonitor.cpp',
+	'src/helper/ResourceManager.cpp',
 	'src/input/InputManager.cpp',
 	'src/lib/any/any.cpp',
 	'src/lib/base/array.cpp',
@@ -210,9 +211,4 @@ sources = [
 
 executable('y', sources, dependencies : deps, install : true)
 
-install_subdir('static/deferred', install_dir : join_paths(get_option('datadir'), 'y'))
-install_subdir('static/forward', install_dir : join_paths(get_option('datadir'), 'y'))
-install_data('static/convolution.shader', install_dir : join_paths(get_option('datadir'), 'y'))
-install_data('static/default-multi.shader', install_dir : join_paths(get_option('datadir'), 'y'))
-install_data('static/default.shader', install_dir : join_paths(get_option('datadir'), 'y'))
-install_data('static/default.shader.graph', install_dir : join_paths(get_option('datadir'), 'y'))
+install_subdir('static/shader', install_dir : join_paths(get_option('datadir'), 'y'))
