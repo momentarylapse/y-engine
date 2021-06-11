@@ -380,7 +380,8 @@ void Music::iterate(){}
 
 void clear_small_cache() {}
 
+}
+
 #endif
 
-}
 
