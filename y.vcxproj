@@ -125,6 +125,7 @@
     <ClCompile Include="src\gui\Text.cpp" />
     <ClCompile Include="src\helper\ErrorHandler.cpp" />
     <ClCompile Include="src\helper\PerformanceMonitor.cpp" />
+    <ClCompile Include="src\helper\ResourceManager.cpp" />
     <ClCompile Include="src\input\InputManager.cpp" />
     <ClCompile Include="src\lib\any\any.cpp" />
     <ClCompile Include="src\lib\base\array.cpp" />
@@ -256,6 +257,7 @@
     <ClInclude Include="src\gui\Text.h" />
     <ClInclude Include="src\helper\ErrorHandler.h" />
     <ClInclude Include="src\helper\PerformanceMonitor.h" />
+    <ClInclude Include="src\helper\ResourceManager.h" />
     <ClInclude Include="src\input\InputManager.h" />
     <ClInclude Include="src\lib\any\any.h" />
     <ClInclude Include="src\lib\base\array.h" />

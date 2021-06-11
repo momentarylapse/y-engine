@@ -13,6 +13,7 @@
 #ifdef _X_ALLOW_X_
 #include "../world/Model.h"
 #include "../world/Material.h"
+#include "../helper/ResourceManager.h"
 #else
 #include "Model.h"
 #include "Material.h"
@@ -69,7 +70,9 @@ void EngineData::set_dirs(const Path &texture_dir, const Path &_map_dir, const P
 	vulkan::Shader::directory = material_dir;
 #endif
 	nix::texture_dir = texture_dir;
-	nix::shader_dir = material_dir;
+#ifdef _X_ALLOW_X_
+	ResourceManager::shader_dir = material_dir;
+#endif
 
 	map_dir = _map_dir;
 	object_dir = _object_dir;

@@ -141,6 +141,7 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 
 Path find_system_font_file(const string &name) {
 #ifdef OS_WINDOWS
+	// TODO use FOLDERID_Fonts
 	Path base = "c:\\Windows\\Fonts";
 #else
 	Path base = "/usr/share/fonts";

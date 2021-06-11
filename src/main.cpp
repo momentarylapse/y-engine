@@ -122,7 +122,7 @@ public:
 				render_path = new RenderPathGLForward(window, engine.width, engine.height, &perf_mon);
 			engine.renderer = render_path;
 		} catch(Exception &e) {
-			msg_error(e.message());
+			hui::ShowError(e.message());
 			throw e;
 		}
 
@@ -389,10 +389,10 @@ int hui_main(const Array<string> &arg) {
 	try {
 		app.run(arg);
 	} catch (const std::exception& e) {
-		msg_error(e.what());
+		hui::ShowError(e.what());
 		return EXIT_FAILURE;
 	} catch (const Exception& e) {
-		msg_error(e.message());
+		hui::ShowError(e.message());
 		return EXIT_FAILURE;
 	}
 

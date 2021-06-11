@@ -12,6 +12,7 @@
 #include "../lib/nix/nix.h"
 
 #include "../helper/PerformanceMonitor.h"
+#include "../helper/ResourceManager.h"
 #include "../plugins/PluginManager.h"
 #include "../gui/gui.h"
 #include "../gui/Node.h"
@@ -67,20 +68,18 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
-	auto sd = nix::shader_dir;
-	nix::Shader::load(hui::Application::directory_static << "deferred/module-surface.shader");
+	ResourceManager::load_shader(":E:/deferred/module-surface.shader");
 
-	shader_blur = nix::Shader::load(hui::Application::directory_static << "forward/blur.shader");
-	shader_depth = nix::Shader::load(hui::Application::directory_static << "forward/depth.shader");
-	shader_out = nix::Shader::load(hui::Application::directory_static << "forward/hdr.shader");
-	shader_3d = nix::Shader::load(hui::Application::directory_static << "deferred/3d.shader");
-	shader_gbuffer_out = nix::Shader::load(hui::Application::directory_static << "deferred/out.shader");
-	shader_fx = nix::Shader::load(hui::Application::directory_static << "forward/3d-fx.shader");
+	shader_blur = ResourceManager::load_shader(":E:/forward/blur.shader");
+	shader_depth = ResourceManager::load_shader(":E:/forward/depth.shader");
+	shader_out = ResourceManager::load_shader(":E:/forward/hdr.shader");
+	shader_3d = ResourceManager::load_shader(":E:/deferred/3d.shader");
+	shader_gbuffer_out = ResourceManager::load_shader(":E:/deferred/out.shader");
+	shader_fx = ResourceManager::load_shader(":E:/forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
-	shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
+	shader_shadow = ResourceManager::load_shader(":E:/forward/3d-shadow.shader");
 
-	shader_2d = nix::Shader::load(hui::Application::directory_static << "forward/2d.shader");
-	nix::shader_dir = sd;
+	shader_2d = ResourceManager::load_shader(":E:/forward/2d.shader");
 }
 
 void RenderPathGLDeferred::draw() {

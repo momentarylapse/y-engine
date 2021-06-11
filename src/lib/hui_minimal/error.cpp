@@ -77,6 +77,17 @@ void RaiseError(const string &message) {
 	hui_default_error_handler();
 }
 
+#ifdef OS_WINDOWS
+#include <windows.h>
+void ShowError(const string& msg) {
+	MessageBox(NULL, msg.c_str(), "Error", MB_ICONERROR | MB_OK);
+}
+#else
+void ShowError(const string& msg) {
+	msg_error(msg);
+}
+#endif
+
 
 };
 

@@ -19,6 +19,8 @@ void SetErrorFunction(const Callback &function);
 void SetDefaultErrorHandler(const Callback &error_cleanup_function);
 void RaiseError(const string &message);
 
+void ShowError(const string& msg);
+
 };
 
 #endif /* HUI_ERROR_H_ */

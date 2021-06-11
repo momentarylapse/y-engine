@@ -11,6 +11,7 @@
 #include "../lib/image/image.h"
 
 #include "../helper/PerformanceMonitor.h"
+#include "../helper/ResourceManager.h"
 #include "../plugins/PluginManager.h"
 #include "../gui/gui.h"
 #include "../gui/Node.h"
@@ -74,29 +75,25 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
-	auto sd = nix::shader_dir;
-	nix::shader_dir = "";
-
 	if (config.get_str("renderer.shader-quality", "") == "pbr")
-		nix::Shader::load(hui::Application::directory_static << "forward/module-surface-pbr.shader");
+		ResourceManager::load_shader(":E:/forward/module-surface-pbr.shader");
 	else
-		nix::Shader::load(hui::Application::directory_static << "forward/module-surface.shader");
+		ResourceManager::load_shader(":E:/forward/module-surface.shader");
 
-	shader_blur = nix::Shader::load(hui::Application::directory_static << "forward/blur.shader");
-	shader_depth = nix::Shader::load(hui::Application::directory_static << "forward/depth.shader");
-	shader_out = nix::Shader::load(hui::Application::directory_static << "forward/hdr.shader");
-	//shader_3d = nix::Shader::load(hui::Application::directory_static << "forward/3d-new.shader");
-	shader_3d = nix::Shader::load(hui::Application::directory_static << "default.shader");
-	shader_3d_multi = nix::Shader::load(hui::Application::directory_static << "default-multi.shader");
+	shader_blur = ResourceManager::load_shader(":E:/forward/blur.shader");
+	shader_depth = ResourceManager::load_shader(":E:/forward/depth.shader");
+	shader_out = ResourceManager::load_shader(":E:/forward/hdr.shader");
+	//shader_3d = ResourceManager::load_shader(":E:/forward/3d-new.shader");
+	shader_3d = ResourceManager::load_shader(":E:/default.shader");
+	shader_3d_multi = ResourceManager::load_shader(":E:/default-multi.shader");
 	if (!shader_3d_multi->link_uniform_block("Multi", 5))
 		msg_error("Multi not found...");
-	shader_fx = nix::Shader::load(hui::Application::directory_static << "forward/3d-fx.shader");
+	shader_fx = ResourceManager::load_shader(":E:/forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
-	shader_shadow = nix::Shader::load(hui::Application::directory_static << "forward/3d-shadow.shader");
+	shader_shadow = ResourceManager::load_shader(":E:/forward/3d-shadow.shader");
 
-	shader_2d = nix::Shader::load(hui::Application::directory_static << "forward/2d.shader");
-	shader_resolve_multisample = nix::Shader::load(hui::Application::directory_static << "forward/resolve-multisample.shader");
-	nix::shader_dir = sd;
+	shader_2d = ResourceManager::load_shader(":E:/forward/2d.shader");
+	shader_resolve_multisample = ResourceManager::load_shader(":E:/forward/resolve-multisample.shader");
 
 	ubo_multi_matrix = new nix::UniformBuffer();
 

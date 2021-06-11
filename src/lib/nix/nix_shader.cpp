@@ -12,8 +12,6 @@
 
 namespace nix{
 
-Path shader_dir;
-
 const int TYPE_LAYOUT = -41;
 const int TYPE_MODULE = -42;
 
@@ -302,20 +300,17 @@ Shader *Shader::load(const Path &filename) {
 	if (filename.is_empty())
 		return default_load;
 
-	Path fn = shader_dir << filename;
-	if (filename.is_absolute())
-		fn = filename;
 	for (Shader *s: weak(shaders))
-		if ((s->filename == fn) and (s->program >= 0))
+		if ((s->filename == filename) and (s->program >= 0))
 			return s;
 
-	msg_write("loading shader: " + fn.str());
+	msg_write("loading shader: " + filename.str());
 
 	try {
-		string source = FileRead(fn);
+		string source = FileRead(filename);
 		Shader *shader = Shader::create(source);
 		if (shader)
-			shader->filename = fn;
+			shader->filename = filename;
 
 		return shader;
 	} catch (Exception &e) {
