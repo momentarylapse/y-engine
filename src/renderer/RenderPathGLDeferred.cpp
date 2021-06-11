@@ -68,18 +68,18 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
-	ResourceManager::load_shader(":E:/deferred/module-surface.shader");
+	ResourceManager::load_shader("deferred/module-surface.shader");
 
-	shader_blur = ResourceManager::load_shader(":E:/forward/blur.shader");
-	shader_depth = ResourceManager::load_shader(":E:/forward/depth.shader");
-	shader_out = ResourceManager::load_shader(":E:/forward/hdr.shader");
-	shader_3d = ResourceManager::load_shader(":E:/deferred/3d.shader");
-	shader_gbuffer_out = ResourceManager::load_shader(":E:/deferred/out.shader");
-	shader_fx = ResourceManager::load_shader(":E:/forward/3d-fx.shader");
+	shader_blur = ResourceManager::load_shader("forward/blur.shader");
+	shader_depth = ResourceManager::load_shader("forward/depth.shader");
+	shader_out = ResourceManager::load_shader("forward/hdr.shader");
+	shader_3d = ResourceManager::load_shader("deferred/3d.shader");
+	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
+	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
-	shader_shadow = ResourceManager::load_shader(":E:/forward/3d-shadow.shader");
+	shader_shadow = ResourceManager::load_shader("forward/3d-shadow.shader");
 
-	shader_2d = ResourceManager::load_shader(":E:/forward/2d.shader");
+	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 }
 
 void RenderPathGLDeferred::draw() {

@@ -12,12 +12,11 @@
 #include "Material.h"
 #include "World.h"
 #include "../y/EngineData.h"
+#include "../helper/ResourceManager.h"
 #ifdef _X_ALLOW_X_
 //#include "../fx/light.h"
 #endif
 #include "../lib/nix/nix.h"
-
-nix::Texture *load_texture(const Path &file);
 
 
 #define Index(x,z)		((x)*(num_z+1)+(z))
@@ -91,7 +90,7 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 					material->textures.resize(num_textures);
 				for (int i=0;i<num_textures;i++)
 					if (!texture_file[i].is_empty())
-						material->textures[i] = load_texture(texture_file[i]);
+						material->textures[i] = ResourceManager::load_texture(texture_file[i]);
 
 				// height
 				for (int x=0;x<num_x+1;x++)

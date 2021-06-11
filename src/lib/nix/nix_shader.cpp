@@ -306,17 +306,12 @@ Shader *Shader::load(const Path &filename) {
 
 	msg_write("loading shader: " + filename.str());
 
-	try {
-		string source = FileRead(filename);
-		Shader *shader = Shader::create(source);
-		if (shader)
-			shader->filename = filename;
+	string source = FileRead(filename);
+	Shader *shader = Shader::create(source);
+	if (shader)
+		shader->filename = filename;
 
-		return shader;
-	} catch (Exception &e) {
-		msg_error(e.message());
-		return default_load;
-	}
+	return shader;
 }
 
 Shader::Shader() {

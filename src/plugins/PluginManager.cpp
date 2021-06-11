@@ -17,6 +17,7 @@
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
 #include "../helper/PerformanceMonitor.h"
+#include "../helper/ResourceManager.h"
 #include "../input/InputManager.h"
 #include "../net/NetworkManager.h"
 #include "../renderer/RenderPathGL.h"
@@ -421,6 +422,8 @@ void PluginManager::link_kaba() {
 	kaba::link_external("cam", &cam);
 	kaba::link_external("engine", &engine);
 	kaba::link_external("load_model", (void*)&ModelManager::load);
+	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
+	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
 }
 
 void PluginManager::reset() {

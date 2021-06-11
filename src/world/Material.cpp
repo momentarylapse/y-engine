@@ -8,11 +8,10 @@
 #elif defined(_X_USE_HUI_MINIMAL_)
 	#include "../lib/hui_minimal/hui.h"
 #endif
+#include "../helper/ResourceManager.h"
 
 
 Path MaterialDir;
-
-nix::Texture *load_texture(const Path &file);
 
 // materials
 static Material *default_material;
@@ -146,8 +145,8 @@ Material *LoadMaterial(const Path &filename) {
 	auto texture_files = c.get_str("textures", "");
 	if (texture_files != "")
 		for (auto &f: texture_files.explode(","))
-			m->textures.add(load_texture(f));
-	m->shader = nix::Shader::load(c.get_str("shader", ""));
+			m->textures.add(ResourceManager::load_texture(f));
+	m->shader = ResourceManager::load_shader(c.get_str("shader", ""));
 
 	m->friction._static = c.get_float("friction.static", 0.5f);
 	m->friction.sliding = c.get_float("friction.slide", 0.5f);
@@ -179,7 +178,7 @@ Material *LoadMaterial(const Path &filename) {
 		texture_files = c.get_str("reflection.cubemap", "");
 		Array<nix::Texture*> cmt;
 		for (auto &f: texture_files.explode(","))
-			cmt.add(load_texture(f));
+			cmt.add(ResourceManager::load_texture(f));
 		m->reflection.density = c.get_float("reflection.density", 1);
 #if 0
 			m->reflection.cube_map = new nix::CubeMap(m->reflection.cube_map_size);

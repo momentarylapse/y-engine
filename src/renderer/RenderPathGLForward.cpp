@@ -76,24 +76,24 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
 	if (config.get_str("renderer.shader-quality", "") == "pbr")
-		ResourceManager::load_shader(":E:/forward/module-surface-pbr.shader");
+		ResourceManager::load_shader("forward/module-surface-pbr.shader");
 	else
-		ResourceManager::load_shader(":E:/forward/module-surface.shader");
+		ResourceManager::load_shader("forward/module-surface.shader");
 
-	shader_blur = ResourceManager::load_shader(":E:/forward/blur.shader");
-	shader_depth = ResourceManager::load_shader(":E:/forward/depth.shader");
-	shader_out = ResourceManager::load_shader(":E:/forward/hdr.shader");
-	//shader_3d = ResourceManager::load_shader(":E:/forward/3d-new.shader");
-	shader_3d = ResourceManager::load_shader(":E:/default.shader");
-	shader_3d_multi = ResourceManager::load_shader(":E:/default-multi.shader");
+	shader_blur = ResourceManager::load_shader("forward/blur.shader");
+	shader_depth = ResourceManager::load_shader("forward/depth.shader");
+	shader_out = ResourceManager::load_shader("forward/hdr.shader");
+	//shader_3d = ResourceManager::load_shader("forward/3d-new.shader");
+	shader_3d = ResourceManager::load_shader("default.shader");
+	shader_3d_multi = ResourceManager::load_shader("default-multi.shader");
 	if (!shader_3d_multi->link_uniform_block("Multi", 5))
 		msg_error("Multi not found...");
-	shader_fx = ResourceManager::load_shader(":E:/forward/3d-fx.shader");
+	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
-	shader_shadow = ResourceManager::load_shader(":E:/forward/3d-shadow.shader");
+	shader_shadow = ResourceManager::load_shader("forward/3d-shadow.shader");
 
-	shader_2d = ResourceManager::load_shader(":E:/forward/2d.shader");
-	shader_resolve_multisample = ResourceManager::load_shader(":E:/forward/resolve-multisample.shader");
+	shader_2d = ResourceManager::load_shader("forward/2d.shader");
+	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
 
 	ubo_multi_matrix = new nix::UniformBuffer();
 
