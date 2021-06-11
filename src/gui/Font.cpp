@@ -48,7 +48,7 @@ Font *Font::_default = nullptr;
 void *ft_load_font(const string &name, float font_size);
 
 Font *Font::load(const string &name) {
-	if (name == "" and Font::_default)
+	if ((name == "") and Font::_default)
 		return Font::_default;
 
 	for (auto f: fonts)
@@ -140,13 +140,21 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 
 
 Path find_system_font_file(const string &name) {
+#ifdef OS_WINDOWS
+	Path base = "c:\\Windows\\Fonts";
+#else
 	Path base = "/usr/share/fonts";
+#endif
 	auto list = dir_search(base, "*.ttf", "fr");
 	for (auto &f: list)
-		if (f.basename_no_ext() == name or f.basename_no_ext() == name + "-Regular")
+		if ((f.basename_no_ext().lower() == name.lower()) or (f.basename_no_ext().lower() == name.lower() + "-regular"))
 			return base << f;
+#ifdef OS_WINDOWS
+	return "c:\\Windows\\Fonts\\arial.ttf";
+#else
 	//return "/usr/share/fonts/TTF/DejaVuSansMono.ttf";
 	return "/usr/share/fonts/noto/NotoSans-Regular.ttf";
+#endif
 }
 
 
@@ -175,7 +183,7 @@ void Font::init_fonts() {
 		throw Exception("can not initialize freetype2 library");
 	}
 #ifdef OS_WINDOWS
-	//_default = Font::load(config.get_str("default-font", "Arial"));
+	_default = Font::load(config.get_str("default-font", "Arial"));
 #else
 	_default = Font::load(config.get_str("default-font", "NotoSans"));
 #endif
