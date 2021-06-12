@@ -214,8 +214,8 @@ void SIAddPackageNix() {
 		func_add_param("yres", TypeInt);
 		func_add_param("fullscreen",TypeBool);*/
 #ifdef _X_USE_HUI_
-	add_func("start_frame_hui", TypeVoid, nix_p(&nix::StartFrameHui), Flags::STATIC);
-	add_func("end_frame_hui", TypeVoid, nix_p(&nix::EndFrameHui), Flags::STATIC);
+	add_func("start_frame_hui", TypeVoid, nix_p(&nix::start_frame_hui), Flags::STATIC);
+	add_func("end_frame_hui", TypeVoid, nix_p(&nix::end_frame_hui), Flags::STATIC);
 #else
 	add_func("start_frame_hui", TypeVoid, nullptr, Flags::STATIC);
 	add_func("end_frame_hui", TypeVoid, nullptr, Flags::STATIC);
