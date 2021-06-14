@@ -44,11 +44,11 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 		new nix::Texture(width, height, "rgba:f16"), // emission
 		new nix::Texture(width, height, "rgba:f16"), // pos
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
-		new nix::DepthBuffer(width, height)});
+		new nix::DepthBuffer(width, height, "d24s8")});
 
 	fb_main = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"),
-		new nix::DepthBuffer(width, height)});
+		new nix::DepthBuffer(width, height, "d24s8")});
 	fb_small1 = new nix::FrameBuffer({
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb_small2 = new nix::FrameBuffer({
@@ -58,9 +58,9 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	fb3 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
+		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
+		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
 	fb_main->color_attachments[0]->set_options("wrap=clamp");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");

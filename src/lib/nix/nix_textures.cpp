@@ -35,7 +35,7 @@ const unsigned int NO_TEXTURE = 0xffffffff;
 
 void init_textures() {
 
-	default_texture = new Texture;
+	default_texture = new Texture(16, 16, "rgba:i8");
 	Image image;
 	image.create(16, 16, White);
 	default_texture->overwrite(image);
@@ -58,29 +58,27 @@ void reincarnate_textures() {
 }
 
 
-struct FormatData {
-	unsigned int internal_format;
-	unsigned int components, x;
-};
-
-FormatData parse_format(const string &_format) {
+// "sized format"
+unsigned int parse_format(const string &_format) {
 	if (_format == "r:i8")
-		return {GL_R8, GL_RED, GL_UNSIGNED_BYTE};
+		return GL_R8;
 	if (_format == "rgb:i8")
-		return {GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE};
+		return GL_RGB8;
 	if (_format == "rgba:i8")
-		return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+		return GL_RGBA8;
 	if (_format == "r:f32")
-		return {GL_R32F, GL_RED, GL_FLOAT};
+		return GL_R32F;
 	if (_format == "rgba:f32")
-		return {GL_RGBA32F, GL_RGBA, GL_FLOAT};
+		return GL_RGBA32F;
 	if (_format == "r:f16")
-		return {GL_R16F, GL_RED, GL_HALF_FLOAT};
+		return GL_R16F;
 	if (_format == "rgba:f16")
-		return {GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT};
+		return GL_RGBA16F;
+	if (_format == "d24s8")
+		return GL_DEPTH24_STENCIL8;
 
 	msg_error("unknown format: " + _format);
-	return {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+	return GL_RGBA8;
 }
 
 Texture::Texture() {
@@ -92,17 +90,24 @@ Texture::Texture() {
 	texture = NO_TEXTURE;
 }
 
+int mip_levels(int width, int height) {
+	int l = min(width, height);
+	for (int n=0; n<20; n++)
+		if (l >> n == 0)
+			return n;
+	return 1;
+}
+
 
 void Texture::_create_2d(int w, int h, const string &_format) {
 	msg_write(format("creating texture [%d x %d: %s] ", w, h, _format));
 	width = w;
 	height = h;
 	type = Type::DEFAULT;
+	internal_format = parse_format(_format);
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	auto d = parse_format(_format);
-	internal_format = d.internal_format;
-	glTextureStorage2D(texture, 1, internal_format, width, height);
+	glTextureStorage2D(texture, mip_levels(width, height), internal_format, width, height);
 	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -114,24 +119,21 @@ Texture::Texture(int w, int h, const string &_format) : Texture() {
 	_create_2d(w, h, _format);
 }
 
-Texture::Texture(int w, int h, int _nz, const string &_format) : Texture() {
-	msg_write(format("creating texture [%d x %d x %d: %s] ", w, h, _nz, _format));
+VolumeTexture::VolumeTexture(int w, int h, int _nz, const string &_format) : Texture() {
+	msg_write(format("creating volume texture [%d x %d x %d: %s] ", w, h, _nz, _format));
 	width = w;
 	height = h;
 	nz = _nz;
 	type = Type::VOLUME;
+	internal_format = parse_format(_format);
 
 	glCreateTextures(GL_TEXTURE_3D, 1, &texture);
-	glBindTexture(GL_TEXTURE_3D, texture);
-	auto d = parse_format(_format);
-	internal_format = d.internal_format;
 	glTextureStorage3D(texture, 1, internal_format, width, height, nz);
-	//glTexImage3D(GL_TEXTURE_3D, 0, internal_format, width, height, nz, 0, d.components, d.x, 0);
 	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//glTextureParameteri(texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
+	glTextureParameteri(texture, GL_TEXTURE_WRAP_R, GL_REPEAT);
 }
 
 Texture::~Texture() {
@@ -147,8 +149,8 @@ void Texture::__init__(int w, int h, const string &f) {
 	new(this) Texture(w, h, f);
 }
 
-void Texture::__init3__(int nx, int ny, int nz, const string &f) {
-	new(this) Texture(nx, ny, nz, f);
+void VolumeTexture::__init__(int nx, int ny, int nz, const string &f) {
+	new(this) VolumeTexture(nx, ny, nz, f);
 }
 
 void Texture::__delete__() {
@@ -194,45 +196,6 @@ void Texture::reload() {
 	delete image;
 }
 
-void Texture::_overwrite(int target, int subtarget, const Image &image) {
-	if (image.error)
-		return;
-
-	if (width != image.width or height != image.height) {
-		//msg_write("texture resize..." + filename.str());
-		glDeleteTextures(1, &texture);
-		_create_2d(image.width, image.height, "rgba:i8");
-		//glTextureStorage2D(texture, 1, internal_format, width, height);
-	}
-
-	image.set_mode(Image::Mode::RGBA);
-
-	if (type == Type::CUBE)
-		target = GL_TEXTURE_CUBE_MAP;
-
-	//glEnable(target);
-//	glBindTexture(target, texture);
-
-
-	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
-
-	//if (image.alpha_used) {
-//		internal_format = GL_RGBA8;
-//		glTexImage2D(subtarget, 0, GL_RGBA8, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
-	//} else {
-	//	internal_format = GL_RGB8;
-	//	glTexImage2D(subtarget, 0, GL_RGB8, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
-	//}
-	if (type == Type::DEFAULT)
-		glGenerateTextureMipmap(texture);
-		//glGenerateMipmap(GL_TEXTURE_2D);
-
-//msg_todo("32 bit textures for OpenGL");
-	//gluBuild2DMipmaps(subtarget,4,NixImage.width,NixImage.height,GL_RGBA,GL_UNSIGNED_BYTE,NixImage.data);
-	//glTexImage2D(subtarget,0,GL_RGBA8,128,128,0,GL_RGBA,GL_UNSIGNED_BYTE,NixImage.data);
-	//glTexImage2D(subtarget,0,4,256,256,0,4,GL_UNSIGNED_BYTE,NixImage.data);
-}
-
 void Texture::set_options(const string &options) const {
 	for (auto &x: options.explode(",")) {
 		auto y = x.explode("=");
@@ -242,7 +205,6 @@ void Texture::set_options(const string &options) const {
 		string value = y[1];
 		if (key == "wrap") {
 			if (value == "repeat") {
-				//glBindTexture(0, texture);
 				glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
 				glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			} else if (value == "clamp") {
@@ -269,45 +231,72 @@ void Texture::set_options(const string &options) const {
 }
 
 void Texture::overwrite(const Image &image) {
+	if (image.error)
+		return;
+
 	if (type == Type::NONE)
 		_create_2d(image.width, image.height, "rgba:i8");
 
-	_overwrite(GL_TEXTURE_2D, GL_TEXTURE_2D, image);
+	if (width != image.width or height != image.height) {
+		//msg_write("texture resize..." + filename.str());
+		glDeleteTextures(1, &texture);
+		_create_2d(image.width, image.height, "rgba:i8");//image.alpha_used ? "rgba:i8" : "rgb:i8");
+	}
+
+	image.set_mode(Image::Mode::RGBA);
+
+	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
+
+	if (type == Type::DEFAULT)
+		glGenerateTextureMipmap(texture);
 }
 
 void Texture::read(Image &image) {
-	set_texture(this);
 	image.create(width, height, Black);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data.data);
+	glGetTextureSubImage(texture, 0, 0, 0, 0, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, image.data.num * sizeof(float), image.data.data);
+}
+
+unsigned int _gl_channels_(int channels) {
+	if (channels == 1)
+		return GL_RED;
+	if (channels == 2)
+		return GL_RG;
+	if (channels == 3)
+		return GL_RGB;
+	return GL_RGBA;
 }
 
 void Texture::read_float(Array<float> &data) {
-	set_texture(this);
-	if ((internal_format == GL_R8) or (internal_format == GL_R32F)) {
-		data.resize(width * height);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, data.data); // 1 channel
-	} else {
-		data.resize(width * height * 4);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, data.data); // 4 channels
-	}
+	int ch = channels();
+	data.resize(width * height * ch);
+	int format = _gl_channels_(ch);
+
+	glGetTextureSubImage(texture, 0, 0, 0, 0, width, height, 1, format, GL_FLOAT, data.num * sizeof(float), data.data);
 }
 
-void Texture::write_float(Array<float> &data, int nx, int ny, int nz) {
-	set_texture(this);
+int Texture::channels() const {
+	if ((internal_format == GL_R8) or (internal_format == GL_R32F))
+		return 1;
+	if ((internal_format == GL_RGB8) or (internal_format == GL_RGB32F))
+		return 3;
+	return 4;
+}
+
+void Texture::write_float(Array<float> &data) {
+	int ch = channels();
+	int length_expected = width * height * ch;
+	if (type == Type::VOLUME)
+		length_expected *= nz;
+	if (data.num != length_expected) {
+		msg_error(format("Texture.write_float: array of length %d given, but %d expected", data.num, length_expected));
+		return;
+	}
+
+	int format = _gl_channels_(ch);
 	if (type == Type::VOLUME) {
-		if ((internal_format == GL_R8) or (internal_format == GL_R32F)) {
-			glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, nx, ny, nz, 0, GL_RED, GL_FLOAT, &data[0]);
-		} else {
-			glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, nx, ny, nz, 0, GL_RGBA, GL_FLOAT, &data[0]);
-		}
+		glTextureSubImage3D(texture, 0, 0, 0, 0, width, height, nz, format, GL_FLOAT, &data[0]);
 	} else {
-		if ((internal_format == GL_R8) or (internal_format == GL_R32F)) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, nx, ny, 0, GL_RED, GL_FLOAT, &data[0]);
-			//glSetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, data.data); // 1 channel
-		} else {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, nx, ny, 0, GL_RGBA, GL_FLOAT, &data[0]);
-			//glSetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, data.data); // 4 channels
-		}
+		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_FLOAT, &data[0]);
 	}
 }
 
@@ -386,16 +375,12 @@ TextureMultiSample::TextureMultiSample(int w, int h, int _samples, const string 
 	samples = _samples;
 	type = Type::MULTISAMPLE;
 	filename = "-multisample-";
+	internal_format = parse_format(_format);
 
 	glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, &texture);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-	auto d = parse_format(_format);
-	internal_format = d.internal_format;
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internal_format, width, height, GL_TRUE);
-	//glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, d.components, d.x, 0);
+	glTextureStorage2DMultisample(texture, samples, internal_format, width, height, GL_TRUE);
 	//glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
 
 ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
@@ -406,8 +391,6 @@ ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
 	type = Type::IMAGE;
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	auto d = parse_format(_format);
-	internal_format = d.internal_format;
 	glTextureStorage2D(texture, 1, internal_format, width, height);
 	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -420,13 +403,13 @@ void ImageTexture::__init__(int width, int height, const string &format) {
 }
 
 
-DepthBuffer::DepthBuffer(int _width, int _height) {
+DepthBuffer::DepthBuffer(int _width, int _height, const string &_format) {
 	msg_write(format("creating depth texture [%d x %d] ", _width, _height));
 	filename = "-depth-";
 	width = _width;
 	height = _height;
 	type = Type::DEPTH;
-	internal_format = GL_DEPTH_COMPONENT;
+	internal_format = parse_format(_format);
 
 
 	// as renderbuffer -> can't sample from it!
@@ -436,9 +419,7 @@ DepthBuffer::DepthBuffer(int _width, int _height) {
 
 	// as texture -> can sample!
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-//	glTextureStorage2D(texture, 1, internal_format, width, height);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTextureStorage2D(texture, 1, internal_format, width, height);
 	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -447,19 +428,19 @@ DepthBuffer::DepthBuffer(int _width, int _height) {
 	glTextureParameterfv(texture, GL_TEXTURE_BORDER_COLOR, borderColor);
 }
 
-void DepthBuffer::__init__(int width, int height) {
-	new(this) DepthBuffer(width, height);
+void DepthBuffer::__init__(int width, int height, const string &format) {
+	new(this) DepthBuffer(width, height, format);
 }
 
-RenderBuffer::RenderBuffer(int w, int h) : RenderBuffer(w, h, 0) {}
+RenderBuffer::RenderBuffer(int w, int h, const string &format) : RenderBuffer(w, h, 0, format) {}
 
-RenderBuffer::RenderBuffer(int w, int h, int _samples) {
+RenderBuffer::RenderBuffer(int w, int h, int _samples, const string &format) {
 	filename = "-render-buffer-";
 	type = Type::RENDERBUFFER;
 	width = w;
 	height = h;
 	samples = _samples;
-	internal_format = GL_DEPTH24_STENCIL8;
+	internal_format = parse_format(format);
 
 	glGenRenderbuffers(1, &texture);
 	glBindRenderbuffer(GL_RENDERBUFFER, texture);
@@ -470,25 +451,13 @@ RenderBuffer::RenderBuffer(int w, int h, int _samples) {
 }
 
 
-static int NixCubeMapTarget[] = {
-	GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-	GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-	GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-	GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-	GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-	GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-};
-
 CubeMap::CubeMap(int size, const string &_format) {
 	msg_write(format("creating cube map [%d x %d x 6]", size, size));
 	width = size;
 	height = size;
 	type = Type::CUBE;
 	filename = "-cubemap-";
-
-	auto d = parse_format(_format);
-	internal_format = d.internal_format;
-
+	internal_format = parse_format(_format);
 
 	glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &texture);
 	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

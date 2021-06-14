@@ -69,8 +69,8 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 	shadow_index = -1;
 
 	ubo_light = new nix::UniformBuffer();
-	tex_white = new nix::Texture();
-	tex_black = new nix::Texture();
+	tex_white = new nix::Texture(16, 16, "rgba:i8");
+	tex_black = new nix::Texture(16, 16, "rgba:i8");
 	Image im;
 	im.create(16, 16, White);
 	tex_white->overwrite(im);
@@ -82,7 +82,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_rect(rect(-1,1, -1,1));
 
-	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE);
+	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
 	fb_cube = nullptr;
 	cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");
 

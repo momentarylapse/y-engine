@@ -43,18 +43,17 @@ nix::UniformBuffer *ubo_multi_matrix = nullptr;
 
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
-	depth_buffer = new nix::DepthBuffer(width, height);
+	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		depth_buffer = new nix::DepthBuffer(width, height);
 		fb_main = new nix::FrameBuffer({
 			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
 			//depth_buffer});
-			new nix::RenderBuffer(width, height, 4)});
+			new nix::RenderBuffer(width, height, 4, "d24s8")});
 	} else {
 		fb_main = new nix::FrameBuffer({
 			new nix::Texture(width, height, "rgba:f16"),
 			depth_buffer});
-			//new nix::RenderBuffer(width, height)});
+			//new nix::RenderBuffer(width, height, "d24s8)});
 	}
 	fb_small1 = new nix::FrameBuffer({
 		new nix::Texture(width/2, height/2, "rgba:f16")});
@@ -65,9 +64,9 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	fb3 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
+		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
+		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
 	if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
 		fb_main->color_attachments[0]->set_options("wrap=clamp");
@@ -109,8 +108,8 @@ void RenderPathGLForward::draw() {
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
-//		if (world.ego)
-//			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
+		if (world.ego)
+			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
 
