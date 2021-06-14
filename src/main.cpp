@@ -115,6 +115,7 @@ public:
 		if (config.get_str("error.missing-files", "ignore") == "ignore")
 			engine.ignore_missing_files = true;
 
+
 		try {
 			if (config.get_str("renderer.path", "forward") == "deferred")
 				render_path = new RenderPathGLDeferred(window, engine.width, engine.height, &perf_mon);

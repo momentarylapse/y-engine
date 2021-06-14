@@ -84,7 +84,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 
 	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE);
 	fb_cube = nullptr;
-	cube_map = new nix::CubeMap(CUBE_SIZE);
+	cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");
 
 	EntityManager::enabled = false;
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);

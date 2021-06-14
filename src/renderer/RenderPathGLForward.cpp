@@ -69,7 +69,8 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution)});
 
-	fb_main->color_attachments[0]->set_options("wrap=clamp");
+	if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
+		fb_main->color_attachments[0]->set_options("wrap=clamp");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 	fb2->color_attachments[0]->set_options("wrap=clamp");
@@ -108,8 +109,8 @@ void RenderPathGLForward::draw() {
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
-		if (world.ego)
-			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
+//		if (world.ego)
+//			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
 

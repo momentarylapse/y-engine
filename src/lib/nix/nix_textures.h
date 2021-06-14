@@ -26,6 +26,7 @@ void reincarnate_textures();
 class Texture : public Sharable<Empty> {
 public:
 	enum class Type {
+		NONE,
 		DEFAULT,
 		DYNAMIC,
 		CUBE,
@@ -57,6 +58,12 @@ public:
 	void _cdecl write_float(Array<float> &data, int nx, int ny, int nz);
 	void _cdecl reload();
 	void _cdecl unload();
+
+
+protected:
+	void _create_2d(int width, int height, const string &format);
+	void _overwrite(int target, int subtarget, const Image &image);
+public:
 
 	void _cdecl set_options(const string &op) const;
 
@@ -90,8 +97,8 @@ public:
 
 class CubeMap : public Texture {
 public:
-	CubeMap(int size);
-	void _cdecl __init__(int size);
+	CubeMap(int size, const string &format);
+	void _cdecl __init__(int size, const string &format);
 
 	void _cdecl overwrite_side(int side, const Image &image);
 	void _cdecl fill_side(int side, Texture *source);

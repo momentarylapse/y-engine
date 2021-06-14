@@ -23,7 +23,7 @@ extern unsigned int VertexArrayID;
 
 namespace nix{
 
-string version = "0.13.6.0";
+string version = "0.13.7.0";
 
 
 

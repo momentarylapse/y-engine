@@ -45,6 +45,9 @@ void Text::rebuild() {
 		return;
 	Image im;
 	font->render_text(text, align, im);
+	if (im.width == 0 or im.height == 0)
+		im.create(1,1, color(0,0,0,0));
+
 	if (texture == nullptr)
 		texture = new nix::Texture();
 

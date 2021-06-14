@@ -151,6 +151,7 @@ void SIAddPackageNix() {
 		class_derive_from(TypeTexture, false, false);
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::CubeMap::__init__));
 			func_add_param("size", TypeInt);
+			func_add_param("format", TypeString);
 
 	add_class(TypeFrameBuffer);
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::FrameBuffer::__init__));
