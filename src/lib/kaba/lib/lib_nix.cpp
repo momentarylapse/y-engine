@@ -67,7 +67,6 @@ const Class *TypeTexture;
 const Class *TypeTextureP;
 const Class *TypeTexturePList;
 const Class *TypeVolumeTexture;
-const Class *TypeEmptyTexture;
 const Class *TypeImageTexture;
 const Class *TypeDepthBuffer;
 const Class *TypeDepthBufferP;
@@ -86,7 +85,6 @@ void SIAddPackageNix() {
 	TypeTexture			= add_type  ("Texture", sizeof(nix::Texture));
 	TypeTextureP		= add_type_p(TypeTexture);
 	TypeTexturePList	= add_type_l(TypeTextureP);
-	TypeEmptyTexture	= add_type  ("EmptyTexture", sizeof(nix::Texture));
 	TypeImageTexture	= add_type  ("ImageTexture", sizeof(nix::Texture));
 	TypeVolumeTexture	= add_type  ("VolumeTexture", sizeof(nix::Texture));
 	TypeDepthBuffer		= add_type  ("DepthBuffer", sizeof(nix::Texture));
@@ -112,6 +110,10 @@ void SIAddPackageNix() {
 
 
 	add_class(TypeTexture);
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::Texture::__init__));
+			func_add_param("width", TypeInt);
+			func_add_param("height", TypeInt);
+			func_add_param("format", TypeString);
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, nix_p(&nix::Texture::__delete__));
 		class_add_func("overwrite", TypeVoid, nix_p(&nix::Texture::overwrite));
 			func_add_param("image", TypeImage);
@@ -125,13 +127,6 @@ void SIAddPackageNix() {
 			func_add_param("filename", TypePath);
 		class_add_element("width", TypeInt, nix_p(&nix::Texture::width));
 		class_add_element("height", TypeInt, nix_p(&nix::Texture::height));
-
-	add_class(TypeEmptyTexture);
-		class_derive_from(TypeTexture, false, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::Texture::__init__));
-			func_add_param("width", TypeInt);
-			func_add_param("height", TypeInt);
-			func_add_param("format", TypeString);
 
 	add_class(TypeVolumeTexture);
 		class_derive_from(TypeTexture, false, false);
@@ -150,7 +145,7 @@ void SIAddPackageNix() {
 
 	add_class(TypeDepthBuffer);
 		class_derive_from(TypeTexture, false, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::DepthBuffer::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::DepthBuffer::__init__), Flags::OVERRIDE);
 			func_add_param("width", TypeInt);
 			func_add_param("height", TypeInt);
 			func_add_param("format", TypeString);
