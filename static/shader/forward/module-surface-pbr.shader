@@ -18,7 +18,7 @@ struct Light {
 uniform int num_lights;
 uniform int shadow_index = -1;
 
-/*layout(binding = 1)*/ uniform LightData {
+layout(std140 /*,binding = 1*/) uniform LightData {
 	Light light[32];
 };
 
@@ -249,7 +249,6 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	out_color.rgb = f * out_color.rgb + (1-f) * fog.color.rgb;
 	
 	*/
-	
 	out_color.a = albedo.a;
 }
 </Module>

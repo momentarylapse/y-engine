@@ -65,6 +65,11 @@ Model* _create_object_multi(World *w, const Path &filename, const Array<vector> 
 #pragma GCC pop_options
 
 
+void global_exit(EngineData& engine) {
+	msg_error("exit by script...");
+	exit(0);
+}
+
 void PluginManager::link_kaba() {
 
 	Camera _cam(v_0, quaternion::ID, rect::ID);
@@ -402,6 +407,7 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("EngineData.second_world_file", &EngineData::second_world_file);
 	kaba::declare_class_element("EngineData.physical_aspect_ratio", &EngineData::physical_aspect_ratio);
 	kaba::declare_class_element("EngineData.renderer", &EngineData::renderer);
+	kaba::link_external_class_func("EngineData.exit", &global_exit);
 
 	kaba::declare_class_size("RenderPath", sizeof(RenderPathGL));
 	kaba::declare_class_element("RenderPath.depth_buffer", &RenderPathGL::depth_buffer);

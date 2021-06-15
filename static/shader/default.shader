@@ -2,7 +2,7 @@
 	version = 420
 </Layout>
 <VertexShader>
-struct Matrix { mat4 model, view, project; };
+layout(column_major) struct Matrix { mat4 model, view, project; };
 /*layout(binding = 0)*/ uniform Matrix matrix;
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
@@ -22,7 +22,7 @@ void main() {
 struct Material { vec4 albedo, emission; float roughness, metal; };
 uniform Material material;
 uniform sampler2D tex0;
-struct Matrix { mat4 model, view, project; };
+layout(column_major) struct Matrix { mat4 model, view, project; };
 /*layout(binding = 0)*/ uniform Matrix matrix;
 
 void main() {
