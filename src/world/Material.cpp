@@ -5,13 +5,14 @@
 #include "../lib/config.h"
 #ifdef _X_USE_HUI_
 	#include "../lib/hui/hui.h"
+	#include "ResourceManager.h"
+	#include "EngineData.h"
 #elif defined(_X_USE_HUI_MINIMAL_)
 	#include "../lib/hui_minimal/hui.h"
+	#include "../helper/ResourceManager.h"
+	#include "../y/EngineData.h"
 #endif
-#include "../helper/ResourceManager.h"
 
-
-Path MaterialDir;
 
 // materials
 static Material *default_material;
@@ -127,7 +128,7 @@ Material *LoadMaterial(const Path &filename) {
 	msg_write("loading material " + filename.str());
 
 	hui::Configuration c;
-	if (!c.load(MaterialDir << filename.with(".material"))) {
+	if (!c.load(engine.material_dir << filename.with(".material"))) {
 		/*if (engine.ignore_missing_files) {
 			msg_error("material file missing: " + filename.str());
 			return default_material->copy();

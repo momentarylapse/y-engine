@@ -12,9 +12,12 @@
 #include "Material.h"
 #include "World.h"
 #include "../y/EngineData.h"
-#include "../helper/ResourceManager.h"
+#include "../lib/config.h"
 #ifdef _X_ALLOW_X_
+#include "../helper/ResourceManager.h"
 //#include "../fx/light.h"
+#else
+#include "ResourceManager.h"
 #endif
 #include "../lib/nix/nix.h"
 

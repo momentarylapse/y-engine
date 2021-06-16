@@ -10,9 +10,11 @@
 #include "../y/EngineData.h"
 #include "../lib/kaba/kaba.h"
 #include "../lib/config.h"
-#include "../helper/ResourceManager.h"
 #ifdef _X_ALLOW_X_
+#include "../helper/ResourceManager.h"
 #include "../plugins/PluginManager.h"
+#else
+#include "ResourceManager.h"
 #endif
 #include "../lib/file/file.h"
 #include "../lib/xfile/chunked.h"
