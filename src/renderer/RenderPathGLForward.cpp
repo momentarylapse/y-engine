@@ -231,6 +231,10 @@ void RenderPathGLForward::draw_particles() {
 		}
 	}
 
+	// script injectors
+	for (auto &i: fx_injectors)
+		i.func();
+
 
 	nix::set_z(true, true);
 	nix::set_alpha(nix::AlphaMode::NONE);

@@ -131,6 +131,10 @@ void RenderPathGL::kaba_add_post_processor(kaba::Function *f) {
 	post_processors.add({(post_process_func_t*)(int_p)f->address});
 }
 
+void RenderPathGL::kaba_add_fx_injector(kaba::Function *f) {
+	fx_injectors.add({(injector_func_t*)(int_p)f->address});
+}
+
 
 // GTX750: 1920x1080 0.277 ms per trivial step
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {

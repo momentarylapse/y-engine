@@ -417,11 +417,13 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("RenderPath.fb3", &RenderPathGL::fb3);
 	kaba::declare_class_element("RenderPath.fb_small1", &RenderPathGL::fb_small1);
 	kaba::declare_class_element("RenderPath.fb_small2", &RenderPathGL::fb_small2);
+	kaba::declare_class_element("RenderPath.shader_fx", &RenderPathGL::shader_fx);
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RenderPathGLForward::render_into_texture, engine.renderer);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RenderPathGLForward::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.next_fb", &RenderPathGL::next_fb);
 	kaba::link_external_class_func("RenderPath.process", &RenderPathGL::process);
 	kaba::link_external_class_func("RenderPath.add_post_processor", &RenderPathGL::kaba_add_post_processor);
+	kaba::link_external_class_func("RenderPath.add_fx_injector", &RenderPathGL::kaba_add_fx_injector);
 
 	kaba::link_external("tex_white", &_tex_white);
 	kaba::link_external("world", &world);

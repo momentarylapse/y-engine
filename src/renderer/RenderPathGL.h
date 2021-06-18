@@ -26,6 +26,11 @@ namespace kaba {
 	class Function;
 }
 
+typedef void injector_func_t();
+struct RenderInjector {
+	injector_func_t *func;
+};
+
 typedef nix::FrameBuffer* post_process_func_t(nix::FrameBuffer* cur);
 struct PostProcessor {
 	post_process_func_t *func;
@@ -94,6 +99,9 @@ public:
 
 	Array<PostProcessor> post_processors;
 	void kaba_add_post_processor(kaba::Function *f);
+
+	Array<RenderInjector> fx_injectors;
+	void kaba_add_fx_injector(kaba::Function *f);
 };
 
 
