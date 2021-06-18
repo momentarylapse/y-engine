@@ -94,7 +94,7 @@ void RenderPathGLDeferred::draw() {
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	render_into_texture(gbuffer.get(), cam);
+	render_into_texture(gbuffer.get(), cam, dynamic_fb_area());
 	render_from_gbuffer(gbuffer.get(), fb_main.get());
 
 	auto source = do_post_processing(fb_main.get());
@@ -120,8 +120,10 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	process(tex, target, s);
 }
 
-void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {
+void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	nix::bind_frame_buffer(fb);
+	nix::set_viewport(target_area);
+	nix::set_scissor(target_area);
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;

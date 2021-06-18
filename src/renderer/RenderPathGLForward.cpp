@@ -127,8 +127,7 @@ void RenderPathGLForward::draw() {
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	cur_fb_area = rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
-	render_into_texture(fb_main.get(), cam);
+	render_into_texture(fb_main.get(), cam, dynamic_fb_area());
 
 	auto source = fb_main.get();
 	if (config.antialiasing_method == AntialiasingMethod::MSAA)
@@ -143,10 +142,10 @@ void RenderPathGLForward::draw() {
 	draw_gui(source);
 }
 
-void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {
+void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	nix::bind_frame_buffer(fb);
-	nix::set_viewport(cur_fb_area);
-	nix::set_scissor(cur_fb_area);
+	nix::set_viewport(target_area);
+	nix::set_scissor(target_area);
 
 	auto m = matrix::scale(1,-1,1);
 	if (config.antialiasing_method == AntialiasingMethod::TAA)

@@ -72,7 +72,7 @@ public:
 
 	RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 
-	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam) = 0;
+	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(nix::DepthBuffer *fb, nix::CubeMap *cube, const vector &pos);
 
 	void start_frame() override;
@@ -89,6 +89,7 @@ public:
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
 
 	nix::FrameBuffer *next_fb(nix::FrameBuffer *cur);
+	rect dynamic_fb_area() const;
 
 
 	Array<PostProcessor> post_processors;

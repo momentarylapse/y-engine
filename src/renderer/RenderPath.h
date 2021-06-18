@@ -65,7 +65,6 @@ public:
 	// dynamic resolution scaling
 	float resolution_scale_x = 1.0f;
 	float resolution_scale_y = 1.0f;
-	rect cur_fb_area;
 };
 
 

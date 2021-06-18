@@ -20,7 +20,7 @@ public:
 	RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 	void draw() override;
 
-	void render_into_texture(nix::FrameBuffer *fb, Camera *cam) override;
+	void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) override;
 	void draw_skyboxes();
 	void draw_terrains(bool allow_material);
 	void draw_objects(bool allow_material);

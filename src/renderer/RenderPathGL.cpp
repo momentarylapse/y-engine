@@ -115,8 +115,12 @@ void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cu
 			cam.ang = quaternion::rotation(vector(0,pi,0));
 		if (i == 5)
 			cam.ang = quaternion::rotation(vector(0,0,0));
-		render_into_texture(fb_cube.get(), &cam);
+		render_into_texture(fb_cube.get(), &cam, fb_cube->area());
 	}
+}
+
+rect RenderPathGL::dynamic_fb_area() const {
+	return rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
 }
 
 nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
