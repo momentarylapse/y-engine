@@ -13,8 +13,13 @@ Config config;
 Config::Config() {
 }
 
-void Config::load() {
+void Config::load(const Array<string> &arg) {
 	hui::Configuration::load("game.ini");
+	for (auto &a: arg)
+		if (a.head(2) == "-c") {
+			auto xx = a.sub_ref(2).explode("=");
+			set_str(xx[0].trim(), xx[1].trim());
+		}
 
 	default_world = get_str("default-world", "");
 	second_world = get_str("second-world", "");

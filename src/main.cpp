@@ -104,7 +104,7 @@ public:
 	gui::Text *fps_display;
 
 	void init(const Array<string> &arg) {
-		config.load();
+		config.load(arg);
 
 		window = create_window();
 		kaba::init();
@@ -139,26 +139,15 @@ public:
 
 		ErrorHandler::init();
 
-
-
-#if HAS_LIB_VULKAN
-		gui::init(renderer->default_render_pass());
-
-		if (config.get("renderer.path", "forward") == "deferred") {
-			render_path = new RenderPathDeferred(renderer, &perf_mon);
-		} else {
-			render_path = new RenderPathForward(renderer, &perf_mon);
-		}
-#endif
-
 		gui::init(render_path->shader_2d);
 
 
 		InputManager::init(window);
 
 
-		if (arg.num > 1)
-			config.default_world = arg[1];
+		for (auto &a: arg.sub_ref(1))
+			if (a.head(1) != "-")
+				config.default_world = a;
 
 		MaterialInit();
 		MaterialSetDefaultShader(render_path->shader_3d);

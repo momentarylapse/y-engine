@@ -34,7 +34,7 @@ public:
 	float target_framerate = 60;
 
 	Config();
-	void load();
+	void load(const Array<string> &arg);
 };
 extern Config config;
 
