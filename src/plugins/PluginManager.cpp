@@ -365,12 +365,15 @@ void PluginManager::link_kaba() {
 	kaba::link_external("ui.mouse", &input::mouse);
 	kaba::link_external("ui.dmouse", &input::dmouse);
 	kaba::link_external("ui.scroll", &input::scroll);
+	kaba::link_external("ui.link_mouse_and_keyboard_into_pad", &input::link_mouse_and_keyboard_into_pad);
 	kaba::link_external("ui.get_pad", (void*)&input::get_pad);
 
 	kaba::declare_class_size("ui.Gamepad", sizeof(input::Gamepad));
 	kaba::declare_class_element("ui.Gamepad.deadzone", &input::Gamepad::deadzone);
 	kaba::link_external_class_func("ui.Gamepad.update", &input::Gamepad::update);
 	kaba::link_external_class_func("ui.Gamepad.is_present", &input::Gamepad::is_present);
+	kaba::link_external_class_func("ui.Gamepad.axis", &input::Gamepad::axis);
+	kaba::link_external_class_func("ui.Gamepad.button", &input::Gamepad::button);
 	kaba::link_external_class_func("ui.Gamepad.clicked", &input::Gamepad::clicked);
 
 	kaba::declare_class_size("NetworkManager", sizeof(NetworkManager));

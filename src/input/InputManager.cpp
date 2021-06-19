@@ -20,9 +20,13 @@ namespace input {
 void init(GLFWwindow *window) {
 	init_mouse(window);
 	init_keyboard(window);
+	init_pads();
 }
 
 void iterate() {
+	iterate_mouse_pre();
+	iterate_keyboard_pre();
+
 	glfwPollEvents();
 
 	iterate_mouse();

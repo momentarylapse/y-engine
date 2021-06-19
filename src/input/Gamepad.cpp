@@ -6,15 +6,25 @@
  */
 
 #include "Gamepad.h"
+#include "Mouse.h"
+#include "Keyboard.h"
+#include "../lib/math/vector.h"
+#include "../lib/hui_minimal/hui.h"
+#include "../y/EngineData.h"
 #include <math.h>
 #include <GLFW/glfw3.h>
 
 namespace input {
 
+bool link_mouse_and_keyboard_into_pad = true;
+
 shared_array<Gamepad> gamepads;
+shared<Gamepad> main_pad;
 
 Gamepad::Gamepad(int _index) {
 	index = _index;
+	state = new GLFWgamepadstate;
+	state_prev = new GLFWgamepadstate;
 }
 
 Gamepad::~Gamepad() {
@@ -39,13 +49,44 @@ void Gamepad::update() {
 	}
 }
 
-bool Gamepad::clicked(BUTTON b) {
+
+float Gamepad::axis(int i) {
+	return state->axes[i];
+}
+
+bool Gamepad::button(Button b) {
+	return state->buttons[(int)b];
+}
+
+bool Gamepad::clicked(Button b) {
 	return state->buttons[(int)b] and not state_prev->buttons[(int)b];
+}
+
+
+void init_pads() {
+	main_pad = get_pad(0);
 }
 
 void iterate_pads() {
 	for (auto pad: weak(gamepads))
 		pad->update();
+
+	if (link_mouse_and_keyboard_into_pad) {
+		if (dmouse.x != 0)
+			main_pad->state->axes[2] = dmouse.x / engine.elapsed;
+		if (dmouse.y != 0)
+			main_pad->state->axes[3] = dmouse.y / engine.elapsed;
+		if (get_button(0))
+			main_pad->state->buttons[(int)Gamepad::Button::R1] = true;
+		if (get_key(hui::KEY_UP) or get_key(hui::KEY_W))
+			main_pad->state->axes[1] = -1;
+		if (get_key(hui::KEY_DOWN) or get_key(hui::KEY_S))
+			main_pad->state->axes[1] = 1;
+		if (get_key(hui::KEY_RIGHT) or get_key(hui::KEY_D))
+			main_pad->state->axes[0] = 1;
+		if (get_key(hui::KEY_LEFT) or get_key(hui::KEY_A))
+			main_pad->state->axes[0] = -1;
+	}
 }
 
 shared<Gamepad> get_pad(int index) {

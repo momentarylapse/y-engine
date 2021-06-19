@@ -22,7 +22,7 @@ public:
 
 class Gamepad: public Sharable<Empty> {
 public:
-	enum class BUTTON {
+	enum class Button {
 		CROSS,
 		CIRCLE,
 		SQUARE,
@@ -51,12 +51,16 @@ public:
 
 	bool is_present() const;
 	void update();
-	bool clicked(BUTTON b);
+	float axis(int i);
+	bool button(Button b);
+	bool clicked(Button b);
 };
 
 
+void init_pads();
 void iterate_pads();
-
 shared<Gamepad> get_pad(int index);
+
+extern bool link_mouse_and_keyboard_into_pad;
 
 }

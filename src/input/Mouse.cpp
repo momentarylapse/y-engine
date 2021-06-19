@@ -78,10 +78,13 @@ void init_mouse(GLFWwindow *window) {
 }
 
 
-void iterate_mouse() {
+void iterate_mouse_pre() {
 	mouse_state.dx = mouse_state.mx - mouse_state_prev.mx;
 	mouse_state.dy = mouse_state.my - mouse_state_prev.my;
 	mouse_state_prev = mouse_state;
+}
+
+void iterate_mouse() {
 
 	auto mouse01_prev = mouse01;
 
@@ -101,6 +104,11 @@ void iterate_mouse() {
 
 	// FIXME might be handled after a click event...!
 	gui::handle_mouse_move(mouse01_prev, mouse01);
+}
+
+
+bool get_button(int index) {
+	return mouse_state.button[index];
 }
 
 
