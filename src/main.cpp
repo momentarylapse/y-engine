@@ -20,6 +20,7 @@
 #include "audio/Sound.h"
 
 #include "input/InputManager.h"
+#include "input/Keyboard.h"
 
 #include "net/NetworkManager.h"
 
@@ -142,7 +143,7 @@ public:
 		gui::init(render_path->shader_2d);
 
 
-		InputManager::init(window);
+		input::init(window);
 
 
 		for (auto &a: arg.sub_ref(1))
@@ -232,7 +233,7 @@ public:
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window)) {
-			InputManager::iterate();
+			input::iterate();
 			perf_mon.frame();
 			engine.elapsed_rt = perf_mon.frame_dt;
 			engine.elapsed = perf_mon.frame_dt;
@@ -242,7 +243,7 @@ public:
 			iterate();
 			draw_frame();
 
-			if (InputManager::get_key(hui::KEY_CONTROL) and InputManager::get_key(hui::KEY_Q))
+			if (input::get_key(hui::KEY_CONTROL) and input::get_key(hui::KEY_Q))
 				break;
 		}
 

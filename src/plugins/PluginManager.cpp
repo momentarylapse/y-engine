@@ -19,6 +19,9 @@
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../input/InputManager.h"
+#include "../input/Gamepad.h"
+#include "../input/Keyboard.h"
+#include "../input/Mouse.h"
 #include "../net/NetworkManager.h"
 #include "../renderer/RenderPathGL.h"
 #include "../renderer/RenderPathGLForward.h"
@@ -355,13 +358,20 @@ void PluginManager::link_kaba() {
 	kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
 	kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
 
-	kaba::link_external("ui.key", (void*)&InputManager::get_key);
-	kaba::link_external("ui.key_down", (void*)&InputManager::get_key_down);
-	kaba::link_external("ui.key_up", (void*)&InputManager::get_key_up);
+	kaba::link_external("ui.key", (void*)&input::get_key);
+	kaba::link_external("ui.key_down", (void*)&input::get_key_down);
+	kaba::link_external("ui.key_up", (void*)&input::get_key_up);
 	kaba::link_external("ui.toplevel", &gui::toplevel);
-	kaba::link_external("ui.mouse", &InputManager::mouse);
-	kaba::link_external("ui.dmouse", &InputManager::dmouse);
-	kaba::link_external("ui.scroll", &InputManager::scroll);
+	kaba::link_external("ui.mouse", &input::mouse);
+	kaba::link_external("ui.dmouse", &input::dmouse);
+	kaba::link_external("ui.scroll", &input::scroll);
+	kaba::link_external("ui.get_pad", (void*)&input::get_pad);
+
+	kaba::declare_class_size("ui.Gamepad", sizeof(input::Gamepad));
+	kaba::declare_class_element("ui.Gamepad.deadzone", &input::Gamepad::deadzone);
+	kaba::link_external_class_func("ui.Gamepad.update", &input::Gamepad::update);
+	kaba::link_external_class_func("ui.Gamepad.is_present", &input::Gamepad::is_present);
+	kaba::link_external_class_func("ui.Gamepad.clicked", &input::Gamepad::clicked);
 
 	kaba::declare_class_size("NetworkManager", sizeof(NetworkManager));
 	kaba::declare_class_element("NewtorkManager.cur_con", &NetworkManager::cur_con);

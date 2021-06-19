@@ -43,7 +43,16 @@
     <ClCompile Include="src\helper\ResourceManager.cpp">
       <Filter>src\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\input\Gamepad.cpp">
+      <Filter>src\input</Filter>
+    </ClCompile>
     <ClCompile Include="src\input\InputManager.cpp">
+      <Filter>src\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\Keyboard.cpp">
+      <Filter>src\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input\Mouse.cpp">
       <Filter>src\input</Filter>
     </ClCompile>
     <ClCompile Include="src\lib\any\any.cpp">
@@ -435,7 +444,16 @@
     <ClInclude Include="src\helper\ResourceManager.h">
       <Filter>src\helper</Filter>
     </ClInclude>
+    <ClInclude Include="src\input\Gamepad.h">
+      <Filter>src\input</Filter>
+    </ClInclude>
     <ClInclude Include="src\input\InputManager.h">
+      <Filter>src\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\Keyboard.h">
+      <Filter>src\input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input\Mouse.h">
       <Filter>src\input</Filter>
     </ClInclude>
     <ClInclude Include="src\lib\any\any.h">

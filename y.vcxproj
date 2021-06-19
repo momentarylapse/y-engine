@@ -126,7 +126,10 @@
     <ClCompile Include="src\helper\ErrorHandler.cpp" />
     <ClCompile Include="src\helper\PerformanceMonitor.cpp" />
     <ClCompile Include="src\helper\ResourceManager.cpp" />
+    <ClCompile Include="src\input\Gamepad.cpp" />
     <ClCompile Include="src\input\InputManager.cpp" />
+    <ClCompile Include="src\input\Keyboard.cpp" />
+    <ClCompile Include="src\input\Mouse.cpp" />
     <ClCompile Include="src\lib\any\any.cpp" />
     <ClCompile Include="src\lib\base\array.cpp" />
     <ClCompile Include="src\lib\base\pointer.cpp" />
@@ -258,7 +261,10 @@
     <ClInclude Include="src\helper\ErrorHandler.h" />
     <ClInclude Include="src\helper\PerformanceMonitor.h" />
     <ClInclude Include="src\helper\ResourceManager.h" />
+    <ClInclude Include="src\input\Gamepad.h" />
     <ClInclude Include="src\input\InputManager.h" />
+    <ClInclude Include="src\input\Keyboard.h" />
+    <ClInclude Include="src\input\Mouse.h" />
     <ClInclude Include="src\lib\any\any.h" />
     <ClInclude Include="src\lib\base\array.h" />
     <ClInclude Include="src\lib\base\base.h" />
