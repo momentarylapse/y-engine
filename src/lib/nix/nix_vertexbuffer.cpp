@@ -156,6 +156,13 @@ void VertexBuffer::update_index(const DynamicArray &a) {
 	index.count = a.num;
 	glNamedBufferData(index.buffer, a.num * a.element_size, a.data, GL_STATIC_DRAW);
 	//glNamedBufferStorage
+
+	if (a.element_size == 1)
+		index.type = GL_UNSIGNED_BYTE;
+	else if (a.element_size == 2)
+		index.type = GL_UNSIGNED_SHORT;
+	else
+		index.type = GL_UNSIGNED_INT;
 }
 
 int VertexBuffer::count() const {
@@ -171,10 +178,10 @@ void VertexBuffer::create_rect(const rect &d, const rect &s) {
 		Array<vector> p = {{d.x1,d.y1,0}, {d.x1,d.y2,0}, {d.x2,d.y1,0}, {d.x2,d.y2,0}};
 		Array<vector> n = {{0,0,1}, {0,0,1}, {0,0,1}, {0,0,1}};
 		Array<float> uv = {s.x1,s.y1, s.x1,s.y2, s.x2,s.y1, s.x2,s.y2};
-		Array<int> index = {0,1,3, 0,3,2};
 		update(0, p);
 		update(1, n);
 		update(2, uv);
+		Array<unsigned char> index = {0,1,3, 0,3,2};
 		update_index(index);
 	} else {
 		Array<vector> p = {{d.x1,d.y1,0}, {d.x1,d.y2,0}, {d.x2,d.y2,0},  {d.x1,d.y1,0}, {d.x2,d.y2,0}, {d.x2,d.y1,0}};
