@@ -104,6 +104,8 @@ void SIAddPackageNix() {
 		class_add_func("update", TypeVoid, nix_p(&nix::VertexBuffer::update));
 			func_add_param("index", TypeInt);
 			func_add_param("data", TypeDynamicArray);
+		class_add_func("update_index", TypeVoid, nix_p(&nix::VertexBuffer::update_index));
+			func_add_param("data", TypeDynamicArray);
 		class_add_func("create_rect", TypeVoid, nix_p(&nix::VertexBuffer::create_rect));
 			func_add_param("dest", TypeRect);
 			func_add_param("source", TypeRect);

@@ -79,7 +79,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 
 	_tex_white = tex_white.get();
 
-	vb_2d = new nix::VertexBuffer("3f,3f,2f");
+	vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
 	vb_2d->create_rect(rect(-1,1, -1,1));
 
 	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");

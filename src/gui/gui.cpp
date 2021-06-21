@@ -21,7 +21,7 @@ shared<Node> toplevel;
 
 
 void init(nix::Shader *s) {
-	vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
+	vertex_buffer = new nix::VertexBuffer("3f,3f,2f|i");
 	vertex_buffer->create_rect(rect::ID);
 
 	Font::init_fonts();
