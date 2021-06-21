@@ -16,43 +16,28 @@ namespace nix {
 VertexBuffer *vb_temp = NULL;
 
 
-// FIXME nope, still not working correctly....
-void _post_config_vertex_buffer_new(VertexBuffer *vb) {
+void _post_config_vertex_buffer(VertexBuffer *vb) {
 	//glBindVertexArray(vb->vao);
 	for (int i=0; i<vb->num_attributes; i++) {
 		auto &a = vb->attr[i];
 		glEnableVertexArrayAttrib(vb->vao, i);
-		glVertexArrayVertexBuffer(vb->vao, i, a.buffer, 0, a.stride);
-		//glBindBuffer(GL_ARRAY_BUFFER, a.buffer);
-		//glVertexAttribPointer(i, a.num_components, a.type, a.normalized, 0, (void*)0);//a.stride, (void*)a.offset);
-
-		glVertexArrayAttribFormat(vb->vao, i, a.num_components, a.type, a.normalized, 0);
 		glVertexArrayAttribBinding(vb->vao, i, i);
+		glVertexArrayVertexBuffer(vb->vao, i, a.buffer, 0, a.stride);
+		glVertexArrayAttribFormat(vb->vao, i, a.num_components, a.type, a.normalized, 0);
 
 		// TODO
 		if (false)
 			glVertexAttribDivisor(i, a.divisor);
 	}
 }
-void _post_config_vertex_buffer_old(VertexBuffer *vb) {
+void ___post_config_vertex_buffer_old(VertexBuffer *vb) {
 	glBindVertexArray(vb->vao);
 	for (int i=0; i<vb->num_attributes; i++) {
 		auto &a = vb->attr[i];
-		glEnableVertexArrayAttrib(vb->vao, i);
-		//glEnableVertexAttribArray(i);
-
+		glEnableVertexAttribArray(i);
 		glBindBuffer(GL_ARRAY_BUFFER, a.buffer);
-		//glVertexArrayVertexBuffer(vb->vao, i, a.buffer, 0, a.stride);
-
-		//glVertexArrayAttribFormat(vb->vao, i, a.num_components, a.type, a.normalized, 0);
-		glVertexAttribPointer(i, a.num_components, a.type, a.normalized, 0, (void*)0);//a.stride, (void*)a.offset);
-
-
-		glVertexArrayAttribBinding(vb->vao, i, i);
-
-		// TODO
-		//if (false)
-//		glVertexAttribDivisor(i, a.divisor);
+		glVertexAttribPointer(i, a.num_components, a.type, a.normalized, a.stride, (void*)0);//a.stride, (void*)a.offset);
+		glVertexAttribDivisor(i, a.divisor);
 	}
 	glBindVertexArray(0);
 }
@@ -114,7 +99,7 @@ VertexBuffer::VertexBuffer(const string &f) {
 		a.stride = a.num_components * gl_component_size(a.type);
 	}
 
-	_post_config_vertex_buffer_old(this);
+	_post_config_vertex_buffer(this);
 }
 
 
