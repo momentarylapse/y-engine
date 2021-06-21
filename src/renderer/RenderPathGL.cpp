@@ -163,9 +163,8 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 nix::FrameBuffer* RenderPathGL::resolve_multisampling(nix::FrameBuffer *source) {
 	auto next = next_fb(source);
 	if (true) {
-		nix::set_shader(shader_resolve_multisample.get());
-		shader_resolve_multisample->set_float(shader_resolve_multisample->get_location("width"), source->width);
-		shader_resolve_multisample->set_float(shader_resolve_multisample->get_location("height"), source->height);
+		shader_resolve_multisample->set_float("width", source->width);
+		shader_resolve_multisample->set_float("height", source->height);
 		process({source->color_attachments[0], depth_buffer}, next, shader_resolve_multisample.get());
 	} else {
 		// not sure, why this does not work... :(
@@ -188,21 +187,19 @@ void RenderPathGL::end_frame() {
 
 
 void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, const complex &axis) {
-	nix::set_shader(shader_blur.get());
 	float r = cam->bloom_radius * resolution_scale_x;
-	shader_blur->set_float(shader_blur->get_location("radius"), r);
-	shader_blur->set_float(shader_blur->get_location("threshold"), threshold / cam->exposure);
-	shader_blur->set_data(shader_blur->get_location("axis"), &axis.x, sizeof(axis));
+	shader_blur->set_float("radius", r);
+	shader_blur->set_float("threshold", threshold / cam->exposure);
+	shader_blur->set_floats("axis", &axis.x, 2);
 	process(source->color_attachments, target, shader_blur.get());
 }
 
 void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, const complex &axis) {
-	nix::set_shader(shader_depth.get());
-	shader_depth->set_float(shader_depth->get_location("max_radius"), 50);
-	shader_depth->set_float(shader_depth->get_location("focal_length"), cam->focal_length);
-	shader_depth->set_float(shader_depth->get_location("focal_blur"), cam->focal_blur);
-	shader_depth->set_data(shader_depth->get_location("axis"), &axis.x, sizeof(axis));
-	shader_depth->set_matrix(shader_depth->get_location("invproj"), cam->m_projection.inverse());
+	shader_depth->set_float("max_radius", 50);
+	shader_depth->set_float("focal_length", cam->focal_length);
+	shader_depth->set_float("focal_blur", cam->focal_blur);
+	shader_depth->set_floats("axis", &axis.x, 2);
+	shader_depth->set_matrix("invproj", cam->m_projection.inverse());
 	process({source->color_attachments[0], depth_buffer}, target, shader_depth.get());
 }
 
@@ -213,7 +210,7 @@ void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer 
 	nix::set_projection_ortho_relative();
 	nix::set_view_matrix(matrix::ID);
 	nix::set_model_matrix(matrix::ID);
-	//nix::set_shader(shader);
+	nix::set_shader(shader);
 
 	nix::set_textures(source);
 	nix::draw_triangles(vb_2d);
@@ -237,8 +234,8 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 			if (p->shader)
 				shader = p->shader.get();
 			nix::set_shader(shader);
-			gui::shader->set_float(shader->get_location("blur"), p->bg_blur);
-			gui::shader->set_color(shader->get_location("color"), p->eff_col);
+			shader->set_float("blur", p->bg_blur);
+			shader->set_color("color", p->eff_col);
 			nix::set_textures({p->texture.get(), source->color_attachments[0]});
 			if (p->angle == 0) {
 				nix::set_model_matrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
@@ -264,10 +261,10 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 
 	nix::set_textures({source->color_attachments[0], bloom});
 	nix::set_shader(shader_out.get());
-	shader_out->set_float(shader_out->get_location("exposure"), cam->exposure);
-	shader_out->set_float(shader_out->get_location("bloom_factor"), cam->bloom_factor);
-	shader_out->set_float(shader_out->get_location("scale_x"), resolution_scale_x);
-	shader_out->set_float(shader_out->get_location("scale_y"), resolution_scale_y);
+	shader_out->set_float("exposure", cam->exposure);
+	shader_out->set_float("bloom_factor", cam->bloom_factor);
+	shader_out->set_float("scale_x", resolution_scale_x);
+	shader_out->set_float("scale_y", resolution_scale_y);
 	nix::set_projection_matrix(matrix::ID);
 	nix::set_view_matrix(matrix::ID);
 	nix::set_model_matrix(matrix::ID);
@@ -284,11 +281,11 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 void RenderPathGL::set_material(Material *m) {
 	auto s = m->shader.get();
 	nix::set_shader(s);
-	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 12);
-	s->set_int(s->get_location("num_lights"), lights.num);
-	s->set_int(s->get_location("shadow_index"), shadow_index);
+	s->set_floats("eye_pos", &cam->pos.x, 3);
+	s->set_int("num_lights", lights.num);
+	s->set_int("shadow_index", shadow_index);
 	for (auto &u: m->uniforms)
-		s->set_data(u.location, u.p, u.size);
+		s->set_floats_l(u.location, u.p, u.size/4);
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS)
 		nix::set_alpha(m->alpha.source, m->alpha.destination);

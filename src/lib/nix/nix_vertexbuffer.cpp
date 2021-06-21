@@ -11,12 +11,63 @@
 #include "nix_common.h"
 
 
-unsigned int VertexArrayID = 0;
-
 namespace nix {
 
 VertexBuffer *vb_temp = NULL;
 
+
+// FIXME nope, still not working correctly....
+void _post_config_vertex_buffer_new(VertexBuffer *vb) {
+	//glBindVertexArray(vb->vao);
+	for (int i=0; i<vb->num_attributes; i++) {
+		auto &a = vb->attr[i];
+		glEnableVertexArrayAttrib(vb->vao, i);
+		glVertexArrayVertexBuffer(vb->vao, i, a.buffer, 0, a.stride);
+		//glBindBuffer(GL_ARRAY_BUFFER, a.buffer);
+		//glVertexAttribPointer(i, a.num_components, a.type, a.normalized, 0, (void*)0);//a.stride, (void*)a.offset);
+
+		glVertexArrayAttribFormat(vb->vao, i, a.num_components, a.type, a.normalized, 0);
+		glVertexArrayAttribBinding(vb->vao, i, i);
+
+		// TODO
+		if (false)
+			glVertexAttribDivisor(i, a.divisor);
+	}
+}
+void _post_config_vertex_buffer_old(VertexBuffer *vb) {
+	glBindVertexArray(vb->vao);
+	for (int i=0; i<vb->num_attributes; i++) {
+		auto &a = vb->attr[i];
+		glEnableVertexArrayAttrib(vb->vao, i);
+		//glEnableVertexAttribArray(i);
+
+		glBindBuffer(GL_ARRAY_BUFFER, a.buffer);
+		//glVertexArrayVertexBuffer(vb->vao, i, a.buffer, 0, a.stride);
+
+		//glVertexArrayAttribFormat(vb->vao, i, a.num_components, a.type, a.normalized, 0);
+		glVertexAttribPointer(i, a.num_components, a.type, a.normalized, 0, (void*)0);//a.stride, (void*)a.offset);
+
+
+		glVertexArrayAttribBinding(vb->vao, i, i);
+
+		// TODO
+		//if (false)
+//		glVertexAttribDivisor(i, a.divisor);
+	}
+	glBindVertexArray(0);
+}
+
+int gl_component_size(unsigned int type) {
+	if ((type == GL_DOUBLE))
+		return 8;
+	if ((type == GL_INT) or (type == GL_UNSIGNED_INT) or (type == GL_FLOAT))
+		return 4;
+	if ((type == GL_SHORT) or (type == GL_UNSIGNED_SHORT) or (type == GL_HALF_FLOAT))
+		return 2;
+	if ((type == GL_BYTE) or (type == GL_UNSIGNED_BYTE))
+		return 1;
+	return 0;
+}
 
 // so far, map each attribute to another buffer
 VertexBuffer::VertexBuffer(const string &f) {
@@ -27,6 +78,9 @@ VertexBuffer::VertexBuffer(const string &f) {
 		throw Exception("VertexBuffer: too many attributes: " + f);
 		num_buffers = num_attributes = 0;
 	}
+
+	glCreateVertexArrays(1, &vao);
+
 	for (int i=0; i<xx.num; i++) {
 		string &x = xx[i];
 		auto &b = buf[i];
@@ -36,8 +90,8 @@ VertexBuffer::VertexBuffer(const string &f) {
 		glCreateBuffers(1, &b.buffer);
 		a.buffer = b.buffer;
 		a.normalized = false;
-		a.stride = 0;
 		a.divisor = 0;
+		a.stride = 0;
 		if (x == "1f") {
 			a.type = GL_FLOAT;
 			a.num_components = 1;
@@ -57,13 +111,17 @@ VertexBuffer::VertexBuffer(const string &f) {
 		} else {
 			throw Exception("VertexBuffer: unhandled format: " + x);
 		}
+		a.stride = a.num_components * gl_component_size(a.type);
 	}
+
+	_post_config_vertex_buffer_old(this);
 }
 
 
 VertexBuffer::~VertexBuffer() {
 	for (int i=0; i<num_buffers; i++)
 		glDeleteBuffers(1, &buf[i].buffer);
+	glDeleteVertexArrays(1, &vao);
 }
 
 void VertexBuffer::__init__(const string &f) {
@@ -85,6 +143,7 @@ void VertexBuffer::update(int index, const DynamicArray &a) {
 		throw Exception("VertexBuffer: invalid index " + i2s(index));
 	buf[index].count = a.num;
 	glNamedBufferData(buf[index].buffer, a.num * a.element_size, a.data, GL_STATIC_DRAW);
+	//glNamedBufferStorage
 }
 
 int VertexBuffer::count() const {
@@ -100,28 +159,11 @@ void VertexBuffer::create_rect(const rect &d, const rect &s) {
 	update(2, uv);
 }
 
-int _current_vb_attr_ = 0;
-
 void bind_vertex_buffer(VertexBuffer *vb) {
-	for (int i=0; i<vb->num_attributes; i++) {
-		auto &a = vb->attr[i];
-		glEnableVertexAttribArray(i);
-		glBindBuffer(GL_ARRAY_BUFFER, a.buffer);
-		glVertexAttribPointer(i, a.num_components, a.type, a.normalized, 0, (void*)0);//a.stride, (void*)a.offset);
-		glVertexAttribDivisor(i, a.divisor);
-	}
-
-	for (int i=vb->num_attributes; i<_current_vb_attr_; i++)
-		glDisableVertexAttribArray(i);
-
-	_current_vb_attr_ = vb->num_attributes;
+	glBindVertexArray(vb->vao);
 }
 
 void init_vertex_buffers() {
-	//glCreateVertexArrays
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
 	vb_temp = new VertexBuffer("3f,3fn,2f");
 }
 

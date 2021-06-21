@@ -198,7 +198,7 @@ public:
 #endif
 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
 		int w = config.get_int("screen.width", 1024);
 		int h = config.get_int("screen.height", 768);

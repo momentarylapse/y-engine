@@ -109,10 +109,9 @@ void RenderPathGLDeferred::draw() {
 
 void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
 	auto s = shader_gbuffer_out.get();
-	nix::set_shader(s);
-	s->set_data(s->get_location("eye_pos"), &cam->pos.x, 12);
-	s->set_int(s->get_location("num_lights"), lights.num);
-	s->set_int(s->get_location("shadow_index"), shadow_index);
+	s->set_floats("eye_pos", &cam->pos.x, 3);
+	s->set_int("num_lights", lights.num);
+	s->set_int("shadow_index", shadow_index);
 	nix::bind_uniform(ubo_light, 1);
 	auto tex = source->color_attachments;
 	tex.add(fb_shadow2->depth_buffer);
@@ -166,8 +165,8 @@ void RenderPathGLDeferred::draw_particles() {
 		nix::set_texture(g->texture);
 		for (auto p: g->particles)
 			if (p->enabled) {
-				shader_fx->set_color(shader_fx->get_location("color"), p->col);
-				shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
+				shader_fx->set_color("color", p->col);
+				shader_fx->set_floats("source", &p->source.x1, 4);
 				nix::set_model_matrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
 				nix::draw_triangles(nix::vb_temp);
 			}
@@ -196,8 +195,8 @@ void RenderPathGLDeferred::draw_particles() {
 			v[4] = p->pos + _e2 + p->length;
 			v[5] = p->pos + _e1;
 			nix::vb_temp->update(0, v);
-			shader_fx->set_color(shader_fx->get_location("color"), p->col);
-			shader_fx->set_data(shader_fx->get_location("source"), &p->source.x1, 16);
+			shader_fx->set_color("color", p->col);
+			shader_fx->set_floats("source", &p->source.x1, 4);
 			nix::draw_triangles(nix::vb_temp);
 		}
 	}
@@ -229,8 +228,8 @@ void RenderPathGLDeferred::draw_terrains(bool allow_material) {
 		nix::set_model_matrix(matrix::ID);
 		if (allow_material) {
 			set_material(t->material);
-			t->material->shader->set_data(t->material->shader->get_location("pattern0"), &t->texture_scale[0].x, 12);
-			t->material->shader->set_data(t->material->shader->get_location("pattern1"), &t->texture_scale[1].x, 12);
+			t->material->shader->set_floats("pattern0", &t->texture_scale[0].x, 3);
+			t->material->shader->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
 		t->draw();
 		nix::draw_triangles(t->vertex_buffer);

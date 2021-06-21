@@ -35,6 +35,8 @@ public:
 	int num_attributes;
 	int num_buffers;
 
+	unsigned int vao;
+
 	VertexBuffer(const string &f);
 	~VertexBuffer();
 
