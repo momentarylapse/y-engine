@@ -112,7 +112,7 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	s->set_floats("eye_pos", &cam->pos.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
-	nix::bind_uniform(ubo_light, 1);
+	nix::bind_buffer(ubo_light, 1);
 	auto tex = source->color_attachments;
 	tex.add(fb_shadow2->depth_buffer);
 	tex.add(fb_shadow->depth_buffer);
@@ -140,7 +140,7 @@ void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 
-	nix::bind_uniform(ubo_light, 1);
+	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->m_view);
 	nix::set_z(true, true);
 

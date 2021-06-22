@@ -76,7 +76,9 @@ const Class *TypeFrameBufferP;
 const Class *TypeCubeMap;
 const Class *TypeShader;
 const Class *TypeShaderP;
+const Class *TypeBuffer;
 const Class *TypeUniformBuffer;
+const Class *TypeShaderStorageBuffer;
 
 void SIAddPackageNix() {
 	add_package("nix");
@@ -95,7 +97,9 @@ void SIAddPackageNix() {
 	TypeCubeMap			= add_type  ("CubeMap", sizeof(nix::Texture));
 	TypeShader			= add_type  ("Shader", sizeof(nix::Shader));
 	TypeShaderP			= add_type_p(TypeShader);
-	TypeUniformBuffer	= add_type  ("UniformBuffer", sizeof(nix::UniformBuffer));
+	TypeBuffer			= add_type  ("Buffer", sizeof(nix::Buffer));
+	TypeUniformBuffer	= add_type  ("UniformBuffer", sizeof(nix::Buffer));
+	TypeShaderStorageBuffer = add_type  ("ShaderStorageBuffer", sizeof(nix::Buffer));
 	
 	add_class(TypeVertexBuffer);
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::VertexBuffer::__init__));
@@ -219,15 +223,27 @@ void SIAddPackageNix() {
 		class_add_const("DEFAULT_2D", TypeShaderP, nix_p(&nix::Shader::default_2d));
 
 
-		add_class(TypeUniformBuffer);
-			class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::UniformBuffer::__init__));
-			class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, nix_p(&nix::UniformBuffer::__delete__));
-			class_add_func("update", TypeVoid, nix_p(&nix::UniformBuffer::update));
-				func_add_param("data", TypePointer);
-				func_add_param("size", TypeInt);
-			class_add_func("update", TypeVoid, nix_p(&nix::UniformBuffer::update_array));
-				func_add_param("data", TypeDynamicArray);
-	
+	add_class(TypeBuffer);
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, nix_p(&nix::Buffer::__delete__));
+		class_add_func("update", TypeVoid, nix_p(&nix::Buffer::update));
+			func_add_param("data", TypePointer);
+			func_add_param("size", TypeInt);
+		class_add_func("update", TypeVoid, nix_p(&nix::Buffer::update_array));
+			func_add_param("data", TypeDynamicArray);
+		class_add_func("read", TypeVoid, nix_p(&nix::Buffer::read));
+			func_add_param("data", TypePointer);
+			func_add_param("size", TypeInt);
+		class_add_func("read", TypeVoid, nix_p(&nix::Buffer::read_array));
+			func_add_param("data", TypeDynamicArray);
+
+	add_class(TypeUniformBuffer);
+	class_derive_from(TypeBuffer, false, false);
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::UniformBuffer::__init__));
+
+	add_class(TypeShaderStorageBuffer);
+	class_derive_from(TypeBuffer, false, false);
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, nix_p(&nix::ShaderStorageBuffer::__init__));
+
 		// drawing
 	add_func("init", TypeVoid, nix_p(&nix::init), Flags::STATIC);
 	add_func("kill", TypeVoid, nix_p(&nix::kill), Flags::STATIC);
@@ -307,8 +323,8 @@ void SIAddPackageNix() {
 		func_add_param("t", TypeTexturePList);
 	add_func("set_shader", TypeVoid, nix_p(&nix::set_shader), Flags::STATIC);
 		func_add_param("s", TypeShader);
-	add_func("bind_uniform", TypeVoid, nix_p(&nix::bind_uniform), Flags::STATIC);
-		func_add_param("buf", TypeUniformBuffer);
+	add_func("bind_buffer", TypeVoid, nix_p(&nix::bind_buffer), Flags::STATIC);
+		func_add_param("buf", TypeBuffer);
 		func_add_param("binding", TypeInt);
 	add_func("screen_shot_to_image", TypeVoid, nix_p(&nix::screen_shot_to_image), Flags::STATIC);
 		func_add_param("im", TypeImage);

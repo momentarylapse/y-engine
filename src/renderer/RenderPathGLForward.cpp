@@ -169,7 +169,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam,
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
 
-	nix::bind_uniform(ubo_light, 1);
+	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->m_view);
 	nix::set_z(true, true);
 
@@ -286,7 +286,7 @@ void RenderPathGLForward::draw_objects(bool allow_material) {
 		auto ss = s.material->shader;
 		s.material->shader = shader_3d_multi;
 		set_material(s.material);
-		nix::bind_uniform(ubo_multi_matrix, 5);
+		nix::bind_buffer(ubo_multi_matrix, 5);
 		//msg_write(s.matrices.num);
 		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
 		s.material->shader = ss;

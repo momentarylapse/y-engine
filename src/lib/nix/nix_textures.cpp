@@ -389,6 +389,7 @@ ImageTexture::ImageTexture(int _width, int _height, const string &_format) {
 	width = _width;
 	height = _height;
 	type = Type::IMAGE;
+	internal_format = parse_format(_format);
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 	glTextureStorage2D(texture, 1, internal_format, width, height);

@@ -14,19 +14,39 @@
 
 namespace nix{
 
-class UniformBuffer {
+class Buffer {
 public:
+	enum class Type {
+		NONE,
+		UNIFORM,
+		SSBO
+	} type;
 	unsigned int buffer;
-	UniformBuffer();
-	~UniformBuffer();
 
-	void __init__();
+	Buffer();
+	~Buffer();
+
 	void __delete__();
 	void update(void *data, int size);
 	void update_array(const DynamicArray &a);
+
+	void read(void *data, int size);
+	void read_array(DynamicArray &a);
 };
 
-void bind_uniform(UniformBuffer *ub, int binding);
+class UniformBuffer : public Buffer {
+public:
+	UniformBuffer();
+	void __init__();
+};
+
+class ShaderStorageBuffer : public Buffer {
+public:
+	ShaderStorageBuffer();
+	void __init__();
+};
+
+void bind_buffer(Buffer *buf, int binding);
 
 class Shader : public Sharable<Empty> {
 public:

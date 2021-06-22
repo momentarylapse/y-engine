@@ -28,33 +28,62 @@ int current_program = 0;
 string shader_error;
 
 
-UniformBuffer::UniformBuffer() {
+Buffer::Buffer() {
+	type = Type::NONE;
 	glCreateBuffers(1, &buffer);
 }
 
-UniformBuffer::~UniformBuffer() {
+Buffer::~Buffer() {
 	glDeleteBuffers(1, &buffer);
+}
+
+void Buffer::__delete__() {
+	this->~Buffer();
+}
+
+void Buffer::update(void *data, int size) {
+	glNamedBufferData(buffer, size, data, GL_DYNAMIC_DRAW);
+}
+
+void Buffer::update_array(const DynamicArray &a) {
+	update(a.data, a.num * a.element_size);
+}
+
+void Buffer::read(void *data, int size) {
+	auto p = glMapNamedBuffer(buffer, GL_READ_ONLY);
+	memcpy(data, p, size);
+	glUnmapNamedBuffer(buffer);
+}
+
+void Buffer::read_array(DynamicArray &a) {
+	read(a.data, a.num * a.element_size);
+}
+
+
+UniformBuffer::UniformBuffer() {
+	type = Type::UNIFORM;
 }
 
 void UniformBuffer::__init__() {
 	new(this) UniformBuffer();
 }
 
-void UniformBuffer::__delete__() {
-	this->~UniformBuffer();
+
+ShaderStorageBuffer::ShaderStorageBuffer() {
+	type = Type::SSBO;
 }
 
-void UniformBuffer::update(void *data, int size) {
-	glNamedBufferData(buffer, size, data, GL_DYNAMIC_DRAW);
+void ShaderStorageBuffer::__init__() {
+	new(this) ShaderStorageBuffer();
 }
 
-void UniformBuffer::update_array(const DynamicArray &a) {
-	glNamedBufferData(buffer, a.num * a.element_size, a.data, GL_DYNAMIC_DRAW);
-}
 
-void bind_uniform(UniformBuffer *ub, int index) {
+void bind_buffer(Buffer *buf, int index) {
 	//glUniformBlockBinding(program, index, 0);
-	glBindBufferBase(GL_UNIFORM_BUFFER, index, ub->buffer);
+	if (buf->type == Buffer::Type::UNIFORM)
+		glBindBufferBase(GL_UNIFORM_BUFFER, index, buf->buffer);
+	else if (buf->type == Buffer::Type::SSBO)
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, buf->buffer);
 }
 
 
