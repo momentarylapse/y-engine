@@ -13,6 +13,13 @@
 
 namespace nix {
 
+// hmmm, some bugs using GTK:
+//  * new vao numbers start over (creating duplicates), after first frame?
+//    (but the context seems to be the same)
+//  * old vaos loose their data?
+bool allow_separate_vertex_arrays = false;
+unsigned int global_vao = 0;
+
 VertexBuffer *vb_temp = NULL;
 VertexBuffer *vb_temp_i = NULL;
 
@@ -60,7 +67,7 @@ int gl_component_size(unsigned int type) {
 
 // so far, map each attribute to another buffer
 VertexBuffer::VertexBuffer(const string &_f) {
-	//msg_write("new VertexBuffer " + f);
+	//msg_write("new VertexBuffer " + _f);
 
 	string f = _f;
 	index.buffer = 0;
@@ -85,7 +92,11 @@ VertexBuffer::VertexBuffer(const string &_f) {
 		num_buffers = num_attributes = 0;
 	}
 
-	glCreateVertexArrays(1, &vao);
+	if (allow_separate_vertex_arrays) {
+		glCreateVertexArrays(1, &vao);
+	} else {
+		vao = global_vao;
+	}
 
 	for (int i=0; i<xx.num; i++) {
 		string &x = xx[i];
@@ -127,7 +138,8 @@ VertexBuffer::VertexBuffer(const string &_f) {
 VertexBuffer::~VertexBuffer() {
 	for (int i=0; i<num_buffers; i++)
 		glDeleteBuffers(1, &buf[i].buffer);
-	glDeleteVertexArrays(1, &vao);
+	if (allow_separate_vertex_arrays)
+		glDeleteVertexArrays(1, &vao);
 }
 
 void VertexBuffer::__init__(const string &f) {
@@ -194,10 +206,32 @@ void VertexBuffer::create_rect(const rect &d, const rect &s) {
 }
 
 void bind_vertex_buffer(VertexBuffer *vb) {
+	if (!allow_separate_vertex_arrays)
+		_post_config_vertex_buffer(vb);
+
+#if 0
+	for (int i=0; i<vb->num_attributes; i++) {
+		auto &a = vb->attr[i];
+		glEnableVertexArrayAttrib(vb->vao, i);
+
+		glVertexArrayAttribBinding(vb->vao, i, i);
+		glVertexArrayVertexBuffer(vb->vao, i, a.buffer, 0, a.stride);
+		glVertexArrayAttribFormat(vb->vao, i, a.num_components, a.type, a.normalized, 0);
+
+		//glEnableVertexAttribArray(i);
+//		glBindBuffer(GL_ARRAY_BUFFER, a.buffer);
+//		glVertexAttribPointer(i, a.num_components, a.type, a.normalized, a.stride, (void*)0);//a.stride, (void*)a.offset);
+		//glVertexAttribDivisor(i, a.divisor);
+	}
+#endif
 	glBindVertexArray(vb->vao);
 }
 
 void init_vertex_buffers() {
+	if (!allow_separate_vertex_arrays) {
+		glCreateVertexArrays(1, &global_vao);
+	}
+
 	vb_temp = new VertexBuffer("3f,3fn,2f");
 	vb_temp_i = new VertexBuffer("3f,3fn,2f|i");
 }

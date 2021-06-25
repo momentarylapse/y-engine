@@ -24,6 +24,7 @@
 
 namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
+	extern bool allow_separate_vertex_arrays;
 }
 
 nix::Texture *_tex_white;
@@ -62,6 +63,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 
 	perf_mon = pm;
 
+	nix::allow_separate_vertex_arrays = true;
 	nix::init();
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);

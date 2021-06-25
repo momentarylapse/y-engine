@@ -310,7 +310,13 @@
     <ClCompile Include="src\lib\nix\nix.cpp">
       <Filter>src\lib\nix</Filter>
     </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_buffer.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
     <ClCompile Include="src\lib\nix\nix_draw.cpp">
+      <Filter>src\lib\nix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\nix\nix_framebuffer.cpp">
       <Filter>src\lib\nix</Filter>
     </ClCompile>
     <ClCompile Include="src\lib\nix\nix_light.cpp">
@@ -681,6 +687,9 @@
     <ClInclude Include="src\lib\nix\nix.h">
       <Filter>src\lib\nix</Filter>
     </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_buffer.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
     <ClInclude Include="src\lib\nix\nix_common.h">
       <Filter>src\lib\nix</Filter>
     </ClInclude>
@@ -688,6 +697,9 @@
       <Filter>src\lib\nix</Filter>
     </ClInclude>
     <ClInclude Include="src\lib\nix\nix_draw.h">
+      <Filter>src\lib\nix</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\nix\nix_framebuffer.h">
       <Filter>src\lib\nix</Filter>
     </ClInclude>
     <ClInclude Include="src\lib\nix\nix_light.h">
