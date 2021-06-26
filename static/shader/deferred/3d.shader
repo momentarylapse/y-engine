@@ -35,12 +35,8 @@ void main() {
 
 #import surface
 
-
-struct Material {
-	float ambient, specular, shininess;
-	vec4 diffusive, emission;
-};
-/*layout(binding = 2)*/ uniform Material material;
+struct Material { vec4 albedo, emission; float roughness, metal; };
+uniform Material material;
 
 
 layout(binding = 3) uniform sampler2D tex0;
@@ -50,10 +46,10 @@ layout(binding = 5) uniform sampler2D tex2;//_glow;
 
 void main() {
 	vec3 n = normalize(in_normal);
-	vec4 di = texture(tex0, in_uv) * material.diffusive;
+	vec4 di = texture(tex0, in_uv) * material.albedo;
 	vec4 em = texture(tex2, in_uv) * material.emission;
 	
-	surface_out(n, di, em, material.specular, material.shininess);
+	surface_out(n, di, em, material.metal, material.roughness);
 }
 
 </FragmentShader>

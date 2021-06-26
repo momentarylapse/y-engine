@@ -2,7 +2,7 @@
 	version = 420
 </Layout>
 <VertexShader>
-#import vertex-default
+#import vertex-animated
 </VertexShader>
 <FragmentShader>
 #import surface

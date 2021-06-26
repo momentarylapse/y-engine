@@ -46,6 +46,8 @@ nix::Shader* ResourceManager::load_shader(const Path& filename) {
 			return s;
 
 	auto s = nix::Shader::load(fn);
+	s->link_uniform_block("BoneData", 7);
+
 	shaders.add(s);
 	return s;
 }

@@ -79,6 +79,8 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 		ResourceManager::load_shader("forward/module-surface-pbr.shader");
 	else
 		ResourceManager::load_shader("forward/module-surface.shader");
+	ResourceManager::load_shader("module-vertex-default.shader");
+	ResourceManager::load_shader("module-vertex-animated.shader");
 
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
@@ -299,9 +301,12 @@ void RenderPathGLForward::draw_objects(bool allow_material) {
 		nix::set_model_matrix(m->_matrix);
 		if (allow_material)
 			set_material(s.material);
-		if (m->anim.meta) {
-			m->anim.mesh[0]->update_vb();
-			nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+		if (m->uses_bone_animations()) {
+			m->anim.buf->update_array(m->anim.dmatrix);
+			nix::bind_buffer(m->anim.buf, 7);
+			//m->anim.mesh[0]->update_vb();
+			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		} else {
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
@@ -314,8 +319,9 @@ void RenderPathGLForward::draw_objects(bool allow_material) {
 		set_material(s.material);
 		nix::set_cull(nix::CullMode::NONE);
 		if (m->anim.meta) {
-			m->anim.mesh[0]->update_vb();
-			nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			//m->anim.mesh[0]->update_vb();
+			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		} else {
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}

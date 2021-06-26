@@ -137,10 +137,14 @@ public:
 		int nv = f->read_int();
 		me->vertex.resize(nv);
 		me->bone_index.resize(nv);
+		me->bone_weight.resize(nv);
 		for (int j=0; j<nv; j++)
 			f->read_vector(&me->vertex[j]);
-		for (int j=0; j<nv; j++)
-			me->bone_index[j] = f->read_int();
+		for (int j=0; j<nv; j++) {
+			me->bone_index[j] = {0,0,0,0};
+			me->bone_index[j].i = f->read_int();
+			me->bone_weight[j] = {1,0,0,0};
+		}
 
 		// skin vertices
 		Array<complex> skin_vert;
@@ -508,7 +512,7 @@ Model* ModelManager::loadx(const Path &_filename, const Path &_script) {
 	AppraiseDimensions(m);
 
 	for (int i=0; i<MODEL_NUM_MESHES; i++)
-		m->mesh[i]->post_process();
+		m->mesh[i]->post_process(m->uses_bone_animations());
 
 	PostProcessPhys(m, m->phys);
 
@@ -517,9 +521,10 @@ Model* ModelManager::loadx(const Path &_filename, const Path &_script) {
 
 	// skeleton
 	if (m->bone.num > 0) {
+		m->anim.dmatrix.resize(m->bone.num);
 		for (int i=0; i<m->bone.num; i++) {
 			m->bone[i].rest_pos = m->get_bone_rest_pos(i);
-			m->bone[i].dmatrix = matrix::translation(m->bone[i].rest_pos);
+			m->anim.dmatrix[i] = matrix::translation(m->bone[i].rest_pos);
 		}
 	}
 

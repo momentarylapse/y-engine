@@ -69,11 +69,12 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
 	ResourceManager::load_shader("deferred/module-surface.shader");
+	ResourceManager::load_shader("module-vertex-default.shader");
 
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
-	shader_3d = ResourceManager::load_shader("deferred/3d.shader");
+	shader_3d = ResourceManager::load_shader("default.shader");
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
@@ -245,8 +246,9 @@ void RenderPathGLDeferred::draw_objects(bool allow_material) {
 			set_material(s.material);
 		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
 		if (m->anim.meta) {
-			m->anim.mesh[0]->update_vb();
-			nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			//m->anim.mesh[0]->update_vb();
+			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		} else {
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
@@ -260,8 +262,9 @@ void RenderPathGLDeferred::draw_objects(bool allow_material) {
 		//nix::DrawInstancedTriangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, 200);
 		nix::set_cull(nix::CullMode::NONE);
 		if (m->anim.meta) {
-			m->anim.mesh[0]->update_vb();
-			nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			//m->anim.mesh[0]->update_vb();
+			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
+			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		} else {
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}

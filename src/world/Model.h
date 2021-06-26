@@ -44,6 +44,7 @@ class TemplateDataScriptVariable;
 class CollisionData;
 namespace nix {
 	class VertexBuffer;
+	class Buffer;
 }
 namespace kaba {
 	class Script;
@@ -61,8 +62,8 @@ class Mesh;
 class SubMesh {
 public:
 	SubMesh();
-	void create_vb();
-	void update_vb(Mesh *mesh);
+	void create_vb(bool animated);
+	void update_vb(Mesh *mesh, bool animated);
 
 	int num_triangles;
 
@@ -81,14 +82,25 @@ public:
 	bool force_update;
 };
 
+class ivec4 {
+public:
+	int i,j,k,l;
+};
+
+class vec4 {
+public:
+	float x,y,z,w;
+};
+
 // visual skin
 class Mesh {
 public:
-	void create_vb();
-	void update_vb();
-	void post_process();
+	void create_vb(bool animated);
+	void update_vb(bool animated);
+	void post_process(bool animated);
 
-	Array<int> bone_index; // skeletal reference
+	Array<ivec4> bone_index; // skeletal reference
+	Array<vec4> bone_weight;
 	Array<vector> vertex;
 
 	Array<SubMesh> sub;
@@ -247,9 +259,9 @@ public:
 	vector rest_pos;
 	Model *model;
 	// current skeletal data
-	matrix dmatrix;
 	quaternion cur_ang;
 	vector cur_pos;
+	matrix dmatrix;
 };
 
 enum {
@@ -392,8 +404,12 @@ public:
 		MetaMove *meta; // shared
 
 		// dynamical data (own)
-		Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
+		//Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
+
+		Array<matrix> dmatrix;
+		nix::Buffer *buf;
 	} anim;
+	bool uses_bone_animations() const;
 
 	btRigidBody* body;
 	btCollisionShape* colShape;
