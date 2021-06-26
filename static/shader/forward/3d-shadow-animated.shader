@@ -2,7 +2,7 @@
 	version = 330
 </Layout>
 <VertexShader>
-#import vertex-default
+#import vertex-animated
 </VertexShader>
 <FragmentShader>
 void main() {

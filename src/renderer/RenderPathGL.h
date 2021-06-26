@@ -57,6 +57,7 @@ public:
 	shared<nix::Shader> shader_fx;
 	//shared<nix::Shader> shader_3d;
 	shared<nix::Shader> shader_shadow;
+	shared<nix::Shader> shader_shadow_animated;
 	shared<nix::Shader> shader_resolve_multisample;
 
 	Array<UBOLight> lights;

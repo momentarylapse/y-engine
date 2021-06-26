@@ -93,6 +93,7 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	//nix::default_shader_3d = shader_3d;
 	shader_shadow = ResourceManager::load_shader("forward/3d-shadow.shader");
+	shader_shadow_animated = ResourceManager::load_shader("forward/3d-shadow-animated.shader");
 
 	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
@@ -302,11 +303,15 @@ void RenderPathGLForward::draw_objects(bool allow_material) {
 		if (allow_material)
 			set_material(s.material);
 		if (m->uses_bone_animations()) {
+			if (!allow_material)
+				nix::set_shader(shader_shadow_animated.get());
 			m->anim.buf->update_array(m->anim.dmatrix);
 			nix::bind_buffer(m->anim.buf, 7);
 			//m->anim.mesh[0]->update_vb();
 			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+			if (!allow_material)
+				nix::set_shader(shader_shadow.get());
 		} else {
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
