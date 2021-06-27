@@ -5,12 +5,12 @@
  *      Author: michi
  */
 
-#ifndef SRC_GUI_NODE_H_
-#define SRC_GUI_NODE_H_
+#pragma once
 
 #include "../lib/base/base.h"
 #include "../lib/base/pointer.h"
-#include "../lib/nix/nix.h"
+#include "../lib/math/rect.h"
+#include "../lib/image/color.h"
 
 namespace gui {
 
@@ -106,5 +106,3 @@ public:
 };*/
 
 }
-
-#endif /* SRC_GUI_NODE_H_ */

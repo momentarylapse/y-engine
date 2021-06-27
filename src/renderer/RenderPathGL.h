@@ -21,6 +21,7 @@ namespace nix {
 class Material;
 class UBOLight;
 class GLFWwindow;
+class rect;
 
 namespace kaba {
 	class Function;

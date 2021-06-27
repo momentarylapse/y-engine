@@ -26,7 +26,12 @@
 
 #include "../lib/base/base.h"
 #include "../lib/file/path.h"
-#include "../lib/math/math.h"
+#include "../lib/math/vector.h"
+#include "../lib/math/matrix.h"
+#include "../lib/math/matrix3.h"
+#include "../lib/math/plane.h"
+#include "../lib/math/quaternion.h"
+#include "../lib/image/color.h"
 #include "../y/Entity.h"
 
 class btRigidBody;
@@ -80,16 +85,6 @@ public:
 
 	// refill the vertex buffer etc...
 	bool force_update;
-};
-
-class ivec4 {
-public:
-	int i,j,k,l;
-};
-
-class vec4 {
-public:
-	float x,y,z,w;
 };
 
 // visual skin

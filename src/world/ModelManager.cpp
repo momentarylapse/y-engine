@@ -8,6 +8,7 @@
 #include "ModelManager.h"
 #include "Model.h"
 #include "../y/EngineData.h"
+#include "../lib/math/complex.h"
 #include "../lib/kaba/kaba.h"
 #include "../lib/config.h"
 #ifdef _X_ALLOW_X_
@@ -25,9 +26,45 @@
 Array<Model*> ModelManager::originals;
 
 
+File *load_file_x(const Path &filename, int &version) {
 
-color file_read_color4i(File *f);
-vector get_normal_by_index(int index);
+	File *f = FileOpen(filename);
+	char c = f->read_char();
+	if (c == 'b') {
+		version = f->read_word();
+		return f;
+	} else if (c == 't') {
+		delete f;
+		f = FileOpenText(filename);
+		f->read_char();
+		version = f->read_word();
+		return f;
+	} else {
+		throw Exception("File format unreadable!");
+	}
+	return nullptr;
+}
+
+
+color file_read_color4i(File *f) {
+	int a = f->read_int();
+	int r = f->read_int();
+	int g = f->read_int();
+	int b = f->read_int();
+	return color((float)a/255.0f, (float)r/255.0f, (float)g/255.0f, (float)b/255.0f);
+}
+
+
+vector get_normal_by_index(int index) {
+	float wz = (float)(index >> 8) * pi / 255.0f;
+	float wxy = (float)(index & 255) * 2 * pi / 255.0f;
+	float swz = sin(wz);
+	if (swz < 0)
+		swz = - swz;
+	float cwz = cos(wz);
+	return vector( cos(wxy) * swz, sin(wxy) * swz, cwz);
+}
+
 void AppraiseDimensions(Model *m);
 void PostProcessPhys(Model *m, PhysicalMesh *s);
 

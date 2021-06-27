@@ -9,7 +9,9 @@
 #define SRC_FX_PARTICLE_H_
 
 #include "../lib/base/base.h"
-#include "../lib/math/math.h"
+#include "../lib/math/vector.h"
+#include "../lib/math/rect.h"
+#include "../lib/image/color.h"
 #include "../y/Entity.h"
 
 

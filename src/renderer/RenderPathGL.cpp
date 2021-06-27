@@ -10,7 +10,11 @@
 #include "RenderPathGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
+#include "../lib/math/vector.h"
+#include "../lib/math/complex.h"
+#include "../lib/math/rect.h"
 #include "../lib/kaba/syntax/Function.h"
+#include "../lib/file/msg.h"
 
 #include "../helper/PerformanceMonitor.h"
 #include "../plugins/PluginManager.h"

@@ -12,7 +12,7 @@
 #include "../gui/Node.h"
 #include "../gui/gui.h"
 #include "../lib/hui_minimal/hui.h"
-#include "../lib/math/math.h"
+#include "../lib/math/vector.h"
 #include "../y/EngineData.h"
 
 #include <GLFW/glfw3.h>

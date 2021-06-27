@@ -5,10 +5,10 @@
  *      Author: michi
  */
 
-#ifndef SRC_RENDERER_RENDERPATH_H_
-#define SRC_RENDERER_RENDERPATH_H_
+#pragma once
 
-#include "../lib/math/math.h"
+#include "../lib/math/matrix.h"
+#include "../lib/image/color.h"
 
 #if HAS_LIB_VULKAN
 namespace vulkan {
@@ -97,5 +97,3 @@ public:
 	virtual vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) = 0;
 };
 #endif
-
-#endif /* SRC_RENDERER_RENDERPATH_H_ */

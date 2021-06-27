@@ -9,6 +9,10 @@
 #include "Node.h"
 #include "Font.h"
 #include "../meta.h"
+#include "../lib/math/rect.h"
+#include "../lib/math/vector.h"
+#include "../lib/math/matrix.h"
+#include "../lib/nix/nix.h"
 #include <stdio.h>
 
 namespace gui {

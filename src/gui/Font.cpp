@@ -9,6 +9,7 @@
 #include "gui.h"
 #include "../Config.h"
 #include "../lib/image/image.h"
+#include "../lib/file/file.h"
 
 //#define USE_CAIRO 1
 #define USE_FREETYPE 1

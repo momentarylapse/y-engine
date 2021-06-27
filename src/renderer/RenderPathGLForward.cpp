@@ -9,6 +9,7 @@
 #include "RenderPathGLForward.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
+#include "../lib/file/msg.h"
 
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"

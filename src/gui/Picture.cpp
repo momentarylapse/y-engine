@@ -6,6 +6,8 @@
  */
 
 #include "Picture.h"
+#include "../lib/math/rect.h"
+#include "../lib/math/vector.h"
 #include "../lib/nix/nix.h"
 #include <iostream>
 

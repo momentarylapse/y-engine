@@ -1,4 +1,5 @@
 #include "ResourceManager.h"
+#include "../lib/file/file.h"
 #include "../lib/nix/nix.h"
 #include "../lib/hui_minimal/Application.h"
 #include "../lib/hui_minimal/error.h"

@@ -5,14 +5,17 @@
  *      Author: michi
  */
 
-#ifndef SRC_GUI_GUI_H_
-#define SRC_GUI_GUI_H_
+#pragma once
 
 
-//#include "../lib/vulkan/vulkan.h"
 #include "../lib/base/pointer.h"
-#include "../lib/nix/nix.h"
 #include <functional>
+
+namespace nix {
+	class VertexBuffer;
+	class Shader;
+}
+class vector;
 
 namespace gui {
 
@@ -40,5 +43,3 @@ extern nix::VertexBuffer *vertex_buffer;
 
 
 
-
-#endif /* SRC_GUI_GUI_H_ */

@@ -11,7 +11,8 @@
 
 #include "Sound.h"
 #include "../y/EngineData.h"
-#include "../lib/math/math.h"
+#include "../lib/math/vector.h"
+#include "../lib/math/quaternion.h"
  
 #if HAS_LIB_OPENAL
 

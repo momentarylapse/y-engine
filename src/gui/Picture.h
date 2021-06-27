@@ -5,10 +5,14 @@
  *      Author: michi
  */
 
-#ifndef SRC_GUI_PICTURE_H_
-#define SRC_GUI_PICTURE_H_
+#pragma once
 
 #include "Node.h"
+
+namespace nix {
+	class Texture;
+	class Shader;
+}
 
 namespace gui {
 
@@ -44,5 +48,3 @@ public:
 };
 
 }
-
-#endif /* SRC_GUI_PICTURE_H_ */

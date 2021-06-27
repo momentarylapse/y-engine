@@ -2,7 +2,7 @@
 
 #include "../lib/config.h"
 #include "../lib/file/file.h"
-#include "../lib/math/math.h"
+#include "../lib/math/vector.h"
 #include "../y/Entity.h"
 
 namespace audio {
