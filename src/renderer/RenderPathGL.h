@@ -22,6 +22,9 @@ class Material;
 class UBOLight;
 class GLFWwindow;
 class rect;
+class Material;
+
+enum class ShaderVariant;
 
 namespace kaba {
 	class Function;
@@ -57,8 +60,9 @@ public:
 	shared<nix::Shader> shader_out;
 	shared<nix::Shader> shader_fx;
 	//shared<nix::Shader> shader_3d;
-	shared<nix::Shader> shader_shadow;
-	shared<nix::Shader> shader_shadow_animated;
+	//shared<nix::Shader> shader_shadow;
+	//shared<nix::Shader> shader_shadow_animated;
+	Material *material_shadow = nullptr;
 	shared<nix::Shader> shader_resolve_multisample;
 
 	Array<UBOLight> lights;
@@ -90,10 +94,18 @@ public:
 	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
 	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
 	nix::FrameBuffer* resolve_multisampling(nix::FrameBuffer *source);
-	void set_material(Material *m);
+	void set_material(Material *m, ShaderVariant v);
 	void set_textures(const Array<nix::Texture*> &tex);
 	void draw_gui(nix::FrameBuffer *source);
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
+
+	void draw_particles();
+	void draw_skyboxes(Camera *c);
+	void draw_terrains(bool allow_material);
+	void draw_objects_opaque(bool allow_material);
+	void draw_objects_transparent(bool allow_material);
+	void draw_objects_instanced(bool allow_material);
+	void prepare_instanced_matrices();
 
 	nix::FrameBuffer *next_fb(nix::FrameBuffer *cur);
 	rect dynamic_fb_area() const;

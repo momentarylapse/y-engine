@@ -5,32 +5,6 @@
 	topology = triangles
 	version = 420
 </Layout>
-<VertexShader>
-
-struct Matrix {
-	mat4 model;
-	mat4 view;
-	mat4 project;
-};
-/*layout(binding = 0)*/ uniform Matrix matrix;
-
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_tex_coord;
-
-layout(location = 0) out vec4 out_pos_world;
-layout(location = 1) out vec2 out_tex_coord;
-layout(location = 2) out vec3 out_normal;
-
-void main() {
-	//float a = gl_InstanceID*0.5;
-	//float b = gl_InstanceID*1.1;
-	out_pos_world = matrix.model * vec4(in_position, 1.0);// + vec4(cos(a)*cos(b),sin(a)*cos(b),sin(b),0) * 300 * pow(gl_InstanceID, 0.4);
-	gl_Position = matrix.project * matrix.view * out_pos_world;
-	out_normal = (matrix.model * vec4(in_normal, 0.0)).xyz;
-	out_tex_coord = in_tex_coord;
-}
-</VertexShader>
 <FragmentShader>
 
 #import surface

@@ -9,6 +9,8 @@
 
 #include "RenderPathGL.h"
 
+class Camera;
+class PerformanceMonitor;
 
 class RenderPathGLForward : public RenderPathGL {
 public:
@@ -17,14 +19,8 @@ public:
 	void draw() override;
 
 	void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) override;
-	void draw_skyboxes(Camera *cam);
-	void draw_terrains(bool allow_material);
-	void draw_objects(bool allow_material);
 	void draw_world(bool allow_material);
-	void draw_particles();
 	void prepare_lights();
 	void render_shadow_map(nix::FrameBuffer *sfb, float scale);
-
-	void prepare_xxx();
 };
 

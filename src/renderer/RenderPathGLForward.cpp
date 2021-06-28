@@ -40,8 +40,6 @@ namespace nix {
 matrix jitter(float w, float h, int uid);
 void break_point();
 
-nix::UniformBuffer *ubo_multi_matrix = nullptr;
-
 
 RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
 	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
@@ -76,30 +74,21 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, Performa
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
+	ResourceManager::default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "") == "pbr")
 		ResourceManager::load_shader("forward/module-surface-pbr.shader");
 	else
 		ResourceManager::load_shader("forward/module-surface.shader");
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
+	ResourceManager::load_shader("module-vertex-instanced.shader");
 
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
-	//shader_3d = ResourceManager::load_shader("forward/3d-new.shader");
-	shader_3d = ResourceManager::load_shader("default.shader");
-	shader_3d_multi = ResourceManager::load_shader("default-multi.shader");
-	if (!shader_3d_multi->link_uniform_block("Multi", 5))
-		msg_error("Multi not found...");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
-	//nix::default_shader_3d = shader_3d;
-	shader_shadow = ResourceManager::load_shader("forward/3d-shadow.shader");
-	shader_shadow_animated = ResourceManager::load_shader("forward/3d-shadow-animated.shader");
-
 	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
-
-	ubo_multi_matrix = new nix::UniformBuffer();
 
 
 	if (nix::total_mem() > 0) {
@@ -118,7 +107,7 @@ void RenderPathGLForward::draw() {
 	}
 
 
-	prepare_xxx();
+	prepare_instanced_matrices();
 
 	perf_mon->tick(PMLabel::PRE);
 
@@ -187,157 +176,12 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam,
 	nix::set_scissor(rect::EMPTY);
 }
 
-void RenderPathGLForward::draw_particles() {
-	nix::set_shader(shader_fx.get());
-	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	nix::set_z(false, true);
-
-	// particles
-	auto r = matrix::rotation_q(cam->ang);
-	nix::vb_temp->create_rect(rect(-1,1, -1,1));
-	for (auto g: world.particle_manager->groups) {
-		nix::set_texture(g->texture);
-		for (auto p: g->particles)
-			if (p->enabled) {
-				shader_fx->set_color("color", p->col);
-				shader_fx->set_floats("source", &p->source.x1, 4);
-				nix::set_model_matrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
-				nix::draw_triangles(nix::vb_temp);
-			}
-	}
-
-	// beams
-	Array<vector> v;
-	v.resize(6);
-	nix::set_model_matrix(matrix::ID);
-	for (auto g: world.particle_manager->groups) {
-		nix::set_texture(g->texture);
-		for (auto p: g->beams) {
-			// TODO geometry shader!
-			auto pa = cam->project(p->pos);
-			auto pb = cam->project(p->pos + p->length);
-			auto pe = vector::cross(pb - pa, vector::EZ).normalized();
-			auto uae = cam->unproject(pa + pe * 0.1f);
-			auto ube = cam->unproject(pb + pe * 0.1f);
-			auto _e1 = (p->pos - uae).normalized() * p->radius;
-			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
-			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
-			v[0] = p->pos - _e1;
-			v[1] = p->pos - _e2 + p->length;
-			v[2] = p->pos + _e2 + p->length;
-			v[3] = p->pos - _e1;
-			v[4] = p->pos + _e2 + p->length;
-			v[5] = p->pos + _e1;
-			nix::vb_temp->update(0, v);
-			shader_fx->set_color("color", p->col);
-			shader_fx->set_floats("source", &p->source.x1, 4);
-			nix::draw_triangles(nix::vb_temp);
-		}
-	}
-
-	// script injectors
-	for (auto &i: fx_injectors)
-		i.func();
-
-
-	nix::set_z(true, true);
-	nix::set_alpha(nix::AlphaMode::NONE);
-	break_point();
-}
-
-void RenderPathGLForward::draw_skyboxes(Camera *cam) {
-	nix::set_z(false, false);
-	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(matrix::rotation_q(cam->ang).transpose());
-	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->ang);
-		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
-		for (int i=0; i<sb->material.num; i++) {
-			set_material(sb->material[i]);
-			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
-		}
-	}
-	nix::set_cull(nix::CullMode::DEFAULT);
-	break_point();
-}
-void RenderPathGLForward::draw_terrains(bool allow_material) {
-	for (auto *t: world.terrains) {
-		//nix::SetWorldMatrix(matrix::translation(t->pos));
-		nix::set_model_matrix(matrix::ID);
-		if (allow_material) {
-			set_material(t->material);
-			t->material->shader->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			t->material->shader->set_floats("pattern1", &t->texture_scale[1].x, 3);
-		}
-		t->draw();
-		nix::draw_triangles(t->vertex_buffer);
-	}
-}
-
-void RenderPathGLForward::prepare_xxx() {
-	for (auto &s: world.sorted_multi) {
-		ubo_multi_matrix->update_array(s.matrices);
-	}
-}
-
-void RenderPathGLForward::draw_objects(bool allow_material) {
-	for (auto &s: world.sorted_multi) {
-		if (!s.material->cast_shadow and !allow_material)
-			continue;
-		Model *m = s.model;
-		nix::set_model_matrix(s.matrices[0]);//m->_matrix);
-		//if (allow_material)
-		auto ss = s.material->shader;
-		s.material->shader = shader_3d_multi;
-		set_material(s.material);
-		nix::bind_buffer(ubo_multi_matrix, 5);
-		//msg_write(s.matrices.num);
-		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
-		s.material->shader = ss;
-	}
-
-	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and !allow_material)
-			continue;
-		Model *m = s.model;
-		nix::set_model_matrix(m->_matrix);
-		if (allow_material)
-			set_material(s.material);
-		if (m->uses_bone_animations()) {
-			if (!allow_material)
-				nix::set_shader(shader_shadow_animated.get());
-			m->anim.buf->update_array(m->anim.dmatrix);
-			nix::bind_buffer(m->anim.buf, 7);
-			//m->anim.mesh[0]->update_vb();
-			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-			if (!allow_material)
-				nix::set_shader(shader_shadow.get());
-		} else {
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-		}
-	}
-
-	if (allow_material)
-	for (auto &s: world.sorted_trans) {
-		Model *m = s.model;
-		nix::set_model_matrix(m->_matrix);
-		set_material(s.material);
-		nix::set_cull(nix::CullMode::NONE);
-		if (m->anim.meta) {
-			//m->anim.mesh[0]->update_vb();
-			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-		} else {
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-		}
-		nix::set_cull(nix::CullMode::DEFAULT);
-	}
-}
-
 void RenderPathGLForward::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
-	draw_objects(allow_material);
+	draw_objects_instanced(allow_material);
+	draw_objects_opaque(allow_material);
+	if (allow_material)
+		draw_objects_transparent(allow_material);
 }
 
 void RenderPathGLForward::prepare_lights() {
@@ -394,7 +238,7 @@ void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) 
 	nix::clear_z();
 
 	nix::set_z(true, true);
-	nix::set_shader(shader_shadow.get());
+	//nix::set_shader(shader_shadow.get());
 
 
 	draw_world(false);

@@ -153,7 +153,6 @@ public:
 				config.default_world = a;
 
 		MaterialInit();
-		MaterialSetDefaultShader(render_path->shader_3d);
 	}
 
 	void load_first_world() {

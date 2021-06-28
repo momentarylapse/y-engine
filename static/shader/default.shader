@@ -1,9 +1,6 @@
 <Layout>
 	version = 420
 </Layout>
-<VertexShader>
-#import vertex-default
-</VertexShader>
 <FragmentShader>
 #import surface
 struct Material { vec4 albedo, emission; float roughness, metal; };

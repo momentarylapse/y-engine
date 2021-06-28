@@ -58,8 +58,6 @@ public:
 	virtual void start_frame() = 0;
 	virtual void end_frame() = 0;
 
-	nix::Shader *shader_3d = nullptr;
-	nix::Shader *shader_3d_multi = nullptr;
 	nix::Shader *shader_2d = nullptr;
 
 	// dynamic resolution scaling
@@ -68,32 +66,3 @@ public:
 };
 
 
-#if HAS_LIB_VULKAN
-class RenderPathVulkan : public RenderPath {
-public:
-	RenderPathVulkan(RendererVulkan *renderer, PerformanceMonitor *perf_mon, const string &shadow_shader_filename, const string &fx_shader_filename);
-	virtual ~RenderPathVulkan();
-
-
-	void prepare_all(Renderer *r, Camera *c);
-	void draw_world(vulkan::CommandBuffer *cb, int light_index);
-	//void render_fx(vulkan::CommandBuffer *cb, Renderer *r);
-
-	void render_into_shadow(ShadowMapRenderer *r);
-
-
-	vulkan::Pipeline *pipeline_fx;
-	vulkan::VertexBuffer *particle_vb;
-
-	RendererVulkan *renderer;
-	ShadowMapRenderer *shadow_renderer;
-	PerformanceMonitor *perf_mon;
-
-	Camera *light_cam;
-	void pick_shadow_source();
-
-
-	virtual vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) = 0;
-	virtual vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) = 0;
-};
-#endif
