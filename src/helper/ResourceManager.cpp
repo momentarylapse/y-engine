@@ -1,8 +1,12 @@
 #include "ResourceManager.h"
 #include "../lib/file/file.h"
 #include "../lib/nix/nix.h"
-#include "../lib/hui_minimal/Application.h"
-#include "../lib/hui_minimal/error.h"
+#ifdef _X_USE_HUI_
+	#include "../lib/hui/hui.h"
+#else
+	#include "../lib/hui_minimal/Application.h"
+	#include "../lib/hui_minimal/error.h"
+#endif
 #include "../y/EngineData.h"
 
 
@@ -48,10 +52,19 @@ nix::Shader* ResourceManager::load_shader(const Path& filename) {
 			return s;
 
 	auto s = nix::Shader::load(fn);
+	if (!s)
+		return nullptr;
 	s->link_uniform_block("BoneData", 7);
 
 	shaders.add(s);
 	return s;
+}
+
+string ResourceManager::expand_shader_source(const string &source, const string &variant) {
+	if (source.find("<VertexShader>") >= 0)
+		return source;
+	//msg_write("INJECTING " + variant);
+	return source + format("\n<VertexShader>\n#import vertex-%s\n</VertexShader>", variant);
 }
 
 nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &variant) {
@@ -85,11 +98,7 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 
 	msg_write("loading shader: " + fnx.str());
 
-	string source = FileRead(fn);
-	if (source.find("<VertexShader>") < 0) {
-		//msg_write("INJECTING " + variant);
-		source += format("\n<VertexShader>\n#import vertex-%s\n</VertexShader>", variant);
-	}
+	string source = expand_shader_source(FileRead(fn), variant);
 	auto shader = nix::Shader::create(source);
 	shader->filename = fnx;
 
@@ -124,8 +133,15 @@ nix::Texture* ResourceManager::load_texture(const Path& filename) {
 		if (fn == t->filename)
 			return t->valid ? t : nullptr;
 
-	auto t = nix::Texture::load(fn);
-	textures.add(t);
-	return t;
+	try {
+		auto t = nix::Texture::load(fn);
+		textures.add(t);
+		return t;
+	} catch(Exception &e) {
+		if (!engine.ignore_missing_files)
+			throw;
+		msg_error(e.message());
+		return nullptr;
+	}
 }
 
