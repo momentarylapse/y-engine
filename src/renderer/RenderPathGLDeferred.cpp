@@ -67,6 +67,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 
 
 	ResourceManager::default_shader = "default.shader";
+	ResourceManager::load_shader("module-lighting-pbr.shader");
 	ResourceManager::load_shader("deferred/module-surface.shader");
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
@@ -114,8 +115,8 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	s->set_int("shadow_index", shadow_index);
 	nix::bind_buffer(ubo_light, 1);
 	auto tex = source->color_attachments;
-	tex.add(fb_shadow2->depth_buffer);
 	tex.add(fb_shadow->depth_buffer);
+	tex.add(fb_shadow2->depth_buffer);
 	process(tex, target, s);
 }
 
@@ -157,49 +158,6 @@ void RenderPathGLDeferred::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
-}
-
-void RenderPathGLDeferred::prepare_lights() {
-
-	lights.clear();
-	for (auto *l: world.lights) {
-		if (!l->enabled)
-			continue;
-
-		if (l->allow_shadow) {
-			if (l->type == LightType::DIRECTIONAL) {
-				vector center = cam->pos + cam->ang*vector::EZ * (shadow_box_size / 3.0f);
-				float grid = shadow_box_size / 16;
-				center.x -= fmod(center.x, grid) - grid/2;
-				center.y -= fmod(center.y, grid) - grid/2;
-				center.z -= fmod(center.z, grid) - grid/2;
-				auto t = matrix::translation(- center);
-				auto r = matrix::rotation(l->light.dir.dir2ang()).transpose();
-				float f = 1 / shadow_box_size;
-				auto s = matrix::scale(f, f, f);
-				// map onto [-1,1]x[-1,1]x[0,1]
-				shadow_proj = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
-			} else {
-				auto t = matrix::translation(- l->light.pos);
-				vector dir = - (cam->ang * vector::EZ);
-				if (l->type == LightType::CONE or l->user_shadow_control)
-					dir = -l->light.dir;
-				auto r = matrix::rotation(dir.dir2ang()).transpose();
-				//auto r = matrix::rotation(l->light.dir.dir2ang()).transpose();
-				float theta = 1.35f;
-				if (l->type == LightType::CONE)
-					theta = l->light.theta;
-				if (l->user_shadow_control)
-					theta = l->user_shadow_theta;
-				auto p = matrix::perspective(2 * theta, 1.0f, l->light.radius * 0.01f, l->light.radius);
-				shadow_proj = p * r * t;
-			}
-			shadow_index = lights.num;
-			l->light.proj = shadow_proj;
-		}
-		lights.add(l->light);
-	}
-	ubo_light->update_array(lights);
 }
 
 void RenderPathGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {

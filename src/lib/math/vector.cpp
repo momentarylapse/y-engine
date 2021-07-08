@@ -82,6 +82,23 @@ float vec2::length() const {
 	return sqrtf( x*x + y*y );
 }
 
+// scale to length 1
+void vec2::normalize() {
+	float l = length();
+	if (l > 0)
+		*this /= l;
+	else
+		*this = vec2::EY;
+}
+
+// scale to length 1
+vec2 vec2::normalized() const {
+	float l = length();
+	if (l == 0)
+		return vec2::EY;
+	return *this / l;
+}
+
 
 //------------------------------------------------------------------------------------------------//
 //                                            vector                                                //
@@ -523,3 +540,88 @@ string vec4::str() const {
 float vec4::length() const {
 	return sqrtf( x*x + y*y + z*z + w*w );
 }
+
+// scale to length 1
+void vec4::normalize() {
+	float l = length();
+	if (l > 0)
+		*this /= l;
+	else
+		*this = vec4::EW;
+}
+
+// scale to length 1
+vec4 vec4::normalized() const {
+	float l = length();
+	if (l == 0)
+		return vec4::EW;
+	return *this / l;
+}
+
+
+
+
+
+int vec4::argmin() const {
+	int n = 0;
+	float m = (*this)[0];
+	for (int i=1; i<3; i++)
+		if ((*this)[i] < m) {
+			n = i;
+			m = (*this)[i];
+		}
+	return n;
+}
+
+int vec4::argmax() const {
+	int n = 0;
+	float m = (*this)[0];
+	for (int i=1; i<3; i++)
+		if ((*this)[i] > m) {
+			n = i;
+			m = (*this)[i];
+		}
+	return n;
+}
+
+float vec4::sum() const {
+	return x + y + z + w;
+}
+
+float &vec4::operator[](int index) {
+	auto vv = &x;
+	return vv[index];
+}
+
+float vec4::operator[](int index) const {
+	auto vv = &x;
+	return vv[index];
+}
+
+
+
+int ivec4::find(int x) const {
+	if (i == x)
+		return 0;
+	if (j == x)
+		return 1;
+	if (k == x)
+		return 2;
+	if (l == x)
+		return 3;
+	return -1;
+}
+
+int &ivec4::operator[](int index) {
+	auto vv = &i;
+	return vv[index];
+}
+
+int ivec4::operator[](int index) const {
+	auto vv = &i;
+	return vv[index];
+}
+
+
+
+

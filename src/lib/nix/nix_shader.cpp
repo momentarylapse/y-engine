@@ -442,15 +442,15 @@ layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_uv;
 
-layout(location = 0) out vec3 out_pos; // camera space
-layout(location = 1) out vec3 out_normal;
-layout(location = 2) out vec2 out_uv;
+layout(location = 0) out vec3 out_normal;
+layout(location = 1) out vec2 out_uv;
+layout(location = 2) out vec4 out_pos; // camera space
 
 void main() {
 	gl_Position = matrix.project * matrix.view * matrix.model * vec4(in_position, 1);
 	out_normal = (matrix.view * matrix.model * vec4(in_normal, 0)).xyz;
 	out_uv = in_uv;
-	out_pos = (matrix.view * matrix.model * vec4(in_position, 1)).xyz;
+	out_pos = matrix.view * matrix.model * vec4(in_position, 1);
 }
 )foodelim"});
 
@@ -475,9 +475,9 @@ struct Light { mat4 proj; vec4 pos, dir, color; float radius, theta, harshness; 
 uniform int num_lights = 0;
 /*layout(binding = 1)*/ uniform LightData { Light light[32]; };
 
-layout(location = 0) in vec3 in_pos;
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_uv;
+layout(location = 0) in vec3 in_normal;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec4 in_pos;
 uniform sampler2D tex0;
 out vec4 out_color;
 
@@ -486,15 +486,15 @@ vec4 basic_lighting(Light l, vec3 n, vec4 tex_col) {
 	vec3 LD = (matrix.view * vec4(l.dir.xyz, 0)).xyz;
 	vec3 LP = (matrix.view * vec4(l.pos.xyz, 1)).xyz;
 	if (l.radius > 0) {
-		LD = normalize(in_pos - LP);
-		attenuation = min(l.radius / length(in_pos - LP), 1);
+		LD = normalize(in_pos.xyz - LP);
+		attenuation = min(l.radius / length(in_pos.xyz - LP), 1);
 	}
 	float d = max(-dot(n, LD), 0) * attenuation;
 	vec4 color = material.albedo * material.roughness * l.color * (1 - l.harshness) / 2;
 	color += material.albedo * l.color * l.harshness * d;
 	color *= tex_col;
 	if ((d > 0) && (material.roughness < 0.8)) {
-		vec3 e = normalize(in_pos); // eye dir
+		vec3 e = normalize(in_pos.xyz); // eye dir
 		vec3 rl = reflect(LD, n);
 		float ee = max(-dot(e, rl), 0);
 		float shininess = 5 / (1.1 - material.roughness);

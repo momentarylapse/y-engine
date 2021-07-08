@@ -20,7 +20,6 @@ public:
 
 	void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) override;
 	void draw_world(bool allow_material);
-	void prepare_lights();
 	void render_shadow_map(nix::FrameBuffer *sfb, float scale);
 };
 
