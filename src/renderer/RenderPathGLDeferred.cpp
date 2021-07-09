@@ -11,6 +11,7 @@
 #include "RenderPathGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/file/msg.h"
+#include "../lib/math/random.h"
 
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
@@ -39,7 +40,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
 		new nix::Texture(width, height, "rgba:f16"), // emission
-		new nix::Texture(width, height, "rgba:f16"), // pos
+		new nix::Texture(width, height, "rgba:f32"), // pos
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
@@ -59,6 +60,8 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
+	for (auto a: gbuffer->color_attachments)
+		a->set_options("wrap=clamp,magfilter=nearest");
 	fb_main->color_attachments[0]->set_options("wrap=clamp");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
@@ -77,8 +80,19 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
+	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
+		msg_error("SSAO");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_2d = ResourceManager::load_shader("forward/2d.shader");
+
+	ssao_sample_buffer = new nix::UniformBuffer();
+	Array<vec4> ssao_samples;
+	Random r;
+	for (int i=0; i<64; i++) {
+		auto v = r.dir() * pow(r.uniform01(), 1);
+		ssao_samples.add(vec4(v.x, v.y, abs(v.z), 0));
+	}
+	ssao_sample_buffer->update_array(ssao_samples);
 }
 
 void RenderPathGLDeferred::draw() {
@@ -113,8 +127,14 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	s->set_floats("eye_pos", &cam->pos.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
+	nix::bind_buffer(ssao_sample_buffer, 13);
+
+	//auto mat_vp = matrix::scale(1,-1,1) * cam->m_projection * cam->m_view;
+	//s->set_matrix("mat_vp", mat_vp);
+
 	nix::bind_buffer(ubo_light, 1);
 	auto tex = source->color_attachments;
+	tex.add(source->depth_buffer);
 	tex.add(fb_shadow->depth_buffer);
 	tex.add(fb_shadow2->depth_buffer);
 	process(tex, target, s);

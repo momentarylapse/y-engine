@@ -15,6 +15,7 @@ public:
 
 	shared<nix::FrameBuffer> gbuffer;
 	shared<nix::Shader> shader_gbuffer_out;
+	nix::UniformBuffer *ssao_sample_buffer;
 
 	RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 	void draw() override;

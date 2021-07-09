@@ -5,7 +5,6 @@
 <Module>
 
 
-
 struct Light {
 	mat4 proj;
 	vec4 pos;
@@ -195,7 +194,6 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	roughness = max(roughness, 0.03);
 	
 ///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
-
 	
 
 	vec4 color = vec4(0);

@@ -228,9 +228,10 @@ void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer 
 	nix::bind_frame_buffer(target);
 	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
 	nix::set_z(false, false);
-	nix::set_projection_ortho_relative();
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);
+	//nix::set_projection_ortho_relative();
+	//nix::set_view_matrix(matrix::ID);
+	//nix::set_model_matrix(matrix::ID);
+	shader->set_floats("resolution_scale", &resolution_scale_x, 2);
 	nix::set_shader(shader);
 
 	nix::set_textures(source);
