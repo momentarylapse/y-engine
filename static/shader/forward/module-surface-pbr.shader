@@ -64,7 +64,7 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	}
 	
 
-	out_color += perform_lighting(p, n, albedo, emission, metal, roughness, eye_pos);
+	out_color += perform_lighting(p, n, albedo, emission, metal, roughness, 0, eye_pos);
 	
 /*	float distance = length(p - eye_pos.xyz);
 	float f = exp(-distance / fog.distance);

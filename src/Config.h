@@ -29,9 +29,10 @@ public:
 	string default_font;
 	AntialiasingMethod antialiasing_method = AntialiasingMethod::NONE;
 
-	float resolution_scale_min = 0.5f;
-	float resolution_scale_max = 1;
-	float target_framerate = 60;
+	float resolution_scale_min = 0;
+	float resolution_scale_max = 0;
+	float target_framerate = 0;
+	float ambient_occlusion_radius = 0;
 
 	Config();
 	void load(const Array<string> &arg);

@@ -16,7 +16,7 @@ Config::Config() {
 void Config::load(const Array<string> &arg) {
 	hui::Configuration::load("game.ini");
 	for (auto &a: arg)
-		if (a.head(2) == "-c") {
+		if (a.head(2).lower() == "-c") {
 			auto xx = a.sub_ref(2).explode("=");
 			set_str(xx[0].trim(), xx[1].trim());
 		}
@@ -41,4 +41,8 @@ void Config::load(const Array<string> &arg) {
 	resolution_scale_min = get_float("renderer.resolution-scale-min", 0.5f);
 	resolution_scale_max = get_float("renderer.resolution-scale-max", 1.0f);
 	target_framerate = get_float("renderer.target-framerate", 60.0f);
+
+	ambient_occlusion_radius = get_float("renderer.ssao.radius", 10);
+	if (!get_bool("renderer.ssao.enabled", true))
+		ambient_occlusion_radius = -1;
 }

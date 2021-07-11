@@ -61,7 +61,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
 	for (auto a: gbuffer->color_attachments)
-		a->set_options("wrap=clamp,magfilter=nearest");
+		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 	fb_main->color_attachments[0]->set_options("wrap=clamp");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
@@ -127,6 +127,7 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	s->set_floats("eye_pos", &cam->pos.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
+	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
 	nix::bind_buffer(ssao_sample_buffer, 13);
 
 	//auto mat_vp = matrix::scale(1,-1,1) * cam->m_projection * cam->m_view;

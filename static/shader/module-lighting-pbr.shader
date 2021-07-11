@@ -164,10 +164,13 @@ vec3 _surf_specular(vec3 albedo, float metal, float roughness, vec3 V, vec3 L, v
         return numerator / max(denominator, 0.001);
 }
 
-vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float roughness, vec3 view_dir, bool with_shadow) {
+vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float roughness, float ambient_occlusion, vec3 view_dir, bool with_shadow) {
 	float shadow_factor = 1.0;
 	if (with_shadow)
 		shadow_factor = _surf_shadow_factor(l, p);
+		
+	// TODO only affect "diffuse"
+	shadow_factor *= (1-ambient_occlusion);
 
 	
         // calculate per-light radiance
@@ -188,7 +191,7 @@ vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float ro
         return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, float roughness, vec3 eye_pos) {
+vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, float roughness, float ambient_occlusion, vec3 eye_pos) {
 	vec3 view_dir = normalize(p - eye_pos);
 	
 	roughness = max(roughness, 0.03);
@@ -198,7 +201,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 
 	vec4 color = vec4(0);
 	for (int i=0; i<num_lights; i++)
-		color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, view_dir, i == shadow_index).rgb;
+		color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, i == shadow_index).rgb;
 	
 /*	float distance = length(p - eye_pos.xyz);
 	float f = exp(-distance / fog.distance);
