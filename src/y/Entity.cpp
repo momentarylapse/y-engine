@@ -6,6 +6,7 @@
  */
 
 #include "Entity.h"
+#include "Component.h"
 
 
 bool EntityManager::enabled = true;
@@ -27,6 +28,21 @@ Entity::~Entity() {
 		world.unregister(this);
 	}
 	//msg_write("/~Entity " + i2s((int)type));*/
+}
+
+
+// TODO (later) optimize...
+void Entity::add_component(Component *c, kaba::Class *type) {
+	components.add(c);
+	c->type = type;
+	c->owner = this;
+}
+
+Component *Entity::get_component(kaba::Class *type) const {
+	for (auto *c: components)
+		if (c->type == type)
+			return c;
+	return nullptr;
 }
 
 

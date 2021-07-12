@@ -26,6 +26,8 @@
 #include "../renderer/RenderPathGL.h"
 #include "../renderer/RenderPathGLForward.h"
 #include "../y/EngineData.h"
+#include "../y/Entity.h"
+#include "../y/Component.h"
 #include "../world/Camera.h"
 #include "../world/Link.h"
 #include "../world/Model.h"
@@ -275,6 +277,12 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("Entity.on_delete", &Entity::on_delete, &entity);
 	kaba::link_external_virtual("Entity.on_iterate", &Entity::on_iterate, &entity);
 	kaba::link_external_class_func("Entity.__del_override__", &global_delete);
+	kaba::link_external_class_func("Entity.get_component", &Entity::get_component);
+	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
+
+	kaba::declare_class_size("Component", sizeof(Component));
+	kaba::declare_class_element("Component.owner", &Component::owner);
+	kaba::link_external_class_func("Component.__init__", &Component::__init__);
 
 	Particle particle(vector::ZERO, 0, nullptr, -1);
 	kaba::declare_class_size("Particle", sizeof(Particle));

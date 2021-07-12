@@ -394,6 +394,9 @@
     <ClCompile Include="src\world\World.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
+    <ClCompile Include="src\y\Component.cpp">
+      <Filter>src\y</Filter>
+    </ClCompile>
     <ClCompile Include="src\y\EngineData.cpp">
       <Filter>src\y</Filter>
     </ClCompile>
@@ -779,6 +782,9 @@
     </ClInclude>
     <ClInclude Include="src\world\World.h">
       <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\y\Component.h">
+      <Filter>src\y</Filter>
     </ClInclude>
     <ClInclude Include="src\y\EngineData.h">
       <Filter>src\y</Filter>

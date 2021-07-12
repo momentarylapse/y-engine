@@ -5,10 +5,15 @@
  *      Author: michi
  */
 
-#ifndef SRC_Y_ENTITY_H_
-#define SRC_Y_ENTITY_H_
+#pragma once
 
 #include "../lib/base/base.h"
+
+class Component;
+
+namespace kaba {
+	class Class;
+}
 
 
 class Entity : public VirtualBase {
@@ -38,6 +43,9 @@ public:
 	virtual void _cdecl on_delete(){}
 
 	Type type;
+	Array<Component*> components;
+	Component *get_component(kaba::Class *type) const;
+	void add_component(Component *c, kaba::Class *type);
 };
 
 
@@ -65,5 +73,3 @@ private:
 	for (int i=(array).num-1; i>=0; i--) \
 		delete((array)[i]); \
 	(array).clear();
-
-#endif /* SRC_Y_ENTITY_H_ */

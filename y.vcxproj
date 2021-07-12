@@ -243,6 +243,7 @@
     <ClCompile Include="src\world\Object.cpp" />
     <ClCompile Include="src\world\Terrain.cpp" />
     <ClCompile Include="src\world\World.cpp" />
+    <ClCompile Include="src\y\Component.cpp" />
     <ClCompile Include="src\y\EngineData.cpp" />
     <ClCompile Include="src\y\Entity.cpp" />
     <ClCompile Include="src\Config.cpp" />
@@ -373,6 +374,7 @@
     <ClInclude Include="src\world\Object.h" />
     <ClInclude Include="src\world\Terrain.h" />
     <ClInclude Include="src\world\World.h" />
+    <ClInclude Include="src\y\Component.h" />
     <ClInclude Include="src\y\EngineData.h" />
     <ClInclude Include="src\y\Entity.h" />
     <ClInclude Include="src\Config.h" />
