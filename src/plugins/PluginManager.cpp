@@ -289,6 +289,7 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("Component.on_init", &Component::on_init, &component);
 	kaba::link_external_virtual("Component.on_delete", &Component::on_delete, &component);
 	kaba::link_external_virtual("Component.on_iterate", &Component::on_iterate, &component);
+	kaba::link_external_virtual("Component.on_collide", &Component::on_collide, &component);
 	kaba::link_external_class_func("Component.set_variables", &Component::set_variables);
 
 

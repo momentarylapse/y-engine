@@ -10,6 +10,7 @@
 #include "../lib/base/base.h"
 
 class Entity;
+class CollisionData;
 namespace kaba {
 	class Class;
 }
@@ -21,6 +22,8 @@ public:
 	virtual void on_init() {}
 	virtual void on_delete() {}
 	virtual void on_iterate(float dt) {}
+
+	virtual void on_collide(const CollisionData &col) {}
 
 	void set_variables(const string &var);
 

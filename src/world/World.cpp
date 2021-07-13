@@ -143,6 +143,12 @@ void GodInit() {
 void GodEnd() {
 }
 
+void send_collision(Model *m, const CollisionData &col) {
+	m->on_collide(col);
+	for (auto c: m->components)
+		c->on_collide(col);
+}
+
 #if HAS_LIB_BULLET
 void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 	auto dispatcher = world->getDispatcher();
@@ -159,9 +165,9 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 			auto &pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() <= 0) {
 				if (a->physics_data.active)
-					a->on_collide({b, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(a, {b, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
 				if (b->physics_data.active)
-					b->on_collide({a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(b, {a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}
