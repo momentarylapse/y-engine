@@ -289,6 +289,7 @@ void PluginManager::link_kaba() {
 	kaba::link_external_virtual("Component.on_init", &Component::on_init, &component);
 	kaba::link_external_virtual("Component.on_delete", &Component::on_delete, &component);
 	kaba::link_external_virtual("Component.on_iterate", &Component::on_iterate, &component);
+	kaba::link_external_class_func("Component.set_variables", &Component::set_variables);
 
 
 	kaba::link_external("get_component_list", (void*)&ComponentManager::get_list);
@@ -473,7 +474,10 @@ Array<TemplateDataScriptVariable> parse_variables(const string &var) {
 	auto xx = var.explode(",");
 	for (auto &x: xx) {
 		auto y = x.explode(":");
-		r.add({y[0].trim(), y[1].trim()});
+		if (y[1].trim().match("\"*\""))
+			r.add({y[0].trim(), y[1].trim().sub_ref(1, -1)});
+		else
+			r.add({y[0].trim(), y[1].trim().unescape()});
 	}
 	return r;
 }
