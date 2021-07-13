@@ -14,6 +14,9 @@ class Path;
 class Controller;
 class PerformanceMonitor;
 class TemplateDataScriptVariable;
+namespace kaba {
+	class Class;
+}
 
 class PluginManager {
 public:
@@ -21,6 +24,9 @@ public:
 
 	void reset();
 
+	static const kaba::Class *find_class(const Path &filename, const string &name);
+	static const kaba::Class *find_class_derived(const Path &filename, const string &base_class);
+	static void *create_instance(const kaba::Class *type, const Array<TemplateDataScriptVariable> &variables);
 	static void *create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables);
 
 	void add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables);

@@ -477,16 +477,13 @@ void assign_variables(char *p, const kaba::Class *c, const Array<TemplateDataScr
 	}
 }
 
-void *PluginManager::create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables) {
+const kaba::Class *PluginManager::find_class_derived(const Path &filename, const string &base_class) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	try {
 		auto s = kaba::load(filename);
 		for (auto c: s->classes()) {
 			if (c->is_derived_from_s(base_class)) {
-				msg_write(format("creating instance  %s", c->long_name()));
-				void *p = c->create_instance();
-				assign_variables((char*)p, c, variables);
-				return p;
+				return c;
 			}
 		}
 	} catch (kaba::Exception &e) {
@@ -495,6 +492,39 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 	}
 	throw Exception(format("script does not contain a class derived from '%s'", base_class));
 	return nullptr;
+}
+
+const kaba::Class *PluginManager::find_class(const Path &filename, const string &name) {
+	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
+	try {
+		auto s = kaba::load(filename);
+		for (auto c: s->classes()) {
+			if (c->name == name) {
+				return c;
+			}
+		}
+	} catch (kaba::Exception &e) {
+		msg_error(e.message());
+		throw Exception(e.message());
+	}
+	throw Exception(format("script does not contain a class named '%s'", name));
+	return nullptr;
+}
+
+void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
+	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
+	msg_write(format("creating instance  %s", c->long_name()));
+	void *p = c->create_instance();
+	assign_variables((char*)p, c, variables);
+	return p;
+}
+
+void *PluginManager::create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables) {
+	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
+	auto c = find_class_derived(filename, base_class);
+	if (!c)
+		return nullptr;
+	return create_instance(c, variables);
 }
 
 void PluginManager::add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables) {

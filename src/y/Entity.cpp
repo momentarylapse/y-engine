@@ -32,13 +32,13 @@ Entity::~Entity() {
 
 
 // TODO (later) optimize...
-void Entity::add_component(Component *c, kaba::Class *type) {
+void Entity::add_component(Component *c, const kaba::Class *type) {
 	components.add(c);
 	c->type = type;
 	c->owner = this;
 }
 
-Component *Entity::get_component(kaba::Class *type) const {
+Component *Entity::get_component(const kaba::Class *type) const {
 	for (auto *c: components)
 		if (c->type == type)
 			return c;

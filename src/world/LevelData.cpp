@@ -82,7 +82,7 @@ bool LevelData::load(const Path &filename) {
 				fog.distance = 1.0f / e.value("density")._float();
 				fog._color = s2c(e.value("color"));
 			} else if (e.tag == "script") {
-				Script s;
+				ScriptData s;
 				s.filename = e.value("file");
 				for (auto &ee: e.elements) {
 					TemplateDataScriptVariable v;
@@ -137,7 +137,6 @@ bool LevelData::load(const Path &filename) {
 			} else if (e.tag == "object") {
 				Object o;
 				o.filename = e.value("file");
-				o.script = e.value("script");
 				o.name = e.value("name");
 				o.pos = s2v(e.value("pos"));
 				o.ang = s2v(e.value("ang"));
@@ -145,6 +144,13 @@ bool LevelData::load(const Path &filename) {
 				o.rot = v_0;
 				if (e.value("role") == "ego")
 					ego_index = objects.num;
+				for (auto &ee: e.elements)
+					if (ee.tag == "component") {
+						ScriptData sd;
+						sd.filename = ee.value("script", "");
+						sd.class_name = ee.value("class", "");
+						o.components.add(sd);
+					}
 				objects.add(o);
 			} else if (e.tag == "link") {
 				Link l;

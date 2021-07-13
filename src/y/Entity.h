@@ -44,8 +44,8 @@ public:
 
 	Type type;
 	Array<Component*> components;
-	Component *get_component(kaba::Class *type) const;
-	void add_component(Component *c, kaba::Class *type);
+	Component *get_component(const kaba::Class *type) const;
+	void add_component(Component *c, const kaba::Class *type);
 };
 
 

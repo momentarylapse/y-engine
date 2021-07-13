@@ -46,6 +46,13 @@ public:
 	bool load(const Path &filename);
 
 
+	class ScriptData {
+	public:
+		Path filename;
+		string class_name;
+		Array<TemplateDataScriptVariable> variables;
+	};
+
 	class Terrain {
 	public:
 		Path filename;
@@ -55,9 +62,9 @@ public:
 	class Object {
 	public:
 		Path filename;
-		Path script;
 		string name;
 		vector pos, ang, vel, rot;
+		Array<ScriptData> components;
 	};
 
 	class Light {
@@ -74,12 +81,6 @@ public:
 		float fov, min_depth, max_depth, exposure;
 	};
 
-	class Script {
-	public:
-		Path filename;
-		Array<TemplateDataScriptVariable> variables;
-	};
-
 	class Link {
 	public:
 		int object[2];
@@ -94,7 +95,7 @@ public:
 	Array<Object> objects;
 	Array<Terrain> terrains;
 	int ego_index;
-	Array<Script> scripts;
+	Array<ScriptData> scripts;
 	Array<Light> lights;
 	Array<Link> links;
 

@@ -26,6 +26,7 @@
 #include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/ParticleManager.h"
+#include "../plugins/PluginManager.h"
 #endif
 
 #ifdef _X_ALLOW_X_
@@ -324,7 +325,7 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()){
 			auto q = quaternion::rotation(o.ang);
-			Object *oo = create_object_x(o.filename, o.name, o.pos, q, o.script, i);
+			Object *oo = create_object_x(o.filename, o.name, o.pos, q, o.components, i);
 			ok &= (oo != nullptr);
 			if (oo){
 				oo->vel = o.vel;
@@ -413,10 +414,10 @@ bool GodLoadWorld(const Path &filename) {
 }
 
 Object *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
-	return create_object_x(filename, "", pos, ang, "");
+	return create_object_x(filename, "", pos, ang, {});
 }
 
-Object *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Path &script, int w_index) {
+Object *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index) {
 	if (engine.resetting_game)
 		throw Exception("CreateObject during game reset");
 
@@ -424,13 +425,22 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		throw Exception("CreateObject: empty filename");
 
 	//msg_write(on);
-	auto *o = static_cast<Object*>(ModelManager::loadx(filename, script));
+	auto *o = static_cast<Object*>(ModelManager::loadx(filename, ""));
 
 	o->script_data.name = name;
 	o->pos = pos;
 	o->ang = ang;
 	o->update_matrix();
 	o->update_theta();
+
+	for (auto &cc: components) {
+		msg_write("add component " + cc.class_name);
+#ifdef _X_ALLOW_X_
+		auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+		auto comp = (Component*)plugin_manager.create_instance(type, cc.variables);
+		o->add_component(comp, type);
+#endif
+	}
 
 
 	register_object(o, w_index);
