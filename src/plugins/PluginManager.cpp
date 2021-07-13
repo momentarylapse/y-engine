@@ -459,7 +459,8 @@ void PluginManager::reset() {
 	controllers.clear();
 }
 
-void assign_variables(char *p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
+void PluginManager::assign_variables(void *_p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
+	char *p = (char*)_p;
 	for (auto &v: variables) {
 		for (auto &e: c->elements) {
 			if (v.name == e.name.lower().replace("_", "")) {
@@ -515,7 +516,7 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	msg_write(format("creating instance  %s", c->long_name()));
 	void *p = c->create_instance();
-	assign_variables((char*)p, c, variables);
+	assign_variables(p, c, variables);
 	return p;
 }
 

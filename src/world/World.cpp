@@ -437,8 +437,8 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = plugin_manager.find_class(cc.filename, cc.class_name);
-		auto comp = (Component*)plugin_manager.create_instance(type, cc.variables);
-		o->add_component(comp, type);
+		auto comp = o->add_component(type);
+		plugin_manager.assign_variables(comp, type, cc.variables);
 #endif
 	}
 

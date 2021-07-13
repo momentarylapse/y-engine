@@ -7,6 +7,11 @@
 
 #include "Entity.h"
 #include "Component.h"
+#include "../lib/config.h"
+#ifdef _X_ALLOW_X_
+#include "../meta.h"
+#include "../plugins/PluginManager.h"
+#endif
 
 
 bool EntityManager::enabled = true;
@@ -32,10 +37,12 @@ Entity::~Entity() {
 
 
 // TODO (later) optimize...
-void Entity::add_component(Component *c, const kaba::Class *type) {
+Component *Entity::add_component(const kaba::Class *type) {
+	auto c = (Component*)plugin_manager.create_instance(type, {});
 	components.add(c);
 	c->type = type;
 	c->owner = this;
+	return c;
 }
 
 Component *Entity::get_component(const kaba::Class *type) const {
