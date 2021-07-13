@@ -440,6 +440,10 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 	o->update_matrix();
 	o->update_theta();
 
+
+	register_object(o, w_index);
+
+
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
@@ -448,9 +452,6 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		comp->set_variables(cc.var);
 #endif
 	}
-
-
-	register_object(o, w_index);
 
 	o->on_init();
 

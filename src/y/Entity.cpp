@@ -31,6 +31,12 @@ Entity::~Entity() {
 	//msg_write("/~Entity " + i2s((int)type));*/
 }
 
+void Entity::on_init_rec() {
+	on_init();
+	for (auto c: components)
+		c->on_init();
+}
+
 
 // TODO (later) optimize...
 Component *Entity::add_component(const kaba::Class *type) {

@@ -41,6 +41,7 @@ public:
 	virtual void _cdecl on_iterate(float dt){}
 	virtual void _cdecl on_init(){}
 	virtual void _cdecl on_delete(){}
+	void on_init_rec();
 
 	Type type;
 	Array<Component*> components;

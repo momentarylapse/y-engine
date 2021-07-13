@@ -409,10 +409,7 @@ public:
 	btRigidBody* body;
 	btCollisionShape* colShape;
 
-	virtual void _cdecl on_init() {}
-	virtual void _cdecl on_delete() {}
 	virtual void _cdecl on_collide(const CollisionData &col) {}
-	virtual void _cdecl on_iterate(float dt) {}
 };
 
 

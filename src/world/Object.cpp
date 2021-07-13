@@ -262,7 +262,7 @@ void Object::update_theta() {
 		physics_data.theta_inv = physics_data.theta.inverse();
 	}else{
 		// Theta and ThetaInv already = identity
-		memset(&physics_data.theta_inv, 0, sizeof(matrix3));
+		physics_data.theta_inv = matrix3::ZERO;
 	}
 }
 
