@@ -22,6 +22,8 @@ public:
 	virtual void on_delete() {}
 	virtual void on_iterate(float dt) {}
 
+	void set_variables(const string &var);
+
 	void __init__();
 	virtual void __delete__();
 

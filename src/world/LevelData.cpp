@@ -84,6 +84,8 @@ bool LevelData::load(const Path &filename) {
 			} else if (e.tag == "script") {
 				ScriptData s;
 				s.filename = e.value("file");
+				s.class_name = e.value("class");
+				s.var = e.value("var");
 				for (auto &ee: e.elements) {
 					TemplateDataScriptVariable v;
 					v.name = ee.value("name").lower().replace("_", "");
@@ -147,8 +149,9 @@ bool LevelData::load(const Path &filename) {
 				for (auto &ee: e.elements)
 					if (ee.tag == "component") {
 						ScriptData sd;
-						sd.filename = ee.value("script", "");
-						sd.class_name = ee.value("class", "");
+						sd.filename = ee.value("script");
+						sd.class_name = ee.value("class");
+						sd.var = ee.value("var");
 						o.components.add(sd);
 					}
 				objects.add(o);

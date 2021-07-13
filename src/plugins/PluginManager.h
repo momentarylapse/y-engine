@@ -29,6 +29,7 @@ public:
 	static void *create_instance(const kaba::Class *type, const Array<TemplateDataScriptVariable> &variables);
 	static void *create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables);
 	static void assign_variables(void *p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables);
+	static void assign_variables(void *p, const kaba::Class *c, const string &variables);
 
 	void add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables);
 

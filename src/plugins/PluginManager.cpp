@@ -468,6 +468,16 @@ void PluginManager::reset() {
 	controllers.clear();
 }
 
+Array<TemplateDataScriptVariable> parse_variables(const string &var) {
+	Array<TemplateDataScriptVariable> r;
+	auto xx = var.explode(",");
+	for (auto &x: xx) {
+		auto y = x.explode(":");
+		r.add({y[0].trim(), y[1].trim()});
+	}
+	return r;
+}
+
 void PluginManager::assign_variables(void *_p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
 	char *p = (char*)_p;
 	for (auto &v: variables) {
@@ -485,6 +495,10 @@ void PluginManager::assign_variables(void *_p, const kaba::Class *c, const Array
 			}
 		}
 	}
+}
+
+void PluginManager::assign_variables(void *_p, const kaba::Class *c, const string &variables) {
+	assign_variables(_p, c, parse_variables(variables));
 }
 
 const kaba::Class *PluginManager::find_class_derived(const Path &filename, const string &base_class) {

@@ -7,6 +7,7 @@
 
 #include "Component.h"
 #include "../lib/base/base.h"
+#include "../plugins/PluginManager.h"
 
 Component::Component() {
 	owner = nullptr;
@@ -21,5 +22,9 @@ void Component::__init__() {
 
 void Component::__delete__() {
 	this->Component::~Component();
+}
+
+void Component::set_variables(const string &var) {
+	plugin_manager.assign_variables(this, type, var);
 }
 
