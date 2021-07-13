@@ -142,8 +142,6 @@ bool LevelData::load(const Path &filename) {
 				o.name = e.value("name");
 				o.pos = s2v(e.value("pos"));
 				o.ang = s2v(e.value("ang"));
-				o.vel = v_0;
-				o.rot = v_0;
 				if (e.value("role") == "ego")
 					ego_index = objects.num;
 				for (auto &ee: e.elements)

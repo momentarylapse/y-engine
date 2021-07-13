@@ -32,4 +32,8 @@ public:
 
 	Entity *owner;
 	const kaba::Class *type;
+
+	template<class Owner>
+	Owner *get_owner() const { return (Owner*)owner; };
 };
+

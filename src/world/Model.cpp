@@ -263,32 +263,16 @@ void Model::reset_data() {
 			}
 	}
 
-	if (physics_data.active)
-		physics_data.mass_inv = 1.0f / physics_data.mass;
-	else
-		physics_data.mass_inv = 0;
-	physics_data.theta = physics_data.theta_0;
-	physics_data.g_factor = 1;
-	physics_data.test_collisions = true;
 	prop.allow_shadow = false;
-	
-	vel = rot = v_0;
 }
 
 
 Model::Model() : Entity(Type::MODEL) {
-	pos = vel = rot = v_0;
+	pos = v_0;
 	ang = quaternion::ID;
 	object_id = -1;
 	registered = false;
-	on_ground = false;
 	visible = true;
-	rotating  = true;
-	moved = false;
-	frozen = false;
-	time_till_freeze = 0;
-	ground_id = -1;
-	ground_normal = v_0;
 
 	is_copy = false;
 	_template = nullptr;
@@ -300,13 +284,6 @@ Model::Model() : Entity(Type::MODEL) {
 	anim.meta = nullptr;
 	anim.buf = nullptr;
 	phys = nullptr;
-
-	vel_surf = acc = v_0;
-	force_int = torque_int = v_0;
-	force_ext = torque_ext = v_0;
-
-	body = nullptr;
-	colShape = nullptr;
 
 
 	parent = nullptr;
@@ -341,7 +318,7 @@ Model *Model::copy(Model *pre_allocated) {
 		m = new Model();
 
 	m->prop = prop;
-	m->physics_data = physics_data;
+	m->physics_data_ = physics_data_;
 	m->_template = _template;
 	m->script_data = script_data;
 

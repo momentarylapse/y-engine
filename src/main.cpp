@@ -139,7 +139,7 @@ public:
 
 		GodInit();
 		global_perf_mon = &perf_mon;
-		PluginManager::link_kaba();
+		PluginManager::init();
 
 		ErrorHandler::init();
 

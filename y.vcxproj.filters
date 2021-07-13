@@ -367,6 +367,9 @@
     <ClCompile Include="src\renderer\RenderPathGLForward.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\components\SolidBodyComponent.cpp">
+      <Filter>src\world\components</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\Camera.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
@@ -759,6 +762,9 @@
     <ClInclude Include="src\renderer\RenderPathGLForward.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\world\components\SolidBodyComponent.h">
+      <Filter>src\world\components</Filter>
+    </ClInclude>
     <ClInclude Include="src\world\Camera.h">
       <Filter>src\world</Filter>
     </ClInclude>
@@ -883,6 +889,9 @@
     </Filter>
     <Filter Include="src\world">
       <UniqueIdentifier>{E9411D56-C9E9-1A0A-845C-CF6F8BB58006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\world\components">
+      <UniqueIdentifier>{8A2D268E-EF85-ACB8-259B-829B79988E30}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\y">
       <UniqueIdentifier>{B4C155E0-F4CA-9BCF-C13C-B164BBA71B0C}</UniqueIdentifier>

@@ -117,11 +117,11 @@ public:
 		me->prop.radius = f->read_float();
 
 		// physics
-		me->physics_data.mass = f->read_float();
+		me->physics_data_.mass = f->read_float();
 		for (int i=0;i<9;i++)
-			me->physics_data.theta_0.e[i] = f->read_float();
-		me->physics_data.active = f->read_bool();
-		me->physics_data.passive = f->read_bool();
+			me->physics_data_.theta_0.e[i] = f->read_float();
+		me->physics_data_.active = f->read_bool();
+		me->physics_data_.passive = f->read_bool();
 	}
 	void write(File *f) override {}
 };

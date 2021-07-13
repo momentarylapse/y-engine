@@ -36,6 +36,7 @@
 #include "../world/Object.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
+#include "../world/components/SolidBodyComponent.h"
 #include "../meta.h"
 #include "../lib/kaba/dynamic/exception.h"
 
@@ -76,7 +77,12 @@ void global_exit(EngineData& engine) {
 	exit(0);
 }
 
-void PluginManager::link_kaba() {
+void PluginManager::init() {
+	export_kaba();
+	import_kaba();
+}
+
+void PluginManager::export_kaba() {
 
 	Camera _cam(v_0, quaternion::ID, rect::ID);
 	kaba::declare_class_size("Camera", sizeof(Camera));
@@ -126,9 +132,7 @@ void PluginManager::link_kaba() {
 	Model model;
 	kaba::declare_class_size("Model", sizeof(Model));
 	kaba::declare_class_element("Model.pos", &Model::pos);
-	kaba::declare_class_element("Model.vel", &Model::vel);
 	kaba::declare_class_element("Model.ang", &Model::ang);
-	kaba::declare_class_element("Model.rot", &Model::rot);
 	kaba::declare_class_element("Model.mesh", &Model::mesh);
 	kaba::declare_class_element("Model.materials", &Model::material);
 	kaba::declare_class_element("Model.bones", &Model::bone);
@@ -139,19 +143,12 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
 	kaba::declare_class_element("Model.vars", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.vars_i", (char*)&model.script_data.var - (char*)&model);
-	kaba::declare_class_element("Model.mass", (char*)&model.physics_data.mass - (char*)&model);
-	kaba::declare_class_element("Model.theta", (char*)&model.physics_data.theta_0 - (char*)&model);
-	kaba::declare_class_element("Model.g_factor", (char*)&model.physics_data.g_factor - (char*)&model);
-	kaba::declare_class_element("Model.physics_active", (char*)&model.physics_data.active - (char*)&model);
-	kaba::declare_class_element("Model.physics_passive", (char*)&model.physics_data.passive - (char*)&model);
 	kaba::declare_class_element("Model.parent", &Model::parent);
 	kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
 	kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
 	kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
-	kaba::link_external_class_func("Model.update_motion", &Object::update_motion);
-	kaba::link_external_class_func("Model.update_mass", &Object::update_mass);
 	kaba::link_external_class_func("Model.get_vertex", &Model::get_vertex);
 //	kaba::link_external_class_func("Model.set_bone_model", &Model::set_bone_model);
 	kaba::link_external_class_func("Model.reset_animation", &Model::reset_animation);
@@ -160,14 +157,25 @@ void PluginManager::link_kaba() {
 	kaba::link_external_class_func("Model.is_animation_done", &Model::is_animation_done);
 	kaba::link_external_class_func("Model.begin_edit_animation", &Model::begin_edit_animation);
 
-	kaba::link_external_class_func("Model.add_force", &Object::add_force);
-	kaba::link_external_class_func("Model.add_impulse", &Object::add_impulse);
-	kaba::link_external_class_func("Model.add_torque", &Object::add_torque);
-	kaba::link_external_class_func("Model.add_torque_impulse", &Object::add_torque_impulse);
 	kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
-	kaba::link_external_virtual("Model.on_collide", &Model::on_collide, &model);
 	kaba::link_external_virtual("Model.on_iterate", &Model::on_iterate, &model);
+
+
+	kaba::declare_class_size("SolidBodyComponent", sizeof(SolidBodyComponent));
+	kaba::declare_class_element("SolidBodyComponent.vel", &SolidBodyComponent::vel);
+	kaba::declare_class_element("SolidBodyComponent.rot", &SolidBodyComponent::rot);
+	kaba::declare_class_element("SolidBodyComponent.mass", &SolidBodyComponent::mass);
+	kaba::declare_class_element("SolidBodyComponent.theta", &SolidBodyComponent::theta);
+	kaba::declare_class_element("SolidBodyComponent.g_factor", &SolidBodyComponent::g_factor);
+	kaba::declare_class_element("SolidBodyComponent.physics_active", &SolidBodyComponent::active);
+	kaba::declare_class_element("SolidBodyComponent.physics_passive", &SolidBodyComponent::passive);
+	kaba::link_external_class_func("SolidBodyComponent.add_force", &SolidBodyComponent::add_force);
+	kaba::link_external_class_func("SolidBodyComponent.add_impulse", &SolidBodyComponent::add_impulse);
+	kaba::link_external_class_func("SolidBodyComponent.add_torque", &SolidBodyComponent::add_torque);
+	kaba::link_external_class_func("SolidBodyComponent.add_torque_impulse", &SolidBodyComponent::add_torque_impulse);
+	kaba::link_external_class_func("SolidBodyComponent.update_motion", &SolidBodyComponent::update_motion);
+	kaba::link_external_class_func("SolidBodyComponent.update_mass", &SolidBodyComponent::update_mass);
 
 
 	kaba::declare_class_size("Terrain", sizeof(Terrain));
@@ -464,6 +472,19 @@ void PluginManager::link_kaba() {
 	kaba::link_external("load_model", (void*)&ModelManager::load);
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
+}
+
+
+void PluginManager::import_kaba() {
+	auto s = kaba::load("y.kaba");
+	for (auto c: s->classes()) {
+		if (c->name == "SolidBodyComponent")
+			SolidBodyComponent::_class = c;
+	}
+	if (!SolidBodyComponent::_class)
+		throw Exception("y.kaba: SolidBodyComponent missing");
+	if (!SolidBodyComponent::_class->is_derived_from_s("y.Component"))
+		throw Exception("y.kaba: SolidBodyComponent not derived from Component");
 }
 
 void PluginManager::reset() {

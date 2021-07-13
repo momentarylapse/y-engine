@@ -5,16 +5,17 @@
  *      Author: michi
  */
 
-#ifndef SRC_WORLD_LINK_H_
-#define SRC_WORLD_LINK_H_
+#pragma once
 
 #include "../y/Entity.h"
 
 class vector;
 class quaternion;
-class Object;
 
 class btTypedConstraint;
+
+class Object;
+class SolidBodyComponent;
 
 
 
@@ -36,8 +37,8 @@ public:
 
 	btTypedConstraint *con;
 	LinkType link_type;
-	Object *a;
-	Object *b;
+	SolidBodyComponent *a;
+	SolidBodyComponent *b;
 
 	void _create_link_data(vector &pa, vector &pb, quaternion &iqa, quaternion &iqb, const vector &pos);
 
@@ -63,5 +64,3 @@ public:
 };
 
 
-
-#endif /* SRC_WORLD_LINK_H_ */

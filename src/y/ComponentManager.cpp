@@ -75,6 +75,7 @@ const kaba::Class *get_component_type_family(const kaba::Class *type) {
 // TODO (later) optimize...
 Component *ComponentManager::create_component(const kaba::Class *type, const string &var) {
 #ifdef _X_ALLOW_X_
+	//Component *c = nullptr;
 	auto c = (Component*)plugin_manager.create_instance(type, var);
 	c->type = type;
 	auto type_family = get_component_type_family(type);

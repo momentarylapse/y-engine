@@ -64,7 +64,7 @@ public:
 	public:
 		Path filename;
 		string name;
-		vector pos, ang, vel, rot;
+		vector pos, ang;
 		Array<ScriptData> components;
 	};
 

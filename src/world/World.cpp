@@ -14,6 +14,7 @@
 #include "../lib/nix/nix.h"
 #include "../y/EngineData.h"
 #include "../y/Component.h"
+#include "../y/ComponentManager.h"
 #include "../meta.h"
 #include "ModelManager.h"
 #include "Link.h"
@@ -22,6 +23,7 @@
 #include "Object.h"
 #include "Terrain.h"
 #include "World.h"
+#include "components/SolidBodyComponent.h"
 
 #ifdef _X_ALLOW_X_
 #include "../fx/Light.h"
@@ -144,7 +146,6 @@ void GodEnd() {
 }
 
 void send_collision(Model *m, const CollisionData &col) {
-	m->on_collide(col);
 	for (auto c: m->components)
 		c->on_collide(col);
 }
@@ -158,16 +159,16 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 		auto contactManifold = dispatcher->getManifoldByIndexInternal(i);
 		auto obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
 		auto obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-		auto a = static_cast<Object*>(obA->getUserPointer());
-		auto b = static_cast<Object*>(obB->getUserPointer());
+		auto a = static_cast<SolidBodyComponent*>(obA->getUserPointer());
+		auto b = static_cast<SolidBodyComponent*>(obB->getUserPointer());
 		int np = contactManifold->getNumContacts();
 		for (int j=0; j<np; j++) {
 			auto &pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() <= 0) {
-				if (a->physics_data.active)
-					send_collision(a, {b, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
-				if (b->physics_data.active)
-					send_collision(b, {a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
+				if (a->active)
+					send_collision((Model*)a->owner, {(Model*)b->owner, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
+				if (b->active)
+					send_collision((Model*)b->owner, {(Model*)a->owner, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}
@@ -334,10 +335,6 @@ bool World::load(const LevelData &ld) {
 			auto q = quaternion::rotation(o.ang);
 			Object *oo = create_object_x(o.filename, o.name, o.pos, q, o.components, i);
 			ok &= (oo != nullptr);
-			if (oo){
-				oo->vel = o.vel;
-				oo->rot = o.rot;
-			}
 			if (ld.ego_index == i)
 				ego = oo;
 			if (i % 5 == 0)
@@ -383,9 +380,6 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 		a = min(a, f);
 		b = max(b, f);
 	}
-	printf("%f   %f\n", a, b);
-
-	msg_write(tt->pattern.str());
 
 	//tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
 	hh.clear();
@@ -438,10 +432,23 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 	o->pos = pos;
 	o->ang = ang;
 	o->update_matrix();
-	o->update_theta();
 
 
 	register_object(o, w_index);
+
+	// for now...
+	if (o->physics_data_.active or o->physics_data_.passive) {
+		// TODO
+
+		auto sb = new SolidBodyComponent(o);
+		sb->type = SolidBodyComponent::_class;
+		ComponentManager::add_to_list(sb, SolidBodyComponent::_class);
+		o->components.add(sb);
+		sb->owner = o;
+
+		//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
+		dynamicsWorld->addRigidBody(sb->body);
+	}
 
 
 	for (auto &cc: components) {
@@ -519,116 +526,26 @@ void World::register_object(Object *o, int index) {
 	register_model(o);
 
 	o->object_id = on;
-
-#if HAS_LIB_BULLET
-	if (o->phys->balls.num + o->phys->cylinders.num + o->phys->poly.num > 0) {
-		auto comp = new btCompoundShape(false, 0);
-		for (auto &b: o->phys->balls) {
-			vector a = o->phys->vertex[b.index];
-			auto bb = new btSphereShape(btScalar(b.radius));
-			comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb);
-		}
-		for (auto &c: o->phys->cylinders) {
-			vector a = o->phys->vertex[c.index[0]];
-			vector b = o->phys->vertex[c.index[1]];
-			auto cc = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length() / 2)));
-			auto q = quaternion::rotation((a-b).dir2ang());
-			comp->addChildShape(bt_set_trafo((a+b)/2, q), cc);
-			if (c.round) {
-				auto bb1 = new btSphereShape(btScalar(c.radius));
-				comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb1);
-				auto bb2 = new btSphereShape(btScalar(c.radius));
-				comp->addChildShape(bt_set_trafo(b, quaternion::ID), bb2);
-			}
-		}
-		for (auto &p: o->phys->poly) {
-			if (true){
-				Set<int> vv;
-				for (int i=0; i<p.num_faces; i++)
-					for (int k=0; k<p.face[i].num_vertices; k++){
-						vv.add(p.face[i].index[k]);
-					}
-				// btConvexPointCloudShape not working!
-				auto pp = new btConvexHullShape();
-				for (int i: vv)
-					pp->addPoint(bt_set_v(o->phys->vertex[i]));
-				comp->addChildShape(bt_set_trafo(v_0, quaternion::ID), pp);
-			} else {
-				// ARGH, btConvexPointCloudShape not working
-				//   let's use a crude box for now... (-_-)'
-				vector a, b;
-				a = b = o->phys->vertex[p.face[0].index[0]];
-				for (int i=0; i<p.num_faces; i++)
-					for (int k=0; k<p.face[i].num_vertices; k++){
-						auto vv = o->phys->vertex[p.face[i].index[k]];
-						a._min(vv);
-						b._max(vv);
-					}
-				auto pp = new btBoxShape(bt_set_v((b-a) / 2));
-				comp->addChildShape(bt_set_trafo((a+b)/2, quaternion::ID), pp);
-
-			}
-		}
-		o->colShape = comp;
-	}
-
-	/*if (o->phys->balls.num > 0) {
-		auto &b = o->phys->balls[0];
-		o->colShape = new btSphereShape(btScalar(b.radius));
-	} else if (o->phys->cylinders.num > 0) {
-		auto &c = o->phys->cylinders[0];
-		vector a = o->mesh[0]->vertex[c.index[0]];
-		vector b = o->mesh[0]->vertex[c.index[1]];
-		o->colShape = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length())));
-	} else if (o->phys->poly.num > 0) {
-
-	} else {
-	}*/
-
-	btTransform startTransform = bt_set_trafo(o->pos, o->ang);
-
-	btScalar mass(o->physics_data.active ? o->physics_data.mass : 0);
-	btVector3 localInertia(0, 0, 0);
-	//if (isDynamic)
-	if (o->colShape) {
-		o->colShape->calculateLocalInertia(mass, localInertia);
-		o->physics_data.theta_0._00 = localInertia.x();
-		o->physics_data.theta_0._11 = localInertia.y();
-		o->physics_data.theta_0._22 = localInertia.z();
-	}
-
-	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, o->colShape, localInertia);
-	o->body = new btRigidBody(rbInfo);
-
-	o->body->setUserPointer(o);
-	o->update_mass();
-
-	if (o->physics_data.active or o->physics_data.passive)
-		dynamicsWorld->addRigidBody(o->body);
-	//else if (o->physics_data.test_collisions)
-	//	dynamicsWorld->addCollisionObject(o->body);
-#endif
-
 }
 
 
 void World::set_active_physics(Object *o, bool active, bool passive) { //, bool test_collisions) {
+	auto b = reinterpret_cast<SolidBodyComponent*>(o->get_component(SolidBodyComponent::_class));
+
 #if HAS_LIB_BULLET
-	btScalar mass(active ? o->physics_data.mass : 0);
+	btScalar mass(active ? b->mass : 0);
 	btVector3 localInertia(0, 0, 0);
-	if (o->colShape) {
-		o->colShape->calculateLocalInertia(mass, localInertia);
-		o->physics_data.theta_0._00 = localInertia.x();
-		o->physics_data.theta_0._11 = localInertia.y();
-		o->physics_data.theta_0._22 = localInertia.z();
+	if (b->colShape) {
+		b->colShape->calculateLocalInertia(mass, localInertia);
+		b->theta_0._00 = localInertia.x();
+		b->theta_0._11 = localInertia.y();
+		b->theta_0._22 = localInertia.z();
 	}
-	o->body->setMassProps(mass, localInertia);
-	if (passive and !o->physics_data.passive)
-		dynamicsWorld->addRigidBody(o->body);
-	if (!passive and o->physics_data.passive)
-		dynamicsWorld->removeRigidBody(o->body);
+	b->body->setMassProps(mass, localInertia);
+	if (passive and !b->passive)
+		dynamicsWorld->addRigidBody(b->body);
+	if (!passive and b->passive)
+		dynamicsWorld->removeRigidBody(b->body);
 
 	/*if (!passive and test_collisions) {
 		msg_error("FIXME pure collision");
@@ -637,9 +554,9 @@ void World::set_active_physics(Object *o, bool active, bool passive) { //, bool 
 #endif
 
 
-	o->physics_data.active = active;
-	o->physics_data.passive = passive;
-	//o->physics_data.test_collisions = test_collisions;
+	b->active = active;
+	b->passive = passive;
+	//b->test_collisions = test_collisions;
 }
 
 // un-object a model
@@ -648,13 +565,9 @@ void World::unregister_object(Object *m) {
 		return;
 
 #if HAS_LIB_BULLET
-	if (m->body) {
-		dynamicsWorld->removeRigidBody(m->body);
-		delete m->body->getMotionState();
-		delete m->body;
-		delete m->colShape;
-		m->body = nullptr;
-		m->colShape = nullptr;
+	auto *sb = (SolidBodyComponent*)m->get_component(SolidBodyComponent::_class);
+	if (sb) {
+		dynamicsWorld->removeRigidBody(sb->body);
 	}
 #endif
 
@@ -812,11 +725,12 @@ void World::iterate_physics(float dt) {
 		dynamicsWorld->stepSimulation(dt, 10);
 
 		btTransform trans;
-		for (auto *o: objects)
-			if (o and o->physics_data.active) {
+		auto list = (Array<SolidBodyComponent*>*)ComponentManager::get_list(SolidBodyComponent::_class);
+		for (auto *o: *list)
+			if (o->active) {
 				o->body->getMotionState()->getWorldTransform(trans);
-				o->pos = bt_get_v(trans.getOrigin());
-				o->ang = bt_get_q(trans.getRotation());
+				o->get_owner<Model>()->pos = bt_get_v(trans.getOrigin());
+				o->get_owner<Model>()->ang = bt_get_q(trans.getRotation());
 				o->vel = bt_get_v(o->body->getLinearVelocity());
 				o->rot = bt_get_v(o->body->getAngularVelocity());
 
@@ -826,9 +740,9 @@ void World::iterate_physics(float dt) {
 			}
 #endif
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
-		for (auto *o: objects)
-			if (o)
-				o->do_physics(dt);
+		auto list = (Array<SolidBodyComponent*>*)ComponentManager::get_list(SolidBodyComponent::_class);
+		for (auto *o: *list)
+			o->do_physics(dt);
 	}
 
 	for (auto *o: objects)

@@ -34,9 +34,6 @@
 #include "../lib/image/color.h"
 #include "../y/Entity.h"
 
-class btRigidBody;
-class btCollisionShape;
-
 
 class Model;
 namespace Fx {
@@ -46,7 +43,6 @@ class Material;
 class TraceData;
 class Terrain;
 class TemplateDataScriptVariable;
-class CollisionData;
 namespace nix {
 	class VertexBuffer;
 	class Buffer;
@@ -348,11 +344,11 @@ public:
 
 	// physics
 	struct PhysicsData {
-		float mass, mass_inv, g_factor;
-		matrix3 theta_0, theta, theta_inv;
+		float mass;
+		matrix3 theta_0;
 		bool active, passive;
 		bool test_collisions;
-	} physics_data;
+	} physics_data_;
 
 	// script data (own)
 	struct ScriptData {
@@ -364,19 +360,12 @@ public:
 	int object_id;
 	Model *parent;
 	Model *_cdecl root();
-	bool on_ground, visible, rotating, moved, frozen;
-	float time_till_freeze;
-	int ground_id;
-	vector ground_normal;
+	bool visible;
 
 
-	vector pos, vel, vel_surf, /*pos_old,*/ acc;
-	quaternion ang /*,ang_old*/;
-	vector rot;
+	vector pos;
+	quaternion ang;
 	matrix _matrix, matrix_old;
-
-	vector force_int, torque_int;
-	vector force_ext, torque_ext;
 
 	// template (shared)
 	ModelTemplate *_template;
@@ -405,11 +394,6 @@ public:
 		nix::Buffer *buf;
 	} anim;
 	bool uses_bone_animations() const;
-
-	btRigidBody* body;
-	btCollisionShape* colShape;
-
-	virtual void _cdecl on_collide(const CollisionData &col) {}
 };
 
 

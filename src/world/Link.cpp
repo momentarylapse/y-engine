@@ -7,6 +7,7 @@
 
 #include "Link.h"
 #include "Object.h"
+#include "components/SolidBodyComponent.h"
 #include "../lib/file/msg.h"
 
 
@@ -21,20 +22,26 @@ btQuaternion bt_set_q(const quaternion &q);
 
 Link::Link(LinkType t, Object *_a, Object *_b) : Entity(Type::LINK) {
 	link_type = t;
-	a = _a;
-	b = _b;
+	a = nullptr;
+	b = nullptr;
+	if (_a)
+		a = reinterpret_cast<SolidBodyComponent*>(_a->get_component(SolidBodyComponent::_class));
+	if (_b)
+		b = reinterpret_cast<SolidBodyComponent*>(_b->get_component(SolidBodyComponent::_class));
+	msg_write(p2s(a));
+	msg_write(p2s(b));
 	con = nullptr;
 }
 
 
 void Link::_create_link_data(vector &pa, vector &pb, quaternion &iqa, quaternion &iqb, const vector &pos) {
-	iqa = a->ang.bar();
+	iqa = a->get_owner<Object>()->ang.bar();
 	iqb = quaternion::ID;
-	pa = iqa * (pos - a->pos);
+	pa = iqa * (pos - a->get_owner<Object>()->pos);
 	pb = pos;
 	if (b) {
-		iqb = b->ang.bar();
-		pb = iqb * (pos - b->pos);
+		iqb = b->get_owner<Object>()->ang.bar();
+		pb = iqb * (pos - b->get_owner<Object>()->pos);
 	}
 }
 
@@ -103,6 +110,7 @@ LinkUniversal::LinkUniversal(Object *_a, Object *_b, const vector &pos, const qu
 }
 
 Link *Link::create(LinkType type, Object *a, Object *b, const vector &pos, const quaternion &ang) {
+	msg_write(format("LINK   %d   %s  %s", (int)type, p2s(a), p2s(b)));
 	if (type == LinkType::SOCKET) {
 		return new LinkSocket(a, b, pos);
 	} else if (type == LinkType::HINGE) {
