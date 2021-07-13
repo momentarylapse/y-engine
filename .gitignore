@@ -1,4 +1,4 @@
 *.o
-y
-message.txt
+/y
+/message.txt
 

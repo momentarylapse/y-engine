@@ -207,6 +207,7 @@ sources = [
 	'src/world/Terrain.cpp',
 	'src/world/World.cpp',
 	'src/y/Component.cpp',
+	'src/y/ComponentManager.cpp',
 	'src/y/EngineData.cpp',
 	'src/y/Entity.cpp',
 	'src/Config.cpp',

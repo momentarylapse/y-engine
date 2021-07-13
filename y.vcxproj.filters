@@ -397,6 +397,9 @@
     <ClCompile Include="src\y\Component.cpp">
       <Filter>src\y</Filter>
     </ClCompile>
+    <ClCompile Include="src\y\ComponentManager.cpp">
+      <Filter>src\y</Filter>
+    </ClCompile>
     <ClCompile Include="src\y\EngineData.cpp">
       <Filter>src\y</Filter>
     </ClCompile>
@@ -784,6 +787,9 @@
       <Filter>src\world</Filter>
     </ClInclude>
     <ClInclude Include="src\y\Component.h">
+      <Filter>src\y</Filter>
+    </ClInclude>
+    <ClInclude Include="src\y\ComponentManager.h">
       <Filter>src\y</Filter>
     </ClInclude>
     <ClInclude Include="src\y\EngineData.h">

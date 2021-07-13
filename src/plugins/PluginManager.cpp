@@ -28,6 +28,7 @@
 #include "../y/EngineData.h"
 #include "../y/Entity.h"
 #include "../y/Component.h"
+#include "../y/ComponentManager.h"
 #include "../world/Camera.h"
 #include "../world/Link.h"
 #include "../world/Model.h"
@@ -283,6 +284,9 @@ void PluginManager::link_kaba() {
 	kaba::declare_class_size("Component", sizeof(Component));
 	kaba::declare_class_element("Component.owner", &Component::owner);
 	kaba::link_external_class_func("Component.__init__", &Component::__init__);
+
+
+	kaba::link_external("get_component_list", (void*)&ComponentManager::get_list);
 
 	Particle particle(vector::ZERO, 0, nullptr, -1);
 	kaba::declare_class_size("Particle", sizeof(Particle));
