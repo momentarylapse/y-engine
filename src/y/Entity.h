@@ -42,11 +42,12 @@ public:
 	virtual void _cdecl on_init(){}
 	virtual void _cdecl on_delete(){}
 	void on_init_rec();
+	void on_delete_rec();
 
 	Type type;
 	Array<Component*> components;
 	Component *get_component(const kaba::Class *type) const;
-	Component *add_component(const kaba::Class *type);
+	Component *add_component(const kaba::Class *type, const string &var);
 };
 
 

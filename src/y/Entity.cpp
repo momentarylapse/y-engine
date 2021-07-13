@@ -8,6 +8,8 @@
 #include "Entity.h"
 #include "Component.h"
 #include "ComponentManager.h"
+#include "../lib/kaba/syntax/Class.h"
+#include "../lib/file/msg.h"
 
 
 bool EntityManager::enabled = true;
@@ -23,6 +25,9 @@ Entity::Entity(Type t) {
 //   one might expect to call on_delete() here, but that's not possible,
 //   since all outer destructors have been called at this point already
 Entity::~Entity() {
+	//msg_write("~Entity " + i2s((int)type));
+	for (auto *c: components)
+		ComponentManager::delete_component(c);
 /*	//msg_write("~Entity " + i2s((int)type));
 	if (EntityManager::enabled) {
 		//msg_write("auto unreg...");
@@ -37,10 +42,16 @@ void Entity::on_init_rec() {
 		c->on_init();
 }
 
+void Entity::on_delete_rec() {
+	for (auto c: components)
+		c->on_delete();
+	on_delete();
+}
+
 
 // TODO (later) optimize...
-Component *Entity::add_component(const kaba::Class *type) {
-	auto c = ComponentManager::create_component(type);
+Component *Entity::add_component(const kaba::Class *type, const string &var) {
+	auto c = ComponentManager::create_component(type, var);
 	components.add(c);
 	c->owner = this;
 	c->on_init();
@@ -49,7 +60,7 @@ Component *Entity::add_component(const kaba::Class *type) {
 
 Component *Entity::get_component(const kaba::Class *type) const {
 	for (auto *c: components)
-		if (c->type == type)
+		if (c->type->is_derived_from(type))
 			return c;
 	return nullptr;
 }

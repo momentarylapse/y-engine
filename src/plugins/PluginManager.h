@@ -26,6 +26,7 @@ public:
 
 	static const kaba::Class *find_class(const Path &filename, const string &name);
 	static const kaba::Class *find_class_derived(const Path &filename, const string &base_class);
+	static void *create_instance(const kaba::Class *type, const string &variables);
 	static void *create_instance(const kaba::Class *type, const Array<TemplateDataScriptVariable> &variables);
 	static void *create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables);
 	static void assign_variables(void *p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables);

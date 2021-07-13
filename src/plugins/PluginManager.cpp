@@ -49,7 +49,7 @@ extern nix::Texture *_tex_white;
 void global_delete(Entity *e) {
 	//msg_error("global delete... " + p2s(e));
 	world.unregister(e);
-	e->on_delete();
+	e->on_delete_rec();
 	delete e;
 }
 
@@ -475,10 +475,11 @@ Array<TemplateDataScriptVariable> parse_variables(const string &var) {
 	auto xx = var.explode(",");
 	for (auto &x: xx) {
 		auto y = x.explode(":");
+		auto name = y[0].trim().lower().replace("_", "");
 		if (y[1].trim().match("\"*\""))
-			r.add({y[0].trim(), y[1].trim().sub_ref(1, -1)});
+			r.add({name, y[1].trim().sub_ref(1, -1)});
 		else
-			r.add({y[0].trim(), y[1].trim().unescape()});
+			r.add({name, y[1].trim().unescape()});
 	}
 	return r;
 }
@@ -538,6 +539,10 @@ const kaba::Class *PluginManager::find_class(const Path &filename, const string 
 	}
 	throw Exception(format("script does not contain a class named '%s'", name));
 	return nullptr;
+}
+
+void *PluginManager::create_instance(const kaba::Class *c, const string &variables) {
+	return create_instance(c, parse_variables(variables));
 }
 
 void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {

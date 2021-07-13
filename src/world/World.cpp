@@ -448,8 +448,7 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = plugin_manager.find_class(cc.filename, cc.class_name);
-		auto comp = o->add_component(type);
-		comp->set_variables(cc.var);
+		auto comp = o->add_component(type, cc.var);
 #endif
 	}
 
@@ -672,7 +671,8 @@ void World::unregister_object(Object *m) {
 
 void World::_delete(Entity* x) {
 	if (unregister(x)) {
-		x->on_delete();
+		msg_error("DEL");
+		x->on_delete_rec();
 		delete x;
 	}
 }
