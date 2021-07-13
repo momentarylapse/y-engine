@@ -23,5 +23,7 @@ public:
 	static List *get_list(const kaba::Class *type);
 
 	static void add_to_list(Component *c, const kaba::Class *type);
+
+	static void iterate(float dt);
 };
 

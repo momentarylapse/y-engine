@@ -37,6 +37,7 @@ Component *Entity::add_component(const kaba::Class *type) {
 	auto c = ComponentManager::create_component(type);
 	components.add(c);
 	c->owner = this;
+	c->on_init();
 	return c;
 }
 

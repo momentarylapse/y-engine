@@ -13,7 +13,13 @@ Component::Component() {
 	type = nullptr;
 }
 
+Component::~Component() {}
+
 void Component::__init__() {
 	new(this) Component();
+}
+
+void Component::__delete__() {
+	this->Component::~Component();
 }
 

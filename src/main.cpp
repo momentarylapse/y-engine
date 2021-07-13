@@ -32,6 +32,7 @@
 #include "gui/Text.h"
 
 #include "y/EngineData.h"
+#include "y/ComponentManager.h"
 #include "meta.h"
 
 
@@ -283,6 +284,7 @@ public:
 		for (auto *o: world.objects)
 			if (o)
 				o->on_iterate(engine.elapsed);
+		ComponentManager::iterate(engine.elapsed);
 		plugin_manager.handle_iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);

@@ -281,9 +281,14 @@ void PluginManager::link_kaba() {
 	kaba::link_external_class_func("Entity.get_component", &Entity::get_component);
 	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
 
+	Component component;
 	kaba::declare_class_size("Component", sizeof(Component));
 	kaba::declare_class_element("Component.owner", &Component::owner);
 	kaba::link_external_class_func("Component.__init__", &Component::__init__);
+	kaba::link_external_virtual("Component.__delete__", &Component::__delete__, &component);
+	kaba::link_external_virtual("Component.on_init", &Component::on_init, &component);
+	kaba::link_external_virtual("Component.on_delete", &Component::on_delete, &component);
+	kaba::link_external_virtual("Component.on_iterate", &Component::on_iterate, &component);
 
 
 	kaba::link_external("get_component_list", (void*)&ComponentManager::get_list);
