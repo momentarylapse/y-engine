@@ -12,6 +12,7 @@
 #include "../lib/file/path.h"
 #include "../lib/math/vector.h"
 #include "../y/Entity.h"
+#include "../y/Component.h"
 #include "Material.h"
 class Material;
 class CollisionData;
@@ -21,9 +22,9 @@ namespace nix {
 	//class DescriptorSet;
 };
 
-enum {
-	TerrainTypeContingous,
-	TerrainTypePattern
+enum class TerrainType {
+	CONTINGUOUS,
+	PATTERN
 };
 
 #define TerrainUpdateNormals	1
@@ -49,11 +50,11 @@ public:
 	int *edge_index;
 };
 
-class Terrain : public Entity {
+class Terrain : public Component {
 public:
 	Terrain();
-	Terrain(const Path &filename, const vector &pos);
-	bool load(const Path &filename, const vector &pos, bool deep = true);
+	Terrain(const Path &filename);
+	bool load(const Path &filename, bool deep = true);
 	~Terrain();
 	void reset();
 	void _cdecl update(int x1,int x2,int z1,int z2,int mode);
@@ -69,10 +70,9 @@ public:
 	void draw();
 
 	Path filename;
-	int type;
+	TerrainType terrain_type;
 	bool error;
 
-	vector pos;
 	int num_x, num_z;
 	Array<float> height;
 	Array<vector> vertex, normal;
@@ -94,6 +94,9 @@ public:
 	bool changed;
 	bool redraw, force_redraw;
 	vector pos_old;
+
+
+	static const kaba::Class *_class;
 };
 
 

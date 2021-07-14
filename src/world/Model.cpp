@@ -251,9 +251,17 @@ void Model::reset_data() {
 }
 
 
-Model::Model() : Entity(Type::MODEL) {
+
+Entity3D::Entity3D(Type type) : Entity(type) {
 	pos = v_0;
 	ang = quaternion::ID;
+}
+
+matrix Entity3D::get_matrix() const {
+	return matrix::translation(pos) * matrix::rotation(ang);
+}
+
+Model::Model() : Entity3D(Type::MODEL) {
 	object_id = -1;
 	registered = false;
 	visible = true;
@@ -629,6 +637,10 @@ Path Model::filename() {
 	if (_template)
 		return _template->filename;
 	return "?";
+}
+
+void Model::update_matrix() {
+	_matrix = get_matrix();
 }
 
 #if 0

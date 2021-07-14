@@ -370,10 +370,13 @@ void World::add_link(Link *l) {
 
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
-	Terrain *tt = new Terrain(filename, pos);
 	terrain_object->pos = pos;
 
-	auto col = new TerrainCollider(tt);
+	auto t = new Terrain(filename);
+	t->type = Terrain::_class;
+	terrain_object->_add_component_external_(t);
+
+	auto col = new TerrainCollider(t);
 	col->type = TerrainCollider::_class;
 	terrain_object->_add_component_external_(col);
 
@@ -387,8 +390,8 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	dynamicsWorld->addRigidBody(sb->body);
 #endif
 
-	terrains.add(tt);
-	return tt;
+	terrains.add(t);
+	return t;
 }
 
 bool GodLoadWorld(const Path &filename) {
@@ -719,7 +722,6 @@ void World::iterate_physics(float dt) {
 		dynamicsWorld->setGravity(bt_set_v(gravity));
 		dynamicsWorld->stepSimulation(dt, 10);
 
-		btTransform trans;
 		for (auto *o: *list)
 			o->get_state_from_bullet();
 #endif
@@ -730,7 +732,7 @@ void World::iterate_physics(float dt) {
 
 	for (auto *sb: *list) {
 		auto o = sb->get_owner<Model>();
-		o->_matrix = matrix::translation(o->pos) * matrix::rotation(o->ang);
+		o->update_matrix();
 	}
 }
 
@@ -779,7 +781,7 @@ void World::add_sound(audio::Sound *s) {
 
 void World::shift_all(const vector &dpos) {
 	for (auto *t: terrains)
-		t->pos += dpos;
+		t->get_owner<Model>()->pos += dpos;
 	for (auto *o: objects)
 		if (o)
 			o->pos += dpos;

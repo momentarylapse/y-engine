@@ -10,6 +10,7 @@
 #include "Terrain.h"
 #include "Camera.h"
 #include "Material.h"
+#include "Model.h"
 #include "World.h"
 #include "../y/EngineData.h"
 #include "../lib/config.h"
@@ -23,6 +24,8 @@
 #endif
 #include "../lib/nix/nix.h"
 #include "../lib/file/file.h"
+
+const kaba::Class *Terrain::_class = nullptr;
 
 
 #define Index(x,z)		((x)*(num_z+1)+(z))
@@ -38,20 +41,18 @@ void Terrain::reset() {
 	vertex_buffer = NULL;
 }
 
-Terrain::Terrain() : Entity(Type::TERRAIN) {
+Terrain::Terrain() {
 	material = nullptr;
 	ubo = nullptr;
 //	dset = nullptr;
 	reset();
 }
 
-Terrain::Terrain(const Path &_filename_, const vector &_pos_) : Terrain() {
-	material = NULL;
-	load(_filename_, _pos_);
+Terrain::Terrain(const Path &_filename_) : Terrain() {
+	load(_filename_);
 }
 
-bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
-{
+bool Terrain::load(const Path &_filename_, bool deep) {
 	msg_write(format("loading terrain: %s", _filename_));
 	msg_right();
 
@@ -59,10 +60,10 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 
 	filename = _filename_;
 	File *f = FileOpen(engine.map_dir << filename.with(".map"));
-	if (f){
+	if (f) {
 
 		int ffv = f->ReadFileFormatVersion();
-		if (ffv == 4){
+		if (ffv == 4) {
 			f->read_byte();
 			// Metrics
 			f->read_comment();
@@ -78,7 +79,7 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 			// Textures
 			f->read_comment();
 			int num_textures = f->read_int();
-			for (int i=0;i<num_textures;i++){
+			for (int i=0;i<num_textures;i++) {
 				texture_file[i] = f->read_str();
 				texture_scale[i].x = f->read_float();
 				texture_scale[i].y = 0.107f + i * 0.231f; // rotation
@@ -86,7 +87,7 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 			}
 			// Material
 			material_file = f->read_str();
-			if (deep){
+			if (deep) {
 				material = LoadMaterial(material_file);
 
 				// load textures
@@ -106,7 +107,7 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 
 				vertex_buffer = new nix::VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
 			}
-		}else{
+		} else {
 			msg_error(format("wrong file format: %d (4 expected)",ffv));
 			error = true;
 		}
@@ -115,16 +116,15 @@ bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 
 
 		// generate normal vectors
-		pos = _pos_;
 		if (deep)
 			update(-1, -1, -1, -1, TerrainUpdateAll);
 		// bounding box
-		min = pos;
-		max = pos + vector(pattern.x * num_x, 0, pattern.z * num_z);
+		min = vector(0,0,0);
+		max = vector(pattern.x * num_x, 0, pattern.z * num_z);
 
 		changed = false;
 		force_redraw = true;
-	}else{
+	} else {
 		error = true;
 	}
 	msg_left();
@@ -142,8 +142,7 @@ Terrain::~Terrain() {
 }
 
 // die Normalen-Vektoren in einem bestimmten Abschnitt der Karte neu berechnen
-void Terrain::update(int x1,int x2,int z1,int z2,int mode)
-{
+void Terrain::update(int x1,int x2,int z1,int z2,int mode) {
 	if (x1<0)		x1=0;
 	if (x2<0)		x2=num_x;
 	if (x2>=num_x)	x2=num_x;
@@ -199,12 +198,11 @@ void Terrain::update(int x1,int x2,int z1,int z2,int mode)
 
 float Terrain::gimme_height(const vector &p) // liefert die interpolierte Hoehe zu einer Position
 {
-	float x = p.x;
-	float z = p.z;
+	auto o = get_owner<Model>();
+	float x = p.x - o->pos.x;
+	float z = p.z - o->pos.z;
 	if ((x<=min.x)||(z<=min.z)||(x>=max.x)||(z>=max.z))
 		return p.y;
-	x-=pos.x;
-	z-=pos.z;
 	bool SPI_OB=false;
 	float he=0;
 	int dr_z=(int)(z/pattern.z); // welches Dreieck?
@@ -223,7 +221,7 @@ float Terrain::gimme_height(const vector &p) // liefert die interpolierte Hoehe 
 		he=height[Index(dr_x+1,dr_z)]-dhx/pattern.x*(dr_x*pattern.x+pattern.x-x)-dhz/pattern.z*(z-dr_z*pattern.z);
 	}
 
-	return he+pos.y;
+	return he+o->pos.y;
 }
 
 float Terrain::gimme_height_n(const vector &p, vector &n) {
@@ -236,13 +234,14 @@ float Terrain::gimme_height_n(const vector &p, vector &n) {
 
 // Daten fuer das Darstellen des Bodens
 void Terrain::calc_detail() {
+	auto o = get_owner<Model>();
 	for (int x1=0;x1<(num_x-1)/32+1;x1++)
 		for (int z1=0;z1<(num_z-1)/32+1;z1++) {
 			int lx=(x1*32>num_x-32)?(num_x%32):32;
 			int lz=(z1*32>num_z-32)?(num_z%32):32;
 			int x0=x1*32;
 			int z0=z1*32;
-			float depth=(cur_cam->pos-pos-vertex[Index(x0+lx/2,z0+lz/2)]).length()/pattern.x;
+			float depth = (cur_cam->pos - o->pos - vertex[Index(x0+lx/2,z0+lz/2)]).length() / pattern.x;
 			int e=32;
 			if (depth<500)	e=32;
 			if (depth<320)	e=16;
@@ -278,6 +277,8 @@ inline void add_edge(int &num, int e0, int e1)
 //    get a part of the terrain
 void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 {
+	auto o = get_owner<Model>();
+
 	h->p = &vertex[0];
 	h->index = TempVertexIndex;
 	h->triangle_index = TempTriangleIndex;
@@ -289,8 +290,8 @@ void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 	h->num_edges = 0;
 
 	// how much do we need
-	vector _min_ = _pos_ - vector(1,1,1) * _radius_ - pos;
-	vector _max_ = _pos_ + vector(1,1,1) * _radius_ - pos;
+	vector _min_ = _pos_ - vector(1,1,1) * _radius_ - o->pos;
+	vector _max_ = _pos_ + vector(1,1,1) * _radius_ - o->pos;
 
 	int x0=int(_min_.x/pattern.x);	if (x0<0)	x0=0;
 	int z0=int(_min_.z/pattern.z);	if (z0<0)	z0=0;
@@ -333,17 +334,17 @@ void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 		}
 }
 
-inline bool TracePattern(Terrain *t, const vector &p1,const vector &p2, CollisionData &data, int x, int z, float y_min, int dir, float range)
+inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const vector &p2, CollisionData &data, int x, int z, float y_min, int dir, float range)
 {
 	// trace beam too high above this pattern?
 	if ( (t->height[Index2(t,x,z)]<y_min) && (t->height[Index2(t,x,z+1)]<y_min) && (t->height[Index2(t,x+1,z)]<y_min) && (t->height[Index2(t,x+1,z+1)]<y_min) )
 		return false;
 
 	// 4 vertices for 2 triangles
-	vector a = t->pos + t->vertex[Index2(t,x  ,z  )];
-	vector b = t->pos + t->vertex[Index2(t,x+1,z  )];
-	vector c = t->pos + t->vertex[Index2(t,x  ,z+1)];
-	vector d = t->pos + t->vertex[Index2(t,x+1,z+1)];
+	vector a = pos + t->vertex[Index2(t,x  ,z  )];
+	vector b = pos + t->vertex[Index2(t,x+1,z  )];
+	vector c = pos + t->vertex[Index2(t,x  ,z+1)];
+	vector d = pos + t->vertex[Index2(t,x+1,z+1)];
 
 	float dmin1 = range, dmin2 = range;
 	vector ttp;
@@ -376,6 +377,7 @@ inline bool TracePattern(Terrain *t, const vector &p1,const vector &p2, Collisio
 
 bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test)
 {
+	auto o = get_owner<Model>();
 	float dmin = range + 1;
 	vector c;
 
@@ -388,8 +390,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 		}
 	}
 
-	vector pr1 = p1 - pos;
-	vector pr2 = p2 - pos;
+	vector pr1 = p1 - o->pos;
+	vector pr2 = p2 - o->pos;
 	float w=(float)atan2(p2.z-p1.z,p2.x-p1.x);
 	int x,z;
 	float y_rel;
@@ -406,8 +408,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y > p2.y )	y_rel = pr1.y + ( ( x + 1 ) * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
 			else				y_rel = pr1.y + (   x       * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
-			if (TracePattern(this,p1,p2,data,x,z  ,y_rel,0,range))	return true;
-			if (TracePattern(this,p1,p2,data,x,z+1,y_rel,0,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x,z  ,y_rel,0,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x,z+1,y_rel,0,range))	return true;
 		}
 	}
 
@@ -421,8 +423,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y > p2.y )	y_rel = pr1.y + ( ( z + 1 ) * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
 			else				y_rel = pr1.y + (   z       * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
-			if (TracePattern(this,p1,p2,data,x  ,z,y_rel,1,range))	return true;
-			if (TracePattern(this,p1,p2,data,x+1,z,y_rel,1,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x  ,z,y_rel,1,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x+1,z,y_rel,1,range))	return true;
 		}
 	}
 
@@ -436,8 +438,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y < p2.y )	y_rel = pr1.y + ( ( x + 1 ) * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
 			else				y_rel = pr1.y + (   x       * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
-			if (TracePattern(this,p1,p2,data,x,z  ,y_rel,2,range))	return true;
-			if (TracePattern(this,p1,p2,data,x,z+1,y_rel,2,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x,z  ,y_rel,2,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x,z+1,y_rel,2,range))	return true;
 		}
 	}
 
@@ -451,8 +453,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y < p2.y )	y_rel = pr1.y + ( ( z + 1 ) * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
 			else				y_rel = pr1.y + (   z       * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
-			if (TracePattern(this,p1,p2,data,x  ,z,y_rel,3,range))	return true;
-			if (TracePattern(this,p1,p2,data,x+1,z,y_rel,3,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x  ,z,y_rel,3,range))	return true;
+			if (TracePattern(this,o->pos,p1,p2,data,x+1,z,y_rel,3,range))	return true;
 		}
 	}
 	return false;

@@ -18,7 +18,6 @@ public:
 //	~Object();
 
 	void make_visible(bool _visible_);
-	void update_matrix();
 };
 
 

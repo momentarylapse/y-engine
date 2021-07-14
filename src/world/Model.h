@@ -256,7 +256,16 @@ public:
 	ModelTemplate(Model *m);
 };
 
-class Model : public Entity {
+class Entity3D : public Entity {
+public:
+	Entity3D(Type type);
+
+	vector pos;
+	quaternion ang;
+	matrix get_matrix() const;
+};
+
+class Model : public Entity3D {
 public:
 	Model();
 	~Model() override;
@@ -330,10 +339,8 @@ public:
 	Model *_cdecl root();
 	bool visible;
 
-
-	vector pos;
-	quaternion ang;
 	matrix _matrix, matrix_old;
+	void update_matrix();
 
 	// template (shared)
 	ModelTemplate *_template;

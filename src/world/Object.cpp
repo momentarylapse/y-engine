@@ -17,8 +17,7 @@
 
 
 // neutral object (for terrains,...)
-Object::Object()
-{
+Object::Object() {
 	//msg_right();
 	//msg_write("terrain object");
 	material.add(new Material);
@@ -50,10 +49,4 @@ void Object::make_visible(bool _visible_) {
 	else
 		world.unregister_model(this);
 	visible = _visible_;
-}
-
-void Object::update_matrix() {
-	auto rot = matrix::rotation_q(ang);
-	auto trans = matrix::translation(pos);
-	_matrix = trans * rot;
 }

@@ -185,7 +185,7 @@ void PluginManager::export_kaba() {
 
 
 	kaba::declare_class_size("Terrain", sizeof(Terrain));
-	kaba::declare_class_element("Terrain.pos", &Terrain::pos);
+	//kaba::declare_class_element("Terrain.pos", &Terrain::pos);
 	kaba::link_external_class_func("Terrain.get_height", &Terrain::gimme_height);
 
 	kaba::declare_class_size("CollisionData", sizeof(CollisionData));
@@ -501,6 +501,7 @@ void PluginManager::import_kaba() {
 	import_component_class<BoxCollider>(s, "BoxCollider");
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
 	import_component_class<Animator>(s, "Animator");
+	import_component_class<Terrain>(s, "Terrain");
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
 	//msg_write(MeshCollider::_class->parent->parent->name);

@@ -22,7 +22,6 @@ public:
 		NONE,
 		CONTROLLER,
 		MODEL,
-		TERRAIN,
 		CAMERA,
 		LIGHT,
 		LINK,
