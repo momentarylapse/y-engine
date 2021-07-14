@@ -414,8 +414,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 }
 void RenderPathGL::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
-		//nix::SetWorldMatrix(matrix::translation(t->pos));
-		nix::set_model_matrix(matrix::ID);
+		nix::set_model_matrix(matrix::translation(t->pos));
 		if (allow_material) {
 			set_material(t->material, ShaderVariant::DEFAULT);
 			t->material->shader[0]->set_floats("pattern0", &t->texture_scale[0].x, 3);

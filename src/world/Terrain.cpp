@@ -174,15 +174,15 @@ void Terrain::update(int x1,int x2,int z1,int z2,int mode)
 				normal[n].normalize();
 			}
 			if (uv)
-				vertex[n]=pos+vector(pattern.x*(float)i,height[n],pattern.z*(float)j);
+				vertex[n]=vector(pattern.x*(float)i,height[n],pattern.z*(float)j);
 		}
 	if (uv){
 		int j = z2;
 		for (int i=x1;i<=x2;i++)
-			vertex[Index(i,j)]=pos+vector(pattern.x*(float)i,height[Index(i,j)],pattern.z*(float)j);
+			vertex[Index(i,j)]=vector(pattern.x*(float)i,height[Index(i,j)],pattern.z*(float)j);
 		int i = x2;
 		for (j=z1;j<=z2;j++)
-			vertex[Index(i,j)]=pos+vector(pattern.x*(float)i,height[Index(i,j)],pattern.z*(float)j);
+			vertex[Index(i,j)]=vector(pattern.x*(float)i,height[Index(i,j)],pattern.z*(float)j);
 	}
 
 	// update planes (for collision detection)
@@ -242,7 +242,7 @@ void Terrain::calc_detail() {
 			int lz=(z1*32>num_z-32)?(num_z%32):32;
 			int x0=x1*32;
 			int z0=z1*32;
-			float depth=(cur_cam->pos-vertex[Index(x0+lx/2,z0+lz/2)]).length()/pattern.x;
+			float depth=(cur_cam->pos-pos-vertex[Index(x0+lx/2,z0+lz/2)]).length()/pattern.x;
 			int e=32;
 			if (depth<500)	e=32;
 			if (depth<320)	e=16;
@@ -340,10 +340,10 @@ inline bool TracePattern(Terrain *t, const vector &p1,const vector &p2, Collisio
 		return false;
 
 	// 4 vertices for 2 triangles
-	vector a = t->vertex[Index2(t,x  ,z  )];
-	vector b = t->vertex[Index2(t,x+1,z  )];
-	vector c = t->vertex[Index2(t,x  ,z+1)];
-	vector d = t->vertex[Index2(t,x+1,z+1)];
+	vector a = t->pos + t->vertex[Index2(t,x  ,z  )];
+	vector b = t->pos + t->vertex[Index2(t,x+1,z  )];
+	vector c = t->pos + t->vertex[Index2(t,x  ,z+1)];
+	vector d = t->pos + t->vertex[Index2(t,x+1,z+1)];
 
 	float dmin1 = range, dmin2 = range;
 	vector ttp;

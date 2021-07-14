@@ -23,6 +23,11 @@ public:
 	static void delete_component(Component *c);
 	static List *get_list(const kaba::Class *type_family);
 
+	template<class C>
+	static Array<C*> *get_listx() {
+		return (Array<C*>*) get_list(C::_class);
+	}
+
 	static void add_to_list(Component *c, const kaba::Class *type_family);
 
 	static const kaba::Class *get_component_type_family(const kaba::Class *type);

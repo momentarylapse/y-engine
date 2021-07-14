@@ -165,7 +165,8 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("SolidBody.vel", &SolidBody::vel);
 	kaba::declare_class_element("SolidBody.rot", &SolidBody::rot);
 	kaba::declare_class_element("SolidBody.mass", &SolidBody::mass);
-	kaba::declare_class_element("SolidBody.theta", &SolidBody::theta);
+	//kaba::declare_class_element("SolidBody.theta", &SolidBody::theta_world);
+	kaba::declare_class_element("SolidBody.theta", &SolidBody::theta_0);
 	kaba::declare_class_element("SolidBody.g_factor", &SolidBody::g_factor);
 	kaba::declare_class_element("SolidBody.physics_active", &SolidBody::active);
 	kaba::declare_class_element("SolidBody.physics_passive", &SolidBody::passive);

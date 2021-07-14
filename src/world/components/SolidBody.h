@@ -22,8 +22,8 @@ public:
 	virtual ~SolidBody();
 
 
-	float mass, mass_inv, g_factor;
-	matrix3 theta_0, theta, theta_inv;
+	float mass, g_factor;
+	matrix3 theta_0;
 	bool active, passive;
 	bool test_collisions;
 
@@ -44,8 +44,8 @@ public:
 
 	void _cdecl update_data(); // script...
 
-	void update_theta();
-	void do_physics(float dt);
+	void get_theta_world(matrix3 &theta_world, matrix3 &theta_world_inv);
+	void do_simple_physics(float dt);
 
 	void _cdecl add_force(const vector &f, const vector &rho);
 	void _cdecl add_impulse(const vector &p, const vector &rho);
@@ -55,6 +55,8 @@ public:
 	void _cdecl make_visible(bool visible);
 	void update_motion();
 	void update_mass();
+
+	void get_state_from_bullet();
 
 	static const kaba::Class *_class;
 };

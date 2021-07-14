@@ -23,6 +23,7 @@ const kaba::Class *SolidBody::_class = nullptr;
 btVector3 bt_set_v(const vector &v);
 btQuaternion bt_set_q(const quaternion &q);
 vector bt_get_v(const btVector3 &v);
+quaternion bt_get_q(const btQuaternion &q);
 btTransform bt_set_trafo(const vector &p, const quaternion &q);
 #endif
 
@@ -66,7 +67,6 @@ SolidBody::SolidBody(Model *o) {
 	active = false;
 	passive = false;
 	mass = 0;
-	mass_inv = 0;
 	body = nullptr;
 
 	vel = rot = v_0;
@@ -133,12 +133,6 @@ SolidBody::~SolidBody() {
 }
 
 void SolidBody::on_init() {
-	if (active)
-		mass_inv = 1.0f / mass;
-	else
-		mass_inv = 0;
-	theta = theta_0;
-	update_theta();
 }
 
 
@@ -217,15 +211,17 @@ void SolidBody::add_torque_impulse(const vector &l) {
 
 
 
-void SolidBody::do_physics(float dt) {
+void SolidBody::do_simple_physics(float dt) {
 	if (dt <= 0)
 		return;
 
 	auto o = get_owner<Object>();
 
 
-	if (_vec_length_fuzzy_(force_int) * mass_inv > AccThreshold)
-	{unfreeze(this);}
+	if (active) {
+		if (_vec_length_fuzzy_(force_int) > AccThreshold * mass)
+		{unfreeze(this);}
+	}
 
 	if (active and !frozen) {
 
@@ -233,7 +229,7 @@ void SolidBody::do_physics(float dt) {
 		if (inf_v(vel))	msg_error("inf   CalcMove Vel  1");
 
 			// linear acceleration
-			acc = force_int * mass_inv;
+			acc = force_int / mass;
 
 			// integrate the equations of motion.... "euler method"
 			vel += acc * dt;
@@ -254,20 +250,21 @@ void SolidBody::do_physics(float dt) {
 			o->ang += q_dot * dt;
 			o->ang.normalize();
 
+			matrix3 theta_world, theta_world_inv;
+			get_theta_world(theta_world, theta_world_inv);
+
 			#ifdef _realistic_calculation_
-				vector L = theta * rot + torque_int * dt;
-				update_theta();
-				rot = theta_inv * L;
+
+				vector L = theta_world * rot + torque_int * dt;
+				rot = theta_world_inv * L;
 			#else
-				UpdateTheta();
-				rot += theta_inv * torque_int * dt;
+				rot += theta_world_inv * torque_int * dt;
 			#endif
 		}
 	}
 
 	// new orientation
 	o->update_matrix();
-	update_theta();
 
 	o->_ResetPhysAbsolute_();
 
@@ -303,15 +300,16 @@ void SolidBody::do_physics(float dt) {
 
 
 // rotate inertia tensor into world coordinates
-void SolidBody::update_theta() {
+void SolidBody::get_theta_world(matrix3 &theta_world, matrix3 &theta_world_inv) {
+	auto r = matrix3::rotation_q(get_owner<Model>()->ang);
+	auto r_inv = r.transpose();
+	theta_world = (r * theta_0 * r_inv);
+
 	if (active) {
-		auto r = matrix3::rotation_q(get_owner<Model>()->ang);
-		auto r_inv = r.transpose();
-		theta = (r * theta_0 * r_inv);
-		theta_inv = theta.inverse();
+		theta_world_inv = theta_world.inverse();
 	} else {
 		// Theta and ThetaInv already = identity
-		theta_inv = matrix3::ZERO;
+		theta_world_inv = matrix3::ZERO;
 	}
 }
 
@@ -322,7 +320,6 @@ void SolidBody::update_data() {
 	unfreeze(this);
 	if (!active) {
 		get_owner<Object>()->update_matrix();
-		update_theta();
 	}
 
 	// set ode data..
@@ -344,15 +341,30 @@ void SolidBody::update_motion() {
 void SolidBody::update_mass() {
 #if HAS_LIB_BULLET
 	if (active) {
-		btScalar mass(active);
-		btVector3 localInertia(theta_0._00, theta_0._11, theta_0._22);
+		btScalar _mass(mass);
+		btVector3 local_inertia(theta_0._00, theta_0._11, theta_0._22);
 		//if (colShape)
 		//	colShape->calculateLocalInertia(mass, localInertia);
-		body->setMassProps(mass, localInertia);
+		body->setMassProps(_mass, local_inertia);
 	} else {
-		btScalar mass(0);
-		btVector3 localInertia(0, 0, 0);
+		btScalar _mass(0);
+		btVector3 local_inertia(0, 0, 0);
 		//body->setMassProps(mass, localInertia);
+	}
+#endif
+}
+
+void SolidBody::get_state_from_bullet() {
+#if HAS_LIB_BULLET
+	if (active) {
+		btTransform trans;
+		body->getMotionState()->getWorldTransform(trans);
+		get_owner<Model>()->pos = bt_get_v(trans.getOrigin());
+		get_owner<Model>()->ang = bt_get_q(trans.getRotation());
+		vel = bt_get_v(body->getLinearVelocity());
+		rot = bt_get_v(body->getAngularVelocity());
+	} else {
+
 	}
 #endif
 }

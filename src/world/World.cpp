@@ -95,10 +95,8 @@ World world;
 
 #ifdef _X_ALLOW_X_
 void DrawSplashScreen(const string &str, float per);
-void ScriptingObjectInit(Object *o);
 #else
 void DrawSplashScreen(const string &str, float per){}
-void ScriptingObjectInit(Object *o){}
 #endif
 
 
@@ -121,9 +119,8 @@ void AddNetMsg(int msg, int argi0, const string &args)
 
 int num_insane=0;
 
-inline bool TestVectorSanity(vector &v, const char *name)
-{
-	if (inf_v(v)){
+inline bool TestVectorSanity(vector &v, const char *name) {
+	if (inf_v(v)) {
 		num_insane++;
 		v=v_0;
 		if (num_insane>100)
@@ -373,6 +370,7 @@ void World::add_link(Link *l) {
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
+	terrain_object->pos = pos;
 
 	auto col = new TerrainCollider(tt);
 	col->type = TerrainCollider::_class;
@@ -387,20 +385,6 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 #if HAS_LIB_BULLET
 	dynamicsWorld->addRigidBody(sb->body);
 #endif
-
-/*#if HAS_LIB_BULLET
-	btTransform startTransform = bt_set_trafo(pos + vector(tt->pattern.x * tt->num_x, 0, tt->pattern.z * tt->num_z)/2, quaternion::ID);
-	btScalar mass(0.f);
-	btVector3 localInertia(0, 0, 0);
-
-	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, tt->colShape, localInertia);
-	tt->body = new btRigidBody(rbInfo);
-	tt->body->setUserPointer(terrain_object);
-
-	dynamicsWorld->addRigidBody(tt->body);
-#endif*/
 
 	terrains.add(tt);
 	return tt;
@@ -721,35 +705,26 @@ void World::unregister_model(Model *m) {
 }
 
 void World::iterate_physics(float dt) {
+	auto list = ComponentManager::get_listx<SolidBody>();
+
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
 #if HAS_LIB_BULLET
 		dynamicsWorld->setGravity(bt_set_v(gravity));
 		dynamicsWorld->stepSimulation(dt, 10);
 
 		btTransform trans;
-		auto list = (Array<SolidBody*>*)ComponentManager::get_list(SolidBody::_class);
 		for (auto *o: *list)
-			if (o->active) {
-				o->body->getMotionState()->getWorldTransform(trans);
-				o->get_owner<Model>()->pos = bt_get_v(trans.getOrigin());
-				o->get_owner<Model>()->ang = bt_get_q(trans.getRotation());
-				o->vel = bt_get_v(o->body->getLinearVelocity());
-				o->rot = bt_get_v(o->body->getAngularVelocity());
-
-			} else {
-
-				//dynamicsWorld->contactTest(o->body, myTickCallback);
-			}
+			o->get_state_from_bullet();
 #endif
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
-		auto list = (Array<SolidBody*>*)ComponentManager::get_list(SolidBody::_class);
 		for (auto *o: *list)
-			o->do_physics(dt);
+			o->do_simple_physics(dt);
 	}
 
-	for (auto *o: objects)
-		if (o)
-			o->_matrix = matrix::translation(o->pos) * matrix::rotation(o->ang);
+	for (auto *sb: *list) {
+		auto o = sb->get_owner<Model>();
+		o->_matrix = matrix::translation(o->pos) * matrix::rotation(o->ang);
+	}
 }
 
 void World::iterate_animations(float dt) {
@@ -820,9 +795,10 @@ bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool sim
 // Perform raycast
 	this->dynamicsWorld->getCollisionWorld()->rayTest(bt_set_v(p1), bt_set_v(p2), ray_callback);
 	if (ray_callback.hasHit()) {
+		auto sb = static_cast<SolidBody*>(ray_callback.m_collisionObject->getUserPointer());
 		d.p = bt_get_v(ray_callback.m_hitPointWorld);
 		d.n = bt_get_v(ray_callback.m_hitNormalWorld);
-		d.m = static_cast<Object*>(ray_callback.m_collisionObject->getUserPointer());
+		d.m = sb->get_owner<Model>();
 
 		// ignore...
 		if (d.m and d.m == o_ignore) {

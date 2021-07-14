@@ -27,7 +27,7 @@ Object::Object()
 	physics_data_.mass = 10000.0f;
 //	physics_data.mass_inv = 0;
 	prop.radius = 30000000;
-	physics_data_.theta_0 = matrix3::ID;
+	physics_data_.theta_0 = matrix3::ZERO;
 	_matrix = matrix::ID;
 	//theta = theta * 10000000.0f;
 	physics_data_.active = false;
