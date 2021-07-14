@@ -200,6 +200,7 @@ public:
 	ChunkMesh() : FileChunk("mesh") {}
 	void create() override {
 		me = new Mesh;
+		me->owner = parent;
 		parent->mesh[_model_parser_tria_mesh_count ++] = me;
 	}
 	void read(File *f) override {

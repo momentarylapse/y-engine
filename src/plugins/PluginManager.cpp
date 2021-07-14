@@ -36,7 +36,8 @@
 #include "../world/Object.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
-#include "../world/components/SolidBodyComponent.h"
+#include "../world/components/SolidBody.h"
+#include "../world/components/Collider.h"
 #include "../meta.h"
 #include "../lib/kaba/dynamic/exception.h"
 
@@ -160,20 +161,22 @@ void PluginManager::export_kaba() {
 	kaba::link_external_virtual("Model.on_iterate", &Model::on_iterate, &model);
 
 
-	kaba::declare_class_size("SolidBodyComponent", sizeof(SolidBodyComponent));
-	kaba::declare_class_element("SolidBodyComponent.vel", &SolidBodyComponent::vel);
-	kaba::declare_class_element("SolidBodyComponent.rot", &SolidBodyComponent::rot);
-	kaba::declare_class_element("SolidBodyComponent.mass", &SolidBodyComponent::mass);
-	kaba::declare_class_element("SolidBodyComponent.theta", &SolidBodyComponent::theta);
-	kaba::declare_class_element("SolidBodyComponent.g_factor", &SolidBodyComponent::g_factor);
-	kaba::declare_class_element("SolidBodyComponent.physics_active", &SolidBodyComponent::active);
-	kaba::declare_class_element("SolidBodyComponent.physics_passive", &SolidBodyComponent::passive);
-	kaba::link_external_class_func("SolidBodyComponent.add_force", &SolidBodyComponent::add_force);
-	kaba::link_external_class_func("SolidBodyComponent.add_impulse", &SolidBodyComponent::add_impulse);
-	kaba::link_external_class_func("SolidBodyComponent.add_torque", &SolidBodyComponent::add_torque);
-	kaba::link_external_class_func("SolidBodyComponent.add_torque_impulse", &SolidBodyComponent::add_torque_impulse);
-	kaba::link_external_class_func("SolidBodyComponent.update_motion", &SolidBodyComponent::update_motion);
-	kaba::link_external_class_func("SolidBodyComponent.update_mass", &SolidBodyComponent::update_mass);
+	kaba::declare_class_size("SolidBody", sizeof(SolidBody));
+	kaba::declare_class_element("SolidBody.vel", &SolidBody::vel);
+	kaba::declare_class_element("SolidBody.rot", &SolidBody::rot);
+	kaba::declare_class_element("SolidBody.mass", &SolidBody::mass);
+	kaba::declare_class_element("SolidBody.theta", &SolidBody::theta);
+	kaba::declare_class_element("SolidBody.g_factor", &SolidBody::g_factor);
+	kaba::declare_class_element("SolidBody.physics_active", &SolidBody::active);
+	kaba::declare_class_element("SolidBody.physics_passive", &SolidBody::passive);
+	kaba::link_external_class_func("SolidBody.add_force", &SolidBody::add_force);
+	kaba::link_external_class_func("SolidBody.add_impulse", &SolidBody::add_impulse);
+	kaba::link_external_class_func("SolidBody.add_torque", &SolidBody::add_torque);
+	kaba::link_external_class_func("SolidBody.add_torque_impulse", &SolidBody::add_torque_impulse);
+	kaba::link_external_class_func("SolidBody.update_motion", &SolidBody::update_motion);
+	kaba::link_external_class_func("SolidBody.update_mass", &SolidBody::update_mass);
+
+	kaba::declare_class_size("Collider", sizeof(Collider));
 
 
 	kaba::declare_class_size("Terrain", sizeof(Terrain));
@@ -472,17 +475,38 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
 }
 
+void check_component_class(const kaba::Class *c, const string &name) {
+	if (!c)
+		throw Exception(format("y.kaba: %s missing", name));
+	if (!c->is_derived_from_s("y.Component"))
+		throw Exception(format("y.kaba: %s not derived from Component", name));
+}
 
 void PluginManager::import_kaba() {
 	auto s = kaba::load("y.kaba");
 	for (auto c: s->classes()) {
-		if (c->name == "SolidBodyComponent")
-			SolidBodyComponent::_class = c;
+		if (c->name == "SolidBody")
+			SolidBody::_class = c;
+		else if (c->name == "Collider")
+			Collider::_class = c;
+		else if (c->name == "MeshCollider")
+			MeshCollider::_class = c;
+		else if (c->name == "SphereCollider")
+			SphereCollider::_class = c;
+		else if (c->name == "BoxCollider")
+			BoxCollider::_class = c;
+		else if (c->name == "TerrainCollider")
+			TerrainCollider::_class = c;
 	}
-	if (!SolidBodyComponent::_class)
-		throw Exception("y.kaba: SolidBodyComponent missing");
-	if (!SolidBodyComponent::_class->is_derived_from_s("y.Component"))
-		throw Exception("y.kaba: SolidBodyComponent not derived from Component");
+	check_component_class(SolidBody::_class, "SolidBody");
+	check_component_class(Collider::_class, "Collider");
+	check_component_class(MeshCollider::_class, "MeshCollider");
+	//msg_write(MeshCollider::_class->name);
+	//msg_write(MeshCollider::_class->parent->name);
+	//msg_write(MeshCollider::_class->parent->parent->name);
+	check_component_class(SphereCollider::_class, "SphereCollider");
+	check_component_class(BoxCollider::_class, "BoxCollider");
+	check_component_class(TerrainCollider::_class, "TerrainCollider");
 }
 
 void PluginManager::reset() {

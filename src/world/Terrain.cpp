@@ -39,10 +39,8 @@ void Terrain::reset() {
 }
 
 Terrain::Terrain() : Entity(Type::TERRAIN) {
-	material = NULL;
+	material = nullptr;
 	ubo = nullptr;
-	body = nullptr;
-	colShape = nullptr;
 //	dset = nullptr;
 	reset();
 }
@@ -54,7 +52,7 @@ Terrain::Terrain(const Path &_filename_, const vector &_pos_) : Terrain() {
 
 bool Terrain::load(const Path &_filename_, const vector &_pos_, bool deep)
 {
-	msg_write("loading terrain: " + _filename_.str());
+	msg_write(format("loading terrain: %s", _filename_));
 	msg_right();
 
 	reset();

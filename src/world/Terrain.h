@@ -21,9 +21,6 @@ namespace nix {
 	//class DescriptorSet;
 };
 
-class btRigidBody;
-class btCollisionShape;
-
 enum {
 	TerrainTypeContingous,
 	TerrainTypePattern
@@ -92,10 +89,6 @@ public:
 	vector texture_scale[MATERIAL_MAX_TEXTURES];
 
 	float dhx, dhz;
-
-
-	btRigidBody* body;
-	btCollisionShape* colShape;
 
 
 	bool changed;

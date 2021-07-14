@@ -15,7 +15,7 @@ class quaternion;
 class btTypedConstraint;
 
 class Object;
-class SolidBodyComponent;
+class SolidBody;
 
 
 
@@ -37,8 +37,8 @@ public:
 
 	btTypedConstraint *con;
 	LinkType link_type;
-	SolidBodyComponent *a;
-	SolidBodyComponent *b;
+	SolidBody *a;
+	SolidBody *b;
 
 	void _create_link_data(vector &pa, vector &pb, quaternion &iqa, quaternion &iqb, const vector &pos);
 

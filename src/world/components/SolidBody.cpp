@@ -5,16 +5,15 @@
  *      Author: michi
  */
 
-#include "SolidBodyComponent.h"
+#include "SolidBody.h"
+#include "Collider.h"
 #include "../World.h"
 #include "../Object.h"
 #include "../Model.h"
 #include "../../y/EngineData.h"
-#include "../../lib/base/set.h"
 #include "../../lib/file/msg.h"
 
-
-const kaba::Class *SolidBodyComponent::_class = nullptr;
+const kaba::Class *SolidBody::_class = nullptr;
 
 
 #if HAS_LIB_BULLET
@@ -31,16 +30,14 @@ btTransform bt_set_trafo(const vector &p, const quaternion &q);
 static int num_insane=0;
 
 
-inline bool ainf_v(vector &v)
-{
+inline bool ainf_v(vector &v) {
 	if (inf_v(v))
 		return true;
 	return (v.length_fuzzy() > 100000000000.0f);
 }
 
-inline bool TestVectorSanity(vector &v,char *name)
-{
-	if (ainf_v(v)){
+inline bool TestVectorSanity(vector &v,char *name) {
+	if (ainf_v(v)) {
 		num_insane++;
 		v=v_0;
 		if (num_insane>100)
@@ -64,13 +61,12 @@ inline bool TestVectorSanity(vector &v,char *name)
 
 
 
-SolidBodyComponent::SolidBodyComponent(Model *o) {
+SolidBody::SolidBody(Model *o) {
 	msg_write("SOLID BODY");
 	active = false;
 	passive = false;
 	mass = 0;
 	mass_inv = 0;
-	col_shape = nullptr;
 	body = nullptr;
 
 	vel = rot = v_0;
@@ -97,72 +93,12 @@ SolidBodyComponent::SolidBodyComponent(Model *o) {
 	mass = o->physics_data_.mass;
 	theta_0 = o->physics_data_.theta_0;
 
-
-
 #if HAS_LIB_BULLET
-	if (o->phys->balls.num + o->phys->cylinders.num + o->phys->poly.num > 0) {
-		auto comp = new btCompoundShape(false, 0);
-		for (auto &b: o->phys->balls) {
-			vector a = o->phys->vertex[b.index];
-			auto bb = new btSphereShape(btScalar(b.radius));
-			comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb);
-		}
-		for (auto &c: o->phys->cylinders) {
-			vector a = o->phys->vertex[c.index[0]];
-			vector b = o->phys->vertex[c.index[1]];
-			auto cc = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length() / 2)));
-			auto q = quaternion::rotation((a-b).dir2ang());
-			comp->addChildShape(bt_set_trafo((a+b)/2, q), cc);
-			if (c.round) {
-				auto bb1 = new btSphereShape(btScalar(c.radius));
-				comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb1);
-				auto bb2 = new btSphereShape(btScalar(c.radius));
-				comp->addChildShape(bt_set_trafo(b, quaternion::ID), bb2);
-			}
-		}
-		for (auto &p: o->phys->poly) {
-			if (true){
-				Set<int> vv;
-				for (int i=0; i<p.num_faces; i++)
-					for (int k=0; k<p.face[i].num_vertices; k++){
-						vv.add(p.face[i].index[k]);
-					}
-				// btConvexPointCloudShape not working!
-				auto pp = new btConvexHullShape();
-				for (int i: vv)
-					pp->addPoint(bt_set_v(o->phys->vertex[i]));
-				comp->addChildShape(bt_set_trafo(v_0, quaternion::ID), pp);
-			} else {
-				// ARGH, btConvexPointCloudShape not working
-				//   let's use a crude box for now... (-_-)'
-				vector a, b;
-				a = b = o->phys->vertex[p.face[0].index[0]];
-				for (int i=0; i<p.num_faces; i++)
-					for (int k=0; k<p.face[i].num_vertices; k++){
-						auto vv = o->phys->vertex[p.face[i].index[k]];
-						a._min(vv);
-						b._max(vv);
-					}
-				auto pp = new btBoxShape(bt_set_v((b-a) / 2));
-				comp->addChildShape(bt_set_trafo((a+b)/2, quaternion::ID), pp);
+	btCollisionShape *col_shape = nullptr;
+	auto col = (Collider*)o->get_component(Collider::_class);
+	if (col)
+		col_shape = col->col_shape;
 
-			}
-		}
-		col_shape = comp;
-	}
-
-	/*if (o->phys->balls.num > 0) {
-		auto &b = o->phys->balls[0];
-		o->colShape = new btSphereShape(btScalar(b.radius));
-	} else if (o->phys->cylinders.num > 0) {
-		auto &c = o->phys->cylinders[0];
-		vector a = o->mesh[0]->vertex[c.index[0]];
-		vector b = o->mesh[0]->vertex[c.index[1]];
-		o->colShape = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length())));
-	} else if (o->phys->poly.num > 0) {
-
-	} else {
-	}*/
 
 	btTransform start_transform = bt_set_trafo(o->pos, o->ang);
 
@@ -189,13 +125,14 @@ SolidBodyComponent::SolidBodyComponent(Model *o) {
 #endif
 }
 
-SolidBodyComponent::~SolidBodyComponent() {
+SolidBody::~SolidBody() {
+#if HAS_LIB_BULLET
 	delete body->getMotionState();
 	delete body;
-	delete col_shape;
+#endif
 }
 
-void SolidBodyComponent::on_init() {
+void SolidBody::on_init() {
 	if (active)
 		mass_inv = 1.0f / mass;
 	else
@@ -207,7 +144,7 @@ void SolidBodyComponent::on_init() {
 
 
 
-void SolidBodyComponent::add_force(const vector &f, const vector &rho) {
+void SolidBody::add_force(const vector &f, const vector &rho) {
 	if (engine.elapsed<=0)
 		return;
 	if (!active)
@@ -227,7 +164,7 @@ void SolidBodyComponent::add_force(const vector &f, const vector &rho) {
 	}
 }
 
-void SolidBodyComponent::add_impulse(const vector &p, const vector &rho) {
+void SolidBody::add_impulse(const vector &p, const vector &rho) {
 	if (engine.elapsed<=0)
 		return;
 	if (!active)
@@ -244,7 +181,7 @@ void SolidBodyComponent::add_impulse(const vector &p, const vector &rho) {
 	}
 }
 
-void SolidBodyComponent::add_torque(const vector &t) {
+void SolidBody::add_torque(const vector &t) {
 	if (engine.elapsed <= 0)
 		return;
 	if (!active)
@@ -261,7 +198,7 @@ void SolidBodyComponent::add_torque(const vector &t) {
 	}
 }
 
-void SolidBodyComponent::add_torque_impulse(const vector &l) {
+void SolidBody::add_torque_impulse(const vector &l) {
 	if (engine.elapsed <= 0)
 		return;
 	if (!active)
@@ -280,7 +217,7 @@ void SolidBodyComponent::add_torque_impulse(const vector &l) {
 
 
 
-void SolidBodyComponent::do_physics(float dt) {
+void SolidBody::do_physics(float dt) {
 	if (dt <= 0)
 		return;
 
@@ -290,7 +227,7 @@ void SolidBodyComponent::do_physics(float dt) {
 	if (_vec_length_fuzzy_(force_int) * mass_inv > AccThreshold)
 	{unfreeze(this);}
 
-	if (active and !frozen){
+	if (active and !frozen) {
 
 		if (inf_v(o->pos))	msg_error("inf   CalcMove Pos  1");
 		if (inf_v(vel))	msg_error("inf   CalcMove Vel  1");
@@ -309,7 +246,7 @@ void SolidBodyComponent::do_physics(float dt) {
 		//}
 
 		// rotation
-		if ((rot != v_0) or (torque_int != v_0)){
+		if ((rot != v_0) or (torque_int != v_0)) {
 
 			quaternion q_dot, q_w;
 			q_w = quaternion( 0, rot );
@@ -341,10 +278,10 @@ void SolidBodyComponent::do_physics(float dt) {
 	moved = false;
 	//if ((Pos!=Pos_old)or(ang!=ang_old))
 	//if ( (vel_surf!=v_0) or (VecLengthFuzzy(Pos-Pos_old)>2.0f*Elapsed) )//or(VecAng!=ang_old))
-	if (active){
+	if (active) {
 		if ( (vel_surf != v_0) or (_vec_length_fuzzy_(vel) > VelThreshold) or (_vec_length_fuzzy_(rot) * o->prop.radius > VelThreshold))
 			moved = true;
-	}else{
+	} else {
 		frozen = true;
 	}
 	// would be best to check on the sub models....
@@ -352,11 +289,11 @@ void SolidBodyComponent::do_physics(float dt) {
 		if (model->bone.num > 0)
 			moved = true;*/
 
-	if (moved){
+	if (moved) {
 		unfreeze(this);
-	}else if (!frozen){
+	} else if (!frozen) {
 		time_till_freeze -= dt;
-		if (time_till_freeze < 0){
+		if (time_till_freeze < 0) {
 			frozen = true;
 			force_ext = torque_ext = v_0;
 		}
@@ -366,13 +303,13 @@ void SolidBodyComponent::do_physics(float dt) {
 
 
 // rotate inertia tensor into world coordinates
-void SolidBodyComponent::update_theta() {
-	if (active){
+void SolidBody::update_theta() {
+	if (active) {
 		auto r = matrix3::rotation_q(get_owner<Model>()->ang);
 		auto r_inv = r.transpose();
 		theta = (r * theta_0 * r_inv);
 		theta_inv = theta.inverse();
-	}else{
+	} else {
 		// Theta and ThetaInv already = identity
 		theta_inv = matrix3::ZERO;
 	}
@@ -381,9 +318,9 @@ void SolidBodyComponent::update_theta() {
 
 
 // scripts have to call this after
-void SolidBodyComponent::update_data() {
+void SolidBody::update_data() {
 	unfreeze(this);
-	if (!active){
+	if (!active) {
 		get_owner<Object>()->update_matrix();
 		update_theta();
 	}
@@ -392,7 +329,7 @@ void SolidBodyComponent::update_data() {
 }
 
 
-void SolidBodyComponent::update_motion() {
+void SolidBody::update_motion() {
 #if HAS_LIB_BULLET
 	btTransform trans;
 	body->setLinearVelocity(bt_set_v(vel));
@@ -404,7 +341,7 @@ void SolidBodyComponent::update_motion() {
 #endif
 }
 
-void SolidBodyComponent::update_mass() {
+void SolidBody::update_mass() {
 #if HAS_LIB_BULLET
 	if (active) {
 		btScalar mass(active);

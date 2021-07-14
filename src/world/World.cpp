@@ -23,7 +23,9 @@
 #include "Object.h"
 #include "Terrain.h"
 #include "World.h"
-#include "components/SolidBodyComponent.h"
+
+#include "components/SolidBody.h"
+#include "components/Collider.h"
 
 #ifdef _X_ALLOW_X_
 #include "../fx/Light.h"
@@ -38,7 +40,6 @@
 
 #if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #endif
@@ -159,8 +160,8 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 		auto contactManifold = dispatcher->getManifoldByIndexInternal(i);
 		auto obA = const_cast<btCollisionObject*>(contactManifold->getBody0());
 		auto obB = const_cast<btCollisionObject*>(contactManifold->getBody1());
-		auto a = static_cast<SolidBodyComponent*>(obA->getUserPointer());
-		auto b = static_cast<SolidBodyComponent*>(obB->getUserPointer());
+		auto a = static_cast<SolidBody*>(obA->getUserPointer());
+		auto b = static_cast<SolidBody*>(obB->getUserPointer());
 		int np = contactManifold->getNumContacts();
 		for (int j=0; j<np; j++) {
 			auto &pt = contactManifold->getContactPoint(j);
@@ -370,26 +371,24 @@ void World::add_link(Link *l) {
 }
 
 
-static Array<float> hh;
-
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	Terrain *tt = new Terrain(filename, pos);
 
-	float a=10000, b=0;
-	for (float f: tt->height){
-		a = min(a, f);
-		b = max(b, f);
-	}
+	auto col = new TerrainCollider(tt);
+	col->type = TerrainCollider::_class;
+	terrain_object->_add_component_external_(col);
 
-	//tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
-	hh.clear();
-	for (int z=0; z<tt->num_z+1; z++)
-		for (int x=0; x<tt->num_x+1; x++)
-			hh.add(tt->height[x * (tt->num_z+1) + z]);
+
+	auto sb = new SolidBody(terrain_object);
+	sb->type = SolidBody::_class;
+	terrain_object->_add_component_external_(sb);
+
+	//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
 #if HAS_LIB_BULLET
-	auto hf = new btHeightfieldTerrainShape(tt->num_x+1, tt->num_z+1, hh.data, 1.0f, -600, 600, 1, PHY_FLOAT, false);
-	hf->setLocalScaling(bt_set_v(tt->pattern + vector(0,1,0)));
-	tt->colShape = hf;
+	dynamicsWorld->addRigidBody(sb->body);
+#endif
+
+/*#if HAS_LIB_BULLET
 	btTransform startTransform = bt_set_trafo(pos + vector(tt->pattern.x * tt->num_x, 0, tt->pattern.z * tt->num_z)/2, quaternion::ID);
 	btScalar mass(0.f);
 	btVector3 localInertia(0, 0, 0);
@@ -401,7 +400,7 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	tt->body->setUserPointer(terrain_object);
 
 	dynamicsWorld->addRigidBody(tt->body);
-#endif
+#endif*/
 
 	terrains.add(tt);
 	return tt;
@@ -440,12 +439,13 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 	if (o->physics_data_.active or o->physics_data_.passive) {
 		// TODO
 
-		auto sb = new SolidBodyComponent(o);
-		sb->type = SolidBodyComponent::_class;
-		ComponentManager::add_to_list(sb, SolidBodyComponent::_class);
-		o->components.add(sb);
-		sb->owner = o;
-		sb->on_init();
+		auto col = new MeshCollider(o);
+		col->type = MeshCollider::_class;
+		o->_add_component_external_(col);
+
+		auto sb = new SolidBody(o);
+		sb->type = SolidBody::_class;
+		o->_add_component_external_(sb);
 
 		//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
 		dynamicsWorld->addRigidBody(sb->body);
@@ -531,13 +531,14 @@ void World::register_object(Object *o, int index) {
 
 
 void World::set_active_physics(Object *o, bool active, bool passive) { //, bool test_collisions) {
-	auto b = reinterpret_cast<SolidBodyComponent*>(o->get_component(SolidBodyComponent::_class));
+	auto b = reinterpret_cast<SolidBody*>(o->get_component(SolidBody::_class));
+	auto c = reinterpret_cast<Collider*>(o->get_component(Collider::_class));
 
 #if HAS_LIB_BULLET
 	btScalar mass(active ? b->mass : 0);
 	btVector3 localInertia(0, 0, 0);
-	if (b->col_shape) {
-		b->col_shape->calculateLocalInertia(mass, localInertia);
+	if (c->col_shape) {
+		c->col_shape->calculateLocalInertia(mass, localInertia);
 		b->theta_0._00 = localInertia.x();
 		b->theta_0._11 = localInertia.y();
 		b->theta_0._22 = localInertia.z();
@@ -566,7 +567,7 @@ void World::unregister_object(Object *m) {
 		return;
 
 #if HAS_LIB_BULLET
-	auto *sb = (SolidBodyComponent*)m->get_component(SolidBodyComponent::_class);
+	auto *sb = (SolidBody*)m->get_component(SolidBody::_class);
 	if (sb) {
 		dynamicsWorld->removeRigidBody(sb->body);
 	}
@@ -726,7 +727,7 @@ void World::iterate_physics(float dt) {
 		dynamicsWorld->stepSimulation(dt, 10);
 
 		btTransform trans;
-		auto list = (Array<SolidBodyComponent*>*)ComponentManager::get_list(SolidBodyComponent::_class);
+		auto list = (Array<SolidBody*>*)ComponentManager::get_list(SolidBody::_class);
 		for (auto *o: *list)
 			if (o->active) {
 				o->body->getMotionState()->getWorldTransform(trans);
@@ -741,7 +742,7 @@ void World::iterate_physics(float dt) {
 			}
 #endif
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
-		auto list = (Array<SolidBodyComponent*>*)ComponentManager::get_list(SolidBodyComponent::_class);
+		auto list = (Array<SolidBody*>*)ComponentManager::get_list(SolidBody::_class);
 		for (auto *o: *list)
 			o->do_physics(dt);
 	}

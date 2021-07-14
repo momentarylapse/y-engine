@@ -1,5 +1,5 @@
 /*
- * SolidBodyComponent.h
+ * SolidBody.h
  *
  *  Created on: Jul 13, 2021
  *      Author: michi
@@ -14,13 +14,12 @@
 class Model;
 
 class btRigidBody;
-class btCollisionShape;
 
 
-class SolidBodyComponent : public Component {
+class SolidBody : public Component {
 public:
-	SolidBodyComponent(Model *m);
-	virtual ~SolidBodyComponent();
+	SolidBody(Model *m);
+	virtual ~SolidBody();
 
 
 	float mass, mass_inv, g_factor;
@@ -39,7 +38,6 @@ public:
 
 
 	btRigidBody* body;
-	btCollisionShape* col_shape;
 
 	void on_init() override;
 

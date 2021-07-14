@@ -7,8 +7,8 @@
 
 #include "Link.h"
 #include "Object.h"
-#include "components/SolidBodyComponent.h"
 #include "../lib/file/msg.h"
+#include "components/SolidBody.h"
 
 
 #if HAS_LIB_BULLET
@@ -25,11 +25,9 @@ Link::Link(LinkType t, Object *_a, Object *_b) : Entity(Type::LINK) {
 	a = nullptr;
 	b = nullptr;
 	if (_a)
-		a = reinterpret_cast<SolidBodyComponent*>(_a->get_component(SolidBodyComponent::_class));
+		a = reinterpret_cast<SolidBody*>(_a->get_component(SolidBody::_class));
 	if (_b)
-		b = reinterpret_cast<SolidBodyComponent*>(_b->get_component(SolidBodyComponent::_class));
-	msg_write(p2s(a));
-	msg_write(p2s(b));
+		b = reinterpret_cast<SolidBody*>(_b->get_component(SolidBody::_class));
 	con = nullptr;
 }
 

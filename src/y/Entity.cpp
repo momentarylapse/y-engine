@@ -58,6 +58,13 @@ Component *Entity::add_component(const kaba::Class *type, const string &var) {
 	return c;
 }
 
+void Entity::_add_component_external_(Component *c) {
+	ComponentManager::add_to_list(c, ComponentManager::get_component_type_family(c->type));
+	components.add(c);
+	c->owner = this;
+	c->on_init();
+}
+
 Component *Entity::get_component(const kaba::Class *type) const {
 	for (auto *c: components)
 		if (c->type->is_derived_from(type))

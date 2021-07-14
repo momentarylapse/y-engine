@@ -63,7 +63,7 @@ void ComponentManager::add_to_list(Component *c, const kaba::Class *type_family)
 }
 
 
-const kaba::Class *get_component_type_family(const kaba::Class *type) {
+const kaba::Class *ComponentManager::get_component_type_family(const kaba::Class *type) {
 	while (type->parent) {
 		if (type->parent->name == "Component")
 			return type;

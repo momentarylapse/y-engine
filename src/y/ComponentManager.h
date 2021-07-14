@@ -25,6 +25,8 @@ public:
 
 	static void add_to_list(Component *c, const kaba::Class *type_family);
 
+	static const kaba::Class *get_component_type_family(const kaba::Class *type);
+
 	static void iterate(float dt);
 };
 
