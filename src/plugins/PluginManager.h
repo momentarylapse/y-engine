@@ -35,6 +35,7 @@ public:
 	static void assign_variables(void *p, const kaba::Class *c, const string &variables);
 
 	void add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables);
+	Controller *get_controller(const kaba::Class *_class);
 
 	Array<Controller*> controllers;
 

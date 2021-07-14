@@ -33,6 +33,8 @@ public:
 
 	virtual void _cdecl on_render_inject() {}
 	virtual void _cdecl on_render_inject2() {}
+
+	const kaba::Class *_class;
 };
 
 #endif /* SRC_PLUGINS_CONTROLLER_H_ */

@@ -7,7 +7,9 @@
 
 #include "Controller.h"
 
-Controller::Controller() : Entity(Type::CONTROLLER) {}
+Controller::Controller() : Entity(Type::CONTROLLER) {
+	_class = nullptr;
+}
 
 void Controller::__init__() {
 	new(this) Controller;

@@ -79,6 +79,10 @@ void global_exit(EngineData& engine) {
 	exit(0);
 }
 
+Controller *global_get_controller(const kaba::Class *type) {
+	return plugin_manager.get_controller(type);
+}
+
 void PluginManager::init() {
 	export_kaba();
 	import_kaba();
@@ -478,6 +482,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_model", (void*)&ModelManager::load);
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
+	kaba::link_external("get_controller", (void*)&global_get_controller);
 }
 
 template<class C>
@@ -604,10 +609,19 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 
 void PluginManager::add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables) {
 	msg_write("add controller: " + name.str());
-	auto *c = (Controller*)create_instance(name, "y.Controller", variables);
+	auto type = find_class_derived(name, "y.Controller");;
+	auto *c = (Controller*)create_instance(type, variables);
+	c->_class = type;
 
 	controllers.add(c);
 	c->on_init();
+}
+
+Controller *PluginManager::get_controller(const kaba::Class *type) {
+	for (auto c: controllers)
+		if (c->_class == type)
+			return c;
+	return nullptr;
 }
 
 void PluginManager::handle_iterate(float dt) {
