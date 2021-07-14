@@ -266,13 +266,10 @@ enum {
 
 class ModelTemplate {
 public:
-	Path filename, script_filename;
-	Array<TemplateDataScriptVariable> variables;
+	Path filename;
 	Model *model;
 	Array<ModelEffectData> fx;
 	Array<Path> bone_model_filename;
-	Array<Path> inventory_filename;
-	kaba::Script *script;
 
 	ModelTemplate(Model *m);
 };
@@ -352,9 +349,7 @@ public:
 
 	// script data (own)
 	struct ScriptData {
-		string name, description;
-		Array<Model*> inventary;
-		Array<float> var;
+		string name;
 	} script_data;
 
 	int object_id;

@@ -135,12 +135,12 @@ public:
 	void read(File *f) override {
 		// Object Data
 		me->script_data.name = f->read_str();
-		me->script_data.description = f->read_str();
+		/*me->script_data.description =*/ f->read_str();
 
 		// Inventary
-		me->script_data.inventary.resize(f->read_int());
-		for (int i=0;i<me->script_data.inventary.num;i++)
-			me->script_data.inventary[i] = ModelManager::load(f->read_str());
+		int n = f->read_int();
+		for (int i=0;i<n;i++)
+			f->read_str();
 	}
 	void write(File *f) override {}
 };
@@ -488,17 +488,16 @@ public:
 		me = parent;
 	}
 	void read(File *f) override {
-		me->_template->script_filename = f->read_str();
-		me->script_data.var.resize(f->read_int());
-		for (int i=0;i<me->script_data.var.num;i++)
-			me->script_data.var[i] = f->read_float();
-
+		f->read_str(); // filename
 		int n = f->read_int();
+		for (int i=0;i<n;i++)
+			f->read_float();
+
+		n = f->read_int();
 		for (int i=0; i<n; i++) {
 			TemplateDataScriptVariable v;
 			v.name = f->read_str().lower().replace("_", "");
 			v.value = f->read_str();
-			me->_template->variables.add(v);
 		}
 	}
 	void write(File *f) override {}
@@ -544,32 +543,18 @@ public:
 
 
 
-Model* fancy_copy(Model *m, const Path &_script) {
-	Model *c = nullptr;
-#ifdef _X_ALLOW_X_
-	Path script = m->_template->script_filename;
-	if (!_script.is_empty())
-		script = _script;
-	//msg_write(format("MODEL  %s   %s", m->_template->filename, script));
-	if (!script.is_empty())
-		c = (Model*)plugin_manager.create_instance(script, "y.Model", m->_template->variables);
-#endif
-	if (!c)
-		c = new Model();
+Model* fancy_copy(Model *m) {
+	Model *c = new Model();
 	return m->copy(c);
 }
 
 Model* ModelManager::load(const Path &_filename) {
-	return loadx(_filename, "");
-}
-
-Model* ModelManager::loadx(const Path &_filename, const Path &_script) {
 	if (_filename == "")
 		return nullptr;
 	auto filename = engine.object_dir << _filename.with(".model");
 	for (auto *o: originals)
 		if (o->_template->filename == filename) {
-			return fancy_copy(o, _script);
+			return fancy_copy(o);
 		}
 
 	Model *m = new Model();
@@ -609,5 +594,5 @@ Model* ModelManager::loadx(const Path &_filename, const Path &_script) {
 
 	//m->load(filename);
 	originals.add(m);
-	return fancy_copy(m, _script);
+	return fancy_copy(m);
 }

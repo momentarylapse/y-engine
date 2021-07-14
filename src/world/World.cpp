@@ -426,7 +426,7 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		throw Exception("CreateObject: empty filename");
 
 	//msg_write(on);
-	auto *o = static_cast<Object*>(ModelManager::loadx(filename, ""));
+	auto *o = static_cast<Object*>(ModelManager::load(filename));
 
 	o->script_data.name = name;
 	o->pos = pos;
@@ -453,7 +453,7 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 
 
 	for (auto &cc: components) {
-		msg_write("add component " + cc.class_name);
+		//msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = plugin_manager.find_class(cc.filename, cc.class_name);
 		auto comp = o->add_component(type, cc.var);

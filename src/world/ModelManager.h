@@ -16,7 +16,6 @@ class Path;
 class ModelManager {
 public:
 	static Model *load(const Path &filename);
-	static Model *loadx(const Path &filename, const Path &script);
 
 	static Array<Model*> originals;
 };

@@ -141,8 +141,6 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
 	kaba::declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
 	kaba::declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
-	kaba::declare_class_element("Model.vars", (char*)&model.script_data.var - (char*)&model);
-	kaba::declare_class_element("Model.vars_i", (char*)&model.script_data.var - (char*)&model);
 	kaba::declare_class_element("Model.parent", &Model::parent);
 	kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);

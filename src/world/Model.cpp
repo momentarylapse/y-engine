@@ -46,7 +46,6 @@ bool Model::AllowDeleteRecursive = true;
 
 
 ModelTemplate::ModelTemplate(Model *m) {
-	script = NULL;
 	model = m;
 }
 
@@ -378,11 +377,6 @@ Model::~Model() {
 		for (Bone &b: bone)
 			if (b.model)
 				delete b.model;
-
-		// delete inventary
-		for (Model *i: script_data.inventary)
-			if (i)
-				delete i;
 	}
 
 	// animation
