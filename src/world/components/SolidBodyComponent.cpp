@@ -70,7 +70,7 @@ SolidBodyComponent::SolidBodyComponent(Model *o) {
 	passive = false;
 	mass = 0;
 	mass_inv = 0;
-	colShape = nullptr;
+	col_shape = nullptr;
 	body = nullptr;
 
 	vel = rot = v_0;
@@ -148,7 +148,7 @@ SolidBodyComponent::SolidBodyComponent(Model *o) {
 
 			}
 		}
-		colShape = comp;
+		col_shape = comp;
 	}
 
 	/*if (o->phys->balls.num > 0) {
@@ -164,22 +164,22 @@ SolidBodyComponent::SolidBodyComponent(Model *o) {
 	} else {
 	}*/
 
-	btTransform startTransform = bt_set_trafo(o->pos, o->ang);
+	btTransform start_transform = bt_set_trafo(o->pos, o->ang);
 
-	btScalar mass(active ? mass : 0);
-	btVector3 localInertia(0, 0, 0);
+	btScalar _mass(active ? mass : 0);
+	btVector3 local_inertia(0, 0, 0);
 	//if (isDynamic)
-	if (colShape) {
-		colShape->calculateLocalInertia(mass, localInertia);
-		theta_0._00 = localInertia.x();
-		theta_0._11 = localInertia.y();
-		theta_0._22 = localInertia.z();
+	if (col_shape) {
+		col_shape->calculateLocalInertia(_mass, local_inertia);
+		theta_0._00 = local_inertia.x();
+		theta_0._11 = local_inertia.y();
+		theta_0._22 = local_inertia.z();
 	}
 
 	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-	body = new btRigidBody(rbInfo);
+	btDefaultMotionState* motion_state = new btDefaultMotionState(start_transform);
+	btRigidBody::btRigidBodyConstructionInfo rb_info(_mass, motion_state, col_shape, local_inertia);
+	body = new btRigidBody(rb_info);
 
 	body->setUserPointer(this);
 	update_mass();
@@ -192,7 +192,7 @@ SolidBodyComponent::SolidBodyComponent(Model *o) {
 SolidBodyComponent::~SolidBodyComponent() {
 	delete body->getMotionState();
 	delete body;
-	delete colShape;
+	delete col_shape;
 }
 
 void SolidBodyComponent::on_init() {

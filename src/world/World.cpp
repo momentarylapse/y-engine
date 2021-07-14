@@ -445,6 +445,7 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		ComponentManager::add_to_list(sb, SolidBodyComponent::_class);
 		o->components.add(sb);
 		sb->owner = o;
+		sb->on_init();
 
 		//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
 		dynamicsWorld->addRigidBody(sb->body);
@@ -535,8 +536,8 @@ void World::set_active_physics(Object *o, bool active, bool passive) { //, bool 
 #if HAS_LIB_BULLET
 	btScalar mass(active ? b->mass : 0);
 	btVector3 localInertia(0, 0, 0);
-	if (b->colShape) {
-		b->colShape->calculateLocalInertia(mass, localInertia);
+	if (b->col_shape) {
+		b->col_shape->calculateLocalInertia(mass, localInertia);
 		b->theta_0._00 = localInertia.x();
 		b->theta_0._11 = localInertia.y();
 		b->theta_0._22 = localInertia.z();

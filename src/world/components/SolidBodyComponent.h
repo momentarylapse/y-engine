@@ -39,7 +39,7 @@ public:
 
 
 	btRigidBody* body;
-	btCollisionShape* colShape;
+	btCollisionShape* col_shape;
 
 	void on_init() override;
 

@@ -128,8 +128,9 @@ Link::~Link() {
 
 void Link::set_motor(float v, float max) {
 #if HAS_LIB_BULLET
-	if (link_type == LinkType::HINGE)
+	if (link_type == LinkType::HINGE) {
 		((btHingeConstraint*)con)->enableAngularMotor(max > 0, v, max);
+	}
 #endif
 }
 
