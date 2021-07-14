@@ -194,9 +194,6 @@ World::World() {
 #endif
 
 
-	terrain_object = new Object();
-	terrain_object->update_matrix();
-
 	reset();
 }
 
@@ -217,8 +214,11 @@ void World::reset() {
 	gravity = v_0;
 
 	// terrains
-	for (auto *t: terrains)
-		delete t;
+	//for (auto *t: terrains)
+	//	delete t;
+	for (auto *o: terrain_objects)
+		delete o;
+	terrain_objects.clear();
 	terrains.clear();
 
 	// objects
@@ -370,20 +370,25 @@ void World::add_link(Link *l) {
 
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
-	terrain_object->pos = pos;
+	msg_error("TERRAIN");
+
+	auto o = new Object();
+	o->update_matrix();
+	o->pos = pos;
+	terrain_objects.add(o);
 
 	auto t = new Terrain(filename);
 	t->type = Terrain::_class;
-	terrain_object->_add_component_external_(t);
+	o->_add_component_external_(t);
 
 	auto col = new TerrainCollider(t);
 	col->type = TerrainCollider::_class;
-	terrain_object->_add_component_external_(col);
+	o->_add_component_external_(col);
 
 
-	auto sb = new SolidBody(terrain_object);
+	auto sb = new SolidBody(o);
 	sb->type = SolidBody::_class;
-	terrain_object->_add_component_external_(sb);
+	o->_add_component_external_(sb);
 
 	//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
 #if HAS_LIB_BULLET

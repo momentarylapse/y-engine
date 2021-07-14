@@ -110,36 +110,28 @@ MeshCollider::MeshCollider(Model *o) {
 
 
 TerrainCollider::TerrainCollider(Terrain *t) {
-	static Array<float> hh;
-
-	/*float a=10000, b=0;
-	for (float f: tt->height){
+	float a = 0, b = 0;
+	for (float f: t->height){
 		a = min(a, f);
 		b = max(b, f);
-	}*/
+	}
+	float d = max(abs(a), abs(b)) + 10;
 
 	//tt->colShape = new btStaticPlaneShape(btVector3(0,1,0), 0);
-	hh.clear();
+
+	// transpose the array for bullet
 	for (int z=0; z<t->num_z+1; z++)
 		for (int x=0; x<t->num_x+1; x++)
 			hh.add(t->height[x * (t->num_z+1) + z]);
+	// data is only referenced by bullet!  (keep)
+
 #if HAS_LIB_BULLET
-	auto hf = new btHeightfieldTerrainShape(t->num_x+1, t->num_z+1, hh.data, 1.0f, -600, 600, 1, PHY_FLOAT, false);
+	auto hf = new btHeightfieldTerrainShape(t->num_x+1, t->num_z+1, hh.data, 1.0f, -d, d, 1, PHY_FLOAT, false);
 	hf->setLocalScaling(bt_set_v(t->pattern + vector(0,1,0)));
-	col_shape = hf;
 
-/*
-	btTransform start_transform = bt_set_trafo(t->pos + vector(t->pattern.x * t->num_x, 0, t->pattern.z * t->num_z)/2, quaternion::ID);
-	btScalar mass(0.f);
-	btVector3 local_inertia(0, 0, 0);
-
-	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(start_transform);
-	btRigidBody::btRigidBodyConstructionInfo rb_info(mass, myMotionState, t->colShape, local_inertia);
-
-	body = new btRigidBody(rb_info);
-	body->setUserPointer(terrain_object);
-
-	dynamicsWorld->addRigidBody(t->body);*/
+	// bullet assumes the origin in the center of the terrain!
+	auto comp = new btCompoundShape(false, 0);
+	comp->addChildShape(bt_set_trafo(vector(t->pattern.x * t->num_x, 0, t->pattern.z * t->num_z)/2, quaternion::ID), hf);
+	col_shape = comp;
 #endif
 }

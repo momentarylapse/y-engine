@@ -45,6 +45,7 @@ public:
 class TerrainCollider : public Collider {
 public:
 	TerrainCollider(Terrain *t);
+	Array<float> hh;
 	static const kaba::Class *_class;
 };
 

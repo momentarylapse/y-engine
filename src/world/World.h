@@ -146,7 +146,7 @@ public:
 	// content of the world
 	Array<Object*> objects;
 	Object *ego;
-	Object *terrain_object;
+	Array<Object*> terrain_objects;
 	int num_reserved_objects;
 
 	Array<Terrain*> terrains;
