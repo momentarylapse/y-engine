@@ -580,10 +580,8 @@ Model* ModelManager::load(const Path &_filename) {
 
 	// skeleton
 	if (m->bone.num > 0) {
-		m->anim.dmatrix.resize(m->bone.num);
 		for (int i=0; i<m->bone.num; i++) {
 			m->bone[i].rest_pos = m->get_bone_rest_pos(i);
-			m->anim.dmatrix[i] = matrix::translation(m->bone[i].rest_pos);
 		}
 	}
 

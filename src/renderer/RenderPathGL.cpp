@@ -30,6 +30,7 @@
 #include "../world/Object.h" // meh
 #include "../world/Terrain.h"
 #include "../world/World.h"
+#include "../world/components/Animator.h"
 #include "../Config.h"
 #include "../meta.h"
 
@@ -449,13 +450,15 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 		Model *m = s.model;
 		nix::set_model_matrix(m->_matrix);
 
-		if (m->uses_bone_animations()) {
+		auto ani = (Animator*)m->get_component(Animator::_class);
+
+		if (ani) {
 			if (allow_material)
 				set_material(s.material, ShaderVariant::ANIMATED);
 			else
 				set_material(material_shadow, ShaderVariant::ANIMATED);
-			m->anim.buf->update_array(m->anim.dmatrix);
-			nix::bind_buffer(m->anim.buf, 7);
+			ani->buf->update_array(ani->dmatrix);
+			nix::bind_buffer(ani->buf, 7);
 			//m->anim.mesh[0]->update_vb();
 			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);

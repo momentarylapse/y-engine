@@ -197,6 +197,7 @@ sources = [
 	'src/renderer/RenderPathGL.cpp',
 	'src/renderer/RenderPathGLDeferred.cpp',
 	'src/renderer/RenderPathGLForward.cpp',
+	'src/world/components/Animator.cpp',
 	'src/world/components/Collider.cpp',
 	'src/world/components/SolidBody.cpp',
 	'src/world/Camera.cpp',

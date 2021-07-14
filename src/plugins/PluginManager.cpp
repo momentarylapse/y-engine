@@ -38,6 +38,7 @@
 #include "../world/World.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
+#include "../world/components/Animator.h"
 #include "../meta.h"
 #include "../lib/kaba/dynamic/exception.h"
 
@@ -150,15 +151,18 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
 	kaba::link_external_class_func("Model.get_vertex", &Model::get_vertex);
 //	kaba::link_external_class_func("Model.set_bone_model", &Model::set_bone_model);
-	kaba::link_external_class_func("Model.reset_animation", &Model::reset_animation);
-	kaba::link_external_class_func("Model.animate", &Model::animate);
-	kaba::link_external_class_func("Model.animate_x", &Model::animate_x);
-	kaba::link_external_class_func("Model.is_animation_done", &Model::is_animation_done);
-	kaba::link_external_class_func("Model.begin_edit_animation", &Model::begin_edit_animation);
 
 	kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
 	kaba::link_external_virtual("Model.on_iterate", &Model::on_iterate, &model);
+
+
+	kaba::declare_class_size("Animator", sizeof(Animator));
+	kaba::link_external_class_func("Animator.reset", &Animator::reset);
+	kaba::link_external_class_func("Animator.add", &Animator::add);
+	kaba::link_external_class_func("Animator.add_x", &Animator::add_x);
+	kaba::link_external_class_func("Animator.is_done", &Animator::is_done);
+	kaba::link_external_class_func("Animator.begin_edit", &Animator::begin_edit);
 
 
 	kaba::declare_class_size("SolidBody", sizeof(SolidBody));
@@ -476,38 +480,30 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
 }
 
-void check_component_class(const kaba::Class *c, const string &name) {
-	if (!c)
+template<class C>
+void import_component_class(shared<kaba::Script> s, const string &name) {
+	for (auto c: s->classes()) {
+		if (c->name == name)
+			C::_class = c;
+	}
+	if (!C::_class)
 		throw Exception(format("y.kaba: %s missing", name));
-	if (!c->is_derived_from_s("y.Component"))
+	if (!C::_class->is_derived_from_s("y.Component"))
 		throw Exception(format("y.kaba: %s not derived from Component", name));
 }
 
 void PluginManager::import_kaba() {
 	auto s = kaba::load("y.kaba");
-	for (auto c: s->classes()) {
-		if (c->name == "SolidBody")
-			SolidBody::_class = c;
-		else if (c->name == "Collider")
-			Collider::_class = c;
-		else if (c->name == "MeshCollider")
-			MeshCollider::_class = c;
-		else if (c->name == "SphereCollider")
-			SphereCollider::_class = c;
-		else if (c->name == "BoxCollider")
-			BoxCollider::_class = c;
-		else if (c->name == "TerrainCollider")
-			TerrainCollider::_class = c;
-	}
-	check_component_class(SolidBody::_class, "SolidBody");
-	check_component_class(Collider::_class, "Collider");
-	check_component_class(MeshCollider::_class, "MeshCollider");
+	import_component_class<SolidBody>(s, "SolidBody");
+	import_component_class<Collider>(s, "Collider");
+	import_component_class<MeshCollider>(s, "MeshCollider");
+	import_component_class<SphereCollider>(s, "SphereCollider");
+	import_component_class<BoxCollider>(s, "BoxCollider");
+	import_component_class<TerrainCollider>(s, "TerrainCollider");
+	import_component_class<Animator>(s, "Animator");
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
 	//msg_write(MeshCollider::_class->parent->parent->name);
-	check_component_class(SphereCollider::_class, "SphereCollider");
-	check_component_class(BoxCollider::_class, "BoxCollider");
-	check_component_class(TerrainCollider::_class, "TerrainCollider");
 }
 
 void PluginManager::reset() {

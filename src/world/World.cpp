@@ -26,6 +26,7 @@
 
 #include "components/SolidBody.h"
 #include "components/Collider.h"
+#include "components/Animator.h"
 
 #ifdef _X_ALLOW_X_
 #include "../fx/Light.h"
@@ -435,6 +436,12 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		dynamicsWorld->addRigidBody(sb->body);
 	}
 
+	if (o->uses_bone_animations()) {
+		auto ani = new Animator(o);
+		ani->type = Animator::_class;
+		o->_add_component_external_(ani);
+	}
+
 
 	for (auto &cc: components) {
 		//msg_write("add component " + cc.class_name);
@@ -728,9 +735,9 @@ void World::iterate_physics(float dt) {
 }
 
 void World::iterate_animations(float dt) {
-	for (auto *o: objects)
-		if (o and o->anim.meta)
-			o->do_animation(dt);
+	auto list = ComponentManager::get_listx<Animator>();
+	for (auto *o: *list)
+		o->do_animation(dt);
 }
 
 void World::iterate(float dt) {

@@ -367,6 +367,9 @@
     <ClCompile Include="src\renderer\RenderPathGLForward.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\components\Animator.cpp">
+      <Filter>src\world\components</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\components\Collider.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
@@ -764,6 +767,9 @@
     </ClInclude>
     <ClInclude Include="src\renderer\RenderPathGLForward.h">
       <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\components\Animator.h">
+      <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Collider.h">
       <Filter>src\world\components</Filter>

@@ -55,7 +55,6 @@ namespace kaba {
 #define MODEL_MAX_POLY_FACES			32
 #define MODEL_MAX_POLY_EDGES			(MODEL_MAX_POLY_FACES*4)
 #define MODEL_MAX_POLY_VERTICES_PER_FACE	16
-#define MODEL_MAX_MOVE_OPS				8
 
 class Mesh;
 
@@ -216,23 +215,6 @@ public:
 	} mesh[4];
 };
 
-// commands for animation (move operations)
-class MoveOperation {
-public:
-	// move operations
-	enum class Command {
-		SET,			// overwrite
-		SET_NEW_KEYED,	// overwrite, if current doesn't equal 0
-		SET_OLD_KEYED,	// overwrite, if last equals 0
-		ADD_1_FACTOR,	// w = w_old         + w_new * f
-		MIX_1_FACTOR,	// w = w_old * (1-f) + w_new * f
-		MIX_2_FACTOR	// w = w_old * a     + w_new * b
-	};
-	int move;
-	Command command;
-	float time, param1, param2;
-};
-
 // to store data to create effects (when copying models)
 class ModelEffectData {
 public:
@@ -286,6 +268,8 @@ public:
 	void reset_data();
 	void _cdecl make_editable();
 	//void Update();
+	void _cdecl begin_edit(int detail);
+	void _cdecl end_edit(int detail);
 
 	static bool AllowDeleteRecursive;
 
@@ -302,17 +286,6 @@ public:
 
 	bool _cdecl trace(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
 	bool _cdecl trace_mesh(const vector &p1, const vector &p2, const vector &dir, float range, TraceData &data, bool simple_test);
-
-	// animation
-	void _cdecl reset_animation();
-	bool _cdecl is_animation_done(int operation_no);
-	bool _cdecl animate_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop);
-	bool _cdecl animate(MoveOperation::Command cmd, int move_no, float &time, float dt, bool loop);
-	int _cdecl get_frames(int move_no);
-	void _cdecl begin_edit_animation();
-	void _cdecl begin_edit(int detail);
-	void _cdecl end_edit(int detail);
-	void do_animation(float elapsed);
 
 	// drawing
 	//void update_vertex_buffer(int mat_no, int detail);
@@ -378,15 +351,7 @@ public:
 
 	// move operations
 	struct AnimationData {
-		int num_operations;
-		MoveOperation operation[MODEL_MAX_MOVE_OPS];
 		MetaMove *meta; // shared
-
-		// dynamical data (own)
-		//Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
-
-		Array<matrix> dmatrix;
-		nix::Buffer *buf;
 	} anim;
 	bool uses_bone_animations() const;
 };

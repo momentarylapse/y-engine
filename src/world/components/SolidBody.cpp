@@ -100,6 +100,7 @@ SolidBody::SolidBody(Model *o) {
 		col_shape = col->col_shape;
 
 
+	msg_write(o->pos.str());
 	btTransform start_transform = bt_set_trafo(o->pos, o->ang);
 
 	btScalar _mass(active ? mass : 0);
