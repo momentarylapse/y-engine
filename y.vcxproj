@@ -115,7 +115,6 @@
     <ClCompile Include="src\audio\Sound.cpp" />
     <ClCompile Include="src\audio\SoundAL.cpp" />
     <ClCompile Include="src\fx\Beam.cpp" />
-    <ClCompile Include="src\fx\Light.cpp" />
     <ClCompile Include="src\fx\Particle.cpp" />
     <ClCompile Include="src\fx\ParticleManager.cpp" />
     <ClCompile Include="src\gui\Font.cpp" />
@@ -240,6 +239,7 @@
     <ClCompile Include="src\world\Camera.cpp" />
     <ClCompile Include="src\world\Entity3D.cpp" />
     <ClCompile Include="src\world\LevelData.cpp" />
+    <ClCompile Include="src\world\Light.cpp" />
     <ClCompile Include="src\world\Link.cpp" />
     <ClCompile Include="src\world\Material.cpp" />
     <ClCompile Include="src\world\Model.cpp" />
@@ -258,7 +258,6 @@
   <ItemGroup>
     <ClInclude Include="src\audio\Sound.h" />
     <ClInclude Include="src\fx\Beam.h" />
-    <ClInclude Include="src\fx\Light.h" />
     <ClInclude Include="src\fx\Particle.h" />
     <ClInclude Include="src\fx\ParticleManager.h" />
     <ClInclude Include="src\gui\Font.h" />
@@ -376,6 +375,7 @@
     <ClInclude Include="src\world\Camera.h" />
     <ClInclude Include="src\world\Entity3D.h" />
     <ClInclude Include="src\world\LevelData.h" />
+    <ClInclude Include="src\world\Light.h" />
     <ClInclude Include="src\world\Link.h" />
     <ClInclude Include="src\world\Material.h" />
     <ClInclude Include="src\world\Model.h" />

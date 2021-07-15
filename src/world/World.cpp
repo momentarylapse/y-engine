@@ -29,7 +29,7 @@
 #include "components/Animator.h"
 
 #ifdef _X_ALLOW_X_
-#include "../fx/Light.h"
+#include "Light.h"
 #include "../fx/Particle.h"
 #include "../fx/ParticleManager.h"
 #include "../plugins/PluginManager.h"
@@ -296,7 +296,7 @@ bool World::load(const LevelData &ld) {
 
 #ifdef _X_ALLOW_X_
 	for (auto &l: ld.lights) {
-		auto *ll = new Light(l.pos, l.ang.ang2dir(), l._color, l.radius, l.theta);
+		auto *ll = new Light(l.pos, quaternion::rotation(l.ang), l._color, l.radius, l.theta);
 		ll->light.harshness = l.harshness;
 		ll->enabled = l.enabled;
 		if (ll->light.radius < 0)

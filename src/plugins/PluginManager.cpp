@@ -9,7 +9,6 @@
 #include "Controller.h"
 #include "../lib/kaba/kaba.h"
 #include "../audio/Sound.h"
-#include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../gui/gui.h"
@@ -36,6 +35,7 @@
 #include "../world/Object.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
+#include "../world/Light.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
@@ -264,10 +264,10 @@ void PluginManager::export_kaba() {
 
 #define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
 
-	Light light(v_0, v_0, Black, 0, 0);
+	Light light(v_0, quaternion::ID, Black, 0, 0);
 	kaba::declare_class_size("Light", sizeof(Light));
-	kaba::declare_class_element("Light.pos", _OFFSET(light, light.pos));
-	kaba::declare_class_element("Light.dir", _OFFSET(light, light.dir));
+	kaba::declare_class_element("Light.pos", &Light::pos);
+	kaba::declare_class_element("Light.ang", &Light::ang);
 	kaba::declare_class_element("Light.color", _OFFSET(light, light.col));
 	kaba::declare_class_element("Light.radius", _OFFSET(light, light.radius));
 	kaba::declare_class_element("Light.theta", _OFFSET(light, light.theta));
@@ -276,6 +276,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Light.allow_shadow", &Light::allow_shadow);
 	kaba::declare_class_element("Light.user_shadow_control", &Light::user_shadow_control);
 	kaba::declare_class_element("Light.user_shadow_theta", &Light::user_shadow_theta);
+	kaba::link_external_class_func("Light.set_direction", &Light::set_direction);
 
 	kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);
 	kaba::link_external_class_func("Light.Spherical.__init__", &Light::__init_spherical__);

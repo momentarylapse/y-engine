@@ -18,11 +18,11 @@
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
-#include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleManager.h"
 #include "../world/Camera.h"
+#include "../world/Light.h"
 #include "../world/Material.h"
 #include "../world/Model.h"
 #include "../world/Object.h" // meh

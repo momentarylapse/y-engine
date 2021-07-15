@@ -18,7 +18,6 @@
 
 #include "../helper/PerformanceMonitor.h"
 #include "../plugins/PluginManager.h"
-#include "../fx/Light.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleManager.h"
@@ -30,6 +29,7 @@
 #include "../world/Object.h" // meh
 #include "../world/Terrain.h"
 #include "../world/World.h"
+#include "../world/Light.h"
 #include "../world/components/Animator.h"
 #include "../Config.h"
 #include "../meta.h"
@@ -504,6 +504,8 @@ void RenderPathGL::prepare_lights() {
 	for (auto *l: world.lights) {
 		if (!l->enabled)
 			continue;
+		l->light.pos = l->pos;
+		l->light.dir = l->ang * vector::EZ;
 
 		if (l->allow_shadow) {
 			if (l->type == LightType::DIRECTIONAL) {

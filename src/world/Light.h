@@ -5,14 +5,13 @@
  *      Author: michi
  */
 
-#ifndef SRC_FX_LIGHT_H_
-#define SRC_FX_LIGHT_H_
+#pragma once
 
 #include "../lib/base/base.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
-#include "../y/Entity.h"
+#include "Entity3D.h"
 
 
 struct UBOLight {
@@ -30,12 +29,14 @@ enum class LightType {
 	CONE
 };
 
-class Light : public Entity {
+class Light : public Entity3D {
 public:
-	Light(const vector &p, const vector &d, const color &c, float r, float t);
-	void __init_parallel__(const vector &d, const color &c);
+	Light(const vector &p, const quaternion &q, const color &c, float r, float t);
+	void __init_parallel__(const quaternion &ang, const color &c);
 	void __init_spherical__(const vector &p, const color &c, float r);
-	void __init_cone__(const vector &p, const vector &d, const color &c, float r, float t);
+	void __init_cone__(const vector &p, const quaternion &ang, const color &c, float r, float t);
+
+	void set_direction(const vector &dir);
 	UBOLight light;
 	bool enabled;
 	bool allow_shadow;
@@ -46,5 +47,3 @@ public:
 };
 
 
-
-#endif /* SRC_FX_LIGHT_H_ */

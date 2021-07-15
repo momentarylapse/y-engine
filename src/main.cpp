@@ -24,7 +24,6 @@
 
 #include "net/NetworkManager.h"
 
-#include "fx/Light.h"
 #include "fx/ParticleManager.h"
 
 #include "gui/gui.h"
@@ -46,6 +45,7 @@
 
 #include "Config.h"
 #include "world/Camera.h"
+#include "world/Light.h"
 #include "world/Material.h"
 #include "world/Model.h"
 #include "world/Object.h"

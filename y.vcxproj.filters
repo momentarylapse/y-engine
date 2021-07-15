@@ -10,9 +10,6 @@
     <ClCompile Include="src\fx\Beam.cpp">
       <Filter>src\fx</Filter>
     </ClCompile>
-    <ClCompile Include="src\fx\Light.cpp">
-      <Filter>src\fx</Filter>
-    </ClCompile>
     <ClCompile Include="src\fx\Particle.cpp">
       <Filter>src\fx</Filter>
     </ClCompile>
@@ -385,6 +382,9 @@
     <ClCompile Include="src\world\LevelData.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\Light.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\Link.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
@@ -433,9 +433,6 @@
       <Filter>src\audio</Filter>
     </ClInclude>
     <ClInclude Include="src\fx\Beam.h">
-      <Filter>src\fx</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fx\Light.h">
       <Filter>src\fx</Filter>
     </ClInclude>
     <ClInclude Include="src\fx\Particle.h">
@@ -787,6 +784,9 @@
       <Filter>src\world</Filter>
     </ClInclude>
     <ClInclude Include="src\world\LevelData.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Light.h">
       <Filter>src\world</Filter>
     </ClInclude>
     <ClInclude Include="src\world\Link.h">
