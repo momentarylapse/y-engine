@@ -24,25 +24,21 @@
 #pragma once
 
 
+#include "Entity3D.h"
 #include "../lib/base/base.h"
+#include "../lib/base/pointer.h"
 #include "../lib/file/path.h"
-#include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
 #include "../lib/math/matrix3.h"
 #include "../lib/math/plane.h"
-#include "../lib/math/quaternion.h"
 #include "../lib/image/color.h"
-#include "../y/Entity.h"
 
 
 class Model;
-namespace Fx {
-	class Effect;
-}
 class Material;
 class TraceData;
-class Terrain;
 class TemplateDataScriptVariable;
+class ModelTemplate;
 namespace nix {
 	class VertexBuffer;
 	class Buffer;
@@ -215,15 +211,6 @@ public:
 	} mesh[4];
 };
 
-// to store data to create effects (when copying models)
-class ModelEffectData {
-public:
-	int vertex;
-	int type;
-	Path filename;
-	float radius, speed;
-	color am, di, sp;
-};
 
 class Bone {
 public:
@@ -246,23 +233,13 @@ enum {
 	MESH_PHYSICAL = 42 // for edward
 };
 
-class ModelTemplate {
+class ModelTemplate : public Sharable<Empty> {
 public:
 	Path filename;
 	Model *model;
-	Array<ModelEffectData> fx;
 	Array<Path> bone_model_filename;
 
 	ModelTemplate(Model *m);
-};
-
-class Entity3D : public Entity {
-public:
-	Entity3D(Type type);
-
-	vector pos;
-	quaternion ang;
-	matrix get_matrix() const;
 };
 
 class Model : public Entity3D {
@@ -342,16 +319,13 @@ public:
 	matrix _matrix, matrix_old;
 	void update_matrix();
 
-	// template (shared)
-	ModelTemplate *_template;
-	Path _cdecl filename();
+	// template
+	shared<ModelTemplate> _template;
+	Path filename();
 
 	// engine data
 	bool registered;
 	bool _detail_needed_[MODEL_NUM_MESHES]; // per frame
-
-	// effects (own)
-	Array<Fx::Effect*> fx;
 
 	// skeleton (own)
 	Array<Bone> bone;

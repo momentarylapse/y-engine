@@ -101,6 +101,8 @@ vector get_normal_by_index(int index) {
 void AppraiseDimensions(Model *m);
 void PostProcessPhys(Model *m, PhysicalMesh *s);
 
+
+
 namespace modelmanager {
 
 class ChunkMeta : public FileChunk<Model, Model> {
@@ -441,6 +443,8 @@ public:
 	void write(File *f) override {}
 };
 
+/*class ModelEffectData;
+
 class ChunkEffect : public FileChunk<Model, ModelEffectData> {
 public:
 	ChunkEffect() : FileChunk("effect") {}
@@ -480,7 +484,7 @@ public:
 		}
 	}
 	void write(File *f) override {}
-};
+};*/
 
 class ChunkScript : public FileChunk<Model, Model> {
 public:
@@ -515,7 +519,7 @@ public:
 		add_child(new ChunkSkeleton);
 		add_child(new ChunkAnimation);
 		add_child(new ChunkScript);
-		add_child(new ChunkEffect);
+//		add_child(new ChunkEffect);
 		add_child(new ChunkOldMeta);
 	}
 	void read(File *f) override {}

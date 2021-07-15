@@ -379,6 +379,9 @@
     <ClCompile Include="src\world\Camera.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\Entity3D.cpp">
+      <Filter>src\world</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\LevelData.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
@@ -778,6 +781,9 @@
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\Camera.h">
+      <Filter>src\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\Entity3D.h">
       <Filter>src\world</Filter>
     </ClInclude>
     <ClInclude Include="src\world\LevelData.h">

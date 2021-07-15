@@ -238,6 +238,7 @@
     <ClCompile Include="src\world\components\Collider.cpp" />
     <ClCompile Include="src\world\components\SolidBody.cpp" />
     <ClCompile Include="src\world\Camera.cpp" />
+    <ClCompile Include="src\world\Entity3D.cpp" />
     <ClCompile Include="src\world\LevelData.cpp" />
     <ClCompile Include="src\world\Link.cpp" />
     <ClCompile Include="src\world\Material.cpp" />
@@ -373,6 +374,7 @@
     <ClInclude Include="src\world\components\Collider.h" />
     <ClInclude Include="src\world\components\SolidBody.h" />
     <ClInclude Include="src\world\Camera.h" />
+    <ClInclude Include="src\world\Entity3D.h" />
     <ClInclude Include="src\world\LevelData.h" />
     <ClInclude Include="src\world\Link.h" />
     <ClInclude Include="src\world\Material.h" />

@@ -38,16 +38,15 @@
 
 
 
-void MoveTimeAdd(Model *m,int operation_no,float elapsed,float v,bool loop);
 
 bool Model::AllowDeleteRecursive = true;
-
-
 
 
 ModelTemplate::ModelTemplate(Model *m) {
 	model = m;
 }
+
+
 
 MetaMove::MetaMove() {
 	num_frames_skeleton = 0;
@@ -252,22 +251,12 @@ void Model::reset_data() {
 
 
 
-Entity3D::Entity3D(Type type) : Entity(type) {
-	pos = v_0;
-	ang = quaternion::ID;
-}
-
-matrix Entity3D::get_matrix() const {
-	return matrix::translation(pos) * matrix::rotation(ang);
-}
-
 Model::Model() : Entity3D(Type::MODEL) {
 	object_id = -1;
 	registered = false;
 	visible = true;
 
 	is_copy = false;
-	_template = nullptr;
 
 	for (int i=0;i<MODEL_NUM_MESHES;i++) {
 		_detail_needed_[i] = false;
@@ -315,8 +304,6 @@ Model *Model::copy(Model *pre_allocated) {
 		m->material.add(mat->copy());
 
 	m->anim.meta = anim.meta;
-
-	m->fx.clear();
 	
 
 	// "copy" presettings (just using references)
@@ -389,10 +376,6 @@ Model::~Model() {
 
 	for (Material* m: material)
 		delete m;
-
-	// template
-	if (!is_copy)
-		delete _template;
 }
 
 void Model::__delete__() {

@@ -5,13 +5,13 @@
  *      Author: michi
  */
 
-#ifndef SRC_WORLD_MODELMANAGER_H_
-#define SRC_WORLD_MODELMANAGER_H_
+#pragma once
 
 #include "../lib/base/base.h"
 
 class Model;
 class Path;
+
 
 class ModelManager {
 public:
@@ -19,5 +19,3 @@ public:
 
 	static Array<Model*> originals;
 };
-
-#endif /* SRC_WORLD_MODELMANAGER_H_ */

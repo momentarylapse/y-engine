@@ -201,6 +201,7 @@ sources = [
 	'src/world/components/Collider.cpp',
 	'src/world/components/SolidBody.cpp',
 	'src/world/Camera.cpp',
+	'src/world/Entity3D.cpp',
 	'src/world/LevelData.cpp',
 	'src/world/Link.cpp',
 	'src/world/Material.cpp',
