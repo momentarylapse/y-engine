@@ -42,6 +42,9 @@ public:
 	float focal_length;
 	float focal_blur;
 
+	matrix view_matrix() const;
+	matrix projection_matrix(float aspect_ratio) const;
+
 	void update_matrices(float aspect_ratio);
 
 	matrix m_projection, m_view;

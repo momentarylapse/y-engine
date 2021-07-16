@@ -12,7 +12,8 @@ layout(binding = 7) uniform sampler2D tex4;//sampler_shadow2;
 
 #import lighting
 
-uniform vec3 eye_pos;
+//uniform vec3 eye_pos;
+const vec3 eye_pos = vec3(0,0,0);
 
 
 uniform samplerCube tex_cube;

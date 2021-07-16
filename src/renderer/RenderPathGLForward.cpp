@@ -193,6 +193,7 @@ void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) 
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 	nix::set_projection_matrix(m * shadow_proj);
 	nix::set_view_matrix(matrix::ID);
+	nix::set_model_matrix(matrix::ID);
 
 	nix::clear_z();
 

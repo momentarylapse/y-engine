@@ -13,9 +13,10 @@
 #include "../lib/image/color.h"
 #include "Entity3D.h"
 
+class Camera;
 
 struct UBOLight {
-	alignas(16) matrix proj;
+	alignas(16) matrix proj; // view -> texture
 	alignas(16) vector pos;
 	alignas(16) vector dir;
 	alignas(16) color col;
@@ -37,11 +38,15 @@ public:
 	void __init_cone__(const vector &p, const quaternion &ang, const color &c, float r, float t);
 
 	void set_direction(const vector &dir);
+
+	void update(Camera *cam, float shadow_box_size, bool using_view_space);
+
 	UBOLight light;
 	bool enabled;
 	bool allow_shadow;
 	bool user_shadow_control;
 	float user_shadow_theta;
+	matrix shadow_projection; // world -> texture
 
 	LightType type;
 };

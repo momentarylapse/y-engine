@@ -81,6 +81,9 @@ public:
 	float shadow_box_size;
 	int shadow_resolution;
 
+
+	bool using_view_space = false;
+
 	RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
 
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;

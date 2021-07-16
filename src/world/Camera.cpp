@@ -109,10 +109,17 @@ void CameraCalcMove(float dt) {
 void Camera::on_iterate(float dt) {
 }
 
+matrix Camera::projection_matrix(float aspect_ratio) const {
+	return matrix::perspective(fov, aspect_ratio, min_depth, max_depth) * matrix::rotation_x(pi);
+}
+
+matrix Camera::view_matrix() const {
+	return matrix::rotation_q(ang).transpose() * matrix::translation(-pos);
+}
+
 void Camera::update_matrices(float aspect_ratio) {
-	m_projection = matrix::perspective(fov, aspect_ratio, min_depth, max_depth);
-	m_projection = m_projection * matrix::rotation_x(pi);
-	m_view = matrix::rotation_q(ang).transpose() * matrix::translation(-pos);
+	m_projection = projection_matrix(aspect_ratio);
+	m_view = view_matrix();
 
 	m_all = m_projection * m_view;
 	im_all = m_all.inverse();

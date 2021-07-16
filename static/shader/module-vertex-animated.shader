@@ -27,9 +27,9 @@ void main() {
 	mat4 model = matrix.model * bm;
 	
 	gl_Position = matrix.project * matrix.view * model * vec4(in_position, 1);
-	out_normal = (model * vec4(in_normal, 0)).xyz;
+	out_normal = (matrix.view * model * vec4(in_normal, 0)).xyz;
 	out_uv = in_uv;
-	out_pos = model * vec4(in_position, 1);
+	out_pos = matrix.view * model * vec4(in_position, 1);
 }
 
 </Module>

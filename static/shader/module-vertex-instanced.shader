@@ -21,9 +21,9 @@ layout(location = 2) out vec3 out_normal;
 void main() {
 	mat4 m = multi[gl_InstanceID];
 	gl_Position = matrix.project * matrix.view * m * vec4(in_position, 1);
-	out_normal = (m * vec4(in_normal, 0)).xyz;
+	out_normal = (matrix.view * m * vec4(in_normal, 0)).xyz;
 	out_uv = in_uv;
-	out_pos = m * vec4(in_position,1);
+	out_pos = matrix.view * m * vec4(in_position,1);
 }
 </Module>
 
