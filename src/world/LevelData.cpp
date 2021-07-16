@@ -109,6 +109,14 @@ bool LevelData::load(const Path &filename) {
 				c.min_depth = e.value("minDepth", "1")._float();
 				c.max_depth = e.value("maxDepth", "10000")._float();
 				c.exposure = e.value("exposure", "1")._float();
+				for (auto &ee: e.elements)
+					if (ee.tag == "component") {
+						ScriptData sd;
+						sd.filename = ee.value("script");
+						sd.class_name = ee.value("class");
+						sd.var = ee.value("var");
+						c.components.add(sd);
+					}
 				cameras.add(c);
 			} else if (e.tag == "light") {
 				Light l;
@@ -130,11 +138,27 @@ bool LevelData::load(const Path &filename) {
 					l._color *= l.radius * l.radius / 100;
 				}
 				l.enabled = e.value("enabled", "true")._bool();
+				for (auto &ee: e.elements)
+					if (ee.tag == "component") {
+						ScriptData sd;
+						sd.filename = ee.value("script");
+						sd.class_name = ee.value("class");
+						sd.var = ee.value("var");
+						l.components.add(sd);
+					}
 				lights.add(l);
 			} else if (e.tag == "terrain") {
 				Terrain t;
 				t.filename = e.value("file");
 				t.pos = s2v(e.value("pos"));
+				for (auto &ee: e.elements)
+					if (ee.tag == "component") {
+						ScriptData sd;
+						sd.filename = ee.value("script");
+						sd.class_name = ee.value("class");
+						sd.var = ee.value("var");
+						t.components.add(sd);
+					}
 				terrains.add(t);
 			} else if (e.tag == "object") {
 				Object o;

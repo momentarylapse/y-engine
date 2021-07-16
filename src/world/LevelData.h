@@ -58,6 +58,7 @@ public:
 	public:
 		Path filename;
 		vector pos;
+		Array<ScriptData> components;
 	};
 
 	class Object {
@@ -74,12 +75,14 @@ public:
 		vector pos, ang;
 		color _color;
 		float radius, theta, harshness;
+		Array<ScriptData> components;
 	};
 
 	class Camera {
 	public:
 		vector pos, ang;
 		float fov, min_depth, max_depth, exposure;
+		Array<ScriptData> components;
 	};
 
 	class Link {
@@ -87,6 +90,7 @@ public:
 		int object[2];
 		LinkType type;
 		vector pos, ang;
+		Array<ScriptData> components;
 	};
 
 	Path world_filename;

@@ -302,6 +302,14 @@ bool World::load(const LevelData &ld) {
 		if (ll->light.radius < 0)
 			ll->allow_shadow = true;
 		add_light(ll);
+
+		for (auto &cc: l.components) {
+			//msg_write("add component " + cc.class_name);
+	#ifdef _X_ALLOW_X_
+			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+			auto comp = ll->add_component(type, cc.var);
+	#endif
+		}
 	}
 #endif
 
@@ -321,6 +329,14 @@ bool World::load(const LevelData &ld) {
 		cam->max_depth = c.max_depth;
 		cam->exposure = c.exposure;
 		cam->fov = c.fov;
+
+		for (auto &cc: c.components) {
+			//msg_write("add component " + cc.class_name);
+	#ifdef _X_ALLOW_X_
+			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+			auto comp = cam->add_component(type, cc.var);
+	#endif
+		}
 		break;
 	}
 
@@ -345,6 +361,14 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &t, ld.terrains, i){
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
 		Terrain *tt = create_terrain(t.filename, t.pos);
+
+		for (auto &cc: t.components) {
+			//msg_write("add component " + cc.class_name);
+	#ifdef _X_ALLOW_X_
+			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+			auto comp = tt->owner->add_component(type, cc.var);
+	#endif
+		}
 		ok &= !tt->error;
 	}
 
