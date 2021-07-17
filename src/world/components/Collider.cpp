@@ -7,6 +7,7 @@
 
 #include "Collider.h"
 #include "../Model.h"
+#include "../ModelManager.h"
 #include "../Terrain.h"
 #include "../../lib/base/set.h"
 #include "../../lib/file/msg.h"
@@ -17,8 +18,6 @@
 
 
 btVector3 bt_set_v(const vector &v);
-btQuaternion bt_set_q(const quaternion &q);
-vector bt_get_v(const btVector3 &v);
 btTransform bt_set_trafo(const vector &p, const quaternion &q);
 #endif
 

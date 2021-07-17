@@ -22,6 +22,7 @@
 \*----------------------------------------------------------------------------*/
 
 #include "Model.h"
+#include "ModelManager.h"
 #include "Material.h"
 #include "World.h"
 #include "../lib/math/complex.h"
@@ -32,6 +33,7 @@
 #include "../lib/nix/nix.h"
 #endif
 #include "../lib/file/msg.h"
+#include "components/Animator.h"
 
 
 #define DynamicNormalCorrect
@@ -40,11 +42,6 @@
 
 
 bool Model::AllowDeleteRecursive = true;
-
-
-ModelTemplate::ModelTemplate(Model *m) {
-	model = m;
-}
 
 
 
@@ -66,8 +63,9 @@ Mesh* Mesh::copy(Model *new_owner) {
 		ss.vertex_buffer = nullptr;
 		//ss.force_update = true;
 	}
-	s->create_vb(new_owner->uses_bone_animations());
-	s->update_vb(new_owner->uses_bone_animations());
+	bool using_animation = owner->_template->animator;
+	s->create_vb(using_animation);
+	s->update_vb(using_animation);
 
 	s->owner = new_owner;
 	return s;
@@ -128,6 +126,7 @@ void Model::_ResetPhysAbsolute_() {
 
 
 
+// TODO: move this into the renderer
 void SubMesh::create_vb(bool animated) {
 	if (animated)
 		vertex_buffer = new nix::VertexBuffer("3f,3f,2f,4i,4f");
@@ -242,9 +241,6 @@ void CopyPhysicalSkin(PhysicalMesh *orig, PhysicalMesh **copy)
 #endif
 
 
-bool Model::uses_bone_animations() const {
-	return (bone.num > 0);
-}
 
 Model *Model::copy(Model *pre_allocated) {
 	if (is_copy)
@@ -271,12 +267,6 @@ Model *Model::copy(Model *pre_allocated) {
 	m->registered = false;
 	m->visible = true;
 
-	// skeleton
-	m->bone = bone;
-	for (int i=0;i<bone.num;i++)
-		if (bone[i].model)
-			m->bone[i].model = nullptr;//CopyModel(bone[i].model, allow_script_init);
-
 	// effects
 	// loaded by ResetData()
 
@@ -296,13 +286,6 @@ void ExternalModelCleanup(Model *m);
 //    don't delete sub models ...done by meta
 Model::~Model() {
 	ExternalModelCleanup(this);
-
-	if (AllowDeleteRecursive) {
-		// delete sub models
-		for (Bone &b: bone)
-			if (b.model)
-				delete b.model;
-	}
 
 	// skin
 	for (int i=0;i<MODEL_NUM_MESHES;i++)
@@ -328,13 +311,6 @@ void Model::__delete__() {
 	this->Model::~Model();
 }
 
-// non-animated state
-vector Model::get_bone_rest_pos(int index) const {
-	auto &b = bone[index];
-	if (b.parent >= 0)
-		return b.delta_pos + get_bone_rest_pos(b.parent);
-	return b.delta_pos;
-}
 
 int get_num_trias(Mesh *s) {
 	int n = 0;
@@ -553,7 +529,7 @@ void Model::begin_edit(int detail) {
 
 // force an update for this model/skin
 void Model::end_edit(int detail) {
-	mesh[detail]->update_vb(uses_bone_animations());
+	mesh[detail]->update_vb(get_component(Animator::_class));
 	//for (int i=0; i<material.num; i++)
 	//	mesh[detail]->sub[i].force_update = true;
 }

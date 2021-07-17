@@ -99,19 +99,6 @@ public:
 	Mesh *copy(Model *new_owner);
 };
 
-
-class Bone {
-public:
-	int parent;
-	vector delta_pos;
-	vector rest_pos;
-	Model *model;
-	// current skeletal data
-	quaternion cur_ang;
-	vector cur_pos;
-	matrix dmatrix;
-};
-
 enum {
 	MESH_HIGH,
 	MESH_MEDIUM,
@@ -119,19 +106,6 @@ enum {
 	MODEL_NUM_MESHES,
 
 	MESH_PHYSICAL = 42 // for edward
-};
-
-class ModelTemplate : public Sharable<Empty> {
-public:
-	Path filename;
-	Model *model;
-	Array<Path> bone_model_filename;
-	SolidBody *solid_body;
-	MeshCollider *mesh_collider;
-	Animator *animator;
-
-
-	ModelTemplate(Model *m);
 };
 
 class Model : public Entity3D {
@@ -153,10 +127,6 @@ public:
 
 	// animation
 	vector _cdecl get_vertex(int index);
-
-	// skeleton
-	vector _cdecl get_bone_rest_pos(int index) const;
-	void _cdecl set_bone_model(int index, Model *sub);
 
 	// helper functions for collision detection
 	void _UpdatePhysAbsolute_();
@@ -180,7 +150,6 @@ public:
 		float radius;
 		vector min, max; // "bounding box"
 		bool allow_shadow;
-		bool flexible;
 	} prop;
 
 	bool is_copy;
@@ -205,11 +174,6 @@ public:
 	// engine data
 	bool registered;
 	bool _detail_needed_[MODEL_NUM_MESHES]; // per frame
-
-	// skeleton (own)
-	Array<Bone> bone;
-
-	bool uses_bone_animations() const;
 };
 
 

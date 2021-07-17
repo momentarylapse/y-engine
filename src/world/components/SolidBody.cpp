@@ -10,6 +10,7 @@
 #include "../World.h"
 #include "../Object.h"
 #include "../Model.h"
+#include "../ModelManager.h"
 #include "../../y/EngineData.h"
 #include "../../lib/file/msg.h"
 

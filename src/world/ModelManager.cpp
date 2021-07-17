@@ -10,6 +10,7 @@
 #include "components/Collider.h"
 #include "components/Animator.h"
 #include "components/SolidBody.h"
+#include "components/Skeleton.h"
 #include "../y/EngineData.h"
 #include "../lib/math/complex.h"
 #include "../lib/kaba/kaba.h"
@@ -27,6 +28,11 @@
 #include "Material.h"
 
 Array<Model*> ModelManager::originals;
+
+ModelTemplate::ModelTemplate(Model *m) {
+	model = m;
+}
+
 
 
 File *load_file_x(const Path &filename, int &version) {
@@ -375,8 +381,9 @@ public:
 	}
 	void read(File *f) override {
 		int version = f->read_int();
-		me->bone.resize(f->read_int());
-		for (auto &b: me->bone) {
+		auto sk = me->_template->skeleton;
+		sk->bone.resize(f->read_int());
+		for (auto &b: sk->bone) {
 			f->read_vector(&b.delta_pos);
 			b.parent = f->read_int();
 			string filename = f->read_str();
@@ -461,11 +468,12 @@ public:
 			}
 		}
 
+		auto sk = parent->_template->skeleton;
 
 		meta->num_frames_skeleton = f->read_int();
 		if (meta->num_frames_skeleton > 0){
-			meta->skel_dpos.resize(meta->num_frames_skeleton * parent->bone.num);
-			meta->skel_ang.resize(meta->num_frames_skeleton * parent->bone.num);
+			meta->skel_dpos.resize(meta->num_frames_skeleton * sk->bone.num);
+			meta->skel_ang.resize(meta->num_frames_skeleton * sk->bone.num);
 		}
 		Array<bool> var_delta_pos;
 		int num_bones = f->read_int();
@@ -478,12 +486,12 @@ public:
 			for (int j=0; j<num_bones; j++) {
 				vector v;
 				f->read_vector(&v);
-				meta->skel_ang[fr * parent->bone.num + j] = quaternion::rotation_v(v);
+				meta->skel_ang[fr * sk->bone.num + j] = quaternion::rotation_v(v);
 			}
 
 			for (int j=0; j<num_bones; j++)
 				if (var_delta_pos[j])
-					f->read_vector(&meta->skel_dpos[fr * parent->bone.num + j]);
+					f->read_vector(&meta->skel_dpos[fr * sk->bone.num + j]);
 		}
 #endif
 	}
@@ -614,35 +622,18 @@ Model* ModelManager::load(const Path &_filename) {
 	m->_template->solid_body = new SolidBody;
 	m->_template->mesh_collider = new MeshCollider;
 	m->_template->animator = new Animator;
+	m->_template->skeleton = new Skeleton;
 
 	modelmanager::ModelParser p;
 	p.read(filename, m);
 
 
 
-	// do some post processing...
-	AppraiseDimensions(m);
-
-	for (int i=0; i<MODEL_NUM_MESHES; i++)
-		m->mesh[i]->post_process(m->uses_bone_animations());
-
-	PostProcessPhys(m, m->_template->mesh_collider->phys);
-
-
-
-
-	// skeleton
-	if (m->bone.num > 0) {
-		for (int i=0; i<m->bone.num; i++) {
-			m->bone[i].rest_pos = m->get_bone_rest_pos(i);
-		}
-	}
-
-
-
-	m->is_copy = false;
-	m->reset_data();
-
+	// remove unneeded components
+	/*if (m->_template->mesh_collider->phys->balls.num + ... == 0) {
+		delete m->_template->mesh_collider;
+		m->_template->mesh_collider = nullptr;
+	}*/
 	if (!m->_template->solid_body->active and !m->_template->solid_body->passive) {
 		delete m->_template->solid_body;
 		m->_template->solid_body = nullptr;
@@ -651,6 +642,26 @@ Model* ModelManager::load(const Path &_filename) {
 		delete m->_template->animator;
 		m->_template->animator = nullptr;
 	}
+	if (m->_template->skeleton->bone.num == 0) {
+		delete m->_template->skeleton;
+		m->_template->skeleton = nullptr;
+	}
+
+
+	// do some post processing...
+	AppraiseDimensions(m);
+
+	for (int i=0; i<MODEL_NUM_MESHES; i++)
+		m->mesh[i]->post_process(m->_template->animator);
+
+	PostProcessPhys(m, m->_template->mesh_collider->phys);
+
+
+
+
+
+	m->is_copy = false;
+	m->reset_data();
 
 
 	//m->load(filename);

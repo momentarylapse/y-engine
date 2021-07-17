@@ -39,6 +39,7 @@
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
+#include "../world/components/Skeleton.h"
 #include "../meta.h"
 #include "../lib/kaba/dynamic/exception.h"
 
@@ -127,13 +128,13 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Model.Mesh.Sub.skin_vertex", &SubMesh::skin_vertex);
 	kaba::declare_class_element("Model.Mesh.Sub.normal", &SubMesh::normal);
 
-	kaba::declare_class_size("Model.Bone", sizeof(Bone));
-	kaba::declare_class_element("Model.Bone.parent", &Bone::parent);
-	kaba::declare_class_element("Model.Bone.pos", &Bone::delta_pos);
-	kaba::declare_class_element("Model.Bone.model", &Bone::model);
-	//kaba::declare_class_element("Model.Bone.dmatrix", &Bone::dmatrix);
-	kaba::declare_class_element("Model.Bone.cur_ang", &Bone::cur_ang);
-	kaba::declare_class_element("Model.Bone.cur_pos", &Bone::cur_pos);
+	kaba::declare_class_size("Skeleton.Bone", sizeof(Bone));
+	kaba::declare_class_element("Skeleton.Bone.parent", &Bone::parent);
+	kaba::declare_class_element("Skeleton.Bone.pos", &Bone::delta_pos);
+	kaba::declare_class_element("Skeleton.Bone.model", &Bone::model);
+	//kaba::declare_class_element("Skeleton.Bone.dmatrix", &Bone::dmatrix);
+	kaba::declare_class_element("Skeleton.Bone.cur_ang", &Bone::cur_ang);
+	kaba::declare_class_element("Skeleton.Bone.cur_pos", &Bone::cur_pos);
 
 	Model model;
 	kaba::declare_class_size("Model", sizeof(Model));
@@ -141,7 +142,6 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Model.ang", &Model::ang);
 	kaba::declare_class_element("Model.mesh", &Model::mesh);
 	kaba::declare_class_element("Model.materials", &Model::material);
-	kaba::declare_class_element("Model.bones", &Model::bone);
 	kaba::declare_class_element("Model.matrix", &Model::_matrix);
 	kaba::declare_class_element("Model.radius", (char*)&model.prop.radius - (char*)&model);
 	kaba::declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
@@ -167,6 +167,10 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Animator.add_x", &Animator::add_x);
 	kaba::link_external_class_func("Animator.is_done", &Animator::is_done);
 	kaba::link_external_class_func("Animator.begin_edit", &Animator::begin_edit);
+
+
+	kaba::declare_class_size("Skeleton", sizeof(Skeleton));
+	kaba::declare_class_element("Skeleton.bones", &Skeleton::bone);
 
 
 	kaba::declare_class_size("SolidBody", sizeof(SolidBody));
@@ -507,6 +511,7 @@ void PluginManager::import_kaba() {
 	import_component_class<BoxCollider>(s, "BoxCollider");
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
 	import_component_class<Animator>(s, "Animator");
+	import_component_class<Skeleton>(s, "Skeleton");
 	import_component_class<Terrain>(s, "Terrain");
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
@@ -605,6 +610,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new Terrain;
 	if (c == Animator::_class)
 		return new Animator;
+	if (c == Skeleton::_class)
+		return new Skeleton;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

@@ -27,6 +27,7 @@
 #include "components/SolidBody.h"
 #include "components/Collider.h"
 #include "components/Animator.h"
+#include "components/Skeleton.h"
 
 #ifdef _X_ALLOW_X_
 #include "Light.h"
@@ -458,6 +459,9 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		dynamicsWorld->addRigidBody(sb->body);
 	}
 
+	if (o->_template->skeleton)
+		o->add_component(Skeleton::_class, "");
+
 	if (o->_template->animator)
 		o->add_component(Animator::_class, "");
 
@@ -690,9 +694,12 @@ void World::register_model(Model *m) {
 	m->registered = true;
 	
 	// sub models
-	for (int i=0;i<m->bone.num;i++)
-		if (m->bone[i].model)
-			register_model(m->bone[i].model);
+	auto sk = (Skeleton*)m->get_component(Skeleton::_class);
+	if (sk) {
+		for (auto &b: sk->bone)
+			if (b.model)
+				register_model(b.model);
+	}
 }
 
 // remove a model from the (possible) rendering list
@@ -725,9 +732,12 @@ void World::unregister_model(Model *m) {
 	//printf("%d\n", m->NumBones);
 
 	// sub models
-	for (int i=0;i<m->bone.num;i++)
-		if (m->bone[i].model)
-			unregister_model(m->bone[i].model);
+	auto sk = (Skeleton*)m->get_component(Skeleton::_class);
+	if (sk) {
+		for (auto &b: sk->bone)
+			if (b.model)
+				unregister_model(b.model);
+	}
 }
 
 void World::iterate_physics(float dt) {
