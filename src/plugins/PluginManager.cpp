@@ -403,6 +403,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("ui.key", (void*)&input::get_key);
 	kaba::link_external("ui.key_down", (void*)&input::get_key_down);
 	kaba::link_external("ui.key_up", (void*)&input::get_key_up);
+	kaba::link_external("ui.button", (void*)&input::get_button);
 	kaba::link_external("ui.toplevel", &gui::toplevel);
 	kaba::link_external("ui.mouse", &input::mouse);
 	kaba::link_external("ui.dmouse", &input::dmouse);

@@ -124,7 +124,11 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
 	//std::cout << "button " << button << " " << action << " " << mods << "\n";
+
+	const Array<int> button_map = {0,2,1};
+
 	if (action == GLFW_PRESS) {
+		mouse_state.button[button_map[button]] = true;
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 			SEND_EVENT(on_left_button_down);
 		if (button == GLFW_MOUSE_BUTTON_MIDDLE)
@@ -132,6 +136,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 			SEND_EVENT(on_right_button_down);
 	} else if (action == GLFW_RELEASE) {
+		mouse_state.button[button_map[button]] = false;
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 			SEND_EVENT(on_left_button_up);
 		if (button == GLFW_MOUSE_BUTTON_MIDDLE)
