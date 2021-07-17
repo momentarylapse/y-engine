@@ -40,7 +40,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
 		new nix::Texture(width, height, "rgba:f16"), // emission
-		new nix::Texture(width, height, "rgba:f32"), // pos
+		new nix::Texture(width, height, "rgba:f16"), // pos
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
@@ -124,7 +124,10 @@ void RenderPathGLDeferred::draw() {
 
 void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
 	auto s = shader_gbuffer_out.get();
-	s->set_floats("eye_pos", &cam->pos.x, 3);
+	if (using_view_space)
+		s->set_floats("eye_pos", &vector::ZERO.x, 3);
+	else
+		s->set_floats("eye_pos", &cam->pos.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);

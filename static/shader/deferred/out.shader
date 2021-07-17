@@ -54,7 +54,7 @@ layout(location = 0) in vec2 in_tex_coord;
 layout(location = 0) out vec4 out_color;
 
 
-uniform vec3 eye_pos;
+uniform vec3 eye_pos = vec3(0,0,0);
 uniform vec2 resolution_scale;
 
 
@@ -70,11 +70,11 @@ float get_ambient_occlusion(vec3 p, vec3 n) {0;
 	if (ambient_occlusion_radius <= 0)
 		return 0;
 
-	vec3 pv = (matrix.view * vec4(p,1)).xyz;
-	vec4 pp = matrix.project * matrix.view * vec4(p,1);
+	vec3 pv = p;
+	vec4 pp = matrix.project * vec4(p,1);
 	pp.xyz /= pp.w;
 	
-	vec3 nv = mat3(matrix.view) * n;
+	vec3 nv = n;
 	
 	vec3 randomVec = vec3(_surf_rand3d(pv)*2-1, _surf_rand3d(p + n)*2-1, 0);
 	vec3 tangent   = normalize(randomVec - nv * dot(nv, randomVec));
@@ -92,13 +92,13 @@ float get_ambient_occlusion(vec3 p, vec3 n) {0;
 			continue;
 		
 		
-		vec4 spv = matrix.view * vec4(p + dp*R,1);
-		vec4 spp = matrix.project * spv;
+		vec3 spv = p + dp*R;
+		vec4 spp = matrix.project * vec4(spv,1);
 		spp.xyz /= spp.w;
 		spp.xyz = spp.xyz * 0.5 + 0.5;
 		vec2 q_uv = spp.xy * resolution_scale + vec2(0,1-resolution_scale.y);
 		vec3 sq = texture(tex_pos, q_uv).xyz;
-		vec3 sqv = (matrix.view * vec4(sq,1)).xyz;
+		vec3 sqv = sq;
 		
 		float rangeCheck = smoothstep(0.0, 1.0, R / abs(pv.z - sqv.z));
 		occlusion += (sqv.z <= spv.z + bias ? 1.0 : 0.0) * rangeCheck;
