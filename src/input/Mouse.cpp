@@ -56,7 +56,9 @@ void init_mouse(GLFWwindow *window) {
 	mouse_state.reset();
 	mouse_state_prev.reset();
 
-	mouse = mouse01 = dmouse = scroll = v_0;
+	dmouse = scroll = v_0;
+	mouse = vector(engine.physical_aspect_ratio/2, 0.5f, 0);
+	mouse01 = vector(0.5f, 0.5f, 0);
 	ignore_velocity = true;
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
