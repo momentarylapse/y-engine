@@ -595,6 +595,16 @@ void *PluginManager::create_instance(const kaba::Class *c, const string &variabl
 void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	msg_write(format("creating instance  %s", c->long_name()));
+	if (c == SolidBody::_class)
+		return new SolidBody;
+	if (c == MeshCollider::_class)
+		return new MeshCollider;
+	if (c == TerrainCollider::_class)
+		return new TerrainCollider;
+	if (c == Terrain::_class)
+		return new Terrain;
+	if (c == Animator::_class)
+		return new Animator;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

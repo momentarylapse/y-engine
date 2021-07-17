@@ -18,7 +18,7 @@ class btRigidBody;
 
 class SolidBody : public Component {
 public:
-	SolidBody(Model *m);
+	SolidBody();
 	virtual ~SolidBody();
 
 

@@ -40,7 +40,10 @@ Collider::~Collider() {
 }
 
 
-MeshCollider::MeshCollider(Model *o) {
+MeshCollider::MeshCollider() {}
+
+void MeshCollider::on_init() {
+	auto o = get_owner<Model>();
 #if HAS_LIB_BULLET
 	if (o->phys->balls.num + o->phys->cylinders.num + o->phys->poly.num > 0) {
 		auto comp = new btCompoundShape(false, 0);
@@ -109,7 +112,11 @@ MeshCollider::MeshCollider(Model *o) {
 }
 
 
-TerrainCollider::TerrainCollider(Terrain *t) {
+TerrainCollider::TerrainCollider(){}
+
+void TerrainCollider::on_init() {
+	auto t = (Terrain*)owner->get_component(Terrain::_class);
+
 	float a = 0, b = 0;
 	for (float f: t->height){
 		a = min(a, f);

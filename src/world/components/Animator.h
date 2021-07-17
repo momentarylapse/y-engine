@@ -40,7 +40,7 @@ public:
 
 class Animator : public Component {
 public:
-	Animator(Model *m);
+	Animator();
 	~Animator();
 
 	void on_init() override;

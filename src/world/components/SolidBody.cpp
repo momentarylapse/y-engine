@@ -62,8 +62,7 @@ inline bool TestVectorSanity(vector &v,char *name) {
 
 
 
-SolidBody::SolidBody(Model *o) {
-	msg_write("SOLID BODY");
+SolidBody::SolidBody() {
 	active = false;
 	passive = false;
 	mass = 0;
@@ -83,8 +82,11 @@ SolidBody::SolidBody(Model *o) {
 
 	g_factor = 1;
 	test_collisions = true;
+}
 
 
+void SolidBody::on_init() {
+	auto o = get_owner<Model>();
 
 	// import
 	active = o->physics_data_.active;
@@ -128,12 +130,11 @@ SolidBody::SolidBody(Model *o) {
 
 SolidBody::~SolidBody() {
 #if HAS_LIB_BULLET
-	delete body->getMotionState();
-	delete body;
+	if (body) {
+		delete body->getMotionState();
+		delete body;
+	}
 #endif
-}
-
-void SolidBody::on_init() {
 }
 
 

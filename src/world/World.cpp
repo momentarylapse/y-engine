@@ -394,27 +394,19 @@ void World::add_link(Link *l) {
 
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
-	msg_error("TERRAIN");
 
 	auto o = new Object();
 	o->update_matrix();
 	o->pos = pos;
 	terrain_objects.add(o);
 
-	auto t = new Terrain(filename);
-	t->type = Terrain::_class;
-	o->_add_component_external_(t);
+	auto t = (Terrain*)o->add_component(Terrain::_class, "");
+	t->load(filename);
 
-	auto col = new TerrainCollider(t);
-	col->type = TerrainCollider::_class;
-	o->_add_component_external_(col);
+	auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
 
+	auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
 
-	auto sb = new SolidBody(o);
-	sb->type = SolidBody::_class;
-	o->_add_component_external_(sb);
-
-	//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
 #if HAS_LIB_BULLET
 	dynamicsWorld->addRigidBody(sb->body);
 #endif
@@ -456,23 +448,15 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 	if (o->physics_data_.active or o->physics_data_.passive) {
 		// TODO
 
-		auto col = new MeshCollider(o);
-		col->type = MeshCollider::_class;
-		o->_add_component_external_(col);
+		auto col = (MeshCollider*)o->add_component(MeshCollider::_class, "");
 
-		auto sb = new SolidBody(o);
-		sb->type = SolidBody::_class;
-		o->_add_component_external_(sb);
+		auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
 
-		//auto sb = (SolidBodyComponent*)o->add_component(SolidBodyComponent::_class, "");
 		dynamicsWorld->addRigidBody(sb->body);
 	}
 
-	if (o->uses_bone_animations()) {
-		auto ani = new Animator(o);
-		ani->type = Animator::_class;
-		o->_add_component_external_(ani);
-	}
+	if (o->uses_bone_animations())
+		o->add_component(Animator::_class, "");
 
 
 	for (auto &cc: components) {

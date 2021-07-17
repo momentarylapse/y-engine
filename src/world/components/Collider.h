@@ -26,25 +26,27 @@ public:
 
 class MeshCollider : public Collider {
 public:
-	MeshCollider(Model *m);
+	MeshCollider();
+	void on_init() override;
 	static const kaba::Class *_class;
 };
 
 class SphereCollider : public Collider {
 public:
-	SphereCollider(Model *m);
+	SphereCollider();
 	static const kaba::Class *_class;
 };
 
 class BoxCollider : public Collider {
 public:
-	BoxCollider(Model *m);
+	BoxCollider();
 	static const kaba::Class *_class;
 };
 
 class TerrainCollider : public Collider {
 public:
-	TerrainCollider(Terrain *t);
+	TerrainCollider();
+	void on_init() override;
 	Array<float> hh;
 	static const kaba::Class *_class;
 };

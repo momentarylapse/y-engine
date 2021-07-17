@@ -13,17 +13,9 @@
 
 const kaba::Class *Animator::_class = nullptr;
 
-Animator::Animator(Model *m) {
-	meta = m->anim.meta;
+Animator::Animator() {
+	meta = nullptr;
 	buf = nullptr;
-
-	// skeleton
-	if (m->bone.num > 0) {
-		dmatrix.resize(m->bone.num);
-		for (int i=0; i<m->bone.num; i++) {
-			dmatrix[i] = matrix::translation(m->bone[i].rest_pos);
-		}
-	}
 
 	// "auto-animate"
 	num_operations = -1;
@@ -43,12 +35,19 @@ Animator::Animator(Model *m) {
 }
 
 Animator::~Animator() {
-	// TODO Auto-generated destructor stub
 }
 
 void Animator::on_init() {
-	dmatrix.resize(get_owner<Model>()->bone.num);
+	auto m = get_owner<Model>();
+
+	meta = m->anim.meta;
 	buf = new nix::UniformBuffer;
+
+	// skeleton
+	dmatrix.resize(get_owner<Model>()->bone.num);
+	for (int i=0; i<m->bone.num; i++) {
+		dmatrix[i] = matrix::translation(m->bone[i].rest_pos);
+	}
 }
 
 
