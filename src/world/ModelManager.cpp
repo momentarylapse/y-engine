@@ -7,6 +7,9 @@
 
 #include "ModelManager.h"
 #include "Model.h"
+#include "components/Collider.h"
+#include "components/Animator.h"
+#include "components/SolidBody.h"
 #include "../y/EngineData.h"
 #include "../lib/math/complex.h"
 #include "../lib/kaba/kaba.h"
@@ -98,9 +101,51 @@ vector get_normal_by_index(int index) {
 	return vector( cos(wxy) * swz, sin(wxy) * swz, cwz);
 }
 
-void AppraiseDimensions(Model *m);
-void PostProcessPhys(Model *m, PhysicalMesh *s);
 
+
+//--------------------------------------------------------------------------------------------------
+// hopefully these functions will be obsolete with the next fileformat
+
+// how big is the model
+void AppraiseDimensions(Model *m) {
+	float rad = 0;
+
+	// bounding box (visual mesh[0])
+	m->prop.min = m->prop.max = v_0;
+	for (int i=0;i<m->mesh[0]->vertex.num;i++) {
+		m->prop.min._min(m->mesh[0]->vertex[i]);
+		m->prop.max._max(m->mesh[0]->vertex[i]);
+		float r = _vec_length_fuzzy_(m->mesh[0]->vertex[i]);
+		if (r > rad)
+			rad = r;
+	}
+
+	// physical skin
+	auto col = (MeshCollider*)m->get_component(MeshCollider::_class);
+	if (col) {
+		for (int i=0;i<col->phys->vertex.num;i++) {
+			float r = _vec_length_fuzzy_(col->phys->vertex[i]);
+			if (r > rad)
+				rad = r;
+		}
+		for (auto &b: col->phys->balls) {
+			float r = _vec_length_fuzzy_(col->phys->vertex[b.index]) + b.radius;
+			if (r > rad)
+				rad = r;
+		}
+	}
+	m->prop.radius = rad;
+}
+
+
+void PostProcessPhys(Model *m, PhysicalMesh *s) {
+	auto col = (MeshCollider*)m->get_component(MeshCollider::_class);
+	if (col) {
+		col->phys_absolute.p.clear();
+		col->phys_absolute.pl.clear();
+	}
+	m->_ResetPhysAbsolute_();
+}
 
 
 namespace modelmanager {
@@ -113,17 +158,18 @@ public:
 	}
 	void read(File *f) override {
 		int version = f->read_int();
+		auto sb = me->_template->solid_body;
 
 		f->read_vector(&me->prop.min);
 		f->read_vector(&me->prop.max);
 		me->prop.radius = f->read_float();
 
 		// physics
-		me->physics_data_.mass = f->read_float();
+		sb->mass = f->read_float();
 		for (int i=0;i<9;i++)
-			me->physics_data_.theta_0.e[i] = f->read_float();
-		me->physics_data_.active = f->read_bool();
-		me->physics_data_.passive = f->read_bool();
+			sb->theta_0.e[i] = f->read_float();
+		sb->active = f->read_bool();
+		sb->passive = f->read_bool();
 	}
 	void write(File *f) override {}
 };
@@ -268,7 +314,7 @@ public:
 	}
 	void create() override {
 		me = new PhysicalMesh;
-		parent->phys = me;
+		parent->_template->mesh_collider->phys = me;
 	}
 	void read(File *f) override {
 		int version = f->read_int();
@@ -370,8 +416,9 @@ public:
 #if 1
 		int version = f->read_int();
 
-		me->anim.meta = new MetaMove;
-		auto meta = me->anim.meta;
+
+		auto meta = new MetaMove;
+		me->_template->animator->meta = meta;
 
 		// headers
 		int num_anims = f->read_int();
@@ -394,8 +441,8 @@ public:
 		meta->num_frames_vertex = f->read_int();
 		for (int s=0; s<4; s++) {
 			int n_vert = 0;
-			if (parent->phys)
-				n_vert = parent->phys->vertex.num;
+			if (parent->_template->mesh_collider->phys)
+				n_vert = parent->_template->mesh_collider->phys->vertex.num;
 			if (s > 0)
 				n_vert = parent->mesh[s - 1]->vertex.num;
 			meta->mesh[s].dpos.resize(meta->num_frames_vertex * n_vert);
@@ -403,7 +450,7 @@ public:
 		for (int fr=0; fr<meta->num_frames_vertex; fr++) {
 			/*fr.duration =*/ f->read_float();
 			for (int s=0; s<4; s++) {
-				int np = parent->phys->vertex.num;
+				int np = parent->_template->mesh_collider->phys->vertex.num;
 				if (s >= 1)
 					np = parent->mesh[s - 1]->vertex.num;
 				int num_vertices = f->read_int();
@@ -546,11 +593,9 @@ public:
 
 }
 
-
-
-Model* fancy_copy(Model *m) {
-	Model *c = new Model();
-	return m->copy(c);
+Model* fancy_copy(Model *orig) {
+	Model *clone = new Model();
+	return orig->copy(clone);
 }
 
 Model* ModelManager::load(const Path &_filename) {
@@ -562,10 +607,14 @@ Model* ModelManager::load(const Path &_filename) {
 			return fancy_copy(o);
 		}
 
+	msg_write("loading " + filename.str());
 	Model *m = new Model();
 	m->_template = new ModelTemplate(m);
 	m->_template->filename = filename;
-	msg_write("loading " + filename.str());
+	m->_template->solid_body = new SolidBody;
+	m->_template->mesh_collider = new MeshCollider;
+	m->_template->animator = new Animator;
+
 	modelmanager::ModelParser p;
 	p.read(filename, m);
 
@@ -577,7 +626,7 @@ Model* ModelManager::load(const Path &_filename) {
 	for (int i=0; i<MODEL_NUM_MESHES; i++)
 		m->mesh[i]->post_process(m->uses_bone_animations());
 
-	PostProcessPhys(m, m->phys);
+	PostProcessPhys(m, m->_template->mesh_collider->phys);
 
 
 
@@ -593,6 +642,15 @@ Model* ModelManager::load(const Path &_filename) {
 
 	m->is_copy = false;
 	m->reset_data();
+
+	if (!m->_template->solid_body->active and !m->_template->solid_body->passive) {
+		delete m->_template->solid_body;
+		m->_template->solid_body = nullptr;
+	}
+	if (!m->_template->animator->meta) {
+		delete m->_template->animator;
+		m->_template->animator = nullptr;
+	}
 
 
 	//m->load(filename);

@@ -51,10 +51,15 @@ void Entity::on_delete_rec() {
 
 // TODO (later) optimize...
 Component *Entity::add_component(const kaba::Class *type, const string &var) {
+	auto c = add_component_no_init(type, var);
+	c->on_init();
+	return c;
+}
+
+Component *Entity::add_component_no_init(const kaba::Class *type, const string &var) {
 	auto c = ComponentManager::create_component(type, var);
 	components.add(c);
 	c->owner = this;
-	c->on_init();
 	return c;
 }
 

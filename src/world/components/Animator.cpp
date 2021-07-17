@@ -13,6 +13,14 @@
 
 const kaba::Class *Animator::_class = nullptr;
 
+
+
+MetaMove::MetaMove() {
+	num_frames_skeleton = 0;
+	num_frames_vertex = 0;
+}
+
+
 Animator::Animator() {
 	meta = nullptr;
 	buf = nullptr;
@@ -35,12 +43,14 @@ Animator::Animator() {
 }
 
 Animator::~Animator() {
+	if (buf)
+		delete buf;
 }
 
 void Animator::on_init() {
 	auto m = get_owner<Model>();
 
-	meta = m->anim.meta;
+	meta = m->_template->animator->meta;
 	buf = new nix::UniformBuffer;
 
 	// skeleton

@@ -21,6 +21,8 @@ public:
 	SolidBody();
 	virtual ~SolidBody();
 
+	void copy_data(SolidBody *source);
+
 
 	float mass, g_factor;
 	matrix3 theta_0;

@@ -84,16 +84,25 @@ SolidBody::SolidBody() {
 	test_collisions = true;
 }
 
+void SolidBody::copy_data(SolidBody *source) {
+	mass = source->mass;
+	theta_0 = source->theta_0;
+	active = source->active;
+	passive = source->passive;
+	test_collisions = source->test_collisions;
+}
+
 
 void SolidBody::on_init() {
 	auto o = get_owner<Model>();
 
 	// import
-	active = o->physics_data_.active;
-	passive = o->physics_data_.passive;
-	test_collisions = o->physics_data_.test_collisions;
-	mass = o->physics_data_.mass;
-	theta_0 = o->physics_data_.theta_0;
+	if (o->_template)
+		if (o->_template->solid_body)
+			copy_data(o->_template->solid_body);
+
+	if (!active and !passive)
+		return;
 
 #if HAS_LIB_BULLET
 	btCollisionShape *col_shape = nullptr;
@@ -102,7 +111,6 @@ void SolidBody::on_init() {
 		col_shape = col->col_shape;
 
 
-	msg_write(o->pos.str());
 	btTransform start_transform = bt_set_trafo(o->pos, o->ang);
 
 	btScalar _mass(active ? mass : 0);

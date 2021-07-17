@@ -39,6 +39,9 @@ class Material;
 class TraceData;
 class TemplateDataScriptVariable;
 class ModelTemplate;
+class MeshCollider;
+class SolidBody;
+class Animator;
 namespace nix {
 	class VertexBuffer;
 	class Buffer;
@@ -48,9 +51,6 @@ namespace kaba {
 }
 
 
-#define MODEL_MAX_POLY_FACES			32
-#define MODEL_MAX_POLY_EDGES			(MODEL_MAX_POLY_FACES*4)
-#define MODEL_MAX_POLY_VERTICES_PER_FACE	16
 
 class Mesh;
 
@@ -99,118 +99,6 @@ public:
 	Mesh *copy(Model *new_owner);
 };
 
-// the face of a polyhedron (=> a polygon)
-class ConvexPolyhedronFace {
-public:
-	int num_vertices;
-	int index[MODEL_MAX_POLY_VERTICES_PER_FACE];
-	plane pl; // in model space
-};
-
-// a convex polyhedron (for the physical skin)
-class ConvexPolyhedron {
-public:
-	int num_faces;
-	ConvexPolyhedronFace face[MODEL_MAX_POLY_FACES];
-
-	// non redundant vertex list!
-	Array<int> vertex;
-
-	// non redundant edge list!
-	int num_edges;
-	Array<int> edge_index;
-
-	// "topology"
-	Array<bool> edge_on_face; // [edge * num_faces + face]
-	Array<int> faces_joining_edge; // [face1 * num_faces + face2]
-};
-
-// a ball (for the physical skin)
-class Ball {
-public:
-	int index;
-	float radius;
-};
-
-// a cylinder (for the physical skin)
-class Cylinder {
-public:
-	int index[2];
-	float radius;
-	bool round;
-};
-
-// data for collision detection
-class PhysicalMesh {
-public:
-	Array<int> bone_nr;
-	Array<vector> vertex; // original vertices
-	Array<vector> vertex_dyn; // here the animated vertices are stored before collision detection
-
-	/*int num_triangles;
-	unsigned short *triangle_index;*/
-
-	/*int NumEdges;
-	unsigned short *EdgeIndex;*/
-
-	Array<Ball> balls;
-
-	Array<Cylinder> cylinders;
-
-	Array<ConvexPolyhedron> poly;
-};
-
-// physical skin, but in world coordinates
-class PhysicalMeshAbsolute {
-public:
-	bool is_ok;
-	Array<vector> p;
-	Array<plane> pl;
-};
-
-enum class AnimationType {
-	NONE,
-	VERTEX,
-	SKELETAL
-};
-
-// single animation
-class Move {
-public:
-	string name;
-	int id;
-	AnimationType type;
-	int num_frames;
-	int frame0;
-
-	// properties
-	float frames_per_sec_const, frames_per_sec_factor;
-	bool inter_quad, inter_loop;
-};
-
-// a list of animations
-class MetaMove {
-public:
-	MetaMove();
-	// universal animation data
-	Array<Move> move;
-
-	int num_frames_skeleton, num_frames_vertex;
-
-
-	// skeletal animation data
-	//Array<Array<vector>> skel_dpos; //   [frame,bone]
-	//Array<Array<quaternion>> skel_ang; //   [frame,bone]
-	Array<vector> skel_dpos;
-	Array<quaternion> skel_ang;
-
-	// vertex animation data
-	struct {
-		//Array<Array<vector>> dpos; // vertex animation data   [frame,vertex]
-		Array<vector> dpos;
-	} mesh[4];
-};
-
 
 class Bone {
 public:
@@ -238,6 +126,10 @@ public:
 	Path filename;
 	Model *model;
 	Array<Path> bone_model_filename;
+	SolidBody *solid_body;
+	MeshCollider *mesh_collider;
+	Animator *animator;
+
 
 	ModelTemplate(Model *m);
 };
@@ -281,11 +173,6 @@ public:
 
 	// material (own)
 	Array<Material*> material;
-	
-	// physical skin (shared)
-	PhysicalMesh *phys;
-	bool phys_is_reference;
-	PhysicalMeshAbsolute phys_absolute;
 
 	// properties
 	struct Properties {
@@ -297,14 +184,6 @@ public:
 	} prop;
 
 	bool is_copy;
-
-	// physics
-	struct PhysicsData {
-		float mass;
-		matrix3 theta_0;
-		bool active, passive;
-		bool test_collisions;
-	} physics_data_;
 
 	// script data (own)
 	struct ScriptData {
@@ -330,10 +209,6 @@ public:
 	// skeleton (own)
 	Array<Bone> bone;
 
-	// move operations
-	struct AnimationData {
-		MetaMove *meta; // shared
-	} anim;
 	bool uses_bone_animations() const;
 };
 

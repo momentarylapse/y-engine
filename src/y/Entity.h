@@ -47,6 +47,7 @@ public:
 	Array<Component*> components;
 	Component *get_component(const kaba::Class *type) const;
 	Component *add_component(const kaba::Class *type, const string &var);
+	Component *add_component_no_init(const kaba::Class *type, const string &var);
 
 	void _add_component_external_(Component *c);
 };

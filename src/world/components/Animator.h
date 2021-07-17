@@ -8,14 +8,62 @@
 
 #include "../../y/Component.h"
 #include "../../lib/base/base.h"
+#include "../../lib/base/pointer.h"
 
 class Model;
 class vector;
+class quaternion;
 class matrix;
 namespace nix {
 	class Buffer;
 }
 class MetaMove;
+
+
+
+enum class AnimationType {
+	NONE,
+	VERTEX,
+	SKELETAL
+};
+
+// single animation
+class Move {
+public:
+	string name;
+	int id;
+	AnimationType type;
+	int num_frames;
+	int frame0;
+
+	// properties
+	float frames_per_sec_const, frames_per_sec_factor;
+	bool inter_quad, inter_loop;
+};
+
+// a list of animations
+class MetaMove : public Sharable<Empty> {
+public:
+	MetaMove();
+	// universal animation data
+	Array<Move> move;
+
+	int num_frames_skeleton, num_frames_vertex;
+
+
+	// skeletal animation data
+	//Array<Array<vector>> skel_dpos; //   [frame,bone]
+	//Array<Array<quaternion>> skel_ang; //   [frame,bone]
+	Array<vector> skel_dpos;
+	Array<quaternion> skel_ang;
+
+	// vertex animation data
+	struct {
+		//Array<Array<vector>> dpos; // vertex animation data   [frame,vertex]
+		Array<vector> dpos;
+	} mesh[4];
+};
+
 
 
 #define MODEL_MAX_MOVE_OPS				8
@@ -48,7 +96,7 @@ public:
 	// move operations
 	int num_operations;
 	MoveOperation operation[MODEL_MAX_MOVE_OPS];
-	MetaMove *meta; // shared
+	shared<MetaMove> meta;
 
 	// dynamical data (own)
 	//Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering

@@ -48,11 +48,6 @@ ModelTemplate::ModelTemplate(Model *m) {
 
 
 
-MetaMove::MetaMove() {
-	num_frames_skeleton = 0;
-	num_frames_vertex = 0;
-}
-
 
 SubMesh::SubMesh() {
 	vertex_buffer = nullptr;
@@ -120,43 +115,15 @@ void Model::_UpdatePhysAbsolute_()
 #endif
 
 // mark data as obsolete
-void Model::_ResetPhysAbsolute_()
-{
-	phys_absolute.is_ok=false;
+void Model::_ResetPhysAbsolute_() {
+#if 0
+	auto col = (MeshCollider*)get_component(MeshCollider::_class);
+	if (col)
+		col->phys_absolute.is_ok=false;
 	for (int i=0;i<bone.num;i++)
 		if (bone[i].model)
 			bone[i].model->_ResetPhysAbsolute_();
-}
-
-//--------------------------------------------------------------------------------------------------
-// hopefully these functions will be obsolete with the next fileformat
-
-// how big is the model
-void AppraiseDimensions(Model *m) {
-	float rad = 0;
-	
-	// bounding box (visual mesh[0])
-	m->prop.min = m->prop.max = v_0;
-	for (int i=0;i<m->mesh[0]->vertex.num;i++) {
-		m->prop.min._min(m->mesh[0]->vertex[i]);
-		m->prop.max._max(m->mesh[0]->vertex[i]);
-		float r = _vec_length_fuzzy_(m->mesh[0]->vertex[i]);
-		if (r > rad)
-			rad = r;
-	}
-
-	// physical skin
-	for (int i=0;i<m->phys->vertex.num;i++) {
-		float r = _vec_length_fuzzy_(m->phys->vertex[i]);
-		if (r > rad)
-			rad = r;
-	}
-	for (auto &b: m->phys->balls) {
-		float r = _vec_length_fuzzy_(m->phys->vertex[b.index]) + b.radius;
-		if (r > rad)
-			rad = r;
-	}
-	m->prop.radius = rad;
+#endif
 }
 
 
@@ -231,11 +198,6 @@ void Mesh::post_process(bool animated) {
 	}
 }
 
-void PostProcessPhys(Model *m, PhysicalMesh *s) {
-	m->phys_absolute.p.clear();
-	m->phys_absolute.pl.clear();
-	m->_ResetPhysAbsolute_();
-}
 
 void Model::reset_data() {
 	registered = false;
@@ -262,12 +224,9 @@ Model::Model() : Entity3D(Type::MODEL) {
 		_detail_needed_[i] = false;
 		mesh[i] = nullptr;
 	}
-	anim.meta = nullptr;
-	phys = nullptr;
 
 
 	parent = nullptr;
-	phys_is_reference = false;
 }
 
 void Model::__init__() {
@@ -296,14 +255,11 @@ Model *Model::copy(Model *pre_allocated) {
 		m = new Model();
 
 	m->prop = prop;
-	m->physics_data_ = physics_data_;
 	m->_template = _template;
 	m->script_data = script_data;
 
 	for (Material* mat: material)
 		m->material.add(mat->copy());
-
-	m->anim.meta = anim.meta;
 	
 
 	// "copy" presettings (just using references)
@@ -312,8 +268,6 @@ Model *Model::copy(Model *pre_allocated) {
 		m->mesh[i] = mesh[i];
 		m->_detail_needed_[i] = false;
 	}
-	m->phys = phys;
-	m->phys_is_reference = true;
 	m->registered = false;
 	m->visible = true;
 
@@ -349,14 +303,6 @@ Model::~Model() {
 			if (b.model)
 				delete b.model;
 	}
-
-	// animation
-	if (anim.meta and !is_copy)
-		delete anim.meta;
-
-	// physical
-	if (phys and !phys_is_reference)
-		delete phys;
 
 	// skin
 	for (int i=0;i<MODEL_NUM_MESHES;i++)

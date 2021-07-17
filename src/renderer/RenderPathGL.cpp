@@ -485,7 +485,8 @@ void RenderPathGL::draw_objects_transparent(bool allow_material) {
 		nix::set_model_matrix(m->_matrix);
 		set_material(s.material, ShaderVariant::DEFAULT);
 		nix::set_cull(nix::CullMode::NONE);
-		if (m->anim.meta) {
+		auto anim = (Animator*)m->get_component(Animator::_class);
+		if (anim) {
 			//m->anim.mesh[0]->update_vb();
 			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
 			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);

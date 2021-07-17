@@ -30,7 +30,6 @@ const kaba::Class *BoxCollider::_class = nullptr;
 const kaba::Class *TerrainCollider::_class = nullptr;
 
 Collider::Collider() {
-	msg_write("COLLIDER");
 	col_shape = nullptr;
 }
 
@@ -40,21 +39,31 @@ Collider::~Collider() {
 }
 
 
-MeshCollider::MeshCollider() {}
+MeshCollider::MeshCollider() {
+	// physical
+	if (phys and !phys_is_reference)
+		delete phys;
+}
 
 void MeshCollider::on_init() {
 	auto o = get_owner<Model>();
+
+	phys = o->_template->mesh_collider->phys;
+	phys_is_reference = true;
+
+
+
 #if HAS_LIB_BULLET
-	if (o->phys->balls.num + o->phys->cylinders.num + o->phys->poly.num > 0) {
+	if (phys->balls.num + phys->cylinders.num + phys->poly.num > 0) {
 		auto comp = new btCompoundShape(false, 0);
-		for (auto &b: o->phys->balls) {
-			vector a = o->phys->vertex[b.index];
+		for (auto &b: phys->balls) {
+			vector a = phys->vertex[b.index];
 			auto bb = new btSphereShape(btScalar(b.radius));
 			comp->addChildShape(bt_set_trafo(a, quaternion::ID), bb);
 		}
-		for (auto &c: o->phys->cylinders) {
-			vector a = o->phys->vertex[c.index[0]];
-			vector b = o->phys->vertex[c.index[1]];
+		for (auto &c: phys->cylinders) {
+			vector a = phys->vertex[c.index[0]];
+			vector b = phys->vertex[c.index[1]];
 			auto cc = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length() / 2)));
 			auto q = quaternion::rotation((a-b).dir2ang());
 			comp->addChildShape(bt_set_trafo((a+b)/2, q), cc);
@@ -65,7 +74,7 @@ void MeshCollider::on_init() {
 				comp->addChildShape(bt_set_trafo(b, quaternion::ID), bb2);
 			}
 		}
-		for (auto &p: o->phys->poly) {
+		for (auto &p: phys->poly) {
 			if (true){
 				Set<int> vv;
 				for (int i=0; i<p.num_faces; i++)
@@ -75,16 +84,16 @@ void MeshCollider::on_init() {
 				// btConvexPointCloudShape not working!
 				auto pp = new btConvexHullShape();
 				for (int i: vv)
-					pp->addPoint(bt_set_v(o->phys->vertex[i]));
+					pp->addPoint(bt_set_v(phys->vertex[i]));
 				comp->addChildShape(bt_set_trafo(v_0, quaternion::ID), pp);
 			} else {
 				// ARGH, btConvexPointCloudShape not working
 				//   let's use a crude box for now... (-_-)'
 				vector a, b;
-				a = b = o->phys->vertex[p.face[0].index[0]];
+				a = b = phys->vertex[p.face[0].index[0]];
 				for (int i=0; i<p.num_faces; i++)
 					for (int k=0; k<p.face[i].num_vertices; k++){
-						auto vv = o->phys->vertex[p.face[i].index[k]];
+						auto vv = phys->vertex[p.face[i].index[k]];
 						a._min(vv);
 						b._max(vv);
 					}
@@ -96,15 +105,15 @@ void MeshCollider::on_init() {
 		col_shape = comp;
 	}
 
-	/*if (o->phys->balls.num > 0) {
-		auto &b = o->phys->balls[0];
+	/*if (phys->balls.num > 0) {
+		auto &b = phys->balls[0];
 		o->colShape = new btSphereShape(btScalar(b.radius));
-	} else if (o->phys->cylinders.num > 0) {
-		auto &c = o->phys->cylinders[0];
+	} else if (phys->cylinders.num > 0) {
+		auto &c = phys->cylinders[0];
 		vector a = o->mesh[0]->vertex[c.index[0]];
 		vector b = o->mesh[0]->vertex[c.index[1]];
 		o->colShape = new btCylinderShapeZ(bt_set_v(vector(c.radius, c.radius, (b - a).length())));
-	} else if (o->phys->poly.num > 0) {
+	} else if (phys->poly.num > 0) {
 
 	} else {
 	}*/

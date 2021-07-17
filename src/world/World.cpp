@@ -406,6 +406,10 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
 
 	auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
+	sb->mass = 10000.0f;
+	sb->theta_0 = matrix3::ZERO;
+	sb->passive = true;
+	sb->on_init();
 
 #if HAS_LIB_BULLET
 	dynamicsWorld->addRigidBody(sb->body);
@@ -444,8 +448,7 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 
 	register_object(o, w_index);
 
-	// for now...
-	if (o->physics_data_.active or o->physics_data_.passive) {
+	if (o->_template->solid_body) {
 		// TODO
 
 		auto col = (MeshCollider*)o->add_component(MeshCollider::_class, "");
@@ -455,7 +458,7 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 		dynamicsWorld->addRigidBody(sb->body);
 	}
 
-	if (o->uses_bone_animations())
+	if (o->_template->animator)
 		o->add_component(Animator::_class, "");
 
 
