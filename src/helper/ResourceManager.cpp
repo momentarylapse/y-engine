@@ -98,7 +98,7 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 
 	msg_write("loading shader: " + fnx.str());
 
-	string source = expand_shader_source(FileRead(fn), variant);
+	string source = expand_shader_source(FileReadText(fn), variant);
 	auto shader = nix::Shader::create(source);
 	shader->filename = fnx;
 
