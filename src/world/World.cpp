@@ -456,7 +456,9 @@ Object *World::create_object_x(const Path &filename, const string &name, const v
 
 		auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
 
+#if HAS_LIB_BULLET
 		dynamicsWorld->addRigidBody(sb->body);
+#endif
 	}
 
 	if (o->_template->skeleton)
