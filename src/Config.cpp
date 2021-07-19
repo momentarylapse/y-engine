@@ -14,7 +14,16 @@ Config::Config() {
 }
 
 void Config::load(const Array<string> &arg) {
+	// fixed config
 	hui::Configuration::load("game.ini");
+
+	// local config override
+	hui::Configuration local;
+	local.load("game-local.ini");
+	for (auto &k: local.keys())
+		set_str(k, local.get_str(k, ""));
+
+	// cli arguments override
 	for (auto &a: arg)
 		if (a.head(2).lower() == "-c") {
 			auto xx = a.sub_ref(2).explode("=");

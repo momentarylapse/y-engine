@@ -72,10 +72,10 @@ void iterate_pads() {
 		pad->update();
 
 	if (link_mouse_and_keyboard_into_pad) {
-		if (dmouse.x != 0)
-			main_pad->state->axes[2] = dmouse.x / engine.elapsed;
-		if (dmouse.y != 0)
-			main_pad->state->axes[3] = dmouse.y / engine.elapsed;
+		if ((dmouse.x != 0) and (engine.elapsed_rt != 0))
+			main_pad->state->axes[2] = dmouse.x / engine.elapsed_rt;
+		if ((dmouse.y != 0) and (engine.elapsed_rt != 0))
+			main_pad->state->axes[3] = dmouse.y / engine.elapsed_rt;
 		if (get_button(0))
 			main_pad->state->buttons[(int)Gamepad::Button::R1] = true;
 		if (get_key(hui::KEY_UP) or get_key(hui::KEY_W))

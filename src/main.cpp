@@ -235,11 +235,11 @@ public:
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window)) {
-			input::iterate();
 			perf_mon.frame();
 			engine.elapsed_rt = perf_mon.frame_dt;
 			engine.elapsed = perf_mon.frame_dt;
 
+			input::iterate();
 			plugin_manager.handle_input();
 
 			iterate();
