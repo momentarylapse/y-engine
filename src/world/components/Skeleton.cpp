@@ -7,6 +7,7 @@
 
 #include "Skeleton.h"
 #include "../Model.h"
+#include "../../y/Entity.h"
 #include "../ModelManager.h"
 
 const kaba::Class *Skeleton::_class = nullptr;
@@ -25,7 +26,7 @@ Skeleton::~Skeleton() {
 }
 
 void Skeleton::on_init() {
-	auto m = get_owner<Model>();
+	auto m = owner->get_component<Model>();
 
 	bone = m->_template->skeleton->bone;
 

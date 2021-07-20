@@ -24,7 +24,8 @@
 #pragma once
 
 
-#include "Entity3D.h"
+//#include "Entity3D.h"
+#include "../y/Component.h"
 #include "../lib/base/base.h"
 #include "../lib/base/pointer.h"
 #include "../lib/file/path.h"
@@ -108,7 +109,7 @@ enum {
 	MESH_PHYSICAL = 42 // for edward
 };
 
-class Model : public Entity3D {
+class Model : public Component {
 public:
 	Model();
 	~Model() override;
@@ -159,9 +160,6 @@ public:
 		string name;
 	} script_data;
 
-	int object_id;
-	Model *parent;
-	Model *_cdecl root();
 	bool visible;
 
 	matrix _matrix, matrix_old;
@@ -174,6 +172,9 @@ public:
 	// engine data
 	bool registered;
 	bool _detail_needed_[MODEL_NUM_MESHES]; // per frame
+
+
+	static const kaba::Class *_class;
 };
 
 

@@ -10,7 +10,7 @@
 #include "Terrain.h"
 #include "Camera.h"
 #include "Material.h"
-#include "Model.h"
+#include "Entity3D.h"
 #include "World.h"
 #include "../y/EngineData.h"
 #include "../lib/config.h"
@@ -161,11 +161,11 @@ void Terrain::update(int x1,int x2,int z1,int z2,int mode) {
 		for (int j=z1;j<=z2;j++){
 			int n=Index(i,j);
 			if (un){
-				if ((i>1)&&(i<num_x-1))
+				if ((i>1) and (i<num_x-1))
 					dhx=height[Index(i+2,j)]-height[Index(i-2,j)];
 				else
 					dhx=0;
-				if ((j>1)&&(j<num_z-1))
+				if ((j>1) and (j<num_z-1))
 					dhz=height[Index(i,j+2)]-height[Index(i,j-2)];
 				else
 					dhz=0;
@@ -198,7 +198,7 @@ void Terrain::update(int x1,int x2,int z1,int z2,int mode) {
 
 float Terrain::gimme_height(const vector &p) // liefert die interpolierte Hoehe zu einer Position
 {
-	auto o = get_owner<Model>();
+	auto o = get_owner<Entity3D>();
 	float x = p.x - o->pos.x;
 	float z = p.z - o->pos.z;
 	if ((x<=min.x)||(z<=min.z)||(x>=max.x)||(z>=max.z))
@@ -234,7 +234,7 @@ float Terrain::gimme_height_n(const vector &p, vector &n) {
 
 // Daten fuer das Darstellen des Bodens
 void Terrain::calc_detail() {
-	auto o = get_owner<Model>();
+	auto o = get_owner<Entity3D>();
 	for (int x1=0;x1<(num_x-1)/32+1;x1++)
 		for (int z1=0;z1<(num_z-1)/32+1;z1++) {
 			int lx=(x1*32>num_x-32)?(num_x%32):32;
@@ -266,7 +266,7 @@ inline void add_edge(int &num, int e0, int e1)
 		e1 = t;
 	}
 	/*for (int i=0;i<num;i++)
-		if ((TempEdgeIndex[i*2] == e0) && (TempEdgeIndex[i*2+1] == e1))
+		if ((TempEdgeIndex[i*2] == e0) and (TempEdgeIndex[i*2+1] == e1))
 			return;*/
 	TempEdgeIndex[num * 2    ] = e0;
 	TempEdgeIndex[num * 2 + 1] = e1;
@@ -277,7 +277,7 @@ inline void add_edge(int &num, int e0, int e1)
 //    get a part of the terrain
 void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 {
-	auto o = get_owner<Model>();
+	auto o = get_owner<Entity3D>();
 
 	h->p = &vertex[0];
 	h->index = TempVertexIndex;
@@ -337,7 +337,7 @@ void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const vector &p2, CollisionData &data, int x, int z, float y_min, int dir, float range)
 {
 	// trace beam too high above this pattern?
-	if ( (t->height[Index2(t,x,z)]<y_min) && (t->height[Index2(t,x,z+1)]<y_min) && (t->height[Index2(t,x+1,z)]<y_min) && (t->height[Index2(t,x+1,z+1)]<y_min) )
+	if ( (t->height[Index2(t,x,z)]<y_min) and (t->height[Index2(t,x,z+1)]<y_min) and (t->height[Index2(t,x+1,z)]<y_min) and (t->height[Index2(t,x+1,z+1)]<y_min) )
 		return false;
 
 	// 4 vertices for 2 triangles
@@ -365,10 +365,10 @@ inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const v
 		return false;
 
 	// don't scan backwards...
-	if ((dir==0)&&(tp.x<p1.x))	return false;
-	if ((dir==1)&&(tp.z<p1.z))	return false;
-	if ((dir==2)&&(tp.x>p1.x))	return false;
-	if ((dir==3)&&(tp.z>p1.z))	return false;
+	if ((dir==0) and (tp.x<p1.x))	return false;
+	if ((dir==1) and (tp.z<p1.z))	return false;
+	if ((dir==2) and (tp.x>p1.x))	return false;
+	if ((dir==3) and (tp.z>p1.z))	return false;
 
 	data.p= tp;
 	data.t = t;
@@ -377,11 +377,11 @@ inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const v
 
 bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test)
 {
-	auto o = get_owner<Model>();
+	auto o = get_owner<Entity3D>();
 	float dmin = range + 1;
 	vector c;
 
-	if ((p2.x==p1.x)&&(p2.z==p1.z)&&(p2.y<p1.y)){
+	if ((p2.x==p1.x) and (p2.z==p1.z) and (p2.y<p1.y)){
 		float h=gimme_height(p1);
 		if (p2.y < h){
 			data.p = vector(p1.x,h,p1.z);
@@ -399,7 +399,7 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 // scanning directions
 
 	// positive x (to the right)
-	if ((w>=-pi/4)&&(w<pi/4)){
+	if ((w>=-pi/4) and (w<pi/4)){
 		int x0 = ::max( int(pr1.x/pattern.x), 0 );
 		int x1 = ::min( int(pr2.x/pattern.x), num_x );
 		for (x=x0;x<x1;x++){
@@ -414,7 +414,7 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 	}
 
 	// positive z (forward)
-	if ((w>=pi/4)&&(w<pi*3/4)){
+	if ((w>=pi/4) and (w<pi*3/4)){
 		int z0 = ::max( int(pr1.z/pattern.z), 0 );
 		int z1 = ::min( int(pr2.z/pattern.z), num_z );
 		for (z=z0;z<z1;z++){
@@ -444,7 +444,7 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 	}
 
 	// negative z (backward)
-	if ((w>=-pi*3/4)&&(w<-pi/4)){
+	if ((w>=-pi*3/4) and (w<-pi/4)){
 		int z0 = ::min( int(pr1.z/pattern.z), num_z );
 		int z1 = ::max( int(pr2.z/pattern.z), 0 );
 		for (z=z0;z>z1;z--){

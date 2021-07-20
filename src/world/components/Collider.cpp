@@ -10,6 +10,7 @@
 #include "../ModelManager.h"
 #include "../Terrain.h"
 #include "../../lib/base/set.h"
+#include "../../lib/math/quaternion.h"
 #include "../../lib/file/msg.h"
 
 #if HAS_LIB_BULLET
@@ -45,9 +46,9 @@ MeshCollider::MeshCollider() {
 }
 
 void MeshCollider::on_init() {
-	auto o = get_owner<Model>();
+	auto m = owner->get_component<Model>();
 
-	phys = o->_template->mesh_collider->phys;
+	phys = m->_template->mesh_collider->phys;
 	phys_is_reference = true;
 
 
@@ -123,7 +124,7 @@ void MeshCollider::on_init() {
 TerrainCollider::TerrainCollider(){}
 
 void TerrainCollider::on_init() {
-	auto t = (Terrain*)owner->get_component(Terrain::_class);
+	auto t = owner->get_component<Terrain>();
 
 	float a = 0, b = 0;
 	for (float f: t->height){

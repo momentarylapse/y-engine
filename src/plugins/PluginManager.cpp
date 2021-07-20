@@ -63,7 +63,7 @@ void global_delete(Entity *e) {
 #pragma GCC optimize("no-inline")
 #pragma GCC optimize("0")
 
-Model* _create_object(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+Entity3D* _create_object(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object(filename, pos, ang); );
 	return nullptr;
 }
@@ -90,6 +90,33 @@ void PluginManager::init() {
 }
 
 void PluginManager::export_kaba() {
+
+	Entity entity(Entity::Type::NONE);
+	kaba::declare_class_size("Entity", sizeof(Entity));
+//	kaba::link_external_class_func("Entity.__init__", &Entity::__init__);
+	kaba::link_external_virtual("Entity.__delete__", &Entity::__delete__, &entity);
+	kaba::link_external_virtual("Entity.on_init", &Entity::on_init, &entity);
+	kaba::link_external_virtual("Entity.on_delete", &Entity::on_delete, &entity);
+	kaba::link_external_virtual("Entity.on_iterate", &Entity::on_iterate, &entity);
+	kaba::link_external_class_func("Entity.__del_override__", &global_delete);
+	kaba::link_external_class_func("Entity.get_component", &Entity::_get_component_untyped_);
+	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
+
+	kaba::declare_class_size("Entity3D", sizeof(Entity3D));
+	kaba::declare_class_element("Entity3D.pos", &Entity3D::pos);
+	kaba::declare_class_element("Entity3D.ang", &Entity3D::ang);
+	kaba::declare_class_element("Entity3D.parent", &Entity3D::parent);
+
+	Component component;
+	kaba::declare_class_size("Component", sizeof(Component));
+	kaba::declare_class_element("Component.owner", &Component::owner);
+	kaba::link_external_class_func("Component.__init__", &Component::__init__);
+	kaba::link_external_virtual("Component.__delete__", &Component::__delete__, &component);
+	kaba::link_external_virtual("Component.on_init", &Component::on_init, &component);
+	kaba::link_external_virtual("Component.on_delete", &Component::on_delete, &component);
+	kaba::link_external_virtual("Component.on_iterate", &Component::on_iterate, &component);
+	kaba::link_external_virtual("Component.on_collide", &Component::on_collide, &component);
+	kaba::link_external_class_func("Component.set_variables", &Component::set_variables);
 
 	Camera _cam(v_0, quaternion::ID, rect::ID);
 	kaba::declare_class_size("Camera", sizeof(Camera));
@@ -138,8 +165,6 @@ void PluginManager::export_kaba() {
 
 	Model model;
 	kaba::declare_class_size("Model", sizeof(Model));
-	kaba::declare_class_element("Model.pos", &Model::pos);
-	kaba::declare_class_element("Model.ang", &Model::ang);
 	kaba::declare_class_element("Model.mesh", &Model::mesh);
 	kaba::declare_class_element("Model.materials", &Model::material);
 	kaba::declare_class_element("Model.matrix", &Model::_matrix);
@@ -147,7 +172,6 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
 	kaba::declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
 	kaba::declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
-	kaba::declare_class_element("Model.parent", &Model::parent);
 	kaba::link_external_class_func("Model.__init__", &Model::__init__);
 	kaba::link_external_virtual("Model.__delete__", &Model::__delete__, &model);
 	kaba::link_external_class_func("Model.make_editable", &Model::make_editable);
@@ -197,7 +221,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Terrain.get_height", &Terrain::gimme_height);
 
 	kaba::declare_class_size("CollisionData", sizeof(CollisionData));
-	kaba::declare_class_element("CollisionData.m", &CollisionData::m);
+	kaba::declare_class_element("CollisionData.sb", &CollisionData::sb);
 	kaba::declare_class_element("CollisionData.sub", &CollisionData::sub);
 	kaba::declare_class_element("CollisionData.t", &CollisionData::t);
 	kaba::declare_class_element("CollisionData.p", &CollisionData::p);
@@ -292,28 +316,6 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Link.set_motor", &Link::set_motor);
 	kaba::link_external_class_func("Link.set_frame", &Link::set_frame);
 	//kaba::link_external_class_func("Link.set_axis", &Link::set_axis);
-
-	Entity entity(Entity::Type::NONE);
-	kaba::declare_class_size("Entity", sizeof(Entity));
-//	kaba::link_external_class_func("Entity.__init__", &Entity::__init__);
-	kaba::link_external_virtual("Entity.__delete__", &Entity::__delete__, &entity);
-	kaba::link_external_virtual("Entity.on_init", &Entity::on_init, &entity);
-	kaba::link_external_virtual("Entity.on_delete", &Entity::on_delete, &entity);
-	kaba::link_external_virtual("Entity.on_iterate", &Entity::on_iterate, &entity);
-	kaba::link_external_class_func("Entity.__del_override__", &global_delete);
-	kaba::link_external_class_func("Entity.get_component", &Entity::get_component);
-	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
-
-	Component component;
-	kaba::declare_class_size("Component", sizeof(Component));
-	kaba::declare_class_element("Component.owner", &Component::owner);
-	kaba::link_external_class_func("Component.__init__", &Component::__init__);
-	kaba::link_external_virtual("Component.__delete__", &Component::__delete__, &component);
-	kaba::link_external_virtual("Component.on_init", &Component::on_init, &component);
-	kaba::link_external_virtual("Component.on_delete", &Component::on_delete, &component);
-	kaba::link_external_virtual("Component.on_iterate", &Component::on_iterate, &component);
-	kaba::link_external_virtual("Component.on_collide", &Component::on_collide, &component);
-	kaba::link_external_class_func("Component.set_variables", &Component::set_variables);
 
 
 	kaba::link_external("get_component_list", (void*)&ComponentManager::get_list);
@@ -513,6 +515,7 @@ void PluginManager::import_kaba() {
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
 	import_component_class<Animator>(s, "Animator");
 	import_component_class<Skeleton>(s, "Skeleton");
+	import_component_class<Model>(s, "Model");
 	import_component_class<Terrain>(s, "Terrain");
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);

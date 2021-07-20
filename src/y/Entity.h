@@ -20,6 +20,7 @@ class Entity : public VirtualBase {
 public:
 	enum class Type {
 		NONE,
+		ENTITY3D,
 		CONTROLLER,
 		MODEL,
 		CAMERA,
@@ -45,9 +46,14 @@ public:
 
 	Type type;
 	Array<Component*> components;
-	Component *get_component(const kaba::Class *type) const;
+	Component *_get_component_untyped_(const kaba::Class *type) const;
 	Component *add_component(const kaba::Class *type, const string &var);
 	Component *add_component_no_init(const kaba::Class *type, const string &var);
+
+	template<class C>
+	C *get_component() const {
+		return (C*)_get_component_untyped_(C::_class);
+	}
 
 	void _add_component_external_(Component *c);
 };

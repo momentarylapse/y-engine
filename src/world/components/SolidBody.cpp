@@ -9,9 +9,11 @@
 #include "Collider.h"
 #include "../World.h"
 #include "../Object.h"
+#include "../Entity3D.h"
 #include "../Model.h"
 #include "../ModelManager.h"
 #include "../../y/EngineData.h"
+#include "../../lib/math/quaternion.h"
 #include "../../lib/file/msg.h"
 
 const kaba::Class *SolidBody::_class = nullptr;
@@ -95,19 +97,20 @@ void SolidBody::copy_data(SolidBody *source) {
 
 
 void SolidBody::on_init() {
-	auto o = get_owner<Model>();
+	auto o = get_owner<Entity3D>();
+	auto m = owner->get_component<Model>();
 
 	// import
-	if (o->_template)
-		if (o->_template->solid_body)
-			copy_data(o->_template->solid_body);
+	if (m)
+		if (m->_template->solid_body)
+			copy_data(m->_template->solid_body);
 
 	if (!active and !passive)
 		return;
 
 #if HAS_LIB_BULLET
 	btCollisionShape *col_shape = nullptr;
-	auto col = (Collider*)o->get_component(Collider::_class);
+	auto col = owner->get_component<Collider>();
 	if (col)
 		col_shape = col->col_shape;
 
@@ -226,7 +229,8 @@ void SolidBody::do_simple_physics(float dt) {
 	if (dt <= 0)
 		return;
 
-	auto o = get_owner<Object>();
+	auto o = get_owner<Entity3D>();
+	auto m = owner->get_component<Model>();
 
 
 	if (active) {
@@ -275,9 +279,9 @@ void SolidBody::do_simple_physics(float dt) {
 	}
 
 	// new orientation
-	o->update_matrix();
+	m->update_matrix();
 
-	o->_ResetPhysAbsolute_();
+	m->_ResetPhysAbsolute_();
 
 	// reset forces
 	force_int = torque_int = v_0;
@@ -287,7 +291,7 @@ void SolidBody::do_simple_physics(float dt) {
 	//if ((Pos!=Pos_old)or(ang!=ang_old))
 	//if ( (vel_surf!=v_0) or (VecLengthFuzzy(Pos-Pos_old)>2.0f*Elapsed) )//or(VecAng!=ang_old))
 	if (active) {
-		if ( (vel_surf != v_0) or (_vec_length_fuzzy_(vel) > VelThreshold) or (_vec_length_fuzzy_(rot) * o->prop.radius > VelThreshold))
+		if ( (vel_surf != v_0) or (_vec_length_fuzzy_(vel) > VelThreshold) or (_vec_length_fuzzy_(rot) * m->prop.radius > VelThreshold))
 			moved = true;
 	} else {
 		frozen = true;
@@ -312,7 +316,7 @@ void SolidBody::do_simple_physics(float dt) {
 
 // rotate inertia tensor into world coordinates
 void SolidBody::get_theta_world(matrix3 &theta_world, matrix3 &theta_world_inv) {
-	auto r = matrix3::rotation_q(get_owner<Model>()->ang);
+	auto r = matrix3::rotation_q(get_owner<Entity3D>()->ang);
 	auto r_inv = r.transpose();
 	theta_world = (r * theta_0 * r_inv);
 
@@ -330,7 +334,7 @@ void SolidBody::get_theta_world(matrix3 &theta_world, matrix3 &theta_world_inv) 
 void SolidBody::update_data() {
 	unfreeze(this);
 	if (!active) {
-		get_owner<Object>()->update_matrix();
+		owner->get_component<Model>()->update_matrix();
 	}
 
 	// set ode data..
@@ -342,7 +346,7 @@ void SolidBody::update_motion() {
 	btTransform trans;
 	body->setLinearVelocity(bt_set_v(vel));
 	body->setAngularVelocity(bt_set_v(rot));
-	auto o = get_owner<Model>();
+	auto o = get_owner<Entity3D>();
 	trans.setRotation(bt_set_q(o->ang));
 	trans.setOrigin(bt_set_v(o->pos));
 	body->getMotionState()->setWorldTransform(trans);
@@ -370,8 +374,8 @@ void SolidBody::get_state_from_bullet() {
 	if (active) {
 		btTransform trans;
 		body->getMotionState()->getWorldTransform(trans);
-		get_owner<Model>()->pos = bt_get_v(trans.getOrigin());
-		get_owner<Model>()->ang = bt_get_q(trans.getRotation());
+		get_owner<Entity3D>()->pos = bt_get_v(trans.getOrigin());
+		get_owner<Entity3D>()->ang = bt_get_q(trans.getRotation());
 		vel = bt_get_v(body->getLinearVelocity());
 		rot = bt_get_v(body->getAngularVelocity());
 	} else {

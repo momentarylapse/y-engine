@@ -21,6 +21,8 @@ class Model;
 class Object;
 class Material;
 class Terrain;
+class SolidBody;
+class Entity3D;
 class TemplateDataScriptVariable;
 class Light;
 class ParticleManager;
@@ -78,7 +80,8 @@ struct GodNetMessage {
 
 class CollisionData {
 public:
-	Model *m, *sub;
+	SolidBody *sb;
+	Model *sub;
 	Terrain *t;
 	vector p, n;
 };
@@ -91,15 +94,15 @@ public:
 	~World();
 	void reset();
 	bool load(const LevelData &ld);
-	Object *create_object(const Path &filename, const vector &pos, const quaternion &ang);
-	Object *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index = -1);
+	Entity3D *create_object(const Path &filename, const vector &pos, const quaternion &ang);
+	Entity3D *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index = -1);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
 
 	Object* create_object_multi(const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang);
 
-	void register_object(Object *o, int index);
-	void unregister_object(Object *o);
-	void set_active_physics(Object *o, bool active, bool passive);//, bool test_collisions);
+	void register_object(Entity3D *o, int index);
+	void unregister_object(Entity3D *o);
+	void set_active_physics(Entity3D *o, bool active, bool passive);//, bool test_collisions);
 
 	bool unregister(Entity *o);
 	void _delete(Entity *o);
@@ -144,9 +147,9 @@ public:
 	Array<GodNetMessage> net_messages;
 
 	// content of the world
-	Array<Object*> objects;
-	Object *ego;
-	Array<Object*> terrain_objects;
+	Array<Entity3D*> objects;
+	Entity3D *ego;
+	Array<Entity3D*> terrain_objects;
 	int num_reserved_objects;
 
 	Array<Terrain*> terrains;
@@ -173,7 +176,7 @@ public:
 	PhysicsMode physics_mode;
 
 
-	bool _cdecl trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Model *o_ignore = NULL);
+	bool _cdecl trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Entity3D *o_ignore = nullptr);
 
 	Array<audio::Sound*> sounds;
 	void add_sound(audio::Sound *s);

@@ -408,7 +408,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_view_matrix(matrix::rotation_q(cam->ang).transpose());
 	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->ang);
+		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
 		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
 			set_material(sb->material[i], ShaderVariant::DEFAULT);
@@ -420,7 +420,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 }
 void RenderPathGL::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
-		auto o = t->get_owner<Model>();
+		auto o = t->get_owner<Entity3D>();
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {
 			set_material(t->material, ShaderVariant::DEFAULT);
@@ -456,7 +456,7 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 		Model *m = s.model;
 		nix::set_model_matrix(m->_matrix);
 
-		auto ani = (Animator*)m->get_component(Animator::_class);
+		auto ani = m->owner->get_component<Animator>();
 
 		if (ani) {
 			if (allow_material)
@@ -485,7 +485,7 @@ void RenderPathGL::draw_objects_transparent(bool allow_material) {
 		nix::set_model_matrix(m->_matrix);
 		set_material(s.material, ShaderVariant::DEFAULT);
 		nix::set_cull(nix::CullMode::NONE);
-		auto anim = (Animator*)m->get_component(Animator::_class);
+		auto anim = m->owner->get_component<Animator>();
 		if (anim) {
 			//m->anim.mesh[0]->update_vb();
 			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);

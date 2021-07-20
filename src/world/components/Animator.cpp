@@ -9,6 +9,7 @@
 #include "Skeleton.h"
 #include "../Model.h"
 #include "../ModelManager.h"
+#include "../../y/Entity.h"
 #include "../../lib/nix/nix.h"
 #include "../../lib/file/msg.h"
 
@@ -50,13 +51,13 @@ Animator::~Animator() {
 }
 
 void Animator::on_init() {
-	auto m = get_owner<Model>();
+	auto m = owner->get_component<Model>();
 
 	meta = m->_template->animator->meta;
 	buf = new nix::UniformBuffer;
 
 	// skeleton
-	auto sk = (Skeleton*)m->get_component(Skeleton::_class);
+	auto sk = m->owner->get_component<Skeleton>();
 	dmatrix.resize(sk->bone.num);
 	for (int i=0; i<sk->bone.num; i++) {
 		dmatrix[i] = matrix::translation(sk->bone[i].rest_pos);
@@ -67,8 +68,8 @@ void Animator::on_init() {
 
 
 void Animator::do_animation(float elapsed) {
-	auto m = get_owner<Model>();
-	auto sk = (Skeleton*)m->get_component(Skeleton::_class);
+	auto m = owner->get_component<Model>();
+	auto sk = owner->get_component<Skeleton>();
 
 	// recursion
 	for (auto &b: sk->bone)
@@ -401,8 +402,8 @@ void Animator::begin_edit() {
 	if (!meta)
 		return;
 	num_operations = -2;
-	auto m = get_owner<Model>();
-	auto sk = (Skeleton*)m->get_component(Skeleton::_class);
+	auto m = owner->get_component<Model>();
+	auto sk = owner->get_component<Skeleton>();
 	for (int i=0;i<sk->bone.num;i++){
 		sk->bone[i].cur_ang = quaternion::ID;
 		sk->bone[i].cur_pos = sk->bone[i].delta_pos;
@@ -411,8 +412,8 @@ void Animator::begin_edit() {
 
 
 vector Animator::get_vertex(int index) {
-	auto m = get_owner<Model>();
-	auto sk = (Skeleton*)m->get_component(Skeleton::_class);
+	auto m = owner->get_component<Model>();
+	auto sk = owner->get_component<Skeleton>();
 	auto s = m->mesh[MESH_HIGH];
 	int b = s->bone_index[index].i;
 	return m->_matrix * dmatrix[b] * s->vertex[index] - sk->bone[b].rest_pos;

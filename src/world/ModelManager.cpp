@@ -7,6 +7,7 @@
 
 #include "ModelManager.h"
 #include "Model.h"
+#include "Entity3D.h"
 #include "components/Collider.h"
 #include "components/Animator.h"
 #include "components/SolidBody.h"
@@ -127,7 +128,7 @@ void AppraiseDimensions(Model *m) {
 	}
 
 	// physical skin
-	auto col = (MeshCollider*)m->get_component(MeshCollider::_class);
+	auto col = m->_template->mesh_collider;
 	if (col) {
 		for (int i=0;i<col->phys->vertex.num;i++) {
 			float r = _vec_length_fuzzy_(col->phys->vertex[i]);
@@ -145,7 +146,7 @@ void AppraiseDimensions(Model *m) {
 
 
 void PostProcessPhys(Model *m, PhysicalMesh *s) {
-	auto col = (MeshCollider*)m->get_component(MeshCollider::_class);
+	auto col = m->_template->mesh_collider;
 	if (col) {
 		col->phys_absolute.p.clear();
 		col->phys_absolute.pl.clear();
@@ -603,6 +604,7 @@ public:
 
 Model* fancy_copy(Model *orig) {
 	Model *clone = new Model();
+	//clone->owner = new Entity3D(Entity::Type::ENTITY3D);
 	return orig->copy(clone);
 }
 

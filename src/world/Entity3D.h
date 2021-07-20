@@ -21,5 +21,9 @@ public:
 	vector pos;
 	quaternion ang;
 	matrix get_matrix() const;
+
+	int object_id;
+	Entity3D *parent;
+	Entity3D *_cdecl root() const;
 };
 

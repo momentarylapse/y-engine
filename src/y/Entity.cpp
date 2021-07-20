@@ -70,7 +70,7 @@ void Entity::_add_component_external_(Component *c) {
 	c->on_init();
 }
 
-Component *Entity::get_component(const kaba::Class *type) const {
+Component *Entity::_get_component_untyped_(const kaba::Class *type) const {
 	for (auto *c: components)
 		if (c->type->is_derived_from(type))
 			return c;

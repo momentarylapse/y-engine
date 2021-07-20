@@ -23,6 +23,7 @@
 
 #include "Model.h"
 #include "ModelManager.h"
+#include "Entity3D.h"
 #include "Material.h"
 #include "World.h"
 #include "../lib/math/complex.h"
@@ -37,6 +38,8 @@
 
 
 #define DynamicNormalCorrect
+
+const kaba::Class *Model::_class = nullptr;
 
 
 
@@ -200,8 +203,6 @@ void Mesh::post_process(bool animated) {
 
 void Model::reset_data() {
 	registered = false;
-	object_id = -1;
-	parent = nullptr;
 	
 	for (int i=0; i<MODEL_NUM_MESHES; i++) {
 		_detail_needed_[i] = false;
@@ -212,8 +213,7 @@ void Model::reset_data() {
 
 
 
-Model::Model() : Entity3D(Type::MODEL) {
-	object_id = -1;
+Model::Model() {
 	registered = false;
 	visible = true;
 
@@ -223,9 +223,6 @@ Model::Model() : Entity3D(Type::MODEL) {
 		_detail_needed_[i] = false;
 		mesh[i] = nullptr;
 	}
-
-
-	parent = nullptr;
 }
 
 void Model::__init__() {
@@ -337,13 +334,6 @@ int get_num_trias(Mesh *s) {
 			GodRegisterModel(sub);
 	}
 }*/
-
-Model *Model::root() {
-	Model *next = this;
-	while (next->parent)
-		next = next->parent;
-	return next;
-}
 
 
 #if 0
@@ -529,7 +519,7 @@ void Model::begin_edit(int detail) {
 
 // force an update for this model/skin
 void Model::end_edit(int detail) {
-	mesh[detail]->update_vb(get_component(Animator::_class));
+	mesh[detail]->update_vb(owner->get_component<Animator>());
 	//for (int i=0; i<material.num; i++)
 	//	mesh[detail]->sub[i].force_update = true;
 }
@@ -545,7 +535,7 @@ Path Model::filename() {
 }
 
 void Model::update_matrix() {
-	_matrix = get_matrix();
+	_matrix = get_owner<Entity3D>()->get_matrix();
 }
 
 #if 0
