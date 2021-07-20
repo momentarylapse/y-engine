@@ -97,6 +97,7 @@ public:
 
 	Path next_filename;
 	void load_soon(const Path &filename);
+	void save(const Path &filename);
 
 	Entity3D *create_object(const Path &filename, const vector &pos, const quaternion &ang);
 	Entity3D *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index = -1);

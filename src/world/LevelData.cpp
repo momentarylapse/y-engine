@@ -197,3 +197,139 @@ bool LevelData::load(const Path &filename) {
 
 	return true;
 }
+
+
+static string v2s(const vector &v) {
+	return format("%.3f %.3f %.3f", v.x, v.y, v.z);
+}
+
+// RGBA
+static string c2s(const color &c) {
+	return format("%.3f %.3f %.3f %.3f", c.r, c.g, c.b, c.a);
+}
+
+string phys_mode_name(PhysicsMode m) {
+	if (m == PhysicsMode::SIMPLE)
+		return "simple";
+	if (m == PhysicsMode::FULL_EXTERNAL)
+		return "full";
+	return "";
+}
+
+#include "Model.h"
+#include "Terrain.h"
+#include "Camera.h"
+#include "Entity3D.h"
+#include "../plugins/PluginManager.h"
+#include "../plugins/Controller.h"
+#include "../lib/kaba/kaba.h"
+
+void LevelData::save(const Path &filename) {
+	xml::Parser p;
+
+	p.elements.add(xml::Element("world"));
+	auto &w = p.elements[0];
+
+	{
+	auto meta = xml::Element("meta");
+	auto bg = xml::Element("background")
+		.witha("color", c2s(world.background));
+	for (auto sb: world.skybox)
+		if (sb)
+			bg.add(xml::Element("skybox").witha("file", sb->filename().str()));
+	meta.add(bg);
+
+	auto phys = xml::Element("physics")
+	.witha("enabled", b2s(world.physics_mode != PhysicsMode::NONE))
+	.witha("gravity", v2s(world.gravity))
+	.witha("mode", phys_mode_name(world.physics_mode));
+	meta.add(phys);
+
+	auto f = xml::Element("fog")
+	.witha("enabled", b2s(world.fog.enabled))
+	.witha("mode", i2s((int)world.fog.mode))
+	.witha("start", f2s(world.fog.start, 3))
+	.witha("end", f2s(world.fog.end, 3))
+	.witha("distance", f2s(world.fog.distance, 6))
+	.witha("color", c2s(world.fog._color));
+	meta.add(f);
+
+	for (auto s: plugin_manager.controllers) {
+		//s->_class->owner->script->filename
+		auto e = xml::Element("script")
+		.witha("file", s->_class->owner->script->filename.relative_to(kaba::config.directory).str());
+		//for (auto &v: s.variables)
+		//	e.elements.add(xml::Element("var").witha("name", v.name).witha("value", v.value));
+		meta.add(e);
+	}
+	w.add(meta);
+	}
+
+	auto cont = xml::Element("3d");
+	for (auto c: ::cameras) {
+		auto o = c->get_owner<Entity3D>();
+		auto e = xml::Element("camera")
+		.witha("pos", v2s(o->pos))
+		.witha("ang", v2s(o->ang.get_angles()))
+		.witha("fov", f2s(c->fov, 3))
+		.witha("minDepth", f2s(c->min_depth, 3))
+		.witha("maxDepth", f2s(c->max_depth, 3))
+		.witha("exposure", f2s(c->exposure, 3));
+		/*for (auto &com: o->components)
+			e.add(xml::Element("component")
+				.witha("script", com.filename.str())
+				.witha("class", com.class_name));*/
+		cont.add(e);
+	}
+
+	//for (auto l: world.lights)
+	//	cont.add(encode_light(l));
+
+	for (auto t: world.terrains) {
+		auto o = t->get_owner<Entity3D>();
+		auto e = xml::Element("terrain")
+		.witha("file", t->filename.str())
+		.witha("pos", v2s(o->pos));
+		/*for (auto &c: t.components)
+			e.add(xml::Element("component")
+				.witha("script", c.filename.str())
+				.witha("class", c.class_name));*/
+		cont.add(e);
+	}
+
+	/*for (auto o: world.objects) {
+		auto e = xml::Element("object")
+		.witha("file", o.filename.str())
+		.witha("name", o.name)
+		.witha("pos", v2s(o.pos))
+		.witha("ang", v2s(o.ang));
+		for (auto &c: o.components)
+			e.add(xml::Element("component")
+				.witha("script", c.filename.str())
+				.witha("class", c.class_name));
+		//if (!o.script.is_empty() and o.script != o.object->_template->script_filename)
+		//	e.add_attribute("script", o.script.str());
+		if (i == data->EgoIndex)
+			e.add_attribute("role", "ego");
+		cont.add(e);
+	}*/
+
+	/*for (auto &l: world.links) {
+		auto e = xml::Element("link")
+		.witha("a", i2s(l.object[0]))
+		.witha("b", i2s(l.object[1]))
+		.witha("type", link_type_canonical(l.type))
+		.witha("pos", v2s(l.pos))
+		//.witha("pivotA", v2s(l.pos - data->objects[l.object[0]].pos))
+		//.witha("pivotB", v2s(l.pos - data->objects[l.object[1]].pos))
+		.witha("ang", v2s(l.ang));
+		for (auto &c: l.components)
+			e.add(xml::Element("component")
+				.witha("script", c.filename.str())
+				.witha("class", c.class_name));
+		cont.add(e);
+	}*/
+	w.add(cont);
+
+	p.save(filename);
+}

@@ -283,6 +283,11 @@ void World::reset() {
 #endif
 }
 
+void World::save(const Path &filename) {
+	LevelData l;
+	l.save(filename);
+}
+
 void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }

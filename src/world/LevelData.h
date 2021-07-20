@@ -44,6 +44,7 @@ class LevelData {
 public:
 	LevelData();
 	bool load(const Path &filename);
+	void save(const Path &filename);
 
 
 	class ScriptData {
