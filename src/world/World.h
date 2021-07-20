@@ -33,6 +33,9 @@ enum class LinkType;
 namespace audio {
 	class Sound;
 }
+namespace kaba {
+	class Function;
+}
 
 
 class btDefaultCollisionConfiguration;
@@ -187,6 +190,17 @@ public:
 
 	Array<audio::Sound*> sounds;
 	void add_sound(audio::Sound *s);
+
+	typedef void callback();
+	struct Observer {
+		string msg;
+		callback *f;
+	};
+	void subscribe(const string &msg, kaba::Function *f);
+	void notify(const string &msg);
+
+	Array<Observer> observers;
+	Entity3D *cur_entity;
 };
 extern World world;
 

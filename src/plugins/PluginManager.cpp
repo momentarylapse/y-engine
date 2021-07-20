@@ -246,6 +246,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("World.fog", &World::fog);
 	kaba::declare_class_element("World.gravity", &World::gravity);
 	kaba::declare_class_element("World.physics_mode", &World::physics_mode);
+	kaba::declare_class_element("World.cur_entity", &World::cur_entity);
 	kaba::link_external_class_func("World.load_soon", &World::load_soon);
 	kaba::link_external_class_func("World.create_object", &_create_object);
 	kaba::link_external_class_func("World.create_object_multi", &_create_object_multi);
@@ -261,6 +262,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("World.trace", &World::trace);
 	kaba::link_external_class_func("World.delete", &World::_delete);
 	kaba::link_external_class_func("World.unregister", &World::unregister);
+	kaba::link_external_class_func("World.subscribe", &World::subscribe);
 
 	kaba::declare_class_element("Fog.color", &Fog::_color);
 	kaba::declare_class_element("Fog.enabled", &Fog::enabled);

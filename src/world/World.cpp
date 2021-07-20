@@ -12,6 +12,7 @@
 #include "../lib/file/file.h"
 //#include "../lib/vulkan/vulkan.h"
 #include "../lib/nix/nix.h"
+#include "../lib/kaba/kaba.h"
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
@@ -212,6 +213,8 @@ World::~World() {
 void World::reset() {
 	net_msg_enabled = false;
 	net_messages.clear();
+
+	observers.clear();
 
 	gravity = v_0;
 
@@ -557,6 +560,9 @@ void World::register_object(Entity3D *o, int index) {
 		register_model(m);
 
 	o->object_id = on;
+
+	cur_entity = o;
+	notify("entity-add");
 }
 
 
@@ -596,6 +602,9 @@ void World::unregister_object(Entity3D *m) {
 	if (m->object_id < 0)
 		return;
 
+	cur_entity = m;
+	notify("entity-delete");
+
 #if HAS_LIB_BULLET
 	auto *sb = m->get_component<SolidBody>();
 	if (sb) {
@@ -622,6 +631,16 @@ void World::_delete(Entity* x) {
 	}
 }
 
+void World::subscribe(const string &msg, kaba::Function *f) {
+	observers.add({msg, (callback*)(int_p)f->address});
+}
+
+void World::notify(const string &msg) {
+	for (auto &o: observers)
+		if (o.msg == msg) {
+			o.f();
+		}
+}
 
 bool World::unregister(Entity* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
