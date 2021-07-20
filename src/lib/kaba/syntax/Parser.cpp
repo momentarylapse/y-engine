@@ -2311,16 +2311,21 @@ shared<Node> Parser::parse_statement_len(Block *block) {
 	if (sub->type->is_array())
 		return tree->add_node_const(tree->add_constant_int(sub->type->array_length));
 
+	// __length__() function?
+	auto *f = sub->type->get_func(IDENTIFIER_FUNC_LENGTH, TypeInt, {});
+	if (f)
+		return tree->add_node_member_call(f, sub);
+
 	// element "int num/length"?
 	for (auto &e: sub->type->elements)
 		if (e.type == TypeInt and (e.name == "length" or e.name == "num")) {
 			return sub->shift(e.offset, e.type);
 		}
 		
-	// __length__() function?
-	auto *f = sub->type->get_func(IDENTIFIER_FUNC_LENGTH, TypeInt, {});
-	if (f)
-		return tree->add_node_member_call(f, sub);
+	// length() function?
+	for (auto f: sub->type->functions)
+		if ((f->name == "length") and (f->num_params == 0))
+			return tree->add_node_member_call(f.get(), sub);
 
 
 	do_error(format("don't know how to get the length of an object of class '%s'", sub->type->long_name()));
