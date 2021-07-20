@@ -30,6 +30,7 @@
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../world/Light.h"
+#include "../world/Entity3D.h"
 #include "../world/components/Animator.h"
 #include "../Config.h"
 #include "../meta.h"
@@ -118,29 +119,32 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cube, const vector &pos) {
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
-	Camera cam(pos, quaternion::ID, rect::ID);
+	Entity3D o(pos, quaternion::ID);
+	Camera cam(rect::ID);
+	cam.owner = &o;
 	cam.fov = pi/2;
 	for (int i=0; i<6; i++) {
-		try{
+		try {
 			fb_cube->update_x({cube, depth}, i);
-		}catch(Exception &e){
+		} catch(Exception &e) {
 			msg_error(e.message());
 			return;
 		}
 		if (i == 0)
-			cam.ang = quaternion::rotation(vector(0,-pi/2,0));
+			o.ang = quaternion::rotation(vector(0,-pi/2,0));
 		if (i == 1)
-			cam.ang = quaternion::rotation(vector(0,pi/2,0));
+			o.ang = quaternion::rotation(vector(0,pi/2,0));
 		if (i == 2)
-			cam.ang = quaternion::rotation(vector(pi/2,0,pi));
+			o.ang = quaternion::rotation(vector(pi/2,0,pi));
 		if (i == 3)
-			cam.ang = quaternion::rotation(vector(-pi/2,0,pi));
+			o.ang = quaternion::rotation(vector(-pi/2,0,pi));
 		if (i == 4)
-			cam.ang = quaternion::rotation(vector(0,pi,0));
+			o.ang = quaternion::rotation(vector(0,pi,0));
 		if (i == 5)
-			cam.ang = quaternion::rotation(vector(0,0,0));
+			o.ang = quaternion::rotation(vector(0,0,0));
 		render_into_texture(fb_cube.get(), &cam, fb_cube->area());
 	}
+	cam.owner = nullptr;
 }
 
 rect RenderPathGL::dynamic_fb_area() const {
@@ -308,7 +312,7 @@ void RenderPathGL::set_material(Material *m, ShaderVariant v) {
 	auto s = m->shader[(int)v].get();
 	nix::set_shader(s);
 	if (using_view_space)
-		s->set_floats("eye_pos", &cam->pos.x, 3);
+		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
 	else
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
@@ -351,7 +355,7 @@ void RenderPathGL::draw_particles() {
 	nix::set_z(false, true);
 
 	// particles
-	auto r = matrix::rotation_q(cam->ang);
+	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
 	nix::vb_temp->create_rect(rect(-1,1, -1,1));
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
@@ -406,7 +410,7 @@ void RenderPathGL::draw_particles() {
 void RenderPathGL::draw_skyboxes(Camera *cam) {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(matrix::rotation_q(cam->ang).transpose());
+	nix::set_view_matrix(matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose());
 	for (auto *sb: world.skybox) {
 		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
 		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
@@ -427,7 +431,7 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 			t->material->shader[0]->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			t->material->shader[0]->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
-		t->draw();
+		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
 		nix::draw_triangles(t->vertex_buffer);
 	}
 }

@@ -36,6 +36,7 @@
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../world/Light.h"
+#include "../world/Entity3D.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
@@ -118,10 +119,8 @@ void PluginManager::export_kaba() {
 	kaba::link_external_virtual("Component.on_collide", &Component::on_collide, &component);
 	kaba::link_external_class_func("Component.set_variables", &Component::set_variables);
 
-	Camera _cam(v_0, quaternion::ID, rect::ID);
+	Camera _cam(rect::ID);
 	kaba::declare_class_size("Camera", sizeof(Camera));
-	kaba::declare_class_element("Camera.pos", &Camera::pos);
-	kaba::declare_class_element("Camera.ang", &Camera::ang);
 	kaba::declare_class_element("Camera.dest", &Camera::dest);
 	kaba::declare_class_element("Camera.fov", &Camera::fov);
 	kaba::declare_class_element("Camera.exposure", &Camera::exposure);
@@ -138,10 +137,6 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Camera.update_matrices", &Camera::update_matrices);
 	kaba::link_external_class_func("Camera.project", &Camera::project);
 	kaba::link_external_class_func("Camera.unproject", &Camera::unproject);
-	kaba::link_external_virtual("Camera.__delete__", &Camera::__delete__, &_cam);
-	kaba::link_external_virtual("Camera.on_init", &Camera::on_init, &_cam);
-	kaba::link_external_virtual("Camera.on_delete", &Camera::on_delete, &_cam);
-	kaba::link_external_virtual("Camera.on_iterate", &Camera::on_iterate, &_cam);
 
 
 	kaba::declare_class_size("Model.Mesh", sizeof(Mesh));
@@ -255,7 +250,9 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("World.create_object_multi", &_create_object_multi);
 	kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	kaba::link_external_class_func("World.set_active_physics", &World::set_active_physics);
-	kaba::link_external_class_func("World.add_light", &World::add_light);
+	kaba::link_external_class_func("World.add_light_parallel", &World::add_light_parallel);
+	kaba::link_external_class_func("World.add_light_point", &World::add_light_point);
+	kaba::link_external_class_func("World.add_light_cone", &World::add_light_cone);
 	kaba::link_external_class_func("World.add_particle", &World::add_particle);
 	kaba::link_external_class_func("World.add_sound", &World::add_sound);
 	kaba::link_external_class_func("World.shift_all", &World::shift_all);
@@ -292,10 +289,8 @@ void PluginManager::export_kaba() {
 
 #define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
 
-	Light light(v_0, quaternion::ID, Black, 0, 0);
+	Light light(Black, 0, 0);
 	kaba::declare_class_size("Light", sizeof(Light));
-	kaba::declare_class_element("Light.pos", &Light::pos);
-	kaba::declare_class_element("Light.ang", &Light::ang);
 	kaba::declare_class_element("Light.color", _OFFSET(light, light.col));
 	kaba::declare_class_element("Light.radius", _OFFSET(light, light.radius));
 	kaba::declare_class_element("Light.theta", _OFFSET(light, light.theta));
@@ -306,9 +301,9 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Light.user_shadow_theta", &Light::user_shadow_theta);
 	kaba::link_external_class_func("Light.set_direction", &Light::set_direction);
 
-	kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);
+	/*kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);
 	kaba::link_external_class_func("Light.Spherical.__init__", &Light::__init_spherical__);
-	kaba::link_external_class_func("Light.Cone.__init__", &Light::__init_cone__);
+	kaba::link_external_class_func("Light.Cone.__init__", &Light::__init_cone__);*/
 
 	kaba::declare_class_size("Link", sizeof(Link));
 	kaba::declare_class_element("Link.a", &Link::a);
@@ -491,6 +486,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
 	kaba::link_external("get_controller", (void*)&global_get_controller);
+	kaba::link_external("add_camera", (void*)&add_camera);
 }
 
 template<class C>
@@ -517,6 +513,8 @@ void PluginManager::import_kaba() {
 	import_component_class<Skeleton>(s, "Skeleton");
 	import_component_class<Model>(s, "Model");
 	import_component_class<Terrain>(s, "Terrain");
+	import_component_class<Light>(s, "Light");
+	import_component_class<Camera>(s, "Camera");
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
 	//msg_write(MeshCollider::_class->parent->parent->name);
@@ -616,6 +614,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new Animator;
 	if (c == Skeleton::_class)
 		return new Skeleton;
+	/*if (c == Light::_class)
+		return new Light;*/
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

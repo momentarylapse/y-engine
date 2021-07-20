@@ -8,7 +8,6 @@
 \*----------------------------------------------------------------------------*/
 
 #include "Terrain.h"
-#include "Camera.h"
 #include "Material.h"
 #include "Entity3D.h"
 #include "World.h"
@@ -233,7 +232,7 @@ float Terrain::gimme_height_n(const vector &p, vector &n) {
 }
 
 // Daten fuer das Darstellen des Bodens
-void Terrain::calc_detail() {
+void Terrain::calc_detail(const vector &cam_pos) {
 	auto o = get_owner<Entity3D>();
 	for (int x1=0;x1<(num_x-1)/32+1;x1++)
 		for (int z1=0;z1<(num_z-1)/32+1;z1++) {
@@ -241,7 +240,7 @@ void Terrain::calc_detail() {
 			int lz=(z1*32>num_z-32)?(num_z%32):32;
 			int x0=x1*32;
 			int z0=z1*32;
-			float depth = (cur_cam->pos - o->pos - vertex[Index(x0+lx/2,z0+lz/2)]).length() / pattern.x;
+			float depth = (cam_pos - o->pos - vertex[Index(x0+lx/2,z0+lz/2)]).length() / pattern.x;
 			int e=32;
 			if (depth<500)	e=32;
 			if (depth<320)	e=16;
@@ -605,12 +604,12 @@ void Terrain::build_vertex_buffer() {
 	vertex_buffer->update(2, uv);
 }
 
-void Terrain::draw() {
+void Terrain::prepare_draw(const vector &cam_pos) {
 	redraw = false;
 	// c d
 	// a b
 	// (acd),(adb)
-	calc_detail(); // how detailed shall it be?
+	calc_detail(cam_pos); // how detailed shall it be?
 
 
 	// do we have to recreate the terrain?
@@ -638,7 +637,7 @@ void Terrain::draw() {
 	nix::Draw3D(vertex_buffer);
 #endif
 
-	pos_old = cur_cam->pos;
+	pos_old = cam_pos;
 	force_redraw = false;
 	for (int x=0;x<num_x/32;x++)
 		for (int z=0;z<num_z/32;z++)

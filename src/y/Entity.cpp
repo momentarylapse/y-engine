@@ -64,7 +64,7 @@ Component *Entity::add_component_no_init(const kaba::Class *type, const string &
 }
 
 void Entity::_add_component_external_(Component *c) {
-	ComponentManager::add_to_list(c, ComponentManager::get_component_type_family(c->type));
+	ComponentManager::add_to_list(c, ComponentManager::get_component_type_family(c->component_type));
 	components.add(c);
 	c->owner = this;
 	c->on_init();
@@ -72,7 +72,7 @@ void Entity::_add_component_external_(Component *c) {
 
 Component *Entity::_get_component_untyped_(const kaba::Class *type) const {
 	for (auto *c: components)
-		if (c->type->is_derived_from(type))
+		if (c->component_type->is_derived_from(type))
 			return c;
 	return nullptr;
 }

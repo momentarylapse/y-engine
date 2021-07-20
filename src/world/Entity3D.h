@@ -16,7 +16,7 @@ class matrix;
 
 class Entity3D : public Entity {
 public:
-	Entity3D(Type type);
+	Entity3D(const vector &pos, const quaternion &ang);
 
 	vector pos;
 	quaternion ang;

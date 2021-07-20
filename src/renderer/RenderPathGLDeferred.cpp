@@ -23,6 +23,7 @@
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleManager.h"
+#include "../world/Entity3D.h"
 #include "../world/Camera.h"
 #include "../world/Light.h"
 #include "../world/Material.h"
@@ -127,7 +128,7 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	if (using_view_space)
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	else
-		s->set_floats("eye_pos", &cam->pos.x, 3);
+		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);

@@ -120,7 +120,9 @@ public:
 	Fog fog;
 
 	Array<Light*> lights;
-	void add_light(Light *l);
+	Light *add_light_parallel(const quaternion &ang, const color &c);
+	Light *add_light_point(const vector &p, const color &c, float r);
+	Light *add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t);
 
 	ParticleManager *particle_manager;
 	void add_particle(Particle *p);

@@ -65,9 +65,9 @@ public:
 
 	bool _cdecl trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test);
 
-	void calc_detail();
+	void calc_detail(const vector &cam_pos);
 	void build_vertex_buffer();
-	void draw();
+	void prepare_draw(const vector &cam_pos);
 
 	Path filename;
 	TerrainType terrain_type;

@@ -79,7 +79,7 @@ Component *ComponentManager::create_component(const kaba::Class *type, const str
 #ifdef _X_ALLOW_X_
 	//Component *c = nullptr;
 	auto c = (Component*)plugin_manager.create_instance(type, var);
-	c->type = type;
+	c->component_type = type;
 	auto type_family = get_component_type_family(type);
 	add_to_list(c, type_family);
 	return c;
@@ -89,7 +89,7 @@ Component *ComponentManager::create_component(const kaba::Class *type, const str
 }
 
 void ComponentManager::delete_component(Component *c) {
-	auto type_family = get_component_type_family(c->type);
+	auto type_family = get_component_type_family(c->component_type);
 	auto list = get_list_x(type_family);
 	list->remove(c);
 	delete c;

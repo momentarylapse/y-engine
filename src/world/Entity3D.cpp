@@ -9,9 +9,9 @@
 #include "../lib/math/matrix.h"
 
 
-Entity3D::Entity3D(Type type) : Entity(type) {
-	pos = v_0;
-	ang = quaternion::ID;
+Entity3D::Entity3D(const vector &_pos, const quaternion &_ang) : Entity(Entity::Type::ENTITY3D) {
+	pos = _pos;
+	ang = _ang;
 	parent = nullptr;
 	object_id = -1;
 }

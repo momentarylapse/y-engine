@@ -31,7 +31,7 @@ public:
 	virtual void __delete__();
 
 	Entity *owner;
-	const kaba::Class *type;
+	const kaba::Class *component_type;
 
 	template<class Owner>
 	Owner *get_owner() const { return (Owner*)owner; };

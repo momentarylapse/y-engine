@@ -17,6 +17,7 @@
 #include "../y/ComponentManager.h"
 #include "../meta.h"
 #include "ModelManager.h"
+#include "Entity3D.h"
 #include "Link.h"
 #include "Material.h"
 #include "Model.h"
@@ -238,7 +239,7 @@ void World::reset() {
 
 #ifdef _X_ALLOW_X_
 	for (auto *l: lights)
-		delete l;
+		delete l->owner;
 	lights.clear();
 
 	particle_manager->clear();
@@ -297,18 +298,20 @@ bool World::load(const LevelData &ld) {
 
 #ifdef _X_ALLOW_X_
 	for (auto &l: ld.lights) {
-		auto *ll = new Light(l.pos, quaternion::rotation(l.ang), l._color, l.radius, l.theta);
+		auto o = new Entity3D(l.pos, quaternion::rotation(l.ang));
+		auto *ll = new Light(l._color, l.radius, l.theta);
 		ll->light.harshness = l.harshness;
 		ll->enabled = l.enabled;
 		if (ll->light.radius < 0)
 			ll->allow_shadow = true;
-		add_light(ll);
+		o->_add_component_external_(ll);
+		lights.add(ll);
 
 		for (auto &cc: l.components) {
 			//msg_write("add component " + cc.class_name);
 	#ifdef _X_ALLOW_X_
 			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
-			auto comp = ll->add_component(type, cc.var);
+			auto comp = o->add_component(type, cc.var);
 	#endif
 		}
 	}
@@ -318,29 +321,30 @@ bool World::load(const LevelData &ld) {
 	skybox.resize(ld.skybox_filename.num);
 	for (int i=0; i<skybox.num; i++) {
 		skybox[i] = ModelManager::load(ld.skybox_filename[i]);
-		if (skybox[i]) {
-			skybox[i]->owner = new Entity3D(Entity::Type::ENTITY3D);
-			skybox[i]->get_owner<Entity3D>()->ang = quaternion::rotation_v(ld.skybox_ang[i]);
-		}
+		if (skybox[i])
+			skybox[i]->owner = new Entity3D(v_0, quaternion::rotation_v(ld.skybox_ang[i]));
 	}
 	background = ld.background_color;
 
 	for (auto &c: ld.cameras) {
-		cam->pos = c.pos;
-		cam->ang = quaternion::rotation(c.ang);
-		cam->min_depth = c.min_depth;
-		cam->max_depth = c.max_depth;
-		cam->exposure = c.exposure;
-		cam->fov = c.fov;
+		auto cc = add_camera(c.pos, quaternion::rotation(c.ang), rect::ID);
+		cam = cc;
+		cc->min_depth = c.min_depth;
+		cc->max_depth = c.max_depth;
+		cc->exposure = c.exposure;
+		cc->fov = c.fov;
 
 		for (auto &cc: c.components) {
 			//msg_write("add component " + cc.class_name);
 	#ifdef _X_ALLOW_X_
 			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
-			auto comp = cam->add_component(type, cc.var);
+			auto comp = cam->owner->add_component(type, cc.var);
 	#endif
 		}
-		break;
+	}
+	if (cameras.num == 0) {
+		msg_error("no camera defined... creating one");
+		cam = add_camera(v_0, quaternion::ID, rect::ID);
 	}
 
 	// objects
@@ -398,8 +402,7 @@ void World::add_link(Link *l) {
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 
-	auto o = new Entity3D(Entity::Type::ENTITY3D);
-	o->pos = pos;
+	auto o = new Entity3D(pos, quaternion::ID);
 	terrain_objects.add(o);
 
 	auto t = (Terrain*)o->add_component(Terrain::_class, "");
@@ -439,13 +442,10 @@ Entity3D *World::create_object_x(const Path &filename, const string &name, const
 	if (filename.is_empty())
 		throw Exception("CreateObject: empty filename");
 
-	auto o = new Entity3D(Entity::Type::ENTITY3D);
-	o->pos = pos;
-	o->ang = ang;
+	auto o = new Entity3D(pos, ang);
 
 	//msg_write(on);
 	auto *m = ModelManager::load(filename);
-	m->type = Model::_class;
 	m->script_data.name = name;
 
 	o->_add_component_external_(m);
@@ -626,7 +626,7 @@ bool World::unregister(Entity* x) {
 				unregister_object(o);
 				return true;
 			}
-	} else if (x->type == Entity::Type::LIGHT) {
+/*	} else if (x->type == Entity::Type::LIGHT) {
 #ifdef _X_ALLOW_X_
 		foreachi(auto *l, lights, i)
 			if (l == x) {
@@ -634,7 +634,7 @@ bool World::unregister(Entity* x) {
 				lights.erase(i);
 				return true;
 			}
-#endif
+#endif*/
 	} else if (x->type == Entity::Type::LINK) {
 		foreachi(auto *l, links, i)
 			if (l == x) {
@@ -796,12 +796,35 @@ void World::iterate(float dt) {
 			delete s;
 		}
 	}
-	audio::set_listener(cam->pos, cam->ang, v_0, 100000);
+	audio::set_listener(cam->get_owner<Entity3D>()->pos, cam->get_owner<Entity3D>()->ang, v_0, 100000);
 #endif
 }
 
-void World::add_light(Light *l) {
+Light *World::add_light_parallel(const quaternion &ang, const color &c) {
+	auto o = new Entity3D(v_0, ang);
+
+	auto l = new Light(c, -1, -1);
+	o->_add_component_external_(l);
 	lights.add(l);
+	return l;
+}
+
+Light *World::add_light_point(const vector &p, const color &c, float r) {
+	auto o = new Entity3D(p, quaternion::ID);
+
+	auto l = new Light(c, r, -1);
+	o->_add_component_external_(l);
+	lights.add(l);
+	return l;
+}
+
+Light *World::add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t) {
+	auto o = new Entity3D(p, ang);
+
+	auto l = new Light(c, r, t);
+	o->_add_component_external_(l);
+	lights.add(l);
+	return l;
 }
 
 void World::add_particle(Particle *p) {
@@ -846,7 +869,7 @@ bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool sim
 		d.sb = sb;
 
 		// ignore...
-		if (d.sb and d.sb->owner == o_ignore) {
+		if (d.sb and d.sb->get_owner<Entity3D>() == o_ignore) {
 			vector dir = (p2 - p1).normalized();
 			return trace(d.p + dir * 2, p2, d, simple_test, o_ignore);
 		}

@@ -9,10 +9,14 @@
 \*----------------------------------------------------------------------------*/
 
 #include "Camera.h"
+#include "Entity3D.h"
+#include "../y/Entity.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
 #include "../y/EngineData.h"
 
+
+const kaba::Class *Camera::_class = nullptr;
 
 
 #define CPKSetCamPos	0
@@ -28,6 +32,15 @@ Array<Camera*> cameras;
 Camera *cam; // "camera"
 Camera *cur_cam; // currently rendering
 
+Camera *add_camera(const vector &pos, const quaternion &ang, const rect &dest) {
+	auto o = new Entity3D(pos, ang);
+
+	auto c = new Camera(dest);
+	o->_add_component_external_(c);
+	cameras.add(c);
+	return c;
+}
+
 
 void CameraInit() {
 	CameraReset();
@@ -37,11 +50,13 @@ void CameraReset() {
 	entity_del(cameras);
 
 	// create the main-view ("cam")
-	cam = new Camera(v_0, quaternion::ID, rect::ID);
+	cam = nullptr;
 	cur_cam = cam;
 }
 
-void Camera::reset() {
+Camera::Camera(const rect &_dest) {
+	component_type = _class;
+
 	fov = pi / 4;
 	exposure = 1.0f;
 	bloom_radius = 10;
@@ -56,42 +71,21 @@ void Camera::reset() {
 	min_depth = 1.0f;
 	max_depth = 1000000.0f;
 
-	enabled = false;
-	dest = rect::ID;
-
-	show = false;
-	
-	pos = v_0;
-	ang = quaternion::ID;
-
 	m_projection = matrix::ID;
 	m_view = matrix::ID;
 	m_all = matrix::ID;
 	im_all = matrix::ID;
-}
 
-Camera::Camera(const vector &_pos, const quaternion &_ang, const rect &_dest) : Entity(Entity::Type::CAMERA) {
-	reset();
 	enabled = true;
 	show = true;
 
-	// register
-	entity_reg(this, cameras);
-
-	pos = _pos;
-	ang = _ang;
 	dest = _dest;
 }
 
-Camera::~Camera() {
-	// unregister
-	entity_unreg(this, cameras);
-}
 
-
-void Camera::__init__(const vector &_pos, const quaternion &_ang, const rect &_dest) {
-	new(this) Camera(_pos, _ang, _dest);
-}
+//void Camera::__init__(const vector &_pos, const quaternion &_ang, const rect &_dest) {
+	//new(this) Camera(_pos, _ang, _dest);
+//}
 
 void Camera::__delete__() {
 	this->Camera::~Camera();
@@ -114,7 +108,8 @@ matrix Camera::projection_matrix(float aspect_ratio) const {
 }
 
 matrix Camera::view_matrix() const {
-	return matrix::rotation_q(ang).transpose() * matrix::translation(-pos);
+	auto o = get_owner<Entity3D>();
+	return matrix::rotation_q(o->ang).transpose() * matrix::translation(-o->pos);
 }
 
 void Camera::update_matrices(float aspect_ratio) {
@@ -149,7 +144,7 @@ vector Camera::unproject(const vector &v) {
 }
 
 void CameraShiftAll(const vector &dpos) {
-	for (Camera *c: cameras)
-		c->pos += dpos;
+	for (auto *c: cameras)
+		c->get_owner<Entity3D>()->pos += dpos;
 }
 

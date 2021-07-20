@@ -11,7 +11,7 @@
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
-#include "Entity3D.h"
+#include "../y/Component.h"
 
 class Camera;
 
@@ -30,12 +30,14 @@ enum class LightType {
 	CONE
 };
 
-class Light : public Entity3D {
+class Light : public Component {
 public:
-	Light(const vector &p, const quaternion &q, const color &c, float r, float t);
-	void __init_parallel__(const quaternion &ang, const color &c);
+	Light(const color &c, float r, float t);
+	/*void __init_parallel__(const quaternion &ang, const color &c);
 	void __init_spherical__(const vector &p, const color &c, float r);
-	void __init_cone__(const vector &p, const quaternion &ang, const color &c, float r, float t);
+	void __init_cone__(const vector &p, const quaternion &ang, const color &c, float r, float t);*/
+
+	void on_init() override;
 
 	void set_direction(const vector &dir);
 
@@ -49,6 +51,7 @@ public:
 	matrix shadow_projection; // world -> texture
 
 	LightType type;
+	static const kaba::Class *_class;
 };
 
 

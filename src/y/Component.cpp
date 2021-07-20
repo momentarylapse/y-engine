@@ -11,7 +11,7 @@
 
 Component::Component() {
 	owner = nullptr;
-	type = nullptr;
+	component_type = nullptr;
 }
 
 Component::~Component() {}
@@ -25,6 +25,6 @@ void Component::__delete__() {
 }
 
 void Component::set_variables(const string &var) {
-	plugin_manager.assign_variables(this, type, var);
+	plugin_manager.assign_variables(this, component_type, var);
 }
 

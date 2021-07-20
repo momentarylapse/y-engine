@@ -214,6 +214,8 @@ void Model::reset_data() {
 
 
 Model::Model() {
+	component_type = Model::_class;
+
 	registered = false;
 	visible = true;
 
