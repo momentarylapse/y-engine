@@ -246,6 +246,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("World.fog", &World::fog);
 	kaba::declare_class_element("World.gravity", &World::gravity);
 	kaba::declare_class_element("World.physics_mode", &World::physics_mode);
+	kaba::link_external_class_func("World.load_soon", &World::load_soon);
 	kaba::link_external_class_func("World.create_object", &_create_object);
 	kaba::link_external_class_func("World.create_object_multi", &_create_object_multi);
 	kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
@@ -521,6 +522,9 @@ void PluginManager::import_kaba() {
 }
 
 void PluginManager::reset() {
+	msg_write("del controller");
+	for (auto *c: controllers)
+		delete c;
 	controllers.clear();
 }
 

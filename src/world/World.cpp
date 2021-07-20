@@ -283,6 +283,9 @@ void World::reset() {
 #endif
 }
 
+void World::load_soon(const Path &filename) {
+	next_filename = filename;
+}
 
 bool World::load(const LevelData &ld) {
 	net_msg_enabled = false;
@@ -426,7 +429,7 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 
 bool GodLoadWorld(const Path &filename) {
 	LevelData level_data;
-	bool ok = level_data.load(filename);
+	bool ok = level_data.load(engine.map_dir << filename.with(".world"));
 	ok &= world.load(level_data);
 	return ok;
 }

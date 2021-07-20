@@ -36,6 +36,9 @@ void init(nix::Shader *s) {
 
 void reset() {
 	toplevel = new Node(rect::ID);
+
+	all_nodes = {};
+	sorted_nodes = {};
 }
 
 void add_to_node_list(Node *n) {

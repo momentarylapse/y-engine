@@ -159,10 +159,16 @@ public:
 	void load_first_world() {
 		if (config.default_world == "")
 			throw std::runtime_error("no default world defined in game.ini");
+		load_world(config.default_world);
+	}
 
-		world.reset();
-		CameraReset();
-		GodLoadWorld(config.default_world);
+	void load_world(const Path &filename) {
+		msg_write("o------------------------------------------------------o");
+		msg_write("| loading                                              |");
+		msg_right();
+		reset_game();
+
+		GodLoadWorld(filename);
 		SHOW_SHADOW = config.get_bool("shadow.debug", false);
 		SHOW_GBUFFER = config.get_bool("gbuffer.debug", false);
 
@@ -190,6 +196,10 @@ public:
 			plugin_manager.add_controller(s.filename, s.variables);
 		for (auto &s: config.get_str("additional-scripts", "").explode(","))
 			plugin_manager.add_controller(s, {});
+
+		msg_left();
+		msg_write("|                                                      |");
+		msg_write("o------------------------------------------------------o");
 	}
 	
 	GLFWwindow* create_window() {
@@ -247,6 +257,11 @@ public:
 
 			if (input::get_key(hui::KEY_CONTROL) and input::get_key(hui::KEY_Q))
 				break;
+
+			if (!world.next_filename.is_empty()) {
+				load_world(world.next_filename);
+				world.next_filename = "";
+			}
 		}
 
 #if HAS_LIB_VULKAN
@@ -256,6 +271,9 @@ public:
 
 	void reset_game() {
 		EntityManager::enabled = false;
+		((RenderPathGL*)render_path)->reset();
+		plugin_manager.reset();
+		CameraReset();
 		world.reset();
 		gui::reset();
 		EntityManager::enabled = true;

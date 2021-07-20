@@ -55,7 +55,7 @@ bool LevelData::load(const Path &filename) {
 	world_filename = filename;
 
 	xml::Parser p;
-	p.load(engine.map_dir << filename.with(".world"));
+	p.load(filename);
 	auto *meta = p.elements[0].find("meta");
 	if (meta) {
 		for (auto &e: meta->elements) {

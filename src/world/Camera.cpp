@@ -29,8 +29,8 @@ const kaba::Class *Camera::_class = nullptr;
 
 
 Array<Camera*> cameras;
-Camera *cam; // "camera"
-Camera *cur_cam; // currently rendering
+Camera *cam = nullptr; // "camera"
+Camera *cur_cam = nullptr; // currently rendering
 
 Camera *add_camera(const vector &pos, const quaternion &ang, const rect &dest) {
 	auto o = new Entity3D(pos, ang);

@@ -120,6 +120,8 @@ public:
 
 	Array<RenderInjector> fx_injectors;
 	void kaba_add_fx_injector(kaba::Function *f);
+
+	void reset();
 };
 
 
