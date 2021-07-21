@@ -251,6 +251,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("World.create_object", &_create_object);
 	kaba::link_external_class_func("World.create_object_multi", &_create_object_multi);
 	kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
+	kaba::link_external_class_func("World.create_entity", &World::create_entity);
 	kaba::link_external_class_func("World.set_active_physics", &World::set_active_physics);
 	kaba::link_external_class_func("World.add_light_parallel", &World::add_light_parallel);
 	kaba::link_external_class_func("World.add_light_point", &World::add_light_point);

@@ -102,6 +102,9 @@ public:
 	void load_soon(const Path &filename);
 	void save(const Path &filename);
 
+	Entity3D *create_entity(const vector &pos);
+	Array<Entity3D*> dummy_entities;
+
 	Entity3D *create_object(const Path &filename, const vector &pos, const quaternion &ang);
 	Entity3D *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index = -1);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
@@ -159,7 +162,6 @@ public:
 	// content of the world
 	Array<Entity3D*> objects;
 	Entity3D *ego;
-	Array<Entity3D*> terrain_objects;
 	int num_reserved_objects;
 
 	Array<Terrain*> terrains;

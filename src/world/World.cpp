@@ -218,12 +218,13 @@ void World::reset() {
 
 	gravity = v_0;
 
+	for (auto *o: dummy_entities)
+		delete o;
+	dummy_entities.clear();
+
 	// terrains
 	//for (auto *t: terrains)
 	//	delete t;
-	for (auto *o: terrain_objects)
-		delete o;
-	terrain_objects.clear();
 	terrains.clear();
 
 	// objects
@@ -241,8 +242,8 @@ void World::reset() {
 	sorted_opaque.clear();
 
 #ifdef _X_ALLOW_X_
-	for (auto *l: lights)
-		delete l->owner;
+	//for (auto *l: lights)
+	//	delete l->owner;
 	lights.clear();
 
 	particle_manager->clear();
@@ -414,7 +415,7 @@ void World::add_link(Link *l) {
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 
 	auto o = new Entity3D(pos, quaternion::ID);
-	terrain_objects.add(o);
+	dummy_entities.add(o);
 
 	auto t = (Terrain*)o->add_component(Terrain::_class, "");
 	t->load(filename);
@@ -440,6 +441,12 @@ bool GodLoadWorld(const Path &filename) {
 	bool ok = level_data.load(engine.map_dir << filename.with(".world"));
 	ok &= world.load(level_data);
 	return ok;
+}
+
+Entity3D *World::create_entity(const vector &pos) {
+	auto o = new Entity3D(pos, quaternion::ID);
+	dummy_entities.add(o);
+	return o;
 }
 
 Entity3D *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
@@ -653,6 +660,18 @@ bool World::unregister(Entity* x) {
 				unregister_object(o);
 				return true;
 			}
+		foreachi(auto *o, dummy_entities, i)
+			if (o == x) {
+				//msg_write(" -> OBJECT");
+				if (auto m = o->get_component<Model>())
+					unregister_model(m);
+				//unregister_object(o);
+
+				cur_entity = o;
+				notify("entity-delete");
+				dummy_entities.erase(i);
+				return true;
+			}
 /*	} else if (x->type == Entity::Type::LIGHT) {
 #ifdef _X_ALLOW_X_
 		foreachi(auto *l, lights, i)
@@ -829,6 +848,7 @@ void World::iterate(float dt) {
 
 Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 	auto o = new Entity3D(v_0, ang);
+	dummy_entities.add(o);
 
 	auto l = new Light(c, -1, -1);
 	o->_add_component_external_(l);
@@ -838,6 +858,7 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 
 Light *World::add_light_point(const vector &p, const color &c, float r) {
 	auto o = new Entity3D(p, quaternion::ID);
+	dummy_entities.add(o);
 
 	auto l = new Light(c, r, -1);
 	o->_add_component_external_(l);
@@ -847,6 +868,7 @@ Light *World::add_light_point(const vector &p, const color &c, float r) {
 
 Light *World::add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t) {
 	auto o = new Entity3D(p, ang);
+	dummy_entities.add(o);
 
 	auto l = new Light(c, r, t);
 	o->_add_component_external_(l);
