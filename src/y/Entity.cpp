@@ -9,10 +9,8 @@
 #include "Component.h"
 #include "ComponentManager.h"
 #include "../lib/kaba/syntax/Class.h"
-#include "../lib/file/msg.h"
 
 
-bool EntityManager::enabled = true;
 Array<Entity*> EntityManager::selection;
 
 

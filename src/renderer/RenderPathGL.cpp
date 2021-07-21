@@ -106,9 +106,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 	fb_cube = nullptr;
 	cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");
 
-	EntityManager::enabled = false;
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
-	EntityManager::enabled = true;
 
 	material_shadow = new Material;
 	material_shadow->shader_path = "shadow.shader";

@@ -354,7 +354,8 @@ bool World::load(const LevelData &ld) {
 	#endif
 		}
 	}
-	if (cameras.num == 0) {
+	auto cameras = ComponentManager::get_listx<Camera>();
+	if (cameras->num == 0) {
 		msg_error("no camera defined... creating one");
 		cam = add_camera(v_0, quaternion::ID, rect::ID);
 	}

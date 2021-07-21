@@ -621,8 +621,10 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new Animator;
 	if (c == Skeleton::_class)
 		return new Skeleton;
-	/*if (c == Light::_class)
-		return new Light;*/
+	if (c == Light::_class)
+		return new Light(White, -1, -1);
+	if (c == Camera::_class)
+		return new Camera(rect::ID);
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

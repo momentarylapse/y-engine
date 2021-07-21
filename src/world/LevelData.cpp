@@ -220,6 +220,7 @@ string phys_mode_name(PhysicsMode m) {
 #include "Terrain.h"
 #include "Camera.h"
 #include "Entity3D.h"
+#include "../y/ComponentManager.h"
 #include "../plugins/PluginManager.h"
 #include "../plugins/Controller.h"
 #include "../lib/kaba/kaba.h"
@@ -266,7 +267,8 @@ void LevelData::save(const Path &filename) {
 	}
 
 	auto cont = xml::Element("3d");
-	for (auto c: ::cameras) {
+	auto cameras = ComponentManager::get_listx<::Camera>();
+	for (auto c: *cameras) {
 		auto o = c->get_owner<Entity3D>();
 		auto e = xml::Element("camera")
 		.witha("pos", v2s(o->pos))

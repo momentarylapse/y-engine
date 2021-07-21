@@ -91,9 +91,7 @@ static void iterate_particles(Array<Particle*> *particles, float dt) {
 			if (p->time_to_live < 0) {
 				//msg_write("PARTICLE SUICIDE");
 				particles->erase(i);
-				EntityManager::enabled = false;
 				delete p;
-				EntityManager::enabled = true;
 				i --;
 				continue;
 			}

@@ -62,7 +62,6 @@ void CameraCalcMove(float dt);
 void CameraShiftAll(const vector &dpos);
 Camera *add_camera(const vector &pos, const quaternion &ang, const rect &dest);
 
-extern Array<Camera*> cameras;
 extern Camera *cam; // "camera"
 extern Camera *cur_cam; // currently rendering
 

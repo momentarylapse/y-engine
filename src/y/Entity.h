@@ -22,12 +22,8 @@ public:
 		NONE,
 		ENTITY3D,
 		CONTROLLER,
-		MODEL,
-		CAMERA,
-		LIGHT,
 		LINK,
 		SOUND,
-		EFFECT,
 		PARTICLE,
 		BEAM,
 		UI_NODE,
@@ -64,22 +60,6 @@ public:
 	static void reset();
 	static void delete_later(Entity *p);
 	static void delete_selection();
-	static bool enabled;
 private:
 	static Array<Entity*> selection;
 };
-
-#define entity_reg(var, array) \
-	if (EntityManager::enabled) \
-		(array).add(var);
-
-#define entity_unreg(var, array) \
-	if (EntityManager::enabled) \
-		for (int i=0;i<(array).num;i++) \
-			if ((array)[i] == var) \
-				(array).erase(i);
-
-#define entity_del(array) \
-	for (int i=(array).num-1; i>=0; i--) \
-		delete((array)[i]); \
-	(array).clear();

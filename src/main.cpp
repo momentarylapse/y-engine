@@ -270,13 +270,11 @@ public:
 	}
 
 	void reset_game() {
-		EntityManager::enabled = false;
 		((RenderPathGL*)render_path)->reset();
 		plugin_manager.reset();
 		CameraReset();
 		world.reset();
 		gui::reset();
-		EntityManager::enabled = true;
 	}
 
 	void cleanup() {
