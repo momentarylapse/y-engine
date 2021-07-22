@@ -7,7 +7,7 @@
 
 #include "Text.h"
 #include "Font.h"
-#include "../lib/math/vector.h"
+#include "../lib/math/vec2.h"
 #include "../lib/image/image.h"
 #include "../lib/nix/nix.h"
 

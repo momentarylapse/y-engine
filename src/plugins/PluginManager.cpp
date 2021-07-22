@@ -352,8 +352,9 @@ void PluginManager::export_kaba() {
 
 	gui::Node node(rect::ID);
 	kaba::declare_class_size("ui.Node", sizeof(gui::Node));
-	kaba::declare_class_element("ui.Node.x", &gui::Node::x);
-	kaba::declare_class_element("ui.Node.y", &gui::Node::y);
+	kaba::declare_class_element("ui.Node.x", &gui::Node::pos);
+	kaba::declare_class_element("ui.Node.y", _OFFSET(node, pos.y));
+	kaba::declare_class_element("ui.Node.pos", &gui::Node::pos);
 	kaba::declare_class_element("ui.Node.width", &gui::Node::width);
 	kaba::declare_class_element("ui.Node.height", &gui::Node::height);
 	kaba::declare_class_element("ui.Node._eff_area", &gui::Node::eff_area);

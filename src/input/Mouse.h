@@ -7,7 +7,7 @@
 
 #pragma once
 
-class vector;
+class vec2;
 struct GLFWwindow;
 
 namespace input {
@@ -17,10 +17,10 @@ void init_mouse(GLFWwindow *window);
 void iterate_mouse_pre();
 void iterate_mouse();
 
-extern vector mouse; //   [0:R]x[0:1] coord system
-extern vector mouse01; // [0:1]x[0:1] coord system
-extern vector dmouse;
-extern vector scroll;
+extern vec2 mouse; //   [0:R]x[0:1] coord system
+extern vec2 mouse01; // [0:1]x[0:1] coord system
+extern vec2 dmouse;
+extern vec2 scroll;
 
 bool get_button(int index);
 

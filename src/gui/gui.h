@@ -15,7 +15,7 @@ namespace nix {
 	class VertexBuffer;
 	class Shader;
 }
-class vector;
+class vec2;
 
 namespace gui {
 
@@ -26,8 +26,8 @@ void init(nix::Shader *s);
 void reset();
 //void render(vulkan::CommandBuffer *cb, const rect &viewport);
 void update();
-void handle_input(const vector &m, std::function<bool(Node *n)> f);
-void handle_mouse_move(const vector &m_prev, const vector &m);
+void handle_input(const vec2 &m, std::function<bool(Node *n)> f);
+void handle_mouse_move(const vec2 &m_prev, const vec2 &m);
 void iterate(float dt);
 
 extern shared<Node> toplevel;

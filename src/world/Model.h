@@ -32,6 +32,7 @@
 #include "../lib/math/matrix.h"
 #include "../lib/math/matrix3.h"
 #include "../lib/math/plane.h"
+#include "../lib/math/vec4.h"
 #include "../lib/image/color.h"
 
 

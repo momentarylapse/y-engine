@@ -10,7 +10,7 @@
 #include "../lib/base/base.h"
 #include "../lib/base/pointer.h"
 #include "../lib/math/rect.h"
-#include "../lib/math/vector.h"
+#include "../lib/math/vec2.h"
 #include "../lib/image/color.h"
 
 namespace gui {
@@ -50,7 +50,8 @@ public:
 
 	Type type;
 	bool visible;
-	float x, y, width, height; // coord system depends on align!
+	vec2 pos; // coord system depends on align!
+	float width, height;
 	rect margin;
 	//rect padding;
 	Align align;

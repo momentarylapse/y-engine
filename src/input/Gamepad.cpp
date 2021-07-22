@@ -8,7 +8,7 @@
 #include "Gamepad.h"
 #include "Mouse.h"
 #include "Keyboard.h"
-#include "../lib/math/vector.h"
+#include "../lib/math/vec2.h"
 #include "../lib/hui_minimal/hui.h"
 #include "../y/EngineData.h"
 #include <math.h>

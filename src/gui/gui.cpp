@@ -72,9 +72,9 @@ void update() {
 }
 
 // input: [0:1]x[0:1]
-void handle_input(const vector &m, std::function<bool(Node *n)> f) {
+void handle_input(const vec2 &m, std::function<bool(Node *n)> f) {
 	foreachb(Node *n, sorted_nodes) {
-		if (n->eff_area.inside(m.x, m.y)) {
+		if (n->eff_area.inside(m)) {
 			if (f(n))
 				return;
 		}
@@ -82,11 +82,11 @@ void handle_input(const vector &m, std::function<bool(Node *n)> f) {
 }
 
 // input: [0:1]x[0:1]
-void handle_mouse_move(const vector &m_prev, const vector &m) {
+void handle_mouse_move(const vec2 &m_prev, const vec2 &m) {
 	for (auto n: all_nodes) {
-		if (n->eff_area.inside(m.x, m.y) and !n->eff_area.inside(m_prev.x, m_prev.y))
+		if (n->eff_area.inside(m) and !n->eff_area.inside(m_prev))
 			n->on_enter();
-		if (!n->eff_area.inside(m.x, m.y) and n->eff_area.inside(m_prev.x, m_prev.y))
+		if (!n->eff_area.inside(m) and n->eff_area.inside(m_prev))
 			n->on_leave();
 	}
 }

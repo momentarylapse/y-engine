@@ -59,8 +59,8 @@ rect rect_sub_margin(const rect &r, const rect &m) {
 }
 
 void Node::set_area(const rect &r) {
-	x = r.x1;
-	y = r.y1;
+	pos.x = r.x1;
+	pos.y = r.y1;
 	width = r.width();
 	height = r.height();
 }
@@ -87,28 +87,28 @@ void Node::update_geometry(const rect &target) {
 			eff_area.x1 = target.x1 + margin.x1 * fx;
 			eff_area.x2 = target.x2 - margin.x2 * fx;
 		} else if (align & Align::LEFT) {
-			eff_area.x1 = target.x1 + (margin.x1 + x) * fx;
-			eff_area.x2 = target.x1 + (margin.x1 + x + width) * fx;
+			eff_area.x1 = target.x1 + (margin.x1 + pos.x) * fx;
+			eff_area.x2 = target.x1 + (margin.x1 + pos.x + width) * fx;
 		} else if (align & Align::CENTER_H) {
-			eff_area.x1 = target.mx() + (x - width / 2) * fx;
-			eff_area.x2 = target.mx() + (x + width / 2) * fx;
+			eff_area.x1 = target.mx() + (pos.x - width / 2) * fx;
+			eff_area.x2 = target.mx() + (pos.x + width / 2) * fx;
 		} else if (align & Align::RIGHT) {
-			eff_area.x1 = target.x2 + (x - margin.x2 - width) * fx;
-			eff_area.x2 = target.x2 + (x - margin.x2) * fx;
+			eff_area.x1 = target.x2 + (pos.x - margin.x2 - width) * fx;
+			eff_area.x2 = target.x2 + (pos.x - margin.x2) * fx;
 		}
 
 		if (align & Align::FILL_Y) {
 			eff_area.y1 = target.y1 + margin.y1;
 			eff_area.y2 = target.y2 - margin.y2;
 		} else if (align & Align::TOP) {
-			eff_area.y1 = target.y1 + margin.y1 + y;
-			eff_area.y2 = target.y1 + margin.y1 + y + height;
+			eff_area.y1 = target.y1 + margin.y1 + pos.y;
+			eff_area.y2 = target.y1 + margin.y1 + pos.y + height;
 		} else if (align & Align::CENTER_V) {
-			eff_area.y1 = target.my() + y - height / 2;
-			eff_area.y2 = target.my() + y + height / 2;
+			eff_area.y1 = target.my() + pos.y - height / 2;
+			eff_area.y2 = target.my() + pos.y + height / 2;
 		} else if (align & Align::BOTTOM) {
-			eff_area.y1 = target.y2 + (y - margin.y2 - height);
-			eff_area.y2 = target.y2 + (y - margin.y2);
+			eff_area.y1 = target.y2 + (pos.y - margin.y2 - height);
+			eff_area.y2 = target.y2 + (pos.y - margin.y2);
 		}
 
 		//eff_area = rect_sub_margin(eff_area, margin);
