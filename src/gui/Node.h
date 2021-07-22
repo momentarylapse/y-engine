@@ -10,6 +10,7 @@
 #include "../lib/base/base.h"
 #include "../lib/base/pointer.h"
 #include "../lib/math/rect.h"
+#include "../lib/math/vector.h"
 #include "../lib/image/color.h"
 
 namespace gui {

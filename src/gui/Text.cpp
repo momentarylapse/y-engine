@@ -17,7 +17,7 @@
 namespace gui {
 
 
-Text::Text(const string &t, float h, float x, float y) : Picture(rect(x,x,y,y), nullptr) {//rect::ID
+Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p.y), nullptr) {//rect::ID
 	type = Type::TEXT;
 	//margin = rect(x, h/6, y, h/10);
 	font = Font::_default;
@@ -30,11 +30,11 @@ Text::~Text() {
 }
 
 void Text::__init2__(const string &t, float h) {
-	new(this) Text(t, h, 0,0);//h/6, h/6);
+	new(this) Text(t, h, vec2::ZERO);//h/6, h/6);
 }
 
-void Text::__init4__(const string &t, float h, float x, float y) {
-	new(this) Text(t, h, x, y);
+void Text::__init4__(const string &t, float h, const vec2 &p) {
+	new(this) Text(t, h, p);
 }
 
 void Text::__delete__() {

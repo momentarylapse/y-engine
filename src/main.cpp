@@ -172,7 +172,7 @@ public:
 		SHOW_SHADOW = config.get_bool("shadow.debug", false);
 		SHOW_GBUFFER = config.get_bool("gbuffer.debug", false);
 
-		fps_display = new gui::Text("", 0.020f, 0.01f, 0.01f);
+		fps_display = new gui::Text("", 0.020f, vec2(0.01f, 0.01f));
 		fps_display->dz = 900;
 		gui::toplevel->add(fps_display);
 		if (SHOW_GBUFFER) {
