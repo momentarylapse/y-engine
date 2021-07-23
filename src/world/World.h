@@ -202,7 +202,10 @@ public:
 	void notify(const string &msg);
 
 	Array<Observer> observers;
-	Entity3D *cur_entity;
+	struct MessageData {
+		Entity3D *e;
+		vector v;
+	} msg_data;
 };
 extern World world;
 

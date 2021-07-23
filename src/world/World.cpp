@@ -569,7 +569,7 @@ void World::register_object(Entity3D *o, int index) {
 
 	o->object_id = on;
 
-	cur_entity = o;
+	msg_data.e = o;
 	notify("entity-add");
 }
 
@@ -610,7 +610,7 @@ void World::unregister_object(Entity3D *m) {
 	if (m->object_id < 0)
 		return;
 
-	cur_entity = m;
+	msg_data.e = m;
 	notify("entity-delete");
 
 #if HAS_LIB_BULLET
@@ -668,7 +668,7 @@ bool World::unregister(Entity* x) {
 					unregister_model(m);
 				//unregister_object(o);
 
-				cur_entity = o;
+				msg_data.e = o;
 				notify("entity-delete");
 				dummy_entities.erase(i);
 				return true;
@@ -889,8 +889,8 @@ void World::add_sound(audio::Sound *s) {
 
 
 void World::shift_all(const vector &dpos) {
-	for (auto *t: terrains)
-		t->get_owner<Entity3D>()->pos += dpos;
+	for (auto *e: dummy_entities)
+		e->pos += dpos;
 	for (auto *o: objects)
 		if (o)
 			o->pos += dpos;
@@ -899,6 +899,8 @@ void World::shift_all(const vector &dpos) {
 		s->pos += dpos;
 	particle_manager->shift_all(dpos);
 #endif
+	msg_data.v = dpos;
+	notify("shift");
 }
 
 vector World::get_g(const vector &pos) const {
