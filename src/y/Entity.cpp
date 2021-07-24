@@ -50,7 +50,7 @@ void Entity::on_delete_rec() {
 // TODO (later) optimize...
 Component *Entity::add_component(const kaba::Class *type, const string &var) {
 	auto c = add_component_no_init(type, var);
-	c->on_init();
+//	c->on_init();
 	return c;
 }
 
@@ -65,7 +65,7 @@ void Entity::_add_component_external_(Component *c) {
 	ComponentManager::add_to_list(c, ComponentManager::get_component_type_family(c->component_type));
 	components.add(c);
 	c->owner = this;
-	c->on_init();
+	//c->on_init();
 }
 
 Component *Entity::_get_component_untyped_(const kaba::Class *type) const {

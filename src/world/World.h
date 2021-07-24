@@ -102,11 +102,14 @@ public:
 	void load_soon(const Path &filename);
 	void save(const Path &filename);
 
-	Entity3D *create_entity(const vector &pos);
+	Entity3D *create_entity(const vector &pos, const quaternion &ang);
 	Array<Entity3D*> dummy_entities;
+	void register_entity(Entity3D *e);
+	void unregister_entity(Entity3D *e);
 
 	Entity3D *create_object(const Path &filename, const vector &pos, const quaternion &ang);
-	Entity3D *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index = -1);
+	Entity3D *create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang);
+	Entity3D *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
 
 	Object* create_object_multi(const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang);

@@ -34,11 +34,11 @@ Camera *cam = nullptr; // "camera"
 Camera *cur_cam = nullptr; // currently rendering
 
 Camera *add_camera(const vector &pos, const quaternion &ang, const rect &dest) {
-	auto o = world.create_entity(pos);//new Entity3D(pos, ang);
-	o->ang = ang;
+	auto o = world.create_entity(pos, ang);
 
 	auto c = new Camera(dest);
 	o->_add_component_external_(c);
+	world.register_entity(o);
 	return c;
 }
 

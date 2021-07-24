@@ -68,6 +68,12 @@ Entity3D* _create_object(World *w, const Path &filename, const vector &pos, cons
 	KABA_EXCEPTION_WRAPPER( return w->create_object(filename, pos, ang); );
 	return nullptr;
 }
+
+Entity3D* _create_object_no_reg(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+	KABA_EXCEPTION_WRAPPER( return w->create_object_no_reg(filename, pos, ang); );
+	return nullptr;
+}
+
 Model* _create_object_multi(World *w, const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_multi(filename, pos, ang); );
 	return nullptr;
@@ -173,6 +179,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Model.begin_edit", &Model::begin_edit);
 	kaba::link_external_class_func("Model.end_edit", &Model::end_edit);
 	kaba::link_external_class_func("Model.get_vertex", &Model::get_vertex);
+	kaba::link_external_class_func("Model.update_matrix", &Model::update_matrix);
 //	kaba::link_external_class_func("Model.set_bone_model", &Model::set_bone_model);
 
 	kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
@@ -249,9 +256,11 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("World.msg_data", &World::msg_data);
 	kaba::link_external_class_func("World.load_soon", &World::load_soon);
 	kaba::link_external_class_func("World.create_object", &_create_object);
+	kaba::link_external_class_func("World.create_object_no_reg", &_create_object_no_reg);
 	kaba::link_external_class_func("World.create_object_multi", &_create_object_multi);
 	kaba::link_external_class_func("World.create_terrain", &World::create_terrain);
 	kaba::link_external_class_func("World.create_entity", &World::create_entity);
+	kaba::link_external_class_func("World.register_entity", &World::register_entity);
 	kaba::link_external_class_func("World.set_active_physics", &World::set_active_physics);
 	kaba::link_external_class_func("World.add_light_parallel", &World::add_light_parallel);
 	kaba::link_external_class_func("World.add_light_point", &World::add_light_point);

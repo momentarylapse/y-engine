@@ -368,7 +368,9 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()){
 			auto q = quaternion::rotation(o.ang);
-			auto *oo = create_object_x(o.filename, o.name, o.pos, q, o.components, i);
+			auto *oo = create_object_x(o.filename, o.name, o.pos, q, o.components);
+			if (oo)
+				register_object(oo, i);
 			ok &= (oo != nullptr);
 			if (ld.ego_index == i)
 				ego = oo;
@@ -415,11 +417,11 @@ void World::add_link(Link *l) {
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 
-	auto o = new Entity3D(pos, quaternion::ID);
-	dummy_entities.add(o);
+	auto o = create_entity(pos, quaternion::ID);
 
 	auto t = (Terrain*)o->add_component(Terrain::_class, "");
 	t->load(filename);
+	terrains.add(t);
 
 	auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
 
@@ -427,13 +429,10 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	sb->mass = 10000.0f;
 	sb->theta_0 = matrix3::ZERO;
 	sb->passive = true;
-	sb->on_init();
+	//sb->on_init();
 
-#if HAS_LIB_BULLET
-	dynamicsWorld->addRigidBody(sb->body);
-#endif
+	register_entity(o);
 
-	terrains.add(t);
 	return t;
 }
 
@@ -444,24 +443,45 @@ bool GodLoadWorld(const Path &filename) {
 	return ok;
 }
 
-Entity3D *World::create_entity(const vector &pos) {
-	auto o = new Entity3D(pos, quaternion::ID);
-	dummy_entities.add(o);
-	return o;
+Entity3D *World::create_entity(const vector &pos, const quaternion &ang) {
+	return new Entity3D(pos, ang);
+}
+
+void World::register_entity(Entity3D *e) {
+	dummy_entities.add(e);
+	e->on_init_rec();
+
+
+	if (auto m = e->get_component<Model>())
+		register_model(m);
+
+#if HAS_LIB_BULLET
+	if (auto sb = e->get_component<SolidBody>())
+		dynamicsWorld->addRigidBody(sb->body);
+#endif
+
+	msg_data.e = e;
+	notify("entity-add");
 }
 
 Entity3D *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
+	auto o = create_object_x(filename, "", pos, ang, {});
+	register_object(o, -1);
+	return o;
+}
+
+Entity3D *World::create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang) {
 	return create_object_x(filename, "", pos, ang, {});
 }
 
-Entity3D *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components, int w_index) {
+Entity3D *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components) {
 	if (engine.resetting_game)
-		throw Exception("CreateObject during game reset");
+		throw Exception("create_object during game reset");
 
 	if (filename.is_empty())
-		throw Exception("CreateObject: empty filename");
+		throw Exception("create_object: empty filename");
 
-	auto o = new Entity3D(pos, ang);
+	auto o = create_entity(pos, ang);
 
 	//msg_write(on);
 	auto *m = ModelManager::load(filename);
@@ -471,18 +491,10 @@ Entity3D *World::create_object_x(const Path &filename, const string &name, const
 	m->update_matrix();
 
 
-	register_object(o, w_index);
-
+	// automatic components
 	if (m->_template->solid_body) {
-		// TODO
-
 		auto col = (MeshCollider*)o->add_component(MeshCollider::_class, "");
-
 		auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
-
-#if HAS_LIB_BULLET
-		dynamicsWorld->addRigidBody(sb->body);
-#endif
 	}
 
 	if (m->_template->skeleton)
@@ -491,7 +503,7 @@ Entity3D *World::create_object_x(const Path &filename, const string &name, const
 	if (m->_template->animator)
 		o->add_component(Animator::_class, "");
 
-
+	// user components
 	for (auto &cc: components) {
 		//msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
@@ -500,9 +512,9 @@ Entity3D *World::create_object_x(const Path &filename, const string &name, const
 #endif
 	}
 
-	o->on_init();
+	//register_object(o, w_index);
 
-	AddNetMsg(NET_MSG_CREATE_OBJECT, o->object_id, filename.str());
+	//AddNetMsg(NET_MSG_CREATE_OBJECT, o->object_id, filename.str());
 
 	return o;
 }
@@ -554,7 +566,7 @@ void World::register_object(Entity3D *o, int index) {
 		if (on >= objects.num)
 			objects.resize(on+1);
 		if (objects[on]) {
-			msg_error("CreateObject:  object index already in use " + i2s(on));
+			msg_error("register_object:  object index already in use " + i2s(on));
 			return;
 		}
 	}
@@ -564,13 +576,19 @@ void World::register_object(Entity3D *o, int index) {
 	}
 	objects[on] = o;
 
-	if (auto m = o->get_component<Model>())
-		register_model(m);
-
 	o->object_id = on;
 
+	register_entity(o);
+
+	/*o->on_init_rec();
+
+#if HAS_LIB_BULLET
+	if (auto sb = o->get_component<SolidBody>())
+		dynamicsWorld->addRigidBody(sb->body);
+#endif
+
 	msg_data.e = o;
-	notify("entity-add");
+	notify("entity-add");*/
 }
 
 
@@ -610,16 +628,6 @@ void World::unregister_object(Entity3D *m) {
 	if (m->object_id < 0)
 		return;
 
-	msg_data.e = m;
-	notify("entity-delete");
-
-#if HAS_LIB_BULLET
-	auto *sb = m->get_component<SolidBody>();
-	if (sb) {
-		dynamicsWorld->removeRigidBody(sb->body);
-	}
-#endif
-
 	// ego...
 	if (m == ego)
 		ego = nullptr;
@@ -650,29 +658,34 @@ void World::notify(const string &msg) {
 		}
 }
 
+void World::unregister_entity(Entity3D *e) {
+
+#if HAS_LIB_BULLET
+	auto *sb = e->get_component<SolidBody>();
+	if (sb)
+		dynamicsWorld->removeRigidBody(sb->body);
+#endif
+
+	if (auto m = e->get_component<Model>())
+		unregister_model(m);
+
+	foreachi(auto *o, dummy_entities, i)
+		if (o == e) {
+			msg_data.e = o;
+			notify("entity-delete");
+			dummy_entities.erase(i);
+			return;
+		}
+}
+
 bool World::unregister(Entity* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
 	if (x->type == Entity::Type::ENTITY3D) {
-		foreachi(auto *o, objects, i)
-			if (o == x) {
-				//msg_write(" -> OBJECT");
-				if (auto m = o->get_component<Model>())
-					unregister_model(m);
-				unregister_object(o);
-				return true;
-			}
-		foreachi(auto *o, dummy_entities, i)
-			if (o == x) {
-				//msg_write(" -> OBJECT");
-				if (auto m = o->get_component<Model>())
-					unregister_model(m);
-				//unregister_object(o);
-
-				msg_data.e = o;
-				notify("entity-delete");
-				dummy_entities.erase(i);
-				return true;
-			}
+		auto e = (Entity3D*)x;
+		if (e->object_id >= 0)
+			unregister_object(e);
+		else
+			unregister_entity(e);
 /*	} else if (x->type == Entity::Type::LIGHT) {
 #ifdef _X_ALLOW_X_
 		foreachi(auto *l, lights, i)
