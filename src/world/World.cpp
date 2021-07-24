@@ -358,24 +358,25 @@ bool World::load(const LevelData &ld) {
 	objects.resize(ld.objects.num);
 	num_reserved_objects = ld.objects.num;
 	foreachi(auto &o, ld.objects, i)
-		if (!o.filename.is_empty()){
-			auto q = quaternion::rotation(o.ang);
-			auto *oo = create_object_x(o.filename, o.name, o.pos, q, o.components);
-			request_next_object_index(i);
-			if (oo)
+		if (!o.filename.is_empty()) {
+			try {
+				auto q = quaternion::rotation(o.ang);
+				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q, o.components);
+				request_next_object_index(i);
 				register_entity(oo);
-			ok &= (oo != nullptr);
-			if (ld.ego_index == i)
-				ego = oo;
-			if (i % 5 == 0)
-				DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
+				if (ld.ego_index == i)
+					ego = oo;
+				if (i % 5 == 0)
+					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
+			} catch (...) {
+				ok = false;
+			}
 		}
-	add_all_objects_to_lists = true;
 
 	// terrains
-	foreachi(auto &t, ld.terrains, i){
+	foreachi(auto &t, ld.terrains, i) {
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
-		Terrain *tt = create_terrain(t.filename, t.pos);
+		auto tt = create_terrain_no_reg(t.filename, t.pos);
 
 		for (auto &cc: t.components) {
 			//msg_write("add component " + cc.class_name);
@@ -384,6 +385,7 @@ bool World::load(const LevelData &ld) {
 			auto comp = tt->owner->add_component(type, cc.var);
 	#endif
 		}
+		register_entity(tt->get_owner<Entity3D>());
 		ok &= !tt->error;
 	}
 
@@ -408,7 +410,7 @@ void World::add_link(Link *l) {
 }
 
 
-Terrain *World::create_terrain(const Path &filename, const vector &pos) {
+Terrain *World::create_terrain_no_reg(const Path &filename, const vector &pos) {
 
 	auto o = create_entity(pos, quaternion::ID);
 
@@ -422,10 +424,13 @@ Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	sb->mass = 10000.0f;
 	sb->theta_0 = matrix3::ZERO;
 	sb->passive = true;
-	//sb->on_init();
 
-	register_entity(o);
+	return t;
+}
 
+Terrain *World::create_terrain(const Path &filename, const vector &pos) {
+	auto t = create_terrain_no_reg(filename, pos);
+	register_entity(t->get_owner<Entity3D>());
 	return t;
 }
 
@@ -461,16 +466,16 @@ void World::register_entity(Entity3D *e) {
 }
 
 Entity3D *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
-	auto o = create_object_x(filename, "", pos, ang, {});
+	auto o = create_object_no_reg_x(filename, "", pos, ang, {});
 	register_entity(o);
 	return o;
 }
 
 Entity3D *World::create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang) {
-	return create_object_x(filename, "", pos, ang, {});
+	return create_object_no_reg_x(filename, "", pos, ang, {});
 }
 
-Entity3D *World::create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components) {
+Entity3D *World::create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components) {
 	if (engine.resetting_game)
 		throw Exception("create_object during game reset");
 
@@ -507,10 +512,6 @@ Entity3D *World::create_object_x(const Path &filename, const string &name, const
 		auto comp = o->add_component(type, cc.var);
 #endif
 	}
-
-	//register_object(o, w_index);
-
-	//AddNetMsg(NET_MSG_CREATE_OBJECT, o->object_id, filename.str());
 
 	return o;
 }
@@ -578,6 +579,8 @@ void World::register_object(Entity3D *o) {
 	objects[on] = o;
 
 	o->object_id = on;
+
+	//AddNetMsg(NET_MSG_CREATE_OBJECT, o->object_id, filename.str());
 }
 
 
@@ -587,14 +590,14 @@ void World::set_active_physics(Entity3D *o, bool active, bool passive) { //, boo
 
 #if HAS_LIB_BULLET
 	btScalar mass(active ? sb->mass : 0);
-	btVector3 localInertia(0, 0, 0);
+	btVector3 local_inertia(0, 0, 0);
 	if (c->col_shape) {
-		c->col_shape->calculateLocalInertia(mass, localInertia);
-		sb->theta_0._00 = localInertia.x();
-		sb->theta_0._11 = localInertia.y();
-		sb->theta_0._22 = localInertia.z();
+		c->col_shape->calculateLocalInertia(mass, local_inertia);
+		sb->theta_0._00 = local_inertia.x();
+		sb->theta_0._11 = local_inertia.y();
+		sb->theta_0._22 = local_inertia.z();
 	}
-	sb->body->setMassProps(mass, localInertia);
+	sb->body->setMassProps(mass, local_inertia);
 	if (passive and !sb->passive)
 		dynamicsWorld->addRigidBody(sb->body);
 	if (!passive and sb->passive)
@@ -652,8 +655,7 @@ void World::unregister_entity(Entity3D *e) {
 		unregister_object(e);
 
 #if HAS_LIB_BULLET
-	auto *sb = e->get_component<SolidBody>();
-	if (sb)
+	if (auto sb = e->get_component<SolidBody>())
 		dynamicsWorld->removeRigidBody(sb->body);
 #endif
 
@@ -751,8 +753,7 @@ void World::register_model(Model *m) {
 	m->registered = true;
 	
 	// sub models
-	auto sk = m->owner->get_component<Skeleton>();
-	if (sk) {
+	if (auto sk = m->owner->get_component<Skeleton>()) {
 		for (auto &b: sk->bone)
 			if (b.model)
 				register_model(b.model);
@@ -789,8 +790,7 @@ void World::unregister_model(Model *m) {
 	//printf("%d\n", m->NumBones);
 
 	// sub models
-	auto sk = m->owner->get_component<Skeleton>();
-	if (sk) {
+	if (auto sk = m->owner->get_component<Skeleton>()) {
 		for (auto &b: sk->bone)
 			if (b.model)
 				unregister_model(b.model);

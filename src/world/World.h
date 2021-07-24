@@ -109,8 +109,9 @@ public:
 
 	Entity3D *create_object(const Path &filename, const vector &pos, const quaternion &ang);
 	Entity3D *create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang);
-	Entity3D *create_object_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components);
+	Entity3D *create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
+	Terrain *create_terrain_no_reg(const Path &filename, const vector &pos);
 
 	Object* create_object_multi(const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang);
 
@@ -177,10 +178,6 @@ public:
 
 
 	Array<LevelData::ScriptData> scripts;
-
-
-	// esotherical (not in the world)
-	bool add_all_objects_to_lists;
 
 
 	btDefaultCollisionConfiguration* collisionConfiguration;
