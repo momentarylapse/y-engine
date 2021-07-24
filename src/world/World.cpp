@@ -222,15 +222,7 @@ void World::reset() {
 		delete o;
 	dummy_entities.clear();
 
-	// terrains
-	//for (auto *t: terrains)
-	//	delete t;
 	terrains.clear();
-
-	// objects
-	for (auto *o: objects)
-		if (o)
-			delete o;//unregister_object(o); // actual deleting done by ModelManager
 	objects.clear();
 	num_reserved_objects = 0;
 	
@@ -369,8 +361,9 @@ bool World::load(const LevelData &ld) {
 		if (!o.filename.is_empty()){
 			auto q = quaternion::rotation(o.ang);
 			auto *oo = create_object_x(o.filename, o.name, o.pos, q, o.components);
+			request_next_object_index(i);
 			if (oo)
-				register_object(oo, i);
+				register_entity(oo);
 			ok &= (oo != nullptr);
 			if (ld.ego_index == i)
 				ego = oo;
@@ -448,6 +441,9 @@ Entity3D *World::create_entity(const vector &pos, const quaternion &ang) {
 }
 
 void World::register_entity(Entity3D *e) {
+	if (auto m = e->get_component<Model>())
+		register_object(e);
+
 	dummy_entities.add(e);
 	e->on_init_rec();
 
@@ -466,7 +462,7 @@ void World::register_entity(Entity3D *e) {
 
 Entity3D *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
 	auto o = create_object_x(filename, "", pos, ang, {});
-	register_object(o, -1);
+	register_entity(o);
 	return o;
 }
 
@@ -555,8 +551,13 @@ void World::register_model_multi(Model *m, const Array<matrix> &matrices) {
 	m->registered = true;
 }
 
-void World::register_object(Entity3D *o, int index) {
-	int on = index;
+void World::request_next_object_index(int i) {
+	next_object_index = i;
+}
+
+void World::register_object(Entity3D *o) {
+	int on = next_object_index;
+	next_object_index = -1;
 	if (on < 0) {
 		// ..... better use a list of "empty" objects???
 		for (int i=num_reserved_objects; i<objects.num; i++)
@@ -577,18 +578,6 @@ void World::register_object(Entity3D *o, int index) {
 	objects[on] = o;
 
 	o->object_id = on;
-
-	register_entity(o);
-
-	/*o->on_init_rec();
-
-#if HAS_LIB_BULLET
-	if (auto sb = o->get_component<SolidBody>())
-		dynamicsWorld->addRigidBody(sb->body);
-#endif
-
-	msg_data.e = o;
-	notify("entity-add");*/
 }
 
 
@@ -659,6 +648,8 @@ void World::notify(const string &msg) {
 }
 
 void World::unregister_entity(Entity3D *e) {
+	if (e->object_id >= 0)
+		unregister_object(e);
 
 #if HAS_LIB_BULLET
 	auto *sb = e->get_component<SolidBody>();
@@ -682,10 +673,7 @@ bool World::unregister(Entity* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
 	if (x->type == Entity::Type::ENTITY3D) {
 		auto e = (Entity3D*)x;
-		if (e->object_id >= 0)
-			unregister_object(e);
-		else
-			unregister_entity(e);
+		unregister_entity(e);
 /*	} else if (x->type == Entity::Type::LIGHT) {
 #ifdef _X_ALLOW_X_
 		foreachi(auto *l, lights, i)
@@ -902,11 +890,11 @@ void World::add_sound(audio::Sound *s) {
 
 
 void World::shift_all(const vector &dpos) {
-	for (auto *e: dummy_entities)
+	for (auto *e: dummy_entities) {
 		e->pos += dpos;
-	for (auto *o: objects)
-		if (o)
-			o->pos += dpos;
+		if (auto m = e->get_component<Model>())
+			m->update_matrix();
+	}
 #ifdef _X_ALLOW_X_
 	for (auto *s: sounds)
 		s->pos += dpos;

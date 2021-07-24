@@ -114,7 +114,10 @@ public:
 
 	Object* create_object_multi(const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang);
 
-	void register_object(Entity3D *o, int index);
+	int next_object_index = -1;
+	void request_next_object_index(int i);
+
+	void register_object(Entity3D *o);
 	void unregister_object(Entity3D *o);
 	void set_active_physics(Entity3D *o, bool active, bool passive);//, bool test_collisions);
 
