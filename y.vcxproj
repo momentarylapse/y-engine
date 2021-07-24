@@ -230,6 +230,7 @@
     <ClCompile Include="src\net\NetworkManager.cpp" />
     <ClCompile Include="src\plugins\Controller.cpp" />
     <ClCompile Include="src\plugins\PluginManager.cpp" />
+    <ClCompile Include="src\plugins\Scheduler.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\renderer\RenderPath.cpp" />
     <ClCompile Include="src\renderer\RenderPathGL.cpp" />
@@ -369,6 +370,7 @@
     <ClInclude Include="src\net\NetworkManager.h" />
     <ClInclude Include="src\plugins\Controller.h" />
     <ClInclude Include="src\plugins\PluginManager.h" />
+    <ClInclude Include="src\plugins\Scheduler.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\renderer\RenderPath.h" />
     <ClInclude Include="src\renderer\RenderPathGL.h" />

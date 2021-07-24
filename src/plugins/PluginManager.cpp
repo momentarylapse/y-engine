@@ -7,6 +7,7 @@
 
 #include "PluginManager.h"
 #include "Controller.h"
+#include "Scheduler.h"
 #include "../lib/kaba/kaba.h"
 #include "../audio/Sound.h"
 #include "../fx/Particle.h"
@@ -505,6 +506,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
 	kaba::link_external("get_controller", (void*)&global_get_controller);
 	kaba::link_external("add_camera", (void*)&add_camera);
+	kaba::link_external("Scheduler.subscribe", (void*)&Scheduler::subscribe);
 }
 
 template<class C>
@@ -543,6 +545,7 @@ void PluginManager::reset() {
 	for (auto *c: controllers)
 		delete c;
 	controllers.clear();
+	Scheduler::reset();
 }
 
 Array<TemplateDataScriptVariable> parse_variables(const string &var) {
@@ -672,6 +675,7 @@ Controller *PluginManager::get_controller(const kaba::Class *type) {
 void PluginManager::handle_iterate(float dt) {
 	for (auto *c: controllers)
 		c->on_iterate(dt);
+	Scheduler::iterate(dt);
 }
 
 void PluginManager::handle_iterate_pre(float dt) {

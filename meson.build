@@ -193,6 +193,7 @@ sources = [
 	'src/net/NetworkManager.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
+	'src/plugins/Scheduler.cpp',
 	'src/renderer/Renderer.cpp',
 	'src/renderer/RenderPath.cpp',
 	'src/renderer/RenderPathGL.cpp',
