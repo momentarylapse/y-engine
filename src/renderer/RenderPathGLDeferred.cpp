@@ -101,7 +101,7 @@ void RenderPathGLDeferred::draw() {
 
 	prepare_instanced_matrices();
 
-	prepare_lights();
+	prepare_lights(cam);
 	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
 	if (shadow_index >= 0) {

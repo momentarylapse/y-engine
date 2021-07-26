@@ -15,6 +15,8 @@ layout(binding = 7) uniform sampler2D tex4;//sampler_shadow2;
 //uniform vec3 eye_pos;
 const vec3 eye_pos = vec3(0,0,0);
 
+struct Matrix { mat4 model, view, project; };
+/*layout(binding = 0)*/ uniform Matrix matrix;
 
 uniform samplerCube tex_cube;
 
@@ -37,10 +39,11 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 
 	//if (metal > 0.01 && false) {
 	if (metal > 0.9 && roughness < 0.2) {
+		mat3 R = transpose(mat3(matrix.view));
 		vec3 L = reflect(view_dir, n);
 		//for (int i=0; i<30; i++) {
 		//vec3 L = normalize(L0 + vec3(_surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5) / 50);
-		vec4 r = texture(tex_cube, -L);
+		vec4 r = texture(tex_cube, R*L);
 		//out_color = r;
 		//return;
 		/*if (roughness > 0.1) {

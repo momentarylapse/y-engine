@@ -109,7 +109,7 @@ public:
 	void draw_objects_transparent(bool allow_material);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();
-	void prepare_lights();
+	void prepare_lights(Camera *cam);
 
 	nix::FrameBuffer *next_fb(nix::FrameBuffer *cur);
 	rect dynamic_fb_area() const;

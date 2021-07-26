@@ -114,7 +114,7 @@ void RenderPathGLForward::draw() {
 
 	perf_mon->tick(PMLabel::PRE);
 
-	prepare_lights();
+	prepare_lights(cam);
 	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
 	if (shadow_index >= 0) {

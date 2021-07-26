@@ -140,6 +140,7 @@ void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cu
 			o.ang = quaternion::rotation(vector(0,pi,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vector(0,0,0));
+		prepare_lights(&cam);
 		render_into_texture(fb_cube.get(), &cam, fb_cube->area());
 	}
 	cam.owner = nullptr;
@@ -511,7 +512,7 @@ void RenderPathGL::prepare_instanced_matrices() {
 	}
 }
 
-void RenderPathGL::prepare_lights() {
+void RenderPathGL::prepare_lights(Camera *cam) {
 
 	lights.clear();
 	for (auto *l: world.lights) {

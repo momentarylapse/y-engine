@@ -6,8 +6,8 @@
 struct Material { vec4 albedo, emission; float roughness, metal; };
 uniform Material material;
 uniform sampler2D tex0;
-struct Matrix { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrix matrix;
+//struct Matrix { mat4 model, view, project; };
+///*layout(binding = 0)*/ uniform Matrix matrix;
 
 void main() {
 	// Mesh
