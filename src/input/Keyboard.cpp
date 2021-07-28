@@ -112,6 +112,8 @@ int key_decode(int key) {
 		return hui::KEY_INSERT;
 	if (key == GLFW_KEY_TAB)
 		return hui::KEY_TAB;
+	if (key == GLFW_KEY_ESCAPE)
+		return hui::KEY_ESCAPE;
 	return -1;
 }
 
