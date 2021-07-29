@@ -723,12 +723,10 @@ void World::register_model(Model *m) {
 	for (int i=0;i<m->material.num;i++){
 		Material *mat = m->material[i];
 		bool trans = false;//!mat->alpha.z_buffer; //false;
-		/*if (mat->TransparencyMode>0){
-			if (mat->TransparencyMode == TransparencyModeFunctions)
-				trans = true;
-			if (mat->TransparencyMode == TransparencyModeFactor)
-				trans = true;
-		}*/
+		if (mat->alpha.mode == TransparencyMode::FUNCTIONS)
+			trans = true;
+		if (mat->alpha.mode == TransparencyMode::FACTOR)
+			trans = true;
 
 		PartialModel p;
 		p.model = m;

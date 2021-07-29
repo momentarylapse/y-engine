@@ -487,6 +487,7 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 }
 
 void RenderPathGL::draw_objects_transparent(bool allow_material) {
+	nix::set_z(false, true);
 	if (allow_material)
 	for (auto &s: world.sorted_trans) {
 		Model *m = s.model;
@@ -503,6 +504,8 @@ void RenderPathGL::draw_objects_transparent(bool allow_material) {
 		}
 		nix::set_cull(nix::CullMode::DEFAULT);
 	}
+	nix::set_alpha(nix::AlphaMode::NONE);
+	nix::set_z(true, true);
 }
 
 
