@@ -166,7 +166,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam,
 	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::bind_buffer(ubo_light, 1);
-	nix::set_view_matrix(cam->m_view);
+	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 
 	draw_world(true);

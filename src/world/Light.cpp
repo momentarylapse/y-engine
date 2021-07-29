@@ -58,7 +58,8 @@ void Light::set_direction(const vector &dir) {
 void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 	auto o = get_owner<Entity3D>();
 	if (using_view_space) {
-		light.pos = cam->m_view * o->pos;
+		//light.pos = cam->m_view * o->pos;
+		light.pos = cam->view_matrix() * o->pos;
 		light.dir = cam->get_owner<Entity3D>()->ang.bar() * o->ang * vector::EZ;
 	} else {
 		light.pos = o->pos;
