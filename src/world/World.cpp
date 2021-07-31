@@ -719,8 +719,9 @@ void PartialModel::clear() {
 void World::register_model(Model *m) {
 	if (m->registered)
 		return;
-	
-	for (int i=0;i<m->material.num;i++){
+	msg_write("reg model " + m->filename().str());
+
+	for (int i=0;i<m->material.num;i++) {
 		Material *mat = m->material[i];
 		bool trans = false;//!mat->alpha.z_buffer; //false;
 		if (mat->alpha.mode == TransparencyMode::FUNCTIONS)
@@ -751,11 +752,16 @@ void World::register_model(Model *m) {
 	m->registered = true;
 	
 	// sub models
+	msg_write("R sk");
+	msg_write(p2s(m->owner));
+	if (m->owner)
 	if (auto sk = m->owner->get_component<Skeleton>()) {
+		msg_write("....sk");
 		for (auto &b: sk->bone)
 			if (b.model)
 				register_model(b.model);
 	}
+	msg_write("/reg");
 }
 
 // remove a model from the (possible) rendering list
@@ -788,11 +794,13 @@ void World::unregister_model(Model *m) {
 	//printf("%d\n", m->NumBones);
 
 	// sub models
+	if (m->owner)
 	if (auto sk = m->owner->get_component<Skeleton>()) {
 		for (auto &b: sk->bone)
 			if (b.model)
 				unregister_model(b.model);
 	}
+	msg_write("/unreg");
 }
 
 void World::iterate_physics(float dt) {
@@ -821,6 +829,19 @@ void World::iterate_animations(float dt) {
 	auto list = ComponentManager::get_listx<Animator>();
 	for (auto *o: *list)
 		o->do_animation(dt);
+
+
+	// TODO
+	auto list2 = ComponentManager::get_listx<Skeleton>();
+	for (auto *o: *list2) {
+		for (auto &b: o->bone) {
+			if (b.model) {
+				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
+				b.model->_matrix = o->get_owner<Entity3D>()->get_matrix() * b.dmatrix;
+			}
+		}
+	}
+		//o->do_animation(dt);
 }
 
 void World::iterate(float dt) {

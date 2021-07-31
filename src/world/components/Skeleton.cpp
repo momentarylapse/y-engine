@@ -10,6 +10,8 @@
 #include "../../y/Entity.h"
 #include "../ModelManager.h"
 
+Model* fancy_copy(Model *orig);
+
 const kaba::Class *Skeleton::_class = nullptr;
 
 Skeleton::Skeleton() {
@@ -31,16 +33,13 @@ void Skeleton::on_init() {
 	bone = m->_template->skeleton->bone;
 
 	// skeleton
-	/*m->bone = bone;
-	for (int i=0;i<bone.num;i++)
-		if (bone[i].model)
-			m->bone[i].model = nullptr;//CopyModel(bone[i].model, allow_script_init);*/
-
-
-
-	// skeleton
 	for (int i=0; i<bone.num; i++) {
 		bone[i].rest_pos = get_bone_rest_pos(i);
+		bone[i].cur_pos = bone[i].rest_pos;
+		bone[i].cur_ang = quaternion::ID;
+		if (bone[i].model) {
+			bone[i].model = fancy_copy(bone[i].model->_template->model);//ModelManager::load(bone[i].model->filename().no_ext());
+		}
 	}
 }
 

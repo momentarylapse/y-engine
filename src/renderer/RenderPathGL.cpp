@@ -464,7 +464,7 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 		Model *m = s.model;
 		nix::set_model_matrix(m->_matrix);
 
-		auto ani = m->owner->get_component<Animator>();
+		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (ani) {
 			if (allow_material)
