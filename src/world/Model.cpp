@@ -537,7 +537,8 @@ Path Model::filename() {
 }
 
 void Model::update_matrix() {
-	_matrix = get_owner<Entity3D>()->get_matrix();
+	if (owner)
+		_matrix = get_owner<Entity3D>()->get_matrix();
 }
 
 #if 0

@@ -911,9 +911,12 @@ void World::add_sound(audio::Sound *s) {
 void World::shift_all(const vector &dpos) {
 	for (auto *e: dummy_entities) {
 		e->pos += dpos;
-		if (auto m = e->get_component<Model>())
-			m->update_matrix();
+		//if (auto m = e->get_component<Model>())
+		//	m->update_matrix();
 	}
+	auto list = ComponentManager::get_listx<Model>();
+	for (auto *m: *list)
+		m->update_matrix();
 #ifdef _X_ALLOW_X_
 	for (auto *s: sounds)
 		s->pos += dpos;
