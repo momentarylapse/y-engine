@@ -247,7 +247,7 @@ public:
 		while (!glfwWindowShouldClose(window)) {
 			perf_mon.frame();
 			engine.elapsed_rt = perf_mon.frame_dt;
-			engine.elapsed = perf_mon.frame_dt;
+			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 0.1f);
 
 			input::iterate();
 			plugin_manager.handle_input();

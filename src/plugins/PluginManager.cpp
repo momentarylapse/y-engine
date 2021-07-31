@@ -266,6 +266,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("World.add_light_parallel", &World::add_light_parallel);
 	kaba::link_external_class_func("World.add_light_point", &World::add_light_point);
 	kaba::link_external_class_func("World.add_light_cone", &World::add_light_cone);
+	kaba::link_external_class_func("World.add_link", &World::add_link);
 	kaba::link_external_class_func("World.add_particle", &World::add_particle);
 	kaba::link_external_class_func("World.add_sound", &World::add_sound);
 	kaba::link_external_class_func("World.shift_all", &World::shift_all);
