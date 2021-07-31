@@ -297,8 +297,8 @@ public:
 		plugin_manager.handle_iterate_pre(engine.elapsed);
 		network_manager.iterate();
 		world.iterate(engine.elapsed);
-		ComponentManager::iterate(engine.elapsed);
 		plugin_manager.handle_iterate(engine.elapsed);
+		ComponentManager::iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
 		perf_mon.tick(PMLabel::ITERATE);
