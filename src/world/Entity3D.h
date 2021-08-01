@@ -16,10 +16,12 @@ class matrix;
 
 class Entity3D : public Entity {
 public:
+	Entity3D();
 	Entity3D(const vector &pos, const quaternion &ang);
 
 	vector pos;
 	quaternion ang;
+	matrix get_local_matrix() const;
 	matrix get_matrix() const;
 
 	int object_id;

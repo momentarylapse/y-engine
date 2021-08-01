@@ -462,6 +462,7 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
 		Model *m = s.model;
+		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
 
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
@@ -491,6 +492,7 @@ void RenderPathGL::draw_objects_transparent(bool allow_material) {
 	if (allow_material)
 	for (auto &s: world.sorted_trans) {
 		Model *m = s.model;
+		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
 		set_material(s.material, ShaderVariant::DEFAULT);
 		nix::set_cull(nix::CullMode::NONE);

@@ -157,13 +157,13 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Model.Mesh.Sub.skin_vertex", &SubMesh::skin_vertex);
 	kaba::declare_class_element("Model.Mesh.Sub.normal", &SubMesh::normal);
 
-	kaba::declare_class_size("Skeleton.Bone", sizeof(Bone));
+	/*kaba::declare_class_size("Skeleton.Bone", sizeof(Bone));
 	kaba::declare_class_element("Skeleton.Bone.parent", &Bone::parent);
 	kaba::declare_class_element("Skeleton.Bone.pos", &Bone::delta_pos);
 	kaba::declare_class_element("Skeleton.Bone.model", &Bone::model);
 	//kaba::declare_class_element("Skeleton.Bone.dmatrix", &Bone::dmatrix);
 	kaba::declare_class_element("Skeleton.Bone.cur_ang", &Bone::cur_ang);
-	kaba::declare_class_element("Skeleton.Bone.cur_pos", &Bone::cur_pos);
+	kaba::declare_class_element("Skeleton.Bone.cur_pos", &Bone::cur_pos);*/
 
 	Model model;
 	kaba::declare_class_size("Model", sizeof(Model));
@@ -197,7 +197,7 @@ void PluginManager::export_kaba() {
 
 
 	kaba::declare_class_size("Skeleton", sizeof(Skeleton));
-	kaba::declare_class_element("Skeleton.bones", &Skeleton::bone);
+	kaba::declare_class_element("Skeleton.bones", &Skeleton::bones);
 
 
 	kaba::declare_class_size("SolidBody", sizeof(SolidBody));

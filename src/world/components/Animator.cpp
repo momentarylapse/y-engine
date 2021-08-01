@@ -58,9 +58,9 @@ void Animator::on_init() {
 
 	// skeleton
 	auto sk = m->owner->get_component<Skeleton>();
-	dmatrix.resize(sk->bone.num);
-	for (int i=0; i<sk->bone.num; i++) {
-		dmatrix[i] = matrix::translation(sk->bone[i].rest_pos);
+	dmatrix.resize(sk->bones.num);
+	for (int i=0; i<sk->bones.num; i++) {
+		dmatrix[i] = matrix::translation(sk->pos0[i]);
 	}
 }
 
@@ -72,13 +72,13 @@ void Animator::do_animation(float elapsed) {
 	auto sk = owner->get_component<Skeleton>();
 
 	// recursion
-	for (auto &b: sk->bone)
-		if (b.model) {
-			b.model->_matrix = m->_matrix * b.dmatrix;
+	//for (auto &b: sk->bone)
+	//	if (auto bm = b.get_component<Model>()) {
+			//bm->_matrix = b.get_matrix();
 
 			// done by global Animator[] list iteration
 			//b.model->do_animation(elapsed);
-		}
+	//	}
 
 	if (!meta)
 		return;
@@ -158,8 +158,8 @@ void Animator::do_animation(float elapsed) {
 
 // skeletal animation
 
-	for (int i=0;i<sk->bone.num;i++){
-		Bone *b = &sk->bone[i];
+	for (int i=0;i<sk->bones.num;i++){
+		auto *b = &sk->bones[i];
 
 		// reset (only if not being edited by script)
 		/*if (Numanim.operations != -2){
@@ -185,10 +185,10 @@ void Animator::do_animation(float elapsed) {
 			int f1 = move->frame0 + fr; // current frame (absolute)
 			int f2 = move->frame0 + (fr+1)%move->num_frames; // next frame (absolute)
 			float df = op->time-(float)fr; // time since start of current frame
-			w1 = meta->skel_ang[f1 * sk->bone.num + i]; // first value
-			p1 = meta->skel_dpos[f1*sk->bone.num + i];
-			w2 = meta->skel_ang[f2*sk->bone.num + i]; // second value
-			p2 = meta->skel_dpos[f2*sk->bone.num + i];
+			w1 = meta->skel_ang[f1 * sk->bones.num + i]; // first value
+			p1 = meta->skel_dpos[f1*sk->bones.num + i];
+			w2 = meta->skel_ang[f2*sk->bones.num + i]; // second value
+			p2 = meta->skel_dpos[f2*sk->bones.num + i];
 			move->inter_quad = false;
 			/*if (m->InterQuad){
 				w0=m->ang[i][(f-1+m->NumFrames)%m->NumFrames]; // last value
@@ -199,7 +199,7 @@ void Animator::do_animation(float elapsed) {
 			}else*/{
 				// interpolate the current alignment
 				w = quaternion::interpolate(w1,w2,df);
-				p=(1.0f-df)*p1+df*p2 + b->delta_pos;
+				p = (1.0f-df)*p1 + df*p2 + sk->dpos[i];
 			}
 
 
@@ -207,62 +207,62 @@ void Animator::do_animation(float elapsed) {
 
 			// overwrite
 			if (op->command == op->Command::SET){
-				b->cur_ang = w;
-				b->cur_pos = p;
+				b->ang = w;
+				b->pos = p;
 
 			// overwrite, if current doesn't equal 0
 			}else if (op->command == op->Command::SET_NEW_KEYED){
-				if (w.w!=1)
-					b->cur_ang=w;
-				if (p!=v_0)
-					b->cur_pos=p;
+				if (w.w != 1)
+					b->ang = w;
+				if (p != v_0)
+					b->pos = p;
 
 			// overwrite, if last equals 0
 			}else if (op->command == op->Command::SET_OLD_KEYED){
-				if (b->cur_ang.w==1)
-					b->cur_ang=w;
-				if (b->cur_pos==v_0)
-					b->cur_pos=p;
+				if (b->ang.w==1)
+					b->ang=w;
+				if (b->pos==v_0)
+					b->pos=p;
 
 			// w = w_old         + w_new * f
 			}else if (op->command == op->Command::ADD_1_FACTOR){
 				w = w.scale_angle(op->param1);
-				b->cur_ang = w * b->cur_ang;
-				b->cur_pos += op->param1 * p;
+				b->ang = w * b->ang;
+				b->pos += op->param1 * p;
 
 			// w = w_old * (1-f) + w_new * f
 			}else if (op->command == op->Command::MIX_1_FACTOR){
-				b->cur_ang = quaternion::interpolate( b->cur_ang, w, op->param1);
-				b->cur_pos = (1 - op->param1) * b->cur_pos + op->param1 * p;
+				b->ang = quaternion::interpolate(b->ang, w, op->param1);
+				b->pos = (1 - op->param1) * b->pos + op->param1 * p;
 
 			// w = w_old * a     + w_new * b
 			}else if (op->command == op->Command::MIX_2_FACTOR){
-				b->cur_ang = b->cur_ang.scale_angle(op->param1);
+				b->ang = b->ang.scale_angle(op->param1);
 				w = w.scale_angle(op->param2);
-				b->cur_ang = quaternion::interpolate( b->cur_ang, w, 0.5f);
-				b->cur_pos = op->param1 * b->cur_pos + op->param2 * p;
+				b->ang = quaternion::interpolate(b->ang, w, 0.5f);
+				b->pos = op->param1 * b->pos + op->param2 * p;
 			}
 		}
 
-		// bone has root -> align to root
+		// bone has parent -> align to parent
 		//vector dpos = b->delta_pos;
-		auto t0 = matrix::translation(-b->rest_pos);
-		if (b->parent >= 0) {
-			b->cur_pos = sk->bone[b->parent].dmatrix * b->delta_pos;
+		auto t0 = matrix::translation(- sk->pos0[i]);
+		if (sk->parent[i] >= 0) {
+			b->pos = sk->bones[sk->parent[i]].pos + sk->bones[sk->parent[i]].ang * sk->dpos[i];
 			//dpos = b->cur_pos - b->rest_pos;
 		}
 
 		// create matrices (model -> skeleton)
-		auto t = matrix::translation(b->cur_pos);
-		auto r = matrix::rotation_q(b->cur_ang);
-		b->dmatrix = t * r;
+		auto t = matrix::translation(b->pos);
+		auto r = matrix::rotation_q(b->ang);
+		//b->dmatrix = t * r;
 		dmatrix[i] = t * r * t0;
 	}
 
 #if 0
 
 	// create the animated data
-	if (bone.num > 0)
+	if (bones.num > 0)
 		for (int s=0;s<MODEL_NUM_MESHES;s++){
 			if (!_detail_needed_[s])
 				continue;
@@ -270,9 +270,9 @@ void Animator::do_animation(float elapsed) {
 			// transform vertices
 			for (int p=0;p<sk->vertex.num;p++){
 				int b = sk->bone_index[p];
-				vector pp = sk->vertex[p] - bone[b].rest_pos;
+				vector pp = sk->vertex[p] - bones[b].rest_pos;
 				// interpolate vertex
-				anim.mesh[s]->vertex[p] = bone[b].dmatrix * pp;
+				anim.mesh[s]->vertex[p] = bones[b].dmatrix * pp;
 				//anim.vertex[s][p]=pp;
 			}
 			// normal vectors
@@ -281,7 +281,7 @@ void Animator::do_animation(float elapsed) {
 				auto sub = &sk->sub[mm];
 			#ifdef DynamicNormalCorrect
 				for (int t=0;t<sub->num_triangles*3;t++)
-					anim.mesh[s]->sub[mm].normal[t] = bone[sk->bone_index[sub->triangle_index[t]]].dmatrix.transform_normal(sub->normal[t]);
+					anim.mesh[s]->sub[mm].normal[t] = bones[sk->bone_index[sub->triangle_index[t]]].dmatrix.transform_normal(sub->normal[t]);
 					//anim.normal[s][t + offset] = ...
 					//anim.normal[s][t + offset]=sub->Normal[t];
 			#else
@@ -397,16 +397,16 @@ int Animator::get_frames(int move_no) {
 	return meta->move[move_no].num_frames;
 }
 
-// edit skelettal animation via script
+// edit skeletal animation via script
 void Animator::begin_edit() {
 	if (!meta)
 		return;
 	num_operations = -2;
 	auto m = owner->get_component<Model>();
 	auto sk = owner->get_component<Skeleton>();
-	for (int i=0;i<sk->bone.num;i++){
-		sk->bone[i].cur_ang = quaternion::ID;
-		sk->bone[i].cur_pos = sk->bone[i].delta_pos;
+	for (int i=0;i<sk->bones.num;i++){
+		sk->bones[i].ang = quaternion::ID;
+		sk->bones[i].pos = sk->pos0[i];
 	}
 }
 
@@ -416,5 +416,5 @@ vector Animator::get_vertex(int index) {
 	auto sk = owner->get_component<Skeleton>();
 	auto s = m->mesh[MESH_HIGH];
 	int b = s->bone_index[index].i;
-	return m->_matrix * dmatrix[b] * s->vertex[index] - sk->bone[b].rest_pos;
+	return m->get_owner<Entity3D>()->get_matrix() * dmatrix[b] * s->vertex[index] - sk->pos0[b];
 }

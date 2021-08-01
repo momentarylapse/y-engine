@@ -218,9 +218,9 @@ void World::reset() {
 
 	gravity = v_0;
 
-	for (auto *o: dummy_entities)
+	for (auto *o: entities)
 		delete o;
-	dummy_entities.clear();
+	entities.clear();
 
 	terrains.clear();
 	objects.clear();
@@ -449,7 +449,7 @@ void World::register_entity(Entity3D *e) {
 	if (auto m = e->get_component<Model>())
 		register_object(e);
 
-	dummy_entities.add(e);
+	entities.add(e);
 	e->on_init_rec();
 
 
@@ -662,11 +662,11 @@ void World::unregister_entity(Entity3D *e) {
 	if (auto m = e->get_component<Model>())
 		unregister_model(m);
 
-	foreachi(auto *o, dummy_entities, i)
+	foreachi(auto *o, entities, i)
 		if (o == e) {
 			msg_data.e = o;
 			notify("entity-delete");
-			dummy_entities.erase(i);
+			entities.erase(i);
 			return;
 		}
 }
@@ -757,9 +757,9 @@ void World::register_model(Model *m) {
 	if (m->owner)
 	if (auto sk = m->owner->get_component<Skeleton>()) {
 		msg_write("....sk");
-		for (auto &b: sk->bone)
-			if (b.model)
-				register_model(b.model);
+		for (auto &b: sk->bones)
+			if (auto *mm = b.get_component<Model>())
+				register_model(mm);
 	}
 	msg_write("/reg");
 }
@@ -796,9 +796,9 @@ void World::unregister_model(Model *m) {
 	// sub models
 	if (m->owner)
 	if (auto sk = m->owner->get_component<Skeleton>()) {
-		for (auto &b: sk->bone)
-			if (b.model)
-				unregister_model(b.model);
+		for (auto &b: sk->bones)
+			if (auto *mm = b.get_component<Model>())
+				unregister_model(mm);
 	}
 	msg_write("/unreg");
 }
@@ -834,10 +834,10 @@ void World::iterate_animations(float dt) {
 	// TODO
 	auto list2 = ComponentManager::get_listx<Skeleton>();
 	for (auto *o: *list2) {
-		for (auto &b: o->bone) {
-			if (b.model) {
-				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
-				b.model->_matrix = o->get_owner<Entity3D>()->get_matrix() * b.dmatrix;
+		for (auto &b: o->bones) {
+			if (auto *mm = b.get_component<Model>()) {
+//				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
+//				mm->_matrix = o->get_owner<Entity3D>()->get_matrix() * b.dmatrix;
 			}
 		}
 	}
@@ -869,7 +869,7 @@ void World::iterate(float dt) {
 
 Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 	auto o = new Entity3D(v_0, ang);
-	dummy_entities.add(o);
+	entities.add(o);
 
 	auto l = new Light(c, -1, -1);
 	o->_add_component_external_(l);
@@ -879,7 +879,7 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 
 Light *World::add_light_point(const vector &p, const color &c, float r) {
 	auto o = new Entity3D(p, quaternion::ID);
-	dummy_entities.add(o);
+	entities.add(o);
 
 	auto l = new Light(c, r, -1);
 	o->_add_component_external_(l);
@@ -889,7 +889,7 @@ Light *World::add_light_point(const vector &p, const color &c, float r) {
 
 Light *World::add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t) {
 	auto o = new Entity3D(p, ang);
-	dummy_entities.add(o);
+	entities.add(o);
 
 	auto l = new Light(c, r, t);
 	o->_add_component_external_(l);
@@ -909,7 +909,7 @@ void World::add_sound(audio::Sound *s) {
 
 
 void World::shift_all(const vector &dpos) {
-	for (auto *e: dummy_entities) {
+	for (auto *e: entities) {
 		e->pos += dpos;
 		//if (auto m = e->get_component<Model>())
 		//	m->update_matrix();

@@ -383,12 +383,17 @@ public:
 	void read(File *f) override {
 		int version = f->read_int();
 		auto sk = me->_template->skeleton;
-		sk->bone.resize(f->read_int());
-		for (auto &b: sk->bone) {
-			f->read_vector(&b.delta_pos);
-			b.parent = f->read_int();
-			string filename = f->read_str();
-			b.model = ModelManager::load(filename);
+		int n = f->read_int();
+		sk->bones.resize(n);
+		sk->parent.resize(n);
+		sk->dpos.resize(n);
+		sk->pos0.resize(n);
+		sk->filename.resize(n);
+		foreachi (auto &b, sk->bones, i) {
+			f->read_vector(&sk->dpos[i]);
+			sk->parent[i] = f->read_int();
+			sk->filename[i] = f->read_str();
+			//b.model = ModelManager::load(filename);
 		}
 		f->read_str();
 	}
@@ -473,8 +478,8 @@ public:
 
 		meta->num_frames_skeleton = f->read_int();
 		if (meta->num_frames_skeleton > 0){
-			meta->skel_dpos.resize(meta->num_frames_skeleton * sk->bone.num);
-			meta->skel_ang.resize(meta->num_frames_skeleton * sk->bone.num);
+			meta->skel_dpos.resize(meta->num_frames_skeleton * sk->bones.num);
+			meta->skel_ang.resize(meta->num_frames_skeleton * sk->bones.num);
 		}
 		Array<bool> var_delta_pos;
 		int num_bones = f->read_int();
@@ -487,12 +492,12 @@ public:
 			for (int j=0; j<num_bones; j++) {
 				vector v;
 				f->read_vector(&v);
-				meta->skel_ang[fr * sk->bone.num + j] = quaternion::rotation_v(v);
+				meta->skel_ang[fr * sk->bones.num + j] = quaternion::rotation_v(v);
 			}
 
 			for (int j=0; j<num_bones; j++)
 				if (var_delta_pos[j])
-					f->read_vector(&meta->skel_dpos[fr * sk->bone.num + j]);
+					f->read_vector(&meta->skel_dpos[fr * sk->bones.num + j]);
 		}
 #endif
 	}
@@ -644,7 +649,7 @@ Model* ModelManager::load(const Path &_filename) {
 		delete m->_template->animator;
 		m->_template->animator = nullptr;
 	}
-	if (m->_template->skeleton->bone.num == 0) {
+	if (m->_template->skeleton->bones.num == 0) {
 		delete m->_template->skeleton;
 		m->_template->skeleton = nullptr;
 	}

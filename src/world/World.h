@@ -103,7 +103,7 @@ public:
 	void save(const Path &filename);
 
 	Entity3D *create_entity(const vector &pos, const quaternion &ang);
-	Array<Entity3D*> dummy_entities;
+	Array<Entity3D*> entities;
 	void register_entity(Entity3D *e);
 	void unregister_entity(Entity3D *e);
 

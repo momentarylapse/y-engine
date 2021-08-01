@@ -9,6 +9,8 @@
 #include "../lib/math/matrix.h"
 
 
+Entity3D::Entity3D() : Entity3D(vector::ZERO, quaternion::ID) {}
+
 Entity3D::Entity3D(const vector &_pos, const quaternion &_ang) : Entity(Entity::Type::ENTITY3D) {
 	pos = _pos;
 	ang = _ang;
@@ -16,8 +18,14 @@ Entity3D::Entity3D(const vector &_pos, const quaternion &_ang) : Entity(Entity::
 	object_id = -1;
 }
 
-matrix Entity3D::get_matrix() const {
+matrix Entity3D::get_local_matrix() const {
 	return matrix::translation(pos) * matrix::rotation(ang);
+}
+
+matrix Entity3D::get_matrix() const {
+	if (parent)
+		return parent->get_matrix() * get_local_matrix();
+	return get_local_matrix();
 }
 
 
