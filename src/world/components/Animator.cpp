@@ -25,11 +25,11 @@ MetaMove::MetaMove() {
 
 
 Animator::Animator() {
-	meta = nullptr;
 	buf = nullptr;
 
 	// "auto-animate"
-	num_operations = -1;
+	auto_animated = true;
+	num_operations = 0;
 	operation[0].move = 0;
 	operation[0].time = 0;
 	operation[0].command = MoveOperation::Command::SET;
@@ -84,38 +84,12 @@ void Animator::do_animation(float elapsed) {
 		return;
 
 
-	// for handling special cases (-1,-2)
 	int num_ops = num_operations;
-
-	// "auto-animated"
-	if (num_operations == -1){
+	if (auto_animated) {
 		// default: just run a single animation
 		_add_time(0, elapsed, 0, true);
 		num_ops = 1;
 	}
-
-	// skeleton edited by script...
-	if (num_operations == -2){
-		num_ops = 0;
-	}
-
-	// make sure we have something to store the animated data in...
-#if 0
-	for (int s=0;s<MODEL_NUM_MESHES;s++)
-		if (_detail_needed_[s]) {
-///			anim.vertex[s].resize(mesh[s]->vertex.num);
-			//memset(anim.vertex[s], 0, sizeof(vector) * Skin[s]->vertex.num);
-///			memcpy(&anim.vertex[s][0], &mesh[s]->vertex[0], sizeof(vector) * mesh[s]->vertex.num);
-			int nt = get_num_trias(mesh[s]);
-//			anim.normal[s].resize(nt * 3);
-			int offset = 0;
-			for (int i=0;i<material.num;i++){
-				memcpy(&anim.normal[s][offset], &mesh[s]->sub[i].normal[0], sizeof(vector) * mesh[s]->sub[i].num_triangles * 3);
-				offset += mesh[s]->sub[i].num_triangles;
-			}
-		}
-#endif
-
 
 // vertex animation
 
@@ -138,21 +112,6 @@ void Animator::do_animation(float elapsed) {
 			int f1 = m->frame0 + fr; // current frame (absolute)
 			int f2 = m->frame0 + (fr+1)%m->num_frames; // next frame (absolute)
 
-#if 0
-			// transform vertices
-			for (int s=0;s<MODEL_NUM_MESHES;s++)
-				if (_detail_needed_[s]){
-					auto *sk = mesh[s];
-					auto *a = anim.mesh[s];
-					for (int p=0;p<sk->vertex.num;p++){
-						vector dp1 = anim.meta->mesh[s + 1].dpos[f1 * sk->vertex.num + p]; // first value
-						vector dp2 = anim.meta->mesh[s + 1].dpos[f2 * sk->vertex.num + p]; // second value
-						a->vertex[p] = sk->vertex[p] + dp1*(1-dt) + dp2*dt;
-					}
-					for (int i=0;i<sk->sub.num;i++)
-						sk->sub[i].force_update = true;
-				}
-#endif
 		}
 	}
 
@@ -160,12 +119,6 @@ void Animator::do_animation(float elapsed) {
 
 	for (int i=0;i<sk->bones.num;i++){
 		auto *b = &sk->bones[i];
-
-		// reset (only if not being edited by script)
-		/*if (Numanim.operations != -2){
-			b->cur_ang = quaternion::ID;//quaternion(1, v_0);
-			b->cur_pos = b->Pos;
-		}*/
 
 		// operations
 		for (int iop=0;iop<num_ops;iop++){
@@ -258,55 +211,6 @@ void Animator::do_animation(float elapsed) {
 		//b->dmatrix = t * r;
 		dmatrix[i] = t * r * t0;
 	}
-
-#if 0
-
-	// create the animated data
-	if (bones.num > 0)
-		for (int s=0;s<MODEL_NUM_MESHES;s++){
-			if (!_detail_needed_[s])
-				continue;
-			auto sk = mesh[s];
-			// transform vertices
-			for (int p=0;p<sk->vertex.num;p++){
-				int b = sk->bone_index[p];
-				vector pp = sk->vertex[p] - bones[b].rest_pos;
-				// interpolate vertex
-				anim.mesh[s]->vertex[p] = bones[b].dmatrix * pp;
-				//anim.vertex[s][p]=pp;
-			}
-			// normal vectors
-			int offset = 0;
-			for (int mm=0;mm<sk->sub.num;mm++){
-				auto sub = &sk->sub[mm];
-			#ifdef DynamicNormalCorrect
-				for (int t=0;t<sub->num_triangles*3;t++)
-					anim.mesh[s]->sub[mm].normal[t] = bones[sk->bone_index[sub->triangle_index[t]]].dmatrix.transform_normal(sub->normal[t]);
-					//anim.normal[s][t + offset] = ...
-					//anim.normal[s][t + offset]=sub->Normal[t];
-			#else
-				memcpy(&anim.normal[s][offset], &sub->Normal[0], sub->num_triangles * 3 * sizeof(vector));
-			#endif
-				sub->force_update = true;
-				offset += sub->num_triangles;
-			}
-		}
-#endif
-
-
-
-	// update effects
-	/*for (int i=0;i<NumFx;i++){
-		sEffect **pfx=(sEffect**)fx;
-		int nn=0;
-		while( (*pfx) ){
-			vector vp;
-			VecTransform(vp, Matrix, Skin[0]->vertex[(*pfx)->vertex]);
-			FxUpdateByModel(*pfx,vp,vp);
-			pfx++;
-		}
-	}*/
-
 }
 
 
@@ -314,6 +218,7 @@ void Animator::do_animation(float elapsed) {
 // reset all animation data for a model (needed in each frame before applying animations!)
 void Animator::reset() {
 	num_operations = 0;
+	auto_animated = false;
 }
 
 // did the animation reach its end?
@@ -359,9 +264,7 @@ void Animator::_add_time(int operation_no, float elapsed, float v, bool loop) {
 bool Animator::add_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop) {
 	if (!meta)
 		return false;
-	if (num_operations < 0){
-		num_operations = 0;
-	}else if (num_operations >= MODEL_MAX_MOVE_OPS - 1){
+	if (num_operations >= MODEL_MAX_MOVE_OPS - 1) {
 		msg_error("Animator.add(): no more than " + i2s(MODEL_MAX_MOVE_OPS) + " animation layers allowed");
 		return false;
 	}
@@ -395,19 +298,6 @@ int Animator::get_frames(int move_no) {
 	if (!meta)
 		return 0;
 	return meta->move[move_no].num_frames;
-}
-
-// edit skeletal animation via script
-void Animator::begin_edit() {
-	if (!meta)
-		return;
-	num_operations = -2;
-	auto m = owner->get_component<Model>();
-	auto sk = owner->get_component<Skeleton>();
-	for (int i=0;i<sk->bones.num;i++){
-		sk->bones[i].ang = quaternion::ID;
-		sk->bones[i].pos = sk->pos0[i];
-	}
 }
 
 

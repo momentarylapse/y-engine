@@ -95,6 +95,7 @@ public:
 
 	// move operations
 	int num_operations;
+	bool auto_animated;
 	MoveOperation operation[MODEL_MAX_MOVE_OPS];
 	shared<MetaMove> meta;
 
@@ -110,7 +111,6 @@ public:
 	bool _cdecl add_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop);
 	bool _cdecl add(MoveOperation::Command cmd, int move_no, float &time, float dt, bool loop);
 	int _cdecl get_frames(int move_no);
-	void _cdecl begin_edit();
 	void do_animation(float elapsed);
 
 	void _add_time(int operation_no, float elapsed, float v, bool loop);

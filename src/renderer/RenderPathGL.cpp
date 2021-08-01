@@ -474,16 +474,13 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 				set_material(material_shadow, ShaderVariant::ANIMATED);
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(ani->buf, 7);
-			//m->anim.mesh[0]->update_vb();
-			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		} else {
 			if (allow_material)
 				set_material(s.material, ShaderVariant::DEFAULT);
 			else
 				set_material(material_shadow, ShaderVariant::DEFAULT);
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		}
+		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 	}
 }
 

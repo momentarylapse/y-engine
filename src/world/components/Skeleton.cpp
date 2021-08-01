@@ -43,14 +43,27 @@ void Skeleton::on_init() {
 		bones[i].ang = quaternion::ID;
 		auto mm = ModelManager::load(m->_template->skeleton->filename[i]);
 		if (mm) {
+			bones[i]._add_component_external_(mm);
+
 			if (mm->_template->skeleton)
 				bones[i].add_component(Skeleton::_class, "");
 
 			if (mm->_template->animator)
 				bones[i].add_component(Animator::_class, "");
-
-			bones[i]._add_component_external_(mm);
 		}
+		bones[i].on_init_rec();
+	}
+}
+
+void Skeleton::on_delete() {
+	for (auto &b: bones)
+		b.on_delete_rec();
+}
+
+void Skeleton::reset() {
+	for (int i=0; i<bones.num; i++){
+		bones[i].ang = quaternion::ID;
+		bones[i].pos = pos0[i];
 	}
 }
 

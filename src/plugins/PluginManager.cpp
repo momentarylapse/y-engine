@@ -114,6 +114,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Entity3D.pos", &Entity3D::pos);
 	kaba::declare_class_element("Entity3D.ang", &Entity3D::ang);
 	kaba::declare_class_element("Entity3D.parent", &Entity3D::parent);
+	kaba::link_external_class_func("Entity3D.get_matrix", &Entity3D::get_matrix);
 
 	Component component;
 	kaba::declare_class_size("Component", sizeof(Component));
@@ -157,14 +158,6 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Model.Mesh.Sub.skin_vertex", &SubMesh::skin_vertex);
 	kaba::declare_class_element("Model.Mesh.Sub.normal", &SubMesh::normal);
 
-	/*kaba::declare_class_size("Skeleton.Bone", sizeof(Bone));
-	kaba::declare_class_element("Skeleton.Bone.parent", &Bone::parent);
-	kaba::declare_class_element("Skeleton.Bone.pos", &Bone::delta_pos);
-	kaba::declare_class_element("Skeleton.Bone.model", &Bone::model);
-	//kaba::declare_class_element("Skeleton.Bone.dmatrix", &Bone::dmatrix);
-	kaba::declare_class_element("Skeleton.Bone.cur_ang", &Bone::cur_ang);
-	kaba::declare_class_element("Skeleton.Bone.cur_pos", &Bone::cur_pos);*/
-
 	Model model;
 	kaba::declare_class_size("Model", sizeof(Model));
 	kaba::declare_class_element("Model.mesh", &Model::mesh);
@@ -193,11 +186,12 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Animator.add", &Animator::add);
 	kaba::link_external_class_func("Animator.add_x", &Animator::add_x);
 	kaba::link_external_class_func("Animator.is_done", &Animator::is_done);
-	kaba::link_external_class_func("Animator.begin_edit", &Animator::begin_edit);
+	//kaba::link_external_class_func("Animator.begin_edit", &Animator::begin_edit);
 
 
 	kaba::declare_class_size("Skeleton", sizeof(Skeleton));
 	kaba::declare_class_element("Skeleton.bones", &Skeleton::bones);
+	kaba::link_external_class_func("Skeleton.reset", &Skeleton::reset);
 
 
 	kaba::declare_class_size("SolidBody", sizeof(SolidBody));

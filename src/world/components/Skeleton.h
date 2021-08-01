@@ -20,12 +20,15 @@ public:
 	virtual ~Skeleton();
 
 	void on_init() override;
+	void on_delete() override;
 
 	Array<Entity3D> bones; // pos relative to parent entity (skeleton)
 	Array<int> parent;
 	Array<vector> pos0; // relative to parent entity (skeleton)
 	Array<vector> dpos; // relative to parent bone
 	Array<Path> filename;
+
+	void reset();
 
 	vector _calc_bone_rest_pos(int index) const;
 	void _cdecl set_bone_model(int index, Model *sub);
