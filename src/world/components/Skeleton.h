@@ -23,7 +23,7 @@ public:
 	void on_delete() override;
 
 	Array<Entity3D> bones; // pos relative to parent entity (skeleton)
-	Array<int> parent;
+	Array<int> parents;
 	Array<vector> pos0; // relative to parent entity (skeleton)
 	Array<vector> dpos; // relative to parent bone
 	Array<Path> filename;

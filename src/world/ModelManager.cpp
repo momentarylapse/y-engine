@@ -385,13 +385,13 @@ public:
 		auto sk = me->_template->skeleton;
 		int n = f->read_int();
 		sk->bones.resize(n);
-		sk->parent.resize(n);
+		sk->parents.resize(n);
 		sk->dpos.resize(n);
 		sk->pos0.resize(n);
 		sk->filename.resize(n);
 		foreachi (auto &b, sk->bones, i) {
 			f->read_vector(&sk->dpos[i]);
-			sk->parent[i] = f->read_int();
+			sk->parents[i] = f->read_int();
 			sk->filename[i] = f->read_str();
 			//b.model = ModelManager::load(filename);
 		}
@@ -437,9 +437,10 @@ public:
 		int num_anims = f->read_int();
 		meta->move.resize(num_anims);
 		Array<int> frame_offset;
-		for (auto &m: meta->move) {
+		foreachi (auto &m, meta->move, i) {
 			m.name = f->read_str();
 			m.id = f->read_int();
+			m.id = i;
 			m.type = (AnimationType)f->read_char();
 			m.frame0 = f->read_int();
 			m.num_frames = f->read_int();

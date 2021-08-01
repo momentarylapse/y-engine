@@ -200,8 +200,8 @@ void Animator::do_animation(float elapsed) {
 		// bone has parent -> align to parent
 		//vector dpos = b->delta_pos;
 		auto t0 = matrix::translation(- sk->pos0[i]);
-		if (sk->parent[i] >= 0) {
-			b->pos = sk->bones[sk->parent[i]].pos + sk->bones[sk->parent[i]].ang * sk->dpos[i];
+		if (sk->parents[i] >= 0) {
+			b->pos = sk->bones[sk->parents[i]].pos + sk->bones[sk->parents[i]].ang * sk->dpos[i];
 			//dpos = b->cur_pos - b->rest_pos;
 		}
 
@@ -274,6 +274,8 @@ bool Animator::add_x(MoveOperation::Command cmd, float param1, float param2, int
 			index = i;
 	if (index < 0) {
 		msg_error("move id not existing: " + i2s(move_no));
+		foreachi (auto &m, meta->move, i)
+			msg_write(m.id);
 		return false;
 	}
 	int n = num_operations ++;

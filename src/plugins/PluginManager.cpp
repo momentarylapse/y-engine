@@ -191,6 +191,9 @@ void PluginManager::export_kaba() {
 
 	kaba::declare_class_size("Skeleton", sizeof(Skeleton));
 	kaba::declare_class_element("Skeleton.bones", &Skeleton::bones);
+	kaba::declare_class_element("Skeleton.parents", &Skeleton::parents);
+	kaba::declare_class_element("Skeleton.dpos", &Skeleton::dpos);
+	kaba::declare_class_element("Skeleton.pos0", &Skeleton::pos0);
 	kaba::link_external_class_func("Skeleton.reset", &Skeleton::reset);
 
 

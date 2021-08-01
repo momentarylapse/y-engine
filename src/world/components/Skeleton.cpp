@@ -31,7 +31,7 @@ void Skeleton::on_init() {
 	auto m = owner->get_component<Model>();
 
 	bones = m->_template->skeleton->bones;
-	parent = m->_template->skeleton->parent;
+	parents = m->_template->skeleton->parents;
 	dpos = m->_template->skeleton->dpos;
 	pos0 = m->_template->skeleton->pos0;
 
@@ -69,8 +69,8 @@ void Skeleton::reset() {
 
 // non-animated state
 vector Skeleton::_calc_bone_rest_pos(int index) const {
-	if (parent[index] >= 0)
-		return dpos[index] + _calc_bone_rest_pos(parent[index]);
+	if (parents[index] >= 0)
+		return dpos[index] + _calc_bone_rest_pos(parents[index]);
 	return dpos[index];
 }
 
