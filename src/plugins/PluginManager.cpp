@@ -187,7 +187,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Animator.add", &Animator::add);
 	kaba::link_external_class_func("Animator.add_x", &Animator::add_x);
 	kaba::link_external_class_func("Animator.is_done", &Animator::is_done);
-	//kaba::link_external_class_func("Animator.begin_edit", &Animator::begin_edit);
+	kaba::link_external_class_func("Animator.begin_edit", &Animator::reset); // JUST FOR COMPATIBILITY WITH OLD BRANCH
 
 
 	kaba::declare_class_size("Skeleton", sizeof(Skeleton));

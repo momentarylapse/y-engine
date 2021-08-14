@@ -424,6 +424,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 		}
 	}
 	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_alpha(nix::AlphaMode::NONE);
 	break_point();
 }
 void RenderPathGL::draw_terrains(bool allow_material) {

@@ -135,7 +135,6 @@ void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, 
 
 	//nix::clear_color(Green);
 	nix::clear_color(world.background);
-	//nix::clear_z();
 
 	draw_skyboxes(cam);
 	perf_mon->tick(PMLabel::SKYBOXES);
@@ -178,7 +177,7 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 
 	//nix::clear_color(Green);//world.background);
 	nix::clear_z();
-	fb->clear_color(2, color(0, 0,0,max_depth * 0.99f));
+	//fb->clear_color(2, color(0, 0,0,max_depth * 0.99f));
 	fb->clear_color(0, color(-1, 0,1,0));
 
 	//draw_skyboxes(cam);
