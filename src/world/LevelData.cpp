@@ -255,7 +255,7 @@ void LevelData::save(const Path &filename) {
 	.witha("color", c2s(world.fog._color));
 	meta.add(f);
 
-	for (auto s: plugin_manager.controllers) {
+	for (auto s: PluginManager::controllers) {
 		//s->_class->owner->script->filename
 		auto e = xml::Element("script")
 		.witha("file", s->_class->owner->script->filename.relative_to(kaba::config.directory).str());

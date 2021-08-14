@@ -16,6 +16,7 @@
 
 #include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
+#include "helper/Scheduler.h"
 
 #include "audio/Sound.h"
 
@@ -172,9 +173,9 @@ public:
 		gui::toplevel->add(fps_display);
 
 		for (auto &s: world.scripts)
-			plugin_manager.add_controller(s.filename, s.variables);
+			PluginManager::add_controller(s.filename, s.variables);
 		for (auto &s: config.get_str("additional-scripts", "").explode(","))
-			plugin_manager.add_controller(s, {});
+			PluginManager::add_controller(s, {});
 
 		msg_left();
 		msg_write("|                                                      |");
@@ -229,7 +230,7 @@ public:
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 0.1f);
 
 			input::iterate();
-			plugin_manager.handle_input();
+			Scheduler::handle_input();
 
 			iterate();
 			draw_frame();
@@ -250,7 +251,7 @@ public:
 
 	void reset_game() {
 		((RenderPathGL*)render_path)->reset();
-		plugin_manager.reset();
+		PluginManager::reset();
 		CameraReset();
 		world.reset();
 		gui::reset();
@@ -273,10 +274,10 @@ public:
 
 	void iterate() {
 		perf_mon.tick(PMLabel::UNKNOWN);
-		plugin_manager.handle_iterate_pre(engine.elapsed);
+		Scheduler::handle_iterate_pre(engine.elapsed);
 		network_manager.iterate();
 		world.iterate(engine.elapsed);
-		plugin_manager.handle_iterate(engine.elapsed);
+		Scheduler::handle_iterate(engine.elapsed);
 		ComponentManager::iterate(engine.elapsed);
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
@@ -339,7 +340,7 @@ public:
 		update_dynamic_resolution();
 
 		render_path->start_frame();
-		plugin_manager.handle_draw_pre();
+		Scheduler::handle_draw_pre();
 		timer_render.peek();
 		render_path->draw();
 		render_times.add(timer_render.get());

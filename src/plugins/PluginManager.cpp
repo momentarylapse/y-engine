@@ -7,7 +7,6 @@
 
 #include "PluginManager.h"
 #include "Controller.h"
-#include "Scheduler.h"
 #include "../lib/kaba/kaba.h"
 #include "../audio/Sound.h"
 #include "../fx/Particle.h"
@@ -18,6 +17,7 @@
 #include "../gui/Text.h"
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
+#include "../helper/Scheduler.h"
 #include "../input/InputManager.h"
 #include "../input/Gamepad.h"
 #include "../input/Keyboard.h"
@@ -47,8 +47,9 @@
 #include "../lib/kaba/dynamic/exception.h"
 
 
-PluginManager plugin_manager;
 PerformanceMonitor *global_perf_mon;
+
+Array<Controller*> PluginManager::controllers;
 
 
 extern nix::Texture *_tex_white;
@@ -87,10 +88,6 @@ Model* _create_object_multi(World *w, const Path &filename, const Array<vector> 
 void global_exit(EngineData& engine) {
 	msg_error("exit by script...");
 	exit(0);
-}
-
-Controller *global_get_controller(const kaba::Class *type) {
-	return plugin_manager.get_controller(type);
 }
 
 void PluginManager::init() {
@@ -508,7 +505,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_model", (void*)&ModelManager::load);
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
-	kaba::link_external("get_controller", (void*)&global_get_controller);
+	kaba::link_external("get_controller", (void*)&PluginManager::get_controller);
 	kaba::link_external("add_camera", (void*)&add_camera);
 	kaba::link_external("Scheduler.subscribe", (void*)&Scheduler::subscribe);
 }
@@ -674,36 +671,5 @@ Controller *PluginManager::get_controller(const kaba::Class *type) {
 		if (c->_class == type)
 			return c;
 	return nullptr;
-}
-
-void PluginManager::handle_iterate(float dt) {
-	for (auto *c: controllers)
-		c->on_iterate(dt);
-	Scheduler::iterate(dt);
-}
-
-void PluginManager::handle_iterate_pre(float dt) {
-	for (auto *c: controllers)
-		c->on_iterate_pre(dt);
-}
-
-void PluginManager::handle_input() {
-	for (auto *c: controllers)
-		c->on_input();
-}
-
-void PluginManager::handle_draw_pre() {
-	for (auto *c: controllers)
-		c->on_draw_pre();
-}
-
-void PluginManager::handle_render_inject() {
-	for (auto *c: controllers)
-		c->on_render_inject();
-}
-
-void PluginManager::handle_render_inject2() {
-	for (auto *c: controllers)
-		c->on_render_inject2();
 }
 

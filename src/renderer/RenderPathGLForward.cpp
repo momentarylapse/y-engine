@@ -13,6 +13,7 @@
 
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
+#include "../helper/Scheduler.h"
 #include "../plugins/PluginManager.h"
 #include "../gui/gui.h"
 #include "../gui/Node.h"
@@ -170,7 +171,7 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam,
 	nix::set_z(true, true);
 
 	draw_world(true);
-	plugin_manager.handle_render_inject();
+	Scheduler::handle_render_inject();
 	break_point();
 	perf_mon->tick(PMLabel::WORLD);
 

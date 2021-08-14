@@ -125,6 +125,7 @@
     <ClCompile Include="src\helper\ErrorHandler.cpp" />
     <ClCompile Include="src\helper\PerformanceMonitor.cpp" />
     <ClCompile Include="src\helper\ResourceManager.cpp" />
+    <ClCompile Include="src\helper\Scheduler.cpp" />
     <ClCompile Include="src\input\Gamepad.cpp" />
     <ClCompile Include="src\input\InputManager.cpp" />
     <ClCompile Include="src\input\Keyboard.cpp" />
@@ -230,7 +231,6 @@
     <ClCompile Include="src\net\NetworkManager.cpp" />
     <ClCompile Include="src\plugins\Controller.cpp" />
     <ClCompile Include="src\plugins\PluginManager.cpp" />
-    <ClCompile Include="src\plugins\Scheduler.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\renderer\RenderPath.cpp" />
     <ClCompile Include="src\renderer\RenderPathGL.cpp" />
@@ -272,6 +272,7 @@
     <ClInclude Include="src\helper\ErrorHandler.h" />
     <ClInclude Include="src\helper\PerformanceMonitor.h" />
     <ClInclude Include="src\helper\ResourceManager.h" />
+    <ClInclude Include="src\helper\Scheduler.h" />
     <ClInclude Include="src\input\Gamepad.h" />
     <ClInclude Include="src\input\InputManager.h" />
     <ClInclude Include="src\input\Keyboard.h" />
@@ -370,7 +371,6 @@
     <ClInclude Include="src\net\NetworkManager.h" />
     <ClInclude Include="src\plugins\Controller.h" />
     <ClInclude Include="src\plugins\PluginManager.h" />
-    <ClInclude Include="src\plugins\Scheduler.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\renderer\RenderPath.h" />
     <ClInclude Include="src\renderer\RenderPathGL.h" />

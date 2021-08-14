@@ -314,7 +314,7 @@ bool World::load(const LevelData &ld) {
 		for (auto &cc: l.components) {
 			//msg_write("add component " + cc.class_name);
 	#ifdef _X_ALLOW_X_
-			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+			auto type = PluginManager::find_class(cc.filename, cc.class_name);
 			auto comp = o->add_component(type, cc.var);
 	#endif
 		}
@@ -341,7 +341,7 @@ bool World::load(const LevelData &ld) {
 		for (auto &cc: c.components) {
 			//msg_write("add component " + cc.class_name);
 	#ifdef _X_ALLOW_X_
-			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+			auto type = PluginManager::find_class(cc.filename, cc.class_name);
 			auto comp = cam->owner->add_component(type, cc.var);
 	#endif
 		}
@@ -381,7 +381,7 @@ bool World::load(const LevelData &ld) {
 		for (auto &cc: t.components) {
 			//msg_write("add component " + cc.class_name);
 	#ifdef _X_ALLOW_X_
-			auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+			auto type = PluginManager::find_class(cc.filename, cc.class_name);
 			auto comp = tt->owner->add_component(type, cc.var);
 	#endif
 		}
@@ -508,7 +508,7 @@ Entity3D *World::create_object_no_reg_x(const Path &filename, const string &name
 	for (auto &cc: components) {
 		//msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
-		auto type = plugin_manager.find_class(cc.filename, cc.class_name);
+		auto type = PluginManager::find_class(cc.filename, cc.class_name);
 		auto comp = o->add_component(type, cc.var);
 #endif
 	}

@@ -40,6 +40,9 @@
     <ClCompile Include="src\helper\ResourceManager.cpp">
       <Filter>src\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\helper\Scheduler.cpp">
+      <Filter>src\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\input\Gamepad.cpp">
       <Filter>src\input</Filter>
     </ClCompile>
@@ -355,9 +358,6 @@
     <ClCompile Include="src\plugins\PluginManager.cpp">
       <Filter>src\plugins</Filter>
     </ClCompile>
-    <ClCompile Include="src\plugins\Scheduler.cpp">
-      <Filter>src\plugins</Filter>
-    </ClCompile>
     <ClCompile Include="src\renderer\Renderer.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
@@ -475,6 +475,9 @@
       <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\helper\ResourceManager.h">
+      <Filter>src\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\Scheduler.h">
       <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\input\Gamepad.h">
@@ -769,9 +772,6 @@
       <Filter>src\plugins</Filter>
     </ClInclude>
     <ClInclude Include="src\plugins\PluginManager.h">
-      <Filter>src\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="src\plugins\Scheduler.h">
       <Filter>src\plugins</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\Renderer.h">
