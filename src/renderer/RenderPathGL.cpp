@@ -168,6 +168,7 @@ void RenderPathGL::reset() {
 
 // GTX750: 1920x1080 0.277 ms per trivial step
 nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
+	PerformanceMonitor::begin(ch_post);
 	auto cur = source;
 
 	// scripts
@@ -187,6 +188,8 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	// render blur into fb3!
 	process_blur(cur, fb_small1.get(), 1.0f, complex(2,0));
 	process_blur(fb_small1.get(), fb_small2.get(), 0.0f, complex(0,1));
+	break_point();
+	PerformanceMonitor::end(ch_post);
 	return cur;
 }
 

@@ -40,6 +40,7 @@ RenderPath::RenderPath() {
 	ch_pre = PerformanceMonitor::create_channel("R.pre", PerformanceChannel::Group::RENDER);
 	ch_gui = PerformanceMonitor::create_channel("R.gui", PerformanceChannel::Group::RENDER);
 	ch_out = PerformanceMonitor::create_channel("R.out", PerformanceChannel::Group::RENDER);
+	ch_post = PerformanceMonitor::create_channel("R.post", PerformanceChannel::Group::RENDER);
 	ch_end = PerformanceMonitor::create_channel("R.end", PerformanceChannel::Group::RENDER);
 	ch_bg = PerformanceMonitor::create_channel("R.bg", PerformanceChannel::Group::RENDER);
 	ch_world = PerformanceMonitor::create_channel("R.world", PerformanceChannel::Group::RENDER);

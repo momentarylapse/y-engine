@@ -16,6 +16,7 @@ public:
 	shared<nix::FrameBuffer> gbuffer;
 	shared<nix::Shader> shader_gbuffer_out;
 	nix::UniformBuffer *ssao_sample_buffer;
+	int ch_gbuf_out = -1;
 
 	RenderPathGLDeferred(GLFWwindow* win, int w, int h);
 	void draw() override;
@@ -27,7 +28,7 @@ public:
 	void render_shadow_map(nix::FrameBuffer *sfb, float scale);
 
 
-	void render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target);
+	void render_out_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target);
 };
 
 

@@ -95,6 +95,8 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : Rend
 		ssao_samples.add(vec4(v.x, v.y, abs(v.z), 0));
 	}
 	ssao_sample_buffer->update_array(ssao_samples);
+
+	ch_gbuf_out = PerformanceMonitor::create_channel("R.gbuf-out", PerformanceChannel::Group::RENDER);
 }
 
 void RenderPathGLDeferred::draw() {
@@ -111,7 +113,7 @@ void RenderPathGLDeferred::draw() {
 
 	render_into_gbuffer(gbuffer.get(), cam, dynamic_fb_area());
 	render_background(fb_main.get(), cam, dynamic_fb_area());
-	render_from_gbuffer(gbuffer.get(), fb_main.get());
+	render_out_from_gbuffer(gbuffer.get(), fb_main.get());
 
 	auto source = do_post_processing(fb_main.get());
 
@@ -141,7 +143,8 @@ void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, 
 
 }
 
-void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
+void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
+	PerformanceMonitor::begin(ch_gbuf_out);
 	auto s = shader_gbuffer_out.get();
 	if (using_view_space)
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
@@ -161,6 +164,8 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	tex.add(fb_shadow->depth_buffer.get());
 	tex.add(fb_shadow2->depth_buffer.get());
 	process(tex, target, s);
+	break_point();
+	PerformanceMonitor::end(ch_gbuf_out);
 }
 
 void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {}
