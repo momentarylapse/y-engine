@@ -101,8 +101,6 @@ public:
 #endif
 	RenderPath *render_path;
 
-	PerformanceMonitor perf_mon;
-
 	gui::Text *fps_display;
 
 	void init(const Array<string> &arg) {
@@ -111,6 +109,7 @@ public:
 		window = create_window();
 		kaba::init();
 		NetworkManager::init();
+		Scheduler::init();
 
 		engine.app_name = app_name;
 		engine.version = app_version;
@@ -120,9 +119,9 @@ public:
 
 		try {
 			if (config.get_str("renderer.path", "forward") == "deferred")
-				render_path = new RenderPathGLDeferred(window, engine.width, engine.height, &perf_mon);
+				render_path = new RenderPathGLDeferred(window, engine.width, engine.height);
 			else
-				render_path = new RenderPathGLForward(window, engine.width, engine.height, &perf_mon);
+				render_path = new RenderPathGLForward(window, engine.width, engine.height);
 			engine.renderer = render_path;
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
@@ -136,7 +135,6 @@ public:
 		audio::init();
 
 		GodInit();
-		global_perf_mon = &perf_mon;
 		PluginManager::init();
 
 		ErrorHandler::init();
@@ -225,8 +223,8 @@ public:
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window)) {
-			perf_mon.frame();
-			engine.elapsed_rt = perf_mon.frame_dt;
+			PerformanceMonitor::next_frame();
+			engine.elapsed_rt = PerformanceMonitor::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 0.1f);
 
 			input::iterate();
@@ -273,18 +271,20 @@ public:
 	}
 
 	void iterate() {
-		perf_mon.tick(PMLabel::UNKNOWN);
+		//perf_mon.tick(PMLabel::UNKNOWN);
 		Scheduler::handle_iterate_pre(engine.elapsed);
+
 		network_manager.iterate();
+
 		world.iterate(engine.elapsed);
+
 		Scheduler::handle_iterate(engine.elapsed);
-		ComponentManager::iterate(engine.elapsed);
+
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
-		perf_mon.tick(PMLabel::ITERATE);
+		//perf_mon.tick(PMLabel::ITERATE);
 
 		world.iterate_animations(engine.elapsed);
-		perf_mon.tick(PMLabel::ANIMATION);
 	}
 
 
@@ -297,7 +297,7 @@ public:
 #if HAS_LIB_VULKAN
 		vulkan::wait_device_idle();
 #endif
-		fps_display->set_text(format("%.1f", 1.0f / perf_mon.avg.frame_time));
+		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
 	}
 
 	static Array<float> render_times;
@@ -334,7 +334,7 @@ public:
 
 
 	void draw_frame() {
-		if (perf_mon.frames == 0)
+		if (PerformanceMonitor::frames == 0)
 			update_statistics();
 
 		update_dynamic_resolution();

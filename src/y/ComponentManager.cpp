@@ -12,6 +12,7 @@
 #ifdef _X_ALLOW_X_
 #include "../meta.h"
 #include "../plugins/PluginManager.h"
+#include "../helper/PerformanceMonitor.h"
 #include "../lib/kaba/syntax/Class.h"
 #include "../lib/kaba/syntax/Function.h"
 #endif
@@ -24,6 +25,7 @@ public:
 	ComponentManager::List list;
 	bool needs_update = false;
 	const kaba::Class *type_family = nullptr;
+	int ch_iterate = -1;
 
 	void add(Component *c) {
 		list.add(c);
@@ -53,6 +55,10 @@ ComponentListX *get_list_x(const kaba::Class *type_family) {
 		ComponentListX list;
 		list.type_family = type_family;
 		list.needs_update = class_func_did_override(type_family, "on_iterate");
+#ifdef _X_ALLOW_X_
+		if (list.needs_update)
+			list.ch_iterate = PerformanceMonitor::create_channel("comp:" + type_family->long_name(), PerformanceChannel::Group::ITERATE);
+#endif
 		component_lists.set(type_family, list);
 		return &component_lists[type_family];
 	}
@@ -102,8 +108,15 @@ ComponentManager::List *ComponentManager::get_list(const kaba::Class *type_famil
 
 void ComponentManager::iterate(float dt) {
 	for (auto &l: component_lists)
-		if (l.value.needs_update)
+		if (l.value.needs_update) {
+#ifdef _X_ALLOW_X_
+			PerformanceMonitor::begin(l.value.ch_iterate);
+#endif
 			for (auto *c: l.value.list)
 				c->on_iterate(dt);
+#ifdef _X_ALLOW_X_
+			PerformanceMonitor::end(l.value.ch_iterate);
+#endif
+		}
 }
 

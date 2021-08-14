@@ -37,7 +37,7 @@
 
 void break_point();
 
-RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
+RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
@@ -98,18 +98,16 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h, Perfor
 }
 
 void RenderPathGLDeferred::draw() {
-	perf_mon->tick(PMLabel::PRE);
-
 	prepare_instanced_matrices();
 
 	prepare_lights(cam);
-	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
+	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
 	}
-	perf_mon->tick(PMLabel::SHADOWS);
+	PerformanceMonitor::end(ch_shadow);
 
 	render_into_gbuffer(gbuffer.get(), cam, dynamic_fb_area());
 	render_background(fb_main.get(), cam, dynamic_fb_area());
@@ -119,12 +117,13 @@ void RenderPathGLDeferred::draw() {
 
 	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
 
-	render_out(source, fb_small2->color_attachments[0]);
+	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);
 }
 
 void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+	PerformanceMonitor::begin(ch_bg);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(target_area);
 	nix::set_scissor(target_area);
@@ -138,7 +137,7 @@ void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, 
 	nix::clear_color(world.background);
 
 	draw_skyboxes(cam);
-	perf_mon->tick(PMLabel::SKYBOXES);
+	PerformanceMonitor::end(ch_bg);
 
 }
 
@@ -157,16 +156,17 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	//s->set_matrix("mat_vp", mat_vp);
 
 	nix::bind_buffer(ubo_light, 1);
-	auto tex = source->color_attachments;
-	tex.add(source->depth_buffer);
-	tex.add(fb_shadow->depth_buffer);
-	tex.add(fb_shadow2->depth_buffer);
+	auto tex = weak(source->color_attachments);
+	tex.add(source->depth_buffer.get());
+	tex.add(fb_shadow->depth_buffer.get());
+	tex.add(fb_shadow2->depth_buffer.get());
 	process(tex, target, s);
 }
 
 void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {}
 
 void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+	PerformanceMonitor::begin(ch_world);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(target_area);
 	nix::set_scissor(target_area);
@@ -181,9 +181,6 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 	//fb->clear_color(2, color(0, 0,0,max_depth * 0.99f));
 	fb->clear_color(0, color(-1, 0,1,0));
 
-	//draw_skyboxes(cam);
-	perf_mon->tick(PMLabel::SKYBOXES);
-
 
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
@@ -196,10 +193,9 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 	draw_world(true);
 	Scheduler::handle_render_inject();
 	break_point();
-	perf_mon->tick(PMLabel::WORLD);
+	PerformanceMonitor::end(ch_world);
 
 	draw_particles();
-	perf_mon->tick(PMLabel::PARTICLES);
 }
 
 void RenderPathGLDeferred::draw_world(bool allow_material) {

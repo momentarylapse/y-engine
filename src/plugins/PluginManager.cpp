@@ -47,8 +47,6 @@
 #include "../lib/kaba/dynamic/exception.h"
 
 
-PerformanceMonitor *global_perf_mon;
-
 Array<Controller*> PluginManager::controllers;
 
 
@@ -447,11 +445,16 @@ void PluginManager::export_kaba() {
 
 	kaba::link_external("network", &network_manager);
 
+	kaba::declare_class_size("PerformanceMonitor.Channel", sizeof(PerformanceChannel));
+	kaba::declare_class_element("PerformanceMonitor.Channel.name", &PerformanceChannel::name);
+	kaba::declare_class_element("PerformanceMonitor.Channel.group", &PerformanceChannel::group);
+	kaba::declare_class_element("PerformanceMonitor.Channel.average", &PerformanceChannel::average);
+
 	kaba::declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
-	kaba::declare_class_element("PerformanceMonitor.avg", &PerformanceMonitor::avg);
-	kaba::declare_class_element("PerformanceMonitor.frames", &PerformanceMonitor::frames);
-	//kaba::declare_class_element("PerformanceMonitor.location", &PerformanceMonitor::avg.location);
-	kaba::link_external("perf_mon", &global_perf_mon);
+	kaba::link_external("PerformanceMonitor.avg_frame_time", &PerformanceMonitor::avg_frame_time);
+	kaba::link_external("PerformanceMonitor.frames", &PerformanceMonitor::frames);
+	kaba::link_external("PerformanceMonitor.channels", &PerformanceMonitor::channels);
+	//kaba::link_external("perf_mon", &global_perf_mon);
 
 	kaba::declare_class_size("EngineData", sizeof(EngineData));
 	kaba::declare_class_element("EngineData.app_name", &EngineData::app_name);
@@ -661,6 +664,7 @@ void PluginManager::add_controller(const Path &name, const Array<TemplateDataScr
 	auto type = find_class_derived(name, "y.Controller");;
 	auto *c = (Controller*)create_instance(type, variables);
 	c->_class = type;
+	c->ch_iterate = PerformanceMonitor::create_channel("cont:" + type->long_name(), PerformanceChannel::Group::ITERATE);
 
 	controllers.add(c);
 	c->on_init();

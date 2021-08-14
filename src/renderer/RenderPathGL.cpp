@@ -70,7 +70,7 @@ void jitter_iterate() {
 	jitter_frame ++;
 }
 
-RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) {
+RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h) {
 	window = win;
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
@@ -78,8 +78,6 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm
 	height = h;
 
 	using_view_space = true;
-
-	perf_mon = pm;
 
 	nix::allow_separate_vertex_arrays = true;
 	nix::init();
@@ -197,7 +195,7 @@ nix::FrameBuffer* RenderPathGL::resolve_multisampling(nix::FrameBuffer *source) 
 	if (true) {
 		shader_resolve_multisample->set_float("width", source->width);
 		shader_resolve_multisample->set_float("height", source->height);
-		process({source->color_attachments[0], depth_buffer}, next, shader_resolve_multisample.get());
+		process({source->color_attachments[0].get(), depth_buffer}, next, shader_resolve_multisample.get());
 	} else {
 		// not sure, why this does not work... :(
 		nix::resolve_multisampling(next, source);
@@ -212,9 +210,10 @@ void RenderPathGL::start_frame() {
 }
 
 void RenderPathGL::end_frame() {
+	PerformanceMonitor::begin(ch_end);
 	nix::end_frame_glfw(window);
 	break_point();
-	perf_mon->tick(PMLabel::END);
+	PerformanceMonitor::end(ch_end);
 }
 
 
@@ -223,7 +222,7 @@ void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *targ
 	shader_blur->set_float("radius", r);
 	shader_blur->set_float("threshold", threshold / cam->exposure);
 	shader_blur->set_floats("axis", &axis.x, 2);
-	process(source->color_attachments, target, shader_blur.get());
+	process(weak(source->color_attachments), target, shader_blur.get());
 }
 
 void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, const complex &axis) {
@@ -232,7 +231,7 @@ void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *tar
 	shader_depth->set_float("focal_blur", cam->focal_blur);
 	shader_depth->set_floats("axis", &axis.x, 2);
 	shader_depth->set_matrix("invproj", cam->m_projection.inverse());
-	process({source->color_attachments[0], depth_buffer}, target, shader_depth.get());
+	process({source->color_attachments[0].get(), depth_buffer}, target, shader_depth.get());
 }
 
 void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
@@ -251,6 +250,7 @@ void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer 
 }
 
 void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
+	PerformanceMonitor::begin(ch_gui);
 	gui::update();
 
 	nix::set_projection_ortho_relative();
@@ -269,7 +269,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 			nix::set_shader(shader);
 			shader->set_float("blur", p->bg_blur);
 			shader->set_color("color", p->eff_col);
-			nix::set_textures({p->texture.get(), source->color_attachments[0]});
+			nix::set_textures({p->texture.get(), source->color_attachments[0].get()});
 			if (p->angle == 0) {
 				nix::set_model_matrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
 			} else {
@@ -287,12 +287,13 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	nix::set_alpha(nix::AlphaMode::NONE);
 
 	break_point();
-	perf_mon->tick(PMLabel::GUI);
+	PerformanceMonitor::end(ch_gui);
 }
 
 void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
+	PerformanceMonitor::begin(ch_out);
 
-	nix::set_textures({source->color_attachments[0], bloom});
+	nix::set_textures({source->color_attachments[0].get(), bloom});
 	nix::set_shader(shader_out.get());
 	shader_out->set_float("exposure", cam->exposure);
 	shader_out->set_float("bloom_factor", cam->bloom_factor);
@@ -307,7 +308,7 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 	nix::draw_triangles(vb_2d);
 
 	break_point();
-	perf_mon->tick(PMLabel::OUT);
+	PerformanceMonitor::end(ch_out);
 }
 
 
@@ -344,8 +345,8 @@ void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 		tt.add(tex_white.get());
 	if (tt.num == 2)
 		tt.add(tex_white.get());
-	tt.add(fb_shadow->depth_buffer);
-	tt.add(fb_shadow2->depth_buffer);
+	tt.add(fb_shadow->depth_buffer.get());
+	tt.add(fb_shadow2->depth_buffer.get());
 	tt.add(cube_map.get());
 	nix::set_textures(tt);
 }
@@ -354,6 +355,7 @@ void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
 
 
 void RenderPathGL::draw_particles() {
+	PerformanceMonitor::begin(ch_fx);
 	nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	nix::set_z(false, true);
@@ -409,6 +411,7 @@ void RenderPathGL::draw_particles() {
 	nix::set_z(true, true);
 	nix::set_alpha(nix::AlphaMode::NONE);
 	break_point();
+	PerformanceMonitor::end(ch_fx);
 }
 
 void RenderPathGL::draw_skyboxes(Camera *cam) {
@@ -510,12 +513,15 @@ void RenderPathGL::draw_objects_transparent(bool allow_material) {
 
 
 void RenderPathGL::prepare_instanced_matrices() {
+	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
 		ubo_multi_matrix->update_array(s.matrices);
 	}
+	PerformanceMonitor::end(ch_pre);
 }
 
 void RenderPathGL::prepare_lights(Camera *cam) {
+	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();
 	for (auto *l: world.lights) {
@@ -531,4 +537,5 @@ void RenderPathGL::prepare_lights(Camera *cam) {
 		lights.add(l->light);
 	}
 	ubo_light->update_array(lights);
+	PerformanceMonitor::end(ch_prepare_lights);
 }

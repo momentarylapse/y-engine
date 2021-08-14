@@ -67,7 +67,6 @@ public:
 
 	Array<UBOLight> lights;
 	nix::UniformBuffer *ubo_light;
-	PerformanceMonitor *perf_mon;
 	nix::VertexBuffer *vb_2d;
 
 	shared<nix::DepthBuffer> depth_cube;
@@ -84,7 +83,7 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathGL(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
+	RenderPathGL(GLFWwindow* win, int w, int h);
 
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(nix::DepthBuffer *fb, nix::CubeMap *cube, const vector &pos);

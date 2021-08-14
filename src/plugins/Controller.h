@@ -35,6 +35,7 @@ public:
 	virtual void _cdecl on_render_inject2() {}
 
 	const kaba::Class *_class;
+	int ch_iterate = -1;
 };
 
 #endif /* SRC_PLUGINS_CONTROLLER_H_ */

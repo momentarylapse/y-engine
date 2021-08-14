@@ -13,6 +13,7 @@ namespace kaba {
 
 class Scheduler {
 public:
+	static void init();
 	static void reset();
 	static void subscribe(float dt, kaba::Function *f);
 	static void iterate_subscriptions(float dt);

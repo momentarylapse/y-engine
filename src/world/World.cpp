@@ -36,6 +36,7 @@
 #include "../fx/Particle.h"
 #include "../fx/ParticleManager.h"
 #include "../plugins/PluginManager.h"
+#include "../helper/PerformanceMonitor.h"
 #endif
 
 #ifdef _X_ALLOW_X_
@@ -183,6 +184,8 @@ World::World() {
 
 #ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager();
+	ch_iterate = PerformanceMonitor::create_channel("world", PerformanceChannel::Group::ITERATE);
+	ch_animation = PerformanceMonitor::create_channel("animation", PerformanceChannel::Group::ITERATE);
 #endif
 
 
@@ -826,6 +829,8 @@ void World::iterate_physics(float dt) {
 }
 
 void World::iterate_animations(float dt) {
+#ifdef _X_ALLOW_X_
+	PerformanceMonitor::begin(ch_animation);
 	auto list = ComponentManager::get_listx<Animator>();
 	for (auto *o: *list)
 		o->do_animation(dt);
@@ -842,18 +847,22 @@ void World::iterate_animations(float dt) {
 		}
 	}
 		//o->do_animation(dt);
+	PerformanceMonitor::end(ch_animation);
+#endif
 }
 
 void World::iterate(float dt) {
 	if (dt == 0)
 		return;
+#ifdef _X_ALLOW_X_
+	PerformanceMonitor::begin(ch_iterate);
 	if (engine.physics_enabled) {
 		iterate_physics(dt);
 	} else {
-		for (auto *o: objects)
+		/*for (auto *o: objects)
 			if (o)
 				if (auto m = o->get_component<Model>())
-					m->update_matrix();
+					m->update_matrix();*/
 	}
 
 #ifdef _X_ALLOW_X_
@@ -864,6 +873,9 @@ void World::iterate(float dt) {
 		}
 	}
 	audio::set_listener(cam->get_owner<Entity3D>()->pos, cam->get_owner<Entity3D>()->ang, v_0, 100000);
+#endif
+
+	PerformanceMonitor::end(ch_iterate);
 #endif
 }
 

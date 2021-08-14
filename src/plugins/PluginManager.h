@@ -40,6 +40,4 @@ public:
 	static Array<Controller*> controllers;
 };
 
-extern PerformanceMonitor *global_perf_mon;
-
 #endif /* SRC_PLUGINS_PLUGINMANAGER_H_ */

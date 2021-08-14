@@ -43,7 +43,7 @@ matrix jitter(float w, float h, int uid);
 void break_point();
 
 
-RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h, PerformanceMonitor *pm) : RenderPathGL(win, w, h, pm) {
+RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h) {
 	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		fb_main = new nix::FrameBuffer({
@@ -113,16 +113,14 @@ void RenderPathGLForward::draw() {
 
 	prepare_instanced_matrices();
 
-	perf_mon->tick(PMLabel::PRE);
-
 	prepare_lights(cam);
-	perf_mon->tick(PMLabel::PREPARE_LIGHTS);
 
+	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
 	}
-	perf_mon->tick(PMLabel::SHADOWS);
+	PerformanceMonitor::end(ch_shadow);
 
 	render_into_texture(fb_main.get(), cam, dynamic_fb_area());
 
@@ -134,12 +132,13 @@ void RenderPathGLForward::draw() {
 
 
 	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
-	render_out(source, fb_small2->color_attachments[0]);
+	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);
 }
 
 void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+	PerformanceMonitor::begin(ch_bg);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(target_area);
 	nix::set_scissor(target_area);
@@ -158,10 +157,11 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam,
 	nix::clear_z();
 
 	draw_skyboxes(cam);
-	perf_mon->tick(PMLabel::SKYBOXES);
+	PerformanceMonitor::end(ch_bg);
 
 
 	// world
+	PerformanceMonitor::begin(ch_world);
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
@@ -173,10 +173,9 @@ void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam,
 	draw_world(true);
 	Scheduler::handle_render_inject();
 	break_point();
-	perf_mon->tick(PMLabel::WORLD);
+	PerformanceMonitor::end(ch_world);
 
 	draw_particles();
-	perf_mon->tick(PMLabel::PARTICLES);
 	nix::set_scissor(rect::EMPTY);
 }
 

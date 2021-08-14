@@ -7,6 +7,7 @@
 
 #include "RenderPath.h"
 #include "Renderer.h"
+#include "../helper/PerformanceMonitor.h"
 #include "../fx/Particle.h"
 #include "../gui/Picture.h"
 #include "../world/Camera.h"
@@ -35,6 +36,17 @@ matrix mtr(const vector &t, const quaternion &a) {
 	return mt * mr;
 }
 
+RenderPath::RenderPath() {
+	ch_pre = PerformanceMonitor::create_channel("R.pre", PerformanceChannel::Group::RENDER);
+	ch_gui = PerformanceMonitor::create_channel("R.gui", PerformanceChannel::Group::RENDER);
+	ch_out = PerformanceMonitor::create_channel("R.out", PerformanceChannel::Group::RENDER);
+	ch_end = PerformanceMonitor::create_channel("R.end", PerformanceChannel::Group::RENDER);
+	ch_bg = PerformanceMonitor::create_channel("R.bg", PerformanceChannel::Group::RENDER);
+	ch_world = PerformanceMonitor::create_channel("R.world", PerformanceChannel::Group::RENDER);
+	ch_fx = PerformanceMonitor::create_channel("R.fx", PerformanceChannel::Group::RENDER);
+	ch_shadow = PerformanceMonitor::create_channel("R.shadow", PerformanceChannel::Group::RENDER);
+	ch_prepare_lights = PerformanceMonitor::create_channel("R.lights", PerformanceChannel::Group::RENDER);
+}
 
 #if HAS_LIB_VULKAN
 

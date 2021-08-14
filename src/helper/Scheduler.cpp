@@ -6,6 +6,8 @@
  */
 
 #include "Scheduler.h"
+#include "PerformanceMonitor.h"
+#include "../y/ComponentManager.h"
 #include "../plugins/PluginManager.h"
 #include "../plugins/Controller.h"
 #include "../lib/kaba/kaba.h"
@@ -18,6 +20,11 @@ struct ScheduleListener {
 	schedule_callback *f;
 };
 static Array<ScheduleListener> schedule_listener;
+static int ch_iterate = -1;
+
+void Scheduler::init() {
+	ch_iterate = PerformanceMonitor::create_channel("scheduler", PerformanceChannel::Group::ITERATE);
+}
 
 void Scheduler::reset() {
 	schedule_listener.clear();
@@ -38,10 +45,17 @@ void Scheduler::iterate_subscriptions(float dt) {
 }
 
 void Scheduler::handle_iterate(float dt) {
-	for (auto *c: PluginManager::controllers)
+	for (auto *c: PluginManager::controllers) {
+		PerformanceMonitor::begin(c->ch_iterate);
 		c->on_iterate(dt);
+		PerformanceMonitor::end(c->ch_iterate);
+	}
 
+	PerformanceMonitor::begin(ch_iterate);
 	iterate_subscriptions(dt);
+	PerformanceMonitor::end(ch_iterate);
+
+	ComponentManager::iterate(dt);
 }
 
 void Scheduler::handle_iterate_pre(float dt) {

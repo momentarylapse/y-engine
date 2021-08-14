@@ -17,7 +17,7 @@ public:
 	shared<nix::Shader> shader_gbuffer_out;
 	nix::UniformBuffer *ssao_sample_buffer;
 
-	RenderPathGLDeferred(GLFWwindow* win, int w, int h, PerformanceMonitor *pm);
+	RenderPathGLDeferred(GLFWwindow* win, int w, int h);
 	void draw() override;
 
 	void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) override;

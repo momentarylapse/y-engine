@@ -209,6 +209,8 @@ public:
 		Entity3D *e;
 		vector v;
 	} msg_data;
+
+	int ch_iterate, ch_animation;
 };
 extern World world;
 
