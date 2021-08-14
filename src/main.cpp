@@ -52,9 +52,6 @@
 #include "world/Terrain.h"
 #include "world/World.h"
 
-bool SHOW_GBUFFER = false;
-bool SHOW_SHADOW = false;
-
 const string app_name = "y";
 const string app_version = "0.1.0";
 
@@ -169,28 +166,10 @@ public:
 		reset_game();
 
 		GodLoadWorld(filename);
-		SHOW_SHADOW = config.get_bool("shadow.debug", false);
-		SHOW_GBUFFER = config.get_bool("gbuffer.debug", false);
 
 		fps_display = new gui::Text("", 0.020f, vec2(0.01f, 0.01f));
 		fps_display->dz = 900;
 		gui::toplevel->add(fps_display);
-		if (SHOW_GBUFFER) {
-			if (auto *rpd = dynamic_cast<RenderPathGLDeferred*>(render_path)) {
-				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.0f, 0.2f), rpd->gbuffer->color_attachments[0]));
-				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.2f, 0.4f), rpd->gbuffer->color_attachments[1]));
-				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.4f, 0.6f), rpd->gbuffer->color_attachments[2]));
-				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.6f, 0.8f), rpd->gbuffer->color_attachments[3]));
-				gui::toplevel->add(new gui::Picture(rect(0.8f,1, 0.8f, 1.0f), rpd->gbuffer->depth_buffer));
-			}
-		}
-		if (SHOW_SHADOW) {
-			if (auto *rpv = dynamic_cast<RenderPathGL*>(render_path)) {
-				gui::toplevel->add(new gui::Picture(rect(0, 0.2f, 0.8f, 1.0f), rpv->fb_shadow->depth_buffer));
-				gui::toplevel->add(new gui::Picture(rect(0.2f, 0.4f, 0.8f, 1.0f), rpv->fb_shadow2->depth_buffer));
-				gui::toplevel->add(new gui::Picture(rect(0.4f, 0.6f, 0.8f, 1.0f), rpv->fb_main->depth_buffer));
-			}
-		}
 
 		for (auto &s: world.scripts)
 			plugin_manager.add_controller(s.filename, s.variables);

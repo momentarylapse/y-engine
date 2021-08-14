@@ -37,7 +37,7 @@ void surface_out(vec3 n, vec4 di, vec4 em, float metal, float roughness) {
 	out_color = di;
 	out_color.a = 1;
 	out_pos.xyz = in_pos.xyz / in_pos.w;
-	out_emission = em;
+	out_emission = vec4(em.rgb, metal);
 	out_normal = vec4(n, roughness);
 }
 

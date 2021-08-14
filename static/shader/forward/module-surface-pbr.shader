@@ -29,7 +29,7 @@ layout(location = 0) out vec4 out_color;
 
 
 void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughness) {
-	out_color = emission;
+	//out_color = emission;
 	vec3 p = in_pos.xyz / in_pos.w;
 	vec3 view_dir = normalize(p - eye_pos.xyz);
 	
@@ -68,7 +68,7 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	}
 	
 
-	out_color += perform_lighting(p, n, albedo, emission, metal, roughness, 0, eye_pos);
+	out_color = perform_lighting(p, n, albedo, emission, metal, roughness, 0, eye_pos);
 	
 /*	float distance = length(p - eye_pos.xyz);
 	float f = exp(-distance / fog.distance);

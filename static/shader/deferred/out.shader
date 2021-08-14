@@ -37,6 +37,7 @@ layout(binding = 9) uniform sampler2D tex6;
 #define tex_emission tex1
 #define tex_pos      tex2
 #define tex_normal   tex3
+#define tex_z        tex4
 #define tex_shadow0  tex5
 #define tex_shadow1  tex6
 
@@ -66,13 +67,25 @@ uniform SSAO {
 uniform float ambient_occlusion_bias = 0.02;
 uniform float ambient_occlusion_radius = 10;
 
-float get_ambient_occlusion(vec3 p, vec3 n) {0;
+vec2 project_onto_texture(vec3 pv) {
+	vec4 pp = matrix.project * vec4(pv,1);
+	pp.xyz /= pp.w;
+	pp.xyz = pp.xyz * 0.5 + 0.5;
+	return pp.xy * resolution_scale + vec2(0,1-resolution_scale.y);
+}
+
+vec3 project_onto_z(vec3 pv) {
+	vec2 q_uv = project_onto_texture(pv);
+	return texture(tex_pos, q_uv).xyz;
+}
+
+float get_ambient_occlusion(vec3 p, vec3 n) {
 	if (ambient_occlusion_radius <= 0)
 		return 0;
 
 	vec3 pv = p;
-	vec4 pp = matrix.project * vec4(p,1);
-	pp.xyz /= pp.w;
+	//vec4 pp = matrix.project * vec4(p,1);
+	//pp.xyz /= pp.w;
 	
 	vec3 nv = n;
 	
@@ -93,12 +106,7 @@ float get_ambient_occlusion(vec3 p, vec3 n) {0;
 		
 		
 		vec3 spv = p + dp*R;
-		vec4 spp = matrix.project * vec4(spv,1);
-		spp.xyz /= spp.w;
-		spp.xyz = spp.xyz * 0.5 + 0.5;
-		vec2 q_uv = spp.xy * resolution_scale + vec2(0,1-resolution_scale.y);
-		vec3 sq = texture(tex_pos, q_uv).xyz;
-		vec3 sqv = sq;
+		vec3 sqv = project_onto_z(spv);
 		
 		float rangeCheck = smoothstep(0.0, 1.0, R / abs(pv.z - sqv.z));
 		occlusion += (sqv.z <= spv.z + bias ? 1.0 : 0.0) * rangeCheck;
@@ -112,17 +120,50 @@ float get_ambient_occlusion(vec3 p, vec3 n) {0;
 void main() {
 
 	vec4 albedo = texture(tex_albedo, in_tex_coord);
-	vec4 emission = texture(tex_emission, in_tex_coord);
+	vec4 em = texture(tex_emission, in_tex_coord);
+	vec3 emission = em.rgb;
 	vec4 nr = texture(tex_normal, in_tex_coord);
 	vec3 n = normalize(nr.xyz);
 	float roughness = nr.w;
-	float metal = 0;
+	float metal = em.a;
 	vec3 p = texture(tex_pos, in_tex_coord).xyz;
+	
+	if (albedo.a < 0) {
+		discard;
+		return;
+	}
+	
+	if (metal > 0.9 && roughness < 0.2) {
+		vec3 dir = reflect(normalize(p), n);
+		dir /= length(dir.xy);
+		
+		vec3 q = p + n*0.5;
+		/*if (n.z < -0.9) {
+			out_color = vec4(1,0,0,1);
+			return;
+		}*/
+		for (float t=0.0; t<2000; t+=0.1) {
+			q = p + n*0.5 + dir * t;
+			vec2 quv = project_onto_texture(q);
+			if (quv.x < 0 || quv.x > resolution_scale.x || quv.y < 1-resolution_scale.y || quv.y > 1) {
+				out_color = vec4(1,0,1,1);
+				return;
+			}
+			vec3 qq = project_onto_z(q);
+			if (qq.z < q.z) {
+				//out_color = vec4(1,1,0,1) * t;
+				out_color = texture(tex_albedo, quv) * min(sqrt(t) * 0.2, 2);
+				return;
+			}
+		}
+		out_color = vec4(1,0,0,1);
+		return;
+	}
 	
 	float occlusion = get_ambient_occlusion(p, n);
 	
-	out_color = emission;
-	out_color += perform_lighting(p, n, albedo, emission, metal, roughness, occlusion, eye_pos) * (1-occlusion);
+	out_color = perform_lighting(p, n, albedo, vec4(emission, 1), metal, roughness, occlusion, eye_pos);
+	out_color.rgb *= (1-occlusion);
 	//out_color.rgb = pp.xyz;
 	//out_color.rgb = vec3(1-occlusion);
 	

@@ -25,6 +25,7 @@
 #include "../net/NetworkManager.h"
 #include "../renderer/RenderPathGL.h"
 #include "../renderer/RenderPathGLForward.h"
+#include "../renderer/RenderPathGLDeferred.h"
 #include "../y/EngineData.h"
 #include "../y/Entity.h"
 #include "../y/Component.h"
@@ -489,6 +490,10 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("RenderPath.fb_small1", &RenderPathGL::fb_small1);
 	kaba::declare_class_element("RenderPath.fb_small2", &RenderPathGL::fb_small2);
 	kaba::declare_class_element("RenderPath.shader_fx", &RenderPathGL::shader_fx);
+	kaba::declare_class_element("RenderPath.fb_shadow", &RenderPathGL::fb_shadow);
+	kaba::declare_class_element("RenderPath.fb_shadow2", &RenderPathGL::fb_shadow2);
+	kaba::declare_class_element("RenderPath.gbuffer", &RenderPathGLDeferred::gbuffer);
+	kaba::declare_class_element("RenderPath.resolution_scale", &RenderPath::resolution_scale_x);
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RenderPathGLForward::render_into_texture, engine.renderer);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RenderPathGLForward::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.next_fb", &RenderPathGL::next_fb);

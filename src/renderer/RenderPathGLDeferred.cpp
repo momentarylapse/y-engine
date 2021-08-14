@@ -110,7 +110,8 @@ void RenderPathGLDeferred::draw() {
 	}
 	perf_mon->tick(PMLabel::SHADOWS);
 
-	render_into_texture(gbuffer.get(), cam, dynamic_fb_area());
+	render_into_gbuffer(gbuffer.get(), cam, dynamic_fb_area());
+	render_background(fb_main.get(), cam, dynamic_fb_area());
 	render_from_gbuffer(gbuffer.get(), fb_main.get());
 
 	auto source = do_post_processing(fb_main.get());
@@ -122,6 +123,24 @@ void RenderPathGLDeferred::draw() {
 	draw_gui(source);
 }
 
+void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+	nix::bind_frame_buffer(fb);
+	nix::set_viewport(target_area);
+	nix::set_scissor(target_area);
+
+	float max_depth = cam->max_depth;
+	cam->max_depth = 2000000;
+	cam->update_matrices((float)fb->width / (float)fb->height);
+	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+
+	//nix::clear_color(Green);
+	nix::clear_color(world.background);
+	//nix::clear_z();
+
+	draw_skyboxes(cam);
+	perf_mon->tick(PMLabel::SKYBOXES);
+
+}
 
 void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
 	auto s = shader_gbuffer_out.get();
@@ -145,7 +164,9 @@ void RenderPathGLDeferred::render_from_gbuffer(nix::FrameBuffer *source, nix::Fr
 	process(tex, target, s);
 }
 
-void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {}
+
+void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(target_area);
 	nix::set_scissor(target_area);
@@ -155,10 +176,12 @@ void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 
-	nix::clear_color(world.background);
+	//nix::clear_color(Green);//world.background);
 	nix::clear_z();
+	fb->clear_color(2, color(0, 0,0,max_depth * 0.99f));
+	fb->clear_color(0, color(-1, 0,1,0));
 
-	draw_skyboxes(cam);
+	//draw_skyboxes(cam);
 	perf_mon->tick(PMLabel::SKYBOXES);
 
 

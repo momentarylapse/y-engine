@@ -200,7 +200,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 ///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
 	
 
-	vec4 color = vec4(0);
+	vec4 color = emission;
 	for (int i=0; i<num_lights; i++)
 		color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, i == shadow_index).rgb;
 	
@@ -209,7 +209,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	out_color.rgb = f * out_color.rgb + (1-f) * fog.color.rgb;
 	
 	*/
-	color.a = albedo.a;	
+	color.a = albedo.a;
 	return color;
 }
 </Module>
