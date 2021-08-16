@@ -28,8 +28,8 @@ void PerformanceMonitor::_reset() {
 	frames = 0;
 }
 
-int PerformanceMonitor::create_channel(const string &name, PerformanceChannel::Group group) {
-	channels.add({name, group});
+int PerformanceMonitor::create_channel(const string &name, int parent) {
+	channels.add({name, parent});
 	return channels.num - 1;
 }
 

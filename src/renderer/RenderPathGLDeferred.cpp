@@ -96,10 +96,11 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : Rend
 	}
 	ssao_sample_buffer->update_array(ssao_samples);
 
-	ch_gbuf_out = PerformanceMonitor::create_channel("R.gbuf-out", PerformanceChannel::Group::RENDER);
+	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", ch_render);
 }
 
 void RenderPathGLDeferred::draw() {
+	PerformanceMonitor::begin(ch_render);
 	prepare_instanced_matrices();
 
 	prepare_lights(cam);
@@ -122,6 +123,7 @@ void RenderPathGLDeferred::draw() {
 	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);
+	PerformanceMonitor::end(ch_render);
 }
 
 void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {

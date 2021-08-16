@@ -101,6 +101,7 @@ RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : Render
 }
 
 void RenderPathGLForward::draw() {
+	PerformanceMonitor::begin(ch_render);
 
 	static int _frame = 0;
 	_frame ++;
@@ -135,6 +136,7 @@ void RenderPathGLForward::draw() {
 	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);
+	PerformanceMonitor::end(ch_render);
 }
 
 void RenderPathGLForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {

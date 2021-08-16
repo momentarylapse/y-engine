@@ -142,7 +142,11 @@ inline bool TestVectorSanity(vector &v, const char *name) {
 
 
 
-void GodInit() {
+void GodInit(int ch_iter) {
+#ifdef _X_ALLOW_X_
+	world.ch_iterate = PerformanceMonitor::create_channel("world", ch_iter);
+	world.ch_animation = PerformanceMonitor::create_channel("animation", ch_iter);
+#endif
 }
 
 void GodEnd() {
@@ -184,8 +188,6 @@ World::World() {
 
 #ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager();
-	ch_iterate = PerformanceMonitor::create_channel("world", PerformanceChannel::Group::ITERATE);
-	ch_animation = PerformanceMonitor::create_channel("animation", PerformanceChannel::Group::ITERATE);
 #endif
 
 

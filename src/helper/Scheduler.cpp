@@ -21,9 +21,10 @@ struct ScheduleListener {
 };
 static Array<ScheduleListener> schedule_listener;
 static int ch_iterate = -1;
+extern int ch_controller;
 
-void Scheduler::init() {
-	ch_iterate = PerformanceMonitor::create_channel("scheduler", PerformanceChannel::Group::ITERATE);
+void Scheduler::init(int ch_iter_parent) {
+	ch_iterate = PerformanceMonitor::create_channel("scheduler", ch_iter_parent);
 }
 
 void Scheduler::reset() {
@@ -45,11 +46,13 @@ void Scheduler::iterate_subscriptions(float dt) {
 }
 
 void Scheduler::handle_iterate(float dt) {
+	PerformanceMonitor::begin(ch_controller);
 	for (auto *c: PluginManager::controllers) {
 		PerformanceMonitor::begin(c->ch_iterate);
 		c->on_iterate(dt);
 		PerformanceMonitor::end(c->ch_iterate);
 	}
+	PerformanceMonitor::end(ch_controller);
 
 	PerformanceMonitor::begin(ch_iterate);
 	iterate_subscriptions(dt);

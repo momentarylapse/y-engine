@@ -64,6 +64,7 @@ public:
 	float resolution_scale_x = 1.0f;
 	float resolution_scale_y = 1.0f;
 
+	int ch_render= -1;
 	int ch_gui = -1, ch_out = -1, ch_end = -1, ch_post = -1;
 	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1, ch_shadow = -1;
 };

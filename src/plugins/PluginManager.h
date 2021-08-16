@@ -20,7 +20,7 @@ namespace kaba {
 
 class PluginManager {
 public:
-	static void init();
+	static void init(int ch_iter);
 	static void export_kaba();
 	static void import_kaba();
 

@@ -22,7 +22,7 @@ namespace gui {
 class Node;
 
 //void init(vulkan::RenderPass *rp);
-void init(nix::Shader *s);
+void init(nix::Shader *s, int ch_iter);
 void reset();
 //void render(vulkan::CommandBuffer *cb, const rect &viewport);
 void update();

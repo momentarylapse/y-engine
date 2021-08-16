@@ -13,6 +13,8 @@
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
 #include "../lib/nix/nix.h"
+#include "../lib/kaba/kaba.h"
+#include "../helper/PerformanceMonitor.h"
 #include <stdio.h>
 
 namespace gui {
@@ -22,11 +24,13 @@ nix::VertexBuffer *vertex_buffer = nullptr;
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;
 shared<Node> toplevel;
+static int ch_gui_iter = -1;
 
 
-void init(nix::Shader *s) {
+void init(nix::Shader *s, int ch_iter) {
 	vertex_buffer = new nix::VertexBuffer("3f,3f,2f|i");
 	vertex_buffer->create_rect(rect::ID);
+	ch_gui_iter = PerformanceMonitor::create_channel("gui", ch_iter);
 
 	Font::init_fonts();
 
@@ -92,11 +96,25 @@ void handle_mouse_move(const vec2 &m_prev, const vec2 &m) {
 }
 
 void iterate(float dt) {
+	PerformanceMonitor::begin(ch_gui_iter);
 	auto nodes = all_nodes;
 	// tree might change...
 	for (auto n: nodes) {
-		n->on_iterate(dt);
+		if (n->visible) {
+			auto prev = std::chrono::high_resolution_clock::now();
+			n->on_iterate(dt);
+#if 0
+			auto now = std::chrono::high_resolution_clock::now();
+			float dt = std::chrono::duration<float, std::chrono::seconds::period>(now - prev).count();
+			auto cc = kaba::get_dynamic_type(n);
+			if (cc)
+				printf("%s     %.2f\n", cc->long_name().c_str(), dt * 1000.0f);
+			else
+				printf("????     %.2f\n", dt * 1000.0f);
+#endif
+		}
 	}
+	PerformanceMonitor::end(ch_gui_iter);
 }
 
 void delete_node(Node *n) {

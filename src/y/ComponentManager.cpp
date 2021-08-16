@@ -19,6 +19,7 @@
 
 #include "../lib/file/msg.h"
 
+static int ch_component = -1;
 
 class ComponentListX {
 public:
@@ -57,11 +58,17 @@ ComponentListX *get_list_x(const kaba::Class *type_family) {
 		list.needs_update = class_func_did_override(type_family, "on_iterate");
 #ifdef _X_ALLOW_X_
 		if (list.needs_update)
-			list.ch_iterate = PerformanceMonitor::create_channel("comp:" + type_family->long_name(), PerformanceChannel::Group::ITERATE);
+			list.ch_iterate = PerformanceMonitor::create_channel(type_family->long_name(), ch_component);
 #endif
 		component_lists.set(type_family, list);
 		return &component_lists[type_family];
 	}
+}
+
+void ComponentManager::init() {
+#ifdef _X_ALLOW_X_
+	ch_component = PerformanceMonitor::create_channel("component");
+#endif
 }
 
 
@@ -107,6 +114,9 @@ ComponentManager::List *ComponentManager::get_list(const kaba::Class *type_famil
 }
 
 void ComponentManager::iterate(float dt) {
+#ifdef _X_ALLOW_X_
+	PerformanceMonitor::begin(ch_component);
+#endif
 	for (auto &l: component_lists)
 		if (l.value.needs_update) {
 #ifdef _X_ALLOW_X_
@@ -118,5 +128,8 @@ void ComponentManager::iterate(float dt) {
 			PerformanceMonitor::end(l.value.ch_iterate);
 #endif
 		}
+#ifdef _X_ALLOW_X_
+	PerformanceMonitor::end(ch_component);
+#endif
 }
 

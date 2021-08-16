@@ -27,14 +27,8 @@
 
 
 struct PerformanceChannel {
-	enum class Group {
-		RENDER,
-		ITERATE,
-		INPUT
-	};
-
 	string name;
-	Group group;
+	int parent = -1;
 	std::chrono::high_resolution_clock::time_point prev;
 	float dt = 0, average = 0;
 	int count = 0;
@@ -45,7 +39,7 @@ public:
 	//PerformanceMonitor();
 
 	static Array<PerformanceChannel> channels;
-	static int create_channel(const string &name, PerformanceChannel::Group group);
+	static int create_channel(const string &name, int parent = -1);
 	static void begin(int channel);
 	static void end(int channel);
 

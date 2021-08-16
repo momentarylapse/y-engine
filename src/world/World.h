@@ -210,12 +210,12 @@ public:
 		vector v;
 	} msg_data;
 
-	int ch_iterate, ch_animation;
+	int ch_iterate = -1, ch_animation = -1;
 };
 extern World world;
 
 
-void GodInit();
+void GodInit(int ch_iter);
 void GodEnd();
 bool GodLoadWorld(const Path &filename);
 

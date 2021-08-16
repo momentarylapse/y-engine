@@ -48,6 +48,7 @@
 
 
 Array<Controller*> PluginManager::controllers;
+int ch_controller = -1;
 
 
 extern nix::Texture *_tex_white;
@@ -88,7 +89,8 @@ void global_exit(EngineData& engine) {
 	exit(0);
 }
 
-void PluginManager::init() {
+void PluginManager::init(int ch_iter) {
+	ch_controller = PerformanceMonitor::create_channel("controller", ch_iter);
 	export_kaba();
 	import_kaba();
 }
@@ -447,7 +449,7 @@ void PluginManager::export_kaba() {
 
 	kaba::declare_class_size("PerformanceMonitor.Channel", sizeof(PerformanceChannel));
 	kaba::declare_class_element("PerformanceMonitor.Channel.name", &PerformanceChannel::name);
-	kaba::declare_class_element("PerformanceMonitor.Channel.group", &PerformanceChannel::group);
+	kaba::declare_class_element("PerformanceMonitor.Channel.parent", &PerformanceChannel::parent);
 	kaba::declare_class_element("PerformanceMonitor.Channel.average", &PerformanceChannel::average);
 
 	kaba::declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
@@ -664,7 +666,7 @@ void PluginManager::add_controller(const Path &name, const Array<TemplateDataScr
 	auto type = find_class_derived(name, "y.Controller");;
 	auto *c = (Controller*)create_instance(type, variables);
 	c->_class = type;
-	c->ch_iterate = PerformanceMonitor::create_channel("cont:" + type->long_name(), PerformanceChannel::Group::ITERATE);
+	c->ch_iterate = PerformanceMonitor::create_channel(type->long_name(), ch_controller);
 
 	controllers.add(c);
 	c->on_init();

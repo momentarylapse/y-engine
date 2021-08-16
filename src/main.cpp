@@ -102,6 +102,7 @@ public:
 	RenderPath *render_path;
 
 	gui::Text *fps_display;
+	int ch_iter = -1;
 
 	void init(const Array<string> &arg) {
 		config.load(arg);
@@ -109,7 +110,9 @@ public:
 		window = create_window();
 		kaba::init();
 		NetworkManager::init();
-		Scheduler::init();
+		ch_iter = PerformanceMonitor::create_channel("iter");
+		ComponentManager::init();
+		Scheduler::init(ch_iter);
 
 		engine.app_name = app_name;
 		engine.version = app_version;
@@ -134,12 +137,12 @@ public:
 
 		audio::init();
 
-		GodInit();
-		PluginManager::init();
+		GodInit(ch_iter);
+		PluginManager::init(ch_iter);
 
 		ErrorHandler::init();
 
-		gui::init(render_path->shader_2d);
+		gui::init(render_path->shader_2d, ch_iter);
 
 
 		input::init(window);
@@ -271,7 +274,7 @@ public:
 	}
 
 	void iterate() {
-		//perf_mon.tick(PMLabel::UNKNOWN);
+		PerformanceMonitor::begin(ch_iter);
 		Scheduler::handle_iterate_pre(engine.elapsed);
 
 		network_manager.iterate();
@@ -282,9 +285,9 @@ public:
 
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
-		//perf_mon.tick(PMLabel::ITERATE);
 
 		world.iterate_animations(engine.elapsed);
+		PerformanceMonitor::end(ch_iter);
 	}
 
 

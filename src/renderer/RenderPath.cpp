@@ -37,16 +37,17 @@ matrix mtr(const vector &t, const quaternion &a) {
 }
 
 RenderPath::RenderPath() {
-	ch_pre = PerformanceMonitor::create_channel("R.pre", PerformanceChannel::Group::RENDER);
-	ch_gui = PerformanceMonitor::create_channel("R.gui", PerformanceChannel::Group::RENDER);
-	ch_out = PerformanceMonitor::create_channel("R.out", PerformanceChannel::Group::RENDER);
-	ch_post = PerformanceMonitor::create_channel("R.post", PerformanceChannel::Group::RENDER);
-	ch_end = PerformanceMonitor::create_channel("R.end", PerformanceChannel::Group::RENDER);
-	ch_bg = PerformanceMonitor::create_channel("R.bg", PerformanceChannel::Group::RENDER);
-	ch_world = PerformanceMonitor::create_channel("R.world", PerformanceChannel::Group::RENDER);
-	ch_fx = PerformanceMonitor::create_channel("R.fx", PerformanceChannel::Group::RENDER);
-	ch_shadow = PerformanceMonitor::create_channel("R.shadow", PerformanceChannel::Group::RENDER);
-	ch_prepare_lights = PerformanceMonitor::create_channel("R.lights", PerformanceChannel::Group::RENDER);
+	ch_render = PerformanceMonitor::create_channel("render");
+	ch_pre = PerformanceMonitor::create_channel("pre", ch_render);
+	ch_gui = PerformanceMonitor::create_channel("gui", ch_render);
+	ch_out = PerformanceMonitor::create_channel("out", ch_render);
+	ch_post = PerformanceMonitor::create_channel("post", ch_render);
+	ch_end = PerformanceMonitor::create_channel("end", ch_render);
+	ch_bg = PerformanceMonitor::create_channel("bg", ch_render);
+	ch_world = PerformanceMonitor::create_channel("world", ch_render);
+	ch_fx = PerformanceMonitor::create_channel("fx", ch_render);
+	ch_shadow = PerformanceMonitor::create_channel("shadow", ch_render);
+	ch_prepare_lights = PerformanceMonitor::create_channel("lights", ch_render);
 }
 
 #if HAS_LIB_VULKAN

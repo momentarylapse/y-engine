@@ -17,6 +17,8 @@
 
 #ifdef USE_CAIRO
 #include <cairo/cairo.h>
+#include <pango/pango.h>
+#include <pango/pangocairo.h>
 #endif
 
 #ifdef USE_FREETYPE
@@ -36,7 +38,7 @@ FT_Library ft2 = nullptr;
 
 #endif
 
-const float Font::FONT_SIZE = 40.0f;
+const float Font::FONT_SIZE = 30.0f;
 //const float Font::LINE_GAP = 0;//.3f;
 //const float Font::LINE_Y_OFFSET = 1;//0.84f;
 
@@ -59,9 +61,11 @@ Font *Font::load(const string &name) {
 	msg_write("loading font " + name);
 	auto f = new Font;
 	f->name = name;
+#ifdef USE_FREETYPE
 	f->face = ft_load_font(name, FONT_SIZE);
 	f->line_height = (((FT_Face)f->face)->size->metrics.height >> 6);//FONT_SIZE * (1.0f + LINE_GAP);
 	f->line_y_offset = (float)(((FT_Face)f->face)->size->metrics.ascender >> 6) / (float)(((FT_Face)f->face)->size->metrics.height >> 6);
+#endif
 	fonts.add(f);
 	return f;
 }
@@ -136,6 +140,8 @@ void cairo_render_text(const string &font_name, float font_size, const string &t
 		cairo_surface_destroy(surface);
 	}
 }
+
+void Font::init_fonts() {}
 
 #else
 
@@ -306,7 +312,10 @@ void Font::render_text(const string &str, Node::Align align, Image &im) {
 }
 
 int Font::get_width(const string &str) {
+#ifdef USE_FREETYPE
 	return ft_get_text_width((FT_Face)face, str);
+#endif
+	return 0;
 }
 
 int Font::get_height(const string &str) {

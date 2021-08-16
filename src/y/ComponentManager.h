@@ -19,6 +19,8 @@ class ComponentManager {
 public:
 	using List = Array<Component*>;
 
+	static void init();
+
 	static Component *create_component(const kaba::Class *type, const string &var);
 	static void delete_component(Component *c);
 	static List *get_list(const kaba::Class *type_family);
