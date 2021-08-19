@@ -83,7 +83,7 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathGL(GLFWwindow* win, int w, int h);
+	RenderPathGL(GLFWwindow* win, int w, int h, Type type);
 
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(nix::DepthBuffer *fb, nix::CubeMap *cube, const vector &pos);

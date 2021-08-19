@@ -43,7 +43,8 @@ matrix jitter(float w, float h, int uid);
 void break_point();
 
 
-RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h) {
+RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, Type::FORWARD) {
+
 	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		fb_main = new nix::FrameBuffer({

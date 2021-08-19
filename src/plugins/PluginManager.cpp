@@ -484,6 +484,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("EngineData.exit", &global_exit);
 
 	kaba::declare_class_size("RenderPath", sizeof(RenderPathGL));
+	kaba::declare_class_element("RenderPath.type", &RenderPathGL::type);
 	kaba::declare_class_element("RenderPath.depth_buffer", &RenderPathGL::depth_buffer);
 	kaba::declare_class_element("RenderPath.cube_map", &RenderPathGL::cube_map);
 	kaba::declare_class_element("RenderPath.fb_main", &RenderPathGL::fb_main);

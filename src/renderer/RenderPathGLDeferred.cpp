@@ -37,7 +37,7 @@
 
 void break_point();
 
-RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h) {
+RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, Type::DEFERRED) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse

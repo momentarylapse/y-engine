@@ -70,7 +70,8 @@ void jitter_iterate() {
 	jitter_frame ++;
 }
 
-RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h) {
+RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, Type _type) {
+	type = _type;
 	window = win;
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
