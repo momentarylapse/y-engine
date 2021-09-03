@@ -49,6 +49,7 @@ public:
 	bool user_shadow_control;
 	float user_shadow_theta;
 	matrix shadow_projection; // world -> texture
+	float shadow_dist_min, shadow_dist_max;
 
 	LightType type;
 	static const kaba::Class *_class;

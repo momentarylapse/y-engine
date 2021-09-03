@@ -313,6 +313,8 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Light.allow_shadow", &Light::allow_shadow);
 	kaba::declare_class_element("Light.user_shadow_control", &Light::user_shadow_control);
 	kaba::declare_class_element("Light.user_shadow_theta", &Light::user_shadow_theta);
+	kaba::declare_class_element("Light.shadow_dist_max", &Light::shadow_dist_max);
+	kaba::declare_class_element("Light.shadow_dist_min", &Light::shadow_dist_min);
 	kaba::link_external_class_func("Light.set_direction", &Light::set_direction);
 
 	/*kaba::link_external_class_func("Light.Parallel.__init__", &Light::__init_parallel__);

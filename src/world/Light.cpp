@@ -25,6 +25,8 @@ Light::Light(const color &c, float r, float t) {
 	allow_shadow = false;
 	user_shadow_control = false;
 	user_shadow_theta = -1;
+	shadow_dist_min = -1;
+	shadow_dist_max = -1;
 	type = LightType::DIRECTIONAL;
 	if (light.radius > 0) {
 		if (light.theta > 0)
@@ -91,7 +93,9 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 				theta = light.theta;
 			if (user_shadow_control)
 				theta = user_shadow_theta;
-			auto p = matrix::perspective(2 * theta, 1.0f, light.radius * 0.01f, light.radius);
+			float dist_min = (shadow_dist_min > 0) ? shadow_dist_min : light.radius * 0.01f;
+			float dist_max = (shadow_dist_max > 0) ? shadow_dist_max : light.radius;
+			auto p = matrix::perspective(2 * theta, 1.0f, dist_min, dist_max);
 			shadow_projection = p * r * t;
 		}
 		if (using_view_space)

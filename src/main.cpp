@@ -75,13 +75,6 @@ string ObjectDir;
 using namespace std::chrono;
 
 
-namespace nix {
-void TextureClear();
-}
-
-extern nix::Texture *_tex_white;
-
-
 
 class YEngineApp {
 public:
