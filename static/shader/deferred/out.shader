@@ -101,7 +101,7 @@ float get_ambient_occlusion(vec3 p, vec3 n) {
 	for (int i=0; i<NSSAO; i++) {
 		vec3 dp = TBN * ssao_samples[i];
 		//dp = ssao_samples[i];
-		if (dot(dp, n) < 0.1)
+		if (dot(dp, n) < 0.3)
 			continue;
 		
 		
