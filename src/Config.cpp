@@ -24,11 +24,16 @@ void Config::load(const Array<string> &arg) {
 		set_str(k, local.get_str(k, ""));
 
 	// cli arguments override
-	for (auto &a: arg)
+	for (auto &a: arg) {
 		if (a.head(2).lower() == "-c") {
 			auto xx = a.sub_ref(2).explode("=");
 			set_str(xx[0].trim(), xx[1].trim());
+		} else if (a == "--fw") {
+			set_str("renderer.path", "forward");
+		} else if (a == "--def") {
+			set_str("renderer.path", "deferred");
 		}
+	}
 
 	default_world = get_str("default-world", "");
 	second_world = get_str("second-world", "");

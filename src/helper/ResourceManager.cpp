@@ -60,14 +60,18 @@ nix::Shader* ResourceManager::load_shader(const Path& filename) {
 	return s;
 }
 
-string ResourceManager::expand_shader_source(const string &source, const string &variant) {
+string ResourceManager::expand_vertex_shader_source(const string &source, const string &variant) {
 	if (source.find("<VertexShader>") >= 0)
 		return source;
 	//msg_write("INJECTING " + variant);
 	return source + format("\n<VertexShader>\n#import vertex-%s\n</VertexShader>", variant);
 }
 
-nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &variant) {
+string ResourceManager::expand_fragment_shader_source(const string &source, const string &render_path) {
+	return source.replace("#import surface", "#import surface-" + render_path);
+}
+
+nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant) {
 	//nix::select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;
@@ -89,7 +93,7 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 		//fn = shader_dir << filename;
 	}
 
-	Path fnx = fn.with(":" + variant);
+	Path fnx = fn.with(":" + variant + ":" + render_path);
 
 	for (auto s : shaders)
 		if ((s->filename == fnx) and (s->program >= 0))
@@ -98,7 +102,8 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 
 	msg_write("loading shader: " + fnx.str());
 
-	string source = expand_shader_source(FileReadText(fn), variant);
+	string source = expand_vertex_shader_source(FileReadText(fn), variant);
+	source = expand_fragment_shader_source(source, render_path);
 	auto shader = nix::Shader::create(source);
 	shader->filename = fnx;
 

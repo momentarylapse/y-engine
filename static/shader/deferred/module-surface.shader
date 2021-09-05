@@ -1,5 +1,5 @@
 <Layout>
-	name = surface
+	name = surface-deferred
 </Layout>
 <Module>
 

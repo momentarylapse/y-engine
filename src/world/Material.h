@@ -51,9 +51,10 @@ public:
 	Path name;
 
 	shared_array<nix::Texture> textures;
-	shared<nix::Shader> shader[3];
+	shared<nix::Shader> shader[6];
 	Path shader_path;
-	void prepare_shader(ShaderVariant v);
+	void _prepare_shader(int render_path_type, ShaderVariant v);
+	nix::Shader *get_shader(int render_path_type, ShaderVariant v);
 
 	struct ShaderUniform {
 		string name;

@@ -42,6 +42,8 @@ RenderPath::RenderPath() {
 	ch_gui = PerformanceMonitor::create_channel("gui", ch_render);
 	ch_out = PerformanceMonitor::create_channel("out", ch_render);
 	ch_post = PerformanceMonitor::create_channel("post", ch_render);
+	ch_post_blur = PerformanceMonitor::create_channel("blur", ch_post);
+	ch_post_focus = PerformanceMonitor::create_channel("focus", ch_post);
 	ch_end = PerformanceMonitor::create_channel("end", ch_render);
 	ch_bg = PerformanceMonitor::create_channel("bg", ch_render);
 	ch_world = PerformanceMonitor::create_channel("world", ch_render);

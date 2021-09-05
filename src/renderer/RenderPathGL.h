@@ -38,6 +38,7 @@ struct RenderInjector {
 typedef nix::FrameBuffer* post_process_func_t(nix::FrameBuffer* cur);
 struct PostProcessor {
 	post_process_func_t *func;
+	int channel;
 };
 
 
@@ -83,7 +84,7 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathGL(GLFWwindow* win, int w, int h, Type type);
+	RenderPathGL(GLFWwindow* win, int w, int h, RenderPathType type);
 
 	virtual void render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(nix::DepthBuffer *fb, nix::CubeMap *cube, const vector &pos);
@@ -96,7 +97,7 @@ public:
 	void process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader);
 	nix::FrameBuffer* do_post_processing(nix::FrameBuffer *source);
 	nix::FrameBuffer* resolve_multisampling(nix::FrameBuffer *source);
-	void set_material(Material *m, ShaderVariant v);
+	void set_material(Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(const Array<nix::Texture*> &tex);
 	void draw_gui(nix::FrameBuffer *source);
 	void render_out(nix::FrameBuffer *source, nix::Texture *bloom);
@@ -105,7 +106,7 @@ public:
 	void draw_skyboxes(Camera *c);
 	void draw_terrains(bool allow_material);
 	void draw_objects_opaque(bool allow_material);
-	void draw_objects_transparent(bool allow_material);
+	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam);

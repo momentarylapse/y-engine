@@ -37,7 +37,7 @@
 
 void break_point();
 
-RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, Type::DEFERRED) {
+RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, RenderPathType::DEFERRED) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
@@ -48,7 +48,8 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : Rend
 
 	fb_main = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"),
-		new nix::DepthBuffer(width, height, "d24s8")});
+		gbuffer->depth_buffer.get()});
+		//new nix::DepthBuffer(width, height, "d24s8")});
 	fb_small1 = new nix::FrameBuffer({
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb_small2 = new nix::FrameBuffer({
@@ -74,6 +75,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : Rend
 	ResourceManager::default_shader = "default.shader";
 	ResourceManager::load_shader("module-lighting-pbr.shader");
 	ResourceManager::load_shader("deferred/module-surface.shader");
+	ResourceManager::load_shader("forward/module-surface-pbr.shader");
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
@@ -97,6 +99,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(GLFWwindow* win, int w, int h) : Rend
 	ssao_sample_buffer->update_array(ssao_samples);
 
 	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", ch_render);
+	ch_trans = PerformanceMonitor::create_channel("trans", ch_render);
 }
 
 void RenderPathGLDeferred::draw() {
@@ -115,6 +118,18 @@ void RenderPathGLDeferred::draw() {
 	render_into_gbuffer(gbuffer.get(), cam, dynamic_fb_area());
 	render_background(fb_main.get(), cam, dynamic_fb_area());
 	render_out_from_gbuffer(gbuffer.get(), fb_main.get());
+
+	PerformanceMonitor::begin(ch_trans);
+	cam->update_matrices((float)fb_main->width / (float)fb_main->height);
+	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::bind_buffer(ubo_light, 1);
+	nix::set_view_matrix(cam->view_matrix());
+	nix::set_z(true, true);
+	draw_objects_transparent(true, RenderPathType::FORWARD);
+	nix::set_z(false, false);
+	nix::set_projection_matrix(matrix::ID);
+	nix::set_view_matrix(matrix::ID);
+	PerformanceMonitor::end(ch_trans);
 
 	auto source = do_post_processing(fb_main.get());
 

@@ -70,7 +70,7 @@ void jitter_iterate() {
 	jitter_frame ++;
 }
 
-RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, Type _type) {
+RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, RenderPathType _type) {
 	type = _type;
 	window = win;
 	glfwMakeContextCurrent(window);
@@ -154,7 +154,7 @@ nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
 }
 
 void RenderPathGL::kaba_add_post_processor(kaba::Function *f) {
-	post_processors.add({(post_process_func_t*)(int_p)f->address});
+	post_processors.add({(post_process_func_t*)(int_p)f->address, PerformanceMonitor::create_channel(f->name, ch_post)});
 }
 
 void RenderPathGL::kaba_add_fx_injector(kaba::Function *f) {
@@ -173,23 +173,33 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	auto cur = source;
 
 	// scripts
-	for (auto &p: post_processors)
+	for (auto &p: post_processors) {
+		PerformanceMonitor::begin(p.channel);
 		cur = p.func(cur);
+		break_point();
+		PerformanceMonitor::end(p.channel);
+	}
 
 
 	if (cam->focus_enabled) {
+		PerformanceMonitor::begin(ch_post_focus);
 		auto next = next_fb(cur);
 		process_depth(cur, next, complex(1,0));
 		cur = next;
 		next = next_fb(cur);
 		process_depth(cur, next, complex(0,1));
 		cur = next;
+		break_point();
+		PerformanceMonitor::end(ch_post_focus);
 	}
 
 	// render blur into fb3!
+	PerformanceMonitor::begin(ch_post_blur);
 	process_blur(cur, fb_small1.get(), 1.0f, complex(2,0));
 	process_blur(fb_small1.get(), fb_small2.get(), 0.0f, complex(0,1));
 	break_point();
+	PerformanceMonitor::end(ch_post_blur);
+
 	PerformanceMonitor::end(ch_post);
 	return cur;
 }
@@ -316,9 +326,8 @@ void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
 }
 
 
-void RenderPathGL::set_material(Material *m, ShaderVariant v) {
-	m->prepare_shader(v);
-	auto s = m->shader[(int)v].get();
+void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
+	auto s = m->get_shader((int)t-1, v);
 	nix::set_shader(s);
 	if (using_view_space)
 		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
@@ -426,7 +435,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
 		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
-			set_material(sb->material[i], ShaderVariant::DEFAULT);
+			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
@@ -439,7 +448,7 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 		auto o = t->get_owner<Entity3D>();
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {
-			set_material(t->material, ShaderVariant::DEFAULT);
+			set_material(t->material, type, ShaderVariant::DEFAULT);
 			t->material->shader[0]->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			t->material->shader[0]->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
@@ -455,9 +464,9 @@ void RenderPathGL::draw_objects_instanced(bool allow_material) {
 		Model *m = s.model;
 		nix::set_model_matrix(s.matrices[0]);//m->_matrix);
 		if (allow_material)
-			set_material(s.material, ShaderVariant::INSTANCED);
+			set_material(s.material, type, ShaderVariant::INSTANCED);
 		else
-			set_material(material_shadow, ShaderVariant::INSTANCED);
+			set_material(material_shadow, type, ShaderVariant::INSTANCED);
 		nix::bind_buffer(ubo_multi_matrix, 5);
 		//msg_write(s.matrices.num);
 		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
@@ -477,38 +486,36 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 
 		if (ani) {
 			if (allow_material)
-				set_material(s.material, ShaderVariant::ANIMATED);
+				set_material(s.material, type, ShaderVariant::ANIMATED);
 			else
-				set_material(material_shadow, ShaderVariant::ANIMATED);
+				set_material(material_shadow, type, ShaderVariant::ANIMATED);
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(ani->buf, 7);
 		} else {
 			if (allow_material)
-				set_material(s.material, ShaderVariant::DEFAULT);
+				set_material(s.material, type, ShaderVariant::DEFAULT);
 			else
-				set_material(material_shadow, ShaderVariant::DEFAULT);
+				set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 	}
 }
 
-void RenderPathGL::draw_objects_transparent(bool allow_material) {
+void RenderPathGL::draw_objects_transparent(bool allow_material, RenderPathType t) {
 	nix::set_z(false, true);
 	if (allow_material)
 	for (auto &s: world.sorted_trans) {
 		Model *m = s.model;
 		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
-		set_material(s.material, ShaderVariant::DEFAULT);
 		nix::set_cull(nix::CullMode::NONE);
-		auto anim = m->owner ? m->owner->get_component<Animator>() : nullptr;
-		if (anim) {
-			//m->anim.mesh[0]->update_vb();
-			//nix::draw_triangles(m->anim.mesh[0]->sub[s.mat_index].vertex_buffer);
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+		if (ani) {
+			set_material(s.material, t, ShaderVariant::ANIMATED);
 		} else {
-			nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+			set_material(s.material, t, ShaderVariant::DEFAULT);
 		}
+		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		nix::set_cull(nix::CullMode::DEFAULT);
 	}
 	nix::set_alpha(nix::AlphaMode::NONE);

@@ -204,13 +204,25 @@ Material *LoadMaterial(const Path &filename) {
 	return m->copy();
 }
 
-void Material::prepare_shader(ShaderVariant v) {
-	if (shader[(int)v])
+inline int shader_index(int render_path_type, ShaderVariant v) {
+	return (int)v + 3 * render_path_type;
+}
+
+void Material::_prepare_shader(int render_path_type, ShaderVariant v) {
+	int i = shader_index(render_path_type, v);
+	if (shader[i])
 		return;
 	string vv = "default";
 	if (v == ShaderVariant::ANIMATED)
 		vv = "animated";
 	if (v == ShaderVariant::INSTANCED)
 		vv = "instanced";
-	shader[(int)v] = ResourceManager::load_surface_shader(shader_path, vv);
+	string rpt = (render_path_type == 1) ? "deferred" : "forward";
+	shader[i] = ResourceManager::load_surface_shader(shader_path, rpt, vv);
+}
+
+nix::Shader *Material::get_shader(int render_path_type, ShaderVariant v) {
+	int i = shader_index(render_path_type, v);
+	_prepare_shader(render_path_type, v);
+	return shader[i].get();
 }

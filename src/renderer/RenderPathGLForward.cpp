@@ -43,7 +43,7 @@ matrix jitter(float w, float h, int uid);
 void break_point();
 
 
-RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, Type::FORWARD) {
+RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, RenderPathType::FORWARD) {
 
 	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -187,7 +187,7 @@ void RenderPathGLForward::draw_world(bool allow_material) {
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
 	if (allow_material)
-		draw_objects_transparent(allow_material);
+		draw_objects_transparent(allow_material, type);
 }
 
 void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
