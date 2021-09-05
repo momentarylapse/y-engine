@@ -449,8 +449,9 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {
 			set_material(t->material, type, ShaderVariant::DEFAULT);
-			t->material->shader[0]->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			t->material->shader[0]->set_floats("pattern1", &t->texture_scale[1].x, 3);
+			auto s = t->material->get_shader((int)type-1, ShaderVariant::DEFAULT);
+			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
+			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
 		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
 		nix::draw_triangles(t->vertex_buffer);
