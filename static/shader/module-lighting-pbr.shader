@@ -114,21 +114,28 @@ float _surf_shadow_pcf_step(vec3 p, vec2 dd, ivec2 ts) {
 	return 0.0;
 }
 
+vec2 VogelDiskSample(int sampleIndex, int samplesCount, float phi) {
+	float GoldenAngle = 2.4;
+
+	float r = sqrt(sampleIndex + 0.5) / sqrt(samplesCount);
+	float theta = sampleIndex * GoldenAngle + phi;
+	return vec2(r * cos(theta), r * sin(theta));
+}
+
 float _surf_shadow_pcf(vec3 p) {
 	ivec2 ts = textureSize(tex_shadow0, 0);
 	float value = 0;//shadow_pcf_step(p, vec2(0,0), ts);
 	const float R = 1.8;
-	const int N = 3;
+	const int N = 16;
+	float phi0 = _surf_rand3d(p) * 2 * 3.1415;
 	for (int i=0; i<N; i++) {
-		float phi = _surf_rand3d(p + p*i) * 2 * 3.1415;
-		float r = R * sqrt(fract(phi * 235.3545));
-		value += _surf_shadow_pcf_step(p, r * vec2(cos(phi), sin(phi)), ts);
+		//float phi = _surf_rand3d(p + p*i) * 2 * 3.1415;
+		//float r = R * sqrt(fract(phi * 235.3545));
+		//vec2 dd = r * vec2(cos(phi), sin(phi));
+		vec2 dd = VogelDiskSample(i, N, phi0) * R;
+		value += _surf_shadow_pcf_step(p, dd, ts);
 	}
-	//value += shadow_pcf_step(p, vec2( 1.0, 1.1), ts);
-	//value += shadow_pcf_step(p, vec2(-0.8, 0.9), ts);
-	//value += shadow_pcf_step(p, vec2( 0.7,-0.8), ts);
-	//value += shadow_pcf_step(p, vec2(-0.5,-1.1), ts);
-	return value / N;//(N+1);
+	return value / N;
 }
 
 float _surf_shadow_factor(Light l, vec3 p) {
