@@ -11,6 +11,7 @@
 
 
 #include "../lib/base/base.h"
+#include "../lib/base/callable.h"
 #include "../lib/file/path.h"
 #include "../lib/image/color.h"
 #include "../y/Entity.h"
@@ -32,9 +33,6 @@ class LevelData;
 enum class LinkType;
 namespace audio {
 	class Sound;
-}
-namespace kaba {
-	class Function;
 }
 
 
@@ -197,11 +195,12 @@ public:
 	void add_sound(audio::Sound *s);
 
 	typedef void callback();
+	using Callback = Callable<void()>;
 	struct Observer {
 		string msg;
-		callback *f;
+		const Callback *f;
 	};
-	void subscribe(const string &msg, kaba::Function *f);
+	void subscribe(const string &msg, const Callback &f);
 	void notify(const string &msg);
 
 	Array<Observer> observers;

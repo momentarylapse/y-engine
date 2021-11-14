@@ -437,7 +437,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_size("NetworkManager", sizeof(NetworkManager));
 	kaba::declare_class_element("NewtorkManager.cur_con", &NetworkManager::cur_con);
 	kaba::link_external_class_func("NetworkManager.connect_to_host", &NetworkManager::connect_to_host);
-	kaba::link_external_class_func("NetworkManager.event", &NetworkManager::event_kaba);
+	kaba::link_external_class_func("NetworkManager.event", &NetworkManager::event);
 
 
 	kaba::declare_class_size("NetworkManager.Connection", sizeof(NetworkManager::Connection));
@@ -503,8 +503,8 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RenderPathGLForward::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.next_fb", &RenderPathGL::next_fb);
 	kaba::link_external_class_func("RenderPath.process", &RenderPathGL::process);
-	kaba::link_external_class_func("RenderPath.add_post_processor", &RenderPathGL::kaba_add_post_processor);
-	kaba::link_external_class_func("RenderPath.add_fx_injector", &RenderPathGL::kaba_add_fx_injector);
+	kaba::link_external_class_func("RenderPath.add_post_processor", &RenderPathGL::add_post_processor);
+	kaba::link_external_class_func("RenderPath.add_fx_injector", &RenderPathGL::add_fx_injector);
 
 	kaba::link_external("tex_white", &_tex_white);
 	kaba::link_external("world", &world);

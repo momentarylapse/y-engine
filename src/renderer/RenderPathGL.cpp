@@ -153,12 +153,12 @@ nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
 	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
-void RenderPathGL::kaba_add_post_processor(kaba::Function *f) {
-	post_processors.add({(post_process_func_t*)(int_p)f->address, PerformanceMonitor::create_channel(f->name, ch_post)});
+void RenderPathGL::add_post_processor(const PostProcessor::Callback *f) {
+	post_processors.add({f, PerformanceMonitor::create_channel("kaba:" + p2s(f), ch_post)});
 }
 
-void RenderPathGL::kaba_add_fx_injector(kaba::Function *f) {
-	fx_injectors.add({(injector_func_t*)(int_p)f->address});
+void RenderPathGL::add_fx_injector(const RenderInjector::Callback *f) {
+	fx_injectors.add({f});
 }
 
 void RenderPathGL::reset() {
@@ -175,7 +175,7 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	// scripts
 	for (auto &p: post_processors) {
 		PerformanceMonitor::begin(p.channel);
-		cur = p.func(cur);
+		cur = (*p.func)(cur);
 		break_point();
 		PerformanceMonitor::end(p.channel);
 	}
@@ -418,7 +418,7 @@ void RenderPathGL::draw_particles() {
 
 	// script injectors
 	for (auto &i: fx_injectors)
-		i.func();
+		(*i.func)();
 
 
 	nix::set_z(true, true);

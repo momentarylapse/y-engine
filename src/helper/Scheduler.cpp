@@ -12,12 +12,10 @@
 #include "../plugins/Controller.h"
 #include "../lib/kaba/kaba.h"
 
-typedef void schedule_callback();
-
 struct ScheduleListener {
 	float dt;
 	float t;
-	schedule_callback *f;
+	const Callable<void()> *f;
 };
 static Array<ScheduleListener> schedule_listener;
 static int ch_iterate = -1;
@@ -31,15 +29,15 @@ void Scheduler::reset() {
 	schedule_listener.clear();
 }
 
-void Scheduler::subscribe(float dt, kaba::Function *f) {
-	schedule_listener.add({dt, dt, (schedule_callback*)(void*)(int_p)f->address});
+void Scheduler::subscribe(float dt, const Callable<void()> &f) {
+	schedule_listener.add({dt, dt, &f});
 }
 
 void Scheduler::iterate_subscriptions(float dt) {
 	for (auto &l: schedule_listener) {
 		l.t -= dt;
 		if (l.t <= 0) {
-			l.f();
+			(*l.f)();
 			l.t = l.dt;
 		}
 	}

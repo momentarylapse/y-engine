@@ -7,15 +7,13 @@
 
 #pragma
 
-namespace kaba {
-	class Function;
-}
+#include "../lib/base/callable.h"
 
 class Scheduler {
 public:
 	static void init(int ch_iter);
 	static void reset();
-	static void subscribe(float dt, kaba::Function *f);
+	static void subscribe(float dt, const Callable<void()> &f);
 	static void iterate_subscriptions(float dt);
 
 	static void handle_iterate_pre(float dt);

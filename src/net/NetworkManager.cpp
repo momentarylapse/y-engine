@@ -112,15 +112,11 @@ void NetworkManager::handle_block(Connection *con) {
 	for (auto &o: observers)
 		if (o.hash == hash) {
 			//msg_error("JAAAAAA");
-			o.callback(o.object);
+			(*o.callback)(o.object);
 			break;
 		}
 
 	con->buffer->set_pos(pos0 + size);
-}
-
-void NetworkManager::event_kaba(const string &message, VirtualBase *ob, kaba::Function *f) {
-	event(message, ob, (Callback*)f->address);
 }
 
 void NetworkManager::event(const string &message, VirtualBase *ob, Callback *cb) {

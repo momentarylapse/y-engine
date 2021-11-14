@@ -9,6 +9,7 @@
 
 #include "RenderPath.h"
 #include "../lib/base/pointer.h"
+#include "../lib/base/callable.h"
 
 namespace nix {
 	class FrameBuffer;
@@ -26,18 +27,14 @@ class Material;
 
 enum class ShaderVariant;
 
-namespace kaba {
-	class Function;
-}
-
-typedef void injector_func_t();
 struct RenderInjector {
-	injector_func_t *func;
+	using Callback = Callable<void()>;
+	const Callback *func;
 };
 
-typedef nix::FrameBuffer* post_process_func_t(nix::FrameBuffer* cur);
 struct PostProcessor {
-	post_process_func_t *func;
+	using Callback = Callable<nix::FrameBuffer*(nix::FrameBuffer*)>;
+	const Callback *func;
 	int channel;
 };
 
@@ -116,10 +113,10 @@ public:
 
 
 	Array<PostProcessor> post_processors;
-	void kaba_add_post_processor(kaba::Function *f);
+	void add_post_processor(const PostProcessor::Callback *f);
 
 	Array<RenderInjector> fx_injectors;
-	void kaba_add_fx_injector(kaba::Function *f);
+	void add_fx_injector(const RenderInjector::Callback *f);
 
 	void reset();
 };

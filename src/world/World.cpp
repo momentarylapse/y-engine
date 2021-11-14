@@ -644,36 +644,44 @@ void World::_delete(Entity* x) {
 	}
 }
 
-void World::subscribe(const string &msg, kaba::Function *f) {
-	observers.add({msg, (callback*)(int_p)f->address});
+void World::subscribe(const string &msg, const Callback &f) {
+	observers.add({msg, &f});
 }
 
 void World::notify(const string &msg) {
 	for (auto &o: observers)
 		if (o.msg == msg) {
-			o.f();
+			(*o.f)();
 		}
 }
 
 void World::unregister_entity(Entity3D *e) {
+	msg_write("U1");
 	if (e->object_id >= 0)
 		unregister_object(e);
+	msg_write("U2");
 
 #if HAS_LIB_BULLET
 	if (auto sb = e->get_component<SolidBody>())
 		dynamicsWorld->removeRigidBody(sb->body);
 #endif
+	msg_write("U3");
 
 	if (auto m = e->get_component<Model>())
 		unregister_model(m);
+	msg_write("U4");
 
 	foreachi(auto *o, entities, i)
 		if (o == e) {
+			msg_write("UX1");
 			msg_data.e = o;
 			notify("entity-delete");
+			msg_write("UX2");
 			entities.erase(i);
+			msg_write("UX3");
 			return;
 		}
+	msg_write("U5");
 }
 
 bool World::unregister(Entity* x) {
