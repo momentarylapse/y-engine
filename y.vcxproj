@@ -261,7 +261,6 @@
     <ClCompile Include="src\y\Entity.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\meta.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\audio\Sound.h" />

@@ -14,6 +14,12 @@
 #include "lib/image/image.h"
 #include "lib/kaba/kaba.h"
 
+#ifdef _X_USE_HUI_
+	#include "lib/hui/hui.h"
+#elif defined(_X_USE_HUI_MINIMAL_)
+	#include "lib/hui_minimal/hui.h"
+#endif
+
 #include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
 #include "helper/Scheduler.h"

@@ -219,8 +219,7 @@ sources = [
 	'src/y/EngineData.cpp',
 	'src/y/Entity.cpp',
 	'src/Config.cpp',
-	'src/main.cpp',
-	'src/meta.cpp'
+	'src/main.cpp'
 ]
 
 
