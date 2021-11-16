@@ -4,18 +4,12 @@
 #include "../lib/base/pointer.h"
 #include "../lib/file/path.h"
 #include "../lib/image/color.h"
+#include "../graphics-fwd.h"
 
 #define MATERIAL_MAX_TEXTURES		8
 
 class Path;
 class Model;
-namespace nix {
-	class Texture;
-	//class CubeMap;
-	class Shader;
-	enum class Alpha;
-	enum class AlphaMode;
-}
 
 
 
@@ -50,11 +44,11 @@ public:
 	// name of the material
 	Path name;
 
-	shared_array<nix::Texture> textures;
-	shared<nix::Shader> shader[6];
+	shared_array<Texture> textures;
+	shared<Shader> shader[6];
 	Path shader_path;
 	void _prepare_shader(int render_path_type, ShaderVariant v);
-	nix::Shader *get_shader(int render_path_type, ShaderVariant v);
+	Shader *get_shader(int render_path_type, ShaderVariant v);
 
 	struct ShaderUniform {
 		string name;
@@ -72,7 +66,7 @@ public:
 
 	struct Transparency {
 		TransparencyMode mode;
-		nix::Alpha source, destination;
+		Alpha source, destination;
 		float factor;
 		bool z_buffer;
 	} alpha;
@@ -81,7 +75,7 @@ public:
 		ReflectionMode mode;
 		float density;
 		//CubeMap *cube_map;
-		nix::Texture *cube_map;
+		Texture *cube_map;
 		int cube_map_size;
 	} reflection;
 
@@ -102,6 +96,6 @@ void MaterialInit();
 void MaterialEnd();
 void MaterialReset();
 void SetDefaultMaterial(Material *m);
-//void MaterialSetDefaultShader(nix::Shader *s);
+//void MaterialSetDefaultShader(Shader *s);
 Material *LoadMaterial(const Path &filename);
 

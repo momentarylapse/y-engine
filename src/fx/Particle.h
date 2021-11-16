@@ -5,20 +5,14 @@
  *      Author: michi
  */
 
-#ifndef SRC_FX_PARTICLE_H_
-#define SRC_FX_PARTICLE_H_
+#pragma once
 
+#include "../graphics-fwd.h"
 #include "../lib/base/base.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/rect.h"
 #include "../lib/image/color.h"
 #include "../y/Entity.h"
-
-
-namespace nix {
-	class Texture;
-	class Shader;
-}
 
 
 /*struct ParticlePushData {
@@ -30,10 +24,10 @@ namespace nix {
 class Particle : public Entity {
 public:
 
-	Particle(const vector &pos, float r, nix::Texture *tex, float ttl);
+	Particle(const vector &pos, float r, Texture *tex, float ttl);
 	virtual ~Particle();
 
-	void __init__(const vector &pos, float r, nix::Texture *tex, float ttl);
+	void __init__(const vector &pos, float r, Texture *tex, float ttl);
 	void __delete__() override;
 	virtual void on_iterate(float dt) {}
 
@@ -41,12 +35,10 @@ public:
 	vector vel;
 	color col;
 	rect source;
-	nix::Texture *texture;
+	Texture *texture;
 	float radius;
 	float time_to_live;
 	bool suicidal;
 	bool enabled;
 };
 
-
-#endif /* SRC_FX_PARTICLE_H_ */

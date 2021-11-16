@@ -9,26 +9,26 @@
 #include "Node.h"
 #include "Font.h"
 #include "../meta.h"
+#include "../graphics-impl.h"
 #include "../lib/math/rect.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
-#include "../lib/nix/nix.h"
 #include "../lib/kaba/kaba.h"
 #include "../helper/PerformanceMonitor.h"
 #include <stdio.h>
 
 namespace gui {
 
-shared<nix::Shader> shader;
-nix::VertexBuffer *vertex_buffer = nullptr;
+shared<Shader> shader;
+VertexBuffer *vertex_buffer = nullptr;
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;
 shared<Node> toplevel;
 static int ch_gui_iter = -1;
 
 
-void init(nix::Shader *s, int ch_iter) {
-	vertex_buffer = new nix::VertexBuffer("3f,3f,2f|i");
+void init(Shader *s, int ch_iter) {
+	vertex_buffer = new VertexBuffer("3f,3f,2f|i");
 	vertex_buffer->create_rect(rect::ID);
 	ch_gui_iter = PerformanceMonitor::create_channel("gui", ch_iter);
 

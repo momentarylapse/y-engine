@@ -7,11 +7,11 @@
 
 #include "Particle.h"
 
-nix::Shader *shader_fx;
+Shader *shader_fx;
 
 //DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
 
-Particle::Particle(const vector &p, float r, nix::Texture *t, float ttl) : Entity(Type::PARTICLE) {
+Particle::Particle(const vector &p, float r, Texture *t, float ttl) : Entity(Type::PARTICLE) {
 	pos = p;
 	vel = vector::ZERO;
 	col = White;
@@ -27,7 +27,7 @@ Particle::Particle(const vector &p, float r, nix::Texture *t, float ttl) : Entit
 Particle::~Particle() {
 }
 
-void Particle::__init__(const vector &p, float r, nix::Texture *t, float ttl) {
+void Particle::__init__(const vector &p, float r, Texture *t, float ttl) {
 	new(this) Particle(p, r, t, ttl);
 }
 

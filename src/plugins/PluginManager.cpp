@@ -44,6 +44,7 @@
 #include "../world/components/Animator.h"
 #include "../world/components/Skeleton.h"
 #include "../meta.h"
+#include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
 
 
@@ -51,7 +52,7 @@ Array<Controller*> PluginManager::controllers;
 int ch_controller = -1;
 
 
-extern nix::Texture *_tex_white;
+extern Texture *_tex_white;
 
 void global_delete(Entity *e) {
 	//msg_error("global delete... " + p2s(e));

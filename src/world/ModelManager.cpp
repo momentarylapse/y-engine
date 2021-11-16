@@ -24,7 +24,7 @@
 #endif
 #include "../lib/file/file.h"
 #include "../lib/xfile/chunked.h"
-#include "../lib/nix/nix.h"
+#include "../graphics-impl.h"
 #include "../meta.h"
 #include "Material.h"
 
@@ -32,6 +32,10 @@ Array<Model*> ModelManager::originals;
 
 ModelTemplate::ModelTemplate(Model *m) {
 	model = m;
+	solid_body = nullptr;
+	mesh_collider = nullptr;
+	animator = nullptr;
+	skeleton = nullptr;
 }
 
 
@@ -226,8 +230,8 @@ public:
 		auto alpha_mode = (TransparencyMode)f->read_int();
 		if (alpha_mode != TransparencyMode::DEFAULT) {
 			me->alpha.mode = alpha_mode;
-			me->alpha.source = (nix::Alpha)f->read_int();
-			me->alpha.destination = (nix::Alpha)f->read_int();
+			me->alpha.source = (Alpha)f->read_int();
+			me->alpha.destination = (Alpha)f->read_int();
 			me->alpha.factor = f->read_float();
 			me->alpha.z_buffer = f->read_bool();
 		} else {

@@ -25,6 +25,7 @@
 
 
 //#include "Entity3D.h"
+#include "../graphics-fwd.h"
 #include "../y/Component.h"
 #include "../lib/base/base.h"
 #include "../lib/base/pointer.h"
@@ -44,10 +45,6 @@ class ModelTemplate;
 class MeshCollider;
 class SolidBody;
 class Animator;
-namespace nix {
-	class VertexBuffer;
-	class Buffer;
-}
 namespace kaba {
 	class Script;
 }
@@ -74,7 +71,7 @@ public:
 	// normals
 	Array<vector> normal;
 
-	nix::VertexBuffer *vertex_buffer;
+	VertexBuffer *vertex_buffer;
 
 	// refill the vertex buffer etc...
 	bool force_update;

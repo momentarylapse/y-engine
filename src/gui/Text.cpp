@@ -9,7 +9,7 @@
 #include "Font.h"
 #include "../lib/math/vec2.h"
 #include "../lib/image/image.h"
-#include "../lib/nix/nix.h"
+#include "../graphics-impl.h"
 
 #include "../y/EngineData.h"
 
@@ -49,7 +49,7 @@ void Text::rebuild() {
 		im.create(1,1, color(0,0,0,0));
 
 	if (texture == nullptr)
-		texture = new nix::Texture();
+		texture = new Texture();
 
 	texture->overwrite(im);
 	//texture->set_options("magfilter=nearest,wrap=clamp");

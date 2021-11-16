@@ -5,8 +5,7 @@
  *      Author: michi
  */
 
-#ifndef SRC_GUI_TEXT_H_
-#define SRC_GUI_TEXT_H_
+#pragma once
 
 #include "Picture.h"
 
@@ -31,5 +30,3 @@ public:
 };
 
 }
-
-#endif /* SRC_GUI_TEXT_H_ */

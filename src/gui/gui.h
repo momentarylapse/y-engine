@@ -10,11 +10,8 @@
 
 #include "../lib/base/pointer.h"
 #include <functional>
+#include "../graphics-fwd.h"
 
-namespace nix {
-	class VertexBuffer;
-	class Shader;
-}
 class vec2;
 
 namespace gui {
@@ -22,7 +19,7 @@ namespace gui {
 class Node;
 
 //void init(vulkan::RenderPass *rp);
-void init(nix::Shader *s, int ch_iter);
+void init(Shader *s, int ch_iter);
 void reset();
 //void render(vulkan::CommandBuffer *cb, const rect &viewport);
 void update();
@@ -37,8 +34,8 @@ void update_tree();
 
 void delete_node(Node *n);
 
-extern shared<nix::Shader> shader;
-extern nix::VertexBuffer *vertex_buffer;
+extern shared<Shader> shader;
+extern VertexBuffer *vertex_buffer;
 }
 
 

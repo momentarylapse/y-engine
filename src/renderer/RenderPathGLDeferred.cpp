@@ -33,6 +33,7 @@
 #include "../world/World.h"
 #include "../Config.h"
 #include "../meta.h"
+#include "../graphics-impl.h"
 
 
 void break_point();

@@ -5,29 +5,25 @@
  *      Author: michi
  */
 
-#ifndef SRC_FX_PARTICLEMANAGER_H_
-#define SRC_FX_PARTICLEMANAGER_H_
+#pragma once
 
+#include "../graphics-fwd.h"
 #include "../lib/base/base.h"
 
-namespace nix {
-	class Texture;
-	class UniformBuffer;
-}
 class Particle;
 class Beam;
 class vector;
 
 class ParticleGroup {
 public:
-	ParticleGroup(nix::Texture *t);
+	ParticleGroup(Texture *t);
 	~ParticleGroup();
 	Array<Particle*> particles;
 	Array<Beam*> beams;
 	void add(Particle *p);
 	bool unregister(Particle *p);
-	nix::Texture *texture;
-	nix::UniformBuffer *ubo;
+	Texture *texture;
+	UniformBuffer *ubo;
 	//DescriptorSet *dset;
 };
 
@@ -43,5 +39,3 @@ public:
 };
 
 
-
-#endif /* SRC_FX_PARTICLEMANAGER_H_ */

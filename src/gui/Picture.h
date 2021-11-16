@@ -7,23 +7,19 @@
 
 #pragma once
 
+#include "../graphics-fwd.h"
 #include "Node.h"
-
-namespace nix {
-	class Texture;
-	class Shader;
-}
 
 namespace gui {
 
 class Picture : public Node {
 public:
-	Picture(const rect &r, nix::Texture *tex, const rect &source, nix::Shader *shader);
-	Picture(const rect &r, nix::Texture *tex, const rect &source = rect::ID);
+	Picture(const rect &r, Texture *tex, const rect &source, Shader *shader);
+	Picture(const rect &r, Texture *tex, const rect &source = rect::ID);
 	virtual ~Picture();
 
-	void __init2__(const rect &r, nix::Texture *tex);
-	void __init3__(const rect &r, nix::Texture *tex, const rect &source);
+	void __init2__(const rect &r, Texture *tex);
+	void __init3__(const rect &r, Texture *tex, const rect &source);
 	virtual void __delete__();
 
 	rect source;
@@ -31,8 +27,8 @@ public:
 	float bg_blur;
 	float angle;
 
-	shared<nix::Shader> shader;
-	shared<nix::Texture> texture;
+	shared<Shader> shader;
+	shared<Texture> texture;
 	/*vulkan::Texture *texture;
 	vulkan::UniformBuffer *ubo;
 	vulkan::DescriptorSet *dset;

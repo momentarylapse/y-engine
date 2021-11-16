@@ -28,11 +28,7 @@
 #include "World.h"
 #include "../lib/math/complex.h"
 #include "../meta.h"
-#if HAS_LIB_VULKAN
-#include "../lib/vulkan/vulkan.h"
-#else
-#include "../lib/nix/nix.h"
-#endif
+#include "../graphics-impl.h"
 #include "../lib/file/msg.h"
 #include "components/Animator.h"
 
@@ -132,9 +128,9 @@ void Model::_ResetPhysAbsolute_() {
 // TODO: move this into the renderer
 void SubMesh::create_vb(bool animated) {
 	if (animated)
-		vertex_buffer = new nix::VertexBuffer("3f,3f,2f,4i,4f");
+		vertex_buffer = new VertexBuffer("3f,3f,2f,4i,4f");
 	else
-		vertex_buffer = new nix::VertexBuffer("3f,3f,2f");
+		vertex_buffer = new VertexBuffer("3f,3f,2f");
 }
 void Mesh::create_vb(bool animated) {
 	for (auto &s: sub)

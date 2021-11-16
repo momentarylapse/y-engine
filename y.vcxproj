@@ -400,6 +400,8 @@
     <ClInclude Include="src\y\EngineData.h" />
     <ClInclude Include="src\y\Entity.h" />
     <ClInclude Include="src\Config.h" />
+    <ClInclude Include="src\graphics-fwd.h" />
+    <ClInclude Include="src\graphics-impl.h" />
     <ClInclude Include="src\meta.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

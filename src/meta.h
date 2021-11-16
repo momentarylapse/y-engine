@@ -10,6 +10,19 @@
 #include "lib/base/base.h"
 #include "lib/file/path.h"
 
+
+
+/*class Texture;
+class Shader;
+class VertexBuffer;
+class FrameBuffer;
+class DepthBuffer;
+class CubeMap;
+class UniformBuffer;*/
+
+
+
+
 class Model;
 class Object;
 class Terrain;

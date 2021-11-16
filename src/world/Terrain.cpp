@@ -21,7 +21,7 @@
 #else
 #include "ResourceManager.h"
 #endif
-#include "../lib/nix/nix.h"
+#include "../graphics-impl.h"
 #include "../lib/file/file.h"
 
 const kaba::Class *Terrain::_class = nullptr;
@@ -104,7 +104,7 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 					for (int z=0;z<num_z/32+1;z++)
 						partition[x][z] = -1;
 
-				vertex_buffer = new nix::VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
+				vertex_buffer = new VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
 			}
 		} else {
 			msg_error(format("wrong file format: %d (4 expected)",ffv));

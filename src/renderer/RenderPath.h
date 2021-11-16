@@ -7,20 +7,10 @@
 
 #pragma once
 
+#include "../graphics-fwd.h"
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
 
-#if HAS_LIB_VULKAN
-namespace vulkan {
-	class Shader;
-	class Pipeline;
-	class CommandBuffer;
-	class VertexBuffer;
-	class DescriptorSet;
-	class UniformBuffer;
-	class Texture;
-}
-#endif
 class Renderer;
 class RendererVulkan;
 class ShadowMapRenderer;
@@ -30,10 +20,6 @@ class Camera;
 class matrix;
 class vector;
 class quaternion;
-
-namespace nix {
-	class Shader;
-}
 
 matrix mtr(const vector &t, const quaternion &a);
 
@@ -65,7 +51,7 @@ public:
 	virtual void start_frame() = 0;
 	virtual void end_frame() = 0;
 
-	nix::Shader *shader_2d = nullptr;
+	Shader *shader_2d = nullptr;
 
 	// dynamic resolution scaling
 	float resolution_scale_x = 1.0f;

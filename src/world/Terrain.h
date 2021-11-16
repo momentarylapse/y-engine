@@ -14,13 +14,10 @@
 #include "../y/Entity.h"
 #include "../y/Component.h"
 #include "Material.h"
+#include "../graphics-fwd.h"
 class Material;
 class CollisionData;
-namespace nix {
-	class VertexBuffer;
-	class UniformBuffer;
-	//class DescriptorSet;
-};
+//class DescriptorSet;
 
 enum class TerrainType {
 	CONTINGUOUS,
@@ -77,8 +74,8 @@ public:
 	Array<float> height;
 	Array<vector> vertex, normal;
 	Array<plane> pl; // for collision detection
-	nix::VertexBuffer *vertex_buffer;
-	nix::UniformBuffer *ubo;
+	VertexBuffer *vertex_buffer;
+	UniformBuffer *ubo;
 	//vulkan::DescriptorSet *dset;
 	int partition[128][128], partition_old[128][128];
 	vector pattern, min, max;

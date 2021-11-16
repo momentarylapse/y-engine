@@ -15,7 +15,6 @@
 #include "../lib/math/rect.h"
 #include "../lib/kaba/syntax/Function.h"
 #include "../lib/file/msg.h"
-
 #include "../helper/PerformanceMonitor.h"
 #include "../plugins/PluginManager.h"
 #include "../fx/Particle.h"
@@ -33,6 +32,7 @@
 #include "../world/Entity3D.h"
 #include "../world/components/Animator.h"
 #include "../Config.h"
+#include "../graphics-fwd.h"
 #include "../meta.h"
 
 

@@ -9,14 +9,12 @@
 #include "../../y/Component.h"
 #include "../../lib/base/base.h"
 #include "../../lib/base/pointer.h"
+#include "../../graphics-fwd.h"
 
 class Model;
 class vector;
 class quaternion;
 class matrix;
-namespace nix {
-	class Buffer;
-}
 class MetaMove;
 
 
@@ -103,7 +101,7 @@ public:
 	//Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
 
 	Array<matrix> dmatrix;
-	nix::Buffer *buf;
+	Buffer *buf;
 
 	// animation
 	void _cdecl reset();

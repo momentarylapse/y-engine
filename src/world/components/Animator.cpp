@@ -10,8 +10,8 @@
 #include "../Model.h"
 #include "../ModelManager.h"
 #include "../../y/Entity.h"
-#include "../../lib/nix/nix.h"
 #include "../../lib/file/msg.h"
+#include "../../graphics-impl.h"
 
 
 const kaba::Class *Animator::_class = nullptr;
@@ -54,7 +54,7 @@ void Animator::on_init() {
 	auto m = owner->get_component<Model>();
 
 	meta = m->_template->animator->meta;
-	buf = new nix::UniformBuffer;
+	buf = new UniformBuffer;
 
 	// skeleton
 	auto sk = m->owner->get_component<Skeleton>();

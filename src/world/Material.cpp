@@ -1,8 +1,8 @@
 #include "Material.h"
 #include "Model.h"
 #include "../lib/file/file.h"
-#include "../lib/nix/nix.h"
 #include "../lib/config.h"
+#include "../graphics-impl.h"
 #ifdef _X_USE_HUI_
 	#include "../lib/hui/hui.h"
 	#include "ResourceManager.h"
@@ -23,7 +23,7 @@ void MaterialInit() {
 	// create the default material
 	trivial_material = new Material;
 	trivial_material->name = "-default-";
-	//trivial_material->shader_path = nix::Shader::default_3d;
+	//trivial_material->shader_path = Shader::default_3d;
 
 	SetDefaultMaterial(trivial_material);
 }
@@ -45,9 +45,9 @@ void SetDefaultMaterial(Material *m) {
 	default_material = m;
 }
 
-/*void MaterialSetDefaultShader(nix::Shader *s) {
+/*void MaterialSetDefaultShader(Shader *s) {
 	default_material->shader[0] = s;
-	nix::Shader::default_load = s;
+	Shader::default_load = s;
 }*/
 
 
@@ -64,8 +64,8 @@ Material::Material() {
 	cast_shadow = true;
 
 	alpha.mode = TransparencyMode::NONE;
-	alpha.source = nix::Alpha::ZERO;
-	alpha.destination = nix::Alpha::ZERO;
+	alpha.source = Alpha::ZERO;
+	alpha.destination = Alpha::ZERO;
 	alpha.factor = 1;
 	alpha.z_buffer = true;
 
@@ -163,8 +163,8 @@ Material *LoadMaterial(const Path &filename) {
 		m->alpha.z_buffer = false;
 	} else if (mode == "function") {
 		m->alpha.mode = TransparencyMode::FUNCTIONS;
-		m->alpha.source = (nix::Alpha)c.get_int("transparency.source", 0);
-		m->alpha.destination = (nix::Alpha)c.get_int("transparency.dest", 0);
+		m->alpha.source = (Alpha)c.get_int("transparency.source", 0);
+		m->alpha.destination = (Alpha)c.get_int("transparency.dest", 0);
 		m->alpha.z_buffer = false;
 	} else if (mode == "key-hard") {
 		m->alpha.mode = TransparencyMode::COLOR_KEY_HARD;
@@ -179,12 +179,12 @@ Material *LoadMaterial(const Path &filename) {
 	if (mode == "static") {
 		m->reflection.mode = ReflectionMode::CUBE_MAP_STATIC;
 		texture_files = c.get_str("reflection.cubemap", "");
-		Array<nix::Texture*> cmt;
+		Array<Texture*> cmt;
 		for (auto &f: texture_files.explode(","))
 			cmt.add(ResourceManager::load_texture(f));
 		m->reflection.density = c.get_float("reflection.density", 1);
 #if 0
-			m->reflection.cube_map = new nix::CubeMap(m->reflection.cube_map_size);
+			m->reflection.cube_map = new CubeMap(m->reflection.cube_map_size);
 			for (int i=0;i<6;i++)
 				m->reflection.cube_map->fill_side(i, cmt[i]);
 #endif
@@ -221,7 +221,7 @@ void Material::_prepare_shader(int render_path_type, ShaderVariant v) {
 	shader[i] = ResourceManager::load_surface_shader(shader_path, rpt, vv);
 }
 
-nix::Shader *Material::get_shader(int render_path_type, ShaderVariant v) {
+Shader *Material::get_shader(int render_path_type, ShaderVariant v) {
 	int i = shader_index(render_path_type, v);
 	_prepare_shader(render_path_type, v);
 	return shader[i].get();

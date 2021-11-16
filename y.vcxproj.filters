@@ -849,6 +849,12 @@
     <ClInclude Include="src\Config.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics-fwd.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics-impl.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\meta.h">
       <Filter>src</Filter>
     </ClInclude>

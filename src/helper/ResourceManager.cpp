@@ -8,13 +8,14 @@
 	#include "../lib/hui_minimal/error.h"
 #endif
 #include "../y/EngineData.h"
+#include "../graphics-impl.h"
 
 
 Path ResourceManager::shader_dir;
 Path ResourceManager::texture_dir;
 Path ResourceManager::default_shader;
-static Array<nix::Shader*> shaders;
-static Array<nix::Texture*> textures;
+static Array<Shader*> shaders;
+static Array<Texture*> textures;
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	if (filename.is_absolute())
@@ -27,21 +28,21 @@ Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	return Path::EMPTY;
 	/*if (engine.ignore_missing_files) {
 		msg_error("missing shader: " + filename.str());
-		return nix::Shader::load("");
+		return Shader::load("");
 	}
 	throw Exception("missing shader: " + filename.str());
 	return filename;*/
 }
 
-nix::Shader* ResourceManager::load_shader(const Path& filename) {
+Shader* ResourceManager::load_shader(const Path& filename) {
 	if (filename.is_empty())
-		return nix::Shader::load("");
+		return Shader::load("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static << "shader"});
 	if (fn.is_empty()) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + filename.str());
-			return nix::Shader::load("");
+			return Shader::load("");
 		}
 		throw Exception("missing shader: " + filename.str());
 		//fn = shader_dir << filename;
@@ -51,7 +52,7 @@ nix::Shader* ResourceManager::load_shader(const Path& filename) {
 		if ((s->filename == fn) and (s->program >= 0))
 			return s;
 
-	auto s = nix::Shader::load(fn);
+	auto s = Shader::load(fn);
 	if (!s)
 		return nullptr;
 	s->link_uniform_block("BoneData", 7);
@@ -71,8 +72,8 @@ string ResourceManager::expand_fragment_shader_source(const string &source, cons
 	return source.replace("#import surface", "#import surface-" + render_path);
 }
 
-nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant) {
-	//nix::select_default_vertex_module("vertex-" + variant);
+Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant) {
+	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;
 	if (filename.is_empty())
@@ -81,13 +82,13 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 
 
 	if (filename.is_empty())
-		return nix::Shader::load("");
+		return Shader::load("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static << "shader"});
 	if (fn.is_empty()) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + filename.str());
-			return nix::Shader::load("");
+			return Shader::load("");
 		}
 		throw Exception("missing shader: " + filename.str());
 		//fn = shader_dir << filename;
@@ -104,10 +105,10 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 
 	string source = expand_vertex_shader_source(FileReadText(fn), variant);
 	source = expand_fragment_shader_source(source, render_path);
-	auto shader = nix::Shader::create(source);
+	auto shader = Shader::create(source);
 	shader->filename = fnx;
 
-	//auto s = nix::Shader::load(fn);
+	//auto s = Shader::load(fn);
 	if (variant == "animated")
 		if (!shader->link_uniform_block("BoneData", 7))
 			msg_error("BoneData not found...");
@@ -121,7 +122,7 @@ nix::Shader* ResourceManager::load_surface_shader(const Path& _filename, const s
 	return shader;
 }
 
-nix::Texture* ResourceManager::load_texture(const Path& filename) {
+Texture* ResourceManager::load_texture(const Path& filename) {
 	if (filename.is_empty())
 		return nullptr;
 
@@ -139,7 +140,7 @@ nix::Texture* ResourceManager::load_texture(const Path& filename) {
 			return t->valid ? t : nullptr;
 
 	try {
-		auto t = nix::Texture::load(fn);
+		auto t = Texture::load(fn);
 		textures.add(t);
 		return t;
 	} catch(Exception &e) {

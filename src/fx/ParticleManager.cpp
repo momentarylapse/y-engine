@@ -12,7 +12,7 @@
 #include "../lib/file/msg.h"
 
 
-ParticleGroup::ParticleGroup(nix::Texture *t) {
+ParticleGroup::ParticleGroup(Texture *t) {
 	texture = t;
 	ubo = nullptr;
 #if USE_API_VULKAN
