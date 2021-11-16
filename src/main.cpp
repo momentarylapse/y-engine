@@ -103,6 +103,19 @@ public:
 	gui::Text *fps_display;
 	int ch_iter = -1;
 
+	RenderPath *create_renderer() {
+		try {
+			if (config.get_str("renderer.path", "forward") == "deferred")
+				return new RenderPathGLDeferred(window, engine.width, engine.height);
+			else
+				return new RenderPathGLForward(window, engine.width, engine.height);
+		} catch(Exception &e) {
+			hui::ShowError(e.message());
+			throw e;
+		}
+		return nullptr;
+	}
+
 	void init(const Array<string> &arg) {
 		config.load(arg);
 
@@ -119,16 +132,8 @@ public:
 			engine.ignore_missing_files = true;
 
 
-		try {
-			if (config.get_str("renderer.path", "forward") == "deferred")
-				render_path = new RenderPathGLDeferred(window, engine.width, engine.height);
-			else
-				render_path = new RenderPathGLForward(window, engine.width, engine.height);
-			engine.renderer = render_path;
-		} catch(Exception &e) {
-			hui::ShowError(e.message());
-			throw e;
-		}
+
+		engine.renderer = render_path = create_renderer();
 
 		std::cout << "on init..." << "\n";
 
@@ -156,7 +161,7 @@ public:
 
 	void load_first_world() {
 		if (config.default_world == "")
-			throw std::runtime_error("no default world defined in game.ini");
+			throw Exception("no default world defined in game.ini");
 		load_world(config.default_world);
 	}
 
@@ -168,7 +173,7 @@ public:
 
 		GodLoadWorld(filename);
 
-		fps_display = new gui::Text("", 0.020f, vec2(0.01f, 0.01f));
+		fps_display = new gui::Text("", 0.020f, {0.01f, 0.01f});
 		fps_display->dz = 900;
 		gui::toplevel->add(fps_display);
 
@@ -263,7 +268,6 @@ public:
 
 		delete render_path;
 #if HAS_LIB_VULKAN
-		delete renderer;
 		vulkan::destroy();
 #endif
 

@@ -153,8 +153,10 @@ nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
 	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
+string callable_name(const void *c);
+
 void RenderPathGL::add_post_processor(const PostProcessor::Callback *f) {
-	post_processors.add({f, PerformanceMonitor::create_channel("kaba:" + p2s(f), ch_post)});
+	post_processors.add({f, PerformanceMonitor::create_channel(callable_name(f), ch_post)});
 }
 
 void RenderPathGL::add_fx_injector(const RenderInjector::Callback *f) {

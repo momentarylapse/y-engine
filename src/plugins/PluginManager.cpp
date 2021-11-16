@@ -683,3 +683,34 @@ Controller *PluginManager::get_controller(const kaba::Class *type) {
 	return nullptr;
 }
 
+
+
+string callable_name(const void *c) {
+	auto t = kaba::get_dynamic_type((const VirtualBase*)c);
+	if (!t)
+		return "callable:" + p2s(c);
+	static const bool EXTRACT_FUNCTION_NAME = false;
+	if (t->is_callable_bind()) {
+		if (EXTRACT_FUNCTION_NAME) {
+			for (auto &e: t->elements)
+				if (e.name == "_fp")
+					return "BIND:" + callable_name(*(const char**)((const char*)c + e.offset));
+			return "kaba:bind:" + t->name_space->name;
+		}
+		return t->name_space->owner->script->filename.basename();
+	}
+	if (t->is_callable_fp()) {
+		if (EXTRACT_FUNCTION_NAME) {
+			for (auto &e: t->elements)
+				if (e.name == "_fp") {
+					auto func = *(const kaba::Function**)((const char*)c + e.offset);
+					return "FUNC:" + func->long_name();
+				}
+			return "func:" + t->long_name();
+		}
+		return t->name_space->owner->script->filename.basename();//relative_to(engine.script_dir).str();
+	}
+	return "callable:" + p2s(c);
+}
+
+
