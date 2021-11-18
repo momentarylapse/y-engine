@@ -133,7 +133,6 @@ public:
 #ifdef USING_VULKAN
 		instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
 #else
-		nix::init();
 #endif
 
 		kaba::init();

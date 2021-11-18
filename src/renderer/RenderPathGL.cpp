@@ -114,7 +114,7 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, RenderPathType _type) 
 	ubo_multi_matrix = new nix::UniformBuffer();
 }
 
-void RenderPathGL::render_into_cubemap(nix::DepthBuffer *depth, nix::CubeMap *cube, const vector &pos) {
+void RenderPathGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity3D o(pos, quaternion::ID);
@@ -150,14 +150,14 @@ rect RenderPathGL::dynamic_fb_area() const {
 	return rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
 }
 
-nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
+FrameBuffer *RenderPathGL::next_fb(FrameBuffer *cur) {
 	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
 
 
 // GTX750: 1920x1080 0.277 ms per trivial step
-nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
+FrameBuffer* RenderPathGL::do_post_processing(FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_post);
 	auto cur = source;
 
@@ -193,7 +193,7 @@ nix::FrameBuffer* RenderPathGL::do_post_processing(nix::FrameBuffer *source) {
 	return cur;
 }
 
-nix::FrameBuffer* RenderPathGL::resolve_multisampling(nix::FrameBuffer *source) {
+FrameBuffer* RenderPathGL::resolve_multisampling(FrameBuffer *source) {
 	auto next = next_fb(source);
 	if (true) {
 		shader_resolve_multisample->set_float("width", source->width);
@@ -220,7 +220,7 @@ void RenderPathGL::end_frame() {
 }
 
 
-void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *target, float threshold, const complex &axis) {
+void RenderPathGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis) {
 	float r = cam->bloom_radius * resolution_scale_x;
 	shader_blur->set_float("radius", r);
 	shader_blur->set_float("threshold", threshold / cam->exposure);
@@ -228,7 +228,7 @@ void RenderPathGL::process_blur(nix::FrameBuffer *source, nix::FrameBuffer *targ
 	process(weak(source->color_attachments), target, shader_blur.get());
 }
 
-void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, const complex &axis) {
+void RenderPathGL::process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis) {
 	shader_depth->set_float("max_radius", 50);
 	shader_depth->set_float("focal_length", cam->focal_length);
 	shader_depth->set_float("focal_blur", cam->focal_blur);
@@ -237,7 +237,7 @@ void RenderPathGL::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *tar
 	process({source->color_attachments[0].get(), depth_buffer}, target, shader_depth.get());
 }
 
-void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
+void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
 	nix::bind_frame_buffer(target);
 	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
 	nix::set_z(false, false);
@@ -252,7 +252,7 @@ void RenderPathGL::process(const Array<nix::Texture*> &source, nix::FrameBuffer 
 	nix::set_scissor(rect::EMPTY);
 }
 
-void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
+void RenderPathGL::draw_gui(FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gui);
 	gui::update();
 
@@ -293,7 +293,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	PerformanceMonitor::end(ch_gui);
 }
 
-void RenderPathGL::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
+void RenderPathGL::render_out(FrameBuffer *source, Texture *bloom) {
 	PerformanceMonitor::begin(ch_out);
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
@@ -330,7 +330,7 @@ void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS)
 		nix::set_alpha(m->alpha.source, m->alpha.destination);
 	else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD)
-		nix::set_alpha(nix::AlphaMode::COLOR_KEY_HARD);
+		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	else
 		nix::disable_alpha();
 
@@ -339,7 +339,7 @@ void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) 
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);
 }
 
-void RenderPathGL::set_textures(const Array<nix::Texture*> &tex) {
+void RenderPathGL::set_textures(const Array<Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
 		tt.add(tex_white.get());
