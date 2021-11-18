@@ -120,6 +120,12 @@ extern bool verbose;
 		return VK_NULL_HANDLE;
 	}
 
+
+	Shader *Shader::create(const string &source) {
+		msg_todo("Shader.create (vulkan)");
+		return nullptr;
+	}
+
 };
 
 #endif

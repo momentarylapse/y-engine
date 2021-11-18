@@ -1,8 +1,8 @@
 BIN = ../y
 CPP = g++
-GLOBALFLAGS = -fno-omit-frame-pointer -O2 -g -std=c++17 -DHAS_LIB_GTK3=1 -DHAS_LIB_ZLIB=1 -DHAS_LIB_GLFW=1 -DHAS_LIB_GL=1 -DHAS_LIB_FREETYPE2=1 -DHAS_LIB_UNWIND=1 -DHAS_LIB_DL=1 -DHAS_LIB_BULLET=1 -DHAS_LIB_OPENAL=1 -DHAS_LIB_OGG=1 -DHAS_LIB_VULKAN=1
-CXXFLAGS =  `pkg-config --cflags gtk+-3.0 zlib glfw3 gl freetype2 bullet openal ogg vorbis vorbisfile vorbisenc vulkan` $(GLOBALFLAGS)
-CXXFLAGSLINKING = -lunwind -ldl `pkg-config --cflags --libs gtk+-3.0 zlib glfw3 gl freetype2 bullet openal ogg vorbis vorbisfile vorbisenc vulkan` $(GLOBALFLAGS)
+GLOBALFLAGS = -fno-omit-frame-pointer -O2 -g -std=c++17 -DHAS_LIB_GTK3=1 -DHAS_LIB_ZLIB=1 -DHAS_LIB_GLFW=1 -DHAS_LIB_GL=1 -DHAS_LIB_FREETYPE2=1 -DHAS_LIB_UNWIND=1 -DHAS_LIB_DL=1 -DHAS_LIB_BULLET=1 -DHAS_LIB_OPENAL=1 -DHAS_LIB_OGG=1 -DHAS_LIB_VULKAN=1 -DHAS_LIB_SHADERC=1
+CXXFLAGS =  `pkg-config --cflags gtk+-3.0 zlib glfw3 gl freetype2 bullet openal ogg vorbis vorbisfile vorbisenc vulkan shaderc` $(GLOBALFLAGS)
+CXXFLAGSLINKING = -lunwind -ldl `pkg-config --cflags --libs gtk+-3.0 zlib glfw3 gl freetype2 bullet openal ogg vorbis vorbisfile vorbisenc vulkan shaderc` $(GLOBALFLAGS)
 prefix = /usr/local
 
 OBJ = audio/Sound.o \
