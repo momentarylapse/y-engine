@@ -207,9 +207,10 @@ FrameBuffer* RenderPathGL::resolve_multisampling(FrameBuffer *source) {
 }
 
 
-void RenderPathGL::start_frame() {
+bool RenderPathGL::start_frame() {
 	nix::start_frame_glfw(window);
 	jitter_iterate();
+	return true;
 }
 
 void RenderPathGL::end_frame() {

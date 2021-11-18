@@ -68,7 +68,7 @@ public:
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
 
-	void start_frame() override;
+	bool start_frame() override;
 	void end_frame() override;
 
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis);

@@ -6,8 +6,6 @@
  */
 
 
-#include <GLFW/glfw3.h>
-
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
 #include "../graphics-impl.h"
@@ -34,7 +32,6 @@
 #include "../world/Entity3D.h"
 #include "../world/components/Animator.h"
 #include "../Config.h"
-#include "../graphics-impl.h"
 #include "../meta.h"
 
 
@@ -75,9 +72,23 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	width = w;
 	height = h;
 
-	/*using_view_space = true;
+	using_view_space = true;
 
-	nix::allow_separate_vertex_arrays = true;
+
+	instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
+
+
+	image_available_semaphore = new vulkan::Semaphore();
+	render_finished_semaphore = new vulkan::Semaphore();
+
+
+	framebuffer_resized = false;
+	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
+
+	_create_swap_chain_and_stuff();
+
+
+	/*nix::allow_separate_vertex_arrays = true;
 	nix::init();
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -108,6 +119,59 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	material_shadow->shader_path = "shadow.shader";
 
 	ubo_multi_matrix = new nix::UniformBuffer();*/
+}
+
+RenderPathVulkan::~RenderPathVulkan() {
+	delete instance;
+}
+
+
+
+void RenderPathVulkan::_create_swap_chain_and_stuff() {
+	swap_chain = new vulkan::SwapChain(window);
+	auto swap_images = swap_chain->create_textures();
+	for (auto t: swap_images)
+		wait_for_frame_fences.add(new vulkan::Fence());
+
+	for (auto t: swap_images)
+		command_buffers.add(new vulkan::CommandBuffer());
+
+	depth_buffer = swap_chain->create_depth_buffer();
+	_default_render_pass = swap_chain->create_render_pass(depth_buffer);
+	frame_buffers = swap_chain->create_frame_buffers(_default_render_pass, depth_buffer);
+	width = swap_chain->width;
+	height = swap_chain->height;
+}
+
+
+/*func _delete_swap_chain_and_stuff()
+	for fb in frame_buffers
+		del fb
+	del _default_render_pass
+	del depth_buffer
+	del swap_chain*/
+
+void RenderPathVulkan::rebuild_default_stuff() {
+	msg_write("recreate swap chain");
+
+	vulkan::default_device->wait_idle();
+
+	//_delete_swap_chain_and_stuff();
+	_create_swap_chain_and_stuff();
+}
+
+
+
+vulkan::RenderPass* RenderPathVulkan::default_render_pass() const {
+	return _default_render_pass;
+}
+
+vulkan::FrameBuffer* RenderPathVulkan::current_frame_buffer() const {
+	return frame_buffers[image_index];
+}
+
+vulkan::CommandBuffer* RenderPathVulkan::current_command_buffer() const {
+	return command_buffers[image_index];
 }
 
 void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
@@ -205,17 +269,55 @@ FrameBuffer* RenderPathVulkan::resolve_multisampling(FrameBuffer *source) {
 }
 
 
-void RenderPathVulkan::start_frame() {
-	msg_write("start frame");
-	/*nix::start_frame_glfw(window);
-	jitter_iterate();*/
+bool RenderPathVulkan::start_frame() {
+
+	if (!swap_chain->acquire_image(&image_index, image_available_semaphore)) {
+		rebuild_default_stuff();
+		return false;
+	}
+
+	auto f = wait_for_frame_fences[image_index];
+	f->wait();
+	f->reset();
+
+
+	auto cb = current_command_buffer();
+	auto rp = default_render_pass();
+	auto fb = current_frame_buffer();
+
+
+
+	cb->begin();
+
+	//cb->set_viewport(r.area());
+
+	rp->clear_color[0] = color(1, 0.8f, 0.2f, 0.2f);
+	cb->begin_render_pass(rp, fb);
+	/*cb.bind_pipeline(pipeline)
+	cb.bind_descriptor_set(0, dset)
+	float x = 0
+	cb.push_constant(0,4,&x)
+
+	cb.draw(vb)
+	stat.draw(cb)*/
+	cb->end_render_pass();
+	cb->end();
+
+
+	return true;
 }
 
 void RenderPathVulkan::end_frame() {
-	/*PerformanceMonitor::begin(ch_end);
-	nix::end_frame_glfw(window);
-	break_point();
-	PerformanceMonitor::end(ch_end);*/
+	PerformanceMonitor::begin(ch_end);
+
+
+	auto f = wait_for_frame_fences[image_index];
+	vulkan::default_device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
+
+	swap_chain->present(image_index, {render_finished_semaphore});
+
+	vulkan::default_device->wait_idle();
+	PerformanceMonitor::end(ch_end);
 }
 
 

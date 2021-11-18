@@ -6,10 +6,9 @@
  */
 
 
-#include <GLFW/glfw3.h>
 #include "RenderPathVulkanForward.h"
 #ifdef USING_VULKAN
-#include "../lib/vulkan/vulkan.h"
+#include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/file/msg.h"
 

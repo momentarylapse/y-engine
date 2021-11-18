@@ -1,8 +1,6 @@
 
 
-#include "lib/nix/nix.h"
-
-#include <GLFW/glfw3.h>
+#include "graphics-impl.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -54,7 +52,6 @@
 	#include "renderer/RenderPathGLForward.h"
 	#include "renderer/RenderPathGLDeferred.h"
 #endif
-#include "graphics-impl.h"
 
 #include "Config.h"
 #include "world/Camera.h"
@@ -101,10 +98,6 @@ public:
 //private:
 	GLFWwindow* window;
 
-#ifdef USING_VULKAN
-	vulkan::Instance *instance;
-#endif
-
 	RenderPath *render_path;
 
 	gui::Text *fps_display;
@@ -131,10 +124,6 @@ public:
 		config.load(arg);
 
 		window = create_window();
-#ifdef USING_VULKAN
-		instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
-#else
-#endif
 
 		kaba::init();
 		NetworkManager::init();
@@ -206,12 +195,12 @@ public:
 	GLFWwindow* create_window() {
 		GLFWwindow* window;
 		glfwInit();
-#if HAS_LIB_VULKAN
+#ifdef USING_VULKAN
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-#endif
-
+#else
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+#endif
 
 		int w = config.get_int("screen.width", 1024);
 		int h = config.get_int("screen.height", 768);
@@ -283,9 +272,6 @@ public:
 		GodEnd();
 
 		delete render_path;
-#ifdef USING_VULKAN
-		delete instance;
-#endif
 
 		glfwDestroyWindow(window);
 
@@ -361,7 +347,8 @@ public:
 
 		update_dynamic_resolution();
 
-		render_path->start_frame();
+		if (!render_path->start_frame())
+			return;
 		Scheduler::handle_draw_pre();
 		timer_render.peek();
 		render_path->draw();

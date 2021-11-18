@@ -12,6 +12,15 @@
 #include "../lib/base/pointer.h"
 #include "../lib/base/callable.h"
 
+namespace vulkan {
+	class Instance;
+	class SwapChain;
+	class Fence;
+	class Semaphore;
+	class RenderPass;
+	class DescriptorPool;
+	class CommandBuffer;
+}
 
 class Material;
 class UBOLight;
@@ -26,6 +35,31 @@ class RenderPathVulkan : public RenderPath {
 public:
 	int width, height;
 	GLFWwindow* window;
+	vulkan::Instance *instance;
+
+	vulkan::Fence* in_flight_fence;
+	Array<vulkan::Fence*> wait_for_frame_fences;
+	vulkan::Semaphore *image_available_semaphore, *render_finished_semaphore;
+
+	Array<vulkan::CommandBuffer*> command_buffers;
+	//var cb: vulkan::CommandBuffer*
+	vulkan::DescriptorPool* pool;
+
+	vulkan::SwapChain *swap_chain;
+	vulkan::RenderPass* _default_render_pass;
+	vulkan::DepthBuffer* depth_buffer;
+	Array<vulkan::FrameBuffer*> frame_buffers;
+	int image_index;
+	bool framebuffer_resized;
+
+	void _create_swap_chain_and_stuff();
+	void rebuild_default_stuff();
+
+
+	vulkan::RenderPass *default_render_pass() const;
+	vulkan::FrameBuffer *current_frame_buffer() const;
+	vulkan::CommandBuffer *current_command_buffer() const;
+
 	shared<Texture> tex_black;
 	shared<Texture> tex_white;
 	shared<FrameBuffer> fb_main;
@@ -35,7 +69,6 @@ public:
 	shared<FrameBuffer> fb3;
 	shared<FrameBuffer> fb_shadow;
 	shared<FrameBuffer> fb_shadow2;
-	DepthBuffer *depth_buffer = nullptr;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_depth;
 	shared<Shader> shader_out;
@@ -65,11 +98,12 @@ public:
 	bool using_view_space = false;
 
 	RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType type);
+	virtual ~RenderPathVulkan();
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
 
-	void start_frame() override;
+	bool start_frame() override;
 	void end_frame() override;
 
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis);
