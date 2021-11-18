@@ -48,6 +48,7 @@
 #include "renderer/RenderPath.h"
 #ifdef USING_VULKAN
 	#include "renderer/RenderPathVulkan.h"
+	#include "renderer/RenderPathVulkanForward.h"
 #else
 	#include "renderer/RenderPathGL.h"
 	#include "renderer/RenderPathGLForward.h"
@@ -112,7 +113,7 @@ public:
 	RenderPath *create_renderer() {
 		try {
 #ifdef USING_VULKAN
-			//return new RenderPathVulkanForward(window, engine.width, engine.height);
+			return new RenderPathVulkanForward(window, engine.width, engine.height);
 #else
 			if (config.get_str("renderer.path", "forward") == "deferred")
 				return new RenderPathGLDeferred(window, engine.width, engine.height);

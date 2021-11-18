@@ -10,7 +10,7 @@
 
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
-#include "../lib/nix/nix.h"
+#include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/complex.h"
@@ -34,14 +34,9 @@
 #include "../world/Entity3D.h"
 #include "../world/components/Animator.h"
 #include "../Config.h"
-#include "../graphics-fwd.h"
+#include "../graphics-impl.h"
 #include "../meta.h"
 
-
-namespace nix {
-	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
-	extern bool allow_separate_vertex_arrays;
-}
 
 UniformBuffer *ubo_multi_matrix = nullptr;
 
@@ -80,7 +75,7 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	width = w;
 	height = h;
 
-	using_view_space = true;
+	/*using_view_space = true;
 
 	nix::allow_separate_vertex_arrays = true;
 	nix::init();
@@ -89,9 +84,9 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	shadow_index = -1;
 
-	ubo_light = new nix::UniformBuffer();
-	tex_white = new nix::Texture(16, 16, "rgba:i8");
-	tex_black = new nix::Texture(16, 16, "rgba:i8");
+	ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
+	tex_white = new Texture(16, 16, "rgba:i8");
+	tex_black = new Texture(16, 16, "rgba:i8");
 	Image im;
 	im.create(16, 16, White);
 	tex_white->overwrite(im);
@@ -112,11 +107,11 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	material_shadow = new Material;
 	material_shadow->shader_path = "shadow.shader";
 
-	ubo_multi_matrix = new nix::UniformBuffer();
+	ubo_multi_matrix = new nix::UniformBuffer();*/
 }
 
 void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
-	if (!fb_cube)
+	/*if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity3D o(pos, quaternion::ID);
 	Camera cam(rect::ID);
@@ -144,14 +139,14 @@ void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, co
 		prepare_lights(&cam);
 		render_into_texture(fb_cube.get(), &cam, fb_cube->area());
 	}
-	cam.owner = nullptr;
+	cam.owner = nullptr;*/
 }
 
 rect RenderPathVulkan::dynamic_fb_area() const {
 	return rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
 }
 
-nix::FrameBuffer *RenderPathVulkan::next_fb(nix::FrameBuffer *cur) {
+FrameBuffer *RenderPathVulkan::next_fb(FrameBuffer *cur) {
 	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
@@ -192,6 +187,7 @@ FrameBuffer* RenderPathVulkan::do_post_processing(FrameBuffer *source) {
 
 	PerformanceMonitor::end(ch_post);
 	return cur;*/
+	return nullptr;
 }
 
 FrameBuffer* RenderPathVulkan::resolve_multisampling(FrameBuffer *source) {
@@ -205,10 +201,12 @@ FrameBuffer* RenderPathVulkan::resolve_multisampling(FrameBuffer *source) {
 		nix::resolve_multisampling(next, source);
 	}
 	return next;*/
+	return nullptr;
 }
 
 
 void RenderPathVulkan::start_frame() {
+	msg_write("start frame");
 	/*nix::start_frame_glfw(window);
 	jitter_iterate();*/
 }
@@ -229,7 +227,7 @@ void RenderPathVulkan::process_blur(FrameBuffer *source, FrameBuffer *target, fl
 	process(weak(source->color_attachments), target, shader_blur.get());*/
 }
 
-void RenderPathVulkan::process_depth(nix::FrameBuffer *source, nix::FrameBuffer *target, const complex &axis) {
+void RenderPathVulkan::process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis) {
 	/*shader_depth->set_float("max_radius", 50);
 	shader_depth->set_float("focal_length", cam->focal_length);
 	shader_depth->set_float("focal_blur", cam->focal_blur);
@@ -238,7 +236,7 @@ void RenderPathVulkan::process_depth(nix::FrameBuffer *source, nix::FrameBuffer 
 	process({source->color_attachments[0].get(), depth_buffer}, target, shader_depth.get());*/
 }
 
-void RenderPathVulkan::process(const Array<nix::Texture*> &source, nix::FrameBuffer *target, nix::Shader *shader) {
+void RenderPathVulkan::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
 	/*nix::bind_frame_buffer(target);
 	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
 	nix::set_z(false, false);
@@ -253,7 +251,7 @@ void RenderPathVulkan::process(const Array<nix::Texture*> &source, nix::FrameBuf
 	nix::set_scissor(rect::EMPTY);*/
 }
 
-void RenderPathVulkan::draw_gui(nix::FrameBuffer *source) {
+void RenderPathVulkan::draw_gui(FrameBuffer *source) {
 #if 0
 	PerformanceMonitor::begin(ch_gui);
 	gui::update();
@@ -296,7 +294,7 @@ void RenderPathVulkan::draw_gui(nix::FrameBuffer *source) {
 #endif
 }
 
-void RenderPathVulkan::render_out(nix::FrameBuffer *source, nix::Texture *bloom) {
+void RenderPathVulkan::render_out(FrameBuffer *source, Texture *bloom) {
 	/*PerformanceMonitor::begin(ch_out);
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
@@ -342,7 +340,7 @@ void RenderPathVulkan::set_material(Material *m, RenderPathType t, ShaderVariant
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);*/
 }
 
-void RenderPathVulkan::set_textures(const Array<nix::Texture*> &tex) {
+void RenderPathVulkan::set_textures(const Array<Texture*> &tex) {
 	/*auto tt = tex;
 	if (tt.num == 0)
 		tt.add(tex_white.get());
@@ -517,15 +515,15 @@ void RenderPathVulkan::draw_objects_transparent(bool allow_material, RenderPathT
 
 
 void RenderPathVulkan::prepare_instanced_matrices() {
-	PerformanceMonitor::begin(ch_pre);
+	/*PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
 		ubo_multi_matrix->update_array(s.matrices);
 	}
-	PerformanceMonitor::end(ch_pre);
+	PerformanceMonitor::end(ch_pre);*/
 }
 
 void RenderPathVulkan::prepare_lights(Camera *cam) {
-	PerformanceMonitor::begin(ch_prepare_lights);
+	/*PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();
 	for (auto *l: world.lights) {
@@ -541,7 +539,7 @@ void RenderPathVulkan::prepare_lights(Camera *cam) {
 		lights.add(l->light);
 	}
 	ubo_light->update_array(lights);
-	PerformanceMonitor::end(ch_prepare_lights);
+	PerformanceMonitor::end(ch_prepare_lights);*/
 }
 
 #endif

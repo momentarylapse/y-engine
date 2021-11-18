@@ -234,6 +234,7 @@ sources = [
 	'src/renderer/RenderPathGLDeferred.cpp',
 	'src/renderer/RenderPathGLForward.cpp',
 	'src/renderer/RenderPathVulkan.cpp',
+	'src/renderer/RenderPathVulkanForward.cpp',
 	'src/world/components/Animator.cpp',
 	'src/world/components/Collider.cpp',
 	'src/world/components/Skeleton.cpp',

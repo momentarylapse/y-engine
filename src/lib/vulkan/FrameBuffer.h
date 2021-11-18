@@ -5,13 +5,13 @@
  *      Author: michi
  */
 
-#ifndef SRC_LIB_VULKAN_FRAMEBUFFER_H_
-#define SRC_LIB_VULKAN_FRAMEBUFFER_H_
+#pragma once
 
 #if HAS_LIB_VULKAN
 
 #include <vulkan/vulkan.h>
 #include "../base/base.h"
+#include "../base/pointer.h"
 #include "Texture.h"
 
 namespace vulkan {
@@ -30,7 +30,7 @@ public:
 	void create(int w, int h, VkFormat format);
 };
 
-class FrameBuffer {
+class FrameBuffer : public Sharable<Empty> {
 public:
 	FrameBuffer(int w, int h, RenderPass *rp, const Array<Texture*> &attachments);
 	~FrameBuffer();
@@ -48,4 +48,3 @@ public:
 
 #endif
 
-#endif /* SRC_LIB_VULKAN_FRAMEBUFFER_H_ */

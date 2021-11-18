@@ -25,7 +25,6 @@
 		class VertexBuffer;
 		class FrameBuffer;
 		class DepthBuffer;
-		class CubeMap;
 		class Buffer;
 		class UniformBuffer;
 		enum class Alpha;
@@ -37,7 +36,7 @@
 	using VertexBuffer = vulkan::VertexBuffer;
 	using FrameBuffer = vulkan::FrameBuffer;
 	using DepthBuffer = vulkan::DepthBuffer;
-	using CubeMap = vulkan::CubeMap;
+	using CubeMap = vulkan::Texture; // TODO
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
 

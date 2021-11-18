@@ -427,6 +427,9 @@
     <ClCompile Include="src\renderer\RenderPathVulkan.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\RenderPathVulkanForward.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\components\Animator.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
@@ -895,6 +898,9 @@
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RenderPathVulkan.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderPathVulkanForward.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Animator.h">

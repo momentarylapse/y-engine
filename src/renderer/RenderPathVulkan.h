@@ -8,7 +8,7 @@
 #pragma once
 
 #include "RenderPath.h"
-#ifdef USING_OPENGL
+#ifdef USING_VULKAN
 #include "../lib/base/pointer.h"
 #include "../lib/base/callable.h"
 

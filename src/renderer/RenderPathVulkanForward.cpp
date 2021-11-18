@@ -41,7 +41,7 @@ void break_point();
 
 RenderPathVulkanForward::RenderPathVulkanForward(GLFWwindow* win, int w, int h) : RenderPathVulkan(win, w, h, RenderPathType::FORWARD) {
 
-	depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
+	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		fb_main = new vulkan::FrameBuffer({
 			new vulkan::TextureMultiSample(width, height, 4, "rgba:f16"),
@@ -94,7 +94,7 @@ RenderPathVulkanForward::RenderPathVulkanForward(GLFWwindow* win, int w, int h) 
 
 //	if (nix::total_mem() > 0) {
 //		msg_write(format("VRAM: %d mb  of  %d mb available", nix::available_mem() / 1024, nix::total_mem() / 1024));
-//	}
+//	}*/
 }
 
 void RenderPathVulkanForward::draw() {
@@ -136,7 +136,7 @@ void RenderPathVulkanForward::draw() {
 	PerformanceMonitor::end(ch_render);*/
 }
 
-void RenderPathVulkanForward::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 }
 
 void RenderPathVulkanForward::draw_world(bool allow_material) {
@@ -147,7 +147,7 @@ void RenderPathVulkanForward::draw_world(bool allow_material) {
 		draw_objects_transparent(allow_material, type);
 }
 
-void RenderPathVulkanForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
+void RenderPathVulkanForward::render_shadow_map(FrameBuffer *sfb, float scale) {
 }
 
 
