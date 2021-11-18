@@ -46,9 +46,14 @@
 #include "plugins/Controller.h"
 
 #include "renderer/RenderPath.h"
-#include "renderer/RenderPathGL.h"
-#include "renderer/RenderPathGLForward.h"
-#include "renderer/RenderPathGLDeferred.h"
+#ifdef USING_VULKAN
+	#include "renderer/RenderPathVulkan.h"
+#else
+	#include "renderer/RenderPathGL.h"
+	#include "renderer/RenderPathGLForward.h"
+	#include "renderer/RenderPathGLDeferred.h"
+#endif
+#include "graphics-impl.h"
 
 #include "Config.h"
 #include "world/Camera.h"
@@ -95,9 +100,10 @@ public:
 //private:
 	GLFWwindow* window;
 
-#if HAS_LIB_VULKAN
-	WindowRendererVulkan *renderer;
+#ifdef USING_VULKAN
+	vulkan::Instance *instance;
 #endif
+
 	RenderPath *render_path;
 
 	gui::Text *fps_display;
@@ -105,10 +111,14 @@ public:
 
 	RenderPath *create_renderer() {
 		try {
+#ifdef USING_VULKAN
+			//return new RenderPathVulkanForward(window, engine.width, engine.height);
+#else
 			if (config.get_str("renderer.path", "forward") == "deferred")
 				return new RenderPathGLDeferred(window, engine.width, engine.height);
 			else
 				return new RenderPathGLForward(window, engine.width, engine.height);
+#endif
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;
@@ -120,6 +130,12 @@ public:
 		config.load(arg);
 
 		window = create_window();
+#ifdef USING_VULKAN
+		instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
+#else
+		nix::init();
+#endif
+
 		kaba::init();
 		NetworkManager::init();
 		ch_iter = PerformanceMonitor::create_channel("iter");
@@ -249,13 +265,13 @@ public:
 			}
 		}
 
-#if HAS_LIB_VULKAN
-		vkDeviceWaitIdle(vulkan::device);
+#ifdef USING_VULKAN
+		vulkan::default_device->wait_idle();
 #endif
 	}
 
 	void reset_game() {
-		((RenderPathGL*)render_path)->reset();
+		render_path->reset();
 		PluginManager::reset();
 		CameraReset();
 		world.reset();
@@ -267,8 +283,8 @@ public:
 		GodEnd();
 
 		delete render_path;
-#if HAS_LIB_VULKAN
-		vulkan::destroy();
+#ifdef USING_VULKAN
+		delete instance;
 #endif
 
 		glfwDestroyWindow(window);
@@ -300,8 +316,8 @@ public:
 
 
 	void update_statistics() {
-#if HAS_LIB_VULKAN
-		vulkan::wait_device_idle();
+#ifdef USING_VULKAN
+		vulkan::default_device->wait_idle();
 #endif
 		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
 	}
@@ -362,13 +378,13 @@ Array<float> YEngineApp::render_times;
 
 YEngineApp app;
 
-#if HAS_LIB_VULKAN
-vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo) {
+#ifdef __________________USING_VULKAN
+vulkan::DescriptorSet *rp_create_dset(const Array<Texture*> &tex, UniformBuffer *ubo) {
 	auto *rpv = dynamic_cast<RenderPathVulkan*>(app.render_path);
 	return rpv->rp_create_dset(tex, ubo);
 }
 
-vulkan::DescriptorSet *rp_create_dset_fx(vulkan::Texture *tex, vulkan::UniformBuffer *ubo) {
+vulkan::DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo) {
 	auto *rpv = dynamic_cast<RenderPathVulkan*>(app.render_path);
 	return rpv->rp_create_dset_fx(tex, ubo);
 }

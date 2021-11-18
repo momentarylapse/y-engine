@@ -167,7 +167,7 @@ void init() {
 
 	set_cull(CullMode::DEFAULT);
 	set_wire(false);
-	set_alpha(AlphaMode::NONE);
+	disable_alpha();
 	set_material(White, 0.5f, 0, color(0.1f, 0.1f, 0.1f, 0.1f));
 	set_projection_perspective();
 	set_z(true, true);
@@ -295,7 +295,8 @@ void set_offset(float offset) {
 	}
 }
 
-void set_alpha(AlphaMode mode) {
+// deprecated...
+void _set_alpha(AlphaMode mode) {
 	//glDisable(GL_ALPHA_TEST);
 	switch (mode) {
 		case AlphaMode::NONE:
@@ -318,8 +319,8 @@ void set_alpha(AlphaMode mode) {
 	}
 }
 
-void set_alpha_mode(AlphaMode mode) {
-	set_alpha(mode);
+void _set_alpha_mode(AlphaMode mode) {
+	_set_alpha(mode);
 }
 
 unsigned int OGLGetAlphaMode(Alpha mode) {
@@ -355,6 +356,11 @@ void set_alpha(Alpha src, Alpha dst) {
 
 void set_alpha_sd(Alpha src,Alpha dst) {
 	set_alpha(src, dst);
+}
+
+void disable_alpha() {
+	glDisable(GL_BLEND);
+	//glDisable(GL_ALPHA_TEST);
 }
 
 

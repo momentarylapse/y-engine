@@ -8,8 +8,8 @@
 #pragma once
 
 #include "RenderPath.h"
+#ifdef USING_OPENGL
 #include "../lib/base/pointer.h"
-#include "../lib/base/callable.h"
 
 
 class Material;
@@ -19,17 +19,6 @@ class rect;
 class Material;
 
 enum class ShaderVariant;
-
-struct RenderInjector {
-	using Callback = Callable<void()>;
-	const Callback *func;
-};
-
-struct PostProcessor {
-	using Callback = Callable<FrameBuffer*(FrameBuffer*)>;
-	const Callback *func;
-	int channel;
-};
 
 
 class RenderPathGL : public RenderPath {
@@ -103,16 +92,7 @@ public:
 
 	FrameBuffer *next_fb(FrameBuffer *cur);
 	rect dynamic_fb_area() const;
-
-
-	Array<PostProcessor> post_processors;
-	void add_post_processor(const PostProcessor::Callback *f);
-
-	Array<RenderInjector> fx_injectors;
-	void add_fx_injector(const RenderInjector::Callback *f);
-
-	void reset();
 };
 
-
+#endif
 

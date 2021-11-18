@@ -54,7 +54,6 @@ void Animator::on_init() {
 	auto m = owner->get_component<Model>();
 
 	meta = m->_template->animator->meta;
-	buf = new UniformBuffer;
 
 	// skeleton
 	auto sk = m->owner->get_component<Skeleton>();
@@ -62,6 +61,13 @@ void Animator::on_init() {
 	for (int i=0; i<sk->bones.num; i++) {
 		dmatrix[i] = matrix::translation(sk->pos0[i]);
 	}
+
+#ifdef USING_OPENGL
+	buf = new UniformBuffer;
+#endif
+#ifdef USING_VULKAN
+	buf = new UniformBuffer(sk->bones.num * sizeof(matrix));
+#endif
 }
 
 

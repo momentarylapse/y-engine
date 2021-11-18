@@ -8,7 +8,7 @@
 #pragma once
 
 #include "RenderPathGL.h"
-
+#ifdef USING_OPENGL
 
 class RenderPathGLDeferred : public RenderPathGL {
 public:
@@ -32,4 +32,4 @@ public:
 	void render_out_from_gbuffer(FrameBuffer *source, FrameBuffer *target);
 };
 
-
+#endif

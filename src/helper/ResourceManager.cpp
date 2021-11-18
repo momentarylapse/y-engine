@@ -14,8 +14,8 @@
 Path ResourceManager::shader_dir;
 Path ResourceManager::texture_dir;
 Path ResourceManager::default_shader;
-static Array<Shader*> shaders;
-static Array<Texture*> textures;
+static Map<Path,Shader*> shaders;
+static Map<Path,Texture*> textures;
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	if (filename.is_absolute())
@@ -48,16 +48,24 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 		//fn = shader_dir << filename;
 	}
 
-	for (auto s : shaders)
-		if ((s->filename == fn) and (s->program >= 0))
-			return s;
+	for (auto s: shaders)
+		if (s.key == fn) {
+#if HAS_LIB_VULKAN
+			return s.value;
+#else
+			return (s.value->program >= 0) ? s.value : nullptr;
+#endif
+		}
 
 	auto s = Shader::load(fn);
 	if (!s)
 		return nullptr;
+#if HAS_LIB_VULKAN
+#else
 	s->link_uniform_block("BoneData", 7);
+#endif
 
-	shaders.add(s);
+	shaders.add({fn, s});
 	return s;
 }
 
@@ -95,10 +103,14 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	}
 
 	Path fnx = fn.with(":" + variant + ":" + render_path);
-
-	for (auto s : shaders)
-		if ((s->filename == fnx) and (s->program >= 0))
-			return s;
+	for (auto s: shaders)
+		if (s.key == fnx) {
+#if HAS_LIB_VULKAN
+			return s.value;
+#else
+			return (s.value->program >= 0) ? s.value : nullptr;
+#endif
+		}
 
 
 	msg_write("loading shader: " + fnx.str());
@@ -106,9 +118,10 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	string source = expand_vertex_shader_source(FileReadText(fn), variant);
 	source = expand_fragment_shader_source(source, render_path);
 	auto shader = Shader::create(source);
-	shader->filename = fnx;
 
 	//auto s = Shader::load(fn);
+#if HAS_LIB_VULKAN
+#else
 	if (variant == "animated")
 		if (!shader->link_uniform_block("BoneData", 7))
 			msg_error("BoneData not found...");
@@ -117,8 +130,10 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	if (variant == "instanced")
 		if (!shader->link_uniform_block("Multi", 5))
 			msg_error("Multi not found...");
+#endif
 
-	shaders.add(shader);
+
+	shaders.add({filename, shader});
 	return shader;
 }
 
@@ -136,12 +151,17 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 	}
 
 	for (auto t: textures)
-		if (fn == t->filename)
-			return t->valid ? t : nullptr;
+		if (fn == t.key) {
+#if HAS_LIB_VULKAN
+			return t.value;
+#else
+			return t.value->valid ? t.value : nullptr;
+#endif
+		}
 
 	try {
 		auto t = Texture::load(fn);
-		textures.add(t);
+		textures.add({fn, t});
 		return t;
 	} catch(Exception &e) {
 		if (!engine.ignore_missing_files)

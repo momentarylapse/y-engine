@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "RenderPathGL.h"
+#ifdef USING_OPENGL
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
@@ -153,20 +154,6 @@ nix::FrameBuffer *RenderPathGL::next_fb(nix::FrameBuffer *cur) {
 	return (cur == fb2) ? fb3.get() : fb2.get();
 }
 
-string callable_name(const void *c);
-
-void RenderPathGL::add_post_processor(const PostProcessor::Callback *f) {
-	post_processors.add({f, PerformanceMonitor::create_channel(callable_name(f), ch_post)});
-}
-
-void RenderPathGL::add_fx_injector(const RenderInjector::Callback *f) {
-	fx_injectors.add({f});
-}
-
-void RenderPathGL::reset() {
-	post_processors.clear();
-	fx_injectors.clear();
-}
 
 
 // GTX750: 1920x1080 0.277 ms per trivial step
@@ -300,7 +287,7 @@ void RenderPathGL::draw_gui(nix::FrameBuffer *source) {
 	nix::set_z(true, true);
 	nix::set_cull(nix::CullMode::DEFAULT);
 
-	nix::set_alpha(nix::AlphaMode::NONE);
+	nix::disable_alpha();
 
 	break_point();
 	PerformanceMonitor::end(ch_gui);
@@ -345,7 +332,7 @@ void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) 
 	else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD)
 		nix::set_alpha(nix::AlphaMode::COLOR_KEY_HARD);
 	else
-		nix::set_alpha(nix::AlphaMode::NONE);
+		nix::disable_alpha();
 
 	set_textures(weak(m->textures));
 
@@ -424,7 +411,7 @@ void RenderPathGL::draw_particles() {
 
 
 	nix::set_z(true, true);
-	nix::set_alpha(nix::AlphaMode::NONE);
+	nix::disable_alpha();
 	break_point();
 	PerformanceMonitor::end(ch_fx);
 }
@@ -442,7 +429,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 		}
 	}
 	nix::set_cull(nix::CullMode::DEFAULT);
-	nix::set_alpha(nix::AlphaMode::NONE);
+	nix::disable_alpha();
 	break_point();
 }
 void RenderPathGL::draw_terrains(bool allow_material) {
@@ -521,7 +508,7 @@ void RenderPathGL::draw_objects_transparent(bool allow_material, RenderPathType 
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		nix::set_cull(nix::CullMode::DEFAULT);
 	}
-	nix::set_alpha(nix::AlphaMode::NONE);
+	nix::disable_alpha();
 	nix::set_z(true, true);
 }
 
@@ -553,3 +540,5 @@ void RenderPathGL::prepare_lights(Camera *cam) {
 	ubo_light->update_array(lights);
 	PerformanceMonitor::end(ch_prepare_lights);
 }
+
+#endif

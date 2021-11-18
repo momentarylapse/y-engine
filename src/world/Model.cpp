@@ -127,10 +127,14 @@ void Model::_ResetPhysAbsolute_() {
 
 // TODO: move this into the renderer
 void SubMesh::create_vb(bool animated) {
+#ifdef USING_VULKAN
+	vertex_buffer = new VertexBuffer();
+#else
 	if (animated)
 		vertex_buffer = new VertexBuffer("3f,3f,2f,4i,4f");
 	else
 		vertex_buffer = new VertexBuffer("3f,3f,2f");
+#endif
 }
 void Mesh::create_vb(bool animated) {
 	for (auto &s: sub)
@@ -138,6 +142,9 @@ void Mesh::create_vb(bool animated) {
 }
 
 void SubMesh::update_vb(Mesh *mesh, bool animated) {
+#ifdef USING_VULKAN
+	msg_todo("vulkan SubMesh.update_vb");
+#else
 	if (true) {
 		Array<vector> p, n;
 		Array<complex> uv;
@@ -173,6 +180,7 @@ void SubMesh::update_vb(Mesh *mesh, bool animated) {
 		vertex_buffer->update(3, bone_index);
 		vertex_buffer->update(4, bone_weight);
 	}
+#endif
 }
 
 void Mesh::update_vb(bool animated) {

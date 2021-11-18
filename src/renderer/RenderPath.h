@@ -10,6 +10,7 @@
 #include "../graphics-fwd.h"
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
+#include "../lib/base/callable.h"
 
 class Renderer;
 class RendererVulkan;
@@ -43,6 +44,17 @@ enum class RenderPathType {
 	DEFERRED
 };
 
+struct RenderInjector {
+	using Callback = Callable<void()>;
+	const Callback *func;
+};
+
+struct PostProcessor {
+	using Callback = Callable<FrameBuffer*(FrameBuffer*)>;
+	const Callback *func;
+	int channel;
+};
+
 class RenderPath {
 public:
 	RenderPath();
@@ -63,6 +75,15 @@ public:
 	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1, ch_shadow = -1;
 
 	RenderPathType type = RenderPathType::NONE;
+
+
+	Array<PostProcessor> post_processors;
+	void add_post_processor(const PostProcessor::Callback *f);
+
+	Array<RenderInjector> fx_injectors;
+	void add_fx_injector(const RenderInjector::Callback *f);
+
+	void reset();
 };
 
 

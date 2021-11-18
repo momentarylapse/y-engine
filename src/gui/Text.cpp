@@ -51,9 +51,13 @@ void Text::rebuild() {
 	if (texture == nullptr)
 		texture = new Texture();
 
+#ifdef USING_VULKAN
+	texture->override(&im);
+#else
 	texture->overwrite(im);
 	//texture->set_options("magfilter=nearest,wrap=clamp");
 	texture->set_options("magfilter=linear,wrap=clamp");
+#endif
 
 	height = font_size * font->get_height_rel(text);
 	width = height * (float)im.width / (float)im.height;

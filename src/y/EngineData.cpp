@@ -65,10 +65,6 @@ EngineData::EngineData() {
 
 
 void EngineData::set_dirs(const Path &_texture_dir, const Path &_map_dir, const Path &_object_dir, const Path &_sound_dir, const Path &_script_dir, const Path &_material_dir, const Path &_font_dir) {
-#if HAS_LIB_VULKAN
-	vulkan::Texture::directory = _texture_dir;
-	vulkan::Shader::directory = _material_dir;
-#endif
 	ResourceManager::texture_dir = _texture_dir;
 	ResourceManager::shader_dir = _material_dir;
 	texture_dir = _texture_dir;

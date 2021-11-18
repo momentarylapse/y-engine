@@ -73,6 +73,15 @@ else
 	add_project_arguments('-DHAS_LIB_OGG=0', language : ['cpp'])
 endif
 
+# optional dependency: vulkan
+d = cc.find_library('vulkan', required : false)
+if d.found()
+	add_project_arguments('-DHAS_LIB_VULKAN=1', language : ['cpp'])
+	deps += [d]
+else
+	add_project_arguments('-DHAS_LIB_VULKAN=0', language : ['cpp'])
+endif
+
 
 sources = [
 	'src/audio/Sound.cpp',
@@ -188,6 +197,23 @@ sources = [
 	'src/lib/nix/nix_textures.cpp',
 	'src/lib/nix/nix_vertexbuffer.cpp',
 	'src/lib/nix/nix_view.cpp',
+	'src/lib/vulkan/AccelerationStructure.cpp',
+	'src/lib/vulkan/Buffer.cpp',
+	'src/lib/vulkan/CommandBuffer.cpp',
+	'src/lib/vulkan/DescriptorSet.cpp',
+	'src/lib/vulkan/Device.cpp',
+	'src/lib/vulkan/FrameBuffer.cpp',
+	'src/lib/vulkan/helper.cpp',
+	'src/lib/vulkan/Instance.cpp',
+	'src/lib/vulkan/Pipeline.cpp',
+	'src/lib/vulkan/Queue.cpp',
+	'src/lib/vulkan/RenderPass.cpp',
+	'src/lib/vulkan/Semaphore.cpp',
+	'src/lib/vulkan/Shader.cpp',
+	'src/lib/vulkan/SwapChain.cpp',
+	'src/lib/vulkan/Texture.cpp',
+	'src/lib/vulkan/VertexBuffer.cpp',
+	'src/lib/vulkan/vulkan.cpp',
 	'src/lib/xfile/chunked.cpp',
 	'src/lib/xfile/pdf.cpp',
 	'src/lib/xfile/xml.cpp',
@@ -199,6 +225,7 @@ sources = [
 	'src/renderer/RenderPathGL.cpp',
 	'src/renderer/RenderPathGLDeferred.cpp',
 	'src/renderer/RenderPathGLForward.cpp',
+	'src/renderer/RenderPathVulkan.cpp',
 	'src/world/components/Animator.cpp',
 	'src/world/components/Collider.cpp',
 	'src/world/components/Skeleton.cpp',

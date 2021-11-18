@@ -8,6 +8,7 @@
 #pragma once
 
 #include "RenderPathGL.h"
+#ifdef USING_OPENGL
 
 class Camera;
 class PerformanceMonitor;
@@ -23,3 +24,4 @@ public:
 	void render_shadow_map(FrameBuffer *sfb, float scale);
 };
 
+#endif

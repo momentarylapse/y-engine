@@ -23,9 +23,11 @@
 #include "../input/Keyboard.h"
 #include "../input/Mouse.h"
 #include "../net/NetworkManager.h"
+#ifdef USING_OPENGL
 #include "../renderer/RenderPathGL.h"
 #include "../renderer/RenderPathGLForward.h"
 #include "../renderer/RenderPathGLDeferred.h"
+#endif
 #include "../y/EngineData.h"
 #include "../y/Entity.h"
 #include "../y/Component.h"
@@ -486,6 +488,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("EngineData.renderer", &EngineData::renderer);
 	kaba::link_external_class_func("EngineData.exit", &global_exit);
 
+#ifdef USING_OPENGL
 	kaba::declare_class_size("RenderPath", sizeof(RenderPathGL));
 	kaba::declare_class_element("RenderPath.type", &RenderPathGL::type);
 	kaba::declare_class_element("RenderPath.depth_buffer", &RenderPathGL::depth_buffer);
@@ -506,6 +509,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("RenderPath.process", &RenderPathGL::process);
 	kaba::link_external_class_func("RenderPath.add_post_processor", &RenderPathGL::add_post_processor);
 	kaba::link_external_class_func("RenderPath.add_fx_injector", &RenderPathGL::add_fx_injector);
+#endif
 
 	kaba::link_external("tex_white", &_tex_white);
 	kaba::link_external("world", &world);

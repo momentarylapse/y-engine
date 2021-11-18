@@ -9,10 +9,43 @@
 
 
 #if HAS_LIB_VULKAN
+	#define USING_VULKAN
+#else
+	#define USING_OPENGL
+#endif
+
+
+#ifdef USING_VULKAN
 
 // Vulkan
 
-#elif HAS_LIB_GL
+	namespace vulkan {
+		class Texture;
+		class Shader;
+		class VertexBuffer;
+		class FrameBuffer;
+		class DepthBuffer;
+		class CubeMap;
+		class Buffer;
+		class UniformBuffer;
+		enum class Alpha;
+		enum class AlphaMode;
+	}
+
+	using Texture = vulkan::Texture;
+	using Shader = vulkan::Shader;
+	using VertexBuffer = vulkan::VertexBuffer;
+	using FrameBuffer = vulkan::FrameBuffer;
+	using DepthBuffer = vulkan::DepthBuffer;
+	using CubeMap = vulkan::CubeMap;
+	using Buffer = vulkan::Buffer;
+	using UniformBuffer = vulkan::UniformBuffer;
+
+	using Alpha = vulkan::Alpha;
+	using AlphaMode = vulkan::AlphaMode;
+
+#endif
+#ifdef USING_OPENGL
 
 // OpenGL
 

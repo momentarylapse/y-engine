@@ -17,7 +17,6 @@
 #include "../lib/math/plane.h"
 #ifdef _X_ALLOW_X_
 #include "../helper/ResourceManager.h"
-//#include "../fx/light.h"
 #else
 #include "ResourceManager.h"
 #endif
@@ -104,7 +103,11 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 					for (int z=0;z<num_z/32+1;z++)
 						partition[x][z] = -1;
 
+#ifdef USING_VULKAN
+				vertex_buffer = new VertexBuffer();
+#else
 				vertex_buffer = new VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
+#endif
 			}
 		} else {
 			msg_error(format("wrong file format: %d (4 expected)",ffv));
@@ -131,10 +134,10 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 }
 
 Terrain::~Terrain() {
-#if HAS_LIB_VULKAN
-	if (dset)
-		delete dset;
-	delete ubo;
+#ifdef USING_VULKAN
+//	if (dset)
+//		delete dset;
+//	delete ubo;
 #endif
 	delete vertex_buffer;
 	delete material;
@@ -598,10 +601,13 @@ void Terrain::build_vertex_buffer() {
 #endif
 				}
 		}
+#ifdef USING_VULKAN
+#else
 //	vertex_buffer->build1(vertices);
 	vertex_buffer->update(0, p);
 	vertex_buffer->update(1, n);
 	vertex_buffer->update(2, uv);
+#endif
 }
 
 void Terrain::prepare_draw(const vector &cam_pos) {

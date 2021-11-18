@@ -1,0 +1,290 @@
+/*
+ * SwapChain.cpp
+ *
+ *  Created on: 03.01.2020
+ *      Author: michi
+ */
+
+#if HAS_LIB_VULKAN
+
+
+#include "SwapChain.h"
+#include "vulkan.h"
+#include "helper.h"
+
+#include <iostream>
+
+namespace vulkan {
+
+
+extern VkSurfaceKHR default_surface;
+
+
+
+VkSurfaceFormatKHR choose_swap_surface_format(const Array<VkSurfaceFormatKHR>& available_formats) {
+	if (available_formats.num == 1 and available_formats[0].format == VK_FORMAT_UNDEFINED) {
+		return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+	}
+
+	for (const auto& format: available_formats) {
+		if (format.format == VK_FORMAT_B8G8R8A8_UNORM and format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+			return format;
+		}
+	}
+
+	return available_formats[0];
+}
+
+VkPresentModeKHR choose_swap_present_mode(const Array<VkPresentModeKHR> available_present_modes) {
+	VkPresentModeKHR best_mode = VK_PRESENT_MODE_FIFO_KHR;
+
+	for (const auto& mode: available_present_modes) {
+		if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+			return mode;
+		} else if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+			best_mode = mode;
+		}
+	}
+
+	return best_mode;
+}
+
+VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* window) {
+	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+		return capabilities.currentExtent;
+	} else {
+
+
+		int win_width = 0;
+		int win_height = 0;
+		while (win_width == 0 or win_height == 0) {
+			glfwGetFramebufferSize(window, &win_width, &win_height);
+			glfwWaitEvents();
+		}
+
+		VkExtent2D actual_extent = {(unsigned)win_width, (unsigned)win_height};
+
+		actual_extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actual_extent.width));
+		actual_extent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actual_extent.height));
+
+		return actual_extent;
+	}
+}
+
+
+Array<Texture*> SwapChain::create_textures() {
+	Array<Texture*> textures;
+	auto images = get_images();
+	auto image_views = create_image_views(images);
+	for (int i=0; i<images.num; i++) {
+		auto t = new Texture();
+		t->image = images[i];
+		t->view = image_views[i];
+		textures.add(t);
+	}
+	return textures;
+}
+
+
+Array<FrameBuffer*> SwapChain::create_frame_buffers(RenderPass *render_pass, DepthBuffer *depth_buffer) {
+	Array<FrameBuffer*> frame_buffers;
+	auto textures = create_textures();
+
+	for (size_t i=0; i<image_count; i++) {
+		frame_buffers.add(new FrameBuffer(width, height, render_pass, {textures[i], depth_buffer}));
+	}
+	return frame_buffers;
+}
+
+
+SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device) {
+	SwapChainSupportDetails details;
+
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, default_surface, &details.capabilities);
+
+	uint32_t format_count;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(device, default_surface, &format_count, nullptr);
+
+	if (format_count != 0) {
+		details.formats.resize(format_count);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device, default_surface, &format_count, &details.formats[0]);
+	}
+
+	uint32_t present_mode_count;
+	vkGetPhysicalDeviceSurfacePresentModesKHR(device, default_surface, &present_mode_count, nullptr);
+
+	if (present_mode_count != 0) {
+		details.present_modes.resize(present_mode_count);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device, default_surface, &present_mode_count, &details.present_modes[0]);
+	}
+
+	return details;
+}
+
+DepthBuffer *SwapChain::create_depth_buffer() {
+	return new DepthBuffer(width, height, default_device->find_depth_format(), false);
+}
+
+RenderPass *SwapChain::create_render_pass(DepthBuffer *depth_buffer) {
+	return new RenderPass({image_format, depth_buffer->format}, "clear,present");
+}
+
+
+//	create_frame_buffers(default_render_pass, depth_buffer);
+
+
+void SwapChain::create() {
+	SwapChainSupportDetails swap_chain_support = query_swap_chain_support(default_device->physical_device);
+
+	VkSurfaceFormatKHR surface_format = choose_swap_surface_format(swap_chain_support.formats);
+	VkPresentModeKHR present_mode = choose_swap_present_mode(swap_chain_support.present_modes);
+	auto extent = choose_swap_extent(swap_chain_support.capabilities, window);
+	width = extent.width;
+	height = extent.height;
+
+	image_count = swap_chain_support.capabilities.minImageCount + 1;
+	if (swap_chain_support.capabilities.maxImageCount > 0 and image_count > swap_chain_support.capabilities.maxImageCount) {
+		image_count = swap_chain_support.capabilities.maxImageCount;
+	}
+
+	VkSwapchainCreateInfoKHR info = {};
+	info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	info.surface = default_surface;
+
+	info.minImageCount = image_count;
+	info.imageFormat = surface_format.format;
+	info.imageColorSpace = surface_format.colorSpace;
+	info.imageExtent = extent;
+	info.imageArrayLayers = 1;
+	info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	QueueFamilyIndices indices = find_queue_families(default_device->physical_device);
+	uint32_t queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
+
+	if (indices.graphics_family != indices.present_family) {
+		info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		info.queueFamilyIndexCount = 2;
+		info.pQueueFamilyIndices = queue_family_indices;
+	} else {
+		info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	}
+
+	info.preTransform = swap_chain_support.capabilities.currentTransform;
+	info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	info.presentMode = present_mode;
+	info.clipped = VK_TRUE;
+
+	if (vkCreateSwapchainKHR(default_device->device, &info, nullptr, &swap_chain) != VK_SUCCESS) {
+		throw Exception("failed to create swap chain!");
+	}
+	image_format = surface_format.format;
+}
+
+Array<VkImage> SwapChain::get_images() {
+	vkGetSwapchainImagesKHR(default_device->device, swap_chain, &image_count, nullptr);
+	Array<VkImage> images;
+	images.resize(image_count);
+	vkGetSwapchainImagesKHR(default_device->device, swap_chain, &image_count, &images[0]);
+	return images;
+}
+
+
+
+
+
+Array<VkImageView> SwapChain::create_image_views(Array<VkImage> &images) {
+	Array<VkImageView> views;
+	for (uint32_t i=0; i<image_count; i++)
+		views.add(create_image_view(images[i], image_format, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D, 1));
+	_image_views = views;
+	return views;
+}
+
+
+
+
+SwapChain::SwapChain(GLFWwindow* w) {
+	window = w;
+	create();
+}
+
+SwapChain::~SwapChain() {
+	cleanup();
+}
+
+
+void SwapChain::__init__(GLFWwindow* window) {
+	new(this) SwapChain(window);
+}
+
+void SwapChain::__delete__() {
+	this->~SwapChain();
+}
+
+void SwapChain::cleanup() {
+/*	if (default_render_pass)
+		delete default_render_pass;
+	default_render_pass = nullptr;
+
+	for (auto frame_buffer: frame_buffers)
+		delete frame_buffer;
+	frame_buffers.clear();
+	images.clear(); // only references anyways
+
+	if (depth_buffer)
+		delete depth_buffer;
+	depth_buffer = nullptr;
+
+	for (auto v: _image_views)
+		vkDestroyImageView(device, v, nullptr);
+	_image_views.clear();*/
+
+	vkDestroySwapchainKHR(default_device->device, swap_chain, nullptr);
+}
+
+void SwapChain::rebuild() {
+	cleanup();
+	create();
+
+	//default_render_pass->rebuild();
+}
+
+
+bool SwapChain::present(int image_index, const Array<Semaphore*> &wait_sem) {
+
+	auto wait_semaphores = extract_semaphores(wait_sem);
+
+	VkPresentInfoKHR present_info = {};
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.waitSemaphoreCount = wait_semaphores.num;
+	present_info.pWaitSemaphores = &wait_semaphores[0];
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = &swap_chain;
+	present_info.pImageIndices = (unsigned int*)&image_index;
+
+	VkResult result = vkQueuePresentKHR(default_device->present_queue.queue, &present_info);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR or result == VK_SUBOPTIMAL_KHR) {
+		return false;
+	} else if (result != VK_SUCCESS) {
+		throw Exception("failed to present swap chain image!");
+	}
+	return true;
+}
+
+bool SwapChain::acquire_image(int *image_index, Semaphore *signal_sem) {
+
+	VkResult result = vkAcquireNextImageKHR(default_device->device, swap_chain, std::numeric_limits<uint64_t>::max(), signal_sem->semaphore, VK_NULL_HANDLE, (unsigned int*)image_index);
+
+	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+		return false;
+	} else if (result != VK_SUCCESS and result != VK_SUBOPTIMAL_KHR) {
+		throw Exception("failed to acquire swap chain image!");
+	}
+	return true;
+}
+
+} /* namespace vulkan */
+
+#endif
+

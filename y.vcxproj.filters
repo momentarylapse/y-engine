@@ -340,6 +340,57 @@
     <ClCompile Include="src\lib\nix\nix_view.cpp">
       <Filter>src\lib\nix</Filter>
     </ClCompile>
+    <ClCompile Include="src\lib\vulkan\AccelerationStructure.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Buffer.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\CommandBuffer.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\DescriptorSet.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Device.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\FrameBuffer.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\helper.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Instance.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Pipeline.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Queue.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\RenderPass.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Semaphore.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Shader.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\SwapChain.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\Texture.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\VertexBuffer.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lib\vulkan\vulkan.cpp">
+      <Filter>src\lib\vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\lib\xfile\chunked.cpp">
       <Filter>src\lib\xfile</Filter>
     </ClCompile>
@@ -371,6 +422,9 @@
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\RenderPathGLForward.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\RenderPathVulkan.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\world\components\Animator.cpp">
@@ -753,6 +807,57 @@
     <ClInclude Include="src\lib\nix\nix_view.h">
       <Filter>src\lib\nix</Filter>
     </ClInclude>
+    <ClInclude Include="src\lib\vulkan\AccelerationStructure.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Buffer.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\CommandBuffer.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\DescriptorSet.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Device.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\FrameBuffer.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\helper.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Instance.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Pipeline.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Queue.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\RenderPass.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Semaphore.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Shader.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\SwapChain.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\Texture.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\VertexBuffer.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lib\vulkan\vulkan.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\lib\xfile\chunked.h">
       <Filter>src\lib\xfile</Filter>
     </ClInclude>
@@ -787,6 +892,9 @@
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RenderPathGLForward.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RenderPathVulkan.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Animator.h">
@@ -922,6 +1030,9 @@
     </Filter>
     <Filter Include="src\lib\nix">
       <UniqueIdentifier>{F2B28380-C7CD-DA9A-3F74-DD2903EC2A01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\vulkan">
+      <UniqueIdentifier>{CA8DC7DE-188E-45F8-3DB9-3760FBE1DAAA}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\lib\xfile">
       <UniqueIdentifier>{87F43273-B0B1-C1EC-F4A8-E622B9C0AE32}</UniqueIdentifier>

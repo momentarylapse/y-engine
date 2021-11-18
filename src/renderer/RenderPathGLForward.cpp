@@ -7,6 +7,7 @@
 
 #include <GLFW/glfw3.h>
 #include "RenderPathGLForward.h"
+#ifdef USING_OPENGL
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
 #include "../lib/file/msg.h"
@@ -211,4 +212,4 @@ void RenderPathGLForward::render_shadow_map(nix::FrameBuffer *sfb, float scale) 
 }
 
 
-
+#endif

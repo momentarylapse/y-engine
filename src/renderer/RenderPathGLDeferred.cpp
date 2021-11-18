@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "RenderPathGLDeferred.h"
+#ifdef USING_OPENGL
 #include "RenderPathGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/file/msg.h"
@@ -243,4 +244,4 @@ void RenderPathGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale)
 }
 
 
-
+#endif

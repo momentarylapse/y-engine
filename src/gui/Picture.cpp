@@ -8,6 +8,7 @@
 #include "Picture.h"
 #include "../lib/math/rect.h"
 #include "../lib/math/vector.h"
+#include "../lib/math/matrix.h"
 #include "../graphics-impl.h"
 #include <iostream>
 

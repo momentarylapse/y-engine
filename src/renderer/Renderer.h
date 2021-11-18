@@ -5,8 +5,7 @@
  *      Author: michi
  */
 
-#ifndef SRC_RENDERER_H_
-#define SRC_RENDERER_H_
+#pragma once
 
 #if HAS_LIB_VULKAN
 #include "../lib/vulkan/vulkan.h"
@@ -44,5 +43,3 @@ public:
 	virtual vulkan::DepthBuffer *depth_buffer() { return nullptr; }
 };
 #endif
-
-#endif /* SRC_RENDERER_H_ */
