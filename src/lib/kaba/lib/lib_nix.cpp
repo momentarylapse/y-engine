@@ -124,7 +124,7 @@ void SIAddPackageNix() {
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, nix_p(&nix::Texture::__delete__));
 		class_add_func("set_options", TypeVoid, nix_p(&nix::Texture::set_options));
 			func_add_param("op", TypeString);
-		class_add_func("overwrite", TypeVoid, nix_p(&nix::Texture::overwrite));
+		class_add_func("override", TypeVoid, nix_p(&nix::Texture::override));
 			func_add_param("image", TypeImage);
 		class_add_func("read", TypeVoid, nix_p(&nix::Texture::read));
 			func_add_param("image", TypeImage);

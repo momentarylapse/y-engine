@@ -91,9 +91,9 @@ RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, RenderPathType _type) 
 	tex_black = new nix::Texture(16, 16, "rgba:i8");
 	Image im;
 	im.create(16, 16, White);
-	tex_white->overwrite(im);
+	tex_white->override(im);
 	im.create(16, 16, Black);
-	tex_black->overwrite(im);
+	tex_black->override(im);
 
 	_tex_white = tex_white.get();
 
@@ -265,7 +265,7 @@ void RenderPathGL::draw_gui(FrameBuffer *source) {
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
-			auto shader = shader_2d.get();
+			auto shader = shader_2d;
 			if (p->shader)
 				shader = p->shader.get();
 			nix::set_shader(shader);

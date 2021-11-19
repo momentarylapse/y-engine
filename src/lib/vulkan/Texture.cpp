@@ -80,6 +80,9 @@ Texture::Texture() {
 	mip_levels = 0;
 	format = VK_FORMAT_UNDEFINED;
 	compare_op = next_compare_op;
+	magfilter = VK_FILTER_LINEAR;
+	minfilter = VK_FILTER_LINEAR;
+	address_mode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
 	textures.add(this);
 }
@@ -88,7 +91,7 @@ Texture::Texture(int w, int h) : Texture() {
 	// sometimes a newly created texture is already used....
 	Image im;
 	im.create(w, h, White);
-	override(&im);
+	override(im);
 }
 
 Texture::~Texture() {
@@ -209,12 +212,12 @@ void Texture::_load(const Path &filename) {
 	if (!im) {
 		throw Exception("failed to load texture image!");
 	}
-	override(im);
+	override(*im);
 	delete im;
 }
 
-void Texture::override(const Image *im) {
-	overridex(im->data.data, im->width, im->height, 1, "rgba:i8");
+void Texture::override(const Image &im) {
+	overridex(im.data.data, im.width, im.height, 1, "rgba:i8");
 }
 
 void Texture::overridex(const void *data, int nx, int ny, int nz, const string &format) {
@@ -353,21 +356,21 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 
 
-void Texture::_create_view() {
+void Texture::_create_view() const {
 	VkImageViewType type = VK_IMAGE_VIEW_TYPE_2D;
 	if (depth > 1)
 		type = VK_IMAGE_VIEW_TYPE_3D;
 	view = create_image_view(image, format, VK_IMAGE_ASPECT_COLOR_BIT, type, mip_levels);
 }
 
-void Texture::_create_sampler() {
+void Texture::_create_sampler() const {
 	VkSamplerCreateInfo si = {};
 	si.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	si.magFilter = VK_FILTER_LINEAR;
-	si.minFilter = VK_FILTER_LINEAR;
-	si.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	si.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	si.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	si.magFilter = magfilter;
+	si.minFilter = minfilter;
+	si.addressModeU = address_mode;
+	si.addressModeV = address_mode;
+	si.addressModeW = address_mode;
 	si.anisotropyEnable = VK_TRUE;
 	si.maxAnisotropy = 16;
 	si.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
@@ -382,6 +385,52 @@ void Texture::_create_sampler() {
 	if (vkCreateSampler(default_device->device, &si, nullptr, &sampler) != VK_SUCCESS) {
 		throw Exception("failed to create texture sampler!");
 	}
+}
+
+// hmmm, mag/minfilter doesn't seem to do much...
+void Texture::set_options(const string &options) const {
+	for (auto &x: options.explode(",")) {
+		auto y = x.explode("=");
+		if (y.num != 2)
+			throw Exception("key=value expected: " + x);
+		string key = y[0];
+		string value = y[1];
+		if (key == "wrap") {
+			if (value == "repeat") {
+				address_mode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			} else if (value == "clamp") {
+				address_mode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			} else {
+				throw Exception("unknown value for key: " + x);
+			}
+		} else if (key == "magfilter") {
+			if (value == "linear") {
+				magfilter = VK_FILTER_LINEAR;
+			} else if (value == "nearest") {
+				magfilter = VK_FILTER_NEAREST;
+			} else if (value == "cubic") {
+				magfilter = VK_FILTER_CUBIC_IMG;
+			} else {
+				throw Exception("unknown value for key: " + x);
+			}
+		} else if (key == "minfilter") {
+			if (value == "linear") {
+				minfilter = VK_FILTER_LINEAR;
+			} else if (value == "nearest") {
+				minfilter = VK_FILTER_NEAREST;
+			} else if (value == "cubic") {
+				minfilter = VK_FILTER_CUBIC_IMG;
+			} else {
+				throw Exception("unknown value for key: " + x);
+			}
+		} else {
+			throw Exception("unknown key: " + key);
+		}
+	}
+	if (sampler)
+		vkDestroySampler(default_device->device, sampler, nullptr);
+	sampler = nullptr;
+	_create_sampler();
 }
 
 

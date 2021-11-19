@@ -129,9 +129,9 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	tex_black = new Texture();
 	Image im;
 	im.create(16, 16, White);
-	tex_white->override(&im);
+	tex_white->override(im);
 	im.create(16, 16, Black);
-	tex_black->override(&im);
+	tex_black->override(im);
 
 	_tex_white = tex_white.get();
 
