@@ -73,7 +73,7 @@ public:
 	//vulkan::DescriptorSet* dset_gui;
 	Array<vulkan::DescriptorSet*> dset_gui;
 	Array<UniformBuffer*> ubo_gui;
-	Array<VertexBuffer*> vb_gui;
+	VertexBuffer* vb_gui;
 	void prepare_gui(FrameBuffer *source);
 
 

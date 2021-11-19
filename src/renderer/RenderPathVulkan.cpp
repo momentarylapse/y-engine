@@ -55,6 +55,7 @@ struct UBO {
 
 struct UBOGUI : UBO {
 	color col;
+	rect source;
 	float blur, exposure, gamma;
 };
 
@@ -157,6 +158,10 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	pipeline_gui->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_gui->set_z(false, false);
 	pipeline_gui->rebuild();
+
+
+	vb_gui = new VertexBuffer();
+	create_quad(vb_gui, rect::ID);
 }
 
 RenderPathVulkan::~RenderPathVulkan() {
@@ -410,10 +415,11 @@ void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gui);
 	gui::update();
 
-	/*nix::set_projection_ortho_relative();
-	nix::set_cull(nix::CullMode::NONE);
-	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	nix::set_z(false, false);*/
+	UBOGUI ubo;
+	ubo.v = matrix::ID;
+	ubo.p = matrix::scale(2.0f, 2.0f, 1) * matrix::translation(vector(-0.5f, -0.5f, 0)); // nix::set_projection_ortho_relative()
+	ubo.gamma = 2.2f;
+	ubo.exposure = 1.0f;
 
 	int index = 0;
 
@@ -423,13 +429,11 @@ void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 
-			if (index >= vb_gui.num) {
-				vb_gui.add(new VertexBuffer());
+			if (index >= ubo_gui.num) {
 				dset_gui.add(pool->create_set("buffer,sampler"));
 				ubo_gui.add(new UniformBuffer(sizeof(UBOGUI)));
 			}
 
-			UBOGUI ubo;
 			if (p->angle == 0) {
 				ubo.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0);
 			} else {
@@ -437,19 +441,15 @@ void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 				float r = (float)width / (float)height;
 				ubo.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0);
 			}
-			ubo.v = matrix::ID;
-			ubo.p = matrix::scale(2.0f, 2.0f, 1) * matrix::translation(vector(-0.5f, -0.5f, 0));
-			ubo.gamma = 2.2f;
-			ubo.exposure = 1.0f;
 			ubo.blur = p->bg_blur;
 			ubo.col = p->eff_col;
+			ubo.source = p->source;
 			ubo_gui[index]->update(&ubo);
 
 			dset_gui[index]->set_buffer(0, ubo_gui[index]);
 			dset_gui[index]->set_texture(1, p->texture.get());
 //			dset_gui[index]->set_texture(2, source->...);
 			dset_gui[index]->update();
-			create_quad(vb_gui[index], rect::ID, p->source);
 			index ++;
 		}
 	}
@@ -458,13 +458,6 @@ void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 
 void RenderPathVulkan::draw_gui(vulkan::CommandBuffer *cb) {
 	PerformanceMonitor::begin(ch_gui);
-
-
-
-	/*nix::set_projection_ortho_relative();
-	nix::set_cull(nix::CullMode::NONE);
-	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	nix::set_z(false, false);*/
 
 	cb->bind_pipeline(pipeline_gui);
 
@@ -475,14 +468,10 @@ void RenderPathVulkan::draw_gui(vulkan::CommandBuffer *cb) {
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 
 			cb->bind_descriptor_set(0, dset_gui[index]);
-			cb->draw(vb_gui[index]);
+			cb->draw(vb_gui);
 			index ++;
 		}
 	}
-	//nix::set_z(true, true);
-	//nix::set_cull(nix::CullMode::DEFAULT);
-
-	//nix::disable_alpha();
 
 	//break_point();
 	PerformanceMonitor::end(ch_gui);

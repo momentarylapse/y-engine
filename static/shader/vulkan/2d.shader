@@ -42,6 +42,7 @@ layout(binding = 0) uniform Parameters {
 	mat4 view;
 	mat4 proj;
 	vec4 color;
+	vec4 source;
 	float blur;
 	float exposure;
 	float gamma;
@@ -66,7 +67,9 @@ vec3 blur_bg(vec2 uv, vec2 d) {
 }*/
 
 void main() {
-	out_color = texture(tex0, in_tex_coord) * param.color;
+	vec2 t0 = vec2(param.source.x, param.source.z);
+	vec2 dt = vec2(param.source.y - param.source.x, param.source.w - param.source.z);
+	out_color = texture(tex0, in_tex_coord * dt + t0) * param.color;
 /*	if (param.blur > 0) {
 		vec3 t = out_color.rgb;
 		ivec2 ts = textureSize(tex1, 0);
