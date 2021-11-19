@@ -29,6 +29,9 @@
 		class UniformBuffer;
 		enum class Alpha;
 		enum class AlphaMode;
+		class Pipeline;
+		class DescriptorSet;
+		class RenderPass;
 	}
 
 	using Texture = vulkan::Texture;

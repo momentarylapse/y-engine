@@ -13,9 +13,9 @@
 #include "../lib/math/vector.h"
 #include "../lib/math/complex.h"
 #include "../lib/math/rect.h"
-#include "../lib/kaba/syntax/Function.h"
 #include "../lib/file/msg.h"
 #include "../helper/PerformanceMonitor.h"
+#include "../helper/ResourceManager.h"
 #include "../plugins/PluginManager.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
@@ -49,6 +49,12 @@ void break_point() {
 }
 
 
+
+struct UBO {
+	matrix m,v,p;
+};
+
+
 const float HALTON2[] = {1/2.0f, 1/4.0f, 3/4.0f, 1/8.0f, 5/8.0f, 3/8.0f, 7/8.0f, 1/16.0f, 9/16.0f, 3/16.0f, 11/16.0f, 5/16.0f, 13/16.0f};
 const float HALTON3[] = {1/3.0f, 2/3.0f, 1/9.0f, 4/9.0f, 7/9.0f, 2/9.0f, 5/9.0f, 8/9.0f, 1/27.0f, 10/27.0f, 19/27.0f, 2/27.0f, 11/27.0f, 20/27.0f};
 
@@ -64,6 +70,16 @@ void jitter_iterate() {
 	jitter_frame ++;
 }
 
+VertexBuffer *create_quad(const rect &r, const rect &s = rect::ID) {
+	auto vb = new VertexBuffer();
+	vb->build_v3_v3_v2_i({
+		{{r.x1,r.y1,0}, {0,0,1}, s.x1,s.y1},
+		{{r.x2,r.y1,0}, {0,0,1}, s.x2,s.y1},
+		{{r.x1,r.y2,0}, {0,0,1}, s.x1,s.y2},
+		{{r.x2,r.y2,0}, {0,0,1}, s.x2,s.y2}}, {0,1,3, 0,3,2});
+	return vb;
+}
+
 RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType _type) {
 	type = _type;
 	window = win;
@@ -77,6 +93,8 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 
 	instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
 
+	tex = ResourceManager::load_texture("glow.png");
+
 
 	image_available_semaphore = new vulkan::Semaphore();
 	render_finished_semaphore = new vulkan::Semaphore();
@@ -86,6 +104,17 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	_create_swap_chain_and_stuff();
+
+
+
+	ubo = new vulkan::UniformBuffer(sizeof(UBO));
+	dset = pool->create_set("buffer,sampler");
+	dset->set_buffer(0, ubo);
+	dset->set_texture(1, tex);
+	dset->update();
+	shader = ResourceManager::load_shader("vulkan/3d.shader"); //vulkan::Shader::load()
+	pipeline = new vulkan::Pipeline(shader.get(), default_render_pass(), 0, 1);
+	vb = create_quad(rect(-1,1, -1,1));
 
 
 	/*nix::allow_separate_vertex_arrays = true;
@@ -172,6 +201,10 @@ vulkan::FrameBuffer* RenderPathVulkan::current_frame_buffer() const {
 
 vulkan::CommandBuffer* RenderPathVulkan::current_command_buffer() const {
 	return command_buffers[image_index];
+}
+
+rect RenderPathVulkan::area() const {
+	return rect(0, frame_buffers[0]->width, 0, frame_buffers[0]->height);
 }
 
 void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
@@ -287,19 +320,25 @@ bool RenderPathVulkan::start_frame() {
 
 
 
+	UBO u;
+	u.p = matrix::perspective(1.0, 1.3, 0.1, 1000);
+	u.v = matrix::translation(vector(0,0,-2));
+	u.m = matrix::ID;
+	ubo->update(&u);
+
+
 	cb->begin();
 
-	//cb->set_viewport(r.area());
+	cb->set_viewport(area());
 
 	rp->clear_color[0] = color(1, 0.8f, 0.2f, 0.2f);
 	cb->begin_render_pass(rp, fb);
-	/*cb.bind_pipeline(pipeline)
-	cb.bind_descriptor_set(0, dset)
-	float x = 0
-	cb.push_constant(0,4,&x)
+	cb->bind_pipeline(pipeline);
+	cb->bind_descriptor_set(0, dset);
+	float x = 0;
+	cb->push_constant(0,4,&x);
 
-	cb.draw(vb)
-	stat.draw(cb)*/
+	cb->draw(vb);
 	cb->end_render_pass();
 	cb->end();
 

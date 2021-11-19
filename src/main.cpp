@@ -138,11 +138,11 @@ public:
 
 
 
-		engine.renderer = render_path = create_renderer();
-
 		std::cout << "on init..." << "\n";
 
 		engine.set_dirs("Textures", "Maps", "Objects", "Sounds", "Scripts", "Materials", "Fonts");
+
+		engine.renderer = render_path = create_renderer();
 
 		audio::init();
 

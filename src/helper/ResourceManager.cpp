@@ -50,17 +50,20 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 
 	for (auto s: shaders)
 		if (s.key == fn) {
-#if HAS_LIB_VULKAN
+#ifdef USING_VULKAN
 			return s.value;
 #else
 			return (s.value->program >= 0) ? s.value : nullptr;
 #endif
 		}
 
+#ifdef USING_VULKAN
+	msg_write("loading shader: " + fn.str());
+#endif
 	auto s = Shader::load(fn);
 	if (!s)
 		return nullptr;
-#if HAS_LIB_VULKAN
+#ifdef USING_VULKAN
 #else
 	s->link_uniform_block("BoneData", 7);
 #endif
@@ -105,7 +108,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	Path fnx = fn.with(":" + variant + ":" + render_path);
 	for (auto s: shaders)
 		if (s.key == fnx) {
-#if HAS_LIB_VULKAN
+#ifdef USING_VULKAN
 			return s.value;
 #else
 			return (s.value->program >= 0) ? s.value : nullptr;
@@ -120,7 +123,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	auto shader = Shader::create(source);
 
 	//auto s = Shader::load(fn);
-#if HAS_LIB_VULKAN
+#ifdef USING_VULKAN
 #else
 	if (variant == "animated")
 		if (!shader->link_uniform_block("BoneData", 7))
@@ -152,7 +155,7 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 
 	for (auto t: textures)
 		if (fn == t.key) {
-#if HAS_LIB_VULKAN
+#ifdef USING_VULKAN
 			return t.value;
 #else
 			return t.value->valid ? t.value : nullptr;
@@ -160,6 +163,9 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 		}
 
 	try {
+#ifdef USING_VULKAN
+		msg_write("loading texture: " + fn.str());
+#endif
 		auto t = Texture::load(fn);
 		textures.add({fn, t});
 		return t;

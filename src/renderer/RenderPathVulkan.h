@@ -60,6 +60,18 @@ public:
 	vulkan::FrameBuffer *current_frame_buffer() const;
 	vulkan::CommandBuffer *current_command_buffer() const;
 
+	shared<Shader> shader;
+	rect area() const;
+
+	UniformBuffer* ubo;
+	vulkan::DescriptorSet* dset;
+	vulkan::Pipeline* pipeline;
+	Texture* tex;
+	VertexBuffer* vb;
+
+
+
+
 	shared<Texture> tex_black;
 	shared<Texture> tex_white;
 	shared<FrameBuffer> fb_main;
