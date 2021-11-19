@@ -1,6 +1,7 @@
 
 
 #include "graphics-impl.h"
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <cstdlib>
