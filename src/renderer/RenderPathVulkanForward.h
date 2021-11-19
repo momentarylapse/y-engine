@@ -5,7 +5,6 @@
  *      Author: michi
  */
 
-
 #pragma once
 
 #include "RenderPathVulkan.h"

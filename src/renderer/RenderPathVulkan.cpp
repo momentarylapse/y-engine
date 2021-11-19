@@ -5,7 +5,6 @@
  *      Author: michi
  */
 
-
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
 #include "../graphics-impl.h"
@@ -54,6 +53,11 @@ struct UBO {
 	matrix m,v,p;
 };
 
+struct UBOGUI : UBO {
+	color col;
+	float blur, exposure, gamma;
+};
+
 
 const float HALTON2[] = {1/2.0f, 1/4.0f, 3/4.0f, 1/8.0f, 5/8.0f, 3/8.0f, 7/8.0f, 1/16.0f, 9/16.0f, 3/16.0f, 11/16.0f, 5/16.0f, 13/16.0f};
 const float HALTON3[] = {1/3.0f, 2/3.0f, 1/9.0f, 4/9.0f, 7/9.0f, 2/9.0f, 5/9.0f, 8/9.0f, 1/27.0f, 10/27.0f, 19/27.0f, 2/27.0f, 11/27.0f, 20/27.0f};
@@ -70,14 +74,12 @@ void jitter_iterate() {
 	jitter_frame ++;
 }
 
-VertexBuffer *create_quad(const rect &r, const rect &s = rect::ID) {
-	auto vb = new VertexBuffer();
+void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
 	vb->build_v3_v3_v2_i({
 		{{r.x1,r.y1,0}, {0,0,1}, s.x1,s.y1},
 		{{r.x2,r.y1,0}, {0,0,1}, s.x2,s.y1},
 		{{r.x1,r.y2,0}, {0,0,1}, s.x1,s.y2},
 		{{r.x2,r.y2,0}, {0,0,1}, s.x2,s.y2}}, {0,1,3, 0,3,2});
-	return vb;
 }
 
 RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType _type) {
@@ -92,8 +94,6 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 
 
 	instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
-
-	tex = ResourceManager::load_texture("glow.png");
 
 
 	image_available_semaphore = new vulkan::Semaphore();
@@ -110,44 +110,53 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	ubo = new vulkan::UniformBuffer(sizeof(UBO));
 	dset = pool->create_set("buffer,sampler");
 	dset->set_buffer(0, ubo);
-	dset->set_texture(1, tex);
+	//dset->set_texture(1, tex);
 	dset->update();
-	shader = ResourceManager::load_shader("vulkan/3d.shader"); //vulkan::Shader::load()
+	shader = ResourceManager::load_shader("vulkan/3d.shader");
 	pipeline = new vulkan::Pipeline(shader.get(), default_render_pass(), 0, 1);
-	vb = create_quad(rect(-1,1, -1,1));
 
 
 	/*nix::allow_separate_vertex_arrays = true;
-	nix::init();
+	nix::init();*/
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	shadow_index = -1;
 
 	ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
-	tex_white = new Texture(16, 16, "rgba:i8");
-	tex_black = new Texture(16, 16, "rgba:i8");
+	tex_white = new Texture();
+	tex_black = new Texture();
 	Image im;
 	im.create(16, 16, White);
-	tex_white->overwrite(im);
+	tex_white->override(&im);
 	im.create(16, 16, Black);
-	tex_black->overwrite(im);
+	tex_black->override(&im);
 
 	_tex_white = tex_white.get();
 
-	vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
-	vb_2d->create_rect(rect(-1,1, -1,1));
+	/*vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
+	vb_2d->create_rect(rect(-1,1, -1,1));*/
 
-	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
+	/*depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
 	fb_cube = nullptr;
-	cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");
+	cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");*/
 
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 
 	material_shadow = new Material;
 	material_shadow->shader_path = "shadow.shader";
 
-	ubo_multi_matrix = new nix::UniformBuffer();*/
+	//ubo_multi_matrix = new nix::UniformBuffer();*/
+
+
+
+
+
+	shader_2d = ResourceManager::load_shader("vulkan/2d.shader");
+	pipeline_gui = new vulkan::Pipeline(shader_2d, default_render_pass(), 0, 1);
+	pipeline_gui->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+	pipeline_gui->set_z(false, false);
+	pipeline_gui->rebuild();
 }
 
 RenderPathVulkan::~RenderPathVulkan() {
@@ -318,6 +327,7 @@ bool RenderPathVulkan::start_frame() {
 	auto rp = default_render_pass();
 	auto fb = current_frame_buffer();
 
+	prepare_gui(fb);
 
 
 	UBO u;
@@ -331,14 +341,18 @@ bool RenderPathVulkan::start_frame() {
 
 	cb->set_viewport(area());
 
-	rp->clear_color[0] = color(1, 0.8f, 0.2f, 0.2f);
+	rp->clear_color[0] = world.background;
 	cb->begin_render_pass(rp, fb);
-	cb->bind_pipeline(pipeline);
+
+	/*cb->bind_pipeline(pipeline);
 	cb->bind_descriptor_set(0, dset);
 	float x = 0;
 	cb->push_constant(0,4,&x);
 
-	cb->draw(vb);
+	cb->draw(vb);*/
+
+	draw_gui(cb);
+
 	cb->end_render_pass();
 	cb->end();
 
@@ -392,47 +406,86 @@ void RenderPathVulkan::process(const Array<Texture*> &source, FrameBuffer *targe
 	nix::set_scissor(rect::EMPTY);*/
 }
 
-void RenderPathVulkan::draw_gui(FrameBuffer *source) {
-#if 0
+void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gui);
 	gui::update();
 
-	nix::set_projection_ortho_relative();
+	/*nix::set_projection_ortho_relative();
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	nix::set_z(false, false);
+	nix::set_z(false, false);*/
+
+	int index = 0;
 
 	for (auto *n: gui::sorted_nodes) {
 		if (!n->eff_visible)
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
-			auto shader = gui::shader.get();
-			if (p->shader)
-				shader = p->shader.get();
-			nix::set_shader(shader);
-			shader->set_float("blur", p->bg_blur);
-			shader->set_color("color", p->eff_col);
-			nix::set_textures({p->texture.get(), source->color_attachments[0].get()});
+
+			if (index >= vb_gui.num) {
+				vb_gui.add(new VertexBuffer());
+				dset_gui.add(pool->create_set("buffer,sampler"));
+				ubo_gui.add(new UniformBuffer(sizeof(UBOGUI)));
+			}
+
+			UBOGUI ubo;
 			if (p->angle == 0) {
-				nix::set_model_matrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0));
+				ubo.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0);
 			} else {
 				// TODO this should use the physical ratio
 				float r = (float)width / (float)height;
-				nix::set_model_matrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0));
+				ubo.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0);
 			}
-			gui::vertex_buffer->create_rect(rect::ID, p->source);
-			nix::draw_triangles(gui::vertex_buffer);
+			ubo.v = matrix::ID;
+			ubo.p = matrix::scale(2.0f, 2.0f, 1) * matrix::translation(vector(-0.5f, -0.5f, 0));
+			ubo.gamma = 2.2f;
+			ubo.exposure = 1.0f;
+			ubo.blur = p->bg_blur;
+			ubo.col = p->eff_col;
+			ubo_gui[index]->update(&ubo);
+
+			dset_gui[index]->set_buffer(0, ubo_gui[index]);
+			dset_gui[index]->set_texture(1, p->texture.get());
+//			dset_gui[index]->set_texture(2, source->...);
+			dset_gui[index]->update();
+			create_quad(vb_gui[index], rect::ID, p->source);
+			index ++;
 		}
 	}
-	nix::set_z(true, true);
-	nix::set_cull(nix::CullMode::DEFAULT);
-
-	nix::disable_alpha();
-
-	break_point();
 	PerformanceMonitor::end(ch_gui);
-#endif
+}
+
+void RenderPathVulkan::draw_gui(vulkan::CommandBuffer *cb) {
+	PerformanceMonitor::begin(ch_gui);
+
+
+
+	/*nix::set_projection_ortho_relative();
+	nix::set_cull(nix::CullMode::NONE);
+	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+	nix::set_z(false, false);*/
+
+	cb->bind_pipeline(pipeline_gui);
+
+	int index = 0;
+	for (auto *n: gui::sorted_nodes) {
+		if (!n->eff_visible)
+			continue;
+		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
+
+			cb->bind_descriptor_set(0, dset_gui[index]);
+			cb->draw(vb_gui[index]);
+			index ++;
+		}
+	}
+	//nix::set_z(true, true);
+	//nix::set_cull(nix::CullMode::DEFAULT);
+
+	//nix::disable_alpha();
+
+	//break_point();
+	PerformanceMonitor::end(ch_gui);
 }
 
 void RenderPathVulkan::render_out(FrameBuffer *source, Texture *bloom) {

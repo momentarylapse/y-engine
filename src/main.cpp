@@ -152,7 +152,7 @@ public:
 
 		ErrorHandler::init();
 
-		gui::init(render_path->shader_2d, ch_iter);
+		gui::init(ch_iter);
 
 
 		input::init(window);

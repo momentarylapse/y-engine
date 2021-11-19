@@ -17,11 +17,6 @@
 #include "../world/World.h"
 #include "../lib/base/callable.h"
 
-#if HAS_LIB_VULKAN
-extern vulkan::Shader *shader_fx;
-extern vulkan::Texture *tex_white;
-extern vulkan::Texture *tex_black;
-#endif
 
 struct GeoPush {
 	alignas(16) matrix model;

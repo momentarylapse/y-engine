@@ -265,7 +265,7 @@ void RenderPathGL::draw_gui(FrameBuffer *source) {
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
-			auto shader = gui::shader.get();
+			auto shader = shader_2d.get();
 			if (p->shader)
 				shader = p->shader.get();
 			nix::set_shader(shader);

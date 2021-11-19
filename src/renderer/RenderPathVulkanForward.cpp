@@ -5,7 +5,6 @@
  *      Author: michi
  */
 
-
 #include "RenderPathVulkanForward.h"
 #ifdef USING_VULKAN
 #include "../graphics-impl.h"
@@ -33,9 +32,6 @@
 #include "../world/World.h"
 #include "../Config.h"
 #include "../meta.h"
-
-matrix jitter(float w, float h, int uid);
-void break_point();
 
 
 RenderPathVulkanForward::RenderPathVulkanForward(GLFWwindow* win, int w, int h) : RenderPathVulkan(win, w, h, RenderPathType::FORWARD) {
@@ -149,5 +145,5 @@ void RenderPathVulkanForward::draw_world(bool allow_material) {
 void RenderPathVulkanForward::render_shadow_map(FrameBuffer *sfb, float scale) {
 }
 
-
 #endif
+

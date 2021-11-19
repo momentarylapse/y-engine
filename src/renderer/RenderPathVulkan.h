@@ -66,8 +66,15 @@ public:
 	UniformBuffer* ubo;
 	vulkan::DescriptorSet* dset;
 	vulkan::Pipeline* pipeline;
-	Texture* tex;
-	VertexBuffer* vb;
+
+
+
+	vulkan::Pipeline* pipeline_gui;
+	//vulkan::DescriptorSet* dset_gui;
+	Array<vulkan::DescriptorSet*> dset_gui;
+	Array<UniformBuffer*> ubo_gui;
+	Array<VertexBuffer*> vb_gui;
+	void prepare_gui(FrameBuffer *source);
 
 
 
@@ -125,7 +132,7 @@ public:
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(const Array<Texture*> &tex);
-	void draw_gui(FrameBuffer *source);
+	void draw_gui(vulkan::CommandBuffer *cb);
 	void render_out(FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();

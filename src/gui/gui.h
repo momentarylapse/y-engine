@@ -19,7 +19,7 @@ namespace gui {
 class Node;
 
 //void init(vulkan::RenderPass *rp);
-void init(Shader *s, int ch_iter);
+void init(int ch_iter);
 void reset();
 //void render(vulkan::CommandBuffer *cb, const rect &viewport);
 void update();
@@ -34,7 +34,6 @@ void update_tree();
 
 void delete_node(Node *n);
 
-extern shared<Shader> shader;
 extern VertexBuffer *vertex_buffer;
 }
 

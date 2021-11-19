@@ -11,6 +11,7 @@
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
 #include "../lib/base/callable.h"
+//#include "../lib/base/pointer.h"
 
 class Renderer;
 class RendererVulkan;
