@@ -159,7 +159,7 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 
 
 
-	ResourceManager::default_shader = "vulkan/default.shader";
+	ResourceManager::default_shader = "default.shader";
 	/*if (config.get_str("renderer.shader-quality", "") == "pbr") {
 		ResourceManager::load_shader("module-lighting-pbr.shader");
 		ResourceManager::load_shader("forward/module-surface-pbr.shader");
@@ -170,7 +170,7 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");*/
 	ResourceManager::load_shader("vulkan/module-surface-dummy.shader");
-	ResourceManager::load_shader("vulkan/module-vertex-default.shader");
+	ResourceManager::load_shader("module-vertex-default.shader");
 }
 
 RenderPathVulkan::~RenderPathVulkan() {
@@ -663,10 +663,14 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 	for (auto *t: world.terrains) {
 		auto o = t->get_owner<Entity3D>();
 		ubo.m = matrix::translation(o->pos);
+		ubo.albedo = t->material->albedo;
+		ubo.emission = t->material->emission;
+		ubo.metal = t->material->metal;
+		ubo.roughness = t->material->roughness;
 
 		if (index >= tr_ubos.num) {
 			tr_ubos.add(new UniformBuffer(sizeof(UBO)));
-			tr_dsets.add(pool->create_set("buffer" + string(",sampler").repeat(t->material->textures.num)));
+			tr_dsets.add(pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 		}
 
 		tr_ubos[index]->update(&ubo);
@@ -674,9 +678,6 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 
 		if (allow_material) {
 			set_material(cb, tr_dsets[index], t->material, type, ShaderVariant::DEFAULT);
-			/*auto s = t->material->get_shader((int)type-1, ShaderVariant::DEFAULT);
-			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);*/
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
 		}
@@ -726,15 +727,15 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 
 		if (index >= ob_ubos.num) {
 			ob_ubos.add(new UniformBuffer(sizeof(UBO)));
-			ob_dsets.add(pool->create_set("buffer,sampler"));
+			ob_dsets.add(pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 		}
 
 		m->update_matrix();
 		ubo.m = m->_matrix;
-		ubo.albedo = White;
-		ubo.emission = Black;
-		ubo.metal = 0;
-		ubo.roughness = 1;
+		ubo.albedo = s.material->albedo;
+		ubo.emission = s.material->emission;
+		ubo.metal = s.material->metal;
+		ubo.roughness = s.material->roughness;
 		ob_ubos[index]->update(&ubo);
 		ob_dsets[index]->set_buffer(0, ob_ubos[index]);
 

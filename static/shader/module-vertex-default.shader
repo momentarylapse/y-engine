@@ -3,8 +3,20 @@
 </Layout>
 <Module>
 
+#ifdef vulkan
+struct Matrices {
+	mat4 model;
+	mat4 view;
+	mat4 project;
+};
+
+layout(binding = 0) uniform Parameters {
+	Matrices matrix;
+};
+#else
 struct Matrix { mat4 model, view, project; };
 /*layout(binding = 0)*/ uniform Matrix matrix;
+#endif
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
