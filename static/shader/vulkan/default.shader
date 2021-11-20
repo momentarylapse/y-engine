@@ -1,6 +1,6 @@
 <Layout>
 	version = 450
-	binding = [[buffer,sampler]]
+	bindings = [[buffer,sampler]]
 	pushsize = 0
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -12,6 +12,10 @@ uniform Material material;
 uniform sampler2D tex0;*/
 //struct Matrix { mat4 model, view, project; };
 ///*layout(binding = 0)*/ uniform Matrix matrix;
+
+layout(binding = 1) uniform sampler2D tex;
+
+layout(location = 1) in vec2 in_tex_coord;
 
 layout(location = 0) out vec4 out_color;
 
@@ -32,8 +36,6 @@ void main() {
 	// SurfaceOutput
 	surface_out(tmp2, tmp9, tmp7, tmp6, tmp5);*/
 	
-	out_color = vec4(1,1,1,1);
-	
-	//out_color = texture(tex, in_tex_coord);
+	out_color = texture(tex, in_tex_coord);
 }
 </FragmentShader>

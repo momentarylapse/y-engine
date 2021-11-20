@@ -532,6 +532,7 @@ Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
 void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader((int)t-1, v);
 	auto p = get_pipeline(s, default_render_pass());
+//	p = pipeline_x;
 
 	cb->bind_pipeline(p);
 
@@ -540,6 +541,7 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Mate
 		if (m->textures[0].get())
 			dset->set_texture(1, m->textures[0].get());
 	dset->update();
+	cb->bind_descriptor_set(0, dset);
 
 
 	/*nix::set_shader(s);
@@ -719,18 +721,16 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 		}
 
 		m->update_matrix();
-		//nix::set_model_matrix(m->_matrix);
 		ubo.m = m->_matrix;
 		ob_ubos[index]->update(&ubo);
-		ob_dsets[index]->set_texture(1, _tex_white);
 		ob_dsets[index]->set_buffer(0, ob_ubos[index]);
-		ob_dsets[index]->update();
-		cb->bind_descriptor_set(0, ob_dsets[index]);
 
-#if 0
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (ani) {
+			set_material(cb, ob_dsets[index], s.material, type, ShaderVariant::DEFAULT);
+
+
 			/*if (allow_material)
 				set_material(s.material, type, ShaderVariant::ANIMATED);
 			else
@@ -743,7 +743,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 			else
 				set_material(cb, ob_dsets[index], material_shadow, type, ShaderVariant::DEFAULT);
 		}
-#endif
+
 		cb->draw(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		index ++;
 	}

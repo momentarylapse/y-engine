@@ -217,7 +217,7 @@ extern bool verbose;
 					m.name = v;
 				} else if (k == "version") {
 					m.version = v;
-				} else if (k == "bindings") {
+				} else if ((k == "binding") or (k == "bindings")) {
 					m.bindings = v;
 				} else if (k == "pushsize") {
 					m.push_size = v._int();
