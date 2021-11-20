@@ -391,54 +391,54 @@ void RayPipeline::create_groups(const Array<Shader*> &shaders) {
 	stage.module = shaders[0]->get_module(VK_SHADER_STAGE_RAYGEN_BIT_NV);
 	shader_stages.add(stage);
 
-	VkRayTracingShaderGroupCreateInfoNV groupInfo = {};
-	groupInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV;
-	groupInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV;
-	groupInfo.closestHitShader = VK_SHADER_UNUSED_NV;
-	groupInfo.anyHitShader = VK_SHADER_UNUSED_NV;
-	groupInfo.intersectionShader = VK_SHADER_UNUSED_NV;
-	groups.add(groupInfo);
+	VkRayTracingShaderGroupCreateInfoNV group_info = {};
+	group_info.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_NV;
+	group_info.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV;
+	group_info.closestHitShader = VK_SHADER_UNUSED_NV;
+	group_info.anyHitShader = VK_SHADER_UNUSED_NV;
+	group_info.intersectionShader = VK_SHADER_UNUSED_NV;
+	groups.add(group_info);
 
     // hit groups
     for (auto *s: shaders.sub_ref(1)) {
-        groupInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV;
-        groupInfo.generalShader = VK_SHADER_UNUSED_NV;
-        groupInfo.closestHitShader = VK_SHADER_UNUSED_NV;
-        groupInfo.anyHitShader = VK_SHADER_UNUSED_NV;
-        groupInfo.intersectionShader = VK_SHADER_UNUSED_NV;
+        group_info.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_NV;
+        group_info.generalShader = VK_SHADER_UNUSED_NV;
+        group_info.closestHitShader = VK_SHADER_UNUSED_NV;
+        group_info.anyHitShader = VK_SHADER_UNUSED_NV;
+        group_info.intersectionShader = VK_SHADER_UNUSED_NV;
 
     	Array<VkPipelineShaderStageCreateInfo> stages;
     	if (s->get_module(VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV)) {
-    		groupInfo.closestHitShader = shader_stages.num + stages.num;
+    		group_info.closestHitShader = shader_stages.num + stages.num;
     		stage.stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV;
     		stage.module = s->get_module(VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV);
     		stages.add(stage);
     	}
     	if (s->get_module(VK_SHADER_STAGE_ANY_HIT_BIT_NV)) {
-    		groupInfo.anyHitShader = shader_stages.num + stages.num;
+    		group_info.anyHitShader = shader_stages.num + stages.num;
     		stage.stage = VK_SHADER_STAGE_ANY_HIT_BIT_NV;
     		stage.module = s->get_module(VK_SHADER_STAGE_ANY_HIT_BIT_NV);
     		stages.add(stage);
     	}
     	//VK_SHADER_STAGE_INTERSECTION_BIT_NV
     	shader_stages.append(stages);
-    	groups.add(groupInfo);
+    	groups.add(group_info);
     }
     miss_group_offset = groups.num;
 
     // miss groups
     for (auto *s: shaders.sub_ref(1))
     	if (s->get_module(VK_SHADER_STAGE_MISS_BIT_NV)) {
-			groupInfo.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV;
-			groupInfo.generalShader = shader_stages.num;
-			groupInfo.closestHitShader = VK_SHADER_UNUSED_NV;
-			groupInfo.anyHitShader = VK_SHADER_UNUSED_NV;
-			groupInfo.intersectionShader = VK_SHADER_UNUSED_NV;
+			group_info.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_NV;
+			group_info.generalShader = shader_stages.num;
+			group_info.closestHitShader = VK_SHADER_UNUSED_NV;
+			group_info.anyHitShader = VK_SHADER_UNUSED_NV;
+			group_info.intersectionShader = VK_SHADER_UNUSED_NV;
 
     		stage.stage = VK_SHADER_STAGE_MISS_BIT_NV;
     		stage.module = s->get_module(VK_SHADER_STAGE_MISS_BIT_NV);
     		shader_stages.add(stage);
-    		groups.add(groupInfo);
+    		groups.add(group_info);
     	}
 }
 

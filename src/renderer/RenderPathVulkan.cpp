@@ -94,7 +94,7 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	using_view_space = true;
 
 
-	instance = vulkan::init(window, {"glfw", "validation", "api=1.1"});
+	instance = vulkan::init(window, {"glfw", "validation", "api=1.2"});
 
 
 	image_available_semaphore = new vulkan::Semaphore();
