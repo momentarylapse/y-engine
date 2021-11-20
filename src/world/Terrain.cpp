@@ -41,8 +41,6 @@ void Terrain::reset() {
 
 Terrain::Terrain() {
 	material = nullptr;
-	ubo = nullptr;
-//	dset = nullptr;
 	reset();
 }
 
@@ -134,11 +132,6 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 }
 
 Terrain::~Terrain() {
-#ifdef USING_VULKAN
-//	if (dset)
-//		delete dset;
-//	delete ubo;
-#endif
 	delete vertex_buffer;
 	delete material;
 }
@@ -602,6 +595,11 @@ void Terrain::build_vertex_buffer() {
 				}
 		}
 #ifdef USING_VULKAN
+	Array<vulkan::Vertex1> vertex;
+	for (int i=0; i<p.num; i++) {
+		vertex.add({p[i], n[i], uv[i*2], uv[i*2+1]});
+	}
+	vertex_buffer->build_v3_v3_v2(vertex);
 #else
 //	vertex_buffer->build1(vertices);
 	vertex_buffer->update(0, p);

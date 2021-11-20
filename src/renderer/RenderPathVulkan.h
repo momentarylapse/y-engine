@@ -64,13 +64,7 @@ public:
 	FrameBuffer *current_frame_buffer() const;
 	CommandBuffer *current_command_buffer() const;
 
-	shared<Shader> shader;
 	rect area() const;
-
-	UniformBuffer* ubo_x;
-	DescriptorSet* dset_x;
-	Pipeline* pipeline_x;
-	VertexBuffer *vb_x;
 
 
 
@@ -136,13 +130,13 @@ public:
 	FrameBuffer* do_post_processing(FrameBuffer *source);
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
-	void set_textures(const Array<Texture*> &tex);
+	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 	void draw_gui(CommandBuffer *cb);
 	void render_out(FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();
 	void draw_skyboxes(Camera *c);
-	void draw_terrains(bool allow_material);
+	void draw_terrains(CommandBuffer *cb, bool allow_material);
 	void draw_objects_opaque(CommandBuffer *cb, bool allow_material);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);

@@ -51,9 +51,12 @@ void break_point() {
 
 struct UBO {
 	matrix m,v,p;
+	color albedo, emission;
+	float roughness, metal;
 };
 
-struct UBOGUI : UBO {
+struct UBOGUI {
+	matrix m,v,p;
 	color col;
 	rect source;
 	float blur, exposure, gamma;
@@ -105,19 +108,6 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	_create_swap_chain_and_stuff();
-
-
-
-	ubo_x = new UniformBuffer(sizeof(UBO));
-	dset_x = pool->create_set("buffer,sampler");
-	dset_x->set_buffer(0, ubo_x);
-	//dset->set_texture(1, tex);
-	dset_x->update();
-	shader = ResourceManager::load_shader("vulkan/3d.shader");
-	pipeline_x = new Pipeline(shader.get(), default_render_pass(), 0, 1);
-
-	vb_x = new VertexBuffer();
-	create_quad(vb_x, rect(-100,100, -100,100));
 
 
 	/*nix::allow_separate_vertex_arrays = true;
@@ -354,13 +344,6 @@ bool RenderPathVulkan::start_frame() {
 	prepare_gui(fb);
 
 
-	UBO u;
-	u.p = matrix::perspective(1.0, 1.3, 0.1, 1000);
-	u.v = matrix::translation(vector(0,0,-2));
-	u.m = matrix::ID;
-	ubo_x->update(&u);
-
-
 	cb->begin();
 
 	cb->set_viewport(area());
@@ -369,6 +352,7 @@ bool RenderPathVulkan::start_frame() {
 	cb->begin_render_pass(rp, fb);
 
 	draw_objects_opaque(cb, true);
+	draw_terrains(cb, true);
 
 	/*cb->bind_pipeline(pipeline);
 	cb->bind_descriptor_set(0, dset);
@@ -532,14 +516,10 @@ Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
 void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader((int)t-1, v);
 	auto p = get_pipeline(s, default_render_pass());
-//	p = pipeline_x;
 
 	cb->bind_pipeline(p);
 
-	dset->set_texture(1, _tex_white);
-	if (m->textures.num > 0)
-		if (m->textures[0].get())
-			dset->set_texture(1, m->textures[0].get());
+	set_textures(dset, 1, m->textures.num, weak(m->textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
 
@@ -566,7 +546,7 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Mate
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);*/
 }
 
-void RenderPathVulkan::set_textures(const Array<Texture*> &tex) {
+void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex) {
 	/*auto tt = tex;
 	if (tt.num == 0)
 		tt.add(tex_white.get());
@@ -574,10 +554,17 @@ void RenderPathVulkan::set_textures(const Array<Texture*> &tex) {
 		tt.add(tex_white.get());
 	if (tt.num == 2)
 		tt.add(tex_white.get());
-	tt.add(fb_shadow->depth_buffer.get());
-	tt.add(fb_shadow2->depth_buffer.get());
-	tt.add(cube_map.get());
-	nix::set_textures(tt);*/
+	//tt.add(fb_shadow->depth_buffer.get());
+	//tt.add(fb_shadow2->depth_buffer.get());
+	//tt.add(cube_map.get());
+	foreachi (auto t, tt, i)
+		dset->set_texture(i0 + i, t);*/
+	for (int k=0; k<n; k++) {
+		dset->set_texture(i0 + k, _tex_white);
+		if (k < tex.num)
+			if (tex[k])
+				dset->set_texture(i0 + k, tex[k]);
+	}
 }
 
 
@@ -659,19 +646,44 @@ void RenderPathVulkan::draw_skyboxes(Camera *cam) {
 	nix::disable_alpha();
 	break_point();*/
 }
-void RenderPathVulkan::draw_terrains(bool allow_material) {
-	/*for (auto *t: world.terrains) {
+
+
+static Array<UniformBuffer*> tr_ubos;
+static Array<DescriptorSet*> tr_dsets;
+
+void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
+	int index = 0;
+	UBO ubo;
+
+	cam->update_matrices((float)width / (float)height);
+	ubo.p = cam->m_projection;
+	ubo.v = cam->m_view;
+	ubo.m = matrix::ID;
+
+	for (auto *t: world.terrains) {
 		auto o = t->get_owner<Entity3D>();
-		nix::set_model_matrix(matrix::translation(o->pos));
+		ubo.m = matrix::translation(o->pos);
+
+		if (index >= tr_ubos.num) {
+			tr_ubos.add(new UniformBuffer(sizeof(UBO)));
+			tr_dsets.add(pool->create_set("buffer" + string(",sampler").repeat(t->material->textures.num)));
+		}
+
+		tr_ubos[index]->update(&ubo);
+		tr_dsets[index]->set_buffer(0, tr_ubos[index]);
+
 		if (allow_material) {
-			set_material(t->material, type, ShaderVariant::DEFAULT);
-			auto s = t->material->get_shader((int)type-1, ShaderVariant::DEFAULT);
+			set_material(cb, tr_dsets[index], t->material, type, ShaderVariant::DEFAULT);
+			/*auto s = t->material->get_shader((int)type-1, ShaderVariant::DEFAULT);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
+			s->set_floats("pattern1", &t->texture_scale[1].x, 3);*/
+			cb->push_constant(0, 4, &t->texture_scale[0].x);
+			cb->push_constant(4, 4, &t->texture_scale[1].x);
 		}
 		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
-		nix::draw_triangles(t->vertex_buffer);
-	}*/
+		cb->draw(t->vertex_buffer);
+		index ++;
+	}
 }
 
 void RenderPathVulkan::draw_objects_instanced(bool allow_material) {
@@ -703,9 +715,6 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 	ubo.v = cam->m_view;
 	ubo.m = matrix::ID;
 
-
-	cb->bind_pipeline(pipeline_x);
-
 	cam->update_matrices((float)width / (float)height);
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
@@ -722,6 +731,10 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 
 		m->update_matrix();
 		ubo.m = m->_matrix;
+		ubo.albedo = White;
+		ubo.emission = Black;
+		ubo.metal = 0;
+		ubo.roughness = 1;
 		ob_ubos[index]->update(&ubo);
 		ob_dsets[index]->set_buffer(0, ob_ubos[index]);
 

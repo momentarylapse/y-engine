@@ -6,22 +6,13 @@
 	topology = triangles
 </Layout>
 <FragmentShader>
-/*#import surface
-struct Material { vec4 albedo, emission; float roughness, metal; };
-uniform Material material;
-uniform sampler2D tex0;*/
-//struct Matrix { mat4 model, view, project; };
-///*layout(binding = 0)*/ uniform Matrix matrix;
+#import surface
 
-layout(binding = 1) uniform sampler2D tex;
-
-layout(location = 1) in vec2 in_tex_coord;
-
-layout(location = 0) out vec4 out_color;
+layout(binding = 1) uniform sampler2D tex0;
 
 void main() {
 	// Mesh
-	/*vec3 tmp1 = in_pos.xyz / in_pos.w;
+	vec3 tmp1 = in_pos.xyz / in_pos.w;
 	vec3 tmp2 = normalize(in_normal);
 	vec2 tmp3 = in_uv;
 	// Material
@@ -34,8 +25,6 @@ void main() {
 	// Multiply
 	vec4 tmp9 = tmp8 * tmp4;
 	// SurfaceOutput
-	surface_out(tmp2, tmp9, tmp7, tmp6, tmp5);*/
-	
-	out_color = texture(tex, in_tex_coord);
+	surface_out(tmp2, tmp9, tmp7, tmp6, tmp5);
 }
 </FragmentShader>

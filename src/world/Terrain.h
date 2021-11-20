@@ -75,8 +75,6 @@ public:
 	Array<vector> vertex, normal;
 	Array<plane> pl; // for collision detection
 	VertexBuffer *vertex_buffer;
-	UniformBuffer *ubo;
-	//vulkan::DescriptorSet *dset;
 	int partition[128][128], partition_old[128][128];
 	vector pattern, min, max;
 	Material *material;

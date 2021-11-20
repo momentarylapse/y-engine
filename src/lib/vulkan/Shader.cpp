@@ -185,13 +185,17 @@ extern bool verbose;
 		string source = expand_shader_source(_source, meta);
 		if (source.num == 0)
 			return nullptr;
-		if (!shaderc)
+		static shaderc_compile_options_t options;
+		if (!shaderc) {
 			shaderc = shaderc_compiler_initialize();
-		msg_write(">>>" + source + "<<<");
+			options = shaderc_compile_options_initialize();
+			shaderc_compile_options_add_macro_definition(options, "vulkan", 6, "1", 1);
+		}
+		//msg_write(">>>" + source + "<<<");
 
 		auto result = shaderc_compile_into_spv(shaderc,
 				(const char*)&source[0], source.num,
-				vk_to_shaderc(type), "dummy", "main", nullptr);
+				vk_to_shaderc(type), "dummy", "main", options);
 
 		if (shaderc_result_get_compilation_status(result) == shaderc_compilation_status_success) {
 			bytes code = bytes(shaderc_result_get_bytes(result), shaderc_result_get_length(result));
