@@ -84,6 +84,7 @@ string ResourceManager::expand_fragment_shader_source(const string &source, cons
 }
 
 Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant) {
+	msg_write("load_surface_shader: " + _filename.str() + "  " + render_path + "  " + variant);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;

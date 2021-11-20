@@ -187,6 +187,7 @@ extern bool verbose;
 			return nullptr;
 		if (!shaderc)
 			shaderc = shaderc_compiler_initialize();
+		msg_write(">>>" + source + "<<<");
 
 		auto result = shaderc_compile_into_spv(shaderc,
 				(const char*)&source[0], source.num,

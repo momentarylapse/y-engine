@@ -32,6 +32,7 @@
 		class Pipeline;
 		class DescriptorSet;
 		class RenderPass;
+		class CommandBuffer;
 	}
 
 	using Texture = vulkan::Texture;
@@ -42,6 +43,9 @@
 	using CubeMap = vulkan::Texture; // TODO
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
+	using Pipeline = vulkan::Pipeline;
+	using CommandBuffer = vulkan::CommandBuffer;
+	using DescriptorSet = vulkan::DescriptorSet;
 
 	using Alpha = vulkan::Alpha;
 	using AlphaMode = vulkan::AlphaMode;

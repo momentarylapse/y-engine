@@ -135,11 +135,11 @@ void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, 
 }
 
 void RenderPathVulkanForward::draw_world(bool allow_material) {
-	draw_terrains(allow_material);
+	/*draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
 	if (allow_material)
-		draw_objects_transparent(allow_material, type);
+		draw_objects_transparent(allow_material, type);*/
 }
 
 void RenderPathVulkanForward::render_shadow_map(FrameBuffer *sfb, float scale) {

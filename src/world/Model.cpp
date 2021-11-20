@@ -143,7 +143,15 @@ void Mesh::create_vb(bool animated) {
 
 void SubMesh::update_vb(Mesh *mesh, bool animated) {
 #ifdef USING_VULKAN
-	msg_todo("vulkan SubMesh.update_vb");
+	Array<vulkan::Vertex1> vertex;
+	for (int i=0; i<num_triangles; i++) {
+		for (int k=0; k<3; k++) {
+			int vi = triangle_index[i*3+k];
+			vertex.add({mesh->vertex[vi], normal[i*3+k], skin_vertex[i*6+k*2  ], skin_vertex[i*6+k*2+1]});
+		}
+	}
+	vertex_buffer->build_v3_v3_v2(vertex);
+
 #else
 	if (true) {
 		Array<vector> p, n;

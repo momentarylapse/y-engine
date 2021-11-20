@@ -21,6 +21,10 @@ namespace vulkan {
 	class DescriptorPool;
 	class CommandBuffer;
 }
+using Semaphore = vulkan::Semaphore;
+using Fence = vulkan::Fence;
+using SwapChain = vulkan::SwapChain;
+using RenderPass = vulkan::RenderPass;
 
 class Material;
 class UBOLight;
@@ -37,18 +41,18 @@ public:
 	GLFWwindow* window;
 	vulkan::Instance *instance;
 
-	vulkan::Fence* in_flight_fence;
-	Array<vulkan::Fence*> wait_for_frame_fences;
-	vulkan::Semaphore *image_available_semaphore, *render_finished_semaphore;
+	Fence* in_flight_fence;
+	Array<Fence*> wait_for_frame_fences;
+	Semaphore *image_available_semaphore, *render_finished_semaphore;
 
-	Array<vulkan::CommandBuffer*> command_buffers;
+	Array<CommandBuffer*> command_buffers;
 	//var cb: vulkan::CommandBuffer*
 	vulkan::DescriptorPool* pool;
 
-	vulkan::SwapChain *swap_chain;
-	vulkan::RenderPass* _default_render_pass;
-	vulkan::DepthBuffer* depth_buffer;
-	Array<vulkan::FrameBuffer*> frame_buffers;
+	SwapChain *swap_chain;
+	RenderPass* _default_render_pass;
+	DepthBuffer* depth_buffer;
+	Array<FrameBuffer*> frame_buffers;
 	int image_index;
 	bool framebuffer_resized;
 
@@ -56,22 +60,23 @@ public:
 	void rebuild_default_stuff();
 
 
-	vulkan::RenderPass *default_render_pass() const;
-	vulkan::FrameBuffer *current_frame_buffer() const;
-	vulkan::CommandBuffer *current_command_buffer() const;
+	RenderPass *default_render_pass() const;
+	FrameBuffer *current_frame_buffer() const;
+	CommandBuffer *current_command_buffer() const;
 
 	shared<Shader> shader;
 	rect area() const;
 
-	UniformBuffer* ubo;
-	vulkan::DescriptorSet* dset;
-	vulkan::Pipeline* pipeline;
+	UniformBuffer* ubo_x;
+	DescriptorSet* dset_x;
+	Pipeline* pipeline_x;
+	VertexBuffer *vb_x;
 
 
 
-	vulkan::Pipeline* pipeline_gui;
-	//vulkan::DescriptorSet* dset_gui;
-	Array<vulkan::DescriptorSet*> dset_gui;
+	Pipeline* pipeline_gui;
+	//DescriptorSet* dset_gui;
+	Array<DescriptorSet*> dset_gui;
 	Array<UniformBuffer*> ubo_gui;
 	VertexBuffer* vb_gui;
 	void prepare_gui(FrameBuffer *source);
@@ -130,15 +135,15 @@ public:
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
 	FrameBuffer* do_post_processing(FrameBuffer *source);
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
-	void set_material(Material *m, RenderPathType type, ShaderVariant v);
+	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(const Array<Texture*> &tex);
-	void draw_gui(vulkan::CommandBuffer *cb);
+	void draw_gui(CommandBuffer *cb);
 	void render_out(FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();
 	void draw_skyboxes(Camera *c);
 	void draw_terrains(bool allow_material);
-	void draw_objects_opaque(bool allow_material);
+	void draw_objects_opaque(CommandBuffer *cb, bool allow_material);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();

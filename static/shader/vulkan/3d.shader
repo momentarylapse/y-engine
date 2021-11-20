@@ -41,7 +41,7 @@ layout(push_constant) uniform MyConstants {
 };
 
 void main() {
-    out_color = texture(tex, in_tex_coord);
-    out_color.r += offset;
+    out_color = vec4(1,1,1,1);//texture(tex, in_tex_coord);
+    //out_color.r += offset;
 }
 </FragmentShader>
