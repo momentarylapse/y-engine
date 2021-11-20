@@ -1,6 +1,6 @@
 <Layout>
 	version = 420
-	bindings = [[buffer,sampler,sampler,sampler]]
+	bindings = [[buffer,buffer,sampler,sampler,sampler]]
 	pushsize = 0
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -18,7 +18,7 @@ uniform Material material;
 
 #endif
 
-layout(binding = 1) uniform sampler2D tex0;
+layout(binding = 2) uniform sampler2D tex0;
 
 void main() {
 	// Mesh

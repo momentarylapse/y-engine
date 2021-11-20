@@ -53,6 +53,7 @@ struct UBO {
 	matrix m,v,p;
 	color albedo, emission;
 	float roughness, metal;
+	int num_lights;
 };
 
 struct UBOGUI {
@@ -342,6 +343,7 @@ bool RenderPathVulkan::start_frame() {
 	auto fb = current_frame_buffer();
 
 	prepare_gui(fb);
+	prepare_lights(cam);
 
 
 	cb->begin();
@@ -519,7 +521,7 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Mate
 
 	cb->bind_pipeline(p);
 
-	set_textures(dset, 1, m->textures.num, weak(m->textures));
+	set_textures(dset, 2, m->textures.num, weak(m->textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
 
@@ -659,6 +661,7 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
 	ubo.m = matrix::ID;
+	ubo.num_lights = world.lights.num;
 
 	for (auto *t: world.terrains) {
 		auto o = t->get_owner<Entity3D>();
@@ -675,6 +678,7 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 
 		tr_ubos[index]->update(&ubo);
 		tr_dsets[index]->set_buffer(0, tr_ubos[index]);
+		tr_dsets[index]->set_buffer(1, ubo_light);
 
 		if (allow_material) {
 			set_material(cb, tr_dsets[index], t->material, type, ShaderVariant::DEFAULT);
@@ -715,6 +719,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
 	ubo.m = matrix::ID;
+	ubo.num_lights = world.lights.num;
 
 	cam->update_matrices((float)width / (float)height);
 	ubo.p = cam->m_projection;
@@ -728,6 +733,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 		if (index >= ob_ubos.num) {
 			ob_ubos.add(new UniformBuffer(sizeof(UBO)));
 			ob_dsets.add(pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+			ob_dsets[index]->set_buffer(1, ubo_light);
 		}
 
 		m->update_matrix();
@@ -794,7 +800,7 @@ void RenderPathVulkan::prepare_instanced_matrices() {
 }
 
 void RenderPathVulkan::prepare_lights(Camera *cam) {
-	/*PerformanceMonitor::begin(ch_prepare_lights);
+	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();
 	for (auto *l: world.lights) {
@@ -809,8 +815,8 @@ void RenderPathVulkan::prepare_lights(Camera *cam) {
 		}
 		lights.add(l->light);
 	}
-	ubo_light->update_array(lights);
-	PerformanceMonitor::end(ch_prepare_lights);*/
+	ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
+	PerformanceMonitor::end(ch_prepare_lights);
 }
 
 #endif
