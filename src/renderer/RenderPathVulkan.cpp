@@ -7,7 +7,7 @@
 
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
-#include "WindowRendererVulkan.h"
+#include "RendererVulkan.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
@@ -88,12 +88,11 @@ void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
 		{{r.x2,r.y2,0}, {0,0,1}, s.x2,s.y2}}, {0,1,3, 0,3,2});
 }
 
-RenderPathVulkan::RenderPathVulkan(WindowRendererVulkan *r, RenderPathType _type) {
+RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 	type = _type;
 	renderer = r;
 	width = renderer->width;
 	height = renderer->height;
-	depth_buffer = renderer->depth_buffer;
 
 	vb_2d = nullptr;
 

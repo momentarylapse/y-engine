@@ -110,7 +110,7 @@ public:
 		try {
 #ifdef USING_VULKAN
 			renderer = new WindowRendererVulkan(window, engine.width, engine.height);
-			return new RenderPathVulkanForward((WindowRendererVulkan*)renderer);
+			return new RenderPathVulkanForward((RendererVulkan*)renderer);
 #else
 			if (config.get_str("renderer.path", "forward") == "deferred")
 				return new RenderPathGLDeferred(window, engine.width, engine.height);
@@ -146,7 +146,7 @@ public:
 
 		engine.set_dirs("Textures", "Maps", "Objects", "Sounds", "Scripts", "Materials", "Fonts");
 
-		engine.renderer = render_path = create_renderer();
+		engine.render_path = render_path = create_renderer();
 
 		audio::init();
 

@@ -32,7 +32,7 @@ class GLFWwindow;
 class rect;
 class Material;
 
-class WindowRendererVulkan;
+class RendererVulkan;
 
 enum class ShaderVariant;
 
@@ -40,38 +40,6 @@ enum class ShaderVariant;
 class RenderPathVulkan : public RenderPath {
 public:
 	int width, height;
-	/*GLFWwindow* window;
-	vulkan::Instance *instance;
-
-	Fence* in_flight_fence;
-	Array<Fence*> wait_for_frame_fences;
-	Semaphore *image_available_semaphore, *render_finished_semaphore;
-
-	Array<CommandBuffer*> command_buffers;
-	//var cb: vulkan::CommandBuffer*
-	vulkan::DescriptorPool* pool;
-
-	SwapChain *swap_chain;
-	RenderPass* _default_render_pass;
-	DepthBuffer* depth_buffer;
-	Array<FrameBuffer*> frame_buffers;
-	int image_index;
-	bool framebuffer_resized;
-
-	void _create_swap_chain_and_stuff();
-	void rebuild_default_stuff();
-
-
-	RenderPass *default_render_pass() const;
-	FrameBuffer *current_frame_buffer() const;
-	CommandBuffer *current_command_buffer() const;
-
-	rect area() const;*/
-
-
-	DepthBuffer* depth_buffer;
-
-
 
 
 	Pipeline* pipeline_gui;
@@ -121,16 +89,14 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathVulkan(WindowRendererVulkan *renderer, RenderPathType type);
+	RenderPathVulkan(RendererVulkan *renderer, RenderPathType type);
 	virtual ~RenderPathVulkan();
 
-	WindowRendererVulkan *renderer;
+	RendererVulkan *renderer;
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
 
-	//bool start_frame() override;
-	//void end_frame() override;
 
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis);
 	void process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis);

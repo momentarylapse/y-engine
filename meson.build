@@ -229,6 +229,7 @@ sources = [
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
 	'src/renderer/Renderer.cpp',
+	'src/renderer/RendererVulkan.cpp',
 	'src/renderer/RenderPath.cpp',
 	'src/renderer/RenderPathGL.cpp',
 	'src/renderer/RenderPathGLDeferred.cpp',

@@ -7,7 +7,7 @@
 
 #include "RenderPathVulkanForward.h"
 #ifdef USING_VULKAN
-#include "WindowRendererVulkan.h"
+#include "RendererVulkan.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/file/msg.h"
@@ -35,7 +35,7 @@
 #include "../meta.h"
 
 
-RenderPathVulkanForward::RenderPathVulkanForward(WindowRendererVulkan *r) : RenderPathVulkan(r, RenderPathType::FORWARD) {
+RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPathVulkan(r, RenderPathType::FORWARD) {
 
 	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {

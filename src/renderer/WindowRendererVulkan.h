@@ -7,10 +7,8 @@
 
 #pragma once
 
-#include "Renderer.h"
-#include "../graphics-fwd.h"
+#include "RendererVulkan.h"
 #ifdef USING_VULKAN
-#include "../lib/base/pointer.h"
 #include "../lib/base/callable.h"
 
 struct GLFWwindow;
@@ -30,7 +28,7 @@ using Fence = vulkan::Fence;
 using SwapChain = vulkan::SwapChain;
 using RenderPass = vulkan::RenderPass;
 
-class WindowRendererVulkan : public Renderer {
+class WindowRendererVulkan : public RendererVulkan {
 public:
 	WindowRendererVulkan(GLFWwindow* win, int w, int h);
 	virtual ~WindowRendererVulkan();
@@ -48,7 +46,6 @@ public:
 
 	Array<CommandBuffer*> command_buffers;
 	//var cb: vulkan::CommandBuffer*
-	vulkan::DescriptorPool* pool;
 
 	SwapChain *swap_chain;
 	RenderPass* _default_render_pass;
@@ -61,9 +58,9 @@ public:
 	void rebuild_default_stuff();
 
 
-	RenderPass *default_render_pass() const;
-	FrameBuffer *current_frame_buffer() const;
-	CommandBuffer *current_command_buffer() const;
+	RenderPass *default_render_pass() const override;
+	FrameBuffer *current_frame_buffer() const override;
+	CommandBuffer *current_command_buffer() const override;
 
 
 	int ch_render= -1;
