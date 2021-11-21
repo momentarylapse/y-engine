@@ -252,6 +252,7 @@
     <ClCompile Include="src\net\NetworkManager.cpp" />
     <ClCompile Include="src\plugins\Controller.cpp" />
     <ClCompile Include="src\plugins\PluginManager.cpp" />
+    <ClCompile Include="src\renderer\helper\jitter.cpp" />
     <ClCompile Include="src\renderer\base.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\renderer\RendererGL.cpp" />
@@ -416,6 +417,7 @@
     <ClInclude Include="src\net\NetworkManager.h" />
     <ClInclude Include="src\plugins\Controller.h" />
     <ClInclude Include="src\plugins\PluginManager.h" />
+    <ClInclude Include="src\renderer\helper\jitter.h" />
     <ClInclude Include="src\renderer\base.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\renderer\RendererGL.h" />

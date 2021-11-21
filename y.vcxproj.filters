@@ -409,6 +409,9 @@
     <ClCompile Include="src\plugins\PluginManager.cpp">
       <Filter>src\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\helper\jitter.cpp">
+      <Filter>src\renderer\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\base.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
@@ -897,6 +900,9 @@
     <ClInclude Include="src\plugins\PluginManager.h">
       <Filter>src\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\helper\jitter.h">
+      <Filter>src\renderer\helper</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\base.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
@@ -1090,6 +1096,9 @@
     </Filter>
     <Filter Include="src\renderer">
       <UniqueIdentifier>{F7955C4E-263A-2E0D-736E-3A991B494B94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\helper">
+      <UniqueIdentifier>{B5FBEC1E-AD04-A485-D29D-D1565E4F165D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\world">
       <UniqueIdentifier>{E9411D56-C9E9-1A0A-845C-CF6F8BB58006}</UniqueIdentifier>

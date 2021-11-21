@@ -228,6 +228,7 @@ sources = [
 	'src/net/NetworkManager.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
+	'src/renderer/helper/jitter.cpp',
 	'src/renderer/base.cpp',
 	'src/renderer/Renderer.cpp',
 	'src/renderer/RendererGL.cpp',

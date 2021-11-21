@@ -10,6 +10,7 @@
 #ifdef USING_OPENGL
 #include "base.h"
 #include "RendererGL.h"
+#include "helper/jitter.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
 #include "../lib/file/msg.h"
@@ -37,8 +38,6 @@
 #include "../meta.h"
 
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
-
-matrix jitter(float w, float h, int uid);
 
 
 RenderPathGLForward::RenderPathGLForward(RendererGL *_renderer) : RenderPathGL(_renderer, RenderPathType::FORWARD) {
