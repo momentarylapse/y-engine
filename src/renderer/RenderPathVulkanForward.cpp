@@ -9,7 +9,6 @@
 #ifdef USING_VULKAN
 #include "RendererVulkan.h"
 #include "../graphics-impl.h"
-#include "../lib/image/image.h"
 #include "../lib/file/msg.h"
 
 #include "../helper/PerformanceMonitor.h"
@@ -37,9 +36,13 @@
 
 RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPathVulkan(r, RenderPathType::FORWARD) {
 
-	fb_main = new vulkan::FrameBuffer(renderer->default_render_pass(), {
-		new vulkan::DynamicTexture(width, height, 1, "rgba:i8"),
-		new DepthBuffer(width, height, "d:f32", true)});
+	auto tex = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
+	auto depth = new DepthBuffer(width, height, "d:f32", true);
+	render_pass = new vulkan::RenderPass({tex, depth}, "clear");
+
+	fb_main = new vulkan::FrameBuffer(render_pass, {
+		tex,
+		depth});
 	fb_main->attachments[0]->set_options("wrap=clamp");
 
 	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
@@ -107,8 +110,8 @@ void RenderPathVulkanForward::draw() {
 	cb->set_viewport(rect(0,cur->width, 0,cur->height));
 
 	//rp->clear_color[0] = world.background;
-	rp->clear_color = {world.background};
-	cb->begin_render_pass(rp, cur);
+	render_pass->clear_color = {world.background};
+	cb->begin_render_pass(render_pass, cur);
 
 	draw_skyboxes(cb, cam);
 	draw_objects_opaque(cb, true);
@@ -128,7 +131,6 @@ void RenderPathVulkanForward::draw() {
 
 	// out
 	cb->set_viewport(renderer->area());
-	rp->clear_color = {};
 	cb->begin_render_pass(rp, fb);
 
 	draw_gui(cb);

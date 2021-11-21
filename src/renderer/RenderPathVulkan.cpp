@@ -130,18 +130,19 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 
 	auto blur_tex1 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:i8");
 	auto blur_tex2 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:i8");
+	auto blur_depth = new DepthBuffer(width/2, height/2, "d:f32", true);
 	blur_tex1->set_options("wrap=clamp");
 	blur_tex2->set_options("wrap=clamp");
 
+	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), renderer->default_render_pass(), 0, 1);
+	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, 1);
 	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
 	blur_ubo[1] = new UniformBuffer(sizeof(UBOBlur));
 	blur_dset[0] = renderer->pool->create_set(shader_blur.get());
 	blur_dset[1] = renderer->pool->create_set(shader_blur.get());
-	blur_render_pass = new vulkan::RenderPass({blur_tex1->format}, "");
-	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, new DepthBuffer(width/2, height/2, "d:f32", true)});
-	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, new DepthBuffer(width/2, height/2, "d:f32", true)});
+	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, blur_depth});
+	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
 
 	ResourceManager::default_shader = "default.shader";
@@ -269,12 +270,8 @@ void RenderPathVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fram
 	blur_dset[iaxis]->set_texture(1, source->attachments[0].get());
 	blur_dset[iaxis]->update();
 
-	//auto rp = blur_render_pass;//renderer->default_render_pass();
-	auto rp = renderer->default_render_pass();
-	rp->clear_color = {White};
+	auto rp = blur_render_pass;
 
-	//msg_error("BLUR  " + p2s(target));
-	//msg_error("BLUR  " + p2s(target->frame_buffer));
 	cb->begin_render_pass(rp, target);
 	cb->set_viewport(rect(0,target->width, 0,target->height));
 

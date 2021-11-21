@@ -50,6 +50,10 @@ public:
 	void prepare_gui(FrameBuffer *source);
 
 
+	//shared<RenderPass> render_pass;
+	RenderPass *render_pass = nullptr;
+
+
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_small1;
 	shared<FrameBuffer> fb_small2;
