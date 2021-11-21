@@ -7,17 +7,12 @@
 
 #include "WindowRendererGL.h"
 #ifdef USING_OPENGL
-
-
 #include <GLFW/glfw3.h>
+#include "base.h"
 #include "../lib/nix/nix.h"
-#include "../lib/image/image.h"
 #include "../lib/file/msg.h"
 #include "../helper/PerformanceMonitor.h"
-//#include "../Config.h"
-//#include "../meta.h"
 
-void break_point();
 
 WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) {
 	window = win;

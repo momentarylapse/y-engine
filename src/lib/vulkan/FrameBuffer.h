@@ -32,16 +32,18 @@ public:
 
 class FrameBuffer : public Sharable<Empty> {
 public:
-	FrameBuffer(int w, int h, RenderPass *rp, const Array<Texture*> &attachments);
+	FrameBuffer(RenderPass *rp, const Array<Texture*> &attachments);
 	~FrameBuffer();
 
-	void __init__(int w, int h, RenderPass *rp, const Array<Texture*> &attachments);
+	void __init__(RenderPass *rp, const Array<Texture*> &attachments);
 	void __delete__();
 
 	VkFramebuffer frame_buffer;
 	int width, height;
-	void create(int w, int h, RenderPass *rp, const Array<Texture*> &attachments);
+	void create(RenderPass *rp, const Array<Texture*> &attachments);
 	void destroy();
+
+	shared_array<Texture> attachments;
 };
 
 }

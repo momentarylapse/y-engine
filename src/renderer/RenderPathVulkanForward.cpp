@@ -37,6 +37,11 @@
 
 RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPathVulkan(r, RenderPathType::FORWARD) {
 
+	fb_main = new vulkan::FrameBuffer(renderer->default_render_pass(), {
+		new vulkan::DynamicTexture(width, height, 1, "rgba:i8"),
+		new DepthBuffer(width, height, "d:f32", true)});
+	fb_main->attachments[0]->set_options("wrap=clamp");
+
 	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		fb_main = new vulkan::FrameBuffer({
@@ -106,21 +111,20 @@ void RenderPathVulkanForward::draw() {
 
 	cb->begin();
 
-	cb->set_viewport(renderer->area());
+	cb->set_viewport(rect(0,width, 0,height));
 
 	rp->clear_color[0] = world.background;
-	cb->begin_render_pass(rp, fb);
+	cb->begin_render_pass(rp, fb_main.get());
 
 	draw_skyboxes(cb, cam);
 	draw_objects_opaque(cb, true);
 	draw_terrains(cb, true);
 
-	/*cb->bind_pipeline(pipeline);
-	cb->bind_descriptor_set(0, dset);
-	float x = 0;
-	cb->push_constant(0,4,&x);
+	cb->end_render_pass();
 
-	cb->draw(vb);*/
+
+	cb->set_viewport(renderer->area());
+	cb->begin_render_pass(rp, fb);
 
 	draw_gui(cb);
 

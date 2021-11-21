@@ -110,8 +110,12 @@ void Texture::__delete__() {
 	this->~Texture();
 }
 
-DynamicTexture::DynamicTexture(int nx, int ny, int nz, const string &format) {
-	_create_image(nullptr, nx, ny, nz, parse_format(format), false, true);
+DynamicTexture::DynamicTexture(int nx, int ny, int nz, const string &_format) {
+	width = nx;
+	height = ny;
+	depth = nz;
+	format = parse_format(_format);
+	_create_image(nullptr, nx, ny, nz, format, false, true);
 	_create_view();
 	_create_sampler();
 }
@@ -152,7 +156,7 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 
 	auto result = vkCreateImage(default_device->device, &imageCreateInfo, nullptr, &image);
 	if (VK_SUCCESS != result)
-		throw Exception("aaa");
+		throw Exception("vkCreateImage failed");
 	VkMemoryRequirements memoryRequirements;
 	vkGetImageMemoryRequirements(default_device->device, image, &memoryRequirements);
 
@@ -164,10 +168,10 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 
 	result = vkAllocateMemory(default_device->device, &memoryAllocateInfo, nullptr, &memory);
 	if (VK_SUCCESS != result)
-		throw Exception("aaa2");
+		throw Exception("vkAllocateMemory failed");
 	result = vkBindImageMemory(default_device->device, image, memory, 0);
 	if (VK_SUCCESS != result)
-		throw Exception("aaa3");
+		throw Exception("vkBindImageMemory failed");
 	if (verbose)
 		std::cout << "  storage image ok\n";
 
