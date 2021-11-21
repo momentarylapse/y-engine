@@ -21,9 +21,19 @@ void main() {
 <FragmentShader>
 #extension GL_ARB_separate_shader_objects : enable
 
+#ifdef vulkan
+layout(binding=0) uniform Parameters {
+	vec2 axis;
+	float radius;
+	float threshold;
+	float kernel[20];
+};
+#else
 uniform vec2 axis = vec2(1,1);
 uniform float radius = 10.0;
 uniform float threshold = 0.0;
+uniform float kernel[20];
+#endif
 
 layout(binding = 1) uniform sampler2D tex0;
 
@@ -37,7 +47,6 @@ float brightness(vec3 c) {
 }
 
 
-uniform float kernel[20];
 
 vec3 blur() {
 	//vec2 DD = 1.0 / textureSize(tex0, 0);
@@ -61,7 +70,7 @@ vec3 blur() {
 }
 
 void main() {
-	//out_color.rgb = texture(tex0, in_tex_coord).rgb;
+	out_color.rgb = texture(tex0, in_tex_coord).rgb;
 	out_color.rgb = blur();
 	out_color.a = 1;
 }

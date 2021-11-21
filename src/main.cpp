@@ -197,6 +197,7 @@ public:
 
 #ifdef USING_VULKAN
 		gui::toplevel->add(new gui::Picture(rect(0.2f,0.5f, 0.2f, 0.5f), ((RenderPathVulkan*)render_path)->fb_main->attachments[0].get()));
+		gui::toplevel->add(new gui::Picture(rect(0.5f,0.8f, 0.2f, 0.5f), ((RenderPathVulkan*)render_path)->fb_small2->attachments[0].get()));
 #endif
 
 		msg_left();

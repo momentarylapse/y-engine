@@ -53,12 +53,9 @@ RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPath
 			new vulkan::Texture(width, height, "rgba:f16"),
 			depth_buffer});
 			//new vulkan::RenderBuffer(width, height, "d24s8)});
-	}
-	fb_small1 = new vulkan::FrameBuffer({
-		new vulkan::Texture(width/2, height/2, "rgba:f16")});
-	fb_small2 = new vulkan::FrameBuffer({
-		new vulkan::Texture(width/2, height/2, "rgba:f16")});
-	fb2 = new vulkan::FrameBuffer({
+	}*/
+
+	/*fb2 = new vulkan::FrameBuffer({
 		new vulkan::Texture(width, height, "rgba:f16")});
 	fb3 = new vulkan::FrameBuffer({
 		new vulkan::Texture(width, height, "rgba:f16")});
@@ -83,19 +80,13 @@ RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPath
 	}
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
-	ResourceManager::load_shader("module-vertex-instanced.shader");
+	ResourceManager::load_shader("module-vertex-instanced.shader");*/
 
-	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	shader_depth = ResourceManager::load_shader("forward/depth.shader");
+	/*shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_2d = ResourceManager::load_shader("forward/2d.shader");
-	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
-
-
-//	if (nix::total_mem() > 0) {
-//		msg_write(format("VRAM: %d mb  of  %d mb available", nix::available_mem() / 1024, nix::total_mem() / 1024));
-//	}*/
+	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
 }
 
 void RenderPathVulkanForward::draw() {
@@ -111,10 +102,13 @@ void RenderPathVulkanForward::draw() {
 
 	cb->begin();
 
-	cb->set_viewport(rect(0,width, 0,height));
+	// into fb_main
+	auto cur = fb_main.get();
+	cb->set_viewport(rect(0,cur->width, 0,cur->height));
 
-	rp->clear_color[0] = world.background;
-	cb->begin_render_pass(rp, fb_main.get());
+	//rp->clear_color[0] = world.background;
+	rp->clear_color = {world.background};
+	cb->begin_render_pass(rp, cur);
 
 	draw_skyboxes(cb, cam);
 	draw_objects_opaque(cb, true);
@@ -123,7 +117,18 @@ void RenderPathVulkanForward::draw() {
 	cb->end_render_pass();
 
 
+
+
+	// render blur into fb3!
+	PerformanceMonitor::begin(ch_post_blur);
+	process_blur(cb, cur, fb_small1.get(), 1.0f, 0);
+	process_blur(cb, fb_small1.get(), fb_small2.get(), 0.0f, 1);
+	PerformanceMonitor::end(ch_post_blur);
+
+
+	// out
 	cb->set_viewport(renderer->area());
+	rp->clear_color = {};
 	cb->begin_render_pass(rp, fb);
 
 	draw_gui(cb);

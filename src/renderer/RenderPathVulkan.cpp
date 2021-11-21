@@ -57,6 +57,18 @@ struct UBOGUI {
 	float blur, exposure, gamma;
 };
 
+struct UBOBlur{
+	vec2 axis;
+	//float dummy1[2];
+	float radius;
+	float threshold;
+	float dummy2[2];
+	float kernel[20];
+};
+UniformBuffer *blur_ubo[2];
+DescriptorSet *blur_dset[2];
+Pipeline *blur_pipeline;
+RenderPass *blur_render_pass;
 
 
 void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
@@ -112,7 +124,24 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 	vb_gui = new VertexBuffer();
 	create_quad(vb_gui, rect::ID);
 
+	vb_2d = new VertexBuffer();
+	create_quad(vb_2d, rect(-1,1, -1,1));
 
+
+	auto blur_tex1 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:i8");
+	auto blur_tex2 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:i8");
+	blur_tex1->set_options("wrap=clamp");
+	blur_tex2->set_options("wrap=clamp");
+
+	shader_blur = ResourceManager::load_shader("forward/blur.shader");
+	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), renderer->default_render_pass(), 0, 1);
+	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
+	blur_ubo[1] = new UniformBuffer(sizeof(UBOBlur));
+	blur_dset[0] = renderer->pool->create_set(shader_blur.get());
+	blur_dset[1] = renderer->pool->create_set(shader_blur.get());
+	blur_render_pass = new vulkan::RenderPass({blur_tex1->format}, "");
+	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, new DepthBuffer(width/2, height/2, "d:f32", true)});
+	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, new DepthBuffer(width/2, height/2, "d:f32", true)});
 
 
 	ResourceManager::default_shader = "default.shader";
@@ -229,12 +258,34 @@ FrameBuffer* RenderPathVulkan::resolve_multisampling(FrameBuffer *source) {
 
 
 
-void RenderPathVulkan::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis) {
-	/*float r = cam->bloom_radius * resolution_scale_x;
-	shader_blur->set_float("radius", r);
-	shader_blur->set_float("threshold", threshold / cam->exposure);
-	shader_blur->set_floats("axis", &axis.x, 2);
-	process(weak(source->color_attachments), target, shader_blur.get());*/
+void RenderPathVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
+	const vec2 AXIS[2] = {{2,0}, {0,1}};
+	UBOBlur u;
+	u.radius = cam->bloom_radius * resolution_scale_x;
+	u.threshold = 0.1f;//threshold / cam->exposure;
+	u.axis = AXIS[iaxis];
+	blur_ubo[iaxis]->update(&u);
+	blur_dset[iaxis]->set_buffer(0, blur_ubo[iaxis]);
+	blur_dset[iaxis]->set_texture(1, source->attachments[0].get());
+	blur_dset[iaxis]->update();
+
+	//auto rp = blur_render_pass;//renderer->default_render_pass();
+	auto rp = renderer->default_render_pass();
+	rp->clear_color = {White};
+
+	//msg_error("BLUR  " + p2s(target));
+	//msg_error("BLUR  " + p2s(target->frame_buffer));
+	cb->begin_render_pass(rp, target);
+	cb->set_viewport(rect(0,target->width, 0,target->height));
+
+	cb->bind_pipeline(blur_pipeline);
+	cb->bind_descriptor_set(0, blur_dset[iaxis]);
+
+	cb->draw(vb_2d);
+
+	cb->end_render_pass();
+
+	//process(cb, {source->attachments[0].get()}, target, shader_blur.get());
 }
 
 void RenderPathVulkan::process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis) {
@@ -246,7 +297,7 @@ void RenderPathVulkan::process_depth(FrameBuffer *source, FrameBuffer *target, c
 	process({source->color_attachments[0].get(), depth_buffer}, target, shader_depth.get());*/
 }
 
-void RenderPathVulkan::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
+void RenderPathVulkan::process(CommandBuffer *cb, const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
 	/*nix::bind_frame_buffer(target);
 	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
 	nix::set_z(false, false);

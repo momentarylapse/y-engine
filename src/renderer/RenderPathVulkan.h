@@ -83,6 +83,8 @@ public:
 	int shadow_resolution;
 
 
+
+
 	bool using_view_space = false;
 
 	RenderPathVulkan(RendererVulkan *renderer, RenderPathType type);
@@ -94,9 +96,9 @@ public:
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
 
 
-	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis);
+	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
 	void process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis);
-	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
+	void process(CommandBuffer *cb, const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
 	FrameBuffer* do_post_processing(FrameBuffer *source);
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
