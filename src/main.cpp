@@ -195,8 +195,9 @@ public:
 		for (auto &s: config.get_str("additional-scripts", "").explode(","))
 			PluginManager::add_controller(s, {});
 
-
+#ifdef USING_VULKAN
 		gui::toplevel->add(new gui::Picture(rect(0.2f,0.5f, 0.2f, 0.5f), ((RenderPathVulkan*)render_path)->fb_main->attachments[0].get()));
+#endif
 
 		msg_left();
 		msg_write("|                                                      |");
