@@ -21,4 +21,8 @@ public:
 
 	virtual bool start_frame() { return false; }
 	virtual void end_frame() {}
+
+
+	int ch_render= -1;
+	int ch_end = -1;
 };

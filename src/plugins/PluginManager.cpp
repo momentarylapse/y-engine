@@ -23,6 +23,7 @@
 #include "../input/Keyboard.h"
 #include "../input/Mouse.h"
 #include "../net/NetworkManager.h"
+#include "../renderer/Renderer.h"
 #ifdef USING_OPENGL
 #include "../renderer/RenderPathGL.h"
 #include "../renderer/RenderPathGLForward.h"

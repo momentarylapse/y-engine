@@ -7,10 +7,15 @@
 
 #include "Renderer.h"
 #include "../lib/math/rect.h"
+#include "../helper/PerformanceMonitor.h"
 
 
 Renderer::Renderer() {
 	width = height = 0;
+
+
+	ch_render = PerformanceMonitor::create_channel("render");
+	ch_end = PerformanceMonitor::create_channel("end", ch_render);
 }
 
 

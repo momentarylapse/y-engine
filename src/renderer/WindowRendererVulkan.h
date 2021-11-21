@@ -61,10 +61,6 @@ public:
 	RenderPass *default_render_pass() const override;
 	FrameBuffer *current_frame_buffer() const override;
 	CommandBuffer *current_command_buffer() const override;
-
-
-	int ch_render= -1;
-	int ch_end = -1;
 };
 
 #endif

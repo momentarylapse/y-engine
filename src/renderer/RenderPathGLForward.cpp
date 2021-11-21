@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include "RenderPathGLForward.h"
 #ifdef USING_OPENGL
+#include "RendererGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
 #include "../lib/file/msg.h"
@@ -44,7 +45,7 @@ matrix jitter(float w, float h, int uid);
 void break_point();
 
 
-RenderPathGLForward::RenderPathGLForward(GLFWwindow* win, int w, int h) : RenderPathGL(win, w, h, RenderPathType::FORWARD) {
+RenderPathGLForward::RenderPathGLForward(RendererGL *_renderer) : RenderPathGL(_renderer, RenderPathType::FORWARD) {
 
 	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -134,7 +135,7 @@ void RenderPathGLForward::draw() {
 	source = do_post_processing(source);
 
 
-	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
+	nix::bind_frame_buffer(renderer->current_frame_buffer());
 	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);

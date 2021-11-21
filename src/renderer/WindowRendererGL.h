@@ -8,14 +8,15 @@
 
 #pragma once
 
-#include "Renderer.h"
+#include "RendererGL.h"
 #include "../graphics-fwd.h"
 #ifdef USING_OPENGL
-#include "../lib/base/pointer.h"
 #include "../lib/base/callable.h"
 
+struct GLFWwindow;
 
-class WindowRendererGL : public Renderer {
+
+class WindowRendererGL : public RendererGL {
 public:
 	WindowRendererGL(GLFWwindow* win, int w, int h);
 	virtual ~WindowRendererGL();
@@ -27,12 +28,10 @@ public:
 	GLFWwindow* window;
 
 	DepthBuffer* depth_buffer;
-	FrameBuffer* frame_buffers;
+	FrameBuffer* frame_buffer;
 
 
-	RenderPass *default_render_pass() const;
 	FrameBuffer *current_frame_buffer() const;
-	CommandBuffer *current_command_buffer() const;
 };
 
 #endif

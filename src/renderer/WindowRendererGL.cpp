@@ -8,13 +8,47 @@
 #include "WindowRendererGL.h"
 #ifdef USING_OPENGL
 
-WindowRendererGL::WindowRendererGL() {
-	// TODO Auto-generated constructor stub
 
+#include <GLFW/glfw3.h>
+#include "../lib/nix/nix.h"
+#include "../lib/image/image.h"
+#include "../lib/file/msg.h"
+#include "../helper/PerformanceMonitor.h"
+//#include "../Config.h"
+//#include "../meta.h"
+
+void break_point();
+
+WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) {
+	window = win;
+	glfwMakeContextCurrent(window);
+	//glfwGetFramebufferSize(window, &width, &height);
+	width = w;
+	height = h;
+
+	frame_buffer = nix::FrameBuffer::DEFAULT;
 }
 
 WindowRendererGL::~WindowRendererGL() {
-	// TODO Auto-generated destructor stub
+}
+
+
+FrameBuffer *WindowRendererGL::current_frame_buffer() const {
+	return frame_buffer;
+}
+
+
+bool WindowRendererGL::start_frame() {
+	nix::start_frame_glfw(window);
+	//jitter_iterate();
+	return true;
+}
+
+void WindowRendererGL::end_frame() {
+	PerformanceMonitor::begin(ch_end);
+	nix::end_frame_glfw(window);
+	break_point();
+	PerformanceMonitor::end(ch_end);
 }
 
 #endif

@@ -9,6 +9,7 @@
 
 #include "RenderPathGL.h"
 #ifdef USING_OPENGL
+#include "RendererGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
@@ -69,13 +70,11 @@ void jitter_iterate() {
 	jitter_frame ++;
 }
 
-RenderPathGL::RenderPathGL(GLFWwindow* win, int w, int h, RenderPathType _type) {
+RenderPathGL::RenderPathGL(RendererGL *r, RenderPathType _type) {
 	type = _type;
-	window = win;
-	glfwMakeContextCurrent(window);
-	//glfwGetFramebufferSize(window, &width, &height);
-	width = w;
-	height = h;
+	renderer = r;
+	width = r->width;
+	height = r->height;
 
 	using_view_space = true;
 
@@ -202,20 +201,6 @@ FrameBuffer* RenderPathGL::resolve_multisampling(FrameBuffer *source) {
 		nix::resolve_multisampling(next, source);
 	}
 	return next;
-}
-
-
-bool RenderPathGL::start_frame() {
-	nix::start_frame_glfw(window);
-	jitter_iterate();
-	return true;
-}
-
-void RenderPathGL::end_frame() {
-	PerformanceMonitor::begin(ch_end);
-	nix::end_frame_glfw(window);
-	break_point();
-	PerformanceMonitor::end(ch_end);
 }
 
 

@@ -20,11 +20,17 @@ class Material;
 
 enum class ShaderVariant;
 
+class RendererGL;
+
 
 class RenderPathGL : public RenderPath {
 public:
 	int width, height;
 	GLFWwindow* window;
+
+
+	RendererGL *renderer;
+
 	shared<Texture> tex_black;
 	shared<Texture> tex_white;
 	shared<FrameBuffer> fb_main;
@@ -63,13 +69,10 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathGL(GLFWwindow* win, int w, int h, RenderPathType type);
+	RenderPathGL(RendererGL *renderer, RenderPathType type);
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
-
-	bool start_frame() override;
-	void end_frame() override;
 
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis);
 	void process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis);

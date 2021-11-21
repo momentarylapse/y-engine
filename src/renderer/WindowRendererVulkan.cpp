@@ -31,10 +31,6 @@ WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) {
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	_create_swap_chain_and_stuff();
-
-
-	ch_render = PerformanceMonitor::create_channel("render");
-	ch_end = PerformanceMonitor::create_channel("end", ch_render);
 }
 
 WindowRendererVulkan::~WindowRendererVulkan() {

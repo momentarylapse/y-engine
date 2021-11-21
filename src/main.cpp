@@ -53,6 +53,7 @@
 	#include "renderer/RenderPathGL.h"
 	#include "renderer/RenderPathGLForward.h"
 	#include "renderer/RenderPathGLDeferred.h"
+	#include "renderer/WindowRendererGL.h"
 #endif
 
 #include "Config.h"
@@ -112,10 +113,11 @@ public:
 			renderer = new WindowRendererVulkan(window, engine.width, engine.height);
 			return new RenderPathVulkanForward((RendererVulkan*)renderer);
 #else
+			renderer = new WindowRendererGL(window, engine.width, engine.height);
 			if (config.get_str("renderer.path", "forward") == "deferred")
-				return new RenderPathGLDeferred(window, engine.width, engine.height);
+				return new RenderPathGLDeferred((RendererGL*)renderer);
 			else
-				return new RenderPathGLForward(window, engine.width, engine.height);
+				return new RenderPathGLForward((RendererGL*)renderer);
 #endif
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
