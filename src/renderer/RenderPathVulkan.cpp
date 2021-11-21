@@ -7,6 +7,7 @@
 
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
+#include "WindowRendererVulkan.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
@@ -87,32 +88,17 @@ void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
 		{{r.x2,r.y2,0}, {0,0,1}, s.x2,s.y2}}, {0,1,3, 0,3,2});
 }
 
-RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType _type) {
+RenderPathVulkan::RenderPathVulkan(WindowRendererVulkan *r, RenderPathType _type) {
 	type = _type;
-	window = win;
-	glfwMakeContextCurrent(window);
-	//glfwGetFramebufferSize(window, &width, &height);
-	width = w;
-	height = h;
+	renderer = r;
+	width = renderer->width;
+	height = renderer->height;
+	depth_buffer = renderer->depth_buffer;
+
+	vb_2d = nullptr;
 
 	using_view_space = true;
 
-
-	instance = vulkan::init(window, {"glfw", "validation", "api=1.2"});
-
-
-	image_available_semaphore = new vulkan::Semaphore();
-	render_finished_semaphore = new vulkan::Semaphore();
-
-
-	framebuffer_resized = false;
-	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
-
-	_create_swap_chain_and_stuff();
-
-
-	/*nix::allow_separate_vertex_arrays = true;
-	nix::init();*/
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
@@ -148,7 +134,7 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 
 
 	shader_2d = ResourceManager::load_shader("vulkan/2d.shader");
-	pipeline_gui = new vulkan::Pipeline(shader_2d, default_render_pass(), 0, 1);
+	pipeline_gui = new vulkan::Pipeline(shader_2d, renderer->default_render_pass(), 0, 1);
 	pipeline_gui->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_gui->set_z(false, false);
 	pipeline_gui->rebuild();
@@ -175,61 +161,8 @@ RenderPathVulkan::RenderPathVulkan(GLFWwindow* win, int w, int h, RenderPathType
 }
 
 RenderPathVulkan::~RenderPathVulkan() {
-	delete instance;
 }
 
-
-
-void RenderPathVulkan::_create_swap_chain_and_stuff() {
-	swap_chain = new vulkan::SwapChain(window);
-	auto swap_images = swap_chain->create_textures();
-	for (auto t: swap_images)
-		wait_for_frame_fences.add(new vulkan::Fence());
-
-	for (auto t: swap_images)
-		command_buffers.add(new CommandBuffer());
-
-	depth_buffer = swap_chain->create_depth_buffer();
-	_default_render_pass = swap_chain->create_render_pass(depth_buffer);
-	frame_buffers = swap_chain->create_frame_buffers(_default_render_pass, depth_buffer);
-	width = swap_chain->width;
-	height = swap_chain->height;
-}
-
-
-/*func _delete_swap_chain_and_stuff()
-	for fb in frame_buffers
-		del fb
-	del _default_render_pass
-	del depth_buffer
-	del swap_chain*/
-
-void RenderPathVulkan::rebuild_default_stuff() {
-	msg_write("recreate swap chain");
-
-	vulkan::default_device->wait_idle();
-
-	//_delete_swap_chain_and_stuff();
-	_create_swap_chain_and_stuff();
-}
-
-
-
-RenderPass* RenderPathVulkan::default_render_pass() const {
-	return _default_render_pass;
-}
-
-FrameBuffer* RenderPathVulkan::current_frame_buffer() const {
-	return frame_buffers[image_index];
-}
-
-CommandBuffer* RenderPathVulkan::current_command_buffer() const {
-	return command_buffers[image_index];
-}
-
-rect RenderPathVulkan::area() const {
-	return rect(0, frame_buffers[0]->width, 0, frame_buffers[0]->height);
-}
 
 void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
 	/*if (!fb_cube)
@@ -326,66 +259,6 @@ FrameBuffer* RenderPathVulkan::resolve_multisampling(FrameBuffer *source) {
 }
 
 
-bool RenderPathVulkan::start_frame() {
-
-	if (!swap_chain->acquire_image(&image_index, image_available_semaphore)) {
-		rebuild_default_stuff();
-		return false;
-	}
-
-	auto f = wait_for_frame_fences[image_index];
-	f->wait();
-	f->reset();
-
-
-	auto cb = current_command_buffer();
-	auto rp = default_render_pass();
-	auto fb = current_frame_buffer();
-
-	prepare_gui(fb);
-	prepare_lights(cam);
-
-
-	cb->begin();
-
-	cb->set_viewport(area());
-
-	rp->clear_color[0] = world.background;
-	cb->begin_render_pass(rp, fb);
-
-	draw_skyboxes(cb, cam);
-	draw_objects_opaque(cb, true);
-	draw_terrains(cb, true);
-
-	/*cb->bind_pipeline(pipeline);
-	cb->bind_descriptor_set(0, dset);
-	float x = 0;
-	cb->push_constant(0,4,&x);
-
-	cb->draw(vb);*/
-
-	draw_gui(cb);
-
-	cb->end_render_pass();
-	cb->end();
-
-
-	return true;
-}
-
-void RenderPathVulkan::end_frame() {
-	PerformanceMonitor::begin(ch_end);
-
-
-	auto f = wait_for_frame_fences[image_index];
-	vulkan::default_device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
-
-	swap_chain->present(image_index, {render_finished_semaphore});
-
-	vulkan::default_device->wait_idle();
-	PerformanceMonitor::end(ch_end);
-}
-
 
 void RenderPathVulkan::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis) {
 	/*float r = cam->bloom_radius * resolution_scale_x;
@@ -438,7 +311,7 @@ void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 			auto *p = (gui::Picture*)n;
 
 			if (index >= ubo_gui.num) {
-				dset_gui.add(pool->create_set("buffer,sampler"));
+				dset_gui.add(renderer->pool->create_set("buffer,sampler"));
 				ubo_gui.add(new UniformBuffer(sizeof(UBOGUI)));
 			}
 
@@ -534,13 +407,13 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Mate
 	Pipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = get_pipeline_alpha(s, default_render_pass(), m->alpha.source, m->alpha.destination);
+		p = get_pipeline_alpha(s, renderer->default_render_pass(), m->alpha.source, m->alpha.destination);
 		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
 		msg_write("HARD");
-		p = get_pipeline_alpha(s, default_render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		p = get_pipeline_alpha(s, renderer->default_render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	} else {
-		p = get_pipeline(s, default_render_pass());
+		p = get_pipeline(s, renderer->default_render_pass());
 	}
 
 	cb->bind_pipeline(p);
@@ -683,7 +556,7 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 		for (int i=0; i<sb->material.num; i++) {
 			if (index >= sb_ubos.num) {
 				sb_ubos.add(new UniformBuffer(sizeof(UBO)));
-				sb_dsets.add(pool->create_set(sb->material[i]->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+				sb_dsets.add(renderer->pool->create_set(sb->material[i]->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 			}
 			ubo.albedo = sb->material[i]->albedo;
 			ubo.emission = sb->material[i]->emission;
@@ -733,7 +606,7 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 
 		if (index >= tr_ubos.num) {
 			tr_ubos.add(new UniformBuffer(sizeof(UBO)));
-			tr_dsets.add(pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+			tr_dsets.add(renderer->pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 		}
 
 		tr_ubos[index]->update(&ubo);
@@ -792,7 +665,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 
 		if (index >= ob_ubos.num) {
 			ob_ubos.add(new UniformBuffer(sizeof(UBO)));
-			ob_dsets.add(pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+			ob_dsets.add(renderer->pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 			ob_dsets[index]->set_buffer(1, ubo_light);
 		}
 

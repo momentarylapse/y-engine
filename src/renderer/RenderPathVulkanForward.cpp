@@ -7,6 +7,7 @@
 
 #include "RenderPathVulkanForward.h"
 #ifdef USING_VULKAN
+#include "WindowRendererVulkan.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/file/msg.h"
@@ -34,7 +35,7 @@
 #include "../meta.h"
 
 
-RenderPathVulkanForward::RenderPathVulkanForward(GLFWwindow* win, int w, int h) : RenderPathVulkan(win, w, h, RenderPathType::FORWARD) {
+RenderPathVulkanForward::RenderPathVulkanForward(WindowRendererVulkan *r) : RenderPathVulkan(r, RenderPathType::FORWARD) {
 
 	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -93,6 +94,40 @@ RenderPathVulkanForward::RenderPathVulkanForward(GLFWwindow* win, int w, int h) 
 }
 
 void RenderPathVulkanForward::draw() {
+
+
+	auto cb = renderer->current_command_buffer();
+	auto rp = renderer->default_render_pass();
+	auto fb = renderer->current_frame_buffer();
+
+	prepare_gui(fb);
+	prepare_lights(cam);
+
+
+	cb->begin();
+
+	cb->set_viewport(renderer->area());
+
+	rp->clear_color[0] = world.background;
+	cb->begin_render_pass(rp, fb);
+
+	draw_skyboxes(cb, cam);
+	draw_objects_opaque(cb, true);
+	draw_terrains(cb, true);
+
+	/*cb->bind_pipeline(pipeline);
+	cb->bind_descriptor_set(0, dset);
+	float x = 0;
+	cb->push_constant(0,4,&x);
+
+	cb->draw(vb);*/
+
+	draw_gui(cb);
+
+	cb->end_render_pass();
+	cb->end();
+
+
 	/*PerformanceMonitor::begin(ch_render);
 
 	static int _frame = 0;

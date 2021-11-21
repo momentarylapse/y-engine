@@ -16,7 +16,7 @@ class PerformanceMonitor;
 class RenderPathVulkanForward : public RenderPathVulkan {
 public:
 
-	RenderPathVulkanForward(GLFWwindow* win, int w, int h);
+	RenderPathVulkanForward(WindowRendererVulkan *r);
 	void draw() override;
 
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;

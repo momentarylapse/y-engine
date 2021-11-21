@@ -61,8 +61,8 @@ public:
 	RenderPath();
 	virtual ~RenderPath() {}
 	virtual void draw() = 0;
-	virtual bool start_frame() = 0;
-	virtual void end_frame() = 0;
+	//virtual bool start_frame() = 0;
+	//virtual void end_frame() = 0;
 
 	Shader *shader_2d = nullptr;
 

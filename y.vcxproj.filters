@@ -430,6 +430,12 @@
     <ClCompile Include="src\renderer\RenderPathVulkanForward.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\WindowRendererGL.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\WindowRendererVulkan.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\components\Animator.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
@@ -903,6 +909,12 @@
     <ClInclude Include="src\renderer\RenderPathVulkanForward.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\WindowRendererGL.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\WindowRendererVulkan.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\world\components\Animator.h">
       <Filter>src\world\components</Filter>
     </ClInclude>
@@ -1004,6 +1016,12 @@
     <Filter Include="src\lib\file">
       <UniqueIdentifier>{596C5346-3ACF-8974-B6F3-FC96F58AE493}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\lib\hui">
+      <UniqueIdentifier>{FDD61BAD-BC45-3E2C-366F-FF481FD83243}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\hui\Controls">
+      <UniqueIdentifier>{6DBC4648-72EE-600C-6EBF-AA8637356A9C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\lib\hui_minimal">
       <UniqueIdentifier>{26A0171C-9ACA-4892-FFB9-D80DAE15A8DC}</UniqueIdentifier>
     </Filter>
@@ -1036,6 +1054,9 @@
     </Filter>
     <Filter Include="src\lib\nix">
       <UniqueIdentifier>{F2B28380-C7CD-DA9A-3F74-DD2903EC2A01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\sound">
+      <UniqueIdentifier>{5EA1CAA4-2FB1-9A0B-18B4-1F9FB1E00655}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\lib\vulkan">
       <UniqueIdentifier>{CA8DC7DE-188E-45F8-3DB9-3760FBE1DAAA}</UniqueIdentifier>

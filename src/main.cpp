@@ -48,6 +48,7 @@
 #ifdef USING_VULKAN
 	#include "renderer/RenderPathVulkan.h"
 	#include "renderer/RenderPathVulkanForward.h"
+	#include "renderer/WindowRendererVulkan.h"
 #else
 	#include "renderer/RenderPathGL.h"
 	#include "renderer/RenderPathGLForward.h"
@@ -100,6 +101,7 @@ public:
 	GLFWwindow* window;
 
 	RenderPath *render_path;
+	Renderer *renderer;
 
 	gui::Text *fps_display;
 	int ch_iter = -1;
@@ -107,7 +109,8 @@ public:
 	RenderPath *create_renderer() {
 		try {
 #ifdef USING_VULKAN
-			return new RenderPathVulkanForward(window, engine.width, engine.height);
+			renderer = new WindowRendererVulkan(window, engine.width, engine.height);
+			return new RenderPathVulkanForward((WindowRendererVulkan*)renderer);
 #else
 			if (config.get_str("renderer.path", "forward") == "deferred")
 				return new RenderPathGLDeferred(window, engine.width, engine.height);
@@ -348,13 +351,13 @@ public:
 
 		update_dynamic_resolution();
 
-		if (!render_path->start_frame())
+		if (!renderer->start_frame())
 			return;
 		Scheduler::handle_draw_pre();
 		timer_render.peek();
 		render_path->draw();
 		render_times.add(timer_render.get());
-		render_path->end_frame();
+		renderer->end_frame();
 	}
 
 

@@ -259,6 +259,8 @@
     <ClCompile Include="src\renderer\RenderPathGLForward.cpp" />
     <ClCompile Include="src\renderer\RenderPathVulkan.cpp" />
     <ClCompile Include="src\renderer\RenderPathVulkanForward.cpp" />
+    <ClCompile Include="src\renderer\WindowRendererGL.cpp" />
+    <ClCompile Include="src\renderer\WindowRendererVulkan.cpp" />
     <ClCompile Include="src\world\components\Animator.cpp" />
     <ClCompile Include="src\world\components\Collider.cpp" />
     <ClCompile Include="src\world\components\Skeleton.cpp" />
@@ -418,6 +420,8 @@
     <ClInclude Include="src\renderer\RenderPathGLForward.h" />
     <ClInclude Include="src\renderer\RenderPathVulkan.h" />
     <ClInclude Include="src\renderer\RenderPathVulkanForward.h" />
+    <ClInclude Include="src\renderer\WindowRendererGL.h" />
+    <ClInclude Include="src\renderer\WindowRendererVulkan.h" />
     <ClInclude Include="src\world\components\Animator.h" />
     <ClInclude Include="src\world\components\Collider.h" />
     <ClInclude Include="src\world\components\Skeleton.h" />
