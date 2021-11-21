@@ -115,6 +115,12 @@ float col_frac(const color &a, const color &b) {
 	return (a.r+a.g+a.b) / (b.r+b.g+b.b);
 }
 
+static const Alpha FILE_ALPHAS[] = {Alpha::ZERO, Alpha::ONE, Alpha::SOURCE_COLOR, Alpha::SOURCE_INV_COLOR, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, Alpha::DEST_COLOR, Alpha::DEST_INV_COLOR, Alpha::DEST_ALPHA, Alpha::DEST_INV_ALPHA};
+
+Alpha parse_alpha(int a) {
+	return FILE_ALPHAS[clamp(a, 0, 10)];
+}
+
 
 Material *LoadMaterial(const Path &filename) {
 	// an empty name loads the default material
@@ -163,8 +169,8 @@ Material *LoadMaterial(const Path &filename) {
 		m->alpha.z_buffer = false;
 	} else if (mode == "function") {
 		m->alpha.mode = TransparencyMode::FUNCTIONS;
-		m->alpha.source = (Alpha)c.get_int("transparency.source", 0);
-		m->alpha.destination = (Alpha)c.get_int("transparency.dest", 0);
+		m->alpha.source = parse_alpha(c.get_int("transparency.source", 0));
+		m->alpha.destination = parse_alpha(c.get_int("transparency.dest", 0));
 		m->alpha.z_buffer = false;
 	} else if (mode == "key-hard") {
 		m->alpha.mode = TransparencyMode::COLOR_KEY_HARD;

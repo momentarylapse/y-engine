@@ -28,6 +28,10 @@
 #include "../meta.h"
 #include "Material.h"
 
+
+Alpha parse_alpha(int a); // Material.h
+
+
 Array<Model*> ModelManager::originals;
 
 ModelTemplate::ModelTemplate(Model *m) {
@@ -230,8 +234,8 @@ public:
 		auto alpha_mode = (TransparencyMode)f->read_int();
 		if (alpha_mode != TransparencyMode::DEFAULT) {
 			me->alpha.mode = alpha_mode;
-			me->alpha.source = (Alpha)f->read_int();
-			me->alpha.destination = (Alpha)f->read_int();
+			me->alpha.source = parse_alpha(f->read_int());
+			me->alpha.destination = parse_alpha(f->read_int());
 			me->alpha.factor = f->read_float();
 			me->alpha.z_buffer = f->read_bool();
 		} else {

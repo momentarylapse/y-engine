@@ -353,6 +353,7 @@ bool RenderPathVulkan::start_frame() {
 	rp->clear_color[0] = world.background;
 	cb->begin_render_pass(rp, fb);
 
+	draw_skyboxes(cb, cam);
 	draw_objects_opaque(cb, true);
 	draw_terrains(cb, true);
 
@@ -514,10 +515,33 @@ Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
 	ob_pipelines.add({s, p});
 	return p;
 }
+Map<Shader*,Pipeline*> ob_pipelines_alpha;
+Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
+	if (ob_pipelines_alpha.contains(s))
+		return ob_pipelines_alpha[s];
+	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
+	auto p = new Pipeline(s, rp, 0, 1);
+	p->set_z(false, false);
+	p->set_blend(src, dst);
+	//p->set_culling(0);
+	p->rebuild();
+	ob_pipelines_alpha.add({s, p});
+	return p;
+}
 
 void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader((int)t-1, v);
-	auto p = get_pipeline(s, default_render_pass());
+	Pipeline *p;
+
+	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
+		p = get_pipeline_alpha(s, default_render_pass(), m->alpha.source, m->alpha.destination);
+		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
+	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
+		msg_write("HARD");
+		p = get_pipeline_alpha(s, default_render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+	} else {
+		p = get_pipeline(s, default_render_pass());
+	}
 
 	cb->bind_pipeline(p);
 
@@ -632,21 +656,57 @@ void RenderPathVulkan::draw_particles() {
 	PerformanceMonitor::end(ch_fx);*/
 }
 
-void RenderPathVulkan::draw_skyboxes(Camera *cam) {
-	/*nix::set_z(false, false);
-	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose());
+static Array<UniformBuffer*> sb_ubos;
+static Array<DescriptorSet*> sb_dsets;
+
+void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
+
+	int index = 0;
+	UBO ubo;
+
+	float max_depth = cam->max_depth;
+	cam->max_depth = 2000000;
+	cam->update_matrices((float)width / (float)height);
+
+	ubo.p = cam->m_projection;
+	ubo.v = matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose();
+	ubo.m = matrix::ID;
+	ubo.num_lights = world.lights.num;
+
+	//nix::set_z(false, false);
+	//nix::set_cull(nix::CullMode::NONE);
 	for (auto *sb: world.skybox) {
 		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
-		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
+		ubo.m = sb->_matrix * matrix::scale(10,10,10);
+
+
 		for (int i=0; i<sb->material.num; i++) {
-			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
-			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
+			if (index >= sb_ubos.num) {
+				sb_ubos.add(new UniformBuffer(sizeof(UBO)));
+				sb_dsets.add(pool->create_set(sb->material[i]->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+			}
+			ubo.albedo = sb->material[i]->albedo;
+			ubo.emission = sb->material[i]->emission;
+			ubo.metal = sb->material[i]->metal;
+			ubo.roughness = sb->material[i]->roughness;
+
+			sb_ubos[index]->update(&ubo);
+			sb_dsets[index]->set_buffer(0, sb_ubos[index]);
+			sb_dsets[index]->set_buffer(1, ubo_light);
+
+			set_material(cb, sb_dsets[index], sb->material[i], type, ShaderVariant::DEFAULT);
+			cb->draw(sb->mesh[0]->sub[i].vertex_buffer);
+
+			index ++;
 		}
 	}
-	nix::set_cull(nix::CullMode::DEFAULT);
-	nix::disable_alpha();
-	break_point();*/
+
+
+	cam->max_depth = max_depth;
+
+	//nix::set_cull(nix::CullMode::DEFAULT);
+	//nix::disable_alpha();
+	//break_point();*/
 }
 
 

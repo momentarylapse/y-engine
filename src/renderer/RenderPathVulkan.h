@@ -135,7 +135,7 @@ public:
 	void render_out(FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();
-	void draw_skyboxes(Camera *c);
+	void draw_skyboxes(CommandBuffer *cb, Camera *c);
 	void draw_terrains(CommandBuffer *cb, bool allow_material);
 	void draw_objects_opaque(CommandBuffer *cb, bool allow_material);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
