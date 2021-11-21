@@ -199,6 +199,11 @@ void reincarnate_device_objects() {
 	reincarnate_textures();
 }
 
+void flush() {
+	glFlush();
+	glFinish();
+}
+
 
 #define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX 0x9048
 #define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049

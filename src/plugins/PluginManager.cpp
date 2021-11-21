@@ -23,6 +23,7 @@
 #include "../input/Keyboard.h"
 #include "../input/Mouse.h"
 #include "../net/NetworkManager.h"
+#include "../renderer/base.h"
 #include "../renderer/Renderer.h"
 #ifdef USING_OPENGL
 #include "../renderer/RenderPathGL.h"
@@ -59,8 +60,6 @@
 Array<Controller*> PluginManager::controllers;
 int ch_controller = -1;
 
-
-extern Texture *_tex_white;
 
 void global_delete(Entity *e) {
 	//msg_error("global delete... " + p2s(e));
@@ -532,7 +531,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("RenderPath.add_post_processor", &RP::add_post_processor);
 	kaba::link_external_class_func("RenderPath.add_fx_injector", &RP::add_fx_injector);
 
-	kaba::link_external("tex_white", &_tex_white);
+	kaba::link_external("tex_white", &tex_white);
 	kaba::link_external("world", &world);
 	kaba::link_external("cam", &cam);
 	kaba::link_external("engine", &engine);

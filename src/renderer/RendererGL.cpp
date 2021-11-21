@@ -8,14 +8,11 @@
 #include "RendererGL.h"
 #ifdef USING_OPENGL
 
-RendererGL::RendererGL() {
-	// TODO Auto-generated constructor stub
-
+/*RendererGL::RendererGL() {
 }
 
 RendererGL::~RendererGL() {
-	// TODO Auto-generated destructor stub
-}
+}*/
 
 
 #endif

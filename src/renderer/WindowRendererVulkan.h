@@ -38,7 +38,6 @@ public:
 	void end_frame() override;
 
 	GLFWwindow* window;
-	vulkan::Instance *instance;
 
 	Fence* in_flight_fence;
 	Array<Fence*> wait_for_frame_fences;

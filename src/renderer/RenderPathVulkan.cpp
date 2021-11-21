@@ -7,6 +7,7 @@
 
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
+#include "base.h"
 #include "RendererVulkan.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
@@ -37,16 +38,8 @@
 
 UniformBuffer *ubo_multi_matrix = nullptr;
 
-Texture *_tex_white;
-
 const int CUBE_SIZE = 128;
 
-void break_point() {
-	if (config.debug) {
-		glFlush();
-		glFinish();
-	}
-}
 
 
 
@@ -104,15 +97,6 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 	shadow_index = -1;
 
 	ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
-	tex_white = new Texture();
-	tex_black = new Texture();
-	Image im;
-	im.create(16, 16, White);
-	tex_white->override(im);
-	im.create(16, 16, Black);
-	tex_black->override(im);
-
-	_tex_white = tex_white.get();
 
 	/*vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
 	vb_2d->create_rect(rect(-1,1, -1,1));*/
@@ -458,7 +442,7 @@ void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Ar
 	foreachi (auto t, tt, i)
 		dset->set_texture(i0 + i, t);*/
 	for (int k=0; k<n; k++) {
-		dset->set_texture(i0 + k, _tex_white);
+		dset->set_texture(i0 + k, tex_white);
 		if (k < tex.num)
 			if (tex[k])
 				dset->set_texture(i0 + k, tex[k]);

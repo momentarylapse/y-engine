@@ -9,6 +9,7 @@
 
 #include "RenderPathGLDeferred.h"
 #ifdef USING_OPENGL
+#include "base.h"
 #include "RendererGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/file/msg.h"
@@ -36,8 +37,6 @@
 #include "../meta.h"
 #include "../graphics-impl.h"
 
-
-void break_point();
 
 RenderPathGLDeferred::RenderPathGLDeferred(RendererGL *_renderer) : RenderPathGL(_renderer, RenderPathType::DEFERRED) {
 

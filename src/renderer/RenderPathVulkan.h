@@ -50,10 +50,6 @@ public:
 	void prepare_gui(FrameBuffer *source);
 
 
-
-
-	shared<Texture> tex_black;
-	shared<Texture> tex_white;
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_small1;
 	shared<FrameBuffer> fb_small2;

@@ -409,7 +409,13 @@
     <ClCompile Include="src\plugins\PluginManager.cpp">
       <Filter>src\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\base.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\Renderer.cpp">
+      <Filter>src\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\RendererGL.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\RendererVulkan.cpp">
@@ -891,7 +897,13 @@
     <ClInclude Include="src\plugins\PluginManager.h">
       <Filter>src\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\base.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\Renderer.h">
+      <Filter>src\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\RendererGL.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RendererVulkan.h">

@@ -20,9 +20,6 @@ WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) {
 	height = h;
 
 
-	instance = vulkan::init(window, {"glfw", "validation", "api=1.2"});
-
-
 	image_available_semaphore = new vulkan::Semaphore();
 	render_finished_semaphore = new vulkan::Semaphore();
 
@@ -34,7 +31,6 @@ WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) {
 }
 
 WindowRendererVulkan::~WindowRendererVulkan() {
-	delete instance;
 }
 
 

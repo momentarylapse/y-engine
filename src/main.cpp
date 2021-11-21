@@ -44,6 +44,7 @@
 #include "plugins/PluginManager.h"
 #include "plugins/Controller.h"
 
+#include "renderer/base.h"
 #include "renderer/RenderPath.h"
 #ifdef USING_VULKAN
 	#include "renderer/RenderPathVulkan.h"
@@ -148,6 +149,7 @@ public:
 
 		engine.set_dirs("Textures", "Maps", "Objects", "Sounds", "Scripts", "Materials", "Fonts");
 
+		api_init(window);
 		engine.render_path = render_path = create_renderer();
 
 		audio::init();
@@ -278,6 +280,8 @@ public:
 		GodEnd();
 
 		delete render_path;
+		delete renderer;
+		api_end();
 
 		glfwDestroyWindow(window);
 

@@ -46,6 +46,7 @@ void _cdecl init();
 void kill_device_objects();
 void reincarnate_device_objects();
 void kill();
+void flush();
 
 enum class FogMode;
 

@@ -10,6 +10,7 @@
 #include "RenderPathGL.h"
 #ifdef USING_OPENGL
 #include "RendererGL.h"
+#include "base.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
@@ -38,21 +39,13 @@
 
 namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
-	extern bool allow_separate_vertex_arrays;
 }
 
 nix::UniformBuffer *ubo_multi_matrix = nullptr;
 
-nix::Texture *_tex_white;
-
 const int CUBE_SIZE = 128;
 
-void break_point() {
-	if (config.debug) {
-		glFlush();
-		glFinish();
-	}
-}
+void break_point();
 
 
 const float HALTON2[] = {1/2.0f, 1/4.0f, 3/4.0f, 1/8.0f, 5/8.0f, 3/8.0f, 7/8.0f, 1/16.0f, 9/16.0f, 3/16.0f, 11/16.0f, 5/16.0f, 13/16.0f};
@@ -78,23 +71,11 @@ RenderPathGL::RenderPathGL(RendererGL *r, RenderPathType _type) {
 
 	using_view_space = true;
 
-	nix::allow_separate_vertex_arrays = true;
-	nix::init();
-
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	shadow_index = -1;
 
 	ubo_light = new nix::UniformBuffer();
-	tex_white = new nix::Texture(16, 16, "rgba:i8");
-	tex_black = new nix::Texture(16, 16, "rgba:i8");
-	Image im;
-	im.create(16, 16, White);
-	tex_white->override(im);
-	im.create(16, 16, Black);
-	tex_black->override(im);
-
-	_tex_white = tex_white.get();
 
 	vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
 	vb_2d->create_rect(rect(-1,1, -1,1));

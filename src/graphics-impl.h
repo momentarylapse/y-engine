@@ -7,14 +7,16 @@
 
 #pragma once
 
+#include "graphics-fwd.h"
 
-#if HAS_LIB_VULKAN
+
+#ifdef USING_VULKAN
 
 // Vulkan
 
 	#include "lib/vulkan/vulkan.h"
 
-#elif HAS_LIB_GL
+#else
 
 // OpenGL
 

@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include "RenderPathGLForward.h"
 #ifdef USING_OPENGL
+#include "base.h"
 #include "RendererGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
@@ -37,12 +38,7 @@
 
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
-namespace nix {
-	int total_mem();
-	int available_mem();
-}
 matrix jitter(float w, float h, int uid);
-void break_point();
 
 
 RenderPathGLForward::RenderPathGLForward(RendererGL *_renderer) : RenderPathGL(_renderer, RenderPathType::FORWARD) {
@@ -96,11 +92,6 @@ RenderPathGLForward::RenderPathGLForward(RendererGL *_renderer) : RenderPathGL(_
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
-
-
-	if (nix::total_mem() > 0) {
-		msg_write(format("VRAM: %d mb  of  %d mb available", nix::available_mem() / 1024, nix::total_mem() / 1024));
-	}
 }
 
 void RenderPathGLForward::draw() {
