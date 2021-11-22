@@ -113,7 +113,7 @@ public:
 	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 	void draw_gui(CommandBuffer *cb);
-	void render_out(FrameBuffer *source, Texture *bloom);
+	void render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);

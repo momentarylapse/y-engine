@@ -132,26 +132,13 @@ void RenderPathVulkanForward::draw() {
 	PerformanceMonitor::end(ch_post_blur);
 
 
+
 	// out
 	cb->set_viewport(renderer->area());
 	//rp->clear_color = {White};
-	cb->begin_render_pass(rp, fb);
-	cb->bind_pipeline(pipeline_out);
-	dset_out->set_texture(1, fb_main->attachments[0].get());
-	dset_out->set_texture(2, fb_small2->attachments[0].get());
-	dset_out->update();
-	cb->bind_descriptor_set(0, dset_out);
-	struct PCOut {
-		float exposure;
-		float bloom_factor;
-		float gamma;
-		float scale_x;
-		float scale_y;
-	};
-	PCOut pco = {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y};
-	cb->push_constant(0, sizeof(pco), &pco);
-	cb->draw(vb_2d);
+	cb->begin_render_pass(renderer->default_render_pass(), renderer->current_frame_buffer());
 
+	render_out(cb, fb_main.get(), fb_small2->attachments[0].get());
 	draw_gui(cb);
 
 	cb->end_render_pass();

@@ -377,7 +377,7 @@ void RenderPathVulkan::draw_gui(CommandBuffer *cb) {
 	PerformanceMonitor::end(ch_gui);
 }
 
-void RenderPathVulkan::render_out(FrameBuffer *source, Texture *bloom) {
+void RenderPathVulkan::render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom) {
 	/*PerformanceMonitor::begin(ch_out);
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
@@ -394,8 +394,27 @@ void RenderPathVulkan::render_out(FrameBuffer *source, Texture *bloom) {
 
 	nix::draw_triangles(vb_2d);
 
-	break_point();
-	PerformanceMonitor::end(ch_out);*/
+	break_point();*/
+
+	PerformanceMonitor::begin(ch_out);
+
+	cb->bind_pipeline(pipeline_out);
+	dset_out->set_texture(1, source->attachments[0].get());
+	dset_out->set_texture(2, bloom);
+	dset_out->update();
+	cb->bind_descriptor_set(0, dset_out);
+	struct PCOut {
+		float exposure;
+		float bloom_factor;
+		float gamma;
+		float scale_x;
+		float scale_y;
+	};
+	PCOut pco = {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y};
+	cb->push_constant(0, sizeof(pco), &pco);
+	cb->draw(vb_2d);
+
+	PerformanceMonitor::end(ch_out);
 }
 
 Map<Shader*,Pipeline*> ob_pipelines;
