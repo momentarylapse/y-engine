@@ -52,8 +52,18 @@ layout(location = 0) in vec2 in_uv;
 
 layout(location = 0) out vec4 out_color;
 
+
+float brightness(vec3 c) {
+	return dot(c, vec3(0.2126, 0.7152, 0.0722));
+}
+
+// TODO: smoother...
 vec3 tone_map(vec3 c) {
-	return vec3(1.0) - exp(-c * exposure*0.5);
+	float b = brightness(c);
+	if (b < 0.8)
+		return c;
+	return mix(c / b * 0.8, vec3(1,1,1), 1-exp(0.8-b));
+	//return vec3(1.0) - exp(-c * exposure*0.5);
 	//return pow(c * exposure, vec3(1,1,1)*0.2);
 }
 
