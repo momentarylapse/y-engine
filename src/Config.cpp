@@ -24,7 +24,7 @@ void Config::load(const Array<string> &arg) {
 		set_str(k, local.get_str(k, ""));
 
 	// cli arguments override
-	for (auto &a: arg) {
+	for (auto &a: arg.sub_ref(1)) {
 		if (a.head(2).lower() == "-c") {
 			auto xx = a.sub_ref(2).explode("=");
 			set_str(xx[0].trim(), xx[1].trim());
@@ -32,6 +32,8 @@ void Config::load(const Array<string> &arg) {
 			set_str("renderer.path", "forward");
 		} else if (a == "--def") {
 			set_str("renderer.path", "deferred");
+		} else if (a.head(1) != "-") {
+			set_str("default-world", a);
 		}
 	}
 

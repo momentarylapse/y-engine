@@ -67,10 +67,10 @@ namespace vulkan{
 
 	class Pipeline : public BasePipeline {
 	public:
-		Pipeline(Shader *shader, RenderPass *render_pass, int subpass, int num_textures);
+		Pipeline(Shader *shader, RenderPass *render_pass, int subpass, int num_uvs);
 		~Pipeline();
 
-		void __init__(Shader *shader, RenderPass *render_pass, int subpass, int num_textures);
+		void __init__(Shader *shader, RenderPass *render_pass, int subpass, int num_uvs);
 		void __delete__();
 
 		void rebuild();

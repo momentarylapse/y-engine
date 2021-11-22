@@ -25,17 +25,17 @@ namespace vulkan {
 	extern bool verbose;
 
 
-	VkVertexInputBindingDescription create_binding_description(int num_textures) {
+	VkVertexInputBindingDescription create_binding_description(int num_uvs) {
 		VkVertexInputBindingDescription bd = {};
 		bd.binding = 0;
-		bd.stride = 2 * sizeof(vector) + num_textures * 2 * sizeof(float);
+		bd.stride = 2 * sizeof(vector) + num_uvs * 2 * sizeof(float);
 		bd.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		return bd;
 	}
 
-	Array<VkVertexInputAttributeDescription> create_attribute_descriptions(int num_textures) {
+	Array<VkVertexInputAttributeDescription> create_attribute_descriptions(int num_uvs) {
 		Array<VkVertexInputAttributeDescription> ad;
-		ad.resize(2 + num_textures);
+		ad.resize(2 + num_uvs);
 
 		// position
 		ad[0].binding = 0;
@@ -49,7 +49,7 @@ namespace vulkan {
 		ad[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		ad[1].offset = sizeof(vector);
 
-		for (int i=0; i<num_textures; i++) {
+		for (int i=0; i<num_uvs; i++) {
 			ad[i+2].binding = 0;
 			ad[i+2].location = 2;
 			ad[i+2].format = VK_FORMAT_R32G32_SFLOAT;
@@ -141,12 +141,12 @@ void BasePipeline::destroy() {
 	pipeline = nullptr;
 }
 
-Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int _subpass, int num_textures) : BasePipeline(_shader) {
+Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int _subpass, int num_uvs) : BasePipeline(_shader) {
 	render_pass = _render_pass;
 	subpass = _subpass;
 
-	binding_description = create_binding_description(num_textures);
-	attribute_descriptions = create_attribute_descriptions(num_textures);
+	binding_description = create_binding_description(num_uvs);
+	attribute_descriptions = create_attribute_descriptions(num_uvs);
 	vertex_input_info = {};
 	vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertex_input_info.vertexBindingDescriptionCount = 1;

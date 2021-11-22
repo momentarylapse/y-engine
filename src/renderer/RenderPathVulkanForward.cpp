@@ -34,9 +34,11 @@
 #include "../meta.h"
 
 
-RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPathVulkan(r, RenderPathType::FORWARD) {
+RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r, bool hdr) : RenderPathVulkan(r, RenderPathType::FORWARD) {
 
-	auto tex = new vulkan::DynamicTexture(width, height, 1, "rgba:i8");
+	string fmt = hdr ? "rgba:f16" : "rgba:i8";
+
+	auto tex = new vulkan::DynamicTexture(width, height, 1, fmt);
 	auto depth = new DepthBuffer(width, height, "d:f32", true);
 	render_pass = new vulkan::RenderPass({tex, depth}, "clear");
 
@@ -90,6 +92,10 @@ RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r) : RenderPath
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
+
+	shader_out = ResourceManager::load_shader("forward/hdr.shader");
+	pipeline_out = new vulkan::Pipeline(shader_out.get(), renderer->default_render_pass(), 0, 1);
+	dset_out = renderer->pool->create_set("buffer,sampler,sampler");
 }
 
 void RenderPathVulkanForward::draw() {
@@ -109,13 +115,10 @@ void RenderPathVulkanForward::draw() {
 	auto cur = fb_main.get();
 	cb->set_viewport(rect(0,cur->width, 0,cur->height));
 
-	//rp->clear_color[0] = world.background;
 	render_pass->clear_color = {world.background};
 	cb->begin_render_pass(render_pass, cur);
 
-	draw_skyboxes(cb, cam);
-	draw_objects_opaque(cb, true);
-	draw_terrains(cb, true);
+	draw_world(cb, true);
 
 	cb->end_render_pass();
 
@@ -131,7 +134,23 @@ void RenderPathVulkanForward::draw() {
 
 	// out
 	cb->set_viewport(renderer->area());
+	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
+	cb->bind_pipeline(pipeline_out);
+	dset_out->set_texture(1, fb_main->attachments[0].get());
+	dset_out->set_texture(2, fb_small2->attachments[0].get());
+	dset_out->update();
+	cb->bind_descriptor_set(0, dset_out);
+	struct PCOut {
+		float exposure;
+		float bloom_factor;
+		float gamma;
+		float scale_x;
+		float scale_y;
+	};
+	PCOut pco = {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y};
+	cb->push_constant(0, sizeof(pco), &pco);
+	cb->draw(vb_2d);
 
 	draw_gui(cb);
 
@@ -180,7 +199,12 @@ void RenderPathVulkanForward::draw() {
 void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 }
 
-void RenderPathVulkanForward::draw_world(bool allow_material) {
+void RenderPathVulkanForward::draw_world(CommandBuffer *cb, bool allow_material) {
+
+	draw_skyboxes(cb, cam);
+	draw_terrains(cb, allow_material);
+	draw_objects_opaque(cb, allow_material);
+
 	/*draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);

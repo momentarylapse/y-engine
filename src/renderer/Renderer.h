@@ -10,6 +10,8 @@
 
 class rect;
 
+class RenderPath;
+
 
 class Renderer {
 public:
@@ -19,8 +21,12 @@ public:
 	int width, height;
 	rect area() const;
 
-	virtual bool start_frame() { return false; }
-	virtual void end_frame() {}
+	RenderPath *render_path;
+	void set_render_path(RenderPath *rp);
+
+	virtual bool start_frame() = 0;
+	virtual void draw_frame();
+	virtual void end_frame() = 0;
 
 
 	int ch_render= -1;

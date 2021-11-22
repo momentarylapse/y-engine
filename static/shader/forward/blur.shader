@@ -70,7 +70,8 @@ vec3 blur() {
 }
 
 void main() {
-	out_color.rgb = texture(tex0, in_tex_coord).rgb;
+	//out_color.rgb = texture(tex0, in_tex_coord).rgb;
+	//out_color.rgb = vec3(brightness(out_color.rgb));
 	out_color.rgb = blur();
 	out_color.a = 1;
 }

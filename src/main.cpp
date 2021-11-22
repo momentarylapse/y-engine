@@ -82,9 +82,6 @@ void DrawSplashScreen(const string &str, float per) {
 void ExternalModelCleanup(Model *m) {}
 
 
-
-string ObjectDir;
-
 using namespace std::chrono;
 
 
@@ -108,23 +105,32 @@ public:
 	gui::Text *fps_display;
 	int ch_iter = -1;
 
-	RenderPath *create_renderer() {
-		try {
+	Renderer *create_window_renderer() {
 #ifdef USING_VULKAN
-			renderer = new WindowRendererVulkan(window, engine.width, engine.height);
-			return new RenderPathVulkanForward((RendererVulkan*)renderer);
+		return new WindowRendererVulkan(window, engine.width, engine.height);
 #else
-			renderer = new WindowRendererGL(window, engine.width, engine.height);
-			if (config.get_str("renderer.path", "forward") == "deferred")
-				return new RenderPathGLDeferred((RendererGL*)renderer);
-			else
-				return new RenderPathGLForward((RendererGL*)renderer);
+		return new WindowRendererGL(window, engine.width, engine.height);
 #endif
+	}
+	RenderPath *create_render_path(Renderer *r) {
+#ifdef USING_VULKAN
+		return new RenderPathVulkanForward((RendererVulkan*)r, true);
+#else
+		if (config.get_str("renderer.path", "forward") == "deferred")
+			return new RenderPathGLDeferred((RendererGL*)r);
+		else
+			return new RenderPathGLForward((RendererGL*)r);
+#endif
+	}
+	void create_full_renderer() {
+		try {
+			engine.renderer = renderer = create_window_renderer();
+			engine.render_path = render_path = create_render_path(renderer);
+			renderer->set_render_path(render_path);
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;
 		}
-		return nullptr;
 	}
 
 	void init(const Array<string> &arg) {
@@ -145,12 +151,12 @@ public:
 
 
 
-		std::cout << "on init..." << "\n";
+		msg_write("on init...");
 
 		engine.set_dirs("Textures", "Maps", "Objects", "Sounds", "Scripts", "Materials", "Fonts");
 
 		api_init(window);
-		engine.render_path = render_path = create_renderer();
+		create_full_renderer();
 
 		audio::init();
 
@@ -165,14 +171,11 @@ public:
 		input::init(window);
 
 
-		for (auto &a: arg.sub_ref(1))
-			if (a.head(1) != "-")
-				config.default_world = a;
-
 		MaterialInit();
 	}
 
 	void load_first_world() {
+		msg_error("FIRST WORLD...." + config.default_world);
 		if (config.default_world == "")
 			throw Exception("no default world defined in game.ini");
 		load_world(config.default_world);
@@ -194,11 +197,6 @@ public:
 			PluginManager::add_controller(s.filename, s.variables);
 		for (auto &s: config.get_str("additional-scripts", "").explode(","))
 			PluginManager::add_controller(s, {});
-
-#ifdef USING_VULKAN
-		gui::toplevel->add(new gui::Picture(rect(0.2f,0.5f, 0.2f, 0.5f), ((RenderPathVulkan*)render_path)->fb_main->attachments[0].get()));
-		gui::toplevel->add(new gui::Picture(rect(0.5f,0.8f, 0.2f, 0.5f), ((RenderPathVulkan*)render_path)->fb_small2->attachments[0].get()));
-#endif
 
 		msg_left();
 		msg_write("|                                                      |");
@@ -366,7 +364,7 @@ public:
 			return;
 		Scheduler::handle_draw_pre();
 		timer_render.peek();
-		render_path->draw();
+		renderer->draw_frame();
 		render_times.add(timer_render.get());
 		renderer->end_frame();
 	}
@@ -380,17 +378,6 @@ Array<float> YEngineApp::render_times;
 
 YEngineApp app;
 
-#ifdef __________________USING_VULKAN
-vulkan::DescriptorSet *rp_create_dset(const Array<Texture*> &tex, UniformBuffer *ubo) {
-	auto *rpv = dynamic_cast<RenderPathVulkan*>(app.render_path);
-	return rpv->rp_create_dset(tex, ubo);
-}
-
-vulkan::DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo) {
-	auto *rpv = dynamic_cast<RenderPathVulkan*>(app.render_path);
-	return rpv->rp_create_dset_fx(tex, ubo);
-}
-#endif
 
 
 int hui_main(const Array<string> &arg) {

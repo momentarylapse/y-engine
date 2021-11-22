@@ -63,13 +63,18 @@ public:
 	shared<FrameBuffer> fb_shadow2;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_depth;
-	shared<Shader> shader_out;
 	shared<Shader> shader_fx;
 	//shared<Shader> shader_3d;
 	//shared<Shader> shader_shadow;
 	//shared<Shader> shader_shadow_animated;
 	Material *material_shadow = nullptr;
 	shared<Shader> shader_resolve_multisample;
+
+
+	shared<Shader> shader_out;
+	Pipeline* pipeline_out;
+	DescriptorSet *dset_out;
+
 
 	Array<UBOLight> lights;
 	UniformBuffer *ubo_light;

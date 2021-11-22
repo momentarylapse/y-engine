@@ -16,11 +16,11 @@ class PerformanceMonitor;
 class RenderPathVulkanForward : public RenderPathVulkan {
 public:
 
-	RenderPathVulkanForward(RendererVulkan *r);
+	RenderPathVulkanForward(RendererVulkan *r, bool hdr);
 	void draw() override;
 
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;
-	void draw_world(bool allow_material);
+	void draw_world(CommandBuffer *cb, bool allow_material);
 	void render_shadow_map(FrameBuffer *sfb, float scale);
 };
 

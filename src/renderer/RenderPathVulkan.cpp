@@ -86,6 +86,8 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 	height = renderer->height;
 
 	vb_2d = nullptr;
+	dset_out = nullptr;
+	pipeline_out = nullptr;
 
 	using_view_space = true;
 
@@ -128,8 +130,8 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 	create_quad(vb_2d, rect(-1,1, -1,1));
 
 
-	auto blur_tex1 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:i8");
-	auto blur_tex2 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:i8");
+	auto blur_tex1 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:f16");
+	auto blur_tex2 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:f16");
 	auto blur_depth = new DepthBuffer(width/2, height/2, "d:f32", true);
 	blur_tex1->set_options("wrap=clamp");
 	blur_tex2->set_options("wrap=clamp");
@@ -263,7 +265,7 @@ void RenderPathVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fram
 	const vec2 AXIS[2] = {{2,0}, {0,1}};
 	UBOBlur u;
 	u.radius = cam->bloom_radius * resolution_scale_x;
-	u.threshold = 0.1f;//threshold / cam->exposure;
+	u.threshold = threshold / cam->exposure;
 	u.axis = AXIS[iaxis];
 	blur_ubo[iaxis]->update(&u);
 	blur_dset[iaxis]->set_buffer(0, blur_ubo[iaxis]);

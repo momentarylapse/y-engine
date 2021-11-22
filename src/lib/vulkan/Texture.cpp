@@ -35,6 +35,10 @@ VkFormat parse_format(const string &s) {
 		return VK_FORMAT_R32G32B32A32_SFLOAT;
 	if (s == "rgb:f32")
 		return VK_FORMAT_R32G32B32_SFLOAT;
+	if (s == "rgba:f16")
+		return VK_FORMAT_R16G16B16A16_SFLOAT;
+	if (s == "rgb:f16")
+		return VK_FORMAT_R16G16B16_SFLOAT;
 	if (s == "r:f32")
 		return VK_FORMAT_R32_SFLOAT;
 	if (s == "d:f32")
@@ -43,7 +47,7 @@ VkFormat parse_format(const string &s) {
 		return VK_FORMAT_D16_UNORM;
 	if (s == "ds:f32i8")
 		return VK_FORMAT_D32_SFLOAT_S8_UINT;
-	std::cerr << "unknown image format: " << s.c_str() << "\n";
+	throw Exception("unknown image format: " + s);
 	return VK_FORMAT_R8G8B8A8_UNORM;
 }
 
@@ -60,6 +64,10 @@ int pixel_size(VkFormat f) {
 		return 16;
 	if (f == VK_FORMAT_R32G32B32_SFLOAT)
 		return 12;
+	if (f == VK_FORMAT_R16G16B16A16_SFLOAT)
+		return 8;
+	if (f == VK_FORMAT_R16G16B16_SFLOAT)
+		return 6;
 	if (f == VK_FORMAT_R32_SFLOAT)
 		return 4;
 	if (f == VK_FORMAT_D32_SFLOAT)
