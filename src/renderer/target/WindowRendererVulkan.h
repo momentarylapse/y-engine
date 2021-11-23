@@ -52,6 +52,7 @@ public:
 
 	RenderPass *default_render_pass() const override;
 	FrameBuffer *current_frame_buffer() const override;
+	DepthBuffer *current_depth_buffer() const override;
 	CommandBuffer *current_command_buffer() const override;
 };
 

@@ -37,22 +37,6 @@
 
 RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", parent, RenderPathType::FORWARD) {
 
-	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
-	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		fb_main = new nix::FrameBuffer({
-			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
-			//depth_buffer});
-			new nix::RenderBuffer(width, height, 4, "d24s8")});
-	} else {
-		fb_main = new nix::FrameBuffer({
-			new nix::Texture(width, height, "rgba:f16"),
-			depth_buffer});
-			//new nix::RenderBuffer(width, height, "d24s8)});
-	}
-	fb_small1 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb_small2 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb2 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb3 = new nix::FrameBuffer({
@@ -62,10 +46,6 @@ RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", 
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
-	if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
-		fb_main->color_attachments[0]->set_options("wrap=clamp");
-	fb_small1->color_attachments[0]->set_options("wrap=clamp");
-	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
@@ -80,14 +60,12 @@ RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", 
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
 
-	shader_blur = ResourceManager::load_shader("forward/blur.shader");
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
-	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
 }
 
-void RenderPathGLForward::draw() {
+void RenderPathGLForward::prepare() {
 	PerformanceMonitor::begin(channel);
 
 	static int _frame = 0;
@@ -110,7 +88,7 @@ void RenderPathGLForward::draw() {
 	}
 	PerformanceMonitor::end(ch_shadow);
 
-	render_into_texture(fb_main.get(), cam, dynamic_fb_area());
+	/*render_into_texture(fb_main.get(), cam, dynamic_fb_area());
 
 	auto source = fb_main.get();
 	if (config.antialiasing_method == AntialiasingMethod::MSAA)
@@ -120,14 +98,22 @@ void RenderPathGLForward::draw() {
 
 
 	nix::bind_frame_buffer(parent->current_frame_buffer());
-	render_out(source, fb_small2->color_attachments[0].get());
+	render_out(source, fb_small2->color_attachments[0].get());*/
+
+	PerformanceMonitor::end(channel);
+}
+
+void RenderPathGLForward::draw() {
+	PerformanceMonitor::begin(channel);
+
+	render_into_texture(parent->current_frame_buffer(), cam, dynamic_fb_area());
 
 	PerformanceMonitor::end(channel);
 }
 
 void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	PerformanceMonitor::begin(ch_bg);
-	nix::bind_frame_buffer(fb);
+	//nix::bind_frame_buffer(fb);
 	nix::set_viewport(target_area);
 	nix::set_scissor(target_area);
 

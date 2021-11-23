@@ -28,6 +28,10 @@ FrameBuffer *WindowRendererGL::current_frame_buffer() const {
 	return frame_buffer;
 }
 
+DepthBuffer *WindowRendererGL::current_depth_buffer() const {
+	return depth_buffer;
+}
+
 
 bool WindowRendererGL::start_frame() {
 	nix::start_frame_glfw(window);
@@ -40,6 +44,21 @@ void WindowRendererGL::end_frame() {
 	nix::end_frame_glfw(window);
 	break_point();
 	PerformanceMonitor::end(ch_end);
+}
+
+void WindowRendererGL::prepare() {
+
+}
+
+void WindowRendererGL::draw() {
+
+	if (child)
+		child->prepare();
+
+	nix::bind_frame_buffer(frame_buffer);
+
+	if (child)
+		child->draw();
 }
 
 #endif

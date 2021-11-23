@@ -33,6 +33,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 	gui::update();
 
 	nix::set_projection_ortho_relative();
+	nix::set_view_matrix(matrix::ID);
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	nix::set_z(false, false);

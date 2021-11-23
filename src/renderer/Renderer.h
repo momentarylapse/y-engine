@@ -37,6 +37,7 @@ public:
 
 
 	virtual FrameBuffer *current_frame_buffer() const;
+	virtual DepthBuffer *current_depth_buffer() const;
 #ifdef USING_VULKAN
 	virtual RenderPass *default_render_pass() const;
 	virtual CommandBuffer *current_command_buffer() const;

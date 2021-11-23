@@ -39,18 +39,10 @@ class RenderPathVulkan : public RenderPath {
 public:
 
 
-	//shared<RenderPass> render_pass;
-	RenderPass *render_pass = nullptr;
-
-
-	shared<FrameBuffer> fb_main;
-	shared<FrameBuffer> fb_small1;
-	shared<FrameBuffer> fb_small2;
 	shared<FrameBuffer> fb2;
 	shared<FrameBuffer> fb3;
 	shared<FrameBuffer> fb_shadow;
 	shared<FrameBuffer> fb_shadow2;
-	shared<Shader> shader_blur;
 	shared<Shader> shader_depth;
 	shared<Shader> shader_fx;
 	//shared<Shader> shader_3d;
@@ -59,10 +51,6 @@ public:
 	Material *material_shadow = nullptr;
 	shared<Shader> shader_resolve_multisample;
 
-
-	shared<Shader> shader_out;
-	Pipeline* pipeline_out;
-	DescriptorSet *dset_out;
 
 
 	Array<UBOLight> lights;
@@ -92,14 +80,12 @@ public:
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
 
 
-	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
 	void process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis);
 	void process(CommandBuffer *cb, const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
 	FrameBuffer* do_post_processing(FrameBuffer *source);
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
-	void render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);

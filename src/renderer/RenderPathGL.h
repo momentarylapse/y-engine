@@ -26,19 +26,11 @@ class RendererGL;
 class RenderPathGL : public RenderPath {
 public:
 
-	shared<Texture> tex_black;
-	shared<Texture> tex_white;
-	shared<FrameBuffer> fb_main;
-	shared<FrameBuffer> fb_small1;
-	shared<FrameBuffer> fb_small2;
 	shared<FrameBuffer> fb2;
 	shared<FrameBuffer> fb3;
 	shared<FrameBuffer> fb_shadow;
 	shared<FrameBuffer> fb_shadow2;
-	DepthBuffer *depth_buffer = nullptr;
-	shared<Shader> shader_blur;
 	shared<Shader> shader_depth;
-	shared<Shader> shader_out;
 	shared<Shader> shader_fx;
 	//shared<Shader> shader_3d;
 	//shared<Shader> shader_shadow;
@@ -76,8 +68,6 @@ public:
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(const Array<Texture*> &tex);
-	void draw_gui(FrameBuffer *source);
-	void render_out(FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();
 	void draw_skyboxes(Camera *c);

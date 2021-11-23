@@ -78,6 +78,10 @@ FrameBuffer* WindowRendererVulkan::current_frame_buffer() const {
 	return frame_buffers[image_index];
 }
 
+DepthBuffer *WindowRendererVulkan::current_depth_buffer() const {
+	return depth_buffer;
+}
+
 CommandBuffer* WindowRendererVulkan::current_command_buffer() const {
 	return command_buffers[image_index];
 }

@@ -16,7 +16,7 @@ class PerformanceMonitor;
 class RenderPathVulkanForward : public RenderPathVulkan {
 public:
 
-	RenderPathVulkanForward(Renderer *parent, bool hdr);
+	RenderPathVulkanForward(Renderer *parent);
 
 	void prepare() override;
 	void draw() override;

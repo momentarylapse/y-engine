@@ -42,14 +42,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
-	fb_main = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16"),
-		gbuffer->depth_buffer.get()});
-		//new nix::DepthBuffer(width, height, "d24s8")});
-	fb_small1 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb_small2 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb2 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb3 = new nix::FrameBuffer({
@@ -61,9 +53,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
-	fb_main->color_attachments[0]->set_options("wrap=clamp");
-	fb_small1->color_attachments[0]->set_options("wrap=clamp");
-	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 	fb2->color_attachments[0]->set_options("wrap=clamp");
 	fb3->color_attachments[0]->set_options("wrap=clamp");
 
@@ -76,9 +65,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
 
-	shader_blur = ResourceManager::load_shader("forward/blur.shader");
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
-	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
@@ -97,7 +84,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 	ch_trans = PerformanceMonitor::create_channel("trans", channel);
 }
 
-void RenderPathGLDeferred::draw() {
+void RenderPathGLDeferred::prepare() {
 	PerformanceMonitor::begin(channel);
 	prepare_instanced_matrices();
 
@@ -111,11 +98,23 @@ void RenderPathGLDeferred::draw() {
 	PerformanceMonitor::end(ch_shadow);
 
 	render_into_gbuffer(gbuffer.get(), cam, dynamic_fb_area());
-	render_background(fb_main.get(), cam, dynamic_fb_area());
-	render_out_from_gbuffer(gbuffer.get(), fb_main.get());
+
+	//auto source = do_post_processing(fb_main.get());
+
+	PerformanceMonitor::end(channel);
+}
+
+void RenderPathGLDeferred::draw() {
+	PerformanceMonitor::begin(channel);
+
+	auto target = parent->current_frame_buffer();
+
+	render_background(target, cam, dynamic_fb_area());
+
+	render_out_from_gbuffer(gbuffer.get(), target);
 
 	PerformanceMonitor::begin(ch_trans);
-	cam->update_matrices((float)fb_main->width / (float)fb_main->height);
+	cam->update_matrices((float)target->width / (float)target->height);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
@@ -125,12 +124,6 @@ void RenderPathGLDeferred::draw() {
 	nix::set_projection_matrix(matrix::ID);
 	nix::set_view_matrix(matrix::ID);
 	PerformanceMonitor::end(ch_trans);
-
-	auto source = do_post_processing(fb_main.get());
-
-	nix::bind_frame_buffer(parent->current_frame_buffer());
-
-	render_out(source, fb_small2->color_attachments[0].get());
 
 	PerformanceMonitor::end(channel);
 }

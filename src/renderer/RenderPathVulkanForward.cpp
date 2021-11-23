@@ -34,18 +34,8 @@
 #include "../meta.h"
 
 
-RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent, bool hdr) : RenderPathVulkan("fw", parent, RenderPathType::FORWARD) {
+RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathVulkan("fw", parent, RenderPathType::FORWARD) {
 
-	string fmt = hdr ? "rgba:f16" : "rgba:i8";
-
-	auto tex = new vulkan::DynamicTexture(width, height, 1, fmt);
-	auto depth = new DepthBuffer(width, height, "d:f32", true);
-	render_pass = new vulkan::RenderPass({tex, depth}, "clear");
-
-	fb_main = new vulkan::FrameBuffer(render_pass, {
-		tex,
-		depth});
-	fb_main->attachments[0]->set_options("wrap=clamp");
 
 	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -88,51 +78,19 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent, bool hdr) : R
 	ResourceManager::load_shader("module-vertex-instanced.shader");*/
 
 	/*shader_depth = ResourceManager::load_shader("forward/depth.shader");
-	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
-
-	shader_out = ResourceManager::load_shader("forward/hdr.shader");
-	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->default_render_pass(), 0, 1);
-	dset_out = pool->create_set("buffer,sampler,sampler");
 }
 
 void RenderPathVulkanForward::prepare() {
-
-
-	auto cb = current_command_buffer();
-
 	prepare_lights(cam);
-
-	// into fb_main
-	auto cur = fb_main.get();
-	cb->set_viewport(rect(0,cur->width, 0,cur->height));
-
-	render_pass->clear_color = {world.background};
-	cb->begin_render_pass(render_pass, cur);
-
-	draw_world(cb, true);
-
-	cb->end_render_pass();
-
-
-
-
-	// render blur into fb3!
-	PerformanceMonitor::begin(ch_post_blur);
-	process_blur(cb, cur, fb_small1.get(), 1.0f, 0);
-	process_blur(cb, fb_small1.get(), fb_small2.get(), 0.0f, 1);
-	PerformanceMonitor::end(ch_post_blur);
-
 }
 
 void RenderPathVulkanForward::draw() {
 
 	auto cb = current_command_buffer();
 
-
-	render_out(cb, fb_main.get(), fb_small2->attachments[0].get());
-
+	draw_world(cb, true);
 
 	/*PerformanceMonitor::begin(ch_render);
 
@@ -164,12 +122,7 @@ void RenderPathVulkanForward::draw() {
 
 	source = do_post_processing(source);
 
-
-	nix::bind_frame_buffer(nix::FrameBuffer::DEFAULT);
-	render_out(source, fb_small2->color_attachments[0].get());
-
-	draw_gui(source);
-	PerformanceMonitor::end(ch_render);*/
+*/
 }
 
 void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {

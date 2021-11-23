@@ -232,6 +232,8 @@ sources = [
 	'src/renderer/gui/GuiRendererVulkan.cpp',
 	'src/renderer/helper/jitter.cpp',
 	'src/renderer/post/blur.cpp',
+	'src/renderer/post/HDRRendererGL.cpp',
+	'src/renderer/post/HDRRendererVulkan.cpp',
 	'src/renderer/target/TargetRenderer.cpp',
 	'src/renderer/target/WindowRendererGL.cpp',
 	'src/renderer/target/WindowRendererVulkan.cpp',

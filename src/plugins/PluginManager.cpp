@@ -509,11 +509,11 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("RenderPath.type", &RP::type);
 //	kaba::declare_class_element("RenderPath.depth_buffer", &RP::depth_buffer);
 	kaba::declare_class_element("RenderPath.cube_map", &RP::cube_map);
-	kaba::declare_class_element("RenderPath.fb_main", &RP::fb_main);
+//	kaba::declare_class_element("RenderPath.fb_main", &RP::fb_main);
 	kaba::declare_class_element("RenderPath.fb2", &RP::fb2);
 	kaba::declare_class_element("RenderPath.fb3", &RP::fb3);
-	kaba::declare_class_element("RenderPath.fb_small1", &RP::fb_small1);
-	kaba::declare_class_element("RenderPath.fb_small2", &RP::fb_small2);
+//	kaba::declare_class_element("RenderPath.fb_small1", &RP::fb_small1);
+//	kaba::declare_class_element("RenderPath.fb_small2", &RP::fb_small2);
 	kaba::declare_class_element("RenderPath.shader_fx", &RP::shader_fx);
 	kaba::declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow);
 	kaba::declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);

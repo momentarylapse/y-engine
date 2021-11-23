@@ -17,6 +17,7 @@ Renderer::Renderer(const string &name, Renderer *_parent) {
 	if (parent) {
 		width = parent->width;
 		height = parent->height;
+		parent->set_child(this);
 	}
 
 	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
@@ -45,6 +46,12 @@ FrameBuffer *Renderer::current_frame_buffer() const {
 	if (!parent)
 		return nullptr;
 	return parent->current_frame_buffer();
+}
+
+DepthBuffer *Renderer::current_depth_buffer() const {
+	if (!parent)
+		return nullptr;
+	return parent->current_depth_buffer();
 }
 
 #ifdef USING_VULKAN

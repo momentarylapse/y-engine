@@ -50,12 +50,14 @@
 	#include "renderer/RenderPathVulkan.h"
 	#include "renderer/RenderPathVulkanForward.h"
 	#include "renderer/gui/GuiRendererVulkan.h"
+	#include "renderer/post/HDRRendererVulkan.h"
 	#include "renderer/target/WindowRendererVulkan.h"
 #else
 	#include "renderer/RenderPathGL.h"
 	#include "renderer/RenderPathGLForward.h"
 	#include "renderer/RenderPathGLDeferred.h"
 	#include "renderer/gui/GuiRendererGL.h"
+	#include "renderer/post/HDRRendererGL.h"
 	#include "renderer/target/WindowRendererGL.h"
 #endif
 
@@ -101,8 +103,10 @@ public:
 //private:
 	GLFWwindow* window;
 
-	RenderPath *render_path;
-	TargetRenderer *renderer;
+	RenderPath *render_path = nullptr;
+	Renderer *gui_renderer = nullptr;
+	Renderer *hdr_renderer = nullptr;
+	TargetRenderer *renderer = nullptr;
 
 	gui::Text *fps_display;
 	int ch_iter = -1;
@@ -123,9 +127,17 @@ public:
 #endif
 	}
 
+	Renderer *create_hdr_renderer(Renderer *parent) {
+#ifdef USING_VULKAN
+		return new HDRRendererVulkan(parent);
+#else
+		return new HDRRendererGL(parent);
+#endif
+	}
+
 	RenderPath *create_render_path(Renderer *parent) {
 #ifdef USING_VULKAN
-		return new RenderPathVulkanForward(parent, true);
+		return new RenderPathVulkanForward(parent);
 #else
 		if (config.get_str("renderer.path", "forward") == "deferred")
 			return new RenderPathGLDeferred(parent);
@@ -133,13 +145,13 @@ public:
 			return new RenderPathGLForward(parent);
 #endif
 	}
+
 	void create_full_renderer() {
 		try {
 			engine.renderer = renderer = create_window_renderer();
-			auto gui_renderer = create_gui_renderer(renderer);
-			engine.render_path = render_path = create_render_path(gui_renderer);
-			renderer->set_child(gui_renderer);
-			gui_renderer->set_child(render_path);
+			gui_renderer = create_gui_renderer(renderer);
+			hdr_renderer = create_hdr_renderer(gui_renderer);
+			engine.render_path = render_path = create_render_path(hdr_renderer);
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;

@@ -49,20 +49,6 @@ struct UBO {
 	int num_lights;
 };
 
-struct UBOBlur{
-	vec2 axis;
-	//float dummy1[2];
-	float radius;
-	float threshold;
-	float dummy2[2];
-	float kernel[20];
-};
-
-UniformBuffer *blur_ubo[2];
-DescriptorSet *blur_dset[2];
-Pipeline *blur_pipeline;
-RenderPass *blur_render_pass;
-
 
 void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
 	vb->build_v3_v3_v2_i({
@@ -76,8 +62,6 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 	type = _type;
 
 	vb_2d = nullptr;
-	dset_out = nullptr;
-	pipeline_out = nullptr;
 
 	using_view_space = true;
 
@@ -88,8 +72,6 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 
 	ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
 
-	/*vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
-	vb_2d->create_rect(rect(-1,1, -1,1));*/
 
 	/*depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
 	fb_cube = nullptr;
@@ -110,21 +92,6 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 	create_quad(vb_2d, rect(-1,1, -1,1));
 
 
-	auto blur_tex1 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:f16");
-	auto blur_tex2 = new vulkan::DynamicTexture(width/2, height/2, 1, "rgba:f16");
-	auto blur_depth = new DepthBuffer(width/2, height/2, "d:f32", true);
-	blur_tex1->set_options("wrap=clamp");
-	blur_tex2->set_options("wrap=clamp");
-
-	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
-	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, 1);
-	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
-	blur_ubo[1] = new UniformBuffer(sizeof(UBOBlur));
-	blur_dset[0] = pool->create_set(shader_blur.get());
-	blur_dset[1] = pool->create_set(shader_blur.get());
-	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, blur_depth});
-	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
 
 	ResourceManager::default_shader = "default.shader";
@@ -178,7 +145,7 @@ void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, co
 }
 
 rect RenderPathVulkan::dynamic_fb_area() const {
-	return rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
+	return area();//return rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
 }
 
 FrameBuffer *RenderPathVulkan::next_fb(FrameBuffer *cur) {
@@ -213,13 +180,6 @@ FrameBuffer* RenderPathVulkan::do_post_processing(FrameBuffer *source) {
 		PerformanceMonitor::end(ch_post_focus);
 	}
 
-	// render blur into fb3!
-	PerformanceMonitor::begin(ch_post_blur);
-	process_blur(cur, fb_small1.get(), 1.0f, complex(2,0));
-	process_blur(fb_small1.get(), fb_small2.get(), 0.0f, complex(0,1));
-	break_point();
-	PerformanceMonitor::end(ch_post_blur);
-
 	PerformanceMonitor::end(ch_post);
 	return cur;*/
 	return nullptr;
@@ -240,32 +200,6 @@ FrameBuffer* RenderPathVulkan::resolve_multisampling(FrameBuffer *source) {
 }
 
 
-
-void RenderPathVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
-	const vec2 AXIS[2] = {{2,0}, {0,1}};
-	UBOBlur u;
-	u.radius = cam->bloom_radius * resolution_scale_x;
-	u.threshold = threshold / cam->exposure;
-	u.axis = AXIS[iaxis];
-	blur_ubo[iaxis]->update(&u);
-	blur_dset[iaxis]->set_buffer(0, blur_ubo[iaxis]);
-	blur_dset[iaxis]->set_texture(1, source->attachments[0].get());
-	blur_dset[iaxis]->update();
-
-	auto rp = blur_render_pass;
-
-	cb->begin_render_pass(rp, target);
-	cb->set_viewport(rect(0,target->width, 0,target->height));
-
-	cb->bind_pipeline(blur_pipeline);
-	cb->bind_descriptor_set(0, blur_dset[iaxis]);
-
-	cb->draw(vb_2d);
-
-	cb->end_render_pass();
-
-	//process(cb, {source->attachments[0].get()}, target, shader_blur.get());
-}
 
 void RenderPathVulkan::process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis) {
 	/*shader_depth->set_float("max_radius", 50);
@@ -289,28 +223,6 @@ void RenderPathVulkan::process(CommandBuffer *cb, const Array<Texture*> &source,
 	nix::set_textures(source);
 	nix::draw_triangles(vb_2d);
 	nix::set_scissor(rect::EMPTY);*/
-}
-
-void RenderPathVulkan::render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom) {
-	PerformanceMonitor::begin(ch_out);
-
-	cb->bind_pipeline(pipeline_out);
-	dset_out->set_texture(1, source->attachments[0].get());
-	dset_out->set_texture(2, bloom);
-	dset_out->update();
-	cb->bind_descriptor_set(0, dset_out);
-	struct PCOut {
-		float exposure;
-		float bloom_factor;
-		float gamma;
-		float scale_x;
-		float scale_y;
-	};
-	PCOut pco = {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y};
-	cb->push_constant(0, sizeof(pco), &pco);
-	cb->draw(vb_2d);
-
-	PerformanceMonitor::end(ch_out);
 }
 
 Map<Shader*,Pipeline*> ob_pipelines;
@@ -689,120 +601,4 @@ void RenderPathVulkan::prepare_lights(Camera *cam) {
 #endif
 
 
-
-#if 0
-RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, PerformanceMonitor *pm, const string &shadow_shader_filename, const string &fx_shader_filename) {
-	renderer = r;
-	perf_mon = pm;
-
-
-	shader_fx = vulkan::Shader::load(fx_shader_filename);
-	pipeline_fx = new vulkan::Pipeline(shader_fx, renderer->default_render_pass(), 0, 1);
-	pipeline_fx->set_blend(VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-	pipeline_fx->set_z(true, false);
-	pipeline_fx->set_culling(0);
-	pipeline_fx->rebuild();
-
-	particle_vb = new vulkan::VertexBuffer();
-	Array<vulkan::Vertex1> vertices;
-	vertices.add({vector(-1,-1,0), vector::EZ, 0,0});
-	vertices.add({vector(-1, 1,0), vector::EZ, 0,1});
-	vertices.add({vector( 1,-1,0), vector::EZ, 1,0});
-	vertices.add({vector( 1, 1,0), vector::EZ, 1,1});
-	particle_vb->build1i(vertices, {0,2,1, 1,2,3});
-
-
-	shadow_renderer = new ShadowMapRenderer(shadow_shader_filename);
-
-
-	AllowXContainer = false;
-	light_cam = new Camera(v_0, quaternion::ID, rect::ID);
-	AllowXContainer = true;
-}
-
-RenderPathVulkan::~RenderPathVulkan() {
-	delete particle_vb;
-	delete pipeline_fx;
-
-	delete shadow_renderer;
-
-	delete light_cam;
-}
-
-void RenderPathVulkan::pick_shadow_source() {
-
-}
-
-void RenderPathVulkan::draw_world(vulkan::CommandBuffer *cb, int light_index) {
-
-	GeoPush gp;
-	gp.eye_pos = cam->pos;
-
-	for (auto *t: world.terrains) {
-		gp.model = matrix::ID;
-		gp.emission = Black;
-		gp.xxx[0] = 0.0f;
-		cb->push_constant(0, sizeof(gp), &gp);
-		cb->bind_descriptor_set_dynamic(0, t->dset, {light_index});
-		cb->draw(t->vertex_buffer);
-	}
-
-	for (auto &s: world.sorted_opaque) {
-		Model *m = s.model;
-		gp.model = mtr(m->pos, m->ang);
-		gp.emission = s.material->emission;
-		gp.xxx[0] = 0.2f;
-		cb->push_constant(0, sizeof(gp), &gp);
-
-		cb->bind_descriptor_set_dynamic(0, s.dset, {light_index});
-		cb->draw(m->mesh[0]->sub[0].vertex_buffer);
-	}
-
-}
-
-void RenderPathVulkan::prepare_all(Renderer *r, Camera *c) {
-
-	c->set_view((float)r->width / (float)r->height);
-
-	UBOMatrices u;
-	u.proj = c->m_projection;
-	u.view = c->m_view;
-
-	UBOFog f;
-	f.col = world.fog._color;
-	f.distance = world.fog.distance;
-	world.ubo_fog->update(&f);
-
-	for (auto *t: world.terrains) {
-		u.model = matrix::ID;
-		t->ubo->update(&u);
-		//t->dset->set({t->ubo, world.ubo_light, world.ubo_fog}, {t->material->textures[0], tex_white, tex_black, shadow_renderer->depth_buffer});
-
-		t->draw(); // rebuild stuff...
-	}
-	for (auto &s: world.sorted_opaque) {
-		Model *m = s.model;
-
-		u.model = mtr(m->pos, m->ang);
-		s.ubo->update(&u);
-	}
-
-	gui::update();
-}
-
-
-void RenderPathVulkan::render_into_shadow(ShadowMapRenderer *r) {
-	r->start_frame();
-	auto *cb = r->cb;
-
-	cb->begin_render_pass(r->default_render_pass(), r->current_frame_buffer());
-	cb->set_pipeline(r->pipeline);
-	cb->set_viewport(r->area());
-
-	draw_world(cb, 0);
-	cb->end_render_pass();
-
-	r->end_frame();
-}
-#endif
 

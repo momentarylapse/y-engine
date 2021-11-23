@@ -48,8 +48,6 @@ const int CUBE_SIZE = 128;
 
 RenderPathGL::RenderPathGL(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
 	type = _type;
-	width = parent->width;
-	height = parent->height;
 
 	using_view_space = true;
 
@@ -107,7 +105,7 @@ void RenderPathGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const 
 }
 
 rect RenderPathGL::dynamic_fb_area() const {
-	return rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
+	return area();//rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
 }
 
 FrameBuffer *RenderPathGL::next_fb(FrameBuffer *cur) {
@@ -142,37 +140,30 @@ FrameBuffer* RenderPathGL::do_post_processing(FrameBuffer *source) {
 		PerformanceMonitor::end(ch_post_focus);
 	}
 
-	// render blur into fb3!
-	PerformanceMonitor::begin(ch_post_blur);
-	process_blur(cur, fb_small1.get(), 1.0f, complex(2,0));
-	process_blur(fb_small1.get(), fb_small2.get(), 0.0f, complex(0,1));
-	break_point();
-	PerformanceMonitor::end(ch_post_blur);
-
 	PerformanceMonitor::end(ch_post);
 	return cur;
 }
 
 FrameBuffer* RenderPathGL::resolve_multisampling(FrameBuffer *source) {
 	auto next = next_fb(source);
-	if (true) {
+	/*if (true) {
 		shader_resolve_multisample->set_float("width", source->width);
 		shader_resolve_multisample->set_float("height", source->height);
 		process({source->color_attachments[0].get(), depth_buffer}, next, shader_resolve_multisample.get());
 	} else {
 		// not sure, why this does not work... :(
 		nix::resolve_multisampling(next, source);
-	}
+	}*/
 	return next;
 }
 
 
 void RenderPathGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis) {
-	float r = cam->bloom_radius * resolution_scale_x;
+	/*float r = cam->bloom_radius * resolution_scale_x;
 	shader_blur->set_float("radius", r);
 	shader_blur->set_float("threshold", threshold / cam->exposure);
 	shader_blur->set_floats("axis", &axis.x, 2);
-	process(weak(source->color_attachments), target, shader_blur.get());
+	process(weak(source->color_attachments), target, shader_blur.get());*/
 }
 
 void RenderPathGL::process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis) {
@@ -181,7 +172,7 @@ void RenderPathGL::process_depth(FrameBuffer *source, FrameBuffer *target, const
 	shader_depth->set_float("focal_blur", cam->focal_blur);
 	shader_depth->set_floats("axis", &axis.x, 2);
 	shader_depth->set_matrix("invproj", cam->m_projection.inverse());
-	process({source->color_attachments[0].get(), depth_buffer}, target, shader_depth.get());
+	process({source->color_attachments[0].get(), current_depth_buffer()}, target, shader_depth.get());
 }
 
 void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
@@ -197,27 +188,6 @@ void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, S
 	nix::set_textures(source);
 	nix::draw_triangles(vb_2d);
 	nix::set_scissor(rect::EMPTY);
-}
-
-void RenderPathGL::render_out(FrameBuffer *source, Texture *bloom) {
-	PerformanceMonitor::begin(ch_out);
-
-	nix::set_textures({source->color_attachments[0].get(), bloom});
-	nix::set_shader(shader_out.get());
-	shader_out->set_float("exposure", cam->exposure);
-	shader_out->set_float("bloom_factor", cam->bloom_factor);
-	shader_out->set_float("scale_x", resolution_scale_x);
-	shader_out->set_float("scale_y", resolution_scale_y);
-	nix::set_projection_matrix(matrix::ID);
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);
-
-	nix::set_z(false, false);
-
-	nix::draw_triangles(vb_2d);
-
-	break_point();
-	PerformanceMonitor::end(ch_out);
 }
 
 
@@ -248,11 +218,11 @@ void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) 
 void RenderPathGL::set_textures(const Array<Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
-		tt.add(tex_white.get());
+		tt.add(tex_white);
 	if (tt.num == 1)
-		tt.add(tex_white.get());
+		tt.add(tex_white);
 	if (tt.num == 2)
-		tt.add(tex_white.get());
+		tt.add(tex_white);
 	tt.add(fb_shadow->depth_buffer.get());
 	tt.add(fb_shadow2->depth_buffer.get());
 	tt.add(cube_map.get());

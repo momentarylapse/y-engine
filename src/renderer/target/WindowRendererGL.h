@@ -22,6 +22,9 @@ public:
 	bool start_frame() override;
 	void end_frame() override;
 
+	void prepare() override;
+	void draw() override;
+
 	GLFWwindow* window;
 
 	DepthBuffer* depth_buffer;
@@ -29,6 +32,7 @@ public:
 
 
 	FrameBuffer *current_frame_buffer() const override;
+	DepthBuffer *current_depth_buffer() const override;
 };
 
 #endif
