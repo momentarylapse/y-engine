@@ -17,6 +17,8 @@ class RenderPathVulkanForward : public RenderPathVulkan {
 public:
 
 	RenderPathVulkanForward(Renderer *parent, bool hdr);
+
+	void prepare() override;
 	void draw() override;
 
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;

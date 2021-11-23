@@ -18,10 +18,6 @@
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
 #include "../plugins/PluginManager.h"
-#include "../gui/gui.h"
-#include "../gui/Node.h"
-#include "../gui/Picture.h"
-#include "../gui/Text.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleManager.h"
@@ -87,7 +83,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
-	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 
 	ssao_sample_buffer = new nix::UniformBuffer();
 	Array<vec4> ssao_samples;
@@ -137,7 +132,6 @@ void RenderPathGLDeferred::draw() {
 
 	render_out(source, fb_small2->color_attachments[0].get());
 
-	draw_gui(source);
 	PerformanceMonitor::end(channel);
 }
 

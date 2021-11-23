@@ -49,13 +49,6 @@ struct UBO {
 	int num_lights;
 };
 
-struct UBOGUI {
-	matrix m,v,p;
-	color col;
-	rect source;
-	float blur, exposure, gamma;
-};
-
 struct UBOBlur{
 	vec2 axis;
 	//float dummy1[2];
@@ -64,6 +57,7 @@ struct UBOBlur{
 	float dummy2[2];
 	float kernel[20];
 };
+
 UniformBuffer *blur_ubo[2];
 DescriptorSet *blur_dset[2];
 Pipeline *blur_pipeline;
@@ -111,16 +105,6 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 
 
 
-
-	shader_2d = ResourceManager::load_shader("vulkan/2d.shader");
-	pipeline_gui = new vulkan::Pipeline(shader_2d, parent->default_render_pass(), 0, 1);
-	pipeline_gui->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
-	pipeline_gui->set_z(false, false);
-	pipeline_gui->rebuild();
-
-
-	vb_gui = new VertexBuffer();
-	create_quad(vb_gui, rect::ID);
 
 	vb_2d = new VertexBuffer();
 	create_quad(vb_2d, rect(-1,1, -1,1));
@@ -305,72 +289,6 @@ void RenderPathVulkan::process(CommandBuffer *cb, const Array<Texture*> &source,
 	nix::set_textures(source);
 	nix::draw_triangles(vb_2d);
 	nix::set_scissor(rect::EMPTY);*/
-}
-
-void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
-	PerformanceMonitor::begin(ch_gui);
-	gui::update();
-
-	UBOGUI ubo;
-	ubo.v = matrix::ID;
-	ubo.p = matrix::scale(2.0f, 2.0f, 1) * matrix::translation(vector(-0.5f, -0.5f, 0)); // nix::set_projection_ortho_relative()
-	ubo.gamma = 2.2f;
-	ubo.exposure = 1.0f;
-
-	int index = 0;
-
-	for (auto *n: gui::sorted_nodes) {
-		if (!n->eff_visible)
-			continue;
-		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
-			auto *p = (gui::Picture*)n;
-
-			if (index >= ubo_gui.num) {
-				dset_gui.add(pool->create_set("buffer,sampler"));
-				ubo_gui.add(new UniformBuffer(sizeof(UBOGUI)));
-			}
-
-			if (p->angle == 0) {
-				ubo.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0);
-			} else {
-				// TODO this should use the physical ratio
-				float r = (float)width / (float)height;
-				ubo.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0);
-			}
-			ubo.blur = p->bg_blur;
-			ubo.col = p->eff_col;
-			ubo.source = p->source;
-			ubo_gui[index]->update(&ubo);
-
-			dset_gui[index]->set_buffer(0, ubo_gui[index]);
-			dset_gui[index]->set_texture(1, p->texture.get());
-//			dset_gui[index]->set_texture(2, source->...);
-			dset_gui[index]->update();
-			index ++;
-		}
-	}
-	PerformanceMonitor::end(ch_gui);
-}
-
-void RenderPathVulkan::draw_gui(CommandBuffer *cb) {
-	PerformanceMonitor::begin(ch_gui);
-
-	cb->bind_pipeline(pipeline_gui);
-
-	int index = 0;
-	for (auto *n: gui::sorted_nodes) {
-		if (!n->eff_visible)
-			continue;
-		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
-
-			cb->bind_descriptor_set(0, dset_gui[index]);
-			cb->draw(vb_gui);
-			index ++;
-		}
-	}
-
-	//break_point();
-	PerformanceMonitor::end(ch_gui);
 }
 
 void RenderPathVulkan::render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom) {

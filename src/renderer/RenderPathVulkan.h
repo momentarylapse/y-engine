@@ -39,14 +39,6 @@ class RenderPathVulkan : public RenderPath {
 public:
 
 
-	Pipeline* pipeline_gui;
-	//DescriptorSet* dset_gui;
-	Array<DescriptorSet*> dset_gui;
-	Array<UniformBuffer*> ubo_gui;
-	VertexBuffer* vb_gui;
-	void prepare_gui(FrameBuffer *source);
-
-
 	//shared<RenderPass> render_pass;
 	RenderPass *render_pass = nullptr;
 
@@ -107,7 +99,6 @@ public:
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
-	void draw_gui(CommandBuffer *cb);
 	void render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom);
 
 	void draw_particles();

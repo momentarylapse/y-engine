@@ -26,6 +26,13 @@ public:
 	Renderer *child = nullptr;
 	void set_child(Renderer *child);
 
+	// (vulkan: BEFORE/OUTSIDE a render pass)
+	// can render into separate targets
+	virtual void prepare();
+
+	// assume, parent has already bound the frame buffer
+	// (vulkan: INSIDE an already started render pass)
+	// just draw into that
 	virtual void draw() = 0;
 
 

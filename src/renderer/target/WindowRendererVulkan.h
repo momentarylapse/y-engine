@@ -27,6 +27,9 @@ public:
 	bool start_frame() override;
 	void end_frame() override;
 
+	void prepare() override;
+	void draw() override;
+
 	GLFWwindow* window;
 
 	Fence* in_flight_fence;

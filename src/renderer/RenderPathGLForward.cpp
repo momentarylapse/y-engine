@@ -18,10 +18,6 @@
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
 #include "../plugins/PluginManager.h"
-#include "../gui/gui.h"
-#include "../gui/Node.h"
-#include "../gui/Picture.h"
-#include "../gui/Text.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleManager.h"
@@ -88,7 +84,6 @@ RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", 
 	shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
-	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
 }
 
@@ -127,7 +122,6 @@ void RenderPathGLForward::draw() {
 	nix::bind_frame_buffer(parent->current_frame_buffer());
 	render_out(source, fb_small2->color_attachments[0].get());
 
-	draw_gui(source);
 	PerformanceMonitor::end(channel);
 }
 

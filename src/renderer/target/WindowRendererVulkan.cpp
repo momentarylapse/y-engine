@@ -10,6 +10,7 @@
 #include "../../graphics-impl.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../lib/file/msg.h"
+#include "../../lib/math/rect.h"
 
 
 WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
@@ -105,6 +106,30 @@ void WindowRendererVulkan::end_frame() {
 
 	vulkan::default_device->wait_idle();
 	//PerformanceMonitor::end(ch_end);
+}
+
+void WindowRendererVulkan::prepare() {
+
+}
+
+void WindowRendererVulkan::draw() {
+	auto cb = current_command_buffer();
+	auto rp = default_render_pass();
+	auto fb = current_frame_buffer();
+
+	cb->begin();
+	if (child)
+		child->prepare();
+
+	cb->set_viewport(area());
+	//rp->clear_color = {White};
+	cb->begin_render_pass(rp, fb);
+
+	if (child)
+		child->draw();
+
+	cb->end_render_pass();
+	cb->end();
 }
 
 

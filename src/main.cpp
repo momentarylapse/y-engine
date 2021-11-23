@@ -49,11 +49,13 @@
 #ifdef USING_VULKAN
 	#include "renderer/RenderPathVulkan.h"
 	#include "renderer/RenderPathVulkanForward.h"
+	#include "renderer/gui/GuiRendererVulkan.h"
 	#include "renderer/target/WindowRendererVulkan.h"
 #else
 	#include "renderer/RenderPathGL.h"
 	#include "renderer/RenderPathGLForward.h"
 	#include "renderer/RenderPathGLDeferred.h"
+	#include "renderer/gui/GuiRendererGL.h"
 	#include "renderer/target/WindowRendererGL.h"
 #endif
 
@@ -112,21 +114,32 @@ public:
 		return new WindowRendererGL(window, engine.width, engine.height);
 #endif
 	}
-	RenderPath *create_render_path(Renderer *r) {
+
+	Renderer *create_gui_renderer(Renderer *parent) {
 #ifdef USING_VULKAN
-		return new RenderPathVulkanForward(r, true);
+		return new GuiRendererVulkan(parent);
+#else
+		return new GuiRendererGL(parent);
+#endif
+	}
+
+	RenderPath *create_render_path(Renderer *parent) {
+#ifdef USING_VULKAN
+		return new RenderPathVulkanForward(parent, true);
 #else
 		if (config.get_str("renderer.path", "forward") == "deferred")
-			return new RenderPathGLDeferred(r);
+			return new RenderPathGLDeferred(parent);
 		else
-			return new RenderPathGLForward(r);
+			return new RenderPathGLForward(parent);
 #endif
 	}
 	void create_full_renderer() {
 		try {
 			engine.renderer = renderer = create_window_renderer();
-			engine.render_path = render_path = create_render_path(renderer);
-			renderer->set_child(render_path);
+			auto gui_renderer = create_gui_renderer(renderer);
+			engine.render_path = render_path = create_render_path(gui_renderer);
+			renderer->set_child(gui_renderer);
+			gui_renderer->set_child(render_path);
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;

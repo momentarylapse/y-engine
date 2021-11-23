@@ -34,7 +34,6 @@ matrix mtr(const vector &t, const quaternion &a) {
 
 RenderPath::RenderPath(const string &name, Renderer *parent) : Renderer(name, parent) {
 	ch_pre = PerformanceMonitor::create_channel("pre", channel);
-	ch_gui = PerformanceMonitor::create_channel("gui", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 	ch_post = PerformanceMonitor::create_channel("post", channel);
 	ch_post_blur = PerformanceMonitor::create_channel("blur", ch_post);

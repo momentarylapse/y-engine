@@ -228,6 +228,8 @@ sources = [
 	'src/net/NetworkManager.cpp',
 	'src/plugins/Controller.cpp',
 	'src/plugins/PluginManager.cpp',
+	'src/renderer/gui/GuiRendererGL.cpp',
+	'src/renderer/gui/GuiRendererVulkan.cpp',
 	'src/renderer/helper/jitter.cpp',
 	'src/renderer/post/blur.cpp',
 	'src/renderer/target/TargetRenderer.cpp',

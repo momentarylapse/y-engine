@@ -36,6 +36,11 @@ void Renderer::set_child(Renderer *_child) {
 	child = _child;
 }
 
+void Renderer::prepare() {
+	if (child)
+		child->prepare();
+}
+
 FrameBuffer *Renderer::current_frame_buffer() const {
 	if (!parent)
 		return nullptr;

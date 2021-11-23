@@ -409,6 +409,12 @@
     <ClCompile Include="src\plugins\PluginManager.cpp">
       <Filter>src\plugins</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\gui\GuiRendererGL.cpp">
+      <Filter>src\renderer\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\gui\GuiRendererVulkan.cpp">
+      <Filter>src\renderer\gui</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\helper\jitter.cpp">
       <Filter>src\renderer\helper</Filter>
     </ClCompile>
@@ -900,6 +906,12 @@
     <ClInclude Include="src\plugins\PluginManager.h">
       <Filter>src\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\gui\GuiRendererGL.h">
+      <Filter>src\renderer\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\gui\GuiRendererVulkan.h">
+      <Filter>src\renderer\gui</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\helper\jitter.h">
       <Filter>src\renderer\helper</Filter>
     </ClInclude>
@@ -1096,6 +1108,9 @@
     </Filter>
     <Filter Include="src\renderer">
       <UniqueIdentifier>{F7955C4E-263A-2E0D-736E-3A991B494B94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\gui">
+      <UniqueIdentifier>{956D7BFD-77FA-1C92-87EC-77961E229E23}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\renderer\helper">
       <UniqueIdentifier>{B5FBEC1E-AD04-A485-D29D-D1565E4F165D}</UniqueIdentifier>

@@ -90,7 +90,6 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent, bool hdr) : R
 	/*shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
-	shader_2d = ResourceManager::load_shader("forward/2d.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
 
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
@@ -98,18 +97,12 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent, bool hdr) : R
 	dset_out = pool->create_set("buffer,sampler,sampler");
 }
 
-void RenderPathVulkanForward::draw() {
+void RenderPathVulkanForward::prepare() {
 
 
 	auto cb = current_command_buffer();
-	auto rp = parent->default_render_pass();
-	auto fb = parent->current_frame_buffer();
 
-	prepare_gui(fb);
 	prepare_lights(cam);
-
-
-	cb->begin();
 
 	// into fb_main
 	auto cur = fb_main.get();
@@ -131,18 +124,14 @@ void RenderPathVulkanForward::draw() {
 	process_blur(cb, fb_small1.get(), fb_small2.get(), 0.0f, 1);
 	PerformanceMonitor::end(ch_post_blur);
 
+}
 
+void RenderPathVulkanForward::draw() {
 
-	// out
-	cb->set_viewport(parent->area());
-	//rp->clear_color = {White};
-	cb->begin_render_pass(parent->default_render_pass(), parent->current_frame_buffer());
+	auto cb = current_command_buffer();
+
 
 	render_out(cb, fb_main.get(), fb_small2->attachments[0].get());
-	draw_gui(cb);
-
-	cb->end_render_pass();
-	cb->end();
 
 
 	/*PerformanceMonitor::begin(ch_render);
