@@ -32,14 +32,11 @@ class GLFWwindow;
 class rect;
 class Material;
 
-class RendererVulkan;
-
 enum class ShaderVariant;
 
 
 class RenderPathVulkan : public RenderPath {
 public:
-	int width, height;
 
 
 	Pipeline* pipeline_gui;
@@ -96,10 +93,8 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathVulkan(RendererVulkan *renderer, RenderPathType type);
+	RenderPathVulkan(const string &name, Renderer *parent, RenderPathType type);
 	virtual ~RenderPathVulkan();
-
-	RendererVulkan *renderer;
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);

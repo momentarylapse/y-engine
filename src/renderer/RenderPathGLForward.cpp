@@ -9,7 +9,6 @@
 #include "RenderPathGLForward.h"
 #ifdef USING_OPENGL
 #include "base.h"
-#include "RendererGL.h"
 #include "helper/jitter.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
@@ -40,7 +39,7 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-RenderPathGLForward::RenderPathGLForward(RendererGL *_renderer) : RenderPathGL(_renderer, RenderPathType::FORWARD) {
+RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", parent, RenderPathType::FORWARD) {
 
 	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -94,7 +93,7 @@ RenderPathGLForward::RenderPathGLForward(RendererGL *_renderer) : RenderPathGL(_
 }
 
 void RenderPathGLForward::draw() {
-	PerformanceMonitor::begin(ch_render);
+	PerformanceMonitor::begin(channel);
 
 	static int _frame = 0;
 	_frame ++;
@@ -125,11 +124,11 @@ void RenderPathGLForward::draw() {
 	source = do_post_processing(source);
 
 
-	nix::bind_frame_buffer(renderer->current_frame_buffer());
+	nix::bind_frame_buffer(parent->current_frame_buffer());
 	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);
-	PerformanceMonitor::end(ch_render);
+	PerformanceMonitor::end(channel);
 }
 
 void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {

@@ -25,11 +25,6 @@ class RendererGL;
 
 class RenderPathGL : public RenderPath {
 public:
-	int width, height;
-	GLFWwindow* window;
-
-
-	RendererGL *renderer;
 
 	shared<Texture> tex_black;
 	shared<Texture> tex_white;
@@ -69,7 +64,7 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathGL(RendererGL *renderer, RenderPathType type);
+	RenderPathGL(const string &name, Renderer *parent, RenderPathType type);
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);

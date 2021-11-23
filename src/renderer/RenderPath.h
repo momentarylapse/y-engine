@@ -7,14 +7,13 @@
 
 #pragma once
 
+#include "Renderer.h"
 #include "../graphics-fwd.h"
 #include "../lib/math/matrix.h"
 #include "../lib/image/color.h"
 #include "../lib/base/callable.h"
 //#include "../lib/base/pointer.h"
 
-class Renderer;
-class RendererVulkan;
 class ShadowMapRenderer;
 class PerformanceMonitor;
 class World;
@@ -56,13 +55,10 @@ struct PostProcessor {
 	int channel;
 };
 
-class RenderPath {
+class RenderPath : public Renderer {
 public:
-	RenderPath();
+	RenderPath(const string &name, Renderer *parent);
 	virtual ~RenderPath() {}
-	virtual void draw() = 0;
-	//virtual bool start_frame() = 0;
-	//virtual void end_frame() = 0;
 
 	Shader *shader_2d = nullptr;
 
@@ -70,8 +66,8 @@ public:
 	float resolution_scale_x = 1.0f;
 	float resolution_scale_y = 1.0f;
 
-	int ch_render= -1;
-	int ch_gui = -1, ch_out = -1, ch_end = -1;
+	//int ch_render= -1;
+	int ch_gui = -1, ch_out = -1;
 	int ch_post = -1, ch_post_blur = -1, ch_post_focus = -1;
 	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1, ch_shadow = -1;
 

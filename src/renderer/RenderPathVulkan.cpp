@@ -8,7 +8,6 @@
 #include "RenderPathVulkan.h"
 #ifdef USING_VULKAN
 #include "base.h"
-#include "RendererVulkan.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
@@ -79,11 +78,8 @@ void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
 		{{r.x2,r.y2,0}, {0,0,1}, s.x2,s.y2}}, {0,1,3, 0,3,2});
 }
 
-RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
+RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
 	type = _type;
-	renderer = r;
-	width = renderer->width;
-	height = renderer->height;
 
 	vb_2d = nullptr;
 	dset_out = nullptr;
@@ -117,7 +113,7 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 
 
 	shader_2d = ResourceManager::load_shader("vulkan/2d.shader");
-	pipeline_gui = new vulkan::Pipeline(shader_2d, renderer->default_render_pass(), 0, 1);
+	pipeline_gui = new vulkan::Pipeline(shader_2d, parent->default_render_pass(), 0, 1);
 	pipeline_gui->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_gui->set_z(false, false);
 	pipeline_gui->rebuild();
@@ -141,8 +137,8 @@ RenderPathVulkan::RenderPathVulkan(RendererVulkan *r, RenderPathType _type) {
 	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, 1);
 	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
 	blur_ubo[1] = new UniformBuffer(sizeof(UBOBlur));
-	blur_dset[0] = renderer->pool->create_set(shader_blur.get());
-	blur_dset[1] = renderer->pool->create_set(shader_blur.get());
+	blur_dset[0] = pool->create_set(shader_blur.get());
+	blur_dset[1] = pool->create_set(shader_blur.get());
 	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, blur_depth});
 	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
@@ -330,7 +326,7 @@ void RenderPathVulkan::prepare_gui(FrameBuffer *source) {
 			auto *p = (gui::Picture*)n;
 
 			if (index >= ubo_gui.num) {
-				dset_gui.add(renderer->pool->create_set("buffer,sampler"));
+				dset_gui.add(pool->create_set("buffer,sampler"));
 				ubo_gui.add(new UniformBuffer(sizeof(UBOGUI)));
 			}
 
@@ -378,24 +374,6 @@ void RenderPathVulkan::draw_gui(CommandBuffer *cb) {
 }
 
 void RenderPathVulkan::render_out(CommandBuffer *cb, FrameBuffer *source, Texture *bloom) {
-	/*PerformanceMonitor::begin(ch_out);
-
-	nix::set_textures({source->color_attachments[0].get(), bloom});
-	nix::set_shader(shader_out.get());
-	shader_out->set_float("exposure", cam->exposure);
-	shader_out->set_float("bloom_factor", cam->bloom_factor);
-	shader_out->set_float("scale_x", resolution_scale_x);
-	shader_out->set_float("scale_y", resolution_scale_y);
-	nix::set_projection_matrix(matrix::ID);
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);
-
-	nix::set_z(false, false);
-
-	nix::draw_triangles(vb_2d);
-
-	break_point();*/
-
 	PerformanceMonitor::begin(ch_out);
 
 	cb->bind_pipeline(pipeline_out);
@@ -445,13 +423,13 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Mate
 	Pipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = get_pipeline_alpha(s, renderer->default_render_pass(), m->alpha.source, m->alpha.destination);
+		p = get_pipeline_alpha(s, parent->default_render_pass(), m->alpha.source, m->alpha.destination);
 		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
 		msg_write("HARD");
-		p = get_pipeline_alpha(s, renderer->default_render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		p = get_pipeline_alpha(s, parent->default_render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	} else {
-		p = get_pipeline(s, renderer->default_render_pass());
+		p = get_pipeline(s, parent->default_render_pass());
 	}
 
 	cb->bind_pipeline(p);
@@ -594,7 +572,7 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 		for (int i=0; i<sb->material.num; i++) {
 			if (index >= sb_ubos.num) {
 				sb_ubos.add(new UniformBuffer(sizeof(UBO)));
-				sb_dsets.add(renderer->pool->create_set(sb->material[i]->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+				sb_dsets.add(pool->create_set(sb->material[i]->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 			}
 			ubo.albedo = sb->material[i]->albedo;
 			ubo.emission = sb->material[i]->emission;
@@ -644,7 +622,7 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 
 		if (index >= tr_ubos.num) {
 			tr_ubos.add(new UniformBuffer(sizeof(UBO)));
-			tr_dsets.add(renderer->pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+			tr_dsets.add(pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 		}
 
 		tr_ubos[index]->update(&ubo);
@@ -703,7 +681,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 
 		if (index >= ob_ubos.num) {
 			ob_ubos.add(new UniformBuffer(sizeof(UBO)));
-			ob_dsets.add(renderer->pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+			ob_dsets.add(pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
 			ob_dsets[index]->set_buffer(1, ubo_light);
 		}
 

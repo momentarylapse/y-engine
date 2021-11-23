@@ -412,16 +412,22 @@
     <ClCompile Include="src\renderer\helper\jitter.cpp">
       <Filter>src\renderer\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\post\blur.cpp">
+      <Filter>src\renderer\post</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\target\TargetRenderer.cpp">
+      <Filter>src\renderer\target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\target\WindowRendererGL.cpp">
+      <Filter>src\renderer\target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp">
+      <Filter>src\renderer\target</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\base.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\Renderer.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RendererGL.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RendererVulkan.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\RenderPath.cpp">
@@ -440,12 +446,6 @@
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\RenderPathVulkanForward.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\WindowRendererGL.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\WindowRendererVulkan.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\world\components\Animator.cpp">
@@ -903,16 +903,22 @@
     <ClInclude Include="src\renderer\helper\jitter.h">
       <Filter>src\renderer\helper</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\post\blur.h">
+      <Filter>src\renderer\post</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\target\TargetRenderer.h">
+      <Filter>src\renderer\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\target\WindowRendererGL.h">
+      <Filter>src\renderer\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\target\WindowRendererVulkan.h">
+      <Filter>src\renderer\target</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\base.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\Renderer.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RendererGL.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RendererVulkan.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RenderPath.h">
@@ -931,12 +937,6 @@
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\RenderPathVulkanForward.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\WindowRendererGL.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\WindowRendererVulkan.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Animator.h">
@@ -1099,6 +1099,12 @@
     </Filter>
     <Filter Include="src\renderer\helper">
       <UniqueIdentifier>{B5FBEC1E-AD04-A485-D29D-D1565E4F165D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\post">
+      <UniqueIdentifier>{83B3818A-1816-CB3C-65E2-E27DB0A569DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\target">
+      <UniqueIdentifier>{1D768818-A3B8-48CD-8B64-75ECD466B30D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\world">
       <UniqueIdentifier>{E9411D56-C9E9-1A0A-845C-CF6F8BB58006}</UniqueIdentifier>

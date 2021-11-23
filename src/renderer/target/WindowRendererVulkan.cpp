@@ -7,12 +7,12 @@
 
 #include "WindowRendererVulkan.h"
 #ifdef USING_VULKAN
-#include "../graphics-impl.h"
-#include "../helper/PerformanceMonitor.h"
-#include "../lib/file/msg.h"
+#include "../../graphics-impl.h"
+#include "../../helper/PerformanceMonitor.h"
+#include "../../lib/file/msg.h"
 
 
-WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) {
+WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
 	window = win;
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
@@ -25,7 +25,6 @@ WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) {
 
 
 	framebuffer_resized = false;
-	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	_create_swap_chain_and_stuff();
 }
@@ -98,14 +97,14 @@ bool WindowRendererVulkan::start_frame() {
 }
 
 void WindowRendererVulkan::end_frame() {
-	PerformanceMonitor::begin(ch_end);
+	//PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
 	vulkan::default_device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
 
 	swap_chain->present(image_index, {render_finished_semaphore});
 
 	vulkan::default_device->wait_idle();
-	PerformanceMonitor::end(ch_end);
+	//PerformanceMonitor::end(ch_end);
 }
 
 

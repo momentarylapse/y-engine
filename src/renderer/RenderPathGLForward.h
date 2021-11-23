@@ -16,7 +16,7 @@ class PerformanceMonitor;
 class RenderPathGLForward : public RenderPathGL {
 public:
 
-	RenderPathGLForward(RendererGL *renderer);
+	RenderPathGLForward(Renderer *parent);
 	void draw() override;
 
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;

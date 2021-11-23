@@ -49,12 +49,12 @@
 #ifdef USING_VULKAN
 	#include "renderer/RenderPathVulkan.h"
 	#include "renderer/RenderPathVulkanForward.h"
-	#include "renderer/WindowRendererVulkan.h"
+	#include "renderer/target/WindowRendererVulkan.h"
 #else
 	#include "renderer/RenderPathGL.h"
 	#include "renderer/RenderPathGLForward.h"
 	#include "renderer/RenderPathGLDeferred.h"
-	#include "renderer/WindowRendererGL.h"
+	#include "renderer/target/WindowRendererGL.h"
 #endif
 
 #include "Config.h"
@@ -100,12 +100,12 @@ public:
 	GLFWwindow* window;
 
 	RenderPath *render_path;
-	Renderer *renderer;
+	TargetRenderer *renderer;
 
 	gui::Text *fps_display;
 	int ch_iter = -1;
 
-	Renderer *create_window_renderer() {
+	TargetRenderer *create_window_renderer() {
 #ifdef USING_VULKAN
 		return new WindowRendererVulkan(window, engine.width, engine.height);
 #else
@@ -114,19 +114,19 @@ public:
 	}
 	RenderPath *create_render_path(Renderer *r) {
 #ifdef USING_VULKAN
-		return new RenderPathVulkanForward((RendererVulkan*)r, true);
+		return new RenderPathVulkanForward(r, true);
 #else
 		if (config.get_str("renderer.path", "forward") == "deferred")
-			return new RenderPathGLDeferred((RendererGL*)r);
+			return new RenderPathGLDeferred(r);
 		else
-			return new RenderPathGLForward((RendererGL*)r);
+			return new RenderPathGLForward(r);
 #endif
 	}
 	void create_full_renderer() {
 		try {
 			engine.renderer = renderer = create_window_renderer();
 			engine.render_path = render_path = create_render_path(renderer);
-			renderer->set_render_path(render_path);
+			renderer->set_child(render_path);
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;
@@ -364,7 +364,7 @@ public:
 			return;
 		Scheduler::handle_draw_pre();
 		timer_render.peek();
-		renderer->draw_frame();
+		renderer->draw();
 		render_times.add(timer_render.get());
 		renderer->end_frame();
 	}

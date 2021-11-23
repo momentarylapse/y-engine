@@ -10,7 +10,6 @@
 #include "RenderPathGLDeferred.h"
 #ifdef USING_OPENGL
 #include "base.h"
-#include "RendererGL.h"
 #include "../lib/nix/nix.h"
 #include "../lib/file/msg.h"
 #include "../lib/math/random.h"
@@ -38,7 +37,7 @@
 #include "../graphics-impl.h"
 
 
-RenderPathGLDeferred::RenderPathGLDeferred(RendererGL *_renderer) : RenderPathGL(_renderer, RenderPathType::DEFERRED) {
+RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def", parent, RenderPathType::DEFERRED) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
@@ -99,12 +98,12 @@ RenderPathGLDeferred::RenderPathGLDeferred(RendererGL *_renderer) : RenderPathGL
 	}
 	ssao_sample_buffer->update_array(ssao_samples);
 
-	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", ch_render);
-	ch_trans = PerformanceMonitor::create_channel("trans", ch_render);
+	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", channel);
+	ch_trans = PerformanceMonitor::create_channel("trans", channel);
 }
 
 void RenderPathGLDeferred::draw() {
-	PerformanceMonitor::begin(ch_render);
+	PerformanceMonitor::begin(channel);
 	prepare_instanced_matrices();
 
 	prepare_lights(cam);
@@ -134,12 +133,12 @@ void RenderPathGLDeferred::draw() {
 
 	auto source = do_post_processing(fb_main.get());
 
-	nix::bind_frame_buffer(renderer->current_frame_buffer());
+	nix::bind_frame_buffer(parent->current_frame_buffer());
 
 	render_out(source, fb_small2->color_attachments[0].get());
 
 	draw_gui(source);
-	PerformanceMonitor::end(ch_render);
+	PerformanceMonitor::end(channel);
 }
 
 void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {

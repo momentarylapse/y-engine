@@ -16,7 +16,7 @@ class PerformanceMonitor;
 class RenderPathVulkanForward : public RenderPathVulkan {
 public:
 
-	RenderPathVulkanForward(RendererVulkan *r, bool hdr);
+	RenderPathVulkanForward(Renderer *parent, bool hdr);
 	void draw() override;
 
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;

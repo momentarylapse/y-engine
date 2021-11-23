@@ -32,20 +32,18 @@ matrix mtr(const vector &t, const quaternion &a) {
 	return mt * mr;
 }
 
-RenderPath::RenderPath() {
-	ch_render = PerformanceMonitor::create_channel("render");
-	ch_pre = PerformanceMonitor::create_channel("pre", ch_render);
-	ch_gui = PerformanceMonitor::create_channel("gui", ch_render);
-	ch_out = PerformanceMonitor::create_channel("out", ch_render);
-	ch_post = PerformanceMonitor::create_channel("post", ch_render);
+RenderPath::RenderPath(const string &name, Renderer *parent) : Renderer(name, parent) {
+	ch_pre = PerformanceMonitor::create_channel("pre", channel);
+	ch_gui = PerformanceMonitor::create_channel("gui", channel);
+	ch_out = PerformanceMonitor::create_channel("out", channel);
+	ch_post = PerformanceMonitor::create_channel("post", channel);
 	ch_post_blur = PerformanceMonitor::create_channel("blur", ch_post);
 	ch_post_focus = PerformanceMonitor::create_channel("focus", ch_post);
-	ch_end = PerformanceMonitor::create_channel("end", ch_render);
-	ch_bg = PerformanceMonitor::create_channel("bg", ch_render);
-	ch_world = PerformanceMonitor::create_channel("world", ch_render);
-	ch_fx = PerformanceMonitor::create_channel("fx", ch_render);
-	ch_shadow = PerformanceMonitor::create_channel("shadow", ch_render);
-	ch_prepare_lights = PerformanceMonitor::create_channel("lights", ch_render);
+	ch_bg = PerformanceMonitor::create_channel("bg", channel);
+	ch_world = PerformanceMonitor::create_channel("world", channel);
+	ch_fx = PerformanceMonitor::create_channel("fx", channel);
+	ch_shadow = PerformanceMonitor::create_channel("shadow", channel);
+	ch_prepare_lights = PerformanceMonitor::create_channel("lights", channel);
 }
 
 

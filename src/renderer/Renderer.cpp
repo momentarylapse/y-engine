@@ -11,13 +11,17 @@
 #include "../helper/PerformanceMonitor.h"
 
 
-Renderer::Renderer() {
+Renderer::Renderer(const string &name, Renderer *_parent) {
 	width = height = 0;
-	render_path = nullptr;
+	parent = _parent;
+	if (parent) {
+		width = parent->width;
+		height = parent->height;
+	}
 
-
-	ch_render = PerformanceMonitor::create_channel("render");
-	ch_end = PerformanceMonitor::create_channel("end", ch_render);
+	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
+	//ch_render = PerformanceMonitor::create_channel("render");
+	//ch_end = PerformanceMonitor::create_channel("end", ch_render);
 }
 
 
@@ -28,10 +32,26 @@ rect Renderer::area() const {
 	return rect(0, width, 0, height);
 }
 
-void Renderer::set_render_path(RenderPath *rp) {
-	render_path = rp;
+void Renderer::set_child(Renderer *_child) {
+	child = _child;
 }
 
-void Renderer::draw_frame() {
-	render_path->draw();
+FrameBuffer *Renderer::current_frame_buffer() const {
+	if (!parent)
+		return nullptr;
+	return parent->current_frame_buffer();
 }
+
+#ifdef USING_VULKAN
+RenderPass *Renderer::default_render_pass() const {
+	if (!parent)
+		return nullptr;
+	return parent->default_render_pass();
+}
+
+CommandBuffer *Renderer::current_command_buffer() const {
+	if (!parent)
+		return nullptr;
+	return parent->current_command_buffer();
+}
+#endif

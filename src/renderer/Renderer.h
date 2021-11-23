@@ -10,25 +10,33 @@
 
 class rect;
 
-class RenderPath;
+#include "../graphics-fwd.h"
+#include "../lib/base/pointer.h"
 
 
 class Renderer {
 public:
-	Renderer();
+	Renderer(const string &name, Renderer *parent = nullptr);
 	virtual ~Renderer();
 
 	int width, height;
 	rect area() const;
 
-	RenderPath *render_path;
-	void set_render_path(RenderPath *rp);
+	Renderer *parent = nullptr;
+	Renderer *child = nullptr;
+	void set_child(Renderer *child);
 
-	virtual bool start_frame() = 0;
-	virtual void draw_frame();
-	virtual void end_frame() = 0;
+	virtual void draw() = 0;
 
 
-	int ch_render= -1;
-	int ch_end = -1;
+	virtual FrameBuffer *current_frame_buffer() const;
+#ifdef USING_VULKAN
+	virtual RenderPass *default_render_pass() const;
+	virtual CommandBuffer *current_command_buffer() const;
+#endif
+
+
+	//int ch_render= -1;
+	//int ch_end = -1;
+	int channel;
 };

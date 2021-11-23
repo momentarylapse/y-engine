@@ -33,7 +33,6 @@
 #ifdef USING_VULKAN
 #include "../renderer/RenderPathVulkan.h"
 #include "../renderer/RenderPathVulkanForward.h"
-#include "../renderer/RendererVulkan.h"
 #endif
 #include "../y/EngineData.h"
 #include "../y/Entity.h"

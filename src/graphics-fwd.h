@@ -33,6 +33,10 @@
 		class DescriptorSet;
 		class RenderPass;
 		class CommandBuffer;
+		class Semaphore;
+		class Fence;
+		class SwapChain;
+		class DescriptorPool;
 	}
 
 	using Texture = vulkan::Texture;
@@ -46,6 +50,7 @@
 	using Pipeline = vulkan::Pipeline;
 	using CommandBuffer = vulkan::CommandBuffer;
 	using DescriptorSet = vulkan::DescriptorSet;
+	using RenderPass = vulkan::RenderPass;
 
 	using Alpha = vulkan::Alpha;
 	using AlphaMode = vulkan::AlphaMode;

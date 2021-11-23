@@ -20,3 +20,7 @@ void break_point();
 
 extern Texture *tex_white;
 extern Texture *tex_black;
+
+#ifdef USING_VULKAN
+extern vulkan::DescriptorPool *pool;
+#endif

@@ -9,7 +9,6 @@
 
 #include "RenderPathGL.h"
 #ifdef USING_OPENGL
-#include "RendererGL.h"
 #include "base.h"
 #include "../lib/nix/nix.h"
 #include "../lib/image/image.h"
@@ -47,11 +46,10 @@ const int CUBE_SIZE = 128;
 
 
 
-RenderPathGL::RenderPathGL(RendererGL *r, RenderPathType _type) {
+RenderPathGL::RenderPathGL(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
 	type = _type;
-	renderer = r;
-	width = r->width;
-	height = r->height;
+	width = parent->width;
+	height = parent->height;
 
 	using_view_space = true;
 

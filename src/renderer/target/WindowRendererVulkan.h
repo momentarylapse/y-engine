@@ -7,28 +7,18 @@
 
 #pragma once
 
-#include "RendererVulkan.h"
+#include "TargetRenderer.h"
 #ifdef USING_VULKAN
-#include "../lib/base/callable.h"
 
 struct GLFWwindow;
 
 
-namespace vulkan {
-	class Instance;
-	class SwapChain;
-	class Fence;
-	class Semaphore;
-	class RenderPass;
-	class DescriptorPool;
-	class CommandBuffer;
-}
 using Semaphore = vulkan::Semaphore;
 using Fence = vulkan::Fence;
 using SwapChain = vulkan::SwapChain;
 using RenderPass = vulkan::RenderPass;
 
-class WindowRendererVulkan : public RendererVulkan {
+class WindowRendererVulkan : public TargetRenderer {
 public:
 	WindowRendererVulkan(GLFWwindow* win, int w, int h);
 	virtual ~WindowRendererVulkan();

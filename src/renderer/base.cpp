@@ -18,9 +18,11 @@ Texture *tex_black = nullptr;
 #ifdef USING_VULKAN
 
 vulkan::Instance *instance = nullptr;
+vulkan::DescriptorPool *pool = nullptr;
 
 void api_init(GLFWwindow* window) {
 	instance = vulkan::init(window, {"glfw", "validation", "api=1.2"});
+	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	tex_white = new Texture();
 	tex_black = new Texture();

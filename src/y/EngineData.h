@@ -17,7 +17,7 @@ namespace Gui {
 }
 
 
-class Renderer;
+class TargetRenderer;
 class RenderPath;
 
 class EngineData {
@@ -61,7 +61,7 @@ public:
 
 	Path map_dir, sound_dir, script_dir, object_dir, texture_dir, shader_dir, material_dir, font_dir;
 
-	Renderer *renderer;
+	TargetRenderer *renderer;
 	RenderPath *render_path;
 };
 extern EngineData engine;

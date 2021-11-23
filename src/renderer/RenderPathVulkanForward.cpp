@@ -7,8 +7,8 @@
 
 #include "RenderPathVulkanForward.h"
 #ifdef USING_VULKAN
-#include "RendererVulkan.h"
 #include "../graphics-impl.h"
+#include "base.h"
 #include "../lib/file/msg.h"
 
 #include "../helper/PerformanceMonitor.h"
@@ -34,7 +34,7 @@
 #include "../meta.h"
 
 
-RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r, bool hdr) : RenderPathVulkan(r, RenderPathType::FORWARD) {
+RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent, bool hdr) : RenderPathVulkan("fw", parent, RenderPathType::FORWARD) {
 
 	string fmt = hdr ? "rgba:f16" : "rgba:i8";
 
@@ -94,16 +94,16 @@ RenderPathVulkanForward::RenderPathVulkanForward(RendererVulkan *r, bool hdr) : 
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
 
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
-	pipeline_out = new vulkan::Pipeline(shader_out.get(), renderer->default_render_pass(), 0, 1);
-	dset_out = renderer->pool->create_set("buffer,sampler,sampler");
+	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->default_render_pass(), 0, 1);
+	dset_out = pool->create_set("buffer,sampler,sampler");
 }
 
 void RenderPathVulkanForward::draw() {
 
 
-	auto cb = renderer->current_command_buffer();
-	auto rp = renderer->default_render_pass();
-	auto fb = renderer->current_frame_buffer();
+	auto cb = current_command_buffer();
+	auto rp = parent->default_render_pass();
+	auto fb = parent->current_frame_buffer();
 
 	prepare_gui(fb);
 	prepare_lights(cam);
@@ -134,9 +134,9 @@ void RenderPathVulkanForward::draw() {
 
 
 	// out
-	cb->set_viewport(renderer->area());
+	cb->set_viewport(parent->area());
 	//rp->clear_color = {White};
-	cb->begin_render_pass(renderer->default_render_pass(), renderer->current_frame_buffer());
+	cb->begin_render_pass(parent->default_render_pass(), parent->current_frame_buffer());
 
 	render_out(cb, fb_main.get(), fb_small2->attachments[0].get());
 	draw_gui(cb);

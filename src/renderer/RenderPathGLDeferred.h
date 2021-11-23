@@ -19,7 +19,7 @@ public:
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
-	RenderPathGLDeferred(RendererGL *renderer);
+	RenderPathGLDeferred(Renderer *parent);
 	void draw() override;
 
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;

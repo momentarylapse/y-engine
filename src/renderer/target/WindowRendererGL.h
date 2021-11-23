@@ -8,18 +8,15 @@
 
 #pragma once
 
-#include "RendererGL.h"
-#include "../graphics-fwd.h"
+#include "TargetRenderer.h"
 #ifdef USING_OPENGL
-#include "../lib/base/callable.h"
 
 struct GLFWwindow;
 
 
-class WindowRendererGL : public RendererGL {
+class WindowRendererGL : public TargetRenderer {
 public:
 	WindowRendererGL(GLFWwindow* win, int w, int h);
-	virtual ~WindowRendererGL();
 
 
 	bool start_frame() override;
@@ -31,7 +28,7 @@ public:
 	FrameBuffer* frame_buffer;
 
 
-	FrameBuffer *current_frame_buffer() const;
+	FrameBuffer *current_frame_buffer() const override;
 };
 
 #endif

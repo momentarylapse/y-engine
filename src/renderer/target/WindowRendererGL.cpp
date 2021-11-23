@@ -8,13 +8,12 @@
 #include "WindowRendererGL.h"
 #ifdef USING_OPENGL
 #include <GLFW/glfw3.h>
-#include "base.h"
-#include "../lib/nix/nix.h"
-#include "../lib/file/msg.h"
-#include "../helper/PerformanceMonitor.h"
+#include "../base.h"
+#include "../../lib/nix/nix.h"
+#include "../../helper/PerformanceMonitor.h"
 
 
-WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) {
+WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
 	window = win;
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
@@ -22,9 +21,6 @@ WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) {
 	height = h;
 
 	frame_buffer = nix::FrameBuffer::DEFAULT;
-}
-
-WindowRendererGL::~WindowRendererGL() {
 }
 
 
