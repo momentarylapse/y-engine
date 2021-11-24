@@ -36,11 +36,11 @@ public:
 	virtual void draw() = 0;
 
 
-	virtual FrameBuffer *current_frame_buffer() const;
-	virtual DepthBuffer *current_depth_buffer() const;
+	virtual FrameBuffer *frame_buffer() const;
+	virtual DepthBuffer *depth_buffer() const;
 #ifdef USING_VULKAN
-	virtual RenderPass *default_render_pass() const;
-	virtual CommandBuffer *current_command_buffer() const;
+	virtual RenderPass *render_pass() const;
+	virtual CommandBuffer *command_buffer() const;
 #endif
 
 

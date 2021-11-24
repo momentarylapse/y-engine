@@ -29,10 +29,16 @@
 #include "../renderer/RenderPathGL.h"
 #include "../renderer/RenderPathGLForward.h"
 #include "../renderer/RenderPathGLDeferred.h"
+#include "../renderer/gui/GuiRendererGL.h"
+#include "../renderer/post/HDRRendererGL.h"
+#include "../renderer/target/WindowRendererGL.h"
 #endif
 #ifdef USING_VULKAN
 #include "../renderer/RenderPathVulkan.h"
 #include "../renderer/RenderPathVulkanForward.h"
+#include "../renderer/gui/GuiRendererVulkan.h"
+#include "../renderer/post/HDRRendererVulkan.h"
+#include "../renderer/target/WindowRendererVulkan.h"
 #endif
 #include "../y/EngineData.h"
 #include "../y/Entity.h"
@@ -489,18 +495,26 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("EngineData.initial_world_file", &EngineData::initial_world_file);
 	kaba::declare_class_element("EngineData.second_world_file", &EngineData::second_world_file);
 	kaba::declare_class_element("EngineData.physical_aspect_ratio", &EngineData::physical_aspect_ratio);
-	kaba::declare_class_element("EngineData.renderer", &EngineData::renderer);
+	kaba::declare_class_element("EngineData.window_renderer", &EngineData::window_renderer);
+	kaba::declare_class_element("EngineData.gui_renderer", &EngineData::gui_renderer);
+	kaba::declare_class_element("EngineData.hdr_renderer", &EngineData::hdr_renderer);
 	kaba::declare_class_element("EngineData.render_path", &EngineData::render_path);
 	kaba::link_external_class_func("EngineData.exit", &global_exit);
 
 
-	kaba::declare_class_size("Render", sizeof(Renderer));
+	kaba::declare_class_size("Renderer", sizeof(Renderer));
 
 #ifdef USING_VULKAN
+	using WR = WindowRendererVulkan;
+	using HR = HDRRendererVulkan;
+	using GR = GuiRendererVulkan;
 	using RP = RenderPathVulkan;
 	using RPF = RenderPathVulkanForward;
 #endif
 #ifdef USING_OPENGL
+	using WR = WindowRendererGL;
+	using HR = HDRRendererGL;
+	using GR = GuiRendererGL;
 	using RP = RenderPathGL;
 	using RPF = RenderPathGLForward;
 	using RPD = RenderPathGLDeferred;
@@ -509,11 +523,8 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("RenderPath.type", &RP::type);
 //	kaba::declare_class_element("RenderPath.depth_buffer", &RP::depth_buffer);
 	kaba::declare_class_element("RenderPath.cube_map", &RP::cube_map);
-//	kaba::declare_class_element("RenderPath.fb_main", &RP::fb_main);
 	kaba::declare_class_element("RenderPath.fb2", &RP::fb2);
 	kaba::declare_class_element("RenderPath.fb3", &RP::fb3);
-//	kaba::declare_class_element("RenderPath.fb_small1", &RP::fb_small1);
-//	kaba::declare_class_element("RenderPath.fb_small2", &RP::fb_small2);
 	kaba::declare_class_element("RenderPath.shader_fx", &RP::shader_fx);
 	kaba::declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow);
 	kaba::declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);
@@ -522,13 +533,23 @@ void PluginManager::export_kaba() {
 #else
 	kaba::declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
 #endif
-	kaba::declare_class_element("RenderPath.resolution_scale", &RenderPath::resolution_scale_x);
+	kaba::declare_class_element("RenderPath.resolution_scale", &RP::resolution_scale_x);
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.render_path);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.next_fb", &RP::next_fb);
 	kaba::link_external_class_func("RenderPath.process", &RP::process);
 	kaba::link_external_class_func("RenderPath.add_post_processor", &RP::add_post_processor);
 	kaba::link_external_class_func("RenderPath.add_fx_injector", &RP::add_fx_injector);
+
+
+	kaba::declare_class_size("WindowRenderer", sizeof(RP));
+	kaba::declare_class_element("RenderPath.type", &RP::type);
+
+	kaba::declare_class_size("HDRRenderer", sizeof(HR));
+	kaba::declare_class_element("HDRRenderer.fb_main", &HR::fb_main);
+	kaba::declare_class_element("HDRRenderer.fb_small1", &HR::fb_small1);
+	kaba::declare_class_element("HDRRenderer.fb_small2", &HR::fb_small2);
+
 
 	kaba::link_external("tex_white", &tex_white);
 	kaba::link_external("world", &world);

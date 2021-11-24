@@ -148,9 +148,9 @@ public:
 
 	void create_full_renderer() {
 		try {
-			engine.renderer = renderer = create_window_renderer();
-			gui_renderer = create_gui_renderer(renderer);
-			hdr_renderer = create_hdr_renderer(gui_renderer);
+			engine.window_renderer = renderer = create_window_renderer();
+			engine.gui_renderer = gui_renderer = create_gui_renderer(renderer);
+			engine.hdr_renderer = hdr_renderer = create_hdr_renderer(gui_renderer);
 			engine.render_path = render_path = create_render_path(hdr_renderer);
 		} catch(Exception &e) {
 			hui::ShowError(e.message());

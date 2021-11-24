@@ -88,7 +88,7 @@ void RenderPathVulkanForward::prepare() {
 
 void RenderPathVulkanForward::draw() {
 
-	auto cb = current_command_buffer();
+	auto cb = command_buffer();
 
 	draw_world(cb, true);
 

@@ -36,13 +36,13 @@ public:
 	Array<Fence*> wait_for_frame_fences;
 	Semaphore *image_available_semaphore, *render_finished_semaphore;
 
-	Array<CommandBuffer*> command_buffers;
+	Array<CommandBuffer*> _command_buffers;
 	//var cb: vulkan::CommandBuffer*
 
 	SwapChain *swap_chain;
 	RenderPass* _default_render_pass;
-	DepthBuffer* depth_buffer;
-	Array<FrameBuffer*> frame_buffers;
+	DepthBuffer* _depth_buffer;
+	Array<FrameBuffer*> _frame_buffers;
 	int image_index;
 	bool framebuffer_resized;
 
@@ -50,10 +50,10 @@ public:
 	void rebuild_default_stuff();
 
 
-	RenderPass *default_render_pass() const override;
-	FrameBuffer *current_frame_buffer() const override;
-	DepthBuffer *current_depth_buffer() const override;
-	CommandBuffer *current_command_buffer() const override;
+	RenderPass *render_pass() const override;
+	FrameBuffer *frame_buffer() const override;
+	DepthBuffer *depth_buffer() const override;
+	CommandBuffer *command_buffer() const override;
 };
 
 #endif

@@ -106,7 +106,7 @@ void RenderPathGLForward::prepare() {
 void RenderPathGLForward::draw() {
 	PerformanceMonitor::begin(channel);
 
-	render_into_texture(parent->current_frame_buffer(), cam, dynamic_fb_area());
+	render_into_texture(parent->frame_buffer(), cam, dynamic_fb_area());
 
 	PerformanceMonitor::end(channel);
 }

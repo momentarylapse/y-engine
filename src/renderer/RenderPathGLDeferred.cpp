@@ -107,7 +107,7 @@ void RenderPathGLDeferred::prepare() {
 void RenderPathGLDeferred::draw() {
 	PerformanceMonitor::begin(channel);
 
-	auto target = parent->current_frame_buffer();
+	auto target = parent->frame_buffer();
 
 	render_background(target, cam, dynamic_fb_area());
 

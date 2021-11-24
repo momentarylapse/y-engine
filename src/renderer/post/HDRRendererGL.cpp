@@ -26,18 +26,18 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : Renderer("hdr", parent) {
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 
-	depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
+	_depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 		fb_main = new nix::FrameBuffer({
 			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
-			//depth_buffer});
+			//_depth_buffer});
 			new nix::RenderBuffer(width, height, 4, "d24s8")});
 	} else {
 		msg_error("no msaa");
 		fb_main = new nix::FrameBuffer({
 			new nix::Texture(width, height, "rgba:f16"),
-			depth_buffer});
+			_depth_buffer});
 			//new nix::RenderBuffer(width, height, "d24s8)});
 	}
 	fb_small1 = new nix::FrameBuffer({

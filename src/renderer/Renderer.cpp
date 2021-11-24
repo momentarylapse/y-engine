@@ -42,28 +42,28 @@ void Renderer::prepare() {
 		child->prepare();
 }
 
-FrameBuffer *Renderer::current_frame_buffer() const {
+FrameBuffer *Renderer::frame_buffer() const {
 	if (!parent)
 		return nullptr;
-	return parent->current_frame_buffer();
+	return parent->frame_buffer();
 }
 
-DepthBuffer *Renderer::current_depth_buffer() const {
+DepthBuffer *Renderer::depth_buffer() const {
 	if (!parent)
 		return nullptr;
-	return parent->current_depth_buffer();
+	return parent->depth_buffer();
 }
 
 #ifdef USING_VULKAN
-RenderPass *Renderer::default_render_pass() const {
+RenderPass *Renderer::render_pass() const {
 	if (!parent)
 		return nullptr;
-	return parent->default_render_pass();
+	return parent->render_pass();
 }
 
-CommandBuffer *Renderer::current_command_buffer() const {
+CommandBuffer *Renderer::command_buffer() const {
 	if (!parent)
 		return nullptr;
-	return parent->current_command_buffer();
+	return parent->command_buffer();
 }
 #endif

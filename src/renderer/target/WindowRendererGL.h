@@ -27,12 +27,12 @@ public:
 
 	GLFWwindow* window;
 
-	DepthBuffer* depth_buffer;
-	FrameBuffer* frame_buffer;
+	DepthBuffer* _depth_buffer;
+	FrameBuffer* _frame_buffer;
 
 
-	FrameBuffer *current_frame_buffer() const override;
-	DepthBuffer *current_depth_buffer() const override;
+	FrameBuffer *frame_buffer() const override;
+	DepthBuffer *depth_buffer() const override;
 };
 
 #endif

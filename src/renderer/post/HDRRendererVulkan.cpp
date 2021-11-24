@@ -41,12 +41,12 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent)
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	auto tex = new vulkan::DynamicTexture(width, height, 1, "rgba:f16");
-	depth_buffer = new DepthBuffer(width, height, "d:f32", true);
-	render_pass = new vulkan::RenderPass({tex, depth_buffer}, "clear");
+	_depth_buffer = new DepthBuffer(width, height, "d:f32", true);
+	_render_pass = new vulkan::RenderPass({tex, _depth_buffer}, "clear");
 
-	fb_main = new vulkan::FrameBuffer(render_pass, {
+	fb_main = new vulkan::FrameBuffer(_render_pass, {
 		tex,
-		depth_buffer});
+		_depth_buffer});
 	fb_main->attachments[0]->set_options("wrap=clamp");
 
 
@@ -67,7 +67,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent)
 	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
-	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->default_render_pass(), 0, 1);
+	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->render_pass(), 0, 1);
 	dset_out = pool->create_set("buffer,sampler,sampler");
 
 
@@ -85,15 +85,15 @@ void HDRRendererVulkan::prepare() {
 		child->prepare();
 
 
-	auto cb = current_command_buffer();
+	auto cb = command_buffer();
 
 
 	// into fb_main
 	auto cur = fb_main.get();
 	cb->set_viewport(rect(0,cur->width, 0,cur->height));
 
-	render_pass->clear_color = {world.background};
-	cb->begin_render_pass(render_pass, cur);
+	_render_pass->clear_color = {world.background};
+	cb->begin_render_pass(_render_pass, cur);
 
 	if (child)
 		child->draw();
@@ -110,7 +110,7 @@ void HDRRendererVulkan::prepare() {
 }
 
 void HDRRendererVulkan::draw() {
-	auto cb = current_command_buffer();
+	auto cb = command_buffer();
 
 
 	render_out(cb, fb_main.get(), fb_small2->attachments[0].get());

@@ -172,7 +172,7 @@ void RenderPathGL::process_depth(FrameBuffer *source, FrameBuffer *target, const
 	shader_depth->set_float("focal_blur", cam->focal_blur);
 	shader_depth->set_floats("axis", &axis.x, 2);
 	shader_depth->set_matrix("invproj", cam->m_projection.inverse());
-	process({source->color_attachments[0].get(), current_depth_buffer()}, target, shader_depth.get());
+	process({source->color_attachments[0].get(), depth_buffer()}, target, shader_depth.get());
 }
 
 void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {

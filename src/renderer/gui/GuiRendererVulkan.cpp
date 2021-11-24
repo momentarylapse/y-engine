@@ -33,7 +33,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 
 
 	shader = ResourceManager::load_shader("vulkan/2d.shader");
-	pipeline = new vulkan::Pipeline(shader, parent->default_render_pass(), 0, 1);
+	pipeline = new vulkan::Pipeline(shader, parent->render_pass(), 0, 1);
 	pipeline->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline->set_z(false, false);
 	pipeline->rebuild();
@@ -49,8 +49,8 @@ GuiRendererVulkan::~GuiRendererVulkan() {
 void GuiRendererVulkan::draw() {
 	if (child)
 		child->draw();
-	prepare_gui(parent->current_frame_buffer());
-	draw_gui(parent->current_command_buffer());
+	prepare_gui(parent->frame_buffer());
+	draw_gui(parent->command_buffer());
 }
 
 void GuiRendererVulkan::prepare_gui(FrameBuffer *source) {

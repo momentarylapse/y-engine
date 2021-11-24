@@ -40,7 +40,10 @@ EngineData::EngineData() {
 
 	width = 0;
 	height = 0;
-	renderer = nullptr;
+	window_renderer = nullptr;
+	gui_renderer = nullptr;
+	hdr_renderer = nullptr;
+	render_path = nullptr;
 
 	detail_level = 100;
 	detail_factor_inv = 1.0f;

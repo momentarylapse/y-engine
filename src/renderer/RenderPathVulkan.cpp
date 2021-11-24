@@ -253,13 +253,13 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Mate
 	Pipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = get_pipeline_alpha(s, parent->default_render_pass(), m->alpha.source, m->alpha.destination);
+		p = get_pipeline_alpha(s, parent->render_pass(), m->alpha.source, m->alpha.destination);
 		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
 		msg_write("HARD");
-		p = get_pipeline_alpha(s, parent->default_render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		p = get_pipeline_alpha(s, parent->render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	} else {
-		p = get_pipeline(s, parent->default_render_pass());
+		p = get_pipeline(s, parent->render_pass());
 	}
 
 	cb->bind_pipeline(p);

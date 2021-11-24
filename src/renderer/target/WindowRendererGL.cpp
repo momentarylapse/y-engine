@@ -20,16 +20,16 @@ WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) : TargetRender
 	width = w;
 	height = h;
 
-	frame_buffer = nix::FrameBuffer::DEFAULT;
+	_frame_buffer = nix::FrameBuffer::DEFAULT;
 }
 
 
-FrameBuffer *WindowRendererGL::current_frame_buffer() const {
-	return frame_buffer;
+FrameBuffer *WindowRendererGL::frame_buffer() const {
+	return _frame_buffer;
 }
 
-DepthBuffer *WindowRendererGL::current_depth_buffer() const {
-	return depth_buffer;
+DepthBuffer *WindowRendererGL::depth_buffer() const {
+	return _depth_buffer;
 }
 
 
@@ -55,7 +55,7 @@ void WindowRendererGL::draw() {
 	if (child)
 		child->prepare();
 
-	nix::bind_frame_buffer(frame_buffer);
+	nix::bind_frame_buffer(_frame_buffer);
 
 	if (child)
 		child->draw();

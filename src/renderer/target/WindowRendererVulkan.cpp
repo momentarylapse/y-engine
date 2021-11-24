@@ -42,11 +42,11 @@ void WindowRendererVulkan::_create_swap_chain_and_stuff() {
 		wait_for_frame_fences.add(new vulkan::Fence());
 
 	for (auto t: swap_images)
-		command_buffers.add(new CommandBuffer());
+		_command_buffers.add(new CommandBuffer());
 
-	depth_buffer = swap_chain->create_depth_buffer();
-	_default_render_pass = swap_chain->create_render_pass(depth_buffer);
-	frame_buffers = swap_chain->create_frame_buffers(_default_render_pass, depth_buffer);
+	_depth_buffer = swap_chain->create_depth_buffer();
+	_default_render_pass = swap_chain->create_render_pass(_depth_buffer);
+	_frame_buffers = swap_chain->create_frame_buffers(_default_render_pass, _depth_buffer);
 	width = swap_chain->width;
 	height = swap_chain->height;
 }
@@ -70,20 +70,20 @@ void WindowRendererVulkan::rebuild_default_stuff() {
 
 
 
-RenderPass* WindowRendererVulkan::default_render_pass() const {
+RenderPass* WindowRendererVulkan::render_pass() const {
 	return _default_render_pass;
 }
 
-FrameBuffer* WindowRendererVulkan::current_frame_buffer() const {
-	return frame_buffers[image_index];
+FrameBuffer* WindowRendererVulkan::frame_buffer() const {
+	return _frame_buffers[image_index];
 }
 
-DepthBuffer *WindowRendererVulkan::current_depth_buffer() const {
-	return depth_buffer;
+DepthBuffer *WindowRendererVulkan::depth_buffer() const {
+	return _depth_buffer;
 }
 
-CommandBuffer* WindowRendererVulkan::current_command_buffer() const {
-	return command_buffers[image_index];
+CommandBuffer* WindowRendererVulkan::command_buffer() const {
+	return _command_buffers[image_index];
 }
 
 
@@ -104,7 +104,7 @@ bool WindowRendererVulkan::start_frame() {
 void WindowRendererVulkan::end_frame() {
 	//PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
-	vulkan::default_device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
+	vulkan::default_device->present_queue.submit(_command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
 
 	swap_chain->present(image_index, {render_finished_semaphore});
 
@@ -117,9 +117,9 @@ void WindowRendererVulkan::prepare() {
 }
 
 void WindowRendererVulkan::draw() {
-	auto cb = current_command_buffer();
-	auto rp = default_render_pass();
-	auto fb = current_frame_buffer();
+	auto cb = command_buffer();
+	auto rp = render_pass();
+	auto fb = frame_buffer();
 
 	cb->begin();
 	if (child)

@@ -29,10 +29,10 @@ public:
 	shared<FrameBuffer> fb_small1;
 	shared<FrameBuffer> fb_small2;
 
-	FrameBuffer *current_frame_buffer() const { return fb_main.get(); };
-	DepthBuffer *current_depth_buffer() const { return depth_buffer; };
+	FrameBuffer *frame_buffer() const { return fb_main.get(); };
+	DepthBuffer *depth_buffer() const { return _depth_buffer; };
 
-	DepthBuffer *depth_buffer = nullptr;
+	DepthBuffer *_depth_buffer = nullptr;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
 
