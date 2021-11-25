@@ -42,13 +42,6 @@ const int CUBE_SIZE = 128;
 
 
 
-struct UBO {
-	matrix m,v,p;
-	color albedo, emission;
-	float roughness, metal;
-	int num_lights;
-};
-
 
 void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
 	vb->build_v3_v3_v2_i({
@@ -77,11 +70,6 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 	fb_cube = nullptr;
 	cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");*/
 
-	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
-
-	material_shadow = new Material;
-	material_shadow->shader_path = "shadow.shader";
-
 	//ubo_multi_matrix = new nix::UniformBuffer();*/
 
 
@@ -106,6 +94,20 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 	ResourceManager::load_shader("module-vertex-instanced.shader");*/
 	ResourceManager::load_shader("vulkan/module-surface-dummy.shader");
 	ResourceManager::load_shader("module-vertex-default.shader");
+
+
+
+
+	auto tex1 = new vulkan::DynamicTexture(shadow_resolution, shadow_resolution, 1, "rgba:i8");
+	auto tex2 = new vulkan::DynamicTexture(shadow_resolution, shadow_resolution, 1, "rgba:i8");
+	auto shadow_depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
+	auto shadow_depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
+	render_pass_shadow = new vulkan::RenderPass({tex1, shadow_depth1}, "clear");
+	fb_shadow = new vulkan::FrameBuffer(render_pass_shadow, {tex1, shadow_depth1});
+	fb_shadow2 = new vulkan::FrameBuffer(render_pass_shadow, {tex2, shadow_depth2});
+
+	material_shadow = new Material;
+	material_shadow->shader_path = "shadow.shader";
 }
 
 RenderPathVulkan::~RenderPathVulkan() {
@@ -248,18 +250,18 @@ Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
 	return p;
 }
 
-void RenderPathVulkan::set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
+void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader((int)t-1, v);
 	Pipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = get_pipeline_alpha(s, parent->render_pass(), m->alpha.source, m->alpha.destination);
+		p = get_pipeline_alpha(s, rp, m->alpha.source, m->alpha.destination);
 		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
 		msg_write("HARD");
-		p = get_pipeline_alpha(s, parent->render_pass(), Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		p = get_pipeline_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	} else {
-		p = get_pipeline(s, parent->render_pass());
+		p = get_pipeline(s, rp);
 	}
 
 	cb->bind_pipeline(p);
@@ -380,6 +382,8 @@ static Array<DescriptorSet*> sb_dsets;
 
 void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 
+	auto rp = parent->render_pass();
+
 	int index = 0;
 	UBO ubo;
 
@@ -413,7 +417,7 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 			sb_dsets[index]->set_buffer(0, sb_ubos[index]);
 			sb_dsets[index]->set_buffer(1, ubo_light);
 
-			set_material(cb, sb_dsets[index], sb->material[i], type, ShaderVariant::DEFAULT);
+			set_material(cb, rp, sb_dsets[index], sb->material[i], type, ShaderVariant::DEFAULT);
 			cb->draw(sb->mesh[0]->sub[i].vertex_buffer);
 
 			index ++;
@@ -428,19 +432,10 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 	//break_point();*/
 }
 
-
-static Array<UniformBuffer*> tr_ubos;
-static Array<DescriptorSet*> tr_dsets;
-
-void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
+void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
 	int index = 0;
-	UBO ubo;
 
-	cam->update_matrices((float)width / (float)height);
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
 	ubo.m = matrix::ID;
-	ubo.num_lights = world.lights.num;
 
 	for (auto *t: world.terrains) {
 		auto o = t->get_owner<Entity3D>();
@@ -450,19 +445,22 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, bool allow_material) {
 		ubo.metal = t->material->metal;
 		ubo.roughness = t->material->roughness;
 
-		if (index >= tr_ubos.num) {
-			tr_ubos.add(new UniformBuffer(sizeof(UBO)));
-			tr_dsets.add(pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+		if (index >= rda.num) {
+			rda.add({new UniformBuffer(sizeof(UBO)),
+			pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT))});
 		}
 
-		tr_ubos[index]->update(&ubo);
-		tr_dsets[index]->set_buffer(0, tr_ubos[index]);
-		tr_dsets[index]->set_buffer(1, ubo_light);
+		rda[index].ubo->update(&ubo);
+		rda[index].dset->set_buffer(0, rda[index].ubo);
+		rda[index].dset->set_buffer(1, ubo_light);
 
 		if (allow_material) {
-			set_material(cb, tr_dsets[index], t->material, type, ShaderVariant::DEFAULT);
+			set_material(cb, rp, rda[index].dset, t->material, type, ShaderVariant::DEFAULT);
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
+		} else {
+			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
+
 		}
 		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
 		cb->draw(t->vertex_buffer);
@@ -487,32 +485,23 @@ void RenderPathVulkan::draw_objects_instanced(bool allow_material) {
 	}*/
 }
 
-static Array<UniformBuffer*> ob_ubos;
-static Array<DescriptorSet*> ob_dsets;
+//static Array<UniformBuffer*> ob_ubos;
+//static Array<DescriptorSet*> ob_dsets;
 
-void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_material) {
+void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
 	int index = 0;
-	UBO ubo;
 
-	cam->update_matrices((float)width / (float)height);
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
 	ubo.m = matrix::ID;
-	ubo.num_lights = world.lights.num;
-
-	cam->update_matrices((float)width / (float)height);
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
 
 	for (auto &s: world.sorted_opaque) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
 		Model *m = s.model;
 
-		if (index >= ob_ubos.num) {
-			ob_ubos.add(new UniformBuffer(sizeof(UBO)));
-			ob_dsets.add(pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT)));
-			ob_dsets[index]->set_buffer(1, ubo_light);
+		if (index >= rda.num) {
+			rda.add({new UniformBuffer(sizeof(UBO)),
+				pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT))});
+			rda[index].dset->set_buffer(1, ubo_light);
 		}
 
 		m->update_matrix();
@@ -521,13 +510,13 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 		ubo.emission = s.material->emission;
 		ubo.metal = s.material->metal;
 		ubo.roughness = s.material->roughness;
-		ob_ubos[index]->update(&ubo);
-		ob_dsets[index]->set_buffer(0, ob_ubos[index]);
+		rda[index].ubo->update(&ubo);
+		rda[index].dset->set_buffer(0, rda[index].ubo);
 
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
-		if (ani) {
-			set_material(cb, ob_dsets[index], s.material, type, ShaderVariant::DEFAULT);
+		if (ani and false) {
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);
 
 
 			/*if (allow_material)
@@ -538,9 +527,9 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, bool allow_materia
 			nix::bind_buffer(ani->buf, 7);*/
 		} else {
 			if (allow_material)
-				set_material(cb, ob_dsets[index], s.material, type, ShaderVariant::DEFAULT);
+				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);
 			else
-				set_material(cb, ob_dsets[index], material_shadow, type, ShaderVariant::DEFAULT);
+				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
 		}
 
 		cb->draw(m->mesh[0]->sub[s.mat_index].vertex_buffer);

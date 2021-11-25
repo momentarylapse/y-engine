@@ -223,6 +223,8 @@ public:
 		for (auto &s: config.get_str("additional-scripts", "").explode(","))
 			PluginManager::add_controller(s, {});
 
+		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow->attachments[0].get()));
+
 		msg_left();
 		msg_write("|                                                      |");
 		msg_write("o------------------------------------------------------o");

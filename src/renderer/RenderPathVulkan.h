@@ -31,8 +31,22 @@ class UBOLight;
 class GLFWwindow;
 class rect;
 class Material;
+class Entity3D;
 
 enum class ShaderVariant;
+
+
+struct UBO {
+	matrix m,v,p;
+	color albedo, emission;
+	float roughness, metal;
+	int num_lights;
+};
+
+struct RenderDataVK {
+	UniformBuffer* ubo;
+	DescriptorSet* dset;
+};
 
 
 class RenderPathVulkan : public RenderPath {
@@ -41,15 +55,17 @@ public:
 
 	shared<FrameBuffer> fb2;
 	shared<FrameBuffer> fb3;
-	shared<FrameBuffer> fb_shadow;
-	shared<FrameBuffer> fb_shadow2;
 	shared<Shader> shader_depth;
 	shared<Shader> shader_fx;
-	//shared<Shader> shader_3d;
-	//shared<Shader> shader_shadow;
-	//shared<Shader> shader_shadow_animated;
+
+	shared<FrameBuffer> fb_shadow;
+	shared<FrameBuffer> fb_shadow2;
+	RenderPass *render_pass_shadow = nullptr;
+	//Pipeline *pipeline_shadow = nullptr;
 	Material *material_shadow = nullptr;
 	shared<Shader> shader_resolve_multisample;
+	//Entity3D *shadow_entity = nullptr;
+	//Camera *shadow_cam = nullptr;
 
 
 
@@ -69,6 +85,10 @@ public:
 	int shadow_resolution;
 
 
+	Array<RenderDataVK> rda_tr;
+	Array<RenderDataVK> rda_tr_shadow;
+	Array<RenderDataVK> rda_ob;
+	Array<RenderDataVK> rda_ob_shadow;
 
 
 	bool using_view_space = false;
@@ -84,13 +104,13 @@ public:
 	void process(CommandBuffer *cb, const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
 	FrameBuffer* do_post_processing(FrameBuffer *source);
 	FrameBuffer* resolve_multisampling(FrameBuffer *source);
-	void set_material(CommandBuffer *cb, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
+	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
 	void draw_particles();
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);
-	void draw_terrains(CommandBuffer *cb, bool allow_material);
-	void draw_objects_opaque(CommandBuffer *cb, bool allow_material);
+	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
+	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();

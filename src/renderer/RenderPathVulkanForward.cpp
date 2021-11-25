@@ -53,13 +53,10 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathV
 	/*fb2 = new vulkan::FrameBuffer({
 		new vulkan::Texture(width, height, "rgba:f16")});
 	fb3 = new vulkan::FrameBuffer({
-		new vulkan::Texture(width, height, "rgba:f16")});
-	fb_shadow = new vulkan::FrameBuffer({
-		new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
-	fb_shadow2 = new vulkan::FrameBuffer({
-		new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
+		new vulkan::Texture(width, height, "rgba:f16")});*/
 
-	if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
+
+	/*if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
 		fb_main->color_attachments[0]->set_options("wrap=clamp");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
@@ -84,13 +81,40 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathV
 
 void RenderPathVulkanForward::prepare() {
 	prepare_lights(cam);
+
+	auto cb = command_buffer();
+
+	/*if (!shadow_cam) {
+		shadow_entity = new Entity3D;
+		shadow_cam = new Camera(rect::ID);
+		shadow_entity->_add_component_external_(shadow_cam);
+		shadow_entity->pos = cam->get_owner<Entity3D>()->pos;
+		shadow_entity->ang = cam->get_owner<Entity3D>()->ang;
+	}*/
+
+	PerformanceMonitor::begin(ch_shadow);
+	if (shadow_index >= 0) {
+		render_shadow_map(cb, fb_shadow.get(), 4);
+		render_shadow_map(cb, fb_shadow2.get(), 1);
+	}
+	PerformanceMonitor::end(ch_shadow);
 }
 
 void RenderPathVulkanForward::draw() {
 
 	auto cb = command_buffer();
+	auto rp = parent->render_pass();
 
-	draw_world(cb, true);
+	draw_skyboxes(cb, cam);
+
+	cam->update_matrices((float)width / (float)height);
+
+	UBO ubo;
+	ubo.p = cam->m_projection;
+	ubo.v = cam->m_view;
+	ubo.num_lights = lights.num;
+
+	draw_world(cb, rp, ubo, true, rda_tr, rda_ob);
 
 	/*PerformanceMonitor::begin(ch_render);
 
@@ -128,11 +152,10 @@ void RenderPathVulkanForward::draw() {
 void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 }
 
-void RenderPathVulkanForward::draw_world(CommandBuffer *cb, bool allow_material) {
+void RenderPathVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda_tr, Array<RenderDataVK> &rda_ob) {
 
-	draw_skyboxes(cb, cam);
-	draw_terrains(cb, allow_material);
-	draw_objects_opaque(cb, allow_material);
+	draw_terrains(cb, rp, ubo, allow_material, rda_tr);
+	draw_objects_opaque(cb, rp, ubo, allow_material, rda_ob);
 
 	/*draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
@@ -141,7 +164,30 @@ void RenderPathVulkanForward::draw_world(CommandBuffer *cb, bool allow_material)
 		draw_objects_transparent(allow_material, type);*/
 }
 
-void RenderPathVulkanForward::render_shadow_map(FrameBuffer *sfb, float scale) {
+void RenderPathVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale) {
+
+	cb->begin_render_pass(render_pass_shadow, sfb);
+	cb->set_viewport(rect(0, shadow_resolution, 0, shadow_resolution));
+
+	auto m = matrix::scale(scale, scale, 1);
+	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
+
+	/*nix::set_projection_matrix(m * shadow_proj);
+	nix::set_view_matrix(matrix::ID);
+	nix::set_model_matrix(matrix::ID);*/
+
+	//nix::set_z(true, true);
+	//nix::set_shader(shader_shadow.get());
+
+	UBO ubo;
+	ubo.p = m * shadow_proj;
+	ubo.v = matrix::ID;
+	ubo.num_lights = lights.num;
+
+
+	draw_world(cb, render_pass_shadow, ubo, false, rda_tr_shadow, rda_ob_shadow);
+
+	cb->end_render_pass();
 }
 
 #endif

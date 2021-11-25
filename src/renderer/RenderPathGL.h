@@ -32,9 +32,6 @@ public:
 	shared<FrameBuffer> fb_shadow2;
 	shared<Shader> shader_depth;
 	shared<Shader> shader_fx;
-	//shared<Shader> shader_3d;
-	//shared<Shader> shader_shadow;
-	//shared<Shader> shader_shadow_animated;
 	Material *material_shadow = nullptr;
 	shared<Shader> shader_resolve_multisample;
 

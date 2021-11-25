@@ -45,6 +45,8 @@ VkFormat parse_format(const string &s) {
 		return VK_FORMAT_D32_SFLOAT;
 	if (s == "d:i16")
 		return VK_FORMAT_D16_UNORM;
+	if (s == "ds:u24i8")
+		return VK_FORMAT_D24_UNORM_S8_UINT;
 	if (s == "ds:f32i8")
 		return VK_FORMAT_D32_SFLOAT_S8_UINT;
 	throw Exception("unknown image format: " + s);
