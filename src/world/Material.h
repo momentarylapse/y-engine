@@ -38,6 +38,8 @@ enum class ShaderVariant {
 	INSTANCED
 };
 
+enum class RenderPathType;
+
 // visual and physical properties
 class Material {
 public:
@@ -47,8 +49,8 @@ public:
 	shared_array<Texture> textures;
 	shared<Shader> shader[6];
 	Path shader_path;
-	void _prepare_shader(int render_path_type, ShaderVariant v);
-	Shader *get_shader(int render_path_type, ShaderVariant v);
+	void _prepare_shader(RenderPathType render_path_type, ShaderVariant v);
+	Shader *get_shader(RenderPathType render_path_type, ShaderVariant v);
 
 	struct ShaderUniform {
 		string name;

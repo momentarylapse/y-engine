@@ -192,7 +192,7 @@ void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, S
 
 
 void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
-	auto s = m->get_shader((int)t-1, v);
+	auto s = m->get_shader(t, v);
 	nix::set_shader(s);
 	if (using_view_space)
 		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
@@ -314,7 +314,7 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {
 			set_material(t->material, type, ShaderVariant::DEFAULT);
-			auto s = t->material->get_shader((int)type-1, ShaderVariant::DEFAULT);
+			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}

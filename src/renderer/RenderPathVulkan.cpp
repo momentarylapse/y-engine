@@ -251,7 +251,7 @@ Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
 }
 
 void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
-	auto s = m->get_shader((int)t-1, v);
+	auto s = m->get_shader(t, v);
 	Pipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
@@ -266,7 +266,7 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descripto
 
 	cb->bind_pipeline(p);
 
-	set_textures(dset, 2, m->textures.num, weak(m->textures));
+	set_textures(dset, 4, m->textures.num, weak(m->textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
 
@@ -312,6 +312,8 @@ void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Ar
 			if (tex[k])
 				dset->set_texture(i0 + k, tex[k]);
 	}
+	dset->set_texture(2, fb_shadow->attachments[1].get());
+	dset->set_texture(3, fb_shadow2->attachments[1].get());
 }
 
 
@@ -406,7 +408,7 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 		for (int i=0; i<sb->material.num; i++) {
 			if (index >= sb_ubos.num) {
 				sb_ubos.add(new UniformBuffer(sizeof(UBO)));
-				sb_dsets.add(pool->create_set(sb->material[i]->get_shader((int)type-1, ShaderVariant::DEFAULT)));
+				sb_dsets.add(pool->create_set(sb->material[i]->get_shader(type, ShaderVariant::DEFAULT)));
 			}
 			ubo.albedo = sb->material[i]->albedo;
 			ubo.emission = sb->material[i]->emission;
@@ -447,7 +449,7 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),
-			pool->create_set(t->material->get_shader((int)type-1, ShaderVariant::DEFAULT))});
+			pool->create_set(t->material->get_shader(type, ShaderVariant::DEFAULT))});
 		}
 
 		rda[index].ubo->update(&ubo);
@@ -500,7 +502,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UB
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),
-				pool->create_set(s.material->get_shader((int)type-1, ShaderVariant::DEFAULT))});
+				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
 			rda[index].dset->set_buffer(1, ubo_light);
 		}
 

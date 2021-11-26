@@ -4,8 +4,8 @@
 </Layout>
 <Module>
 
-layout(binding = 6) uniform sampler2D tex3;//sampler_shadow;
-layout(binding = 7) uniform sampler2D tex4;//sampler_shadow2;
+layout(binding = 2) uniform sampler2D tex3;//sampler_shadow;
+layout(binding = 3) uniform sampler2D tex4;//sampler_shadow2;
 
 #define tex_shadow0 tex3
 #define tex_shadow1 tex4

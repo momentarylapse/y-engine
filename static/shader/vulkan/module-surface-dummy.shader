@@ -39,8 +39,8 @@ layout(location = 2) in vec3 in_normal;
 layout(location = 0) out vec4 out_color;
 
 
-layout(binding = 6) uniform sampler2D tex_shadow0;
-layout(binding = 7) uniform sampler2D tex_shadow1;
+layout(binding = 2) uniform sampler2D tex_shadow0;
+layout(binding = 3) uniform sampler2D tex_shadow1;
 
 
 const float PI = 3.141592654;

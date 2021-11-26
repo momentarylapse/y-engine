@@ -210,11 +210,11 @@ Material *LoadMaterial(const Path &filename) {
 	return m->copy();
 }
 
-inline int shader_index(int render_path_type, ShaderVariant v) {
-	return (int)v + 3 * render_path_type;
+inline int shader_index(RenderPathType render_path_type, ShaderVariant v) {
+	return (int)v + 3 * ((int)render_path_type - 1);
 }
 
-void Material::_prepare_shader(int render_path_type, ShaderVariant v) {
+void Material::_prepare_shader(RenderPathType render_path_type, ShaderVariant v) {
 	int i = shader_index(render_path_type, v);
 	if (shader[i])
 		return;
@@ -223,11 +223,11 @@ void Material::_prepare_shader(int render_path_type, ShaderVariant v) {
 		vv = "animated";
 	if (v == ShaderVariant::INSTANCED)
 		vv = "instanced";
-	string rpt = (render_path_type == 1) ? "deferred" : "forward";
+	string rpt = ((int)render_path_type == 2) ? "deferred" : "forward";
 	shader[i] = ResourceManager::load_surface_shader(shader_path, rpt, vv);
 }
 
-Shader *Material::get_shader(int render_path_type, ShaderVariant v) {
+Shader *Material::get_shader(RenderPathType render_path_type, ShaderVariant v) {
 	int i = shader_index(render_path_type, v);
 	_prepare_shader(render_path_type, v);
 	return shader[i].get();

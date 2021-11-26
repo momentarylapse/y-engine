@@ -105,9 +105,9 @@ void RenderPathVulkanForward::draw() {
 	auto cb = command_buffer();
 	auto rp = parent->render_pass();
 
-	draw_skyboxes(cb, cam);
-
 	cam->update_matrices((float)width / (float)height);
+
+	draw_skyboxes(cb, cam);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;
@@ -171,13 +171,6 @@ void RenderPathVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *
 
 	auto m = matrix::scale(scale, scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
-
-	/*nix::set_projection_matrix(m * shadow_proj);
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);*/
-
-	//nix::set_z(true, true);
-	//nix::set_shader(shader_shadow.get());
 
 	UBO ubo;
 	ubo.p = m * shadow_proj;
