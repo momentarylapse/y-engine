@@ -42,8 +42,10 @@ RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", 
 	fb3 = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
+		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
+		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
 	fb2->color_attachments[0]->set_options("wrap=clamp");

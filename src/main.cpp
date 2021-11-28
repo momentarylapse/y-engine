@@ -225,6 +225,9 @@ public:
 
 #ifdef USING_VULKAN
 		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow->attachments[0].get()));
+#else
+		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow->color_attachments[0].get()));
+		//gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow->depth_buffer.get()));
 #endif
 
 		msg_left();
