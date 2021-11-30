@@ -27,6 +27,7 @@ struct Light {
 layout(binding = 0) uniform ParameterData {
 	Matrices matrix;
 	Material material;
+	int shadow_index;
 };
 layout(binding = 1) uniform LightData {
 	Light light[32];
@@ -142,7 +143,7 @@ vec2 VogelDiskSample(int sampleIndex, int samplesCount, float phi) {
 
 float _surf_shadow_pcf(vec3 p) {
 	ivec2 ts = textureSize(tex_shadow0, 0);
-	float value = 0;//shadow_pcf_step(p, vec2(0,0), ts);
+	float value = 0;//_surf_shadow_pcf_step(p, vec2(0,0), ts);
 	const float R = 1.8;
 	const int N = 16;
 	float phi0 = _surf_rand3d(p) * 2 * 3.1415;
@@ -238,7 +239,7 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 
 	out_color = emission;
 	for (int i=0; i<material.num_lights; i++)
-		out_color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, false).rgb;
+		out_color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, i == shadow_index).rgb;
 	
 /*	float distance = length(p - eye_pos.xyz);
 	float f = exp(-distance / fog.distance);

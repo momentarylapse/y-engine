@@ -224,10 +224,15 @@ public:
 			PluginManager::add_controller(s, {});
 
 #ifdef USING_VULKAN
-		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow->attachments[0].get()));
+		//gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow->attachments[0].get()));
+		//gui::toplevel->add(new gui::Picture(rect(1.0f,1.2f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow2->attachments[0].get()));
+		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow->attachments[1].get()));
+		gui::toplevel->add(new gui::Picture(rect(1.0f,1.2f, 0.8f,1.0f), ((RenderPathVulkanForward*)render_path)->fb_shadow2->attachments[1].get()));
 #else
-		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow->color_attachments[0].get()));
-		//gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow->depth_buffer.get()));
+		//gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow->color_attachments[0].get()));
+		//gui::toplevel->add(new gui::Picture(rect(1.0f,1.2f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow2->color_attachments[0].get()));
+		gui::toplevel->add(new gui::Picture(rect(0.8f,1.0f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow->depth_buffer.get()));
+		gui::toplevel->add(new gui::Picture(rect(1.0f,1.2f, 0.8f,1.0f), ((RenderPathGL*)render_path)->fb_shadow2->depth_buffer.get()));
 #endif
 
 		msg_left();

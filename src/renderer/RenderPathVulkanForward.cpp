@@ -113,6 +113,7 @@ void RenderPathVulkanForward::draw() {
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
 	ubo.num_lights = lights.num;
+	ubo.shadow_index = shadow_index;
 
 	draw_world(cb, rp, ubo, true, rda_tr, rda_ob);
 
@@ -178,7 +179,10 @@ void RenderPathVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *
 	ubo.num_lights = lights.num;
 
 
-	draw_world(cb, render_pass_shadow, ubo, false, rda_tr_shadow, rda_ob_shadow);
+	if (scale == 1)
+		draw_world(cb, render_pass_shadow, ubo, false, rda_tr_shadow, rda_ob_shadow);
+	else
+		draw_world(cb, render_pass_shadow, ubo, false, rda_tr_shadow2, rda_ob_shadow2);
 
 	cb->end_render_pass();
 }

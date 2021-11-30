@@ -41,6 +41,7 @@ struct UBO {
 	color albedo, emission;
 	float roughness, metal;
 	int num_lights;
+	int shadow_index;
 };
 
 struct RenderDataVK {
@@ -87,8 +88,10 @@ public:
 
 	Array<RenderDataVK> rda_tr;
 	Array<RenderDataVK> rda_tr_shadow;
+	Array<RenderDataVK> rda_tr_shadow2;
 	Array<RenderDataVK> rda_ob;
 	Array<RenderDataVK> rda_ob_shadow;
+	Array<RenderDataVK> rda_ob_shadow2;
 
 
 	bool using_view_space = false;
