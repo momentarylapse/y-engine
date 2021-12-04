@@ -13,7 +13,7 @@ struct Matrices {
 struct Material {
 	vec4 albedo, emission;
 	float roughness, metal;
-	int num_lights;
+	int _dummy1, _dummy2;
 };
 
 struct Light {
@@ -27,13 +27,15 @@ struct Light {
 layout(binding = 0) uniform ParameterData {
 	Matrices matrix;
 	Material material;
+	int num_lights;
 	int shadow_index;
+	float sa, sb;
 };
 layout(binding = 1) uniform LightData {
 	Light light[32];
 };
 
-layout(location = 0) in vec4 in_pos; // world
+layout(location = 0) in vec4 in_pos; // view space
 layout(location = 1) in vec2 in_uv;
 layout(location = 2) in vec3 in_normal;
 
@@ -121,11 +123,17 @@ float _surf_brightness(Light l, vec3 p) {
 	return b * (1 - smoothstep(tmax*0.8, tmax, t));
 }
 
+// amount of shadow
 float _surf_shadow_pcf_step(vec3 p, vec2 dd, ivec2 ts) {
 	vec2 d = dd / ts * 0.8;
 	vec2 tp = p.xy + d;
 	float epsilon = 0.004;
 	float shadow_z = texture(tex_shadow1, p.xy + d).r + epsilon;
+	//return clamp(abs(p.z - shadow_z), 0.0, 1.0);
+	//if (shadow_z > 0)
+	//	return 1.0;
+	//return 0.0;
+	
 	if (tp.x > 0.38 && tp.y > 0.38 && tp.x < 0.62 && tp.y < 0.62)
 		shadow_z = texture(tex_shadow0, (p.xy - vec2(0.5,0.5))*4 + vec2(0.5,0.5) + d).r + epsilon/4;
 	if (p.z > shadow_z)
@@ -157,15 +165,25 @@ float _surf_shadow_pcf(vec3 p) {
 	return value / N;
 }
 
-float _surf_shadow_factor(Light l, vec3 p) {
+vec3 _surf_light_proj(Light l, vec3 p) {
+	//return sin(p/50);
 	vec4 proj = l.proj * vec4(p,1);
 	proj.xyz /= proj.w;
 	proj.x = (proj.x +1)/2;
 	proj.y = (proj.y +1)/2;
-	proj.z = (proj.z +1)/2;
+	//proj.z = (proj.z +1)/2;
+	proj.z = (proj.z + sa) * sb;
+	//proj.z = proj.z *2;
+//	if (proj.z > 1 || proj.z < 0 || proj.x < 0 || proj.x > 1 || proj.y < 0 || proj.y > 1)
+//		return vec3(1,0,0);
+	return clamp(proj.xyz, 0,1);
+}
+
+float _surf_shadow_factor(Light l, vec3 p) {
+	vec3 proj = _surf_light_proj(l, p);
 	
 	if (proj.x > 0.01 && proj.x < 0.99 && proj.y > 0.01 && proj.y < 0.99 && proj.z < 1.0)
-		return 1.0 - _surf_shadow_pcf(proj.xyz) * l.harshness;
+		return 1.0 - _surf_shadow_pcf(proj) * l.harshness;
 	
 	return 1.0;
 }
@@ -238,7 +256,7 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	
 
 	out_color = emission;
-	for (int i=0; i<material.num_lights; i++)
+	for (int i=0; i<num_lights; i++)
 		out_color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, i == shadow_index).rgb;
 	
 /*	float distance = length(p - eye_pos.xyz);
@@ -246,6 +264,7 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	out_color.rgb = f * out_color.rgb + (1-f) * fog.color.rgb;
 	
 	*/
+//	out_color.rgb = abs(_surf_light_proj(light[0], p));
 	out_color.a = albedo.a;
 }
 

@@ -32,6 +32,8 @@ void Config::load(const Array<string> &arg) {
 			set_str("renderer.path", "forward");
 		} else if (a == "--def") {
 			set_str("renderer.path", "deferred");
+		} else if (a == "--direct") {
+			set_str("renderer.path", "direct");
 		} else if (a.head(1) != "-") {
 			set_str("default-world", a);
 		}

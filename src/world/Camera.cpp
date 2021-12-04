@@ -102,8 +102,12 @@ void CameraCalcMove(float dt) {
 void Camera::on_iterate(float dt) {
 }
 
-matrix Camera::projection_matrix(float aspect_ratio) const {
-	return matrix::perspective(fov, aspect_ratio, min_depth, max_depth) * matrix::rotation_x(pi);
+// view space -> relative screen space (API independent)
+// (-1,-1) = top left
+// (+1,+1) = bottom right
+matrix Camera::projection_matrix(float aspect_ratio, bool z_sym) const {
+	// flip the y-axis
+	return matrix::perspective(fov, aspect_ratio, min_depth, max_depth, z_sym) * matrix::scale(1,-1,1);
 }
 
 matrix Camera::view_matrix() const {
@@ -111,35 +115,30 @@ matrix Camera::view_matrix() const {
 	return matrix::rotation_q(o->ang).transpose() * matrix::translation(-o->pos);
 }
 
-void Camera::update_matrices(float aspect_ratio) {
-	m_projection = projection_matrix(aspect_ratio);
+void Camera::update_matrices(float aspect_ratio, bool z_sym) {
+	m_projection = projection_matrix(aspect_ratio, z_sym);
 	m_view = view_matrix();
 
-	m_all = m_projection * m_view;
+	// TODO fix.... use own projection matrix?
+
+	auto m_rel = matrix::translation(vector(0.5f * engine.physical_aspect_ratio, 0.5f, 0.5f)) * matrix::scale(0.5f * engine.physical_aspect_ratio, 0.5f, 0.5f);
+
+	m_all = m_rel * m_projection * m_view;
 	im_all = m_all.inverse();
 }
 
 // into [0:R]x[0:1] system!
 vector Camera::project(const vector &v) {
-	//auto vv = m_all.project(v);
-	float x = m_all._00 * v.x + m_all._01 * v.y + m_all._02 * v.z + m_all._03;
-	float y = m_all._10 * v.x + m_all._11 * v.y + m_all._12 * v.z + m_all._13;
-	float z = m_all._20 * v.x + m_all._21 * v.y + m_all._22 * v.z + m_all._23;
-	float w = m_all._30 * v.x + m_all._31 * v.y + m_all._32 * v.z + m_all._33;
-	if (w == 0)
-		return vector(0, 0, -1);
-	return vector((x/w * 0.5f + 0.5f) * engine.physical_aspect_ratio, 0.5f + y/w * 0.5f, z/w * 0.5f + 0.5f);
+	return m_all.project(v);
+	//return vector((vv.x * 0.5f + 0.5f) * engine.physical_aspect_ratio, 0.5f + vv.y * 0.5f, vv.z * 0.5f + 0.5f);
 }
 
 vector Camera::unproject(const vector &v) {
-	float xx = (v.x/engine.physical_aspect_ratio - 0.5f) * 2;
+	return im_all.project(v);
+	/*float xx = (v.x/engine.physical_aspect_ratio - 0.5f) * 2;
 	float yy = (v.y - 0.5f) * 2;
 	float zz = (v.z - 0.5f) * 2;
-	float x = im_all._00 * xx + im_all._01 * yy + im_all._02 * zz + im_all._03;
-	float y = im_all._10 * xx + im_all._11 * yy + im_all._12 * zz + im_all._13;
-	float z = im_all._20 * xx + im_all._21 * yy + im_all._22 * zz + im_all._23;
-	float w = im_all._30 * xx + im_all._31 * yy + im_all._32 * zz + im_all._33;
-	return vector(x, y, z) / w;
+	return im_all.project(vector(xx,yy,zz));*/
 }
 
 void CameraShiftAll(const vector &dpos) {

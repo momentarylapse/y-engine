@@ -40,8 +40,10 @@ struct UBO {
 	matrix m,v,p;
 	color albedo, emission;
 	float roughness, metal;
+	int dummy[2];
 	int num_lights;
 	int shadow_index;
+	float sa, sb;
 };
 
 struct RenderDataVK {
@@ -84,6 +86,7 @@ public:
 
 	float shadow_box_size;
 	int shadow_resolution;
+	float sa = 2.0f, sb = 0.5f;
 
 
 	Array<RenderDataVK> rda_tr;

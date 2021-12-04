@@ -36,5 +36,6 @@ void main() {
 	vec4 tmp9 = tmp8 * tmp4;
 	// SurfaceOutput
 	surface_out(tmp2, tmp9, tmp7, tmp6, tmp5);
+	//out_color = vec4(in_uv,0,1);
 }
 </FragmentShader>

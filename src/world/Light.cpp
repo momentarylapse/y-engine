@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "Camera.h"
 #include "Entity3D.h"
+#include "../lib/file/msg.h"
 
 const kaba::Class *Light::_class = nullptr;
 
@@ -70,17 +71,22 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 
 	if (allow_shadow) {
 		if (type == LightType::DIRECTIONAL) {
-			vector center = cam->get_owner<Entity3D>()->pos + cam->get_owner<Entity3D>()->ang*vector::EZ * (shadow_box_size / 3.0f);
+			//msg_write(format("shadow dir: %s  %s", light.pos.str(), light.dir.str()));
+			vector center = cam->get_owner<Entity3D>()->pos;// + cam->get_owner<Entity3D>()->ang*vector::EZ * (shadow_box_size / 3.0f);
 			float grid = shadow_box_size / 16;
 			center.x -= fmod(center.x, grid) - grid/2;
 			center.y -= fmod(center.y, grid) - grid/2;
 			center.z -= fmod(center.z, grid) - grid/2;
+			//center = vector(0,200,0);
 			auto t = matrix::translation(- center);
+			//auto r = matrix::rotation({pi/2,0,0}).transpose();
+			//o->ang = quaternion(pi/2, {1,0,0});
 			auto r = matrix::rotation(o->ang).transpose();
 			float f = 1 / shadow_box_size;
-			auto s = matrix::scale(f, f, f);
+			auto s = matrix::scale(f, f, -f/2);
 			// map onto [-1,1]x[-1,1]x[0,1]
 			shadow_projection = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
+			//msg_write(shadow_projection.str());
 		} else {
 			auto t = matrix::translation(- o->pos);
 			vector dir = - (cam->get_owner<Entity3D>()->ang * vector::EZ);
@@ -95,8 +101,10 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 				theta = user_shadow_theta;
 			float dist_min = (shadow_dist_min > 0) ? shadow_dist_min : light.radius * 0.01f;
 			float dist_max = (shadow_dist_max > 0) ? shadow_dist_max : light.radius;
-			auto p = matrix::perspective(2 * theta, 1.0f, dist_min, dist_max);
-			shadow_projection = p * r * t;
+			auto p = matrix::perspective(2 * theta, 1.0f, dist_min, dist_max, false);
+			//static const float EEE[] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,-1};
+			static const float EEE[] = {1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,-1};
+			shadow_projection = p * matrix(EEE) * r * t;
 		}
 		if (using_view_space)
 			light.proj = shadow_projection * cam->view_matrix().inverse();

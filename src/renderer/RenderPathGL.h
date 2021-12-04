@@ -49,6 +49,7 @@ public:
 
 	float shadow_box_size;
 	int shadow_resolution;
+	float sa = 0, sb = 0;
 
 
 	bool using_view_space = false;

@@ -150,8 +150,12 @@ public:
 		try {
 			engine.window_renderer = renderer = create_window_renderer();
 			engine.gui_renderer = gui_renderer = create_gui_renderer(renderer);
-			engine.hdr_renderer = hdr_renderer = create_hdr_renderer(gui_renderer);
-			engine.render_path = render_path = create_render_path(hdr_renderer);
+			if (config.get_str("renderer.path", "forward") == "direct") {
+				engine.render_path = render_path = create_render_path(gui_renderer);
+			} else {
+				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(gui_renderer);
+				engine.render_path = render_path = create_render_path(hdr_renderer);
+			}
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;

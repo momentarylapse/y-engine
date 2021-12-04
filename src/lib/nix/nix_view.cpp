@@ -65,12 +65,13 @@ void set_projection_perspective_ext(float center_x, float center_y, float width_
 		vector(center_x / float(target_width) * 2.0f - 1,
 			1 - center_y / float(target_height) * 2.0f,
 			0));
-	auto p = matrix::perspective(pi / 2, 1, z_min, z_max);
+	auto p = matrix::perspective(pi / 2, 1, z_min, z_max, true);
 	auto s = matrix::scale(2 * width_1 / target_width,
 			2 * height_1 / target_height,
 			- 1); // z reflection: right/left handedness
+	static const float EEE[] = {1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1}; // UNDO z-flip... :P
 
-	set_projection_matrix(t * p * s);
+	set_projection_matrix(t * p * matrix(EEE) * s);
 }
 
 // center_x/y: pixel coordinates of (0,0,0)

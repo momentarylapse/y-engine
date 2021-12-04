@@ -114,7 +114,7 @@ void RenderPathGLDeferred::draw() {
 	render_out_from_gbuffer(gbuffer.get(), target);
 
 	PerformanceMonitor::begin(ch_trans);
-	cam->update_matrices((float)target->width / (float)target->height);
+	cam->update_matrices((float)target->width / (float)target->height, true);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
@@ -136,7 +136,7 @@ void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, 
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices((float)fb->width / (float)fb->height, true);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 	//nix::clear_color(Green);
@@ -182,7 +182,7 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices((float)fb->width / (float)fb->height, true);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 	//nix::clear_color(Green);//world.background);
@@ -192,7 +192,7 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 
 
 	cam->max_depth = max_depth;
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices((float)fb->width / (float)fb->height, true);
 	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
 
 	nix::bind_buffer(ubo_light, 1);
