@@ -173,8 +173,7 @@ void RenderPathVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *
 	cb->begin_render_pass(render_pass_shadow, sfb);
 	cb->set_viewport(rect(0, shadow_resolution, 0, shadow_resolution));
 
-	//static const float EEE[] = {1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1};
-	auto m = matrix::scale(scale, scale, -1);
+	auto m = matrix::scale(scale, -scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 
 	//msg_write(shadow_proj.str());

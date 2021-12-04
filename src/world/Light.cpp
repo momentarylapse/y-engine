@@ -72,7 +72,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 	if (allow_shadow) {
 		if (type == LightType::DIRECTIONAL) {
 			//msg_write(format("shadow dir: %s  %s", light.pos.str(), light.dir.str()));
-			vector center = cam->get_owner<Entity3D>()->pos;// + cam->get_owner<Entity3D>()->ang*vector::EZ * (shadow_box_size / 3.0f);
+			vector center = cam->get_owner<Entity3D>()->pos + cam->get_owner<Entity3D>()->ang*vector::EZ * (shadow_box_size / 3.0f);
 			float grid = shadow_box_size / 16;
 			center.x -= fmod(center.x, grid) - grid/2;
 			center.y -= fmod(center.y, grid) - grid/2;
@@ -83,7 +83,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 			//o->ang = quaternion(pi/2, {1,0,0});
 			auto r = matrix::rotation(o->ang).transpose();
 			float f = 1 / shadow_box_size;
-			auto s = matrix::scale(f, f, -f/2);
+			auto s = matrix::scale(f, f, f);
 			// map onto [-1,1]x[-1,1]x[0,1]
 			shadow_projection = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
 			//msg_write(shadow_projection.str());
