@@ -357,11 +357,23 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 	}
 
 	// beams
-	/*Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
-	nix::set_model_matrix(matrix::ID);
 	for (auto g: world.particle_manager->groups) {
-		nix::set_texture(g->texture);
+
+		if (index >= rda_fx.num) {
+			rda_fx.add({new UniformBuffer(sizeof(UBOFx)),
+				pool->create_set(shader_fx.get())});
+			//rda_fx[index].dset->set_buffer(1, ubo_light);
+			rda_fx[index].dset->set_buffer(0, rda_fx[index].ubo);
+			rda_fx[index].dset->set_texture(1, g->texture);
+			rda_fx[index].dset->update();
+			vb_fx.add(new VertexBuffer("3f,4f,2f"));
+		}
+
+		Array<VertexFx> v;
+
 		for (auto p: g->beams) {
+			if (!p->enabled)
+				continue;
 			// TODO geometry shader!
 			auto pa = cam->project(p->pos);
 			auto pb = cam->project(p->pos + p->length);
@@ -371,17 +383,28 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 			auto _e1 = (p->pos - uae).normalized() * p->radius;
 			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
 			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
-			v[0].p = p->pos - _e1;
-			v[1].p = p->pos - _e2 + p->length;
-			v[2].p = p->pos + _e2 + p->length;
-			v[3].p = p->pos - _e1;
-			v[4].p = p->pos + _e2 + p->length;
-			v[5].p = p->pos + _e1;
-			nix::vb_temp->update(v);
-			shader_fx->set_color("color", p->col);
-			shader_fx->set_floats("source", &p->source.x1, 4);
-			nix::draw_triangles(nix::vb_temp);
+
+			vector p00 = p->pos - _e1;
+			vector p01 = p->pos - _e2 + p->length;
+			vector p10 = p->pos + _e1;
+			vector p11 = p->pos + _e2 + p->length;
+
+			v.add({p00, p->col, p->source.x1, p->source.y1});
+			v.add({p01, p->col, p->source.x2, p->source.y1});
+			v.add({p11, p->col, p->source.x2, p->source.y2});
+			v.add({p00, p->col, p->source.x1, p->source.y1});
+			v.add({p11, p->col, p->source.x2, p->source.y2});
+			v.add({p10, p->col, p->source.x1, p->source.y2});
 		}
+
+		vb_fx[index]->update(v);
+
+		rda_fx[index].ubo->update(&ubo);
+
+		cb->bind_descriptor_set(0, rda_fx[index].dset);
+		cb->draw(vb_fx[index]);
+
+		index ++;
 	}
 
 	// script injectors
@@ -389,9 +412,6 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 		(*i.func)();
 
 
-	nix::set_z(true, true);
-	nix::disable_alpha();
-	break_point();*/
 	PerformanceMonitor::end(ch_fx);
 }
 
