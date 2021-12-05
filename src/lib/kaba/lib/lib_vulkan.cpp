@@ -232,8 +232,6 @@ void SIAddPackageVulkan() {
 		class_add_element("width", TypeInt, vul_p(&vulkan::FrameBuffer::width));
 		class_add_element("height", TypeInt, vul_p(&vulkan::FrameBuffer::height));
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::FrameBuffer::__init__));
-			func_add_param("w", TypeInt);
-			func_add_param("h", TypeInt);
 			func_add_param("rp", TypeRenderPass);
 			func_add_param("attachments", TypePointerList);
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::FrameBuffer::__delete__));
@@ -260,7 +258,7 @@ void SIAddPackageVulkan() {
 			func_add_param("s", TypeString);
 			func_add_param("max_sets", TypeInt);
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::DescriptorPool::__delete__));
-		class_add_func("create_set", TypeDescriptorSetP, vul_p(&vulkan::DescriptorPool::create_set), Flags::CONST);
+		class_add_func("create_set", TypeDescriptorSetP, vul_p(&vulkan::DescriptorPool::_create_set_str), Flags::CONST);
 			func_add_param("bindings", TypeString);
 
 	add_class(TypeDescriptorSet);
@@ -299,7 +297,7 @@ void SIAddPackageVulkan() {
 #endif
 			func_add_param("alpha", TypeFloat32);
 #if defined(_X_USE_VULKAN_) && HAS_LIB_VULKAN
-		void (vulkan::Pipeline::*mpf2)(VkBlendFactor, VkBlendFactor) = &vulkan::Pipeline::set_blend;
+		void (vulkan::Pipeline::*mpf2)(vulkan::Alpha, vulkan::Alpha) = &vulkan::Pipeline::set_blend;
 		class_add_func("set_blend", TypeVoid, vul_p(mpf2));
 #else
 		class_add_func("set_blend", TypeVoid, nullptr);
