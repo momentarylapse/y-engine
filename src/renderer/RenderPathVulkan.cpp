@@ -309,28 +309,55 @@ void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Ar
 
 
 
-void RenderPathVulkan::draw_particles() {
+void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 	PerformanceMonitor::begin(ch_fx);
-	/*nix::set_shader(shader_fx.get());
-	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	nix::set_z(false, true);
+
+	cb->bind_pipeline(pipeline_fx);
+
+	UBOFx ubo;
+	ubo.p = cam->m_projection;
+	ubo.v = cam->m_view;
+	ubo.m = matrix::ID;
 
 	// particles
 	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
-	nix::vb_temp->create_quad(rect::ID_SYM);
+	int index = 0;
 	for (auto g: world.particle_manager->groups) {
-		nix::set_texture(g->texture);
+
+		if (index >= rda_fx.num) {
+			rda_fx.add({new UniformBuffer(sizeof(UBOFx)),
+				pool->create_set(shader_fx.get())});
+			//rda_fx[index].dset->set_buffer(1, ubo_light);
+			rda_fx[index].dset->set_buffer(0, rda_fx[index].ubo);
+			rda_fx[index].dset->set_texture(1, g->texture);
+			rda_fx[index].dset->update();
+			vb_fx.add(new VertexBuffer("3f,4f,2f"));
+		}
+
+		Array<VertexFx> v;
 		for (auto p: g->particles)
 			if (p->enabled) {
-				shader_fx->set_color("color", p->col);
-				shader_fx->set_floats("source", &p->source.x1, 4);
-				nix::set_model_matrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
-				nix::draw_triangles(nix::vb_temp);
+				auto m = matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius);
+
+				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vector( 1, 1,0), p->col, p->source.x2, p->source.y1});
+				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vector(-1,-1,0), p->col, p->source.x1, p->source.y2});
 			}
+		vb_fx[index]->update(v);
+
+		rda_fx[index].ubo->update(&ubo);
+
+		cb->bind_descriptor_set(0, rda_fx[index].dset);
+		cb->draw(vb_fx[index]);
+
+		index ++;
 	}
 
 	// beams
-	Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
+	/*Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_model_matrix(matrix::ID);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);

@@ -190,6 +190,7 @@ Pipeline::Pipeline(Shader *_shader, RenderPass *_render_pass, int _subpass, VkVe
 	rasterizer.depthClampEnable = VK_FALSE;
 	rasterizer.rasterizerDiscardEnable = VK_FALSE;
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 	rasterizer.lineWidth = 1;
 	//rasterizer.cullMode = VK_CULL_MODE_NONE;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;

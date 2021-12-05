@@ -3,9 +3,9 @@
 	pushsize = 100
 	input = [vec3,vec3,vec2]
 	topology = triangles
+	version = 450
 </Layout>
 <VertexShader>
-#version 450
 #extension GL_ARB_separate_shader_objects : enable
 
 
@@ -32,7 +32,6 @@ void main() {
 }
 </VertexShader>
 <FragmentShader>
-#version 450
 #extension GL_ARB_separate_shader_objects : enable
 
 /*layout(binding = 3)*/ uniform sampler2D tex0;

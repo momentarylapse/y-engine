@@ -11,6 +11,8 @@
 #ifdef USING_VULKAN
 #include "../lib/base/pointer.h"
 #include "../lib/base/callable.h"
+#include "../lib/math/vector.h"
+#include "../lib/math/rect.h"
 
 namespace vulkan {
 	class Instance;
@@ -48,6 +50,16 @@ struct UBO {
 struct RenderDataVK {
 	UniformBuffer* ubo;
 	DescriptorSet* dset;
+};
+
+struct UBOFx {
+	matrix m,v,p;
+};
+
+struct VertexFx {
+	vector pos;
+	color col;
+	float u, v;
 };
 
 
@@ -94,6 +106,10 @@ public:
 	Array<RenderDataVK> rda_ob_shadow;
 	Array<RenderDataVK> rda_ob_shadow2;
 
+	Array<RenderDataVK> rda_fx;
+	Array<VertexBuffer*> vb_fx;
+	Pipeline *pipeline_fx = nullptr;
+
 
 	bool using_view_space = false;
 
@@ -111,7 +127,7 @@ public:
 	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
-	void draw_particles();
+	void draw_particles(CommandBuffer *cb, RenderPass *rp);
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);

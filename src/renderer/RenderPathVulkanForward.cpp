@@ -75,8 +75,13 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathV
 	ResourceManager::load_shader("module-vertex-instanced.shader");*/
 
 	/*shader_depth = ResourceManager::load_shader("forward/depth.shader");
-	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
+
+	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
+	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "3f,4f,2f");
+	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+	//pipeline_fx->set_culling(0);
+	pipeline_fx->rebuild();
 }
 
 void RenderPathVulkanForward::prepare() {
@@ -117,6 +122,8 @@ void RenderPathVulkanForward::draw() {
 	ubo.shadow_index = shadow_index;
 
 	draw_world(cb, rp, ubo, true, rda_tr, rda_ob);
+
+	draw_particles(cb, rp);
 
 	/*PerformanceMonitor::begin(ch_render);
 

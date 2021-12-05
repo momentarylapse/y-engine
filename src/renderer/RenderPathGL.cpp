@@ -240,7 +240,7 @@ void RenderPathGL::draw_particles() {
 
 	// particles
 	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
-	nix::vb_temp->create_quad(rect::ID_SYM);
+	nix::vb_temp->create_quad(rect::ID_SYM, rect(0,1, 1,0)); // flip uv y
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 		for (auto p: g->particles)
