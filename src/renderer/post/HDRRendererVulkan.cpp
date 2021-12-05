@@ -58,7 +58,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent)
 
 	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, 1);
+	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, "3f,3f,2f");
 	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
 	blur_ubo[1] = new UniformBuffer(sizeof(UBOBlur));
 	blur_dset[0] = pool->create_set(shader_blur.get());
@@ -67,12 +67,12 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent)
 	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
-	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->render_pass(), 0, 1);
+	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->render_pass(), 0, "3f,3f,2f");
 	dset_out = pool->create_set("buffer,sampler,sampler");
 
 
 
-	vb_2d = new VertexBuffer();
+	vb_2d = new VertexBuffer("3f,3f,2f");
 	create_quad(vb_2d, rect(-1,1, -1,1));
 
 }

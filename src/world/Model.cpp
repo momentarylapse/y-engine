@@ -128,7 +128,7 @@ void Model::_ResetPhysAbsolute_() {
 // TODO: move this into the renderer
 void SubMesh::create_vb(bool animated) {
 #ifdef USING_VULKAN
-	vertex_buffer = new VertexBuffer();
+	vertex_buffer = new VertexBuffer("3f,3f,2f");
 #else
 	if (animated)
 		vertex_buffer = new VertexBuffer("3f,3f,2f,4i,4f");

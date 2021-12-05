@@ -102,7 +102,7 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 						partition[x][z] = -1;
 
 #ifdef USING_VULKAN
-				vertex_buffer = new VertexBuffer();
+				vertex_buffer = new VertexBuffer("3f,3f,2f");
 #else
 				vertex_buffer = new VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
 #endif

@@ -28,7 +28,7 @@ static int ch_gui_iter = -1;
 
 void init(int ch_iter) {
 #ifdef USING_VULKAN
-	vertex_buffer = new VertexBuffer();
+	vertex_buffer = new VertexBuffer("3f,3f,2f|i");
 	vertex_buffer->build_v3_v3_v2_i({{{0,0,0}, {0,0,1}, 0,0}, {{0,1,0}, {0,0,1}, 0,1}, {{1,0,0}, {0,0,1}, 1,0}, {{1,1,0}, {0,0,1}, 1,1}}, {0,1,3, 0,3,2});
 #else
 	vertex_buffer = new VertexBuffer("3f,3f,2f|i");
