@@ -108,15 +108,13 @@ void RenderPathVulkanForward::draw() {
 	draw_skyboxes(cb, cam);
 
 
-	cam->update_matrices((float)width / (float)height, false);
+	cam->update_matrices((float)width / (float)height);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
-	ubo.sa = sa;
-	ubo.sb = sb;
 
 	draw_world(cb, rp, ubo, true, rda_tr, rda_ob);
 

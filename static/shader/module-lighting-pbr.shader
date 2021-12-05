@@ -143,7 +143,7 @@ float _surf_shadow_factor(Light l, vec3 p) {
 	proj.xyz /= proj.w;
 	proj.x = (proj.x +1)/2;
 	proj.y = (proj.y +1)/2;
-	proj.z = (proj.z +1)/2;
+	//proj.z = (proj.z +1)/2;
 	
 	if (proj.x > 0.01 && proj.x < 0.99 && proj.y > 0.01 && proj.y < 0.99 && proj.z < 1.0)
 		return 1.0 - _surf_shadow_pcf(proj.xyz) * l.harshness;

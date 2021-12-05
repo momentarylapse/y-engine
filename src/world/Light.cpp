@@ -85,7 +85,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 			float f = 1 / shadow_box_size;
 			auto s = matrix::scale(f, f, f);
 			// map onto [-1,1]x[-1,1]x[0,1]
-			shadow_projection = matrix::translation(vector(0,0,-0.5f)) * s * r * t;
+			shadow_projection = matrix::translation(vector(0,0,0.5f)) * matrix::scale(1,1,0.5f) * matrix::translation(vector(0,0,-0.5f)) * s * r * t;
 			//msg_write(shadow_projection.str());
 		} else {
 			auto t = matrix::translation(- o->pos);

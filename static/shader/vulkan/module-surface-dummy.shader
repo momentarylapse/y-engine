@@ -29,7 +29,6 @@ layout(binding = 0) uniform ParameterData {
 	Material material;
 	int num_lights;
 	int shadow_index;
-	float sa, sb;
 };
 layout(binding = 1) uniform LightData {
 	Light light[32];
@@ -171,9 +170,7 @@ vec3 _surf_light_proj(Light l, vec3 p) {
 	proj.xyz /= proj.w;
 	proj.x = (proj.x +1)/2;
 	proj.y = (proj.y +1)/2;
-	//proj.z = (proj.z +1)/2;
-	proj.z = (proj.z + sa) * sb;
-	//proj.z = proj.z *2;
+	proj.y = 1 - proj.y;
 //	if (proj.z > 1 || proj.z < 0 || proj.x < 0 || proj.x > 1 || proj.y < 0 || proj.y > 1)
 //		return vec3(1,0,0);
 	return clamp(proj.xyz, 0,1);

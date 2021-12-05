@@ -178,6 +178,8 @@ void init() {
 	FrameBuffer::DEFAULT->width = vp[2];
 	FrameBuffer::DEFAULT->height = vp[3];
 
+	glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+
 
 	msg_ok();
 	msg_left();

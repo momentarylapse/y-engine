@@ -126,7 +126,7 @@ void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, cons
 	// skyboxes
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices((float)fb->width / (float)fb->height, true);
+	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::clear_color(world.background);
@@ -139,7 +139,7 @@ void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, cons
 	// world
 	PerformanceMonitor::begin(ch_world);
 	cam->max_depth = max_depth;
-	cam->update_matrices((float)fb->width / (float)fb->height, true);
+	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::bind_buffer(ubo_light, 1);

@@ -391,7 +391,7 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices((float)width / (float)height, false);
+	cam->update_matrices((float)width / (float)height);
 
 	ubo.p = cam->m_projection;
 	ubo.v = matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose();

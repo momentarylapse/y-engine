@@ -105,9 +105,9 @@ void Camera::on_iterate(float dt) {
 // view space -> relative screen space (API independent)
 // (-1,-1) = top left
 // (+1,+1) = bottom right
-matrix Camera::projection_matrix(float aspect_ratio, bool z_sym) const {
+matrix Camera::projection_matrix(float aspect_ratio) const {
 	// flip the y-axis
-	return matrix::perspective(fov, aspect_ratio, min_depth, max_depth, z_sym) * matrix::scale(1,-1,1);
+	return matrix::perspective(fov, aspect_ratio, min_depth, max_depth, false) * matrix::scale(1,-1,1);
 }
 
 matrix Camera::view_matrix() const {
@@ -115,8 +115,8 @@ matrix Camera::view_matrix() const {
 	return matrix::rotation_q(o->ang).transpose() * matrix::translation(-o->pos);
 }
 
-void Camera::update_matrices(float aspect_ratio, bool z_sym) {
-	m_projection = projection_matrix(aspect_ratio, z_sym);
+void Camera::update_matrices(float aspect_ratio) {
+	m_projection = projection_matrix(aspect_ratio);
 	m_view = view_matrix();
 
 	// TODO fix.... use own projection matrix?
