@@ -84,6 +84,7 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 	ResourceManager::load_shader("module-vertex-instanced.shader");*/
 	ResourceManager::load_shader("vulkan/module-surface-dummy.shader");
 	ResourceManager::load_shader("module-vertex-default.shader");
+	ResourceManager::load_shader("module-vertex-animated.shader");
 
 
 
@@ -217,8 +218,8 @@ void RenderPathVulkan::process(CommandBuffer *cb, const Array<Texture*> &source,
 	nix::set_scissor(rect::EMPTY);*/
 }
 
-Map<Shader*,Pipeline*> ob_pipelines;
 Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
+	static Map<Shader*,Pipeline*> ob_pipelines;
 	if (ob_pipelines.contains(s))
 		return ob_pipelines[s];
 	msg_write("NEW PIPELINE");
@@ -226,8 +227,8 @@ Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
 	ob_pipelines.add({s, p});
 	return p;
 }
-Map<Shader*,Pipeline*> ob_pipelines_alpha;
 Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
+	static Map<Shader*,Pipeline*> ob_pipelines_alpha;
 	if (ob_pipelines_alpha.contains(s))
 		return ob_pipelines_alpha[s];
 	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
@@ -237,6 +238,16 @@ Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
 	//p->set_culling(0);
 	p->rebuild();
 	ob_pipelines_alpha.add({s, p});
+	return p;
+}
+
+Pipeline *get_pipeline_ani(Shader *s, RenderPass *rp) {
+	static Map<Shader*,Pipeline*> ob_ani_pipelines;
+	if (ob_ani_pipelines.contains(s))
+		return ob_ani_pipelines[s];
+	msg_write("NEW PIPELINE ANIMATED");
+	auto p = new Pipeline(s, rp, 0, "3f,3f,2f,4i,4f");
+	ob_ani_pipelines.add({s, p});
 	return p;
 }
 
@@ -250,6 +261,8 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descripto
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
 		msg_write("HARD");
 		p = get_pipeline_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+	} else if (v == ShaderVariant::ANIMATED) {
+		p = get_pipeline_ani(s, rp);
 	} else {
 		p = get_pipeline(s, rp);
 	}
@@ -326,12 +339,12 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 
 		if (index >= rda_fx.num) {
 			rda_fx.add({new UniformBuffer(sizeof(UBOFx)),
-				pool->create_set(shader_fx.get())});
+				pool->create_set(shader_fx.get()),
+				new VertexBuffer("3f,4f,2f")});
 			//rda_fx[index].dset->set_buffer(1, ubo_light);
 			rda_fx[index].dset->set_buffer(0, rda_fx[index].ubo);
 			rda_fx[index].dset->set_texture(1, g->texture);
 			rda_fx[index].dset->update();
-			vb_fx.add(new VertexBuffer("3f,4f,2f"));
 		}
 
 		Array<VertexFx> v;
@@ -346,12 +359,12 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
 				v.add({m * vector(-1,-1,0), p->col, p->source.x1, p->source.y2});
 			}
-		vb_fx[index]->update(v);
+		rda_fx[index].vb->update(v);
 
 		rda_fx[index].ubo->update(&ubo);
 
 		cb->bind_descriptor_set(0, rda_fx[index].dset);
-		cb->draw(vb_fx[index]);
+		cb->draw(rda_fx[index].vb);
 
 		index ++;
 	}
@@ -361,12 +374,12 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 
 		if (index >= rda_fx.num) {
 			rda_fx.add({new UniformBuffer(sizeof(UBOFx)),
-				pool->create_set(shader_fx.get())});
+				pool->create_set(shader_fx.get()),
+				new VertexBuffer("3f,4f,2f")});
 			//rda_fx[index].dset->set_buffer(1, ubo_light);
 			rda_fx[index].dset->set_buffer(0, rda_fx[index].ubo);
 			rda_fx[index].dset->set_texture(1, g->texture);
 			rda_fx[index].dset->update();
-			vb_fx.add(new VertexBuffer("3f,4f,2f"));
 		}
 
 		Array<VertexFx> v;
@@ -397,12 +410,12 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 			v.add({p10, p->col, p->source.x1, p->source.y2});
 		}
 
-		vb_fx[index]->update(v);
+		rda_fx[index].vb->update(v);
 
 		rda_fx[index].ubo->update(&ubo);
 
 		cb->bind_descriptor_set(0, rda_fx[index].dset);
-		cb->draw(vb_fx[index]);
+		cb->draw(rda_fx[index].vb);
 
 		index ++;
 	}
@@ -485,12 +498,12 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),
-			pool->create_set(t->material->get_shader(type, ShaderVariant::DEFAULT))});
+				pool->create_set(t->material->get_shader(type, ShaderVariant::DEFAULT))});
+			rda[index].dset->set_buffer(0, rda[index].ubo);
+			rda[index].dset->set_buffer(1, ubo_light);
 		}
 
 		rda[index].ubo->update(&ubo);
-		rda[index].dset->set_buffer(0, rda[index].ubo);
-		rda[index].dset->set_buffer(1, ubo_light);
 
 		if (allow_material) {
 			set_material(cb, rp, rda[index].dset, t->material, type, ShaderVariant::DEFAULT);
@@ -526,7 +539,7 @@ void RenderPathVulkan::draw_objects_instanced(bool allow_material) {
 //static Array<UniformBuffer*> ob_ubos;
 //static Array<DescriptorSet*> ob_dsets;
 
-void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
+void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBOAni &ubo, bool allow_material, Array<RenderDataVK> &rda) {
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -536,9 +549,12 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UB
 			continue;
 		Model *m = s.model;
 
+		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+
 		if (index >= rda.num) {
-			rda.add({new UniformBuffer(sizeof(UBO)),
+			rda.add({new UniformBuffer(ani ? sizeof(UBOAni) : sizeof(UBO)),
 				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
+			rda[index].dset->set_buffer(0, rda[index].ubo);
 			rda[index].dset->set_buffer(1, ubo_light);
 		}
 
@@ -548,21 +564,15 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UB
 		ubo.emission = s.material->emission;
 		ubo.metal = s.material->metal;
 		ubo.roughness = s.material->roughness;
+		if (ani)
+			memcpy(ubo.bone_matrix, &ani->dmatrix[0], sizeof(matrix) * ani->dmatrix.num);
 		rda[index].ubo->update(&ubo);
-		rda[index].dset->set_buffer(0, rda[index].ubo);
 
-		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-
-		if (ani and false) {
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);
-
-
-			/*if (allow_material)
-				set_material(s.material, type, ShaderVariant::ANIMATED);
+		if (ani) {
+			if (allow_material)
+				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED);
 			else
-				set_material(material_shadow, type, ShaderVariant::ANIMATED);
-			ani->buf->update_array(ani->dmatrix);
-			nix::bind_buffer(ani->buf, 7);*/
+				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::ANIMATED);
 		} else {
 			if (allow_material)
 				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);

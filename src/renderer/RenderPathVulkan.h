@@ -39,12 +39,19 @@ enum class ShaderVariant;
 
 
 struct UBO {
+	// matrix
 	matrix m,v,p;
+	// material
 	color albedo, emission;
 	float roughness, metal;
 	int dummy[2];
 	int num_lights;
 	int shadow_index;
+	int dummy2[2];
+};
+
+struct UBOAni : UBO {
+	matrix bone_matrix[128];
 };
 
 struct RenderDataVK {
@@ -60,6 +67,12 @@ struct VertexFx {
 	vector pos;
 	color col;
 	float u, v;
+};
+
+struct RenderDataFxVK {
+	UniformBuffer *ubo;
+	DescriptorSet *dset;
+	VertexBuffer *vb;
 };
 
 
@@ -106,8 +119,7 @@ public:
 	Array<RenderDataVK> rda_ob_shadow;
 	Array<RenderDataVK> rda_ob_shadow2;
 
-	Array<RenderDataVK> rda_fx;
-	Array<VertexBuffer*> vb_fx;
+	Array<RenderDataFxVK> rda_fx;
 	Pipeline *pipeline_fx = nullptr;
 
 
@@ -130,7 +142,7 @@ public:
 	void draw_particles(CommandBuffer *cb, RenderPass *rp);
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
-	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
+	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBOAni &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();

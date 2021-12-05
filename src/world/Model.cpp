@@ -127,14 +127,10 @@ void Model::_ResetPhysAbsolute_() {
 
 // TODO: move this into the renderer
 void SubMesh::create_vb(bool animated) {
-#ifdef USING_VULKAN
-	vertex_buffer = new VertexBuffer("3f,3f,2f");
-#else
 	if (animated)
 		vertex_buffer = new VertexBuffer("3f,3f,2f,4i,4f");
 	else
 		vertex_buffer = new VertexBuffer("3f,3f,2f");
-#endif
 }
 void Mesh::create_vb(bool animated) {
 	for (auto &s: sub)
@@ -173,7 +169,6 @@ void SubMesh::update_vb(Mesh *mesh, bool animated) {
 	}
 #endif
 
-#ifdef USING_OPENGL
 	if (animated) {
 		Array<VertexAnimated> vertex;
 		for (int i=0; i<num_triangles; i++) {
@@ -184,9 +179,6 @@ void SubMesh::update_vb(Mesh *mesh, bool animated) {
 		}
 		vertex_buffer->update(vertex);
 	} else {
-#else
-	{
-#endif
 		Array<Vertex1> vertex;
 		for (int i=0; i<num_triangles; i++) {
 			for (int k=0; k<3; k++) {
