@@ -9,7 +9,6 @@
 #include "Node.h"
 #include "Font.h"
 #include "../meta.h"
-#include "../graphics-impl.h"
 #include "../lib/math/rect.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
@@ -19,7 +18,6 @@
 
 namespace gui {
 
-VertexBuffer *vertex_buffer = nullptr;
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;
 shared<Node> toplevel;
@@ -27,12 +25,6 @@ static int ch_gui_iter = -1;
 
 
 void init(int ch_iter) {
-	vertex_buffer = new VertexBuffer("3f,3f,2f|i");
-#ifdef USING_VULKAN
-	vertex_buffer->update_v3_v3_v2_i({{{0,0,0}, {0,0,1}, 0,0}, {{0,1,0}, {0,0,1}, 0,1}, {{1,0,0}, {0,0,1}, 1,0}, {{1,1,0}, {0,0,1}, 1,1}}, {0,1,3, 0,3,2});
-#else
-	vertex_buffer->create_rect(rect::ID);
-#endif
 	ch_gui_iter = PerformanceMonitor::create_channel("gui", ch_iter);
 
 	Font::init_fonts();

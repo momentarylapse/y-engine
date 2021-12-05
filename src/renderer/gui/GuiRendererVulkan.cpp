@@ -26,8 +26,6 @@ struct UBOGUI {
 };
 
 
-void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID);
-
 GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent) {
 	ch_gui = PerformanceMonitor::create_channel("gui", channel);
 
@@ -40,7 +38,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 
 
 	vb = new VertexBuffer("3f,3f,2f");
-	create_quad(vb, rect::ID);
+	vb->create_quad(rect::ID);
 }
 
 GuiRendererVulkan::~GuiRendererVulkan() {

@@ -33,8 +33,6 @@ RenderPass *blur_render_pass;
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
-void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID);
-
 
 HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
@@ -73,7 +71,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent)
 
 
 	vb_2d = new VertexBuffer("3f,3f,2f");
-	create_quad(vb_2d, rect(-1,1, -1,1));
+	vb_2d->create_quad(rect::ID_SYM);
 
 }
 

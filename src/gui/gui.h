@@ -10,7 +10,6 @@
 
 #include "../lib/base/pointer.h"
 #include <functional>
-#include "../graphics-fwd.h"
 
 class vec2;
 
@@ -33,8 +32,6 @@ extern Array<Node*> sorted_nodes;
 void update_tree();
 
 void delete_node(Node *n);
-
-extern VertexBuffer *vertex_buffer;
 }
 
 

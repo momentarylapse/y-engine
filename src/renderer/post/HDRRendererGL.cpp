@@ -54,7 +54,7 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : Renderer("hdr", parent) {
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 
 	vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
-	vb_2d->create_rect(rect(-1,1, -1,1));
+	vb_2d->create_quad(rect::ID_SYM);
 }
 
 HDRRendererGL::~HDRRendererGL() {

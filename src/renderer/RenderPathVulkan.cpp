@@ -41,16 +41,6 @@ const int CUBE_SIZE = 128;
 
 
 
-
-
-void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
-	vb->update_v3_v3_v2_i({
-		{{r.x1,r.y1,0}, {0,0,1}, s.x1,s.y1},
-		{{r.x2,r.y1,0}, {0,0,1}, s.x2,s.y1},
-		{{r.x1,r.y2,0}, {0,0,1}, s.x1,s.y2},
-		{{r.x2,r.y2,0}, {0,0,1}, s.x2,s.y2}}, {0,1,3, 0,3,2});
-}
-
 RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
 	type = _type;
 
@@ -77,7 +67,7 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 
 
 	vb_2d = new VertexBuffer("3f,3f,2f");
-	create_quad(vb_2d, rect(-1,1, -1,1));
+	vb_2d->create_quad(rect::ID_SYM);
 
 
 

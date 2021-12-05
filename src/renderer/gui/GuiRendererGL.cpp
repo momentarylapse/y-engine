@@ -17,6 +17,9 @@
 GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
 	ch_gui = PerformanceMonitor::create_channel("gui", channel);
 	shader = ResourceManager::load_shader("forward/2d.shader");
+
+	vb = new VertexBuffer("3f,3f,2f");
+	vb->create_quad(rect::ID);
 }
 
 GuiRendererGL::~GuiRendererGL() {
@@ -57,8 +60,8 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 				float r = (float)width / (float)height;
 				nix::set_model_matrix(matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0));
 			}
-			gui::vertex_buffer->create_rect(rect::ID, p->source);
-			nix::draw_triangles(gui::vertex_buffer);
+			vb->create_quad(rect::ID, p->source);
+			nix::draw_triangles(vb);
 		}
 	}
 	nix::set_z(true, true);
