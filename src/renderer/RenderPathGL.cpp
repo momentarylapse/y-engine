@@ -10,7 +10,7 @@
 #include "RenderPathGL.h"
 #ifdef USING_OPENGL
 #include "base.h"
-#include "../lib/nix/nix.h"
+#include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/complex.h"
@@ -253,8 +253,7 @@ void RenderPathGL::draw_particles() {
 	}
 
 	// beams
-	Array<vector> v;
-	v.resize(6);
+	Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_model_matrix(matrix::ID);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
@@ -268,13 +267,13 @@ void RenderPathGL::draw_particles() {
 			auto _e1 = (p->pos - uae).normalized() * p->radius;
 			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
 			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
-			v[0] = p->pos - _e1;
-			v[1] = p->pos - _e2 + p->length;
-			v[2] = p->pos + _e2 + p->length;
-			v[3] = p->pos - _e1;
-			v[4] = p->pos + _e2 + p->length;
-			v[5] = p->pos + _e1;
-			nix::vb_temp->update(0, v);
+			v[0].p = p->pos - _e1;
+			v[1].p = p->pos - _e2 + p->length;
+			v[2].p = p->pos + _e2 + p->length;
+			v[3].p = p->pos - _e1;
+			v[4].p = p->pos + _e2 + p->length;
+			v[5].p = p->pos + _e1;
+			nix::vb_temp->update(v);
 			shader_fx->set_color("color", p->col);
 			shader_fx->set_floats("source", &p->source.x1, 4);
 			nix::draw_triangles(nix::vb_temp);

@@ -141,18 +141,15 @@ void Mesh::create_vb(bool animated) {
 		s.create_vb(animated);
 }
 
-void SubMesh::update_vb(Mesh *mesh, bool animated) {
-#ifdef USING_VULKAN
-	Array<vulkan::Vertex1> vertex;
-	for (int i=0; i<num_triangles; i++) {
-		for (int k=0; k<3; k++) {
-			int vi = triangle_index[i*3+k];
-			vertex.add({mesh->vertex[vi], normal[i*3+k], skin_vertex[i*6+k*2  ], skin_vertex[i*6+k*2+1]});
-		}
-	}
-	vertex_buffer->build_v3_v3_v2(vertex);
+struct VertexAnimated {
+	vector p, n;
+	float u,v;
+	ivec4 bone;
+	vec4 weight;
+};
 
-#else
+void SubMesh::update_vb(Mesh *mesh, bool animated) {
+#if 0
 	if (true) {
 		Array<vector> p, n;
 		Array<complex> uv;
@@ -174,21 +171,31 @@ void SubMesh::update_vb(Mesh *mesh, bool animated) {
 		vertex_buffer->update(1, normal);
 		vertex_buffer->update(2, skin_vertex);
 	}
+#endif
 
+#ifdef USING_OPENGL
 	if (animated) {
-		Array<ivec4> bone_index;
-		Array<vec4> bone_weight;
+		Array<VertexAnimated> vertex;
 		for (int i=0; i<num_triangles; i++) {
 			for (int k=0; k<3; k++) {
 				int vi = triangle_index[i*3+k];
-				bone_index.add(mesh->bone_index[vi]);
-				bone_weight.add(mesh->bone_weight[vi]);
+				vertex.add({mesh->vertex[vi], normal[i*3+k], skin_vertex[i*6+k*2  ], skin_vertex[i*6+k*2+1], mesh->bone_index[vi], mesh->bone_weight[vi]});
 			}
 		}
-		vertex_buffer->update(3, bone_index);
-		vertex_buffer->update(4, bone_weight);
-	}
+		vertex_buffer->update(vertex);
+	} else {
+#else
+	{
 #endif
+		Array<Vertex1> vertex;
+		for (int i=0; i<num_triangles; i++) {
+			for (int k=0; k<3; k++) {
+				int vi = triangle_index[i*3+k];
+				vertex.add({mesh->vertex[vi], normal[i*3+k], skin_vertex[i*6+k*2  ], skin_vertex[i*6+k*2+1]});
+			}
+		}
+		vertex_buffer->update(vertex);
+	}
 }
 
 void Mesh::update_vb(bool animated) {

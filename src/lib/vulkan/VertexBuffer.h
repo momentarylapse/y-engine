@@ -42,10 +42,10 @@ namespace vulkan {
 		Buffer vertex_buffer;
 		Buffer index_buffer;
 
-		void build(const DynamicArray &vertices);
-		void build_i(const DynamicArray &vertices, const Array<int> &indices);
-		void build_v3_v3_v2(const Array<Vertex1> &vertices);
-		void build_v3_v3_v2_i(const Array<Vertex1> &vertices, const Array<int> &indices);
+		void update(const DynamicArray &vertices);
+		void update_i(const DynamicArray &vertices, const Array<int> &indices);
+		void update_v3_v3_v2(const Array<Vertex1> &vertices);
+		void update_v3_v3_v2_i(const Array<Vertex1> &vertices, const Array<int> &indices);
 	};
 };
 

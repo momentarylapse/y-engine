@@ -94,23 +94,23 @@ void VertexBuffer::_destroy() {
 	output_count = 0;
 }
 
-void VertexBuffer::build(const DynamicArray &vertices) {
+void VertexBuffer::update(const DynamicArray &vertices) {
 	_create_buffer(vertex_buffer, vertices);
 	vertex_count = vertices.num;
 	output_count = vertices.num; // might be overwritten by creat_index_buffer()
 }
 
-void VertexBuffer::build_i(const DynamicArray &vertices, const Array<int> &indices) {
-	build(vertices);
+void VertexBuffer::update_i(const DynamicArray &vertices, const Array<int> &indices) {
+	update(vertices);
 	_create_index_buffer_i32(indices);
 }
 
-void VertexBuffer::build_v3_v3_v2(const Array<Vertex1> &vertices) {
-	build(vertices);
+void VertexBuffer::update_v3_v3_v2(const Array<Vertex1> &vertices) {
+	update(vertices);
 }
 
-void VertexBuffer::build_v3_v3_v2_i(const Array<Vertex1> &vertices, const Array<int> &indices) {
-	build_v3_v3_v2(vertices);
+void VertexBuffer::update_v3_v3_v2_i(const Array<Vertex1> &vertices, const Array<int> &indices) {
+	update_v3_v3_v2(vertices);
 	_create_index_buffer_i32(indices);
 }
 

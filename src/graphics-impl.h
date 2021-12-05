@@ -15,12 +15,14 @@
 // Vulkan
 
 	#include "lib/vulkan/vulkan.h"
+	using Vertex1 = vulkan::Vertex1;
 
 #else
 
 // OpenGL
 
 	#include "lib/nix/nix.h"
+	using Vertex1 = nix::Vertex1;
 
 #endif
 

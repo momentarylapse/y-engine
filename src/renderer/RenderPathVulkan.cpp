@@ -44,7 +44,7 @@ const int CUBE_SIZE = 128;
 
 
 void create_quad(VertexBuffer *vb, const rect &r, const rect &s = rect::ID) {
-	vb->build_v3_v3_v2_i({
+	vb->update_v3_v3_v2_i({
 		{{r.x1,r.y1,0}, {0,0,1}, s.x1,s.y1},
 		{{r.x2,r.y1,0}, {0,0,1}, s.x2,s.y1},
 		{{r.x1,r.y2,0}, {0,0,1}, s.x1,s.y2},

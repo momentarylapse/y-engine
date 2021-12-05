@@ -594,13 +594,12 @@ void Terrain::build_vertex_buffer() {
 #endif
 				}
 		}
-#ifdef USING_VULKAN
-	Array<vulkan::Vertex1> vertex;
+	Array<Vertex1> vertex;
 	for (int i=0; i<p.num; i++) {
 		vertex.add({p[i], n[i], uv[i*2], uv[i*2+1]});
 	}
-	vertex_buffer->build_v3_v3_v2(vertex);
-#else
+	vertex_buffer->update(vertex);
+#if 0
 //	vertex_buffer->build1(vertices);
 	vertex_buffer->update(0, p);
 	vertex_buffer->update(1, n);
