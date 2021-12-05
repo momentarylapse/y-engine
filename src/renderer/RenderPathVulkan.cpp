@@ -310,14 +310,14 @@ void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Ar
 
 
 void RenderPathVulkan::draw_particles() {
-	/*PerformanceMonitor::begin(ch_fx);
-	nix::set_shader(shader_fx.get());
+	PerformanceMonitor::begin(ch_fx);
+	/*nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	nix::set_z(false, true);
 
 	// particles
 	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
-	nix::vb_temp->create_rect(rect(-1,1, -1,1));
+	nix::vb_temp->create_quad(rect::ID_SYM);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 		for (auto p: g->particles)
@@ -330,8 +330,7 @@ void RenderPathVulkan::draw_particles() {
 	}
 
 	// beams
-	Array<vector> v;
-	v.resize(6);
+	Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_model_matrix(matrix::ID);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
@@ -345,13 +344,13 @@ void RenderPathVulkan::draw_particles() {
 			auto _e1 = (p->pos - uae).normalized() * p->radius;
 			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
 			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
-			v[0] = p->pos - _e1;
-			v[1] = p->pos - _e2 + p->length;
-			v[2] = p->pos + _e2 + p->length;
-			v[3] = p->pos - _e1;
-			v[4] = p->pos + _e2 + p->length;
-			v[5] = p->pos + _e1;
-			nix::vb_temp->update(0, v);
+			v[0].p = p->pos - _e1;
+			v[1].p = p->pos - _e2 + p->length;
+			v[2].p = p->pos + _e2 + p->length;
+			v[3].p = p->pos - _e1;
+			v[4].p = p->pos + _e2 + p->length;
+			v[5].p = p->pos + _e1;
+			nix::vb_temp->update(v);
 			shader_fx->set_color("color", p->col);
 			shader_fx->set_floats("source", &p->source.x1, 4);
 			nix::draw_triangles(nix::vb_temp);
@@ -365,8 +364,8 @@ void RenderPathVulkan::draw_particles() {
 
 	nix::set_z(true, true);
 	nix::disable_alpha();
-	break_point();
-	PerformanceMonitor::end(ch_fx);*/
+	break_point();*/
+	PerformanceMonitor::end(ch_fx);
 }
 
 static Array<UniformBuffer*> sb_ubos;

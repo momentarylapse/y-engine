@@ -94,6 +94,30 @@ Model* _create_object_multi(World *w, const Path &filename, const Array<vector> 
 	return nullptr;
 }
 
+void framebuffer_init(FrameBuffer *fb, const Array<Texture*> &tex) {
+#ifdef USING_VULKAN
+	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__()"));
+#else
+	fb->__init__(tex);
+#endif
+}
+
+void *framebuffer_depthbuffer(FrameBuffer *fb) {
+#ifdef USING_VULKAN
+	return fb->attachments.back().get();
+#else
+	return fb->depth_buffer.get();
+#endif
+}
+
+Array<Texture*> framebuffer_color_attachments(FrameBuffer *fb) {
+#ifdef USING_VULKAN
+	return weak(fb->attachments.sub_ref(0, -1));
+#else
+	return weak(fb->color_attachments);
+#endif
+}
+
 #pragma GCC pop_options
 
 
@@ -549,6 +573,15 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("HDRRenderer.fb_main", &HR::fb_main);
 	kaba::declare_class_element("HDRRenderer.fb_small1", &HR::fb_small1);
 	kaba::declare_class_element("HDRRenderer.fb_small2", &HR::fb_small2);
+
+
+	kaba::declare_class_size("FrameBuffer", sizeof(FrameBuffer));
+	kaba::declare_class_element("FrameBuffer.width", &FrameBuffer::width);
+	kaba::declare_class_element("FrameBuffer.height", &FrameBuffer::height);
+	kaba::link_external_class_func("FrameBuffer.__init__", &framebuffer_init);
+	kaba::link_external_class_func("FrameBuffer.depth_buffer", &framebuffer_depthbuffer);
+	kaba::link_external_class_func("FrameBuffer.color_attachments", &framebuffer_color_attachments);
+
 
 
 	kaba::link_external("tex_white", &tex_white);
