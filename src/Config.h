@@ -21,7 +21,7 @@ enum class AntialiasingMethod {
 
 class Config : public hui::Configuration {
 public:
-	bool debug = false;
+	int debug = 0;
 	string main_script;
 	string default_world;
 	string second_world;

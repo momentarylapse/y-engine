@@ -28,6 +28,8 @@ void Config::load(const Array<string> &arg) {
 		if (a.head(2).lower() == "-c") {
 			auto xx = a.sub_ref(2).explode("=");
 			set_str(xx[0].trim(), xx[1].trim());
+		} else if (a == "--debug") {
+			set_str("debug", "2");
 		} else if (a == "--fw") {
 			set_str("renderer.path", "forward");
 		} else if (a == "--def") {
@@ -47,7 +49,7 @@ void Config::load(const Array<string> &arg) {
 	main_script = get_str("main-script", "");
 	default_font = get_str("default-font", "");
 	default_material = get_str("default-material", "");
-	debug = get_bool("debug", true);
+	debug = get_int("debug", 1);
 
 	string aa = get_str("renderer.antialiasing", "");
 	if (aa == "") {

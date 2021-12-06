@@ -236,6 +236,12 @@ public:
 			PluginManager::add_controller(s.filename, s.variables);
 		for (auto &s: config.get_str("additional-scripts", "").explode(","))
 			PluginManager::add_controller(s, {});
+		if (config.debug >= 1)
+			for (auto &s: config.get_str("debug.scripts1", "").explode(","))
+				PluginManager::add_controller(s, {});
+		if (config.debug >= 2)
+			for (auto &s: config.get_str("debug.scripts2", "").explode(","))
+				PluginManager::add_controller(s, {});
 
 		msg_left();
 		msg_write("|                                                      |");
