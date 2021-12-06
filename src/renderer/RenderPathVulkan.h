@@ -50,10 +50,6 @@ struct UBO {
 	int dummy2[2];
 };
 
-struct UBOAni : UBO {
-	matrix bone_matrix[128];
-};
-
 struct RenderDataVK {
 	UniformBuffer* ubo;
 	DescriptorSet* dset;
@@ -118,6 +114,7 @@ public:
 	Array<RenderDataVK> rda_ob;
 	Array<RenderDataVK> rda_ob_shadow;
 	Array<RenderDataVK> rda_ob_shadow2;
+	Array<RenderDataVK> rda_sky;
 
 	Array<RenderDataFxVK> rda_fx;
 	Pipeline *pipeline_fx = nullptr;
@@ -142,7 +139,7 @@ public:
 	void draw_particles(CommandBuffer *cb, RenderPass *rp);
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
-	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBOAni &ubo, bool allow_material, Array<RenderDataVK> &rda);
+	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();

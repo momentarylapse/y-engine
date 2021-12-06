@@ -116,7 +116,7 @@ void RenderPathVulkanForward::draw() {
 
 	cam->update_matrices((float)width / (float)height);
 
-	UBOAni ubo;
+	UBO ubo;
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
 	ubo.num_lights = lights.num;
@@ -162,7 +162,7 @@ void RenderPathVulkanForward::draw() {
 void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 }
 
-void RenderPathVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBOAni &ubo, bool allow_material, Array<RenderDataVK> &rda_tr, Array<RenderDataVK> &rda_ob) {
+void RenderPathVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda_tr, Array<RenderDataVK> &rda_ob) {
 
 	draw_terrains(cb, rp, ubo, allow_material, rda_tr);
 	draw_objects_opaque(cb, rp, ubo, allow_material, rda_ob);
@@ -183,7 +183,7 @@ void RenderPathVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 
 	//msg_write(shadow_proj.str());
-	UBOAni ubo;
+	UBO ubo;
 	ubo.p = m * shadow_proj;
 	ubo.v = matrix::ID;
 	ubo.num_lights = 0;

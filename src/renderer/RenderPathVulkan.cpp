@@ -40,6 +40,13 @@ UniformBuffer *ubo_multi_matrix = nullptr;
 const int CUBE_SIZE = 128;
 
 
+const int LOCATION_PARAMS = 0;
+const int LOCATION_LIGHT = 1;
+const int LOCATION_SHADOW0 = 2;
+const int LOCATION_SHADOW1 = 3;
+const int LOCATION_TEX0 = 4;
+const int LOCATION_FX_TEX0 = 1;
+
 
 RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
 	type = _type;
@@ -269,7 +276,7 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descripto
 
 	cb->bind_pipeline(p);
 
-	set_textures(dset, 4, m->textures.num, weak(m->textures));
+	set_textures(dset, LOCATION_TEX0, m->textures.num, weak(m->textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
 
@@ -315,8 +322,8 @@ void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Ar
 			if (tex[k])
 				dset->set_texture(i0 + k, tex[k]);
 	}
-	dset->set_texture(2, fb_shadow->attachments[1].get());
-	dset->set_texture(3, fb_shadow2->attachments[1].get());
+	dset->set_texture(LOCATION_SHADOW0, fb_shadow->attachments[1].get());
+	dset->set_texture(LOCATION_SHADOW1, fb_shadow2->attachments[1].get());
 }
 
 
@@ -341,9 +348,9 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 			rda_fx.add({new UniformBuffer(sizeof(UBOFx)),
 				pool->create_set(shader_fx.get()),
 				new VertexBuffer("3f,4f,2f")});
-			//rda_fx[index].dset->set_buffer(1, ubo_light);
-			rda_fx[index].dset->set_buffer(0, rda_fx[index].ubo);
-			rda_fx[index].dset->set_texture(1, g->texture);
+			//rda_fx[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+			rda_fx[index].dset->set_buffer(LOCATION_PARAMS, rda_fx[index].ubo);
+			rda_fx[index].dset->set_texture(LOCATION_FX_TEX0, g->texture);
 			rda_fx[index].dset->update();
 		}
 
@@ -376,9 +383,9 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 			rda_fx.add({new UniformBuffer(sizeof(UBOFx)),
 				pool->create_set(shader_fx.get()),
 				new VertexBuffer("3f,4f,2f")});
-			//rda_fx[index].dset->set_buffer(1, ubo_light);
-			rda_fx[index].dset->set_buffer(0, rda_fx[index].ubo);
-			rda_fx[index].dset->set_texture(1, g->texture);
+			//rda_fx[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+			rda_fx[index].dset->set_buffer(LOCATION_PARAMS, rda_fx[index].ubo);
+			rda_fx[index].dset->set_texture(LOCATION_FX_TEX0, g->texture);
 			rda_fx[index].dset->update();
 		}
 
@@ -428,9 +435,6 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 	PerformanceMonitor::end(ch_fx);
 }
 
-static Array<UniformBuffer*> sb_ubos;
-static Array<DescriptorSet*> sb_dsets;
-
 void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 
 	auto rp = parent->render_pass();
@@ -447,28 +451,26 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 	ubo.m = matrix::ID;
 	ubo.num_lights = world.lights.num;
 
-	//nix::set_z(false, false);
-	//nix::set_cull(nix::CullMode::NONE);
 	for (auto *sb: world.skybox) {
 		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
 		ubo.m = sb->_matrix * matrix::scale(10,10,10);
 
 
 		for (int i=0; i<sb->material.num; i++) {
-			if (index >= sb_ubos.num) {
-				sb_ubos.add(new UniformBuffer(sizeof(UBO)));
-				sb_dsets.add(pool->create_set(sb->material[i]->get_shader(type, ShaderVariant::DEFAULT)));
+			if (index >= rda_sky.num) {
+				rda_sky.add({new UniformBuffer(sizeof(UBO)),
+					pool->create_set(sb->material[i]->get_shader(type, ShaderVariant::DEFAULT))});
+				rda_sky[index].dset->set_buffer(LOCATION_PARAMS, rda_sky[index].ubo);
+				rda_sky[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
 			}
 			ubo.albedo = sb->material[i]->albedo;
 			ubo.emission = sb->material[i]->emission;
 			ubo.metal = sb->material[i]->metal;
 			ubo.roughness = sb->material[i]->roughness;
 
-			sb_ubos[index]->update(&ubo);
-			sb_dsets[index]->set_buffer(0, sb_ubos[index]);
-			sb_dsets[index]->set_buffer(1, ubo_light);
+			rda_sky[index].ubo->update(&ubo);
 
-			set_material(cb, rp, sb_dsets[index], sb->material[i], type, ShaderVariant::DEFAULT);
+			set_material(cb, rp, rda_sky[index].dset, sb->material[i], type, ShaderVariant::DEFAULT);
 			cb->draw(sb->mesh[0]->sub[i].vertex_buffer);
 
 			index ++;
@@ -477,10 +479,6 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 
 
 	cam->max_depth = max_depth;
-
-	//nix::set_cull(nix::CullMode::DEFAULT);
-	//nix::disable_alpha();
-	//break_point();*/
 }
 
 void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
@@ -499,8 +497,8 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),
 				pool->create_set(t->material->get_shader(type, ShaderVariant::DEFAULT))});
-			rda[index].dset->set_buffer(0, rda[index].ubo);
-			rda[index].dset->set_buffer(1, ubo_light);
+			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
 		}
 
 		rda[index].ubo->update(&ubo);
@@ -536,10 +534,7 @@ void RenderPathVulkan::draw_objects_instanced(bool allow_material) {
 	}*/
 }
 
-//static Array<UniformBuffer*> ob_ubos;
-//static Array<DescriptorSet*> ob_dsets;
-
-void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBOAni &ubo, bool allow_material, Array<RenderDataVK> &rda) {
+void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -552,10 +547,10 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UB
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (index >= rda.num) {
-			rda.add({new UniformBuffer(ani ? sizeof(UBOAni) : sizeof(UBO)),
+			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(matrix) * ani->dmatrix.num) : sizeof(UBO)),
 				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
-			rda[index].dset->set_buffer(0, rda[index].ubo);
-			rda[index].dset->set_buffer(1, ubo_light);
+			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
 		}
 
 		m->update_matrix();
@@ -564,9 +559,9 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UB
 		ubo.emission = s.material->emission;
 		ubo.metal = s.material->metal;
 		ubo.roughness = s.material->roughness;
+		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 		if (ani)
-			memcpy(ubo.bone_matrix, &ani->dmatrix[0], sizeof(matrix) * ani->dmatrix.num);
-		rda[index].ubo->update(&ubo);
+			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
 		if (ani) {
 			if (allow_material)

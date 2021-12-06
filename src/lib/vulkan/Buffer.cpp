@@ -102,8 +102,8 @@ void Buffer::update(void *source) {
 	update_part(source, 0, size);
 }
 
-void Buffer::update_array(const DynamicArray &array) {
-	update_part(array.data, 0, array.num * array.element_size);
+void Buffer::update_array(const DynamicArray &array, int offset) {
+	update_part(array.data, offset, array.num * array.element_size);
 }
 
 
