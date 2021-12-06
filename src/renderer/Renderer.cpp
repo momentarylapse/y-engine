@@ -11,6 +11,8 @@
 #include "../helper/PerformanceMonitor.h"
 
 
+
+
 Renderer::Renderer(const string &name, Renderer *_parent) {
 	width = height = 0;
 	parent = _parent;

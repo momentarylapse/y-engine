@@ -13,6 +13,11 @@ class rect;
 #include "../graphics-fwd.h"
 #include "../lib/base/pointer.h"
 
+class rect;
+
+rect dynamicly_scaled_area(FrameBuffer *fb);
+rect dynamicly_scaled_source();
+
 
 class Renderer {
 public:

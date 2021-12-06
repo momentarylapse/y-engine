@@ -85,10 +85,11 @@ void HDRRendererVulkan::prepare() {
 
 	auto cb = command_buffer();
 
+	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 	// into fb_main
 	auto cur = fb_main.get();
-	cb->set_viewport(rect(0,cur->width, 0,cur->height));
+	cb->set_viewport(dynamicly_scaled_area(cur));
 
 	_render_pass->clear_color = {world.background};
 	cb->begin_render_pass(_render_pass, cur);
@@ -128,7 +129,7 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	auto rp = blur_render_pass;
 
 	cb->begin_render_pass(rp, target);
-	cb->set_viewport(rect(0,target->width, 0,target->height));
+	cb->set_viewport(dynamicly_scaled_area(target));
 
 	cb->bind_pipeline(blur_pipeline);
 	cb->bind_descriptor_set(0, blur_dset[iaxis]);

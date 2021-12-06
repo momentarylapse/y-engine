@@ -507,6 +507,9 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("EngineData.time_scale", &EngineData::time_scale);
 	kaba::declare_class_element("EngineData.fps_min", &EngineData::fps_min);
 	kaba::declare_class_element("EngineData.fps_max", &EngineData::fps_max);
+	kaba::declare_class_element("EngineData.resolution_scale", &EngineData::resolution_scale_x);
+	kaba::declare_class_element("EngineData.width", &EngineData::width);
+	kaba::declare_class_element("EngineData.height", &EngineData::height);
 	kaba::declare_class_element("EngineData.debug", &EngineData::debug);
 	kaba::declare_class_element("EngineData.console_enabled", &EngineData::console_enabled);
 	kaba::declare_class_element("EngineData.wire_mode", &EngineData::wire_mode);
@@ -557,7 +560,6 @@ void PluginManager::export_kaba() {
 #else
 	kaba::declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
 #endif
-	kaba::declare_class_element("RenderPath.resolution_scale", &RP::resolution_scale_x);
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.render_path);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.next_fb", &RP::next_fb);

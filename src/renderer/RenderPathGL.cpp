@@ -177,11 +177,12 @@ void RenderPathGL::process_depth(FrameBuffer *source, FrameBuffer *target, const
 
 void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
 	nix::bind_frame_buffer(target);
-	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
+	nix::set_scissor(dynamicly_scaled_area(target));
 	nix::set_z(false, false);
 	//nix::set_projection_ortho_relative();
 	//nix::set_view_matrix(matrix::ID);
 	//nix::set_model_matrix(matrix::ID);
+	float resolution_scale_x = 1.0f;
 	shader->set_floats("resolution_scale", &resolution_scale_x, 2);
 	nix::set_shader(shader);
 

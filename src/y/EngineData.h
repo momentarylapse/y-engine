@@ -50,7 +50,13 @@ public:
 	// output rendering/frame buffer resolution (might be smaller than the physical screen resolution)
 	int width, height;
 
-	// the "real world" aspect ratio of the output image (screen or window)
+
+	// dynamic resolution scaling
+	float resolution_scale_x = 1.0f;
+	float resolution_scale_y = 1.0f;
+
+
+	// the "real world" aspect ratio (cm/cm) of the output image (screen or window)
 	float physical_aspect_ratio;
 
 	bool first_frame;

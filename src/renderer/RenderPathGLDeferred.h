@@ -30,7 +30,7 @@ public:
 	void render_shadow_map(FrameBuffer *sfb, float scale);
 
 
-	void render_out_from_gbuffer(FrameBuffer *source, FrameBuffer *target);
+	void render_out_from_gbuffer(FrameBuffer *source);
 };
 
 #endif

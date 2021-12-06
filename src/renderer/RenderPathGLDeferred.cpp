@@ -13,20 +13,15 @@
 #include "../lib/nix/nix.h"
 #include "../lib/file/msg.h"
 #include "../lib/math/random.h"
+#include "../lib/math/vec4.h"
 
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
 #include "../plugins/PluginManager.h"
-#include "../fx/Particle.h"
-#include "../fx/Beam.h"
-#include "../fx/ParticleManager.h"
 #include "../world/Entity3D.h"
 #include "../world/Camera.h"
 #include "../world/Light.h"
-#include "../world/Material.h"
-#include "../world/Model.h"
-#include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../Config.h"
 #include "../meta.h"
@@ -111,7 +106,7 @@ void RenderPathGLDeferred::draw() {
 
 	render_background(target, cam, dynamic_fb_area());
 
-	render_out_from_gbuffer(gbuffer.get(), target);
+	render_out_from_gbuffer(gbuffer.get());
 
 	PerformanceMonitor::begin(ch_trans);
 	cam->update_matrices((float)target->width / (float)target->height);
@@ -130,9 +125,9 @@ void RenderPathGLDeferred::draw() {
 
 void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	PerformanceMonitor::begin(ch_bg);
-	nix::bind_frame_buffer(fb);
-	nix::set_viewport(target_area);
-	nix::set_scissor(target_area);
+	//nix::bind_frame_buffer(fb);
+	//nix::set_viewport(dynamicly_scaled_area(fb));
+	//nix::set_scissor(target_area);
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
@@ -147,7 +142,7 @@ void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, 
 
 }
 
-void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, nix::FrameBuffer *target) {
+void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gbuf_out);
 	auto s = shader_gbuffer_out.get();
 	if (using_view_space)
@@ -159,15 +154,23 @@ void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, nix
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
 	nix::bind_buffer(ssao_sample_buffer, 13);
 
-	//auto mat_vp = matrix::scale(1,-1,1) * cam->m_projection * cam->m_view;
-	//s->set_matrix("mat_vp", mat_vp);
-
 	nix::bind_buffer(ubo_light, 1);
 	auto tex = weak(source->color_attachments);
 	tex.add(source->depth_buffer.get());
 	tex.add(fb_shadow->depth_buffer.get());
 	tex.add(fb_shadow2->depth_buffer.get());
-	process(tex, target, s);
+	nix::set_textures(tex);
+
+
+	nix::set_z(false, false);
+	float resolution_scale_x = 1.0f;
+	s->set_floats("resolution_scale", &resolution_scale_x, 2);
+	nix::set_shader(s);
+
+	nix::vb_temp->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+	nix::draw_triangles(nix::vb_temp);
+
+
 	break_point();
 	PerformanceMonitor::end(ch_gbuf_out);
 }
@@ -177,8 +180,8 @@ void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam
 void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	PerformanceMonitor::begin(ch_world);
 	nix::bind_frame_buffer(fb);
-	nix::set_viewport(target_area);
-	nix::set_scissor(target_area);
+	nix::set_viewport(dynamicly_scaled_area(fb));
+	//nix::set_scissor(target_area);
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;

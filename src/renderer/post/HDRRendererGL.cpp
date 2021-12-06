@@ -64,7 +64,10 @@ void HDRRendererGL::prepare() {
 	if (child)
 		child->prepare();
 
+	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+
 	nix::bind_frame_buffer(fb_main.get());
+	nix::set_viewport(dynamicly_scaled_area(fb_main.get()));
 
 	if (child)
 		child->draw();
@@ -91,7 +94,8 @@ void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float
 
 void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
 	nix::bind_frame_buffer(target);
-	nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
+	nix::set_viewport(dynamicly_scaled_area(target));
+	//nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
 	nix::set_z(false, false);
 	//nix::set_projection_ortho_relative();
 	//nix::set_view_matrix(matrix::ID);
@@ -101,7 +105,7 @@ void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, 
 
 	nix::set_textures(source);
 	nix::draw_triangles(vb_2d);
-	nix::set_scissor(rect::EMPTY);
+	//nix::set_scissor(rect::EMPTY);
 }
 
 void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {

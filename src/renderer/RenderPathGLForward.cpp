@@ -18,16 +18,9 @@
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
 #include "../plugins/PluginManager.h"
-#include "../fx/Particle.h"
-#include "../fx/Beam.h"
-#include "../fx/ParticleManager.h"
 #include "../world/Camera.h"
 #include "../world/Light.h"
 #include "../world/Entity3D.h"
-#include "../world/Material.h"
-#include "../world/Model.h"
-#include "../world/Object.h" // meh
-#include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../Config.h"
 #include "../meta.h"
@@ -108,16 +101,12 @@ void RenderPathGLForward::prepare() {
 void RenderPathGLForward::draw() {
 	PerformanceMonitor::begin(channel);
 
-	render_into_texture(parent->frame_buffer(), cam, dynamic_fb_area());
+	auto fb = frame_buffer();
 
-	PerformanceMonitor::end(channel);
-}
-
-void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 	PerformanceMonitor::begin(ch_bg);
 	//nix::bind_frame_buffer(fb);
-	nix::set_viewport(target_area);
-	nix::set_scissor(target_area);
+	//nix::set_viewport(target_area);
+	//nix::set_scissor(target_area);
 
 	auto m = matrix::scale(1,-1,1);
 	if (config.antialiasing_method == AntialiasingMethod::TAA)
@@ -152,7 +141,12 @@ void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, cons
 	PerformanceMonitor::end(ch_world);
 
 	draw_particles();
-	nix::set_scissor(rect::EMPTY);
+	//nix::set_scissor(rect::EMPTY);
+
+	PerformanceMonitor::end(channel);
+}
+
+void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 }
 
 void RenderPathGLForward::draw_world(bool allow_material) {

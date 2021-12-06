@@ -39,7 +39,8 @@ void set_viewport(const rect &area) {
 	target_width = max((int)area.width(), 1);
 	target_height = max((int)area.height(), 1);
 
-	glViewport(area.x1, cur_framebuffer->height - area.height() + area.y1, area.width(), area.height());
+	//glViewport(area.x1, cur_framebuffer->height - area.height() + area.y1, area.width(), area.height());
+	glViewport(area.x1, area.y1, area.width(), area.height());
 }
 
 void set_model_matrix(const matrix &mat) {

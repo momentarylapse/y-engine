@@ -90,6 +90,16 @@ using namespace std::chrono;
 
 
 
+rect dynamicly_scaled_area(FrameBuffer *fb) {
+	//return rect(0, fb->width, 0, fb->height);
+	return rect(0, fb->width * engine.resolution_scale_x, 0, fb->height * engine.resolution_scale_y);
+}
+
+rect dynamicly_scaled_source() {
+	return rect(0, engine.resolution_scale_x, 0, engine.resolution_scale_y);
+}
+
+
 class YEngineApp {
 public:
 	
@@ -368,14 +378,14 @@ public:
 			//msg_write(format("%s  ---  %f", fa2s(render_times), target_dt));
 			// TODO measure render time better... even when rendering faster than 60Hz OpenGL will wait...
 			if (dt > target_dt * 1.05f) {
-				render_path->resolution_scale_x /= 1.20f;
+				engine.resolution_scale_x /= 1.20f;
 			} else if (dt < target_dt * 0.82f) {
-				render_path->resolution_scale_x *= 1.20f;
+				engine.resolution_scale_x *= 1.20f;
 			}
-			render_path->resolution_scale_x = clamp(render_path->resolution_scale_x, config.resolution_scale_min, config.resolution_scale_max);
-			if (render_path->resolution_scale_x != render_path->resolution_scale_y)
-				msg_write(format("dyn res   %.0f %%", render_path->resolution_scale_x * 100));
-			render_path->resolution_scale_y = render_path->resolution_scale_x;
+			engine.resolution_scale_x = clamp(engine.resolution_scale_x, config.resolution_scale_min, config.resolution_scale_max);
+			if (engine.resolution_scale_x != engine.resolution_scale_y)
+				msg_write(format("dyn res   %.0f %%", engine.resolution_scale_x * 100));
+			engine.resolution_scale_y = engine.resolution_scale_x;
 			drt_time = 0;
 			drt_frames = 0;
 			render_times.clear();
