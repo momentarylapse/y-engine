@@ -10,8 +10,6 @@ cc = meson.get_compiler('cpp')
 # mandatory dependencies
 mdep = cc.find_library('m', required : false)
 threaddep = dependency('threads')
-gtk3dep = dependency('gtk+-3.0')
-add_project_arguments('-DHAS_LIB_GTK3=1', language : ['cpp'])
 zlibdep = dependency('zlib')
 add_project_arguments('-DHAS_LIB_ZLIB=1', language : ['cpp'])
 glfwdep = dependency('glfw')
@@ -20,7 +18,7 @@ gldep = dependency('GL')
 add_project_arguments('-DHAS_LIB_GL=1', language : ['cpp'])
 freetype2dep = dependency('freetype2')
 add_project_arguments('-DHAS_LIB_FREETYPE2=1', language : ['cpp'])
-deps = [mdep, threaddep, gtk3dep, zlibdep, glfwdep, gldep, freetype2dep]
+deps = [mdep, threaddep, zlibdep, glfwdep, gldep, freetype2dep]
 
 # optional dependency: unwind
 d = cc.find_library('unwind', required : false)
