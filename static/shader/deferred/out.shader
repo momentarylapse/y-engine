@@ -70,7 +70,7 @@ uniform float ambient_occlusion_radius = 10;
 vec2 project_onto_texture(vec3 pv) {
 	vec4 pp = matrix.project * vec4(pv,1);
 	pp.xyz /= pp.w;
-	pp.xyz = pp.xyz * 0.5 + 0.5;
+	pp.xy = pp.xy * 0.5 + 0.5;
 	return pp.xy * resolution_scale + vec2(0,1-resolution_scale.y);
 }
 

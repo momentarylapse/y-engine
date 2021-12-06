@@ -33,6 +33,9 @@ public:
 
 	FrameBuffer *frame_buffer() const override;
 	DepthBuffer *depth_buffer() const override;
+
+
+	bool forwarding_into_window() const override { return true; }
 };
 
 #endif

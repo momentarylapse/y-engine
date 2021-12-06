@@ -66,6 +66,8 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent)
 
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 	pipeline_out = new vulkan::Pipeline(shader_out.get(), parent->render_pass(), 0, "3f,3f,2f");
+	pipeline_out->set_culling(0);
+	pipeline_out->rebuild();
 	dset_out = pool->create_set("buffer,sampler,sampler");
 
 
@@ -150,13 +152,14 @@ void HDRRendererVulkan::render_out(CommandBuffer *cb, FrameBuffer *source, Textu
 	dset_out->update();
 	cb->bind_descriptor_set(0, dset_out);
 	struct PCOut {
+		matrix p, m, v;
 		float exposure;
 		float bloom_factor;
 		float gamma;
 		float scale_x;
 		float scale_y;
 	};
-	PCOut pco = {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y};
+	PCOut pco = {matrix::ID, matrix::ID, matrix::ID, cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y};
 	cb->push_constant(0, sizeof(pco), &pco);
 	cb->draw(vb_2d);
 

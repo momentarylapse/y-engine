@@ -48,6 +48,9 @@ public:
 	virtual CommandBuffer *command_buffer() const;
 #endif
 
+	virtual bool forwarding_into_window() const;
+	bool rendering_into_window() const;
+
 
 	//int ch_render= -1;
 	//int ch_end = -1;

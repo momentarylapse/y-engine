@@ -102,13 +102,11 @@ void RenderPathGLForward::draw() {
 	PerformanceMonitor::begin(channel);
 
 	auto fb = frame_buffer();
+	bool flip_y = rendering_into_window();
 
 	PerformanceMonitor::begin(ch_bg);
-	//nix::bind_frame_buffer(fb);
-	//nix::set_viewport(target_area);
-	//nix::set_scissor(target_area);
 
-	auto m = matrix::scale(1,-1,1);
+	auto m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
 	if (config.antialiasing_method == AntialiasingMethod::TAA)
 		 m *= jitter(fb->width, fb->height, 0);
 
@@ -120,6 +118,7 @@ void RenderPathGLForward::draw() {
 
 	nix::clear_color(world.background);
 	nix::clear_z();
+	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
 	draw_skyboxes(cam);
 	PerformanceMonitor::end(ch_bg);
@@ -134,6 +133,7 @@ void RenderPathGLForward::draw() {
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
+	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
 	draw_world(true);
 	Scheduler::handle_render_inject();
@@ -142,6 +142,8 @@ void RenderPathGLForward::draw() {
 
 	draw_particles();
 	//nix::set_scissor(rect::EMPTY);
+
+	nix::set_cull(nix::CullMode::DEFAULT);
 
 	PerformanceMonitor::end(channel);
 }

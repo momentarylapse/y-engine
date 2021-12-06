@@ -112,7 +112,7 @@ void *framebuffer_depthbuffer(FrameBuffer *fb) {
 
 Array<Texture*> framebuffer_color_attachments(FrameBuffer *fb) {
 #ifdef USING_VULKAN
-	return weak(fb->attachments.sub_ref(0, -1));
+	return weak(fb->attachments);//.sub_ref(0, -1));
 #else
 	return weak(fb->color_attachments);
 #endif

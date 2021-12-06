@@ -23,6 +23,8 @@ public:
 	void prepare() override;
 	void draw() override;
 
+	bool forwarding_into_window() const override { return false; };
+
 	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;
 	void render_into_gbuffer(FrameBuffer *fb, Camera *cam, const rect &target_area);
 	void render_background(FrameBuffer *fb, Camera *cam, const rect &target_area);

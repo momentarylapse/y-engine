@@ -32,8 +32,9 @@ public:
 	shared<FrameBuffer> fb_small1;
 	shared<FrameBuffer> fb_small2;
 
-	FrameBuffer *frame_buffer() const { return fb_main.get(); };
-	DepthBuffer *depth_buffer() const { return _depth_buffer; };
+	FrameBuffer *frame_buffer() const override { return fb_main.get(); };
+	DepthBuffer *depth_buffer() const override { return _depth_buffer; };
+	bool forwarding_into_window() const override { return false; };
 
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;

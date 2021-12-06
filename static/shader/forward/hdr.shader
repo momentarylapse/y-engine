@@ -8,6 +8,19 @@
 <VertexShader>
 #extension GL_ARB_separate_shader_objects : enable
 
+struct Matrix {
+	mat4 model;
+	mat4 view;
+	mat4 project;
+};
+#ifdef vulkan
+layout(push_constant) uniform ParameterData {
+	Matrix matrix;
+};
+#else
+uniform Matrix matrix;
+#endif
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_uv;
@@ -16,17 +29,27 @@ layout(location = 2) in vec2 in_uv;
 layout(location = 0) out vec2 out_uv;
 
 void main() {
-	gl_Position = vec4(in_position, 1.0);
+	gl_Position = matrix.project * vec4(in_position, 1.0);
 	out_uv = in_uv;
 }
 </VertexShader>
 <FragmentShader>
 #extension GL_ARB_separate_shader_objects : enable
 
+/*struct Matrix {
+	mat4 model;
+	mat4 view;
+	mat4 project;
+};*/
 
 #ifdef vulkan
 
-layout(push_constant) uniform Parameters {
+
+layout(push_constant) uniform ParameterData {
+	//Matrix matrix;
+	mat4 model;
+	mat4 view;
+	mat4 project;
 	float exposure;
 	float bloom_factor;
 	float gamma;
@@ -36,6 +59,7 @@ layout(push_constant) uniform Parameters {
 
 #else
 
+//uniform Matrix matrix;
 uniform float exposure = 1.0;
 uniform float bloom_factor = 0.2;
 uniform float gamma = 2.2;
@@ -72,6 +96,7 @@ void main() {
 	vec2 uv = in_uv * vec2(scale_x, scale_y);
 	uv.y += 1 - scale_y;
 	out_color.rgb = textureLod(tex0, uv, 0).rgb;
+	
 	vec3 bloom = textureLod(tex1, uv, 0).rgb;
 	out_color.rgb += bloom * bloom_factor;
 	out_color.rgb = tone_map(out_color.rgb);

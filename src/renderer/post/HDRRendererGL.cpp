@@ -46,14 +46,14 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : Renderer("hdr", parent) {
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 
 	if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
-		fb_main->color_attachments[0]->set_options("wrap=clamp");
+		fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
 	shader_out = ResourceManager::load_shader("forward/hdr.shader");
 
-	vb_2d = new nix::VertexBuffer("3f,3f,2f|i");
+	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 }
 
@@ -81,7 +81,8 @@ void HDRRendererGL::prepare() {
 }
 
 void HDRRendererGL::draw() {
-	render_out(fb_main.get(), fb_small2->color_attachments[0].get());
+	bool flip_y = rendering_into_window();
+	render_out(fb_main.get(), fb_small2->color_attachments[0].get(), flip_y);
 }
 
 void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis) {
@@ -108,7 +109,7 @@ void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, 
 	//nix::set_scissor(rect::EMPTY);
 }
 
-void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {
+void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, bool flip_y) {
 	PerformanceMonitor::begin(ch_out);
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
@@ -117,14 +118,16 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {
 	shader_out->set_float("bloom_factor", cam->bloom_factor);
 	shader_out->set_float("scale_x", resolution_scale_x);
 	shader_out->set_float("scale_y", resolution_scale_y);
-	nix::set_projection_matrix(matrix::ID);
+	nix::set_projection_matrix(flip_y ? matrix::scale(1,-1,1) : matrix::ID);
 	nix::set_view_matrix(matrix::ID);
 	nix::set_model_matrix(matrix::ID);
+	nix::set_cull(nix::CullMode::NONE);
 
 	nix::set_z(false, false);
 
 	nix::draw_triangles(vb_2d);
 
+	nix::set_cull(nix::CullMode::DEFAULT);
 	break_point();
 	PerformanceMonitor::end(ch_out);
 }

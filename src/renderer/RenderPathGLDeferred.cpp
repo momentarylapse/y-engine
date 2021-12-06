@@ -103,6 +103,7 @@ void RenderPathGLDeferred::draw() {
 	PerformanceMonitor::begin(channel);
 
 	auto target = parent->frame_buffer();
+	bool flip_y = rendering_into_window();
 
 	render_background(target, cam, dynamic_fb_area());
 
@@ -196,17 +197,19 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::set_projection_matrix(matrix::scale(1,1,1) * cam->m_projection);
 
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
+	nix::set_cull(nix::CullMode::CW);
 
 	draw_world(true);
 	Scheduler::handle_render_inject();
 	break_point();
 	PerformanceMonitor::end(ch_world);
 
+	nix::set_cull(nix::CullMode::DEFAULT);
 	draw_particles();
 }
 

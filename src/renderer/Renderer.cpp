@@ -69,3 +69,16 @@ CommandBuffer *Renderer::command_buffer() const {
 	return parent->command_buffer();
 }
 #endif
+
+
+bool Renderer::rendering_into_window() const {
+	if (!parent)
+		return false;
+	return parent->forwarding_into_window();
+}
+
+bool Renderer::forwarding_into_window() const {
+	if (!parent)
+		return false;
+	return parent->forwarding_into_window();
+}
