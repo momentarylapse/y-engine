@@ -31,6 +31,31 @@ void GuiRendererGL::draw() {
 	draw_gui(nullptr);
 }
 
+void apply_shader_data(Shader *s, Any &shader_data) {
+	if (shader_data.is_empty())
+		return;
+	if (!shader_data.is_array()) {
+		msg_write("invalid shader data: " + shader_data.str());
+		return;
+	}
+	for (auto &x: shader_data.as_array()) {
+		if (!x.is_array()) {
+			msg_write("invalid shader data item: " + x.str());
+			continue;
+		}
+		if (!x.array_get(0).is_string()) {
+			msg_write("invalid shader data item: " + x.str());
+			continue;
+		}
+		if (x.array_get(1).is_float())
+			s->set_float(x.array_get(0).as_string(), x.array_get(1).as_float());
+		else if (x.array_get(1).is_int())
+			s->set_float(x.array_get(0).as_string(), x.array_get(1).as_int());
+		else
+			msg_write("invalid shader data item: " + x.str());
+	}
+}
+
 void GuiRendererGL::draw_gui(FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gui);
 	gui::update();
@@ -47,8 +72,10 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 			auto s = shader;
-			if (p->shader)
+			if (p->shader) {
 				s = p->shader.get();
+				apply_shader_data(s, p->shader_data);
+			}
 			nix::set_shader(s);
 			s->set_float("blur", p->bg_blur);
 			s->set_color("color", p->eff_col);

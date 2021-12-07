@@ -141,6 +141,10 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	return shader;
 }
 
+Shader* ResourceManager::create_shader(const string &source) {
+	return Shader::create(source);
+}
+
 Texture* ResourceManager::load_texture(const Path& filename) {
 	if (filename.is_empty())
 		return nullptr;

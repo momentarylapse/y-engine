@@ -434,6 +434,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
 	kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
 	kaba::declare_class_element("ui.Picture.shader", &gui::Picture::shader);
+	kaba::declare_class_element("ui.Picture.shader_data", &gui::Picture::shader_data);
 	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
 	kaba::declare_class_element("ui.Picture.angle", &gui::Picture::angle);
 	kaba::link_external_class_func("ui.Picture.__init__:Picture:rect:Texture", &gui::Picture::__init2__);
@@ -592,6 +593,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("engine", &engine);
 	kaba::link_external("load_model", (void*)&ModelManager::load);
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
+	kaba::link_external("create_shader", (void*)&ResourceManager::create_shader);
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
 	kaba::link_external("get_controller", (void*)&PluginManager::get_controller);
 	kaba::link_external("add_camera", (void*)&add_camera);

@@ -9,6 +9,7 @@
 
 #include "../graphics-fwd.h"
 #include "Node.h"
+#include "../lib/any/any.h"
 
 namespace gui {
 
@@ -29,18 +30,7 @@ public:
 
 	shared<Shader> shader;
 	shared<Texture> texture;
-	/*vulkan::Texture *texture;
-	vulkan::UniformBuffer *ubo;
-	vulkan::DescriptorSet *dset;
-	vulkan::Shader *user_shader;
-	vulkan::Pipeline *user_pipeline;*/
-
-	//virtual void rebuild();
-
-	/*static vulkan::Shader *shader;
-	static vulkan::Pipeline *pipeline;
-	static vulkan::VertexBuffer *vertex_buffer;
-	static vulkan::RenderPass *render_pass;*/
+	Any shader_data;
 };
 
 }
