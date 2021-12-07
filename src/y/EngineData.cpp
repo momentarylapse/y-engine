@@ -42,6 +42,7 @@ EngineData::EngineData() {
 	height = 0;
 	window_renderer = nullptr;
 	gui_renderer = nullptr;
+	post_processor = nullptr;
 	hdr_renderer = nullptr;
 	render_path = nullptr;
 

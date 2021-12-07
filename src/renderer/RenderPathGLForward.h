@@ -20,7 +20,7 @@ public:
 	void prepare() override;
 	void draw() override;
 
-	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;
+	void render_into_texture(FrameBuffer *fb, Camera *cam) override;
 	void draw_world(bool allow_material);
 	void render_shadow_map(FrameBuffer *sfb, float scale);
 };

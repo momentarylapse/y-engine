@@ -427,6 +427,12 @@
     <ClCompile Include="src\renderer\post\HDRRendererVulkan.cpp">
       <Filter>src\renderer\post</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\post\PostProcessorGL.cpp">
+      <Filter>src\renderer\post</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\post\PostProcessorVulkan.cpp">
+      <Filter>src\renderer\post</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
@@ -930,6 +936,12 @@
     <ClInclude Include="src\renderer\post\HDRRendererVulkan.h">
       <Filter>src\renderer\post</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\post\PostProcessorGL.h">
+      <Filter>src\renderer\post</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\post\PostProcessorVulkan.h">
+      <Filter>src\renderer\post</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\target\TargetRenderer.h">
       <Filter>src\renderer\target</Filter>
     </ClInclude>
@@ -1096,9 +1108,6 @@
     </Filter>
     <Filter Include="src\lib\nix">
       <UniqueIdentifier>{F2B28380-C7CD-DA9A-3F74-DD2903EC2A01}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\lib\sound">
-      <UniqueIdentifier>{5EA1CAA4-2FB1-9A0B-18B4-1F9FB1E00655}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\lib\vulkan">
       <UniqueIdentifier>{CA8DC7DE-188E-45F8-3DB9-3760FBE1DAAA}</UniqueIdentifier>

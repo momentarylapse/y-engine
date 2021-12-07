@@ -31,6 +31,7 @@
 #include "../renderer/RenderPathGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
 #include "../renderer/post/HDRRendererGL.h"
+#include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
 #endif
 #ifdef USING_VULKAN
@@ -38,6 +39,7 @@
 #include "../renderer/RenderPathVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
 #include "../renderer/post/HDRRendererVulkan.h"
+#include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
 #include "../y/EngineData.h"
@@ -526,6 +528,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("EngineData.window_renderer", &EngineData::window_renderer);
 	kaba::declare_class_element("EngineData.gui_renderer", &EngineData::gui_renderer);
 	kaba::declare_class_element("EngineData.hdr_renderer", &EngineData::hdr_renderer);
+	kaba::declare_class_element("EngineData.post_processor", &EngineData::post_processor);
 	kaba::declare_class_element("EngineData.render_path", &EngineData::render_path);
 	kaba::link_external_class_func("EngineData.exit", &global_exit);
 
@@ -538,6 +541,7 @@ void PluginManager::export_kaba() {
 	using GR = GuiRendererVulkan;
 	using RP = RenderPathVulkan;
 	using RPF = RenderPathVulkanForward;
+	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
 	using WR = WindowRendererGL;
@@ -546,28 +550,29 @@ void PluginManager::export_kaba() {
 	using RP = RenderPathGL;
 	using RPF = RenderPathGLForward;
 	using RPD = RenderPathGLDeferred;
+	using PP = PostProcessorGL;
 #endif
 	kaba::declare_class_size("RenderPath", sizeof(RP));
 	kaba::declare_class_element("RenderPath.type", &RP::type);
-//	kaba::declare_class_element("RenderPath.depth_buffer", &RP::depth_buffer);
 	kaba::declare_class_element("RenderPath.cube_map", &RP::cube_map);
-	kaba::declare_class_element("RenderPath.fb2", &RP::fb2);
-	kaba::declare_class_element("RenderPath.fb3", &RP::fb3);
 	kaba::declare_class_element("RenderPath.shader_fx", &RP::shader_fx);
 	kaba::declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow);
 	kaba::declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);
 #ifdef USING_OPENGL
 	kaba::declare_class_element("RenderPath.gbuffer", &RPD::gbuffer);
 #else
-	kaba::declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
+	//kaba::declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
 #endif
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.render_path);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
-	kaba::link_external_class_func("RenderPath.next_fb", &RP::next_fb);
-	kaba::link_external_class_func("RenderPath.process", &RP::process);
-	kaba::link_external_class_func("RenderPath.add_post_processor", &RP::add_post_processor);
 	kaba::link_external_class_func("RenderPath.add_fx_injector", &RP::add_fx_injector);
 
+	kaba::declare_class_size("PostProcessor", sizeof(PP));
+	kaba::declare_class_element("PostProcessor.fb1", &PP::fb1);
+	kaba::declare_class_element("PostProcessor.fb2", &PP::fb2);
+	kaba::link_external_class_func("PostProcessor.next_fb", &PP::next_fb);
+	kaba::link_external_class_func("PostProcessor.process", &PP::process);
+	kaba::link_external_class_func("PostProcessor.add_stage", &PP::add_stage);
 
 	kaba::declare_class_size("WindowRenderer", sizeof(RP));
 	kaba::declare_class_element("RenderPath.type", &RP::type);

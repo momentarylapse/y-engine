@@ -71,6 +71,7 @@ public:
 	TargetRenderer *window_renderer;
 	Renderer *gui_renderer;
 	Renderer *hdr_renderer;
+	Renderer *post_processor;
 	RenderPath *render_path;
 };
 extern EngineData engine;

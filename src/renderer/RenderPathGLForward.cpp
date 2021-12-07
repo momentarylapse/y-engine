@@ -30,19 +30,12 @@
 
 RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", parent, RenderPathType::FORWARD) {
 
-	fb2 = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16")});
-	fb3 = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
-
-	fb2->color_attachments[0]->set_options("wrap=clamp");
-	fb3->color_attachments[0]->set_options("wrap=clamp");
 
 	ResourceManager::default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "") == "pbr") {
@@ -55,9 +48,7 @@ RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", 
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
 
-	shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
-	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
 }
 
 void RenderPathGLForward::prepare() {
@@ -148,7 +139,7 @@ void RenderPathGLForward::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
+void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 }
 
 void RenderPathGLForward::draw_world(bool allow_material) {

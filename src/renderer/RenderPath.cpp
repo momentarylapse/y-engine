@@ -44,17 +44,10 @@ RenderPath::RenderPath(const string &name, Renderer *parent) : Renderer(name, pa
 }
 
 
-string callable_name(const void *c);
-
-void RenderPath::add_post_processor(const PostProcessor::Callback *f) {
-	post_processors.add({f, PerformanceMonitor::create_channel(callable_name(f), ch_post)});
-}
-
 void RenderPath::add_fx_injector(const RenderInjector::Callback *f) {
 	fx_injectors.add({f});
 }
 
 void RenderPath::reset() {
-	post_processors.clear();
 	fx_injectors.clear();
 }

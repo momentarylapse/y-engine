@@ -99,97 +99,11 @@ void RenderPathGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const 
 		if (i == 5)
 			o.ang = quaternion::rotation(vector(0,0,0));
 		prepare_lights(&cam);
-		render_into_texture(fb_cube.get(), &cam, fb_cube->area());
+		render_into_texture(fb_cube.get(), &cam);
 	}
 	cam.owner = nullptr;
 }
 
-rect RenderPathGL::dynamic_fb_area() const {
-	return area();//rect(0, fb_main->width * resolution_scale_x, 0, fb_main->height * resolution_scale_y);
-}
-
-FrameBuffer *RenderPathGL::next_fb(FrameBuffer *cur) {
-	return (cur == fb2) ? fb3.get() : fb2.get();
-}
-
-
-
-// GTX750: 1920x1080 0.277 ms per trivial step
-FrameBuffer* RenderPathGL::do_post_processing(FrameBuffer *source) {
-	PerformanceMonitor::begin(ch_post);
-	auto cur = source;
-
-	// scripts
-	for (auto &p: post_processors) {
-		PerformanceMonitor::begin(p.channel);
-		cur = (*p.func)(cur);
-		break_point();
-		PerformanceMonitor::end(p.channel);
-	}
-
-
-	if (cam->focus_enabled) {
-		PerformanceMonitor::begin(ch_post_focus);
-		auto next = next_fb(cur);
-		process_depth(cur, next, complex(1,0));
-		cur = next;
-		next = next_fb(cur);
-		process_depth(cur, next, complex(0,1));
-		cur = next;
-		break_point();
-		PerformanceMonitor::end(ch_post_focus);
-	}
-
-	PerformanceMonitor::end(ch_post);
-	return cur;
-}
-
-FrameBuffer* RenderPathGL::resolve_multisampling(FrameBuffer *source) {
-	auto next = next_fb(source);
-	/*if (true) {
-		shader_resolve_multisample->set_float("width", source->width);
-		shader_resolve_multisample->set_float("height", source->height);
-		process({source->color_attachments[0].get(), depth_buffer}, next, shader_resolve_multisample.get());
-	} else {
-		// not sure, why this does not work... :(
-		nix::resolve_multisampling(next, source);
-	}*/
-	return next;
-}
-
-
-void RenderPathGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const complex &axis) {
-	/*float r = cam->bloom_radius * resolution_scale_x;
-	shader_blur->set_float("radius", r);
-	shader_blur->set_float("threshold", threshold / cam->exposure);
-	shader_blur->set_floats("axis", &axis.x, 2);
-	process(weak(source->color_attachments), target, shader_blur.get());*/
-}
-
-void RenderPathGL::process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis) {
-	shader_depth->set_float("max_radius", 50);
-	shader_depth->set_float("focal_length", cam->focal_length);
-	shader_depth->set_float("focal_blur", cam->focal_blur);
-	shader_depth->set_floats("axis", &axis.x, 2);
-	shader_depth->set_matrix("invproj", cam->m_projection.inverse());
-	process({source->color_attachments[0].get(), depth_buffer()}, target, shader_depth.get());
-}
-
-void RenderPathGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
-	nix::bind_frame_buffer(target);
-	nix::set_scissor(dynamicly_scaled_area(target));
-	nix::set_z(false, false);
-	//nix::set_projection_ortho_relative();
-	//nix::set_view_matrix(matrix::ID);
-	//nix::set_model_matrix(matrix::ID);
-	float resolution_scale_x = 1.0f;
-	shader->set_floats("resolution_scale", &resolution_scale_x, 2);
-	nix::set_shader(shader);
-
-	nix::set_textures(source);
-	nix::draw_triangles(vb_2d);
-	nix::set_scissor(rect::EMPTY);
-}
 
 
 void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {

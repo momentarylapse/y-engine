@@ -49,12 +49,6 @@ struct RenderInjector {
 	const Callback *func;
 };
 
-struct PostProcessor {
-	using Callback = Callable<FrameBuffer*(FrameBuffer*)>;
-	const Callback *func;
-	int channel;
-};
-
 class RenderPath : public Renderer {
 public:
 	RenderPath(const string &name, Renderer *parent);
@@ -65,9 +59,6 @@ public:
 
 	RenderPathType type = RenderPathType::NONE;
 
-
-	Array<PostProcessor> post_processors;
-	void add_post_processor(const PostProcessor::Callback *f);
 
 	Array<RenderInjector> fx_injectors;
 	void add_fx_injector(const RenderInjector::Callback *f);

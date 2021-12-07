@@ -25,9 +25,9 @@ public:
 
 	bool forwarding_into_window() const override { return false; };
 
-	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;
-	void render_into_gbuffer(FrameBuffer *fb, Camera *cam, const rect &target_area);
-	void render_background(FrameBuffer *fb, Camera *cam, const rect &target_area);
+	void render_into_texture(FrameBuffer *fb, Camera *cam) override;
+	void render_into_gbuffer(FrameBuffer *fb, Camera *cam);
+	void render_background(FrameBuffer *fb, Camera *cam);
 	void draw_world(bool allow_material);
 	void render_shadow_map(FrameBuffer *sfb, float scale);
 

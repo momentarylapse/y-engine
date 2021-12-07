@@ -76,9 +76,6 @@ class RenderPathVulkan : public RenderPath {
 public:
 
 
-	shared<FrameBuffer> fb2;
-	shared<FrameBuffer> fb3;
-	shared<Shader> shader_depth;
 	shared<Shader> shader_fx;
 
 	shared<FrameBuffer> fb_shadow;
@@ -86,9 +83,6 @@ public:
 	RenderPass *render_pass_shadow = nullptr;
 	//Pipeline *pipeline_shadow = nullptr;
 	Material *material_shadow = nullptr;
-	shared<Shader> shader_resolve_multisample;
-	//Entity3D *shadow_entity = nullptr;
-	//Camera *shadow_cam = nullptr;
 
 
 
@@ -129,10 +123,6 @@ public:
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
 
 
-	void process_depth(FrameBuffer *source, FrameBuffer *target, const complex &axis);
-	void process(CommandBuffer *cb, const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
-	FrameBuffer* do_post_processing(FrameBuffer *source);
-	FrameBuffer* resolve_multisampling(FrameBuffer *source);
 	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
@@ -144,9 +134,6 @@ public:
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam);
-
-	FrameBuffer *next_fb(FrameBuffer *cur);
-	rect dynamic_fb_area() const;
 };
 
 #endif

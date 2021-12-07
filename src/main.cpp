@@ -51,6 +51,7 @@
 	#include "renderer/RenderPathVulkanForward.h"
 	#include "renderer/gui/GuiRendererVulkan.h"
 	#include "renderer/post/HDRRendererVulkan.h"
+	#include "renderer/post/PostProcessorVulkan.h"
 	#include "renderer/target/WindowRendererVulkan.h"
 #else
 	#include "renderer/RenderPathGL.h"
@@ -58,6 +59,7 @@
 	#include "renderer/RenderPathGLDeferred.h"
 	#include "renderer/gui/GuiRendererGL.h"
 	#include "renderer/post/HDRRendererGL.h"
+	#include "renderer/post/PostProcessorGL.h"
 	#include "renderer/target/WindowRendererGL.h"
 #endif
 
@@ -116,6 +118,7 @@ public:
 	RenderPath *render_path = nullptr;
 	Renderer *gui_renderer = nullptr;
 	Renderer *hdr_renderer = nullptr;
+	Renderer *post_processor = nullptr;
 	TargetRenderer *renderer = nullptr;
 
 	gui::Text *fps_display;
@@ -145,6 +148,14 @@ public:
 #endif
 	}
 
+	Renderer *create_post_processor(Renderer *parent) {
+#ifdef USING_VULKAN
+		return new PostProcessorVulkan(parent);
+#else
+		return new PostProcessorGL(parent);
+#endif
+	}
+
 	RenderPath *create_render_path(Renderer *parent) {
 #ifdef USING_VULKAN
 		return new RenderPathVulkanForward(parent);
@@ -163,7 +174,8 @@ public:
 			if (config.get_str("renderer.path", "forward") == "direct") {
 				engine.render_path = render_path = create_render_path(gui_renderer);
 			} else {
-				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(gui_renderer);
+				engine.post_processor = post_processor = create_post_processor(gui_renderer);
+				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(post_processor);
 				engine.render_path = render_path = create_render_path(hdr_renderer);
 			}
 		} catch(Exception &e) {

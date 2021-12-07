@@ -37,10 +37,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
-	fb2 = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16")});
-	fb3 = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16")});
 	fb_shadow = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
@@ -48,8 +44,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
-	fb2->color_attachments[0]->set_options("wrap=clamp");
-	fb3->color_attachments[0]->set_options("wrap=clamp");
 
 
 	ResourceManager::default_shader = "default.shader";
@@ -60,7 +54,6 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
 
-	shader_depth = ResourceManager::load_shader("forward/depth.shader");
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
@@ -92,7 +85,7 @@ void RenderPathGLDeferred::prepare() {
 	}
 	PerformanceMonitor::end(ch_shadow);
 
-	render_into_gbuffer(gbuffer.get(), cam, dynamic_fb_area());
+	render_into_gbuffer(gbuffer.get(), cam);
 
 	//auto source = do_post_processing(fb_main.get());
 
@@ -105,7 +98,7 @@ void RenderPathGLDeferred::draw() {
 	auto target = parent->frame_buffer();
 	bool flip_y = rendering_into_window();
 
-	render_background(target, cam, dynamic_fb_area());
+	render_background(target, cam);
 
 	render_out_from_gbuffer(gbuffer.get());
 
@@ -124,11 +117,8 @@ void RenderPathGLDeferred::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam) {
 	PerformanceMonitor::begin(ch_bg);
-	//nix::bind_frame_buffer(fb);
-	//nix::set_viewport(dynamicly_scaled_area(fb));
-	//nix::set_scissor(target_area);
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
@@ -176,13 +166,12 @@ void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
 	PerformanceMonitor::end(ch_gbuf_out);
 }
 
-void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {}
+void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 
-void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam, const rect &target_area) {
+void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam) {
 	PerformanceMonitor::begin(ch_world);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
-	//nix::set_scissor(target_area);
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
