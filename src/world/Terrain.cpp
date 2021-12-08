@@ -101,11 +101,11 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 					for (int z=0;z<num_z/32+1;z++)
 						partition[x][z] = -1;
 
-#ifdef USING_VULKAN
+//#ifdef USING_VULKAN
 				vertex_buffer = new VertexBuffer("3f,3f,2f");
-#else
-				vertex_buffer = new VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
-#endif
+//#else
+//				vertex_buffer = new VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
+//#endif
 			}
 		} else {
 			msg_error(format("wrong file format: %d (4 expected)",ffv));

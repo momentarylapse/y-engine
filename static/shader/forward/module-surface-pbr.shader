@@ -37,6 +37,18 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	
 ///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
 
+
+
+
+		/*mat3 R = transpose(mat3(matrix.view));
+		vec3 L = reflect(view_dir, n);
+		//for (int i=0; i<30; i++) {
+		//vec3 L = normalize(L0 + vec3(_surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5) / 50);
+	//out_color = texture(tex_cube, reflect(view_dir, n));
+	out_color = texture(tex_cube, R * n);
+	return;*/
+	
+
 	//if (metal > 0.01 && false) {
 	if (metal > 0.9 && roughness < 0.2) {
 		mat3 R = transpose(mat3(matrix.view));
