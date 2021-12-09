@@ -154,7 +154,7 @@ void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
 	}
 	PerformanceMonitor::end(ch_shadow);
 
-	bool flip_y = true;
+	bool flip_y = false;
 	nix::bind_frame_buffer(fb);
 
 	PerformanceMonitor::begin(ch_bg);

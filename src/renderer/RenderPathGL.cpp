@@ -87,17 +87,17 @@ void RenderPathGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const 
 			return;
 		}
 		if (i == 0)
-			o.ang = quaternion::rotation(vector(0,-pi/2,0));
-		if (i == 1)
 			o.ang = quaternion::rotation(vector(0,pi/2,0));
+		if (i == 1)
+			o.ang = quaternion::rotation(vector(0,-pi/2,0));
 		if (i == 2)
-			o.ang = quaternion::rotation(vector(pi/2,0,pi));
+			o.ang = quaternion::rotation(vector(-pi/2,pi,pi));
 		if (i == 3)
-			o.ang = quaternion::rotation(vector(-pi/2,0,pi));
+			o.ang = quaternion::rotation(vector(pi/2,pi,pi));
 		if (i == 4)
-			o.ang = quaternion::rotation(vector(0,pi,0));
-		if (i == 5)
 			o.ang = quaternion::rotation(vector(0,0,0));
+		if (i == 5)
+			o.ang = quaternion::rotation(vector(0,pi,0));
 		prepare_lights(&cam);
 		render_into_texture(fb_cube.get(), &cam);
 	}
