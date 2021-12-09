@@ -28,7 +28,9 @@ void Config::load(const Array<string> &arg) {
 		if (a.head(2).lower() == "-c") {
 			auto xx = a.sub_ref(2).explode("=");
 			set_str(xx[0].trim(), xx[1].trim());
-		} else if (a == "--debug") {
+		} else if (a == "--uncapped" or a == "-u") {
+			set_bool("renderer.uncapped-framerate", true);
+		} else if (a == "--debug" or a == "-D") {
 			set_str("debug", "2");
 		} else if (a == "--fw") {
 			set_str("renderer.path", "forward");

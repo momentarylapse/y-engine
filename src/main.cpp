@@ -297,7 +297,10 @@ public:
 
 		glfwSetWindowUserPointer(window, this);
 		glfwMakeContextCurrent(window);
-		glfwSwapInterval(0);
+		if (config.get_bool("renderer.uncapped-framerate", false))
+			glfwSwapInterval(0);
+		else
+			glfwSwapInterval(1);
 		return window;
 	}
 
