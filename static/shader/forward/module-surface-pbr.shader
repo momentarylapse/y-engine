@@ -34,6 +34,8 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	vec3 view_dir = normalize(p - eye_pos.xyz);
 	
 	roughness = max(roughness, 0.03);
+	//roughness = 0.5;
+	//metal = 0.3;
 	
 ///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
 

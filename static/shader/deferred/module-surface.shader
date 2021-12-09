@@ -27,17 +27,18 @@ layout(location = 0) in vec4 in_pos; // world space
 layout(location = 1) in vec2 in_uv;
 layout(location = 2) in vec3 in_normal;
 
-layout(location = 0) out vec4 out_color;
+layout(location = 0) out vec4 out_color; // albedo
 layout(location = 1) out vec4 out_emission;
 layout(location = 2) out vec4 out_pos;
 layout(location = 3) out vec4 out_normal;
 
 
-void surface_out(vec3 n, vec4 di, vec4 em, float metal, float roughness) {
-	out_color = di;
+void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughness) {
+	out_color = albedo;
 	out_color.a = 1;
 	out_pos.xyz = in_pos.xyz / in_pos.w;
-	out_emission = vec4(em.rgb, metal);
+	out_pos.a = 1;
+	out_emission = vec4(emission.rgb, metal);
 	out_normal = vec4(n, roughness);
 }
 
