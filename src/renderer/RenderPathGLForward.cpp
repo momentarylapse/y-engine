@@ -140,7 +140,6 @@ void RenderPathGLForward::draw() {
 }
 
 void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
-	nix::bind_frame_buffer(fb);
 	auto c0 = cam;
 	cam = _cam;
 	//draw();
@@ -148,7 +147,15 @@ void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
 
 	prepare_lights(cam);
 
+	PerformanceMonitor::begin(ch_shadow);
+	if (shadow_index >= 0) {
+		render_shadow_map(fb_shadow.get(), 4);
+		render_shadow_map(fb_shadow2.get(), 1);
+	}
+	PerformanceMonitor::end(ch_shadow);
+
 	bool flip_y = true;
+	nix::bind_frame_buffer(fb);
 
 	PerformanceMonitor::begin(ch_bg);
 
