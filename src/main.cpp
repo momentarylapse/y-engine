@@ -275,23 +275,24 @@ public:
 		engine.width = w;
 		engine.height = h;
 		auto monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
 
-		bool fullscreen = config.get_bool("screen.fullscreen", false);
-		bool windowed_fullscreen = config.get_bool("screen.windowed-fullscreen", false);
+		string mode = config.get_str("screen.mode", "window");
+		bool fullscreen = (mode == "fullscreen"); //config.get_bool("screen.fullscreen", false);
+		bool windowed_fullscreen = (mode == "windowed-fullscreen"); //config.get_bool("screen.windowed-fullscreen", false);
 		engine.physical_aspect_ratio = (float)w / (float)h;
 
-		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		glfwWindowHint(GLFW_RED_BITS, vidmode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, vidmode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, vidmode->blueBits);
+		glfwWindowHint(GLFW_REFRESH_RATE, vidmode->refreshRate);
 
 		if (!fullscreen and !windowed_fullscreen)
 			monitor = nullptr;
 
 		if (windowed_fullscreen) {
-			w = mode->width;
-			h = mode->height;
+			w = vidmode->width;
+			h = vidmode->height;
 		}
 		window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
 
