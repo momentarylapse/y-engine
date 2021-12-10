@@ -80,7 +80,9 @@ string ResourceManager::expand_vertex_shader_source(const string &source, const 
 }
 
 string ResourceManager::expand_fragment_shader_source(const string &source, const string &render_path) {
-	return source.replace("#import surface", "#import surface-" + render_path);
+	if (render_path.num > 0)
+		return source.replace("#import surface", "#import surface-" + render_path);
+	return source;
 }
 
 Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant) {

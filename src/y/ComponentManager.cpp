@@ -43,9 +43,11 @@ public:
 Map<const kaba::Class*, ComponentListX> component_lists;
 
 bool class_func_did_override(const kaba::Class *type, const string &fname) {
+#ifdef _X_ALLOW_X_
 	for (auto f: weak(type->functions))
 		if (f->name == fname)
 			return f->name_space != type->get_root();
+#endif
 	return false;
 }
 
@@ -79,12 +81,16 @@ void ComponentManager::add_to_list(Component *c, const kaba::Class *type_family)
 
 
 const kaba::Class *ComponentManager::get_component_type_family(const kaba::Class *type) {
+#ifdef _X_ALLOW_X_
 	while (type->parent) {
 		if ((type->parent->name == "Component") or (type->parent->name == "Component3D"))
 			return type;
 		type = type->parent;
 	}
 	return type;
+#else
+	return nullptr;
+#endif
 }
 
 // TODO (later) optimize...

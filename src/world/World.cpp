@@ -890,6 +890,7 @@ void World::iterate(float dt) {
 }
 
 Light *World::add_light_parallel(const quaternion &ang, const color &c) {
+#ifdef _X_ALLOW_X_
 	auto o = new Entity3D(v_0, ang);
 	entities.add(o);
 
@@ -897,9 +898,13 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 	o->_add_component_external_(l);
 	lights.add(l);
 	return l;
+#else
+	return nullptr;
+#endif
 }
 
 Light *World::add_light_point(const vector &p, const color &c, float r) {
+#ifdef _X_ALLOW_X_
 	auto o = new Entity3D(p, quaternion::ID);
 	entities.add(o);
 
@@ -907,9 +912,13 @@ Light *World::add_light_point(const vector &p, const color &c, float r) {
 	o->_add_component_external_(l);
 	lights.add(l);
 	return l;
+#else
+	return nullptr;
+#endif
 }
 
 Light *World::add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t) {
+#ifdef _X_ALLOW_X_
 	auto o = new Entity3D(p, ang);
 	entities.add(o);
 
@@ -917,6 +926,9 @@ Light *World::add_light_cone(const vector &p, const quaternion &ang, const color
 	o->_add_component_external_(l);
 	lights.add(l);
 	return l;
+#else
+	return nullptr;
+#endif
 }
 
 void World::add_particle(Particle *p) {

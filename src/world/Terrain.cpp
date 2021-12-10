@@ -229,14 +229,18 @@ float Terrain::gimme_height_n(const vector &p, vector &n) {
 
 // Daten fuer das Darstellen des Bodens
 void Terrain::calc_detail(const vector &cam_pos) {
-	auto o = get_owner<Entity3D>();
+	vector dpos = cam_pos;
+	if (owner) {
+		auto o = get_owner<Entity3D>();
+		dpos -= o->pos;
+	}
 	for (int x1=0;x1<(num_x-1)/32+1;x1++)
 		for (int z1=0;z1<(num_z-1)/32+1;z1++) {
 			int lx=(x1*32>num_x-32)?(num_x%32):32;
 			int lz=(z1*32>num_z-32)?(num_z%32):32;
 			int x0=x1*32;
 			int z0=z1*32;
-			float depth = (cam_pos - o->pos - vertex[Index(x0+lx/2,z0+lz/2)]).length() / pattern.x;
+			float depth = (dpos - vertex[Index(x0+lx/2,z0+lz/2)]).length() / pattern.x;
 			int e=32;
 			if (depth<500)	e=32;
 			if (depth<320)	e=16;
@@ -370,9 +374,16 @@ inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const v
 	return true;
 }
 
-bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test)
-{
-	auto o = get_owner<Entity3D>();
+bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float range, CollisionData &data, bool simple_test) {
+	vector pr1 = p1;
+	vector pr2 = p2;
+	vector pos = v_0;
+	if (owner) {
+		auto o = get_owner<Entity3D>();
+		pr1 -= o->pos;
+		pr2 -= o->pos;
+		pos = o->pos;
+	}
 	float dmin = range + 1;
 	vector c;
 
@@ -385,8 +396,6 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 		}
 	}
 
-	vector pr1 = p1 - o->pos;
-	vector pr2 = p2 - o->pos;
 	float w=(float)atan2(p2.z-p1.z,p2.x-p1.x);
 	int x,z;
 	float y_rel;
@@ -403,8 +412,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y > p2.y )	y_rel = pr1.y + ( ( x + 1 ) * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
 			else				y_rel = pr1.y + (   x       * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
-			if (TracePattern(this,o->pos,p1,p2,data,x,z  ,y_rel,0,range))	return true;
-			if (TracePattern(this,o->pos,p1,p2,data,x,z+1,y_rel,0,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x,z  ,y_rel,0,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x,z+1,y_rel,0,range))	return true;
 		}
 	}
 
@@ -418,8 +427,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y > p2.y )	y_rel = pr1.y + ( ( z + 1 ) * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
 			else				y_rel = pr1.y + (   z       * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
-			if (TracePattern(this,o->pos,p1,p2,data,x  ,z,y_rel,1,range))	return true;
-			if (TracePattern(this,o->pos,p1,p2,data,x+1,z,y_rel,1,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x  ,z,y_rel,1,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x+1,z,y_rel,1,range))	return true;
 		}
 	}
 
@@ -433,8 +442,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y < p2.y )	y_rel = pr1.y + ( ( x + 1 ) * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
 			else				y_rel = pr1.y + (   x       * pattern.x - pr1.x ) * ( pr2.y - pr1.y ) / ( pr2.x - pr1.x );
-			if (TracePattern(this,o->pos,p1,p2,data,x,z  ,y_rel,2,range))	return true;
-			if (TracePattern(this,o->pos,p1,p2,data,x,z+1,y_rel,2,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x,z  ,y_rel,2,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x,z+1,y_rel,2,range))	return true;
 		}
 	}
 
@@ -448,8 +457,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 				break;
 			if ( p1.y < p2.y )	y_rel = pr1.y + ( ( z + 1 ) * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
 			else				y_rel = pr1.y + (   z       * pattern.z - pr1.z ) * ( pr2.y - pr1.y ) / ( pr2.z - pr1.z );
-			if (TracePattern(this,o->pos,p1,p2,data,x  ,z,y_rel,3,range))	return true;
-			if (TracePattern(this,o->pos,p1,p2,data,x+1,z,y_rel,3,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x  ,z,y_rel,3,range))	return true;
+			if (TracePattern(this,pos,p1,p2,data,x+1,z,y_rel,3,range))	return true;
 		}
 	}
 	return false;

@@ -34,8 +34,10 @@ Collider::Collider() {
 }
 
 Collider::~Collider() {
+#if HAS_LIB_BULLET
 	if (col_shape)
 		delete col_shape;
+#endif
 }
 
 

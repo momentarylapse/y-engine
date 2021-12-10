@@ -221,11 +221,14 @@ string phys_mode_name(PhysicsMode m) {
 #include "Camera.h"
 #include "Entity3D.h"
 #include "../y/ComponentManager.h"
+#ifdef _X_ALLOW_X_
 #include "../plugins/PluginManager.h"
 #include "../plugins/Controller.h"
+#endif
 #include "../lib/kaba/kaba.h"
 
 void LevelData::save(const Path &filename) {
+#ifdef _X_ALLOW_X_
 	xml::Parser p;
 
 	p.elements.add(xml::Element("world"));
@@ -334,4 +337,5 @@ void LevelData::save(const Path &filename) {
 	w.add(cont);
 
 	p.save(filename);
+#endif
 }
