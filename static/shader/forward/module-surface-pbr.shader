@@ -12,6 +12,12 @@ layout(binding = 3) uniform sampler2D tex4;//sampler_shadow2;
 
 #import lighting
 
+
+struct Material { vec4 albedo, emission; float roughness, metal; };
+uniform Material material;
+//struct Matrix { mat4 model, view, project; };
+///*layout(binding = 0)*/ uniform Matrix matrix;
+
 //uniform vec3 eye_pos;
 const vec3 eye_pos = vec3(0,0,0);
 

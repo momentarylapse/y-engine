@@ -3,6 +3,15 @@
 </Layout>
 <Module>
 
+
+struct Material {
+	vec4 albedo, emission;
+	float roughness, metal;
+};
+uniform Material material;
+//struct Matrix { mat4 model, view, project; };
+///*layout(binding = 0)*/ uniform Matrix matrix;
+
 struct Light {
 	mat4 proj;
 	vec4 pos;

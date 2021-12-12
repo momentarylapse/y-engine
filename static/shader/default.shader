@@ -8,15 +8,6 @@
 <FragmentShader>
 #import surface
 
-#ifdef vulkan
-#else
-
-struct Material { vec4 albedo, emission; float roughness, metal; };
-uniform Material material;
-//struct Matrix { mat4 model, view, project; };
-///*layout(binding = 0)*/ uniform Matrix matrix;
-
-#endif
 
 layout(binding = 4) uniform sampler2D tex0;
 
