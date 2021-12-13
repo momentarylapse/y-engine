@@ -1,4 +1,10 @@
 *.o
+*.dll
 /y
 /message.txt
 
+/.vs
+/Debug/y.tlog
+/x64/Release
+/y.vcxproj.user
+*.exe
