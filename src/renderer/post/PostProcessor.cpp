@@ -10,12 +10,12 @@
 
 string callable_name(const void *c);
 
-PostProcessorStage::PostProcessorStage(const string &name) : Renderer(name, nullptr) {
+PostProcessorStage::PostProcessorStage(const string &name, Renderer *parent) : Renderer(name, parent) {
 }
 
 
 PostProcessorStageUser::PostProcessorStageUser(const PostProcessorStageUser::Callback *p, const PostProcessorStageUser::Callback *d) :
-		PostProcessorStage(callable_name(d)) {
+		PostProcessorStage(callable_name(d), nullptr) {
 }
 
 void PostProcessorStageUser::prepare() {
@@ -36,7 +36,33 @@ PostProcessor::~PostProcessor() {
 
 void PostProcessor::add_stage(const PostProcessorStageUser::Callback *p, const PostProcessorStageUser::Callback *d) {
 	stages.add(new PostProcessorStageUser(p, d));
+	rebuild();
 }
 void PostProcessor::reset() {
 	stages.clear();
+	if (hdr)
+		stages.add(hdr);
+	rebuild();
+}
+
+void PostProcessor::rebuild() {
+	auto stages_eff = stages;
+	if (hdr)
+		stages_eff.insert(hdr, 0);
+
+	if (stages_eff.num > 0) {
+		stages_eff[0]->set_child(child);
+		parent->set_child(stages_eff.back());
+	} else {
+		parent->set_child(child);
+	}
+	for (int i=1; i<stages_eff.num; i++)
+		stages_eff[i]->set_child(stages_eff[i-1]);
+	for (int i=0; i<stages_eff.num-1; i++)
+		stages_eff[i]->parent = stages_eff[i+1];
+}
+
+void PostProcessor::set_hdr(PostProcessorStage *_hdr) {
+	hdr = _hdr;
+	rebuild();
 }

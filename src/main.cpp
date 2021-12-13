@@ -117,12 +117,24 @@ public:
 
 	RenderPath *render_path = nullptr;
 	Renderer *gui_renderer = nullptr;
-	Renderer *hdr_renderer = nullptr;
-	Renderer *post_processor = nullptr;
+	PostProcessorStage *hdr_renderer = nullptr;
+	PostProcessor *post_processor = nullptr;
 	TargetRenderer *renderer = nullptr;
 
 	gui::Text *fps_display;
 	int ch_iter = -1;
+
+	void print_render_chain() {
+		Renderer *r = renderer;
+		string s = PerformanceMonitor::get_name(r->channel);
+		while (r->child) {
+			r = r->child;
+			s += " <<< " + PerformanceMonitor::get_name(r->channel);
+		}
+		msg_write("------------------------------------------");
+		msg_write("CHAIN:  " + s);
+		msg_write("------------------------------------------");
+	}
 
 	TargetRenderer *create_window_renderer() {
 #ifdef USING_VULKAN
@@ -140,7 +152,7 @@ public:
 #endif
 	}
 
-	Renderer *create_hdr_renderer(Renderer *parent) {
+	PostProcessorStage *create_hdr_renderer(PostProcessor *parent) {
 #ifdef USING_VULKAN
 		return new HDRRendererVulkan(parent);
 #else
@@ -148,7 +160,7 @@ public:
 #endif
 	}
 
-	Renderer *create_post_processor(Renderer *parent) {
+	PostProcessor *create_post_processor(Renderer *parent) {
 #ifdef USING_VULKAN
 		return new PostProcessorVulkan(parent);
 #else
@@ -177,11 +189,13 @@ public:
 				engine.post_processor = post_processor = create_post_processor(gui_renderer);
 				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(post_processor);
 				engine.render_path = render_path = create_render_path(hdr_renderer);
+				//post_processor->set_hdr(hdr_renderer);
 			}
 		} catch(Exception &e) {
 			hui::ShowError(e.message());
 			throw e;
 		}
+		print_render_chain();
 	}
 
 	void init(const Array<string> &arg) {

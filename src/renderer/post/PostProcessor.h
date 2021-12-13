@@ -17,7 +17,7 @@ class Any;
 class PostProcessor;
 
 struct PostProcessorStage : public Renderer {
-	PostProcessorStage(const string &name);
+	PostProcessorStage(const string &name, Renderer *parent);
 	PostProcessor *post = nullptr;
 };
 
@@ -40,6 +40,10 @@ public:
 	Array<PostProcessorStage*> stages;
 	void add_stage(const PostProcessorStageUser::Callback *p, const PostProcessorStageUser::Callback *d);
 	void reset();
+	void rebuild();
+
+	PostProcessorStage *hdr = nullptr;
+	void set_hdr(PostProcessorStage *hdr);
 
 	/*void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader, const Any &data);
 	FrameBuffer* do_post_processing(FrameBuffer *source);

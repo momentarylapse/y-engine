@@ -33,6 +33,10 @@ int PerformanceMonitor::create_channel(const string &name, int parent) {
 	return channels.num - 1;
 }
 
+string PerformanceMonitor::get_name(int channel) {
+	return channels[channel].name;
+}
+
 void PerformanceMonitor::begin(int channel) {
 	channels[channel].prev = std::chrono::high_resolution_clock::now();
 }

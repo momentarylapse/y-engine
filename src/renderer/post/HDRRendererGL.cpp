@@ -21,7 +21,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 
-HDRRendererGL::HDRRendererGL(Renderer *parent) : Renderer("hdr", parent) {
+HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 

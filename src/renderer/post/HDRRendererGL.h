@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "../Renderer.h"
+#include "PostProcessor.h"
 #ifdef USING_OPENGL
 
 class vec2;
 
-class HDRRendererGL : public Renderer {
+class HDRRendererGL : public PostProcessorStage {
 public:
 	HDRRendererGL(Renderer *parent);
 	virtual ~HDRRendererGL();

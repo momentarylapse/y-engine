@@ -7,6 +7,7 @@
 
 #include "Renderer.h"
 #include "RenderPath.h"
+#include "../y/EngineData.h"
 #include "../lib/math/rect.h"
 #include "../helper/PerformanceMonitor.h"
 
@@ -14,7 +15,8 @@
 
 
 Renderer::Renderer(const string &name, Renderer *_parent) {
-	width = height = 0;
+	width = engine.width;
+	height = engine.height;
 	parent = _parent;
 	if (parent) {
 		width = parent->width;

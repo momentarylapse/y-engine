@@ -20,6 +20,7 @@ namespace Gui {
 class TargetRenderer;
 class Renderer;
 class RenderPath;
+class PostProcessor;
 
 class EngineData {
 public:
@@ -71,7 +72,7 @@ public:
 	TargetRenderer *window_renderer;
 	Renderer *gui_renderer;
 	Renderer *hdr_renderer;
-	Renderer *post_processor;
+	PostProcessor *post_processor;
 	RenderPath *render_path;
 };
 extern EngineData engine;

@@ -40,6 +40,8 @@ public:
 
 	static Array<PerformanceChannel> channels;
 	static int create_channel(const string &name, int parent = -1);
+	static string get_name(int channel);
+
 	static void begin(int channel);
 	static void end(int channel);
 

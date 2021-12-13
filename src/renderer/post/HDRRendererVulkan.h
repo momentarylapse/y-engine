@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include "../Renderer.h"
+#include "PostProcessor.h"
 #ifdef USING_VULKAN
 
-class HDRRendererVulkan : public Renderer {
+class HDRRendererVulkan : public PostProcessorStage {
 public:
 	HDRRendererVulkan(Renderer *parent);
 	virtual ~HDRRendererVulkan();

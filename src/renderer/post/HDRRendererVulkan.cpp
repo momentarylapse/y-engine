@@ -34,7 +34,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 
-HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : Renderer("hdr", parent) {
+HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr", parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
