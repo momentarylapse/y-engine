@@ -22,7 +22,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 
-PostProcessorGL::PostProcessorGL(Renderer *parent) : Renderer("post", parent) {
+PostProcessorGL::PostProcessorGL(Renderer *parent) : PostProcessor(parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
@@ -94,16 +94,6 @@ bool PostProcessorGL::forwarding_into_window() const {
 	return true;
 }
 
-string callable_name(const void *c);
-
-void PostProcessorGL::add_stage(const PostProcessorStage::Callback *f) {
-	//stages.add({f, PerformanceMonitor::create_channel(callable_name(f), ch_post)});
-}
-
-void PostProcessorGL::reset() {
-	stages.clear();
-}
-
 FrameBuffer *PostProcessorGL::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }
@@ -149,7 +139,7 @@ FrameBuffer* PostProcessorGL::do_post_processing(FrameBuffer *source) {
 	// scripts
 	for (auto *p: stages) {
 		PerformanceMonitor::begin(p->channel);
-		cur = (*p->func)(cur);
+//		cur = (*p->func)(cur);
 		break_point();
 		PerformanceMonitor::end(p->channel);
 	}

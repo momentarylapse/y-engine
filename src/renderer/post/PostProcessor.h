@@ -1,29 +1,47 @@
 /*
- * PostProcessorGL.h
+ * PostProcessor.h
  *
- *  Created on: Dec 7, 2021
+ *  Created on: Dec 13, 2021
  *      Author: michi
  */
 
 
 #pragma once
 
-#include "PostProcessor.h"
-#ifdef USING_OPENGL
+#include "../Renderer.h"
 #include "../../graphics-fwd.h"
+#include "../../lib/base/callable.h"
 
 class vec2;
 class Any;
+class PostProcessor;
 
-class PostProcessorGL : public PostProcessor {
-public:
-	PostProcessorGL(Renderer *parent);
-	virtual ~PostProcessorGL();
+struct PostProcessorStage : public Renderer {
+	PostProcessorStage(const string &name);
+	PostProcessor *post = nullptr;
+};
+
+struct PostProcessorStageUser : public PostProcessorStage {
+	using Callback = Callable<void()>;
+	const Callback *func_prepare = nullptr;
+	const Callback *func_draw = nullptr;
+
+	PostProcessorStageUser(const Callback *p, const Callback *d);
 
 	void prepare() override;
 	void draw() override;
+};
 
-	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader, const Any &data);
+class PostProcessor : public Renderer {
+public:
+	PostProcessor(Renderer *parent);
+	virtual ~PostProcessor();
+
+	Array<PostProcessorStage*> stages;
+	void add_stage(const PostProcessorStageUser::Callback *p, const PostProcessorStageUser::Callback *d);
+	void reset();
+
+	/*void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader, const Any &data);
 	FrameBuffer* do_post_processing(FrameBuffer *source);
 
 	shared<Shader> shader_depth;
@@ -48,7 +66,6 @@ public:
 
 	VertexBuffer *vb_2d;
 
-	int ch_post_blur = -1, ch_out = -1;
+	int ch_post_blur = -1, ch_out = -1;*/
 };
 
-#endif

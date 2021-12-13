@@ -427,6 +427,9 @@
     <ClCompile Include="src\renderer\post\HDRRendererVulkan.cpp">
       <Filter>src\renderer\post</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\post\PostProcessor.cpp">
+      <Filter>src\renderer\post</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\post\PostProcessorGL.cpp">
       <Filter>src\renderer\post</Filter>
     </ClCompile>
@@ -934,6 +937,9 @@
       <Filter>src\renderer\post</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\post\HDRRendererVulkan.h">
+      <Filter>src\renderer\post</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\post\PostProcessor.h">
       <Filter>src\renderer\post</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\post\PostProcessorGL.h">

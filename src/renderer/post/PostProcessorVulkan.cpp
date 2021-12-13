@@ -22,7 +22,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 
-PostProcessorVulkan::PostProcessorVulkan(Renderer *parent) : Renderer("post", parent) {
+PostProcessorVulkan::PostProcessorVulkan(Renderer *parent) : PostProcessor(parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
@@ -94,16 +94,6 @@ bool PostProcessorVulkan::forwarding_into_window() const {
 	return true;
 }
 
-string callable_name(const void *c);
-
-void PostProcessorVulkan::add_stage(const PostProcessorStage::Callback *f) {
-	//stages.add({f, PerformanceMonitor::create_channel(callable_name(f), ch_post)});
-}
-
-void PostProcessorVulkan::reset() {
-	stages.clear();
-}
-
 FrameBuffer *PostProcessorVulkan::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }
@@ -149,7 +139,7 @@ FrameBuffer* PostProcessorVulkan::do_post_processing(FrameBuffer *source) {
 	// scripts
 	for (auto *p: stages) {
 		PerformanceMonitor::begin(p->channel);
-		cur = (*p->func)(cur);
+//		cur = (*p->func)(cur);
 		break_point();
 		PerformanceMonitor::end(p->channel);
 	}

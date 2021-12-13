@@ -7,31 +7,20 @@
 
 #pragma once
 
-#include "../Renderer.h"
+#include "PostProcessor.h"
 #ifdef USING_VULKAN
 #include "../../graphics-fwd.h"
-#include "../../lib/base/callable.h"
 
 class vec2;
 class Any;
 
-struct PostProcessorStage : public Renderer {
-	using Callback = Callable<FrameBuffer*(FrameBuffer*)>;
-	const Callback *func;
-	int channel;
-};
-
-class PostProcessorVulkan : public Renderer {
+class PostProcessorVulkan : public PostProcessor {
 public:
 	PostProcessorVulkan(Renderer *parent);
 	virtual ~PostProcessorVulkan();
 
 	void prepare() override;
 	void draw() override;
-
-	Array<PostProcessorStage*> stages;
-	void add_stage(const PostProcessorStage::Callback *f);
-	void reset();
 
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader, const Any &data);
 	FrameBuffer* do_post_processing(FrameBuffer *source);

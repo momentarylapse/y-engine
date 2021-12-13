@@ -232,6 +232,7 @@ sources = [
 	'src/renderer/post/blur.cpp',
 	'src/renderer/post/HDRRendererGL.cpp',
 	'src/renderer/post/HDRRendererVulkan.cpp',
+	'src/renderer/post/PostProcessor.cpp',
 	'src/renderer/post/PostProcessorGL.cpp',
 	'src/renderer/post/PostProcessorVulkan.cpp',
 	'src/renderer/target/TargetRenderer.cpp',
