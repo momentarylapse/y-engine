@@ -44,6 +44,11 @@ RenderPath::RenderPath(const string &name, Renderer *parent) : Renderer(name, pa
 }
 
 
+color RenderPath::background() const {
+	return world.background;
+}
+
+
 void RenderPath::add_fx_injector(const RenderInjector::Callback *f) {
 	fx_injectors.add({f});
 }

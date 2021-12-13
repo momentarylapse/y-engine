@@ -151,7 +151,7 @@ Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
 	if (ob_pipelines.contains(s))
 		return ob_pipelines[s];
 	msg_write("NEW PIPELINE");
-	auto p = new Pipeline(s, rp, 0, "3f,3f,2f");
+	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
 	ob_pipelines.add({s, p});
 	return p;
 }
@@ -160,7 +160,7 @@ Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
 	if (ob_pipelines_alpha.contains(s))
 		return ob_pipelines_alpha[s];
 	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
-	auto p = new Pipeline(s, rp, 0, "3f,3f,2f");
+	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
 	p->set_z(false, false);
 	p->set_blend(src, dst);
 	//p->set_culling(0);
@@ -174,7 +174,7 @@ Pipeline *get_pipeline_ani(Shader *s, RenderPass *rp) {
 	if (ob_ani_pipelines.contains(s))
 		return ob_ani_pipelines[s];
 	msg_write("NEW PIPELINE ANIMATED");
-	auto p = new Pipeline(s, rp, 0, "3f,3f,2f,4i,4f");
+	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f,4i,4f");
 	ob_ani_pipelines.add({s, p});
 	return p;
 }

@@ -31,7 +31,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 
 
 	shader = ResourceManager::load_shader("vulkan/2d.shader");
-	pipeline = new vulkan::Pipeline(shader, parent->render_pass(), 0, "3f,3f,2f");
+	pipeline = new vulkan::Pipeline(shader, parent->render_pass(), 0, "triangles", "3f,3f,2f");
 	pipeline->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline->set_z(false, false);
 	pipeline->rebuild();

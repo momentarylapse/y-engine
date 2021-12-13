@@ -46,6 +46,10 @@ void Renderer::prepare() {
 		child->prepare();
 }
 
+color Renderer::background() const {
+	return Red;
+}
+
 FrameBuffer *Renderer::frame_buffer() const {
 	if (!parent)
 		return nullptr;

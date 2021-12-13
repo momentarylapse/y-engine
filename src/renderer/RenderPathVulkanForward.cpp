@@ -78,17 +78,26 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathV
 	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
 
 	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
-	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "3f,4f,2f");
+	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_fx->set_z(true, false);
 	pipeline_fx->set_culling(0);
 	pipeline_fx->rebuild();
 }
 
+static int cur_query_offset;
+
 void RenderPathVulkanForward::prepare() {
 	prepare_lights(cam);
 
+	static int pool_no = 0;
+	pool_no = (pool_no + 1) % 16;
+	cur_query_offset = pool_no * 8;
+	vulkan::default_device->reset_query_pool(cur_query_offset, 8);
+
 	auto cb = command_buffer();
+
+	cb->timestamp(cur_query_offset + 0);
 
 	/*if (!shadow_cam) {
 		shadow_entity = new Entity3D;
@@ -104,6 +113,7 @@ void RenderPathVulkanForward::prepare() {
 		render_shadow_map(cb, fb_shadow2.get(), 1);
 	}
 	PerformanceMonitor::end(ch_shadow);
+	cb->timestamp(cur_query_offset + 1);
 }
 
 void RenderPathVulkanForward::draw() {
@@ -157,6 +167,7 @@ void RenderPathVulkanForward::draw() {
 	source = do_post_processing(source);
 
 */
+	cb->timestamp(cur_query_offset + 2);
 }
 
 void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {

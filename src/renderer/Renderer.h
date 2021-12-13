@@ -14,6 +14,7 @@ class rect;
 #include "../lib/base/pointer.h"
 
 class rect;
+class color;
 
 rect dynamicly_scaled_area(FrameBuffer *fb);
 rect dynamicly_scaled_source();
@@ -39,6 +40,8 @@ public:
 	// (vulkan: INSIDE an already started render pass)
 	// just draw into that
 	virtual void draw() = 0;
+
+	virtual color background() const;
 
 
 	virtual FrameBuffer *frame_buffer() const;

@@ -11,6 +11,7 @@
 #include "../../helper/PerformanceMonitor.h"
 #include "../../lib/file/msg.h"
 #include "../../lib/math/rect.h"
+#include "../../Config.h" // for timing experiment
 
 
 WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
@@ -110,6 +111,17 @@ void WindowRendererVulkan::end_frame() {
 
 	vulkan::default_device->wait_idle();
 	//PerformanceMonitor::end(ch_end);
+
+	static int frame = 0;
+	frame ++;
+	if ((frame%100 == 0) and (config.debug >= 2)) {
+		auto tt = vulkan::default_device->get_timestamps(0, 3);
+		//msg_write(ia2s(tt));
+		//msg_write(f2s(vulkan::default_device->device_properties.limits.timestampPeriod, 9));
+		msg_write("vulkan timing:");
+		msg_write(f2s(vulkan::default_device->device_properties.limits.timestampPeriod * (tt[1] - tt[0]) * 0.000001f, 3));
+		msg_write(f2s(vulkan::default_device->device_properties.limits.timestampPeriod * (tt[2] - tt[0]) * 0.000001f, 3));
+	}
 }
 
 void WindowRendererVulkan::prepare() {

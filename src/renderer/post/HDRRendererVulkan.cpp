@@ -37,7 +37,7 @@ static int BLUR_SCALE = 4;
 
 HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex) {
 	shader_out = s;
-	pipeline_out = new vulkan::Pipeline(s, r->parent->render_pass(), 0, "3f,3f,2f");
+	pipeline_out = new vulkan::Pipeline(s, r->parent->render_pass(), 0, "triangles", "3f,3f,2f");
 	pipeline_out->set_culling(0);
 	pipeline_out->rebuild();
 	dset_out = pool->create_set("buffer,sampler,sampler");
@@ -79,6 +79,24 @@ HDRRendererVulkan::RenderIntoData::RenderIntoData(Renderer *r) {
 	fb_main->attachments[0]->set_options("wrap=clamp");
 }
 
+void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r) {
+	if (!r)
+		return;
+
+	auto cb = r->command_buffer();
+
+	//vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+
+	cb->set_viewport(dynamicly_scaled_area(fb_main.get()));
+
+	_render_pass->clear_color = {r->background()};
+	cb->begin_render_pass(_render_pass, fb_main.get());
+
+	r->draw();
+
+	cb->end_render_pass();
+}
+
 
 HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr", parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
@@ -96,7 +114,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
 	// without clear, we get artifacts from dynamic resolution scaling
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, "3f,3f,2f");
+	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, "triangles", "3f,3f,2f");
 	blur_pipeline->set_z(false, false);
 	blur_pipeline->rebuild();
 	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
@@ -118,27 +136,11 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 HDRRendererVulkan::~HDRRendererVulkan() {
 }
 
-void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r) {
-	if (!r)
-		return;
-
-	auto cb = r->command_buffer();
-
-	//vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-
-	cb->set_viewport(dynamicly_scaled_area(fb_main.get()));
-
-	_render_pass->clear_color = {world.background};
-	cb->begin_render_pass(_render_pass, fb_main.get());
-
-	r->draw();
-
-	cb->end_render_pass();
-}
-
 void HDRRendererVulkan::prepare() {
 	if (child)
 		child->prepare();
+
+	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 	into.render_into(child);
 
