@@ -101,6 +101,7 @@ public:
 	Array<RenderDataVK> rda_tr_shadow;
 	Array<RenderDataVK> rda_tr_shadow2;
 	Array<RenderDataVK> rda_ob;
+	Array<RenderDataVK> rda_ob_trans;
 	Array<RenderDataVK> rda_ob_shadow;
 	Array<RenderDataVK> rda_ob_shadow2;
 	Array<RenderDataVK> rda_sky;
@@ -125,7 +126,7 @@ public:
 	void draw_skyboxes(CommandBuffer *cb, Camera *c);
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
-	void draw_objects_transparent(bool allow_material, RenderPathType t);
+	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, Array<RenderDataVK> &rda);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam);

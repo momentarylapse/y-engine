@@ -161,7 +161,7 @@ Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
 		return ob_pipelines_alpha[s];
 	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
 	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
-	p->set_z(false, false);
+	p->set_z(true, false);
 	p->set_blend(src, dst);
 	//p->set_culling(0);
 	p->rebuild();
@@ -517,25 +517,44 @@ void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp,
 	}
 }
 
-void WorldRendererVulkan::draw_objects_transparent(bool allow_material, RenderPathType t) {
-	/*nix::set_z(false, true);
-	if (allow_material)
+void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, Array<RenderDataVK> &rda) {
+	int index = 0;
+
+	ubo.m = matrix::ID;
+
 	for (auto &s: world.sorted_trans) {
+		//if (!s.material->cast_shadow)
+		//	continue;
 		Model *m = s.model;
-		m->update_matrix();
-		nix::set_model_matrix(m->_matrix);
-		nix::set_cull(nix::CullMode::NONE);
+
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-		if (ani) {
-			set_material(s.material, t, ShaderVariant::ANIMATED);
-		} else {
-			set_material(s.material, t, ShaderVariant::DEFAULT);
+
+		if (index >= rda.num) {
+			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(matrix) * ani->dmatrix.num) : sizeof(UBO)),
+				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
+			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
 		}
-		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-		nix::set_cull(nix::CullMode::DEFAULT);
+
+		m->update_matrix();
+		ubo.m = m->_matrix;
+		ubo.albedo = s.material->albedo;
+		ubo.emission = s.material->emission;
+		ubo.metal = s.material->metal;
+		ubo.roughness = s.material->roughness;
+		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+		if (ani)
+			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
+
+		if (ani) {
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED);
+		} else {
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);
+		}
+
+		cb->draw(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		index ++;
 	}
-	nix::disable_alpha();
-	nix::set_z(true, true);*/
 }
 
 

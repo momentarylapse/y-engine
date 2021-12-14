@@ -35,48 +35,6 @@
 
 
 WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
-
-
-	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
-	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		fb_main = new vulkan::FrameBuffer({
-			new vulkan::TextureMultiSample(width, height, 4, "rgba:f16"),
-			//depth_buffer});
-			new vulkan::RenderBuffer(width, height, 4, "d24s8")});
-	} else {
-		fb_main = new vulkan::FrameBuffer({
-			new vulkan::Texture(width, height, "rgba:f16"),
-			depth_buffer});
-			//new vulkan::RenderBuffer(width, height, "d24s8)});
-	}*/
-
-	/*fb2 = new vulkan::FrameBuffer({
-		new vulkan::Texture(width, height, "rgba:f16")});
-	fb3 = new vulkan::FrameBuffer({
-		new vulkan::Texture(width, height, "rgba:f16")});*/
-
-
-	/*if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
-		fb_main->color_attachments[0]->set_options("wrap=clamp");
-	fb_small1->color_attachments[0]->set_options("wrap=clamp");
-	fb_small2->color_attachments[0]->set_options("wrap=clamp");
-	fb2->color_attachments[0]->set_options("wrap=clamp");
-	fb3->color_attachments[0]->set_options("wrap=clamp");
-
-	ResourceManager::default_shader = "default.shader";
-	if (config.get_str("renderer.shader-quality", "") == "pbr") {
-		ResourceManager::load_shader("module-lighting-pbr.shader");
-		ResourceManager::load_shader("forward/module-surface-pbr.shader");
-	} else {
-		ResourceManager::load_shader("forward/module-surface.shader");
-	}
-	ResourceManager::load_shader("module-vertex-default.shader");
-	ResourceManager::load_shader("module-vertex-animated.shader");
-	ResourceManager::load_shader("module-vertex-instanced.shader");*/
-
-	/*shader_depth = ResourceManager::load_shader("forward/depth.shader");
-	shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");*/
-
 	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
 	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
@@ -132,57 +90,16 @@ void WorldRendererVulkanForward::draw() {
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	draw_world(cb, rp, ubo, true, rda_tr, rda_ob);
+	draw_terrains(cb, rp, ubo, true, rda_tr);
+	draw_objects_opaque(cb, rp, ubo, true, rda_ob);
+	draw_objects_transparent(cb, rp, ubo, rda_ob_trans);
 
 	draw_particles(cb, rp);
 
-	/*PerformanceMonitor::begin(ch_render);
-
-	static int _frame = 0;
-	_frame ++;
-	if (_frame > 10) {
-		if (world.ego)
-			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
-		_frame = 0;
-	}
-
-
-	prepare_instanced_matrices();
-
-	prepare_lights(cam);
-
-	PerformanceMonitor::begin(ch_shadow);
-	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow.get(), 4);
-		render_shadow_map(fb_shadow2.get(), 1);
-	}
-	PerformanceMonitor::end(ch_shadow);
-
-	render_into_texture(fb_main.get(), cam, dynamic_fb_area());
-
-	auto source = fb_main.get();
-	if (config.antialiasing_method == AntialiasingMethod::MSAA)
-		source = resolve_multisampling(source);
-
-	source = do_post_processing(source);
-
-*/
 	cb->timestamp(cur_query_offset + 2);
 }
 
 void WorldRendererVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
-}
-
-void WorldRendererVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda_tr, Array<RenderDataVK> &rda_ob) {
-
-	draw_terrains(cb, rp, ubo, allow_material, rda_tr);
-	draw_objects_opaque(cb, rp, ubo, allow_material, rda_ob);
-
-	/*draw_terrains(allow_material);
-	draw_objects_instanced(allow_material);
-	draw_objects_opaque(allow_material);
-	if (allow_material)
-		draw_objects_transparent(allow_material, type);*/
 }
 
 void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale) {
@@ -201,10 +118,13 @@ void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffe
 	ubo.shadow_index = -1;
 
 
-	if (scale == 1)
-		draw_world(cb, render_pass_shadow, ubo, false, rda_tr_shadow, rda_ob_shadow);
-	else
-		draw_world(cb, render_pass_shadow, ubo, false, rda_tr_shadow2, rda_ob_shadow2);
+	if (scale == 1) {
+		draw_terrains(cb, render_pass_shadow, ubo, false, rda_tr_shadow);
+		draw_objects_opaque(cb, render_pass_shadow, ubo, false, rda_ob_shadow);
+	} else {
+		draw_terrains(cb, render_pass_shadow, ubo, false, rda_tr_shadow2);
+		draw_objects_opaque(cb, render_pass_shadow, ubo, false, rda_ob_shadow2);
+	}
 
 	cb->end_render_pass();
 }

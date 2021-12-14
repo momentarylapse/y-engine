@@ -110,7 +110,10 @@ void WorldRendererGLDeferred::draw() {
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
+
 	draw_objects_transparent(true, RenderPathType::FORWARD);
+	draw_particles();
+
 	nix::set_z(false, false);
 	nix::set_projection_matrix(matrix::ID);
 	nix::set_view_matrix(matrix::ID);
