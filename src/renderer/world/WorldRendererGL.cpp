@@ -1,39 +1,40 @@
 /*
- * RenderPathGL.cpp
+ * WorldRendererGL.cpp
  *
  *  Created on: 07.08.2020
  *      Author: michi
  */
 
+#include "WorldRendererGL.h"
+
 #include <GLFW/glfw3.h>
 
-#include "RenderPathGL.h"
 #ifdef USING_OPENGL
-#include "base.h"
-#include "../graphics-impl.h"
-#include "../lib/image/image.h"
-#include "../lib/math/vector.h"
-#include "../lib/math/complex.h"
-#include "../lib/math/rect.h"
-#include "../lib/file/msg.h"
-#include "../helper/PerformanceMonitor.h"
-#include "../plugins/PluginManager.h"
-#include "../fx/Particle.h"
-#include "../fx/Beam.h"
-#include "../fx/ParticleManager.h"
-#include "../gui/gui.h"
-#include "../gui/Picture.h"
-#include "../world/Camera.h"
-#include "../world/Material.h"
-#include "../world/Model.h"
-#include "../world/Object.h" // meh
-#include "../world/Terrain.h"
-#include "../world/World.h"
-#include "../world/Light.h"
-#include "../world/Entity3D.h"
-#include "../world/components/Animator.h"
-#include "../Config.h"
-#include "../meta.h"
+#include "../base.h"
+#include "../../graphics-impl.h"
+#include "../../lib/image/image.h"
+#include "../../lib/math/vector.h"
+#include "../../lib/math/complex.h"
+#include "../../lib/math/rect.h"
+#include "../../lib/file/msg.h"
+#include "../../helper/PerformanceMonitor.h"
+#include "../../plugins/PluginManager.h"
+#include "../../fx/Particle.h"
+#include "../../fx/Beam.h"
+#include "../../fx/ParticleManager.h"
+#include "../../gui/gui.h"
+#include "../../gui/Picture.h"
+#include "../../world/Camera.h"
+#include "../../world/Material.h"
+#include "../../world/Model.h"
+#include "../../world/Object.h" // meh
+#include "../../world/Terrain.h"
+#include "../../world/World.h"
+#include "../../world/Light.h"
+#include "../../world/Entity3D.h"
+#include "../../world/components/Animator.h"
+#include "../../Config.h"
+#include "../../meta.h"
 
 
 namespace nix {
@@ -46,7 +47,7 @@ const int CUBE_SIZE = 128;
 
 
 
-RenderPathGL::RenderPathGL(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
+WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
 	type = _type;
 
 	using_view_space = true;
@@ -72,7 +73,7 @@ RenderPathGL::RenderPathGL(const string &name, Renderer *parent, RenderPathType 
 	ubo_multi_matrix = new nix::UniformBuffer();
 }
 
-void RenderPathGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
+void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity3D o(pos, quaternion::ID);
@@ -106,7 +107,7 @@ void RenderPathGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const 
 
 
 
-void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
+void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
 	nix::set_shader(s);
 	if (using_view_space)
@@ -130,7 +131,7 @@ void RenderPathGL::set_material(Material *m, RenderPathType t, ShaderVariant v) 
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);
 }
 
-void RenderPathGL::set_textures(const Array<Texture*> &tex) {
+void WorldRendererGL::set_textures(const Array<Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
 		tt.add(tex_white);
@@ -147,7 +148,7 @@ void RenderPathGL::set_textures(const Array<Texture*> &tex) {
 
 
 
-void RenderPathGL::draw_particles() {
+void WorldRendererGL::draw_particles() {
 	PerformanceMonitor::begin(ch_fx);
 	nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
@@ -206,7 +207,7 @@ void RenderPathGL::draw_particles() {
 	PerformanceMonitor::end(ch_fx);
 }
 
-void RenderPathGL::draw_skyboxes(Camera *cam) {
+void WorldRendererGL::draw_skyboxes(Camera *cam) {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_view_matrix(matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose());
@@ -222,7 +223,7 @@ void RenderPathGL::draw_skyboxes(Camera *cam) {
 	nix::disable_alpha();
 	break_point();
 }
-void RenderPathGL::draw_terrains(bool allow_material) {
+void WorldRendererGL::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
 		auto o = t->get_owner<Entity3D>();
 		nix::set_model_matrix(matrix::translation(o->pos));
@@ -237,7 +238,7 @@ void RenderPathGL::draw_terrains(bool allow_material) {
 	}
 }
 
-void RenderPathGL::draw_objects_instanced(bool allow_material) {
+void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 	for (auto &s: world.sorted_multi) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
@@ -254,7 +255,7 @@ void RenderPathGL::draw_objects_instanced(bool allow_material) {
 	}
 }
 
-void RenderPathGL::draw_objects_opaque(bool allow_material) {
+void WorldRendererGL::draw_objects_opaque(bool allow_material) {
 	for (auto &s: world.sorted_opaque) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
@@ -281,7 +282,7 @@ void RenderPathGL::draw_objects_opaque(bool allow_material) {
 	}
 }
 
-void RenderPathGL::draw_objects_transparent(bool allow_material, RenderPathType t) {
+void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathType t) {
 	nix::set_z(false, true);
 	if (allow_material)
 	for (auto &s: world.sorted_trans) {
@@ -303,7 +304,7 @@ void RenderPathGL::draw_objects_transparent(bool allow_material, RenderPathType 
 }
 
 
-void RenderPathGL::prepare_instanced_matrices() {
+void WorldRendererGL::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
 		ubo_multi_matrix->update_array(s.matrices);
@@ -311,7 +312,7 @@ void RenderPathGL::prepare_instanced_matrices() {
 	PerformanceMonitor::end(ch_pre);
 }
 
-void RenderPathGL::prepare_lights(Camera *cam) {
+void WorldRendererGL::prepare_lights(Camera *cam) {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();

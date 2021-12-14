@@ -1,5 +1,5 @@
 /*
- * RenderPathVulkanForward.h
+ * WorldRendererVulkanForward.h
  *
  *  Created on: Nov 18, 2021
  *      Author: michi
@@ -7,17 +7,17 @@
 
 #pragma once
 
-#include "RenderPathVulkan.h"
+#include "WorldRendererVulkan.h"
 #ifdef USING_VULKAN
 
 class Camera;
 class PerformanceMonitor;
 struct UBO;
 
-class RenderPathVulkanForward : public RenderPathVulkan {
+class WorldRendererVulkanForward : public WorldRendererVulkan {
 public:
 
-	RenderPathVulkanForward(Renderer *parent);
+	WorldRendererVulkanForward(Renderer *parent);
 
 	void prepare() override;
 	void draw() override;

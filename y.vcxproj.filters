@@ -445,28 +445,28 @@
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRenderer.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRendererGL.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRendererGLDeferred.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRendererGLForward.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRendererVulkan.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRendererVulkanForward.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\base.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\Renderer.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderPath.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderPathGL.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderPathGLDeferred.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderPathGLForward.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderPathVulkan.cpp">
-      <Filter>src\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer\RenderPathVulkanForward.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\world\components\Animator.cpp">
@@ -957,28 +957,28 @@
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h">
       <Filter>src\renderer\target</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRenderer.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRendererGL.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRendererGLDeferred.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRendererGLForward.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRendererVulkan.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRendererVulkanForward.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\base.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\Renderer.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RenderPath.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RenderPathGL.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RenderPathGLDeferred.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RenderPathGLForward.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RenderPathVulkan.h">
-      <Filter>src\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer\RenderPathVulkanForward.h">
       <Filter>src\renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Animator.h">
@@ -1141,6 +1141,9 @@
     </Filter>
     <Filter Include="src\renderer\target">
       <UniqueIdentifier>{1D768818-A3B8-48CD-8B64-75ECD466B30D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\world">
+      <UniqueIdentifier>{D4D42F7D-7B2C-AD64-9C61-0EA56ECD7EE5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\world">
       <UniqueIdentifier>{E9411D56-C9E9-1A0A-845C-CF6F8BB58006}</UniqueIdentifier>

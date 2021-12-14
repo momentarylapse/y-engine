@@ -1,5 +1,5 @@
 /*
- * RenderPathGL.h
+ * WorldRendererGL.h
  *
  *  Created on: 07.08.2020
  *      Author: michi
@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "RenderPath.h"
+#include "WorldRenderer.h"
 #ifdef USING_OPENGL
-#include "../lib/base/pointer.h"
+#include "../../lib/base/pointer.h"
 
 
 class Material;
@@ -23,7 +23,7 @@ enum class ShaderVariant;
 class RendererGL;
 
 
-class RenderPathGL : public RenderPath {
+class WorldRendererGL : public WorldRenderer {
 public:
 
 	shared<FrameBuffer> fb_shadow;
@@ -49,7 +49,7 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathGL(const string &name, Renderer *parent, RenderPathType type);
+	WorldRendererGL(const string &name, Renderer *parent, RenderPathType type);
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);

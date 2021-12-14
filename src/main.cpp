@@ -45,18 +45,18 @@
 #include "plugins/Controller.h"
 
 #include "renderer/base.h"
-#include "renderer/RenderPath.h"
+#include "renderer/world/WorldRenderer.h"
 #ifdef USING_VULKAN
-	#include "renderer/RenderPathVulkan.h"
-	#include "renderer/RenderPathVulkanForward.h"
+	#include "renderer/world/WorldRendererVulkan.h"
+	#include "renderer/world/WorldRendererVulkanForward.h"
 	#include "renderer/gui/GuiRendererVulkan.h"
 	#include "renderer/post/HDRRendererVulkan.h"
 	#include "renderer/post/PostProcessorVulkan.h"
 	#include "renderer/target/WindowRendererVulkan.h"
 #else
-	#include "renderer/RenderPathGL.h"
-	#include "renderer/RenderPathGLForward.h"
-	#include "renderer/RenderPathGLDeferred.h"
+	#include "renderer/world/WorldRendererGL.h"
+	#include "renderer/world/WorldRendererGLForward.h"
+	#include "renderer/world/WorldRendererGLDeferred.h"
 	#include "renderer/gui/GuiRendererGL.h"
 	#include "renderer/post/HDRRendererGL.h"
 	#include "renderer/post/PostProcessorGL.h"
@@ -115,7 +115,7 @@ public:
 //private:
 	GLFWwindow* window;
 
-	RenderPath *render_path = nullptr;
+	WorldRenderer *world_renderer = nullptr;
 	Renderer *gui_renderer = nullptr;
 	PostProcessorStage *hdr_renderer = nullptr;
 	PostProcessor *post_processor = nullptr;
@@ -168,14 +168,14 @@ public:
 #endif
 	}
 
-	RenderPath *create_render_path(Renderer *parent) {
+	WorldRenderer *create_world_renderer(Renderer *parent) {
 #ifdef USING_VULKAN
-		return new RenderPathVulkanForward(parent);
+		return new WorldRendererVulkanForward(parent);
 #else
 		if (config.get_str("renderer.path", "forward") == "deferred")
-			return new RenderPathGLDeferred(parent);
+			return new WorldRendererGLDeferred(parent);
 		else
-			return new RenderPathGLForward(parent);
+			return new WorldRendererGLForward(parent);
 #endif
 	}
 
@@ -184,11 +184,11 @@ public:
 			engine.window_renderer = renderer = create_window_renderer();
 			engine.gui_renderer = gui_renderer = create_gui_renderer(renderer);
 			if (config.get_str("renderer.path", "forward") == "direct") {
-				engine.render_path = render_path = create_render_path(gui_renderer);
+				engine.world_renderer = world_renderer = create_world_renderer(gui_renderer);
 			} else {
 				engine.post_processor = post_processor = create_post_processor(gui_renderer);
 				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(post_processor);
-				engine.render_path = render_path = create_render_path(hdr_renderer);
+				engine.world_renderer = world_renderer = create_world_renderer(hdr_renderer);
 				//post_processor->set_hdr(hdr_renderer);
 			}
 		} catch(Exception &e) {
@@ -346,7 +346,7 @@ public:
 	}
 
 	void reset_game() {
-		render_path->reset();
+		world_renderer->reset();
 		PluginManager::reset();
 		CameraReset();
 		world.reset();
@@ -357,7 +357,7 @@ public:
 		reset_game();
 		GodEnd();
 
-		delete render_path;
+		delete world_renderer;
 		delete renderer;
 		api_end();
 

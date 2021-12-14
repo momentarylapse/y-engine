@@ -1,21 +1,20 @@
 /*
- * RenderPath.cpp
+ * WorldRenderer.cpp
  *
  *  Created on: Jan 19, 2020
  *      Author: michi
  */
 
-#include "RenderPath.h"
-#include "Renderer.h"
-#include "../helper/PerformanceMonitor.h"
-#include "../fx/Particle.h"
-#include "../gui/Picture.h"
-#include "../world/Camera.h"
-#include "../world/Light.h"
-#include "../world/Model.h"
-#include "../world/Terrain.h"
-#include "../world/World.h"
-#include "../lib/base/callable.h"
+#include "WorldRenderer.h"
+#include "../../helper/PerformanceMonitor.h"
+#include "../../fx/Particle.h"
+#include "../../gui/Picture.h"
+#include "../../world/Camera.h"
+#include "../../world/Light.h"
+#include "../../world/Model.h"
+#include "../../world/Terrain.h"
+#include "../../world/World.h"
+#include "../../lib/base/callable.h"
 
 
 struct GeoPush {
@@ -32,7 +31,7 @@ matrix mtr(const vector &t, const quaternion &a) {
 	return mt * mr;
 }
 
-RenderPath::RenderPath(const string &name, Renderer *parent) : Renderer(name, parent) {
+WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(name, parent) {
 	ch_pre = PerformanceMonitor::create_channel("pre", channel);
 	ch_post = PerformanceMonitor::create_channel("post", channel);
 	ch_post_focus = PerformanceMonitor::create_channel("focus", ch_post);
@@ -44,15 +43,15 @@ RenderPath::RenderPath(const string &name, Renderer *parent) : Renderer(name, pa
 }
 
 
-color RenderPath::background() const {
+color WorldRenderer::background() const {
 	return world.background;
 }
 
 
-void RenderPath::add_fx_injector(const RenderInjector::Callback *f) {
+void WorldRenderer::add_fx_injector(const RenderInjector::Callback *f) {
 	fx_injectors.add({f});
 }
 
-void RenderPath::reset() {
+void WorldRenderer::reset() {
 	fx_injectors.clear();
 }

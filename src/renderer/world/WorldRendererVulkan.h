@@ -1,5 +1,5 @@
 /*
- * RenderPathVulkan.h
+ * WorldRendererVulkan.h
  *
  *  Created on: Nov 18, 2021
  *      Author: michi
@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "RenderPath.h"
+#include "WorldRenderer.h"
 #ifdef USING_VULKAN
-#include "../lib/base/pointer.h"
-#include "../lib/base/callable.h"
-#include "../lib/math/vector.h"
-#include "../lib/math/rect.h"
+#include "../../lib/base/pointer.h"
+#include "../../lib/base/callable.h"
+#include "../../lib/math/vector.h"
+#include "../../lib/math/rect.h"
 
 namespace vulkan {
 	class Instance;
@@ -72,7 +72,7 @@ struct RenderDataFxVK {
 };
 
 
-class RenderPathVulkan : public RenderPath {
+class WorldRendererVulkan : public WorldRenderer {
 public:
 
 
@@ -116,8 +116,8 @@ public:
 
 	bool using_view_space = false;
 
-	RenderPathVulkan(const string &name, Renderer *parent, RenderPathType type);
-	virtual ~RenderPathVulkan();
+	WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType type);
+	virtual ~WorldRendererVulkan();
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);

@@ -1,5 +1,5 @@
 /*
- * RenderPathGLDeferred.h
+ * WorldRendererGLDeferred.h
  *
  *  Created on: 07.08.2020
  *      Author: michi
@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "RenderPathGL.h"
+#include "WorldRendererGL.h"
 #ifdef USING_OPENGL
 
-class RenderPathGLDeferred : public RenderPathGL {
+class WorldRendererGLDeferred : public WorldRendererGL {
 public:
 
 	shared<FrameBuffer> gbuffer;
@@ -19,7 +19,7 @@ public:
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
-	RenderPathGLDeferred(Renderer *parent);
+	WorldRendererGLDeferred(Renderer *parent);
 	void prepare() override;
 	void draw() override;
 

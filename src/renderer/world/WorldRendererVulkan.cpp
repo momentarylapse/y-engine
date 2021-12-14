@@ -1,38 +1,38 @@
 /*
- * RenderPathVulkan.cpp
+ * WorldRendererVulkan.cpp
  *
  *  Created on: Nov 18, 2021
  *      Author: michi
  */
 
-#include "RenderPathVulkan.h"
+#include "WorldRendererVulkan.h"
 #ifdef USING_VULKAN
-#include "base.h"
-#include "../graphics-impl.h"
-#include "../lib/image/image.h"
-#include "../lib/math/vector.h"
-#include "../lib/math/complex.h"
-#include "../lib/math/rect.h"
-#include "../lib/file/msg.h"
-#include "../helper/PerformanceMonitor.h"
-#include "../helper/ResourceManager.h"
-#include "../plugins/PluginManager.h"
-#include "../fx/Particle.h"
-#include "../fx/Beam.h"
-#include "../fx/ParticleManager.h"
-#include "../gui/gui.h"
-#include "../gui/Picture.h"
-#include "../world/Camera.h"
-#include "../world/Material.h"
-#include "../world/Model.h"
-#include "../world/Object.h" // meh
-#include "../world/Terrain.h"
-#include "../world/World.h"
-#include "../world/Light.h"
-#include "../world/Entity3D.h"
-#include "../world/components/Animator.h"
-#include "../Config.h"
-#include "../meta.h"
+#include "../base.h"
+#include "../../graphics-impl.h"
+#include "../../lib/image/image.h"
+#include "../../lib/math/vector.h"
+#include "../../lib/math/complex.h"
+#include "../../lib/math/rect.h"
+#include "../../lib/file/msg.h"
+#include "../../helper/PerformanceMonitor.h"
+#include "../../helper/ResourceManager.h"
+#include "../../plugins/PluginManager.h"
+#include "../../fx/Particle.h"
+#include "../../fx/Beam.h"
+#include "../../fx/ParticleManager.h"
+#include "../../gui/gui.h"
+#include "../../gui/Picture.h"
+#include "../../world/Camera.h"
+#include "../../world/Material.h"
+#include "../../world/Model.h"
+#include "../../world/Object.h" // meh
+#include "../../world/Terrain.h"
+#include "../../world/World.h"
+#include "../../world/Light.h"
+#include "../../world/Entity3D.h"
+#include "../../world/components/Animator.h"
+#include "../../Config.h"
+#include "../../meta.h"
 
 
 UniformBuffer *ubo_multi_matrix = nullptr;
@@ -48,7 +48,7 @@ const int LOCATION_TEX0 = 4;
 const int LOCATION_FX_TEX0 = 1;
 
 
-RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderPathType _type) : RenderPath(name, parent) {
+WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
 	type = _type;
 
 	vb_2d = nullptr;
@@ -108,11 +108,11 @@ RenderPathVulkan::RenderPathVulkan(const string &name, Renderer *parent, RenderP
 	material_shadow->shader_path = "shadow.shader";
 }
 
-RenderPathVulkan::~RenderPathVulkan() {
+WorldRendererVulkan::~WorldRendererVulkan() {
 }
 
 
-void RenderPathVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
+void WorldRendererVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
 	/*if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity3D o(pos, quaternion::ID);
@@ -179,7 +179,7 @@ Pipeline *get_pipeline_ani(Shader *s, RenderPass *rp) {
 	return p;
 }
 
-void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
+void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
 	Pipeline *p;
 
@@ -224,7 +224,7 @@ void RenderPathVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descripto
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);*/
 }
 
-void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex) {
+void WorldRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex) {
 	/*auto tt = tex;
 	if (tt.num == 0)
 		tt.add(tex_white.get());
@@ -250,7 +250,7 @@ void RenderPathVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Ar
 
 
 
-void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
+void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 	PerformanceMonitor::begin(ch_fx);
 
 	cb->bind_pipeline(pipeline_fx);
@@ -356,7 +356,7 @@ void RenderPathVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 	PerformanceMonitor::end(ch_fx);
 }
 
-void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
+void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 
 	auto rp = parent->render_pass();
 
@@ -402,7 +402,7 @@ void RenderPathVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam) {
 	cam->max_depth = max_depth;
 }
 
-void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
+void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -438,7 +438,7 @@ void RenderPathVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo
 	}
 }
 
-void RenderPathVulkan::draw_objects_instanced(bool allow_material) {
+void WorldRendererVulkan::draw_objects_instanced(bool allow_material) {
 	/*for (auto &s: world.sorted_multi) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
@@ -455,7 +455,7 @@ void RenderPathVulkan::draw_objects_instanced(bool allow_material) {
 	}*/
 }
 
-void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
+void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -501,7 +501,7 @@ void RenderPathVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UB
 	}
 }
 
-void RenderPathVulkan::draw_objects_transparent(bool allow_material, RenderPathType t) {
+void WorldRendererVulkan::draw_objects_transparent(bool allow_material, RenderPathType t) {
 	/*nix::set_z(false, true);
 	if (allow_material)
 	for (auto &s: world.sorted_trans) {
@@ -523,7 +523,7 @@ void RenderPathVulkan::draw_objects_transparent(bool allow_material, RenderPathT
 }
 
 
-void RenderPathVulkan::prepare_instanced_matrices() {
+void WorldRendererVulkan::prepare_instanced_matrices() {
 	/*PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
 		ubo_multi_matrix->update_array(s.matrices);
@@ -531,7 +531,7 @@ void RenderPathVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::end(ch_pre);*/
 }
 
-void RenderPathVulkan::prepare_lights(Camera *cam) {
+void WorldRendererVulkan::prepare_lights(Camera *cam) {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();

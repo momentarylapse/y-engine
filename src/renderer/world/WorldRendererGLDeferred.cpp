@@ -1,34 +1,35 @@
 /*
- * RenderPathGL.cpp
+ * WorldRendererGL.cpp
  *
  *  Created on: 07.08.2020
  *      Author: michi
  */
 
+#include "WorldRendererGLDeferred.h"
+
 #include <GLFW/glfw3.h>
 
-#include "RenderPathGLDeferred.h"
 #ifdef USING_OPENGL
-#include "base.h"
-#include "../lib/nix/nix.h"
-#include "../lib/file/msg.h"
-#include "../lib/math/random.h"
-#include "../lib/math/vec4.h"
+#include "../base.h"
+#include "../../lib/nix/nix.h"
+#include "../../lib/file/msg.h"
+#include "../../lib/math/random.h"
+#include "../../lib/math/vec4.h"
 
-#include "../helper/PerformanceMonitor.h"
-#include "../helper/ResourceManager.h"
-#include "../helper/Scheduler.h"
-#include "../plugins/PluginManager.h"
-#include "../world/Entity3D.h"
-#include "../world/Camera.h"
-#include "../world/Light.h"
-#include "../world/World.h"
-#include "../Config.h"
-#include "../meta.h"
-#include "../graphics-impl.h"
+#include "../../helper/PerformanceMonitor.h"
+#include "../../helper/ResourceManager.h"
+#include "../../helper/Scheduler.h"
+#include "../../plugins/PluginManager.h"
+#include "../../world/Entity3D.h"
+#include "../../world/Camera.h"
+#include "../../world/Light.h"
+#include "../../world/World.h"
+#include "../../Config.h"
+#include "../../meta.h"
+#include "../../graphics-impl.h"
 
 
-RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def", parent, RenderPathType::DEFERRED) {
+WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRendererGL("world/def", parent, RenderPathType::DEFERRED) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
@@ -72,7 +73,7 @@ RenderPathGLDeferred::RenderPathGLDeferred(Renderer *parent) : RenderPathGL("def
 	ch_trans = PerformanceMonitor::create_channel("trans", channel);
 }
 
-void RenderPathGLDeferred::prepare() {
+void WorldRendererGLDeferred::prepare() {
 	PerformanceMonitor::begin(channel);
 	prepare_instanced_matrices();
 
@@ -92,7 +93,7 @@ void RenderPathGLDeferred::prepare() {
 	PerformanceMonitor::end(channel);
 }
 
-void RenderPathGLDeferred::draw() {
+void WorldRendererGLDeferred::draw() {
 	PerformanceMonitor::begin(channel);
 
 	auto target = parent->frame_buffer();
@@ -117,7 +118,7 @@ void RenderPathGLDeferred::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam) {
+void WorldRendererGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam) {
 	PerformanceMonitor::begin(ch_bg);
 
 	float max_depth = cam->max_depth;
@@ -133,7 +134,7 @@ void RenderPathGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam) 
 
 }
 
-void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
+void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gbuf_out);
 	auto s = shader_gbuffer_out.get();
 	if (using_view_space)
@@ -166,9 +167,9 @@ void RenderPathGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
 	PerformanceMonitor::end(ch_gbuf_out);
 }
 
-void RenderPathGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
+void WorldRendererGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 
-void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam) {
+void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam) {
 	PerformanceMonitor::begin(ch_world);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
@@ -202,13 +203,13 @@ void RenderPathGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam
 	draw_particles();
 }
 
-void RenderPathGLDeferred::draw_world(bool allow_material) {
+void WorldRendererGLDeferred::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
 }
 
-void RenderPathGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
+void WorldRendererGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
 	nix::set_projection_matrix(matrix::translation(vector(0,0,0.5f)) * matrix::scale(1,1,0.5f) * matrix::scale(scale, scale, 1) * shadow_proj);

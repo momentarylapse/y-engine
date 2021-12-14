@@ -1,34 +1,35 @@
 /*
- * RenderPathGLForward.cpp
+ * WorldRendererGLForward.cpp
  *
  *  Created on: Jun 2, 2021
  *      Author: michi
  */
 
-#include <GLFW/glfw3.h>
-#include "RenderPathGLForward.h"
-#ifdef USING_OPENGL
-#include "base.h"
-#include "helper/jitter.h"
-#include "../lib/nix/nix.h"
-#include "../lib/image/image.h"
-#include "../lib/file/msg.h"
+#include "WorldRendererGLForward.h"
 
-#include "../helper/PerformanceMonitor.h"
-#include "../helper/ResourceManager.h"
-#include "../helper/Scheduler.h"
-#include "../plugins/PluginManager.h"
-#include "../world/Camera.h"
-#include "../world/Light.h"
-#include "../world/Entity3D.h"
-#include "../world/World.h"
-#include "../Config.h"
-#include "../meta.h"
+#include <GLFW/glfw3.h>
+#ifdef USING_OPENGL
+#include "../base.h"
+#include "../helper/jitter.h"
+#include "../../lib/nix/nix.h"
+#include "../../lib/image/image.h"
+#include "../../lib/file/msg.h"
+
+#include "../../helper/PerformanceMonitor.h"
+#include "../../helper/ResourceManager.h"
+#include "../../helper/Scheduler.h"
+#include "../../plugins/PluginManager.h"
+#include "../../world/Camera.h"
+#include "../../world/Light.h"
+#include "../../world/Entity3D.h"
+#include "../../world/World.h"
+#include "../../Config.h"
+#include "../../meta.h"
 
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", parent, RenderPathType::FORWARD) {
+WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world/fw", parent, RenderPathType::FORWARD) {
 
 	fb_shadow = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
@@ -51,7 +52,7 @@ RenderPathGLForward::RenderPathGLForward(Renderer *parent) : RenderPathGL("fw", 
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 }
 
-void RenderPathGLForward::prepare() {
+void WorldRendererGLForward::prepare() {
 	PerformanceMonitor::begin(channel);
 
 	static int _frame = 0;
@@ -89,7 +90,7 @@ void RenderPathGLForward::prepare() {
 	PerformanceMonitor::end(channel);
 }
 
-void RenderPathGLForward::draw() {
+void WorldRendererGLForward::draw() {
 	PerformanceMonitor::begin(channel);
 
 	auto fb = frame_buffer();
@@ -139,7 +140,7 @@ void RenderPathGLForward::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
+void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
 	auto c0 = cam;
 	cam = _cam;
 	//draw();
@@ -203,7 +204,7 @@ void RenderPathGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
 	cam = c0;
 }
 
-void RenderPathGLForward::draw_world(bool allow_material) {
+void WorldRendererGLForward::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
@@ -211,7 +212,7 @@ void RenderPathGLForward::draw_world(bool allow_material) {
 		draw_objects_transparent(allow_material, type);
 }
 
-void RenderPathGLForward::render_shadow_map(FrameBuffer *sfb, float scale) {
+void WorldRendererGLForward::render_shadow_map(FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
 	auto m = matrix::scale(scale, scale, 1);

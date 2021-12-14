@@ -6,10 +6,10 @@
  */
 
 #include "Renderer.h"
-#include "RenderPath.h"
 #include "../y/EngineData.h"
 #include "../lib/math/rect.h"
 #include "../helper/PerformanceMonitor.h"
+#include "world/WorldRenderer.h"
 
 
 

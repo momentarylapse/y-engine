@@ -26,17 +26,17 @@
 #include "../renderer/base.h"
 #include "../renderer/Renderer.h"
 #ifdef USING_OPENGL
-#include "../renderer/RenderPathGL.h"
-#include "../renderer/RenderPathGLForward.h"
-#include "../renderer/RenderPathGLDeferred.h"
+#include "../renderer/world/WorldRendererGL.h"
+#include "../renderer/world/WorldRendererGLForward.h"
+#include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
 #include "../renderer/post/HDRRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
 #endif
 #ifdef USING_VULKAN
-#include "../renderer/RenderPathVulkan.h"
-#include "../renderer/RenderPathVulkanForward.h"
+#include "../renderer/world/WorldRendererVulkan.h"
+#include "../renderer/world/WorldRendererVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
 #include "../renderer/post/HDRRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
@@ -529,7 +529,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("EngineData.gui_renderer", &EngineData::gui_renderer);
 	kaba::declare_class_element("EngineData.hdr_renderer", &EngineData::hdr_renderer);
 	kaba::declare_class_element("EngineData.post_processor", &EngineData::post_processor);
-	kaba::declare_class_element("EngineData.render_path", &EngineData::render_path);
+	kaba::declare_class_element("EngineData.render_path", &EngineData::world_renderer);
 	kaba::link_external_class_func("EngineData.exit", &global_exit);
 
 
@@ -539,17 +539,17 @@ void PluginManager::export_kaba() {
 	using WR = WindowRendererVulkan;
 	using HR = HDRRendererVulkan;
 	using GR = GuiRendererVulkan;
-	using RP = RenderPathVulkan;
-	using RPF = RenderPathVulkanForward;
+	using RP = WorldRendererVulkan;
+	using RPF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
 	using WR = WindowRendererGL;
 	using HR = HDRRendererGL;
 	using GR = GuiRendererGL;
-	using RP = RenderPathGL;
-	using RPF = RenderPathGLForward;
-	using RPD = RenderPathGLDeferred;
+	using RP = WorldRendererGL;
+	using RPF = WorldRendererGLForward;
+	using RPD = WorldRendererGLDeferred;
 	using PP = PostProcessorGL;
 #endif
 	kaba::declare_class_size("RenderPath", sizeof(RP));
@@ -563,7 +563,7 @@ void PluginManager::export_kaba() {
 #else
 	//kaba::declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
 #endif
-	kaba::link_external_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.render_path);
+	kaba::link_external_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.add_fx_injector", &RP::add_fx_injector);
 

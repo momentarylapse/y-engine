@@ -1,5 +1,5 @@
 /*
- * RenderPathGLForward.h
+ * WorldRendererGLForward.h
  *
  *  Created on: Jun 2, 2021
  *      Author: michi
@@ -7,15 +7,15 @@
 
 #pragma once
 
-#include "RenderPathGL.h"
+#include "WorldRendererGL.h"
 #ifdef USING_OPENGL
 
 class Camera;
 class PerformanceMonitor;
 
-class RenderPathGLForward : public RenderPathGL {
+class WorldRendererGLForward : public WorldRendererGL {
 public:
-	RenderPathGLForward(Renderer *parent);
+	WorldRendererGLForward(Renderer *parent);
 
 	void prepare() override;
 	void draw() override;

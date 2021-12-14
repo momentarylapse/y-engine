@@ -1,5 +1,5 @@
 /*
- * RenderPath.h
+ * WorldRenderer.h
  *
  *  Created on: Jan 19, 2020
  *      Author: michi
@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include "Renderer.h"
-#include "../graphics-fwd.h"
-#include "../lib/math/matrix.h"
-#include "../lib/image/color.h"
-#include "../lib/base/callable.h"
+#include "../Renderer.h"
+#include "../../graphics-fwd.h"
+#include "../../lib/math/matrix.h"
+#include "../../lib/image/color.h"
+#include "../../lib/base/callable.h"
 //#include "../lib/base/pointer.h"
 
 class ShadowMapRenderer;
@@ -49,10 +49,10 @@ struct RenderInjector {
 	const Callback *func;
 };
 
-class RenderPath : public Renderer {
+class WorldRenderer : public Renderer {
 public:
-	RenderPath(const string &name, Renderer *parent);
-	virtual ~RenderPath() {}
+	WorldRenderer(const string &name, Renderer *parent);
+	virtual ~WorldRenderer() {}
 
 	color background() const override;
 

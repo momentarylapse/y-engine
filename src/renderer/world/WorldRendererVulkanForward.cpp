@@ -1,40 +1,40 @@
 /*
- * RenderPathVulkanForward.cpp
+ * WorldRendererVulkanForward.cpp
  *
  *  Created on: Nov 18, 2021
  *      Author: michi
  */
 
-#include "RenderPathVulkanForward.h"
+#include "WorldRendererVulkanForward.h"
 #ifdef USING_VULKAN
-#include "../graphics-impl.h"
-#include "base.h"
-#include "../lib/file/msg.h"
+#include "../../graphics-impl.h"
+#include "../base.h"
+#include "../../lib/file/msg.h"
 
-#include "../helper/PerformanceMonitor.h"
-#include "../helper/ResourceManager.h"
-#include "../helper/Scheduler.h"
-#include "../plugins/PluginManager.h"
-#include "../gui/gui.h"
-#include "../gui/Node.h"
-#include "../gui/Picture.h"
-#include "../gui/Text.h"
-#include "../fx/Particle.h"
-#include "../fx/Beam.h"
-#include "../fx/ParticleManager.h"
-#include "../world/Camera.h"
-#include "../world/Light.h"
-#include "../world/Entity3D.h"
-#include "../world/Material.h"
-#include "../world/Model.h"
-#include "../world/Object.h" // meh
-#include "../world/Terrain.h"
-#include "../world/World.h"
-#include "../Config.h"
-#include "../meta.h"
+#include "../../helper/PerformanceMonitor.h"
+#include "../../helper/ResourceManager.h"
+#include "../../helper/Scheduler.h"
+#include "../../plugins/PluginManager.h"
+#include "../../gui/gui.h"
+#include "../../gui/Node.h"
+#include "../../gui/Picture.h"
+#include "../../gui/Text.h"
+#include "../../fx/Particle.h"
+#include "../../fx/Beam.h"
+#include "../../fx/ParticleManager.h"
+#include "../../world/Camera.h"
+#include "../../world/Light.h"
+#include "../../world/Entity3D.h"
+#include "../../world/Material.h"
+#include "../../world/Model.h"
+#include "../../world/Object.h" // meh
+#include "../../world/Terrain.h"
+#include "../../world/World.h"
+#include "../../Config.h"
+#include "../../meta.h"
 
 
-RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathVulkan("fw", parent, RenderPathType::FORWARD) {
+WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
 
 
 	/*depth_buffer = new vulkan::DepthBuffer(width, height, "d24s8");
@@ -87,7 +87,7 @@ RenderPathVulkanForward::RenderPathVulkanForward(Renderer *parent) : RenderPathV
 
 static int cur_query_offset;
 
-void RenderPathVulkanForward::prepare() {
+void WorldRendererVulkanForward::prepare() {
 	prepare_lights(cam);
 
 	static int pool_no = 0;
@@ -116,7 +116,7 @@ void RenderPathVulkanForward::prepare() {
 	cb->timestamp(cur_query_offset + 1);
 }
 
-void RenderPathVulkanForward::draw() {
+void WorldRendererVulkanForward::draw() {
 
 	auto cb = command_buffer();
 	auto rp = parent->render_pass();
@@ -170,10 +170,10 @@ void RenderPathVulkanForward::draw() {
 	cb->timestamp(cur_query_offset + 2);
 }
 
-void RenderPathVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
+void WorldRendererVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) {
 }
 
-void RenderPathVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda_tr, Array<RenderDataVK> &rda_ob) {
+void WorldRendererVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda_tr, Array<RenderDataVK> &rda_ob) {
 
 	draw_terrains(cb, rp, ubo, allow_material, rda_tr);
 	draw_objects_opaque(cb, rp, ubo, allow_material, rda_ob);
@@ -185,7 +185,7 @@ void RenderPathVulkanForward::draw_world(CommandBuffer *cb, RenderPass *rp, UBO 
 		draw_objects_transparent(allow_material, type);*/
 }
 
-void RenderPathVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale) {
+void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale) {
 
 	cb->begin_render_pass(render_pass_shadow, sfb);
 	cb->set_viewport(rect(0, shadow_resolution, 0, shadow_resolution));
