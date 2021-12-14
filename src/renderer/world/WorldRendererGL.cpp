@@ -368,8 +368,9 @@ void WorldRendererGL::prepare_lights(Camera *cam) {
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 
-void WorldRendererGL::draw_user_mesh(VertexBuffer *vb, Shader *s, const Array<Texture*> &tex, const Any &data) {
+void WorldRendererGL::draw_user_mesh(VertexBuffer *vb, Shader *s, const matrix &m, const Array<Texture*> &tex, const Any &data) {
 	nix::set_textures(tex);
+	nix::set_model_matrix(m);
 	apply_shader_data(s, data);
 	nix::set_shader(s);
 	nix::draw_triangles(vb);
