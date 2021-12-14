@@ -97,15 +97,16 @@ void WorldRendererGLDeferred::draw() {
 	PerformanceMonitor::begin(channel);
 
 	auto target = parent->frame_buffer();
-	bool flip_y = rendering_into_window();
 
-	render_background(target, cam);
+	draw_background(target, cam);
 
 	render_out_from_gbuffer(gbuffer.get());
 
 	PerformanceMonitor::begin(ch_trans);
+	bool flip_y = rendering_into_window();
+	matrix m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
 	cam->update_matrices((float)target->width / (float)target->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::set_projection_matrix(m * cam->m_projection);
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
@@ -118,13 +119,15 @@ void WorldRendererGLDeferred::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLDeferred::render_background(nix::FrameBuffer *fb, Camera *cam) {
+void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, Camera *cam) {
 	PerformanceMonitor::begin(ch_bg);
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
+	bool flip_y = rendering_into_window();
+	matrix m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::set_projection_matrix(m * cam->m_projection);
 
 	//nix::clear_color(Green);
 	nix::clear_color(world.background);
