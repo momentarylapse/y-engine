@@ -40,6 +40,7 @@
 namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
 }
+void apply_shader_data(Shader *s, const Any &shader_data);
 
 nix::UniformBuffer *ubo_multi_matrix = nullptr;
 
@@ -150,6 +151,12 @@ void WorldRendererGL::set_textures(const Array<Texture*> &tex) {
 
 void WorldRendererGL::draw_particles() {
 	PerformanceMonitor::begin(ch_fx);
+
+	// script injectors
+	for (auto &i: fx_injectors)
+		if (!i.transparent)
+			(*i.func)();
+
 	nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	nix::set_z(false, true);
@@ -198,7 +205,8 @@ void WorldRendererGL::draw_particles() {
 
 	// script injectors
 	for (auto &i: fx_injectors)
-		(*i.func)();
+		if (i.transparent)
+			(*i.func)();
 
 
 	nix::set_z(true, true);
@@ -330,6 +338,13 @@ void WorldRendererGL::prepare_lights(Camera *cam) {
 	}
 	ubo_light->update_array(lights);
 	PerformanceMonitor::end(ch_prepare_lights);
+}
+
+void WorldRendererGL::draw_user_mesh(VertexBuffer *vb, Shader *s, const Array<Texture*> &tex, const Any &data) {
+	nix::set_textures(tex);
+	apply_shader_data(s, data);
+	nix::set_shader(s);
+	nix::draw_triangles(vb);
 }
 
 #endif

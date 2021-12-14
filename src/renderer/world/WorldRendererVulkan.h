@@ -34,6 +34,7 @@ class GLFWwindow;
 class rect;
 class Material;
 class Entity3D;
+class Any;
 
 enum class ShaderVariant;
 
@@ -134,6 +135,9 @@ public:
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam);
+
+
+	void draw_user_mesh(VertexBuffer *vb, Shader *s, const Array<Texture*> &tex, const Any &data);
 };
 
 #endif

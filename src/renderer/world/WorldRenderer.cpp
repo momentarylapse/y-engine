@@ -48,8 +48,8 @@ color WorldRenderer::background() const {
 }
 
 
-void WorldRenderer::add_fx_injector(const RenderInjector::Callback *f) {
-	fx_injectors.add({f});
+void WorldRenderer::add_fx_injector(const RenderInjector::Callback *f, bool transparent) {
+	fx_injectors.add({f, transparent});
 }
 
 void WorldRenderer::reset() {

@@ -31,7 +31,7 @@ void GuiRendererGL::draw() {
 	draw_gui(nullptr);
 }
 
-void apply_shader_data(Shader *s, Any &shader_data) {
+void apply_shader_data(Shader *s, const Any &shader_data) {
 	if (shader_data.is_empty())
 		return;
 	if (!shader_data.is_array()) {
@@ -43,16 +43,24 @@ void apply_shader_data(Shader *s, Any &shader_data) {
 			msg_write("invalid shader data item: " + x.str());
 			continue;
 		}
-		if (!x.array_get(0).is_string()) {
+		auto key = x.array_get(0);
+		auto val = x.array_get(1);
+		if (!key.is_string()) {
 			msg_write("invalid shader data item: " + x.str());
 			continue;
 		}
-		if (x.array_get(1).is_float())
-			s->set_float(x.array_get(0).as_string(), x.array_get(1).as_float());
-		else if (x.array_get(1).is_int())
-			s->set_float(x.array_get(0).as_string(), x.array_get(1).as_int());
-		else
+		if (val.is_float()) {
+			s->set_float(key.as_string(), val.as_float());
+		} else if (val.is_int()) {
+			s->set_float(key.as_string(), val.as_int());
+		} else if (val.is_array()) {
+			float ff[4];
+			for (int i=0; i<val.as_array().num; i++)
+				ff[i] = val.as_array()[i].as_float();
+			s->set_floats(key.as_string(), ff, val.as_array().num);
+		} else {
 			msg_write("invalid shader data item: " + x.str());
+		}
 	}
 }
 

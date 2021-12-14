@@ -566,6 +566,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	kaba::link_external_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 	kaba::link_external_class_func("RenderPath.add_fx_injector", &RP::add_fx_injector);
+	kaba::link_external_class_func("RenderPath.draw_user_mesh", &RP::draw_user_mesh);
 
 	kaba::declare_class_size("PostProcessor", sizeof(PP));
 	kaba::declare_class_element("PostProcessor.fb1", &PP::fb1);

@@ -551,6 +551,13 @@ void WorldRendererVulkan::prepare_lights(Camera *cam) {
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 
+void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const Array<Texture*> &tex, const Any &data) {
+	/*nix::set_textures(tex);
+	apply_shader_data(s, data);
+	nix::set_shader(s);
+	nix::draw_triangles(vb);*/
+}
+
 #endif
 
 

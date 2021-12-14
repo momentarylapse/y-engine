@@ -47,6 +47,7 @@ enum class RenderPathType {
 struct RenderInjector {
 	using Callback = Callable<void()>;
 	const Callback *func;
+	bool transparent;
 };
 
 class WorldRenderer : public Renderer {
@@ -63,7 +64,7 @@ public:
 
 
 	Array<RenderInjector> fx_injectors;
-	void add_fx_injector(const RenderInjector::Callback *f);
+	void add_fx_injector(const RenderInjector::Callback *f, bool transparent);
 
 	void reset();
 };
