@@ -167,7 +167,7 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	const vec2 AXIS[2] = {{(float)BLUR_SCALE,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
 	UBOBlur u;
-	u.radius = cam->bloom_radius * resolution_scale_x * 2 / (float)BLUR_SCALE;
+	u.radius = cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
 	u.threshold = threshold / cam->exposure;
 	u.axis = AXIS[iaxis];
 	blur_ubo[iaxis]->update(&u);

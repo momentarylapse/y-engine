@@ -570,7 +570,7 @@ void WorldRendererVulkan::prepare_lights(Camera *cam) {
 void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const Array<Texture*> &tex, const Any &data) {
 	auto cb = command_buffer();
 
-	Map<VertexBuffer*,RenderDataVK> rdas;
+	static Map<VertexBuffer*,RenderDataVK> rdas;
 	RenderDataVK *rda;
 	if (rdas.contains(vb)) {
 		rda = &rdas[vb];

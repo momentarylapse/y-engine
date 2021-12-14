@@ -2,7 +2,7 @@
 *.dll
 /y
 /message.txt
-
+/.settings
 /.vs
 /Debug/y.tlog
 /x64/Release
