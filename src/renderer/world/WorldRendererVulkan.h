@@ -60,12 +60,6 @@ struct UBOFx {
 	matrix m,v,p;
 };
 
-struct VertexFx {
-	vector pos;
-	color col;
-	float u, v;
-};
-
 struct RenderDataFxVK {
 	UniformBuffer *ubo;
 	DescriptorSet *dset;

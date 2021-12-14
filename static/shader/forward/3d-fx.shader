@@ -1,8 +1,6 @@
 <Layout>
 	bindings = [[buffer,dbuffer,buffer,sampler]]
 	pushsize = 100
-	input = [vec3,vec3,vec2]
-	topology = triangles
 	version = 450
 </Layout>
 <VertexShader>
@@ -19,16 +17,18 @@ struct Matrix {
 
 
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_tex_coord;
+layout(location = 1) in vec4 in_color;
+layout(location = 2) in vec2 in_uv;
 
-layout(location = 0) out vec2 out_tex_coord;
-layout(location = 1) out vec4 out_pos_proj;
+layout(location = 0) out vec4 out_pos_proj;
+layout(location = 1) out vec4 out_color;
+layout(location = 2) out vec2 out_uv;
 
 void main() {
 	gl_Position = matrix.project * matrix.view * matrix.model * vec4(in_position, 1.0);
 	out_pos_proj = gl_Position;
-	out_tex_coord = in_tex_coord;
+	out_color = in_color;
+	out_uv = in_uv;
 }
 </VertexShader>
 <FragmentShader>
@@ -36,13 +36,11 @@ void main() {
 
 /*layout(binding = 3)*/ uniform sampler2D tex0;
 
-layout(location = 0) in vec2 in_tex_coord;
-layout(location = 1) in vec4 in_pos_proj;
+layout(location = 0) in vec4 in_pos_proj;
+layout(location = 1) in vec4 in_color;
+layout(location = 2) in vec2 in_uv;
 
 layout(location = 0) out vec4 out_color;
-
-uniform vec4 color;
-uniform vec4 source;
 
 
 struct Fog {
@@ -59,10 +57,10 @@ void main() {
 	
 //	vec2 tc = ppp.xy/2 - vec2(0.5,0.5);
 
-	vec2 tc = vec2(source.x + (source.y-source.x) * in_tex_coord.x, source.z + (source.w-source.z) * in_tex_coord.y);
+	vec2 tc = in_uv;
 
 	// previous pixel pos (screen space)
-	out_color = texture(tex0, tc) * color;
+	out_color = texture(tex0, tc) * in_color;
 	//out_color.rgb = out_color.rgb * (1-fog_density) + fog_color.rgb * fog_density;
 }
 </FragmentShader>

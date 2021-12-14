@@ -10,6 +10,7 @@
 #include "../Renderer.h"
 #include "../../graphics-fwd.h"
 #include "../../lib/math/matrix.h"
+#include "../../lib/math/vector.h"
 #include "../../lib/image/color.h"
 #include "../../lib/base/callable.h"
 //#include "../lib/base/pointer.h"
@@ -35,6 +36,12 @@ struct UBOMatrices {
 struct UBOFog {
 	alignas(16) color col;
 	alignas(16) float distance;
+};
+
+struct VertexFx {
+	vector pos;
+	color col;
+	float u, v;
 };
 
 

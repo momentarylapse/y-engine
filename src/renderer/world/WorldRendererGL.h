@@ -29,8 +29,10 @@ public:
 
 	shared<FrameBuffer> fb_shadow;
 	shared<FrameBuffer> fb_shadow2;
-	shared<Shader> shader_fx;
 	Material *material_shadow = nullptr;
+
+	shared<Shader> shader_fx;
+	VertexBuffer *vb_fx = nullptr;
 
 	Array<UBOLight> lights;
 	UniformBuffer *ubo_light;

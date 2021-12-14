@@ -253,6 +253,11 @@ void WorldRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const
 void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 	PerformanceMonitor::begin(ch_fx);
 
+	// script injectors
+	for (auto &i: fx_injectors)
+		if (!i.transparent)
+			(*i.func)();
+
 	cb->bind_pipeline(pipeline_fx);
 
 	UBOFx ubo;
@@ -350,7 +355,8 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp) {
 
 	// script injectors
 	for (auto &i: fx_injectors)
-		(*i.func)();
+		if (i.transparent)
+			(*i.func)();
 
 
 	PerformanceMonitor::end(ch_fx);

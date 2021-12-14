@@ -68,6 +68,8 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 
+	vb_fx = new nix::VertexBuffer("3f,4f,2f");
+
 	material_shadow = new Material;
 	material_shadow->shader_path = "shadow.shader";
 
@@ -146,7 +148,15 @@ void WorldRendererGL::set_textures(const Array<Texture*> &tex) {
 	nix::set_textures(tt);
 }
 
-
+void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const color &c) {
+	Array<VertexFx> v = {{{d.x1,d.y1,0}, c, s.x1,s.y1},
+	                    {{d.x1,d.y2,0}, c, s.x1,s.y2},
+	                    {{d.x2,d.y2,0}, c, s.x2,s.y2},
+	                    {{d.x1,d.y1,0}, c, s.x1,s.y1},
+	                    {{d.x2,d.y2,0}, c, s.x2,s.y2},
+	                    {{d.x2,d.y1,0}, c, s.x2,s.y1}};
+	vb->update(v);
+}
 
 
 void WorldRendererGL::draw_particles() {
@@ -163,16 +173,24 @@ void WorldRendererGL::draw_particles() {
 
 	// particles
 	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
-	nix::vb_temp->create_quad(rect::ID_SYM, rect(0,1, 1,0)); // flip uv y
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
+
+		Array<VertexFx> v;
 		for (auto p: g->particles)
 			if (p->enabled) {
-				shader_fx->set_color("color", p->col);
-				shader_fx->set_floats("source", &p->source.x1, 4);
-				nix::set_model_matrix(matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius));
-				nix::draw_triangles(nix::vb_temp);
+				auto m = matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius);
+
+				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vector( 1, 1,0), p->col, p->source.x2, p->source.y1});
+				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vector(-1,-1,0), p->col, p->source.x1, p->source.y2});
 			}
+		vb_fx->update(v);
+		nix::set_model_matrix(matrix::ID);
+		nix::draw_triangles(vb_fx);
 	}
 
 	// beams
@@ -180,7 +198,12 @@ void WorldRendererGL::draw_particles() {
 	nix::set_model_matrix(matrix::ID);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
+
+		Array<VertexFx> v;
+
 		for (auto p: g->beams) {
+			if (!p->enabled)
+				continue;
 			// TODO geometry shader!
 			auto pa = cam->project(p->pos);
 			auto pb = cam->project(p->pos + p->length);
@@ -190,17 +213,22 @@ void WorldRendererGL::draw_particles() {
 			auto _e1 = (p->pos - uae).normalized() * p->radius;
 			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
 			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
-			v[0].p = p->pos - _e1;
-			v[1].p = p->pos - _e2 + p->length;
-			v[2].p = p->pos + _e2 + p->length;
-			v[3].p = p->pos - _e1;
-			v[4].p = p->pos + _e2 + p->length;
-			v[5].p = p->pos + _e1;
-			nix::vb_temp->update(v);
-			shader_fx->set_color("color", p->col);
-			shader_fx->set_floats("source", &p->source.x1, 4);
-			nix::draw_triangles(nix::vb_temp);
+
+			vector p00 = p->pos - _e1;
+			vector p01 = p->pos - _e2 + p->length;
+			vector p10 = p->pos + _e1;
+			vector p11 = p->pos + _e2 + p->length;
+
+			v.add({p00, p->col, p->source.x1, p->source.y1});
+			v.add({p01, p->col, p->source.x2, p->source.y1});
+			v.add({p11, p->col, p->source.x2, p->source.y2});
+			v.add({p00, p->col, p->source.x1, p->source.y1});
+			v.add({p11, p->col, p->source.x2, p->source.y2});
+			v.add({p10, p->col, p->source.x1, p->source.y2});
 		}
+
+		vb_fx->update(v);
+		nix::draw_triangles(vb_fx);
 	}
 
 	// script injectors
