@@ -119,7 +119,7 @@ void WorldRendererVulkanForward::prepare() {
 void WorldRendererVulkanForward::draw() {
 
 	auto cb = command_buffer();
-	auto rp = parent->render_pass();
+	auto rp = render_pass();
 
 	draw_skyboxes(cb, cam);
 

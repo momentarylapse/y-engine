@@ -179,6 +179,16 @@ Pipeline *get_pipeline_ani(Shader *s, RenderPass *rp) {
 	return p;
 }
 
+Pipeline *get_pipeline_user(Shader *s, RenderPass *rp, const string &format) {
+	static Map<Shader*,Pipeline*> ob_pipelines;
+	if (ob_pipelines.contains(s))
+		return ob_pipelines[s];
+	msg_write("NEW PIPELINE");
+	auto p = new Pipeline(s, rp, 0, "triangles", format);
+	ob_pipelines.add({s, p});
+	return p;
+}
+
 void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
 	Pipeline *p;
@@ -558,10 +568,33 @@ void WorldRendererVulkan::prepare_lights(Camera *cam) {
 }
 
 void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const Array<Texture*> &tex, const Any &data) {
-	/*nix::set_textures(tex);
-	apply_shader_data(s, data);
-	nix::set_shader(s);
-	nix::draw_triangles(vb);*/
+	auto cb = command_buffer();
+
+	Map<VertexBuffer*,RenderDataVK> rdas;
+	RenderDataVK *rda;
+	if (rdas.contains(vb)) {
+		rda = &rdas[vb];
+	} else {
+		rdas.set(vb, {new UniformBuffer(sizeof(UBO)),
+			pool->create_set(s)});
+		rda = &rdas[vb];
+		rda->dset->set_buffer(LOCATION_PARAMS, rda->ubo);
+		//rda->dset->set_buffer(LOCATION_LIGHT, ubo_light);
+		rda->dset->set_texture(1, tex[0]);
+		rda->dset->update();
+	}
+
+	UBO ubo;
+	ubo.p = cam->m_projection;
+	ubo.v = cam->m_view;
+	ubo.m = matrix::ID;
+
+	rda->ubo->update_part(&ubo, 0, sizeof(UBO));
+
+	auto pipeline = get_pipeline_user(s, render_pass(), "3f,4f,2f");
+	cb->bind_pipeline(pipeline);
+	cb->bind_descriptor_set(0, rda->dset);
+	cb->draw(vb);
 }
 
 #endif
