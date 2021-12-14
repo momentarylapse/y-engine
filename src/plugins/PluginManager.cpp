@@ -120,6 +120,15 @@ Array<Texture*> framebuffer_color_attachments(FrameBuffer *fb) {
 #endif
 }
 
+
+void vertexbuffer_init(VertexBuffer *vb, const string &format) {
+	vb->__init__(format);
+}
+
+void vertexbuffer_update(VertexBuffer *vb, const DynamicArray &vertices) {
+	vb->update(vertices);
+}
+
 #pragma GCC pop_options
 
 
@@ -590,6 +599,10 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("FrameBuffer.__init__", &framebuffer_init);
 	kaba::link_external_class_func("FrameBuffer.depth_buffer", &framebuffer_depthbuffer);
 	kaba::link_external_class_func("FrameBuffer.color_attachments", &framebuffer_color_attachments);
+
+	kaba::declare_class_size("VertexBuffer", sizeof(VertexBuffer));
+	kaba::link_external_class_func("VertexBuffer.__init__", &vertexbuffer_init);
+	kaba::link_external_class_func("VertexBuffer.update", &vertexbuffer_update);
 
 
 
