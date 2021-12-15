@@ -39,7 +39,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
 	ResourceManager::default_shader = "default.shader";
-	if (config.get_str("renderer.shader-quality", "") == "pbr") {
+	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
 		ResourceManager::load_shader("module-lighting-pbr.shader");
 		ResourceManager::load_shader("forward/module-surface-pbr.shader");
 	} else {

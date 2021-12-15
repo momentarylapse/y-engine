@@ -81,7 +81,7 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 
 
 	ResourceManager::default_shader = "default.shader";
-	/*if (config.get_str("renderer.shader-quality", "") == "pbr") {
+	/*if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
 		ResourceManager::load_shader("module-lighting-pbr.shader");
 		ResourceManager::load_shader("forward/module-surface-pbr.shader");
 	} else {

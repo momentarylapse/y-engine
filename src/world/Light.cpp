@@ -92,9 +92,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 			auto ang = cam->get_owner<Entity3D>()->ang;
 			if (type == LightType::CONE or user_shadow_control)
 				ang = o->ang;
-			msg_write((ang * vector::EZ).str());
 			auto r = matrix::rotation(ang).transpose();
-			//auto r = matrix::rotation(light.dir.dir2ang()).transpose();
 			float theta = 1.35f;
 			if (type == LightType::CONE)
 				theta = light.theta;
@@ -102,11 +100,8 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 				theta = user_shadow_theta;
 			float dist_min = (shadow_dist_min > 0) ? shadow_dist_min : light.radius * 0.01f;
 			float dist_max = (shadow_dist_max > 0) ? shadow_dist_max : light.radius;
-			msg_write(format("%.1f : %.1f", dist_min, dist_max));
 			auto p = matrix::perspective(2 * theta, 1.0f, dist_min, dist_max, false);
-			//static const float EEE[] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,-1};
-			static const float EEE[] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
-			shadow_projection = p * matrix(EEE) * r * t;
+			shadow_projection = p * r * t;
 		}
 		if (using_view_space)
 			light.proj = shadow_projection * cam->view_matrix().inverse();
