@@ -8,6 +8,7 @@
 #include "GuiRendererVulkan.h"
 #ifdef USING_VULKAN
 #include "../base.h"
+#include "../helper/PipelineManager.h"
 #include "../../graphics-impl.h"
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"
@@ -31,10 +32,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 
 
 	shader = ResourceManager::load_shader("vulkan/2d.shader");
-	pipeline = new vulkan::Pipeline(shader, parent->render_pass(), 0, "triangles", "3f,3f,2f");
-	pipeline->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
-	pipeline->set_z(false, false);
-	pipeline->rebuild();
+	pipeline = PipelineManager::get_gui(shader, parent->render_pass(), "3f,3f,2f");
 
 
 	vb = new VertexBuffer("3f,3f,2f");
@@ -106,9 +104,17 @@ void GuiRendererVulkan::draw_gui(CommandBuffer *cb) {
 		if (!n->eff_visible)
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
+			auto *p = (gui::Picture*)n;
+			if (p->shader) {
+				auto pl = PipelineManager::get_gui(p->shader.get(), parent->render_pass(), "3f,3f,2f");
+				cb->bind_pipeline(pl);
+			}
 
 			cb->bind_descriptor_set(0, dset[index]);
 			cb->draw(vb);
+
+			if (p->shader)
+				cb->bind_pipeline(pipeline);
 			index ++;
 		}
 	}

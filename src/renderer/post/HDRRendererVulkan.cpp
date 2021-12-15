@@ -103,6 +103,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	into = RenderIntoData(this);
+	fb_main = into.fb_main.get();
 
 
 	auto blur_tex1 = new vulkan::DynamicTexture(width/BLUR_SCALE, height/BLUR_SCALE, 1, "rgba:f16");

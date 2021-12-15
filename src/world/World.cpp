@@ -293,6 +293,17 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
+void add_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
+
+	for (auto &cc: components) {
+		msg_write("add component " + cc.class_name);
+#ifdef _X_ALLOW_X_
+		auto type = PluginManager::find_class(cc.filename, cc.class_name);
+		auto comp = ent->add_component(type, cc.var);
+#endif
+	}
+}
+
 bool World::load(const LevelData &ld) {
 	net_msg_enabled = false;
 	bool ok = true;
@@ -314,15 +325,8 @@ bool World::load(const LevelData &ld) {
 		if (ll->light.radius < 0)
 			ll->allow_shadow = true;
 		o->_add_component_external_(ll);
-		lights.add(ll);
-
-		for (auto &cc: l.components) {
-			//msg_write("add component " + cc.class_name);
-	#ifdef _X_ALLOW_X_
-			auto type = PluginManager::find_class(cc.filename, cc.class_name);
-			auto comp = o->add_component(type, cc.var);
-	#endif
-		}
+		add_components(o, l.components);
+		register_entity(o);
 	}
 #endif
 
@@ -343,13 +347,7 @@ bool World::load(const LevelData &ld) {
 		cc->exposure = c.exposure;
 		cc->fov = c.fov;
 
-		for (auto &cc: c.components) {
-			//msg_write("add component " + cc.class_name);
-	#ifdef _X_ALLOW_X_
-			auto type = PluginManager::find_class(cc.filename, cc.class_name);
-			auto comp = cam->owner->add_component(type, cc.var);
-	#endif
-		}
+		add_components(cam->owner, c.components);
 	}
 	auto cameras = ComponentManager::get_listx<Camera>();
 	if (cameras->num == 0) {
@@ -366,13 +364,15 @@ bool World::load(const LevelData &ld) {
 		if (!o.filename.is_empty()) {
 			try {
 				auto q = quaternion::rotation(o.ang);
-				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q, o.components);
+				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q);
+				add_components(oo, o.components);
 				request_next_object_index(i);
 				register_entity(oo);
 				if (ld.ego_index == i)
 					ego = oo;
 				if (i % 5 == 0)
 					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
+
 			} catch (...) {
 				ok = false;
 			}
@@ -382,15 +382,9 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &t, ld.terrains, i) {
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
 		auto tt = create_terrain_no_reg(t.filename, t.pos);
-
-		for (auto &cc: t.components) {
-			//msg_write("add component " + cc.class_name);
-	#ifdef _X_ALLOW_X_
-			auto type = PluginManager::find_class(cc.filename, cc.class_name);
-			auto comp = tt->owner->add_component(type, cc.var);
-	#endif
-		}
 		register_entity(tt->get_owner<Entity3D>());
+
+		add_components(tt->owner, t.components);
 		ok &= !tt->error;
 	}
 
@@ -421,7 +415,6 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vector &pos) {
 
 	auto t = (Terrain*)o->add_component(Terrain::_class, "");
 	t->load(filename);
-	terrains.add(t);
 
 	auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
 
@@ -454,6 +447,12 @@ void World::register_entity(Entity3D *e) {
 	if (auto m = e->get_component<Model>())
 		register_object(e);
 
+	if (auto t = e->get_component<Terrain>())
+		terrains.add(t);
+
+	if (auto l = e->get_component<Light>())
+		lights.add(l);
+
 	entities.add(e);
 	e->on_init_rec();
 
@@ -471,16 +470,16 @@ void World::register_entity(Entity3D *e) {
 }
 
 Entity3D *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
-	auto o = create_object_no_reg_x(filename, "", pos, ang, {});
+	auto o = create_object_no_reg_x(filename, "", pos, ang);
 	register_entity(o);
 	return o;
 }
 
 Entity3D *World::create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang) {
-	return create_object_no_reg_x(filename, "", pos, ang, {});
+	return create_object_no_reg_x(filename, "", pos, ang);
 }
 
-Entity3D *World::create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang, const Array<LevelData::ScriptData> &components) {
+Entity3D *World::create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang) {
 	if (engine.resetting_game)
 		throw Exception("create_object during game reset");
 
@@ -508,15 +507,6 @@ Entity3D *World::create_object_no_reg_x(const Path &filename, const string &name
 
 	if (m->_template->animator)
 		o->add_component(Animator::_class, "");
-
-	// user components
-	for (auto &cc: components) {
-		//msg_write("add component " + cc.class_name);
-#ifdef _X_ALLOW_X_
-		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		auto comp = o->add_component(type, cc.var);
-#endif
-	}
 
 	return o;
 }
@@ -896,7 +886,7 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 
 	auto l = new Light(c, -1, -1);
 	o->_add_component_external_(l);
-	lights.add(l);
+	register_entity(o);
 	return l;
 #else
 	return nullptr;
@@ -910,7 +900,7 @@ Light *World::add_light_point(const vector &p, const color &c, float r) {
 
 	auto l = new Light(c, r, -1);
 	o->_add_component_external_(l);
-	lights.add(l);
+	register_entity(o);
 	return l;
 #else
 	return nullptr;
@@ -924,7 +914,7 @@ Light *World::add_light_cone(const vector &p, const quaternion &ang, const color
 
 	auto l = new Light(c, r, t);
 	o->_add_component_external_(l);
-	lights.add(l);
+	register_entity(o);
 	return l;
 #else
 	return nullptr;

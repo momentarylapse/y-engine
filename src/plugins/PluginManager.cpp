@@ -588,7 +588,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("RenderPath.type", &RP::type);
 
 	kaba::declare_class_size("HDRRenderer", sizeof(HR));
-	//kaba::declare_class_element("HDRRenderer.fb_main", &HR::fb_main);
+	kaba::declare_class_element("HDRRenderer.fb_main", &HR::fb_main);
 	kaba::declare_class_element("HDRRenderer.fb_small1", &HR::fb_small1);
 	kaba::declare_class_element("HDRRenderer.fb_small2", &HR::fb_small2);
 

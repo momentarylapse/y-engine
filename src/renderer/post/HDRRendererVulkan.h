@@ -45,6 +45,7 @@ public:
 	} out;
 
 
+	FrameBuffer *fb_main;
 	shared<FrameBuffer> fb_small1;
 	shared<FrameBuffer> fb_small2;
 

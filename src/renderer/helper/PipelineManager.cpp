@@ -56,6 +56,19 @@ Pipeline *get_user(Shader *s, RenderPass *rp, const string &format) {
 	return p;
 }
 
+Pipeline *get_gui(Shader *s, RenderPass *rp, const string &format) {
+	static Map<Shader*,Pipeline*> ob_pipelines;
+	if (ob_pipelines.contains(s))
+		return ob_pipelines[s];
+	msg_write("NEW PIPELINE GUI");
+	auto p = new vulkan::Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
+	p->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+	p->set_z(false, false);
+	p->rebuild();
+	ob_pipelines.add({s, p});
+	return p;
+}
+
 
 }
 

@@ -70,8 +70,8 @@ void WorldRendererGLForward::prepare() {
 
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
+		render_shadow_map(fb_shadow.get(), 4);
 	}
 	PerformanceMonitor::end(ch_shadow);
 
@@ -224,7 +224,6 @@ void WorldRendererGLForward::render_shadow_map(FrameBuffer *sfb, float scale) {
 	nix::clear_z();
 
 	nix::set_z(true, true);
-	//nix::set_shader(shader_shadow.get());
 
 
 	draw_world(false);

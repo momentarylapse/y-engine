@@ -625,29 +625,18 @@ void Terrain::prepare_draw(const vector &cam_pos) {
 
 
 	// do we have to recreate the terrain?
-	if (force_redraw)
+	if (force_redraw) {
 		redraw = true;
-	else
+	} else {
 		for (int x=0;x<num_x/32;x++)
 			for (int z=0;z<num_z/32;z++)
 				if (partition_old[x][z]!=partition[x][z])
 					redraw = true;
+	}
 
 	// recreate (in vertex buffer)
 	if (redraw)
 		build_vertex_buffer();
-
-#if 0
-#ifdef _X_ALLOW_X_
-	Light::Apply(cur_cam->pos);
-#endif
-
-	material->apply();
-
-	// the actual drawing
-	nix::set_model_matrix(matrix::ID);
-	nix::Draw3D(vertex_buffer);
-#endif
 
 	pos_old = cam_pos;
 	force_redraw = false;

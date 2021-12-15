@@ -108,7 +108,7 @@ float _surf_shadow_pcf_step(vec3 p, vec2 dd, ivec2 ts) {
 	float epsilon = 0.004;
 	float shadow_z = texture(tex_shadow1, p.xy + d).r + epsilon;
 	if (tp.x > 0.38 && tp.y > 0.38 && tp.x < 0.62 && tp.y < 0.62)
-		shadow_z = texture(tex_shadow0, (p.xy - vec2(0.5,0.5))*4 + vec2(0.5,0.5) + d).r + epsilon/4;
+		shadow_z = texture(tex_shadow0, (p.xy - vec2(0.5,0.5))*4 + vec2(0.5,0.5) + d).r + epsilon;
 	if (p.z > shadow_z)
 		return 1.0;
 	return 0.0;

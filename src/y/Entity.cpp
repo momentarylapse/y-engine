@@ -11,6 +11,9 @@
 #include "../lib/kaba/syntax/Class.h"
 
 
+//#include "../lib/file/msg.h"
+
+
 Array<Entity*> EntityManager::selection;
 
 
@@ -35,9 +38,12 @@ Entity::~Entity() {
 }
 
 void Entity::on_init_rec() {
+	//msg_write("init rec");
 	on_init();
-	for (auto c: components)
+	for (auto c: components) {
+		//msg_write(" -> " + c->component_type->name);
 		c->on_init();
+	}
 }
 
 void Entity::on_delete_rec() {
@@ -50,7 +56,9 @@ void Entity::on_delete_rec() {
 // TODO (later) optimize...
 Component *Entity::add_component(const kaba::Class *type, const string &var) {
 	auto c = add_component_no_init(type, var);
+
 //	c->on_init();
+	// don't init now, wait until the on_init_rec() later (via World.register_entity())!
 	return c;
 }
 

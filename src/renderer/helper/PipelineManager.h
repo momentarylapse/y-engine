@@ -17,6 +17,7 @@ Pipeline *get(Shader *s, RenderPass *rp);
 Pipeline *get_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst);
 Pipeline *get_ani(Shader *s, RenderPass *rp);
 Pipeline *get_user(Shader *s, RenderPass *rp, const string &format);
+Pipeline *get_gui(Shader *s, RenderPass *rp, const string &format);
 
 }
 

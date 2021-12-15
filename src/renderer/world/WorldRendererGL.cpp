@@ -268,6 +268,8 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
+		} else {
+			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
 		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
 		nix::draw_triangles(t->vertex_buffer);
