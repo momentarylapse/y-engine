@@ -8,6 +8,7 @@
 #include "WorldRendererVulkan.h"
 #ifdef USING_VULKAN
 #include "../base.h"
+#include "../helper/PipelineManager.h"
 #include "../../graphics-impl.h"
 #include "../../lib/image/image.h"
 #include "../../lib/math/vector.h"
@@ -146,63 +147,20 @@ void WorldRendererVulkan::render_into_cubemap(DepthBuffer *depth, CubeMap *cube,
 
 
 
-Pipeline *get_pipeline(Shader *s, RenderPass *rp) {
-	static Map<Shader*,Pipeline*> ob_pipelines;
-	if (ob_pipelines.contains(s))
-		return ob_pipelines[s];
-	msg_write("NEW PIPELINE");
-	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
-	ob_pipelines.add({s, p});
-	return p;
-}
-Pipeline *get_pipeline_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
-	static Map<Shader*,Pipeline*> ob_pipelines_alpha;
-	if (ob_pipelines_alpha.contains(s))
-		return ob_pipelines_alpha[s];
-	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
-	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
-	p->set_z(true, false);
-	p->set_blend(src, dst);
-	//p->set_culling(0);
-	p->rebuild();
-	ob_pipelines_alpha.add({s, p});
-	return p;
-}
-
-Pipeline *get_pipeline_ani(Shader *s, RenderPass *rp) {
-	static Map<Shader*,Pipeline*> ob_ani_pipelines;
-	if (ob_ani_pipelines.contains(s))
-		return ob_ani_pipelines[s];
-	msg_write("NEW PIPELINE ANIMATED");
-	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f,4i,4f");
-	ob_ani_pipelines.add({s, p});
-	return p;
-}
-
-Pipeline *get_pipeline_user(Shader *s, RenderPass *rp, const string &format) {
-	static Map<Shader*,Pipeline*> ob_pipelines;
-	if (ob_pipelines.contains(s))
-		return ob_pipelines[s];
-	msg_write("NEW PIPELINE");
-	auto p = new Pipeline(s, rp, 0, "triangles", format);
-	ob_pipelines.add({s, p});
-	return p;
-}
-
 void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
 	Pipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = get_pipeline_alpha(s, rp, m->alpha.source, m->alpha.destination);
+		p = PipelineManager::get_alpha(s, rp, m->alpha.source, m->alpha.destination);
 		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
 		msg_write("HARD");
-		p = get_pipeline_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		p = PipelineManager::get_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	} else if (v == ShaderVariant::ANIMATED) {
-		p = get_pipeline_ani(s, rp);
+		p = PipelineManager::get_ani(s, rp);
 	} else {
-		p = get_pipeline(s, rp);
+		p = PipelineManager::get(s, rp);
 	}
 
 	cb->bind_pipeline(p);
@@ -610,7 +568,7 @@ void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const matr
 
 	rda->ubo->update_part(&ubo, 0, sizeof(UBO));
 
-	auto pipeline = get_pipeline_user(s, render_pass(), "3f,4f,2f");
+	auto pipeline = PipelineManager::get_user(s, render_pass(), "3f,4f,2f");
 	cb->bind_pipeline(pipeline);
 	cb->bind_descriptor_set(0, rda->dset);
 	cb->draw(vb);
