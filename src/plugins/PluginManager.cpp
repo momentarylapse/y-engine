@@ -98,7 +98,7 @@ Model* _create_object_multi(World *w, const Path &filename, const Array<vector> 
 
 void framebuffer_init(FrameBuffer *fb, const Array<Texture*> &tex) {
 #ifdef USING_VULKAN
-	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__()"));
+	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__() for vulkan"));
 #else
 	fb->__init__(tex);
 #endif
@@ -127,6 +127,39 @@ void vertexbuffer_init(VertexBuffer *vb, const string &format) {
 
 void vertexbuffer_update(VertexBuffer *vb, const DynamicArray &vertices) {
 	vb->update(vertices);
+}
+
+void texture_init(Texture *t, int w, int h, const string &format) {
+#ifdef USING_VULKAN
+	new(t) vulkan::DynamicTexture(w, h, 1, format);
+#else
+	t->__init__(w, h, format);
+#endif
+}
+
+void texture_delete(Texture *t) {
+	t->__delete__();
+}
+
+void texture_update(Texture *t, const Image &im) {
+	t->override(im);
+}
+
+void cubemap_init(CubeMap *t, int size, const string &format) {
+#ifdef USING_VULKAN
+	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: CubeMap.__init__() for vulkan"));
+	//new(t) vulkan::CubeMap(size, format);
+#else
+	new(t) nix::CubeMap(size, format);
+#endif
+}
+
+void depthbuffer_init(DepthBuffer *t, int w, int h, const string &format) {
+#ifdef USING_VULKAN
+	new(t) DepthBuffer(w, h, format, true);
+#else
+	new(t) DepthBuffer(w, h, format);
+#endif
 }
 
 #pragma GCC pop_options
@@ -603,6 +636,17 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_size("VertexBuffer", sizeof(VertexBuffer));
 	kaba::link_external_class_func("VertexBuffer.__init__", &vertexbuffer_init);
 	kaba::link_external_class_func("VertexBuffer.update", &vertexbuffer_update);
+
+	kaba::declare_class_size("Texture", sizeof(Texture));
+	kaba::declare_class_element("Texture.width", &Texture::width);
+	kaba::declare_class_element("Texture.height", &Texture::height);
+	kaba::link_external_class_func("Texture.__init__", &texture_init);
+	kaba::link_external_class_func("Texture.__delete__", &texture_delete);
+	kaba::link_external_class_func("Texture.update", &texture_update);
+
+	kaba::link_external_class_func("CubeMap.__init__", &cubemap_init);
+
+	kaba::link_external_class_func("DepthBuffer.__init__", &depthbuffer_init);
 
 
 
