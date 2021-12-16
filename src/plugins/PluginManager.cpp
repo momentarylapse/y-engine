@@ -130,11 +130,7 @@ void vertexbuffer_update(VertexBuffer *vb, const DynamicArray &vertices) {
 }
 
 void texture_init(Texture *t, int w, int h, const string &format) {
-#ifdef USING_VULKAN
-	new(t) vulkan::DynamicTexture(w, h, 1, format);
-#else
-	t->__init__(w, h, format);
-#endif
+	new(t) Texture(w, h, format);
 }
 
 void texture_delete(Texture *t) {
@@ -146,12 +142,7 @@ void texture_update(Texture *t, const Image &im) {
 }
 
 void cubemap_init(CubeMap *t, int size, const string &format) {
-#ifdef USING_VULKAN
-	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: CubeMap.__init__() for vulkan"));
-	//new(t) vulkan::CubeMap(size, format);
-#else
-	new(t) nix::CubeMap(size, format);
-#endif
+	new(t) CubeMap(size, format);
 }
 
 void depthbuffer_init(DepthBuffer *t, int w, int h, const string &format) {

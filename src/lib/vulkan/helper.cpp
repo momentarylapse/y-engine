@@ -13,21 +13,23 @@ bool has_stencil_component(VkFormat format) {
 	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
-void create_image(uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& image_memory) {
+void create_image(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& image_memory, bool cube) {
 	VkImageCreateInfo image_info = {};
 	image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	image_info.imageType = VK_IMAGE_TYPE_2D;
+	image_info.imageType = type;
 	image_info.extent.width = width;
 	image_info.extent.height = height;
 	image_info.extent.depth = depth;
 	image_info.mipLevels = mip_levels;
-	image_info.arrayLayers = 1;
+	image_info.arrayLayers = cube ? 6 : 1;
 	image_info.format = format;
 	image_info.tiling = tiling;
 	image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	image_info.usage = usage;
 	image_info.samples = VK_SAMPLE_COUNT_1_BIT;
 	image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	if (cube)
+		image_info.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
 	if (vkCreateImage(default_device->device, &image_info, nullptr, &image) != VK_SUCCESS) {
 		throw Exception("failed to create image!");

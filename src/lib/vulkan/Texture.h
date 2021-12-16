@@ -16,7 +16,7 @@ namespace vulkan {
 	class Texture : public Sharable<Empty> {
 	public:
 		Texture();
-		Texture(int w, int h);
+		Texture(int w, int h, const string &format);
 		~Texture();
 
 		void __init__();
@@ -31,8 +31,8 @@ namespace vulkan {
 
 		void _destroy();
 		void _generate_mipmaps(VkFormat image_format);
-		void _create_image(const void *data, int nx, int ny, int nz, VkFormat image_format, bool allow_mip, bool as_storage);
-		void _create_view() const;
+		void _create_image(const void *data, VkImageType type, bool allow_mip, bool as_storage, bool cube);
+		void _create_view(VkImageViewType type) const;
 		void _create_sampler() const;
 
 
@@ -51,9 +51,9 @@ namespace vulkan {
 		static Texture* load(const Path &filename);
 	};
 
-	class DynamicTexture : public Texture {
+	class VolumeTexture : public Texture {
 	public:
-		DynamicTexture(int nx, int ny, int nz, const string &format);
+		VolumeTexture(int nx, int ny, int nz, const string &format);
 		void __init__(int nx, int ny, int nz, const string &format);
 	};
 
@@ -61,6 +61,13 @@ namespace vulkan {
 	public:
 		StorageTexture(int nx, int ny, int nz, const string &format);
 		void __init__(int nx, int ny, int nz, const string &format);
+	};
+
+	class CubeMap : public Texture {
+	public:
+		CubeMap(int size, const string &format);
+		void __init__(int size, const string &format);
+		void override_side(int side, const Image &image);
 	};
 
 	extern Array<Texture*> textures;

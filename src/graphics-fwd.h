@@ -21,6 +21,8 @@
 
 	namespace vulkan {
 		class Texture;
+		class VolumeTexture;
+		class CubeMap;
 		class Shader;
 		class VertexBuffer;
 		class FrameBuffer;
@@ -44,7 +46,8 @@
 	using VertexBuffer = vulkan::VertexBuffer;
 	using FrameBuffer = vulkan::FrameBuffer;
 	using DepthBuffer = vulkan::DepthBuffer;
-	using CubeMap = vulkan::Texture; // TODO
+	using CubeMap = vulkan::CubeMap;
+	using VolumeTexture = vulkan::VolumeTexture;
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
 	using Pipeline = vulkan::Pipeline;
@@ -67,6 +70,7 @@
 		class FrameBuffer;
 		class DepthBuffer;
 		class CubeMap;
+		class VolumeTexture;
 		class Buffer;
 		class UniformBuffer;
 		enum class Alpha;
@@ -79,6 +83,7 @@
 	using FrameBuffer = nix::FrameBuffer;
 	using DepthBuffer = nix::DepthBuffer;
 	using CubeMap = nix::CubeMap;
+	using VolumeTexture = nix::VolumeTexture;
 	using Buffer = nix::Buffer;
 	using UniformBuffer = nix::UniformBuffer;
 

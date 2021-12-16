@@ -69,7 +69,7 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 
 
 HDRRendererVulkan::RenderIntoData::RenderIntoData(Renderer *r) {
-	auto tex = new vulkan::DynamicTexture(r->width, r->height, 1, "rgba:f16");
+	auto tex = new vulkan::Texture(r->width, r->height, "rgba:f16");
 	_depth_buffer = new DepthBuffer(r->width, r->height, "d:f32", true);
 	_render_pass = new vulkan::RenderPass({tex, _depth_buffer}, "clear");
 
@@ -106,8 +106,8 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 	fb_main = into.fb_main.get();
 
 
-	auto blur_tex1 = new vulkan::DynamicTexture(width/BLUR_SCALE, height/BLUR_SCALE, 1, "rgba:f16");
-	auto blur_tex2 = new vulkan::DynamicTexture(width/BLUR_SCALE, height/BLUR_SCALE, 1, "rgba:f16");
+	auto blur_tex1 = new vulkan::Texture(width/BLUR_SCALE, height/BLUR_SCALE, "rgba:f16");
+	auto blur_tex2 = new vulkan::Texture(width/BLUR_SCALE, height/BLUR_SCALE, "rgba:f16");
 	auto blur_depth = new DepthBuffer(width/BLUR_SCALE, height/BLUR_SCALE, "d:f32", true);
 	blur_tex1->set_options("wrap=clamp");
 	blur_tex2->set_options("wrap=clamp");
