@@ -71,6 +71,7 @@ class WorldRendererVulkan : public WorldRenderer {
 public:
 
 	RenderPass *render_pass_shadow = nullptr;
+	RenderPass *render_pass_cube = nullptr;
 
 
 	VertexBuffer *vb_2d;
@@ -79,32 +80,33 @@ public:
 	shared<FrameBuffer> fb_cube;
 	shared<CubeMap> cube_map;
 
+	struct RenderViewDataVK {
+		Array<RenderDataVK> rda_tr;
+		Array<RenderDataVK> rda_ob;
+		Array<RenderDataVK> rda_ob_trans;
+		Array<RenderDataVK> rda_sky;
+		Array<RenderDataFxVK> rda_fx;
+	};
+	RenderViewDataVK rvd_def;
+	RenderViewDataVK rvd_cube[6];
+	RenderViewDataVK rvd_shadow1, rvd_shadow2;
 
-	Array<RenderDataVK> rda_tr;
-	Array<RenderDataVK> rda_tr_shadow;
-	Array<RenderDataVK> rda_tr_shadow2;
-	Array<RenderDataVK> rda_ob;
-	Array<RenderDataVK> rda_ob_trans;
-	Array<RenderDataVK> rda_ob_shadow;
-	Array<RenderDataVK> rda_ob_shadow2;
-	Array<RenderDataVK> rda_sky;
-
-	Array<RenderDataFxVK> rda_fx;
 	Pipeline *pipeline_fx = nullptr;
 
 
 	WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType type);
 	virtual ~WorldRendererVulkan();
 
-	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) = 0;
-	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vector &pos);
+	virtual void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) = 0;
+	virtual void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) = 0;
+	void render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vector &pos);
 
 
 	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
-	void draw_particles(CommandBuffer *cb, RenderPass *rp);
-	void draw_skyboxes(CommandBuffer *cb, Camera *c);
+	void draw_particles(CommandBuffer *cb, RenderPass *rp, Array<RenderDataFxVK> &rda);
+	void draw_skyboxes(CommandBuffer *cb, Camera *c, Array<RenderDataVK> &rda);
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
 	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, Array<RenderDataVK> &rda);

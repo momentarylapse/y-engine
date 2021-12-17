@@ -22,8 +22,8 @@ public:
 	void prepare() override;
 	void draw() override;
 
-	void render_into_texture(FrameBuffer *fb, Camera *cam, const rect &target_area) override;
-	void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale);
+	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
+	void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) override;
 };
 
 #endif
