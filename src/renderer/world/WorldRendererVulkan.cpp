@@ -55,13 +55,6 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 
 	vb_2d = nullptr;
 
-	using_view_space = true;
-
-
-	shadow_box_size = config.get_float("shadow.boxsize", 2000);
-	shadow_resolution = config.get_int("shadow.resolution", 1024);
-	shadow_index = -1;
-
 	ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
 
 
@@ -112,7 +105,7 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	auto shadow_depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
 	auto shadow_depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
 	render_pass_shadow = new vulkan::RenderPass({tex1, shadow_depth1}, "clear");
-	fb_shadow = new vulkan::FrameBuffer(render_pass_shadow, {tex1, shadow_depth1});
+	fb_shadow1 = new vulkan::FrameBuffer(render_pass_shadow, {tex1, shadow_depth1});
 	fb_shadow2 = new vulkan::FrameBuffer(render_pass_shadow, {tex2, shadow_depth2});
 
 	material_shadow = new Material;
@@ -221,7 +214,7 @@ void WorldRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const
 			if (tex[k])
 				dset->set_texture(i0 + k, tex[k]);
 	}
-	dset->set_texture(LOCATION_SHADOW0, fb_shadow->attachments[1].get());
+	dset->set_texture(LOCATION_SHADOW0, fb_shadow1->attachments[1].get());
 	dset->set_texture(LOCATION_SHADOW1, fb_shadow2->attachments[1].get());
 	dset->set_texture(LOCATION_CUBE, cube_map.get());
 }

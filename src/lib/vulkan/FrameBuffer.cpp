@@ -53,11 +53,11 @@ void DepthBuffer::create(int w, int h, VkFormat format) {
 
 FrameBuffer::FrameBuffer(RenderPass *rp, const Array<Texture*> &attachments) {
 	frame_buffer = nullptr;
-	create(rp, attachments);
+	update(rp, attachments);
 }
 
 FrameBuffer::~FrameBuffer() {
-	destroy();
+	_destroy();
 }
 
 
@@ -70,10 +70,21 @@ void FrameBuffer::__delete__() {
 	this->~FrameBuffer();
 }
 
-void FrameBuffer::create(RenderPass *rp, const Array<Texture*> &_attachments) {
-	attachments.clear();
+void FrameBuffer::update(RenderPass *rp, const Array<Texture*> &_attachments) {
+	update_x(rp, _attachments, 0);
+}
+
+void FrameBuffer::update_x(RenderPass *rp, const Array<Texture*> &_attachments, int layer) {
+	_destroy();
+	_create(rp, _attachments, layer);
+}
+
+void FrameBuffer::_create(RenderPass *rp, const Array<Texture*> &_attachments, int layer) {
+	shared_array<Texture> new_attachments;
 	for (auto a: _attachments)
-		attachments.add(a);
+		new_attachments.add(a);
+	attachments = new_attachments;
+
 	width = 1;
 	height = 1;
 	if (attachments.num > 0) {
@@ -82,8 +93,15 @@ void FrameBuffer::create(RenderPass *rp, const Array<Texture*> &_attachments) {
 	}
 
 	Array<VkImageView> views;
-	for (auto a: _attachments)
-		views.add(a->view);
+	for (auto a: _attachments) {
+		if (a->type == Texture::Type::CUBE) {
+			auto v = a->image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D, 1, layer, 1);
+			cube_views.add(v);
+			views.add(v);
+		} else {
+			views.add(a->view);
+		}
+	}
 
 	VkFramebufferCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -99,10 +117,14 @@ void FrameBuffer::create(RenderPass *rp, const Array<Texture*> &_attachments) {
 	}
 }
 
-void FrameBuffer::destroy() {
+void FrameBuffer::_destroy() {
 	if (frame_buffer)
 		vkDestroyFramebuffer(default_device->device, frame_buffer, nullptr);
 	frame_buffer = nullptr;
+
+	for (auto v: cube_views)
+		vkDestroyImageView(default_device->device, v, nullptr);
+	cube_views.clear();
 }
 
 

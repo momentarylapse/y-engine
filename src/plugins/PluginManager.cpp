@@ -589,7 +589,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("RenderPath.type", &RP::type);
 	kaba::declare_class_element("RenderPath.cube_map", &RP::cube_map);
 	kaba::declare_class_element("RenderPath.shader_fx", &RP::shader_fx);
-	kaba::declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow);
+	kaba::declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow1);
 	kaba::declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);
 #ifdef USING_OPENGL
 	kaba::declare_class_element("RenderPath.gbuffer", &RPD::gbuffer);

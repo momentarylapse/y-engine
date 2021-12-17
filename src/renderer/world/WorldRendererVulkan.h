@@ -70,31 +70,14 @@ struct RenderDataFxVK {
 class WorldRendererVulkan : public WorldRenderer {
 public:
 
-
-	shared<Shader> shader_fx;
-
-	shared<FrameBuffer> fb_shadow;
-	shared<FrameBuffer> fb_shadow2;
 	RenderPass *render_pass_shadow = nullptr;
-	//Pipeline *pipeline_shadow = nullptr;
-	Material *material_shadow = nullptr;
 
 
-
-	Array<UBOLight> lights;
-	UniformBuffer *ubo_light;
 	VertexBuffer *vb_2d;
 
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;
 	shared<CubeMap> cube_map;
-
-	//Camera *shadow_cam;
-	matrix shadow_proj;
-	int shadow_index;
-
-	float shadow_box_size;
-	int shadow_resolution;
 
 
 	Array<RenderDataVK> rda_tr;
@@ -109,8 +92,6 @@ public:
 	Array<RenderDataFxVK> rda_fx;
 	Pipeline *pipeline_fx = nullptr;
 
-
-	bool using_view_space = false;
 
 	WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType type);
 	virtual ~WorldRendererVulkan();

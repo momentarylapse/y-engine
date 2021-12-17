@@ -67,7 +67,7 @@ void WorldRendererVulkanForward::prepare() {
 
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
-		render_shadow_map(cb, fb_shadow.get(), 4);
+		render_shadow_map(cb, fb_shadow1.get(), 4);
 		render_shadow_map(cb, fb_shadow2.get(), 1);
 	}
 	PerformanceMonitor::end(ch_shadow);

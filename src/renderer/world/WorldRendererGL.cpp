@@ -33,7 +33,6 @@
 #include "../../world/Light.h"
 #include "../../world/Entity3D.h"
 #include "../../world/components/Animator.h"
-#include "../../Config.h"
 #include "../../meta.h"
 
 
@@ -51,16 +50,7 @@ const int CUBE_SIZE = 128;
 WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
 	type = _type;
 
-	using_view_space = true;
-
-	shadow_box_size = config.get_float("shadow.boxsize", 2000);
-	shadow_resolution = config.get_int("shadow.resolution", 1024);
-	shadow_index = -1;
-
 	ubo_light = new nix::UniformBuffer();
-
-	vb_2d = new nix::VertexBuffer("3f,3f,2f");
-	vb_2d->create_quad(rect::ID_SYM);
 
 	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
 	fb_cube = nullptr;
@@ -142,7 +132,7 @@ void WorldRendererGL::set_textures(const Array<Texture*> &tex) {
 		tt.add(tex_white);
 	if (tt.num == 2)
 		tt.add(tex_white);
-	tt.add(fb_shadow->depth_buffer.get());
+	tt.add(fb_shadow1->depth_buffer.get());
 	tt.add(fb_shadow2->depth_buffer.get());
 	tt.add(cube_map.get());
 	nix::set_textures(tt);

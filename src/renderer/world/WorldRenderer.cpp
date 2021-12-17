@@ -6,6 +6,7 @@
  */
 
 #include "WorldRenderer.h"
+#include "../../graphics-impl.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../fx/Particle.h"
 #include "../../gui/Picture.h"
@@ -15,6 +16,7 @@
 #include "../../world/Terrain.h"
 #include "../../world/World.h"
 #include "../../lib/base/callable.h"
+#include "../../Config.h"
 
 
 struct GeoPush {
@@ -40,6 +42,15 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(na
 	ch_fx = PerformanceMonitor::create_channel("fx", channel);
 	ch_shadow = PerformanceMonitor::create_channel("shadow", channel);
 	ch_prepare_lights = PerformanceMonitor::create_channel("lights", channel);
+
+	using_view_space = true;
+
+	shadow_box_size = config.get_float("shadow.boxsize", 2000);
+	shadow_resolution = config.get_int("shadow.resolution", 1024);
+	shadow_index = -1;
+}
+
+WorldRenderer::~WorldRenderer() {
 }
 
 

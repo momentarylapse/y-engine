@@ -31,7 +31,7 @@
 
 WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world/fw", parent, RenderPathType::FORWARD) {
 
-	fb_shadow = new nix::FrameBuffer({
+	fb_shadow1 = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
@@ -71,7 +71,7 @@ void WorldRendererGLForward::prepare() {
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow2.get(), 1);
-		render_shadow_map(fb_shadow.get(), 4);
+		render_shadow_map(fb_shadow1.get(), 4);
 	}
 	PerformanceMonitor::end(ch_shadow);
 
@@ -150,7 +150,7 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) 
 
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow.get(), 4);
+		render_shadow_map(fb_shadow1.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
 	}
 	PerformanceMonitor::end(ch_shadow);

@@ -38,7 +38,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
-	fb_shadow = new nix::FrameBuffer({
+	fb_shadow1 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
@@ -81,7 +81,7 @@ void WorldRendererGLDeferred::prepare() {
 
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow.get(), 4);
+		render_shadow_map(fb_shadow1.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
 	}
 	PerformanceMonitor::end(ch_shadow);
@@ -155,7 +155,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	nix::bind_buffer(ubo_light, 1);
 	auto tex = weak(source->color_attachments);
 	tex.add(source->depth_buffer.get());
-	tex.add(fb_shadow->depth_buffer.get());
+	tex.add(fb_shadow1->depth_buffer.get());
 	tex.add(fb_shadow2->depth_buffer.get());
 	nix::set_textures(tex);
 

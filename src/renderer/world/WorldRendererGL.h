@@ -9,12 +9,8 @@
 
 #include "WorldRenderer.h"
 #ifdef USING_OPENGL
-#include "../../lib/base/pointer.h"
 
 
-class Material;
-class UBOLight;
-class GLFWwindow;
 class rect;
 class Material;
 class Any;
@@ -26,31 +22,7 @@ class RendererGL;
 
 class WorldRendererGL : public WorldRenderer {
 public:
-
-	shared<FrameBuffer> fb_shadow;
-	shared<FrameBuffer> fb_shadow2;
-	Material *material_shadow = nullptr;
-
-	shared<Shader> shader_fx;
 	VertexBuffer *vb_fx = nullptr;
-
-	Array<UBOLight> lights;
-	UniformBuffer *ubo_light;
-	VertexBuffer *vb_2d;
-
-	shared<DepthBuffer> depth_cube;
-	shared<FrameBuffer> fb_cube;
-	shared<CubeMap> cube_map;
-
-	//Camera *shadow_cam;
-	matrix shadow_proj;
-	int shadow_index;
-
-	float shadow_box_size;
-	int shadow_resolution;
-
-
-	bool using_view_space = false;
 
 	WorldRendererGL(const string &name, Renderer *parent, RenderPathType type);
 
