@@ -290,7 +290,7 @@ void CommandBuffer::barrier(const Array<Texture*> &textures, int mode) {
 		b.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		b.oldLayout = is_depth ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		b.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		b.image = t->image;
+		b.image = t->image.image;
 		b.subresourceRange = sr;
 		barriers.add(b);
 
@@ -329,7 +329,7 @@ void CommandBuffer::image_barrier(const Texture *t, const Array<int> &flags) {
 	barrier.newLayout = (VkImageLayout)flags[0];
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = t->image;
+	barrier.image = t->image.image;
 	barrier.subresourceRange = sr;
 
 	vkCmdPipelineBarrier(buffer,
@@ -351,9 +351,9 @@ void CommandBuffer::copy_image(const Texture *source, const Texture *dest, const
 	region.dstOffset = {extend[4], extend[5], 0};
 	region.extent = {(unsigned)extend[2], (unsigned)extend[3], 1};
 	vkCmdCopyImage(buffer,
-			source->image,
+			source->image.image,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			dest->image,
+			dest->image.image,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&region);

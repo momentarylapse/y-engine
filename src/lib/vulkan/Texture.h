@@ -1,5 +1,4 @@
-#ifndef _NIX_TEXTURE_H
-#define _NIX_TEXTURE_H
+#pragma once
 
 #if HAS_LIB_VULKAN
 
@@ -8,6 +7,7 @@
 #include "../base/pointer.h"
 #include "../file/path.h"
 #include <vulkan/vulkan.h>
+#include "helper.h"
 
 class Image;
 
@@ -39,8 +39,7 @@ namespace vulkan {
 		int width, height, depth;
 		int mip_levels;
 		VkFormat format;
-		VkImage image;
-		VkDeviceMemory memory;
+		ImageAndMemory image;
 
 		mutable VkImageView view;
 		mutable VkSampler sampler;
@@ -75,4 +74,3 @@ namespace vulkan {
 
 #endif
 
-#endif

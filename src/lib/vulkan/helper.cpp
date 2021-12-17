@@ -13,7 +13,16 @@ bool has_stencil_component(VkFormat format) {
 	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
-void create_image(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& image_memory, bool cube) {
+void ImageAndMemory::_destroy() {
+	if (image)
+		vkDestroyImage(default_device->device, image, nullptr);
+	if (memory)
+		vkFreeMemory(default_device->device, memory, nullptr);
+	image = nullptr;
+	memory = nullptr;
+}
+
+void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, bool cube) {
 	VkImageCreateInfo image_info = {};
 	image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	image_info.imageType = type;
@@ -43,11 +52,11 @@ void create_image(VkImageType type, uint32_t width, uint32_t height, uint32_t de
 	alloc_info.allocationSize = mem_requirements.size;
 	alloc_info.memoryTypeIndex = default_device->find_memory_type(mem_requirements, properties);
 
-	if (vkAllocateMemory(default_device->device, &alloc_info, nullptr, &image_memory) != VK_SUCCESS) {
+	if (vkAllocateMemory(default_device->device, &alloc_info, nullptr, &memory) != VK_SUCCESS) {
 		throw Exception("failed to allocate image memory!");
 	}
 
-	vkBindImageMemory(default_device->device, image, image_memory, 0);
+	vkBindImageMemory(default_device->device, image, memory, 0);
 }
 
 void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
@@ -60,7 +69,7 @@ void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
 	end_single_time_commands(command_buffer);
 }
 
-VkImageView create_image_view(VkImage image, VkFormat format, VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels) {
+VkImageView ImageAndMemory::create_view(VkFormat format, VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels) const {
 	VkImageViewCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	info.image = image;
@@ -99,7 +108,7 @@ void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32
 	end_single_time_commands(command_buffer);
 }
 
-void transition_image_layout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels) {
+void ImageAndMemory::transition_layout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels) const {
 	VkCommandBuffer command_buffer = begin_single_time_commands();
 
 	VkImageMemoryBarrier barrier = {};

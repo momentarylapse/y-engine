@@ -103,8 +103,6 @@ int format_size(VkFormat f) {
 }
 
 Texture::Texture() {
-	image = nullptr;
-	memory = nullptr;
 	sampler = nullptr;
 	view = nullptr;
 	width = height = 0;
@@ -193,11 +191,11 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	imageCreateInfo.pQueueFamilyIndices = nullptr;
 	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-	auto result = vkCreateImage(default_device->device, &imageCreateInfo, nullptr, &image);
+	auto result = vkCreateImage(default_device->device, &imageCreateInfo, nullptr, &image.image);
 	if (VK_SUCCESS != result)
 		throw Exception("vkCreateImage failed");
 	VkMemoryRequirements memoryRequirements;
-	vkGetImageMemoryRequirements(default_device->device, image, &memoryRequirements);
+	vkGetImageMemoryRequirements(default_device->device, image.image, &memoryRequirements);
 
 	VkMemoryAllocateInfo memoryAllocateInfo;
 	memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -205,10 +203,10 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	memoryAllocateInfo.allocationSize = memoryRequirements.size;
 	memoryAllocateInfo.memoryTypeIndex = default_device->find_memory_type(memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	result = vkAllocateMemory(default_device->device, &memoryAllocateInfo, nullptr, &memory);
+	result = vkAllocateMemory(default_device->device, &memoryAllocateInfo, nullptr, &image.memory);
 	if (VK_SUCCESS != result)
 		throw Exception("vkAllocateMemory failed");
-	result = vkBindImageMemory(default_device->device, image, memory, 0);
+	result = vkBindImageMemory(default_device->device, image.image, image.memory, 0);
 	if (VK_SUCCESS != result)
 		throw Exception("vkBindImageMemory failed");
 	if (verbose)
@@ -227,14 +225,9 @@ void Texture::_destroy() {
 		vkDestroySampler(default_device->device, sampler, nullptr);
 	if (view)
 		vkDestroyImageView(default_device->device, view, nullptr);
-	if (image)
-		vkDestroyImage(default_device->device, image, nullptr);
-	if (memory)
-		vkFreeMemory(default_device->device, memory, nullptr);
+	image._destroy();
 	sampler = nullptr;
 	view = nullptr;
-	image = nullptr;
-	memory = nullptr;
 	width = height = depth = 0;
 	mip_levels = 0;
 }
@@ -293,12 +286,12 @@ void Texture::_create_image(const void *image_data, VkImageType type, bool allow
 	if (allow_storage)
 		usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 	auto tiling = VK_IMAGE_TILING_OPTIMAL;
-	create_image(type, width, height, depth, mip_levels, format, tiling, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory, cube);
+	image.create(type, width, height, depth, mip_levels, format, tiling, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, cube);
 
-	transition_image_layout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
+	image.transition_layout(format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
 
 	if (image_data) {
-		copy_buffer_to_image(staging.buffer, image, width, height, depth);
+		copy_buffer_to_image(staging.buffer, image.image, width, height, depth);
 	}
 
 	auto layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -308,7 +301,7 @@ void Texture::_create_image(const void *image_data, VkImageType type, bool allow
 	if (allow_mip)
 		_generate_mipmaps(format);
 	else
-		transition_image_layout(image, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layout, mip_levels);
+		image.transition_layout(format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layout, mip_levels);
 }
 
 void Texture::_generate_mipmaps(VkFormat image_format) {
@@ -324,7 +317,7 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 	VkImageMemoryBarrier barrier = {};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.image = image;
+	barrier.image = image.image;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -363,8 +356,8 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 		blit.dstSubresource.layerCount = 1;
 
 		vkCmdBlitImage(command_buffer,
-			image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			image.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			image.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1, &blit,
 			VK_FILTER_LINEAR);
 
@@ -401,7 +394,7 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 
 void Texture::_create_view(VkImageViewType type) const {
-	view = create_image_view(image, format, VK_IMAGE_ASPECT_COLOR_BIT, type, mip_levels);
+	view = image.create_view(format, VK_IMAGE_ASPECT_COLOR_BIT, type, mip_levels);
 }
 
 void Texture::_create_sampler() const {
