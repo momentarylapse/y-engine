@@ -46,7 +46,6 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent) : World
 static int cur_query_offset;
 
 void WorldRendererVulkanForward::prepare() {
-	prepare_lights(cam);
 
 
 	static int pool_no = 0;
@@ -68,6 +67,7 @@ void WorldRendererVulkanForward::prepare() {
 			render_into_cubemap(cb, cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
+	prepare_lights(cam, rvd_def);
 
 	/*if (!shadow_cam) {
 		shadow_entity = new Entity3D;
@@ -93,7 +93,7 @@ void WorldRendererVulkanForward::draw() {
 
 	auto &rvd = rvd_def;
 
-	draw_skyboxes(cb, cam, rvd.rda_sky);
+	draw_skyboxes(cb, cam, rvd);
 
 
 	cam->update_matrices((float)width / (float)height);
@@ -104,16 +104,18 @@ void WorldRendererVulkanForward::draw() {
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	draw_terrains(cb, rp, ubo, true, rvd.rda_tr);
-	draw_objects_opaque(cb, rp, ubo, true, rvd.rda_ob);
-	draw_objects_transparent(cb, rp, ubo, rvd.rda_ob_trans);
+	draw_terrains(cb, rp, ubo, true, rvd);
+	draw_objects_opaque(cb, rp, ubo, true, rvd);
+	draw_objects_transparent(cb, rp, ubo, rvd);
 
-	draw_particles(cb, rp, rvd.rda_fx);
+	draw_particles(cb, rp, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
 }
 
 void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) {
+
+	prepare_lights(cam, rvd);
 
 	rp->clear_color[0] = background();
 
@@ -121,7 +123,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 
-	draw_skyboxes(cb, cam, rvd.rda_sky);
+	draw_skyboxes(cb, cam, rvd);
 
 
 	cam->update_matrices((float)fb->width / (float)fb->height);
@@ -132,11 +134,11 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	draw_terrains(cb, rp, ubo, true, rvd.rda_tr);
-	draw_objects_opaque(cb, rp, ubo, true, rvd.rda_ob);
-	draw_objects_transparent(cb, rp, ubo, rvd.rda_ob_trans);
+	draw_terrains(cb, rp, ubo, true, rvd);
+	draw_objects_opaque(cb, rp, ubo, true, rvd);
+	draw_objects_transparent(cb, rp, ubo, rvd);
 
-	draw_particles(cb, rp, rvd.rda_fx);
+	draw_particles(cb, rp, rvd);
 
 	cb->end_render_pass();
 
@@ -158,8 +160,8 @@ void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffe
 	ubo.shadow_index = -1;
 
 
-	draw_terrains(cb, render_pass_shadow, ubo, false, rvd.rda_tr);
-	draw_objects_opaque(cb, render_pass_shadow, ubo, false, rvd.rda_ob);
+	draw_terrains(cb, render_pass_shadow, ubo, false, rvd);
+	draw_objects_opaque(cb, render_pass_shadow, ubo, false, rvd);
 
 	cb->end_render_pass();
 }

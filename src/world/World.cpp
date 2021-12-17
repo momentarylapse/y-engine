@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include "../lib/file/file.h"
-//#include "../lib/vulkan/vulkan.h"
 #include "../lib/nix/nix.h"
 #include "../lib/kaba/kaba.h"
 #include "../y/EngineData.h"
@@ -50,9 +49,6 @@
 #endif
 
 #include "Camera.h"
-
-
-//vulkan::DescriptorSet *rp_create_dset(const Array<vulkan::Texture*> &tex, vulkan::UniformBuffer *ubo);
 
 
 
@@ -183,8 +179,6 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 #endif
 
 World::World() {
-//	ubo_light = nullptr;
-//	ubo_fog = nullptr;
 
 #ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager();
@@ -735,8 +729,6 @@ void World::register_model(Model *m) {
 		PartialModel p;
 		p.model = m;
 		p.material = mat;
-//		p.ubo = new vulkan::UniformBuffer(64*3);
-//		p.dset = rp_create_dset(mat->textures, p.ubo);
 		p.mat_index = i;
 		p.transparent = trans;
 		p.shadow = false;

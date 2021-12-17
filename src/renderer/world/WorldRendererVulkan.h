@@ -81,6 +81,7 @@ public:
 	shared<CubeMap> cube_map;
 
 	struct RenderViewDataVK {
+		UniformBuffer *ubo_light = nullptr;
 		Array<RenderDataVK> rda_tr;
 		Array<RenderDataVK> rda_ob;
 		Array<RenderDataVK> rda_ob_trans;
@@ -105,14 +106,14 @@ public:
 	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
-	void draw_particles(CommandBuffer *cb, RenderPass *rp, Array<RenderDataFxVK> &rda);
-	void draw_skyboxes(CommandBuffer *cb, Camera *c, Array<RenderDataVK> &rda);
-	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
-	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda);
-	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, Array<RenderDataVK> &rda);
+	void draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd);
+	void draw_skyboxes(CommandBuffer *cb, Camera *c, RenderViewDataVK &rvd);
+	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
+	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
+	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);
 	void draw_objects_instanced(bool allow_material);
 	void prepare_instanced_matrices();
-	void prepare_lights(Camera *cam);
+	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);
 
 
 	void draw_user_mesh(VertexBuffer *vb, Shader *s, const matrix &m, const Array<Texture*> &tex, const Any &data);

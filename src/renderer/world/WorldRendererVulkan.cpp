@@ -55,7 +55,12 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 
 	vb_2d = nullptr;
 
-	ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
+	rvd_def.ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
+	for (int i=0; i<6; i++)
+		rvd_cube[i].ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
+	rvd_shadow1.ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
+	rvd_shadow2.ubo_light = new UniformBuffer(3 * sizeof(UBOLight));
+
 
 
 
@@ -145,7 +150,6 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 			o.ang = quaternion::rotation(vector(0,0,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vector(0,pi,0));
-		//prepare_lights(&cam);
 		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cam, rvd_cube[i]);
 	}
 	cam.owner = nullptr;
@@ -225,8 +229,9 @@ void WorldRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const
 
 
 
-void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Array<RenderDataFxVK> &rda) {
+void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_fx);
+	auto &rda = rvd.rda_fx;
 
 	// script injectors
 	for (auto &i: fx_injectors)
@@ -337,7 +342,8 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Arra
 	PerformanceMonitor::end(ch_fx);
 }
 
-void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam, Array<RenderDataVK> &rda) {
+void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam, RenderViewDataVK &rvd) {
+	auto &rda = rvd.rda_sky;
 
 	auto rp = parent->render_pass();
 
@@ -363,7 +369,7 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam, Array<Re
 				rda.add({new UniformBuffer(sizeof(UBO)),
 					pool->create_set(sb->material[i]->get_shader(type, ShaderVariant::DEFAULT))});
 				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-				rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 			}
 			ubo.albedo = sb->material[i]->albedo;
 			ubo.emission = sb->material[i]->emission;
@@ -383,7 +389,8 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam, Array<Re
 	cam->max_depth = max_depth;
 }
 
-void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
+void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
+	auto &rda = rvd.rda_tr;
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -400,7 +407,7 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 			rda.add({new UniformBuffer(sizeof(UBO)),
 				pool->create_set(t->material->get_shader(type, ShaderVariant::DEFAULT))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 		}
 
 		rda[index].ubo->update(&ubo);
@@ -436,7 +443,8 @@ void WorldRendererVulkan::draw_objects_instanced(bool allow_material) {
 	}*/
 }
 
-void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, Array<RenderDataVK> &rda) {
+void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
+	auto &rda = rvd.rda_ob;
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -452,7 +460,7 @@ void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp,
 			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(matrix) * ani->dmatrix.num) : sizeof(UBO)),
 				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 		}
 
 		m->update_matrix();
@@ -482,7 +490,8 @@ void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp,
 	}
 }
 
-void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, Array<RenderDataVK> &rda) {
+void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
+	auto &rda = rvd.rda_ob_trans;
 	int index = 0;
 
 	ubo.m = matrix::ID;
@@ -498,7 +507,7 @@ void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass
 			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(matrix) * ani->dmatrix.num) : sizeof(UBO)),
 				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 		}
 
 		m->update_matrix();
@@ -531,7 +540,7 @@ void WorldRendererVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::end(ch_pre);*/
 }
 
-void WorldRendererVulkan::prepare_lights(Camera *cam) {
+void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();
@@ -547,7 +556,7 @@ void WorldRendererVulkan::prepare_lights(Camera *cam) {
 		}
 		lights.add(l->light);
 	}
-	ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
+	rvd.ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 

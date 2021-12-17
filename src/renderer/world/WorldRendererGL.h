@@ -23,6 +23,7 @@ class RendererGL;
 class WorldRendererGL : public WorldRenderer {
 public:
 	VertexBuffer *vb_fx = nullptr;
+	UniformBuffer *ubo_light = nullptr;
 
 	WorldRendererGL(const string &name, Renderer *parent, RenderPathType type);
 

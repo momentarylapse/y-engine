@@ -78,7 +78,6 @@ public:
 	shared<Shader> shader_fx;
 
 	Array<UBOLight> lights;
-	UniformBuffer *ubo_light = nullptr;
 
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;
