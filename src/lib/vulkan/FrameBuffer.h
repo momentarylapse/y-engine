@@ -21,7 +21,6 @@ class RenderPass;
 
 class DepthBuffer : public Texture {
 public:
-	bool with_sampler;
 
 	DepthBuffer(int w, int h, VkFormat format, bool with_sampler);
 	DepthBuffer(int w, int h, const string &format, bool with_sampler);

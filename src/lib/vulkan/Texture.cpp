@@ -119,11 +119,18 @@ Texture::Texture() {
 	textures.add(this);
 }
 
-Texture::Texture(int w, int h, const string &format) : Texture() {
+Texture::Texture(int w, int h, const string &_format) : Texture() {
 	// sometimes a newly created texture is already used....
-	Image im;
+	/*Image im;
 	im.create(w, h, White);
-	override(im);
+	override(im);*/
+	width = w;
+	height = h;
+	depth = 1;
+	format = parse_format(_format);
+	_create_image(nullptr, VK_IMAGE_TYPE_2D, false, true, false);
+	_create_view(VK_IMAGE_VIEW_TYPE_2D);
+	_create_sampler();
 }
 
 Texture::~Texture() {
