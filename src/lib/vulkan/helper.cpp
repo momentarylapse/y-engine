@@ -9,9 +9,6 @@
 namespace vulkan{
 
 
-bool has_stencil_component(VkFormat format) {
-	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
-}
 
 void ImageAndMemory::_destroy() {
 	if (image)
@@ -22,7 +19,9 @@ void ImageAndMemory::_destroy() {
 	memory = nullptr;
 }
 
-void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, bool cube) {
+void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat _format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, bool cube) {
+	format = _format;
+
 	VkImageCreateInfo image_info = {};
 	image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	image_info.imageType = type;
@@ -59,6 +58,17 @@ void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, u
 	vkBindImageMemory(default_device->device, image, memory, 0);
 }
 
+bool format_is_depth_buffer(VkFormat f) {
+	return (f == VK_FORMAT_D32_SFLOAT) or (f == VK_FORMAT_D32_SFLOAT_S8_UINT) or (f == VK_FORMAT_D24_UNORM_S8_UINT) or (f == VK_FORMAT_D16_UNORM);
+}
+
+bool ImageAndMemory::is_depth_buffer() const {
+	return format_is_depth_buffer(format);
+}
+bool ImageAndMemory::has_stencil_component() const {
+	return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
 void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
 	VkCommandBuffer command_buffer = begin_single_time_commands();
 
@@ -69,7 +79,7 @@ void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
 	end_single_time_commands(command_buffer);
 }
 
-VkImageView ImageAndMemory::create_view(VkFormat format, VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels) const {
+VkImageView ImageAndMemory::create_view(VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels, uint32_t layer) const {
 	VkImageViewCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	info.image = image;
@@ -78,7 +88,7 @@ VkImageView ImageAndMemory::create_view(VkFormat format, VkImageAspectFlags aspe
 	info.subresourceRange.aspectMask = aspect;
 	info.subresourceRange.baseMipLevel = 0;
 	info.subresourceRange.levelCount = mip_levels;
-	info.subresourceRange.baseArrayLayer = 0;
+	info.subresourceRange.baseArrayLayer = layer;
 	info.subresourceRange.layerCount = 1;
 
 	VkImageView image_view;
@@ -108,21 +118,21 @@ void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32
 	end_single_time_commands(command_buffer);
 }
 
-void ImageAndMemory::transition_layout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels) const {
+void ImageAndMemory::transition_layout(VkImageLayout old_layout, VkImageLayout new_layout, uint32_t mip_levels) const {
 	VkCommandBuffer command_buffer = begin_single_time_commands();
 
 	VkImageMemoryBarrier barrier = {};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.oldLayout = oldLayout;
-	barrier.newLayout = newLayout;
+	barrier.oldLayout = old_layout;
+	barrier.newLayout = new_layout;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image;
 
-	if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+	if (new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-		if (has_stencil_component(format)) {
+		if (has_stencil_component()) {
 			barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 		}
 	} else {
@@ -130,26 +140,26 @@ void ImageAndMemory::transition_layout(VkFormat format, VkImageLayout oldLayout,
 	}
 
 	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = mipLevels;
+	barrier.subresourceRange.levelCount = mip_levels;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 1;
 
 	VkPipelineStageFlags source_stage;
 	VkPipelineStageFlags destination_stage;
 
-	if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED and newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+	if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED and new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
 		barrier.srcAccessMask = 0;
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
 		source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 		destination_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-	} else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL and newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+	} else if (old_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL and new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
 		source_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		destination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	} else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED and newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+	} else if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED and new_layout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
 		barrier.srcAccessMask = 0;
 		barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 

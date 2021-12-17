@@ -30,15 +30,14 @@ namespace vulkan {
 		void set_options(const string &op) const;
 
 		void _destroy();
-		void _generate_mipmaps(VkFormat image_format);
-		void _create_image(const void *data, VkImageType type, bool allow_mip, bool as_storage, bool cube);
+		void _generate_mipmaps();
+		void _create_image(const void *data, VkImageType type, VkFormat format, bool allow_mip, bool as_storage, bool cube);
 		void _create_view(VkImageViewType type) const;
 		void _create_sampler() const;
 
 
 		int width, height, depth;
 		int mip_levels;
-		VkFormat format;
 		ImageAndMemory image;
 
 		mutable VkImageView view;

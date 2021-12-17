@@ -108,7 +108,6 @@ Texture::Texture() {
 	width = height = 0;
 	depth = 1;
 	mip_levels = 0;
-	format = VK_FORMAT_UNDEFINED;
 	compare_op = next_compare_op;
 	magfilter = VK_FILTER_LINEAR;
 	minfilter = VK_FILTER_LINEAR;
@@ -117,7 +116,7 @@ Texture::Texture() {
 	textures.add(this);
 }
 
-Texture::Texture(int w, int h, const string &_format) : Texture() {
+Texture::Texture(int w, int h, const string &format) : Texture() {
 	// sometimes a newly created texture is already used....
 	/*Image im;
 	im.create(w, h, White);
@@ -125,8 +124,7 @@ Texture::Texture(int w, int h, const string &_format) : Texture() {
 	width = w;
 	height = h;
 	depth = 1;
-	format = parse_format(_format);
-	_create_image(nullptr, VK_IMAGE_TYPE_2D, false, true, false);
+	_create_image(nullptr, VK_IMAGE_TYPE_2D, parse_format(format), false, true, false);
 	_create_view(VK_IMAGE_VIEW_TYPE_2D);
 	_create_sampler();
 }
@@ -147,12 +145,11 @@ void Texture::__delete__() {
 	this->~Texture();
 }
 
-VolumeTexture::VolumeTexture(int nx, int ny, int nz, const string &_format) {
+VolumeTexture::VolumeTexture(int nx, int ny, int nz, const string &format) {
 	width = nx;
 	height = ny;
 	depth = nz;
-	format = parse_format(_format);
-	_create_image(nullptr, VK_IMAGE_TYPE_3D, false, true, false);
+	_create_image(nullptr, VK_IMAGE_TYPE_3D, parse_format(format), false, true, false);
 	_create_view(VK_IMAGE_VIEW_TYPE_3D);
 	_create_sampler();
 }
@@ -165,8 +162,8 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	width = nx;
 	height = ny;
 	depth = nz;
-	format = parse_format(_format);
-	int ps = format_size(format);
+	image.format = parse_format(_format);
+	int ps = format_size(image.format);
 	VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = 1;
 
@@ -179,7 +176,7 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	imageCreateInfo.pNext = nullptr;
 	imageCreateInfo.flags = 0;
 	imageCreateInfo.imageType = depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
-	imageCreateInfo.format = format;
+	imageCreateInfo.format = image.format;
 	imageCreateInfo.extent = extent;
 	imageCreateInfo.mipLevels = 1;
 	imageCreateInfo.arrayLayers = 1;
@@ -256,19 +253,18 @@ void Texture::override(const Image &im) {
 	overridex(im.data.data, im.width, im.height, 1, "rgba:i8");
 }
 
-void Texture::overridex(const void *data, int nx, int ny, int nz, const string &_format) {
+void Texture::overridex(const void *data, int nx, int ny, int nz, const string &format) {
 	_destroy();
 	width = nx;
 	height = ny;
 	depth = nz;
-	format = parse_format(_format);
 
-	_create_image(data, depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D, depth == 1, false, false);
+	_create_image(data, depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D, parse_format(format), depth == 1, false, false);
 	_create_view(depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D);
 	_create_sampler();
 }
 
-void Texture::_create_image(const void *image_data, VkImageType type, bool allow_mip, bool allow_storage, bool cube) {
+void Texture::_create_image(const void *image_data, VkImageType type, VkFormat format, bool allow_mip, bool allow_storage, bool cube) {
 	int ps = format_size(format);
 	VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
@@ -288,7 +284,7 @@ void Texture::_create_image(const void *image_data, VkImageType type, bool allow
 	auto tiling = VK_IMAGE_TILING_OPTIMAL;
 	image.create(type, width, height, depth, mip_levels, format, tiling, usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, cube);
 
-	image.transition_layout(format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
+	image.transition_layout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mip_levels);
 
 	if (image_data) {
 		copy_buffer_to_image(staging.buffer, image.image, width, height, depth);
@@ -299,15 +295,15 @@ void Texture::_create_image(const void *image_data, VkImageType type, bool allow
 	//	layout = VK_IMAGE_LAYOUT_GENERAL;
 
 	if (allow_mip)
-		_generate_mipmaps(format);
+		_generate_mipmaps();
 	else
-		image.transition_layout(format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layout, mip_levels);
+		image.transition_layout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layout, mip_levels);
 }
 
-void Texture::_generate_mipmaps(VkFormat image_format) {
+void Texture::_generate_mipmaps() {
 	// Check if image format supports linear blitting
 	VkFormatProperties fp;
-	vkGetPhysicalDeviceFormatProperties(default_device->physical_device, image_format, &fp);
+	vkGetPhysicalDeviceFormatProperties(default_device->physical_device, image.format, &fp);
 
 	if (!(fp.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
 		throw Exception("texture image format does not support linear blitting!");
@@ -394,7 +390,7 @@ void Texture::_generate_mipmaps(VkFormat image_format) {
 
 
 void Texture::_create_view(VkImageViewType type) const {
-	view = image.create_view(format, VK_IMAGE_ASPECT_COLOR_BIT, type, mip_levels);
+	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, type, mip_levels, 0);
 }
 
 void Texture::_create_sampler() const {
@@ -467,16 +463,15 @@ void Texture::set_options(const string &options) const {
 	_create_sampler();
 }
 
-CubeMap::CubeMap(int size, const string &_format) {
+CubeMap::CubeMap(int size, const string &format) {
 	width = size;
 	height = size;
-	format = parse_format(_format);
 	const unsigned int COL[6] = {0xff000000, 0xffff0000, 0xff00ff00, 0xff0000ff, 0xff00ffff, 0xffff00ff};
 	Array<unsigned int> data;
 	for (int k=0; k<6; k++)
 		for (int i=0; i<size*size; i++)
 			data.add(COL[k]);
-	_create_image(&data[0], VK_IMAGE_TYPE_2D, false, true, true);
+	_create_image(&data[0], VK_IMAGE_TYPE_2D, parse_format(format), false, true, true);
 	_create_view(VK_IMAGE_VIEW_TYPE_CUBE);
 	_create_sampler();
 }
