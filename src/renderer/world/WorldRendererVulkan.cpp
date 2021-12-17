@@ -45,6 +45,7 @@ const int LOCATION_PARAMS = 0;
 const int LOCATION_LIGHT = 1;
 const int LOCATION_SHADOW0 = 2;
 const int LOCATION_SHADOW1 = 3;
+const int LOCATION_CUBE = 5;
 const int LOCATION_TEX0 = 4;
 const int LOCATION_FX_TEX0 = 1;
 
@@ -71,6 +72,15 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	//ubo_multi_matrix = new nix::UniformBuffer();*/
 
 
+	cube_map = new CubeMap(CUBE_SIZE, "rgba:i8");
+	cube_map->set_options("magfilter=nearest,minfilter=nearest");
+	Image im;
+	im.create(CUBE_SIZE, CUBE_SIZE, Red);
+	cube_map->override_side(0, im);
+	im.create(CUBE_SIZE, CUBE_SIZE, color(1, 1,0.5f,0));
+	cube_map->override_side(1, im);
+	im.create(CUBE_SIZE, CUBE_SIZE, color(1, 1,0,1));
+	cube_map->override_side(2, im);
 
 
 
@@ -213,6 +223,7 @@ void WorldRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const
 	}
 	dset->set_texture(LOCATION_SHADOW0, fb_shadow->attachments[1].get());
 	dset->set_texture(LOCATION_SHADOW1, fb_shadow2->attachments[1].get());
+	dset->set_texture(LOCATION_CUBE, cube_map.get());
 }
 
 

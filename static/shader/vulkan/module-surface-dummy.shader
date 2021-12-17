@@ -43,6 +43,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(binding = 2) uniform sampler2D tex_shadow0;
 layout(binding = 3) uniform sampler2D tex_shadow1;
+layout(binding = 5) uniform samplerCube tex_cube;
 
 
 const float PI = 3.141592654;
@@ -248,6 +249,19 @@ void surface_out(vec3 n, vec4 albedo, vec4 emission, float metal, float roughnes
 	roughness = max(roughness, 0.03);
 	
 	float ambient_occlusion = 0.0;
+	
+	
+	if (metal > 0.9 && roughness < 0.2) {
+		mat3 R = transpose(mat3(matrix.view));
+		vec3 L = reflect(view_dir, n);
+		//for (int i=0; i<30; i++) {
+		//vec3 L = normalize(L0 + vec3(_surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5) / 50);
+		//vec4 r = texture(tex_cube, n);//R*L);
+		vec4 r = texture(tex_cube, R*L);
+		r.a = 1;
+		out_color = r;
+		return;
+	}
 	
 ///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
 	

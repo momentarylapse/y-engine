@@ -199,7 +199,7 @@ Array<VkImage> SwapChain::get_images() {
 Array<VkImageView> SwapChain::create_image_views(Array<VkImage> &images) {
 	Array<VkImageView> views;
 	for (uint32_t i=0; i<image_count; i++)
-		views.add(ImageAndMemory{images[i], nullptr, image_format}.create_view(VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D, 1, 0));
+		views.add(ImageAndMemory{images[i], nullptr, image_format}.create_view(VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D, 1, 0, 1));
 	_image_views = views;
 	return views;
 }

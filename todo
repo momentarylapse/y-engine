@@ -1,0 +1,39 @@
+== rendering ==
+
+-- gl --
+
+* repair multisample
+* repair deferred/ambient occlusion
+
+
+-- vulkan --
+
+* deferred
+~ pipeline/dset management
+* instanced
+J shadows
+J particles
+J beams
+J transparent models
+* cube maps
+
+
+-- general --
+
+j repair dyn scaling
+* post processing
+j universal shaders
+	j edward
+	~ data mapping from scripts
+j user meshes
+* point shadows
+
+
+
+
+
+
+== other ==
+
+* model scaling? (orbits...)
+

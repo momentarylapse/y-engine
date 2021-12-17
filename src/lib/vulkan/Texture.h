@@ -15,6 +15,18 @@ namespace vulkan {
 
 	class Texture : public Sharable<Empty> {
 	public:
+		enum class Type {
+			NONE,
+			DEFAULT,
+			DYNAMIC,
+			CUBE,
+			DEPTH,
+			IMAGE,
+			VOLUME,
+			MULTISAMPLE,
+			RENDERBUFFER
+		};
+
 		Texture();
 		Texture(int w, int h, const string &format);
 		~Texture();
@@ -30,12 +42,11 @@ namespace vulkan {
 		void set_options(const string &op) const;
 
 		void _destroy();
-		void _generate_mipmaps();
 		void _create_image(const void *data, VkImageType type, VkFormat format, bool allow_mip, bool as_storage, bool cube);
-		void _create_view(VkImageViewType type) const;
 		void _create_sampler() const;
 
 
+		Type type;
 		int width, height, depth;
 		int mip_levels;
 		ImageAndMemory image;

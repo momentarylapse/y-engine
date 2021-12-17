@@ -19,7 +19,7 @@ void ImageAndMemory::_destroy() {
 	memory = nullptr;
 }
 
-void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, VkFormat _format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, bool cube) {
+void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t mip_levels, uint32_t num_layers, VkFormat _format, VkImageUsageFlags usage, bool cube) {
 	format = _format;
 
 	VkImageCreateInfo image_info = {};
@@ -29,9 +29,9 @@ void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, u
 	image_info.extent.height = height;
 	image_info.extent.depth = depth;
 	image_info.mipLevels = mip_levels;
-	image_info.arrayLayers = cube ? 6 : 1;
+	image_info.arrayLayers = num_layers;
 	image_info.format = format;
-	image_info.tiling = tiling;
+	image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	image_info.usage = usage;
 	image_info.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -46,6 +46,8 @@ void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, u
 	VkMemoryRequirements mem_requirements;
 	vkGetImageMemoryRequirements(default_device->device, image, &mem_requirements);
 
+	VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
 	VkMemoryAllocateInfo alloc_info = {};
 	alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	alloc_info.allocationSize = mem_requirements.size;
@@ -56,6 +58,93 @@ void ImageAndMemory::create(VkImageType type, uint32_t width, uint32_t height, u
 	}
 
 	vkBindImageMemory(default_device->device, image, memory, 0);
+}
+
+void ImageAndMemory::generate_mipmaps(uint32_t width, uint32_t height, uint32_t mip_levels, uint32_t layer0, uint32_t num_layers, VkImageLayout new_layout) {
+	// Check if image format supports linear blitting
+	VkFormatProperties fp;
+	vkGetPhysicalDeviceFormatProperties(default_device->physical_device, format, &fp);
+
+	if (!(fp.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+		throw Exception("texture image format does not support linear blitting!");
+	}
+
+	VkCommandBuffer command_buffer = begin_single_time_commands();
+
+	VkImageMemoryBarrier barrier = {};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.image = image;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseArrayLayer = layer0;
+	barrier.subresourceRange.layerCount = num_layers;
+	barrier.subresourceRange.levelCount = 1;
+
+	int32_t mip_width = width;
+	int32_t mip_height = height;
+
+	for (int i=1; i<mip_levels; i++) {
+		barrier.subresourceRange.baseMipLevel = i - 1;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+		vkCmdPipelineBarrier(command_buffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier);
+
+		VkImageBlit blit = {};
+		blit.srcOffsets[0] = {0, 0, 0};
+		blit.srcOffsets[1] = {mip_width, mip_height, 1};
+		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.srcSubresource.mipLevel = i - 1;
+		blit.srcSubresource.baseArrayLayer = layer0;
+		blit.srcSubresource.layerCount = num_layers;
+		blit.dstOffsets[0] = {0, 0, 0};
+		blit.dstOffsets[1] = {mip_width > 1 ? mip_width / 2 : 1, mip_height > 1 ? mip_height / 2 : 1, 1};
+		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.dstSubresource.mipLevel = i;
+		blit.dstSubresource.baseArrayLayer = layer0;
+		blit.dstSubresource.layerCount = num_layers;
+
+		vkCmdBlitImage(command_buffer,
+			image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1, &blit,
+			VK_FILTER_LINEAR);
+
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		vkCmdPipelineBarrier(command_buffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier);
+
+		if (mip_width > 1) mip_width /= 2;
+		if (mip_height > 1) mip_height /= 2;
+	}
+
+	barrier.subresourceRange.baseMipLevel = mip_levels - 1;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	barrier.newLayout = new_layout;
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+	vkCmdPipelineBarrier(command_buffer,
+		VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier);
+
+	end_single_time_commands(command_buffer);
 }
 
 bool format_is_depth_buffer(VkFormat f) {
@@ -79,7 +168,7 @@ void copy_buffer(VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size) {
 	end_single_time_commands(command_buffer);
 }
 
-VkImageView ImageAndMemory::create_view(VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels, uint32_t layer) const {
+VkImageView ImageAndMemory::create_view(VkImageAspectFlags aspect, VkImageViewType type, uint32_t mip_levels, uint32_t layer0, uint32_t num_layers) const {
 	VkImageViewCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	info.image = image;
@@ -88,8 +177,8 @@ VkImageView ImageAndMemory::create_view(VkImageAspectFlags aspect, VkImageViewTy
 	info.subresourceRange.aspectMask = aspect;
 	info.subresourceRange.baseMipLevel = 0;
 	info.subresourceRange.levelCount = mip_levels;
-	info.subresourceRange.baseArrayLayer = layer;
-	info.subresourceRange.layerCount = 1;
+	info.subresourceRange.baseArrayLayer = layer0;
+	info.subresourceRange.layerCount = num_layers;
 
 	VkImageView image_view;
 	if (vkCreateImageView(default_device->device, &info, nullptr, &image_view) != VK_SUCCESS) {
@@ -99,7 +188,7 @@ VkImageView ImageAndMemory::create_view(VkImageAspectFlags aspect, VkImageViewTy
 	return image_view;
 }
 
-void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth) {
+void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth, uint32_t level, uint32_t layer) {
 	VkCommandBuffer command_buffer = begin_single_time_commands();
 
 	VkBufferImageCopy region = {};
@@ -107,8 +196,8 @@ void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32
 	region.bufferRowLength = 0;
 	region.bufferImageHeight = 0;
 	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	region.imageSubresource.mipLevel = 0;
-	region.imageSubresource.baseArrayLayer = 0;
+	region.imageSubresource.mipLevel = level;
+	region.imageSubresource.baseArrayLayer = layer;
 	region.imageSubresource.layerCount = 1;
 	region.imageOffset = {0, 0, 0};
 	region.imageExtent = {width, height, depth};
@@ -118,7 +207,7 @@ void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32
 	end_single_time_commands(command_buffer);
 }
 
-void ImageAndMemory::transition_layout(VkImageLayout old_layout, VkImageLayout new_layout, uint32_t mip_levels) const {
+void ImageAndMemory::transition_layout(VkImageLayout old_layout, VkImageLayout new_layout, uint32_t mip_levels, uint32_t layer0, uint32_t num_layers) const {
 	VkCommandBuffer command_buffer = begin_single_time_commands();
 
 	VkImageMemoryBarrier barrier = {};
@@ -141,13 +230,19 @@ void ImageAndMemory::transition_layout(VkImageLayout old_layout, VkImageLayout n
 
 	barrier.subresourceRange.baseMipLevel = 0;
 	barrier.subresourceRange.levelCount = mip_levels;
-	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = 1;
+	barrier.subresourceRange.baseArrayLayer = layer0;
+	barrier.subresourceRange.layerCount = num_layers;
 
 	VkPipelineStageFlags source_stage;
 	VkPipelineStageFlags destination_stage;
 
-	if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED and new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+	if (old_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL and new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+		source_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destination_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	} else if (old_layout == VK_IMAGE_LAYOUT_UNDEFINED and new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
 		barrier.srcAccessMask = 0;
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
