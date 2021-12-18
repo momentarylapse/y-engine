@@ -61,7 +61,7 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 		matrix p, m, v;
 		float x[32];
 	};
-	PCOut pco = {matrix::ID, matrix::ID, matrix::ID, cam->exposure};
+	PCOut pco = {matrix::ID, matrix::ID, matrix::ID, cam_main->exposure};
 	memcpy(&pco.x, &data[0], sizeof(float) * data.num);
 	cb->push_constant(0, sizeof(matrix) * 3 + sizeof(float) * data.num, &pco);
 	cb->draw(vb_2d);
@@ -160,7 +160,7 @@ void HDRRendererVulkan::draw() {
 
 
 	PerformanceMonitor::begin(ch_out);
-	out.render_out(cb, {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y});
+	out.render_out(cb, {cam_main->exposure, cam_main->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y});
 	PerformanceMonitor::end(ch_out);
 }
 
@@ -168,8 +168,8 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	const vec2 AXIS[2] = {{(float)BLUR_SCALE,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
 	UBOBlur u;
-	u.radius = cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
-	u.threshold = threshold / cam->exposure;
+	u.radius = cam_main->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
+	u.threshold = threshold / cam_main->exposure;
 	u.axis = AXIS[iaxis];
 	blur_ubo[iaxis]->update(&u);
 	blur_dset[iaxis]->set_buffer(0, blur_ubo[iaxis]);

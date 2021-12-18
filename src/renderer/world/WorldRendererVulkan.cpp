@@ -229,7 +229,7 @@ void WorldRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const
 
 
 
-void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd) {
+void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Camera *cam, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_fx);
 	auto &rda = rvd.rda_fx;
 
@@ -419,7 +419,7 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
 
 		}
-		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
+		t->prepare_draw(cam_main->get_owner<Entity3D>()->pos);
 		cb->draw(t->vertex_buffer);
 		index ++;
 	}
@@ -577,8 +577,8 @@ void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const matr
 	}
 
 	UBO ubo;
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
+	ubo.p = cam_main->m_projection; // FIXME use current rendering cam...
+	ubo.v = cam_main->m_view;
 	ubo.m = m;
 
 	rda->ubo->update_part(&ubo, 0, sizeof(UBO));

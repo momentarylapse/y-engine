@@ -66,7 +66,7 @@ void WorldRendererGLForward::prepare() {
 
 	prepare_instanced_matrices();
 
-	prepare_lights(cam);
+	prepare_lights(cam_main);
 
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
@@ -103,27 +103,27 @@ void WorldRendererGLForward::draw() {
 		 m *= jitter(fb->width, fb->height, 0);
 
 	// skyboxes
-	float max_depth = cam->max_depth;
-	cam->max_depth = 2000000;
-	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(m * cam->m_projection);
+	float max_depth = cam_main->max_depth;
+	cam_main->max_depth = 2000000;
+	cam_main->update_matrices((float)fb->width / (float)fb->height);
+	nix::set_projection_matrix(m * cam_main->m_projection);
 
 	nix::clear_color(world.background);
 	nix::clear_z();
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
-	draw_skyboxes(cam);
+	draw_skyboxes(cam_main);
 	PerformanceMonitor::end(ch_bg);
 
 
 	// world
 	PerformanceMonitor::begin(ch_world);
-	cam->max_depth = max_depth;
-	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(m * cam->m_projection);
+	cam_main->max_depth = max_depth;
+	cam_main->update_matrices((float)fb->width / (float)fb->height);
+	nix::set_projection_matrix(m * cam_main->m_projection);
 
 	nix::bind_buffer(ubo_light, 1);
-	nix::set_view_matrix(cam->view_matrix());
+	nix::set_view_matrix(cam_main->view_matrix());
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
@@ -132,7 +132,7 @@ void WorldRendererGLForward::draw() {
 	break_point();
 	PerformanceMonitor::end(ch_world);
 
-	draw_particles();
+	draw_particles(cam_main);
 	//nix::set_scissor(rect::EMPTY);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
@@ -140,9 +140,7 @@ void WorldRendererGLForward::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) {
-	auto c0 = cam;
-	cam = _cam;
+void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 	//draw();
 
 
@@ -194,14 +192,10 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *_cam) 
 	break_point();
 	PerformanceMonitor::end(ch_world);
 
-	draw_particles();
+	draw_particles(cam);
 	//nix::set_scissor(rect::EMPTY);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
-
-
-
-	cam = c0;
 }
 
 void WorldRendererGLForward::draw_world(bool allow_material) {

@@ -33,8 +33,8 @@ public:
 	void set_material(Material *m, RenderPathType type, ShaderVariant v);
 	void set_textures(const Array<Texture*> &tex);
 
-	void draw_particles();
-	void draw_skyboxes(Camera *c);
+	void draw_particles(Camera *cam);
+	void draw_skyboxes(Camera *cam);
 	void draw_terrains(bool allow_material);
 	void draw_objects_opaque(bool allow_material);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);

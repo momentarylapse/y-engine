@@ -77,7 +77,7 @@ void WorldRendererGLDeferred::prepare() {
 	PerformanceMonitor::begin(channel);
 	prepare_instanced_matrices();
 
-	prepare_lights(cam);
+	prepare_lights(cam_main);
 
 	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
@@ -86,7 +86,7 @@ void WorldRendererGLDeferred::prepare() {
 	}
 	PerformanceMonitor::end(ch_shadow);
 
-	render_into_gbuffer(gbuffer.get(), cam);
+	render_into_gbuffer(gbuffer.get(), cam_main);
 
 	//auto source = do_post_processing(fb_main.get());
 
@@ -98,21 +98,21 @@ void WorldRendererGLDeferred::draw() {
 
 	auto target = parent->frame_buffer();
 
-	draw_background(target, cam);
+	draw_background(target, cam_main);
 
 	render_out_from_gbuffer(gbuffer.get());
 
 	PerformanceMonitor::begin(ch_trans);
 	bool flip_y = rendering_into_window();
 	matrix m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
-	cam->update_matrices((float)target->width / (float)target->height);
-	nix::set_projection_matrix(m * cam->m_projection);
+	cam_main->update_matrices((float)target->width / (float)target->height);
+	nix::set_projection_matrix(m * cam_main->m_projection);
 	nix::bind_buffer(ubo_light, 1);
-	nix::set_view_matrix(cam->view_matrix());
+	nix::set_view_matrix(cam_main->view_matrix());
 	nix::set_z(true, true);
 
 	draw_objects_transparent(true, RenderPathType::FORWARD);
-	draw_particles();
+	draw_particles(cam_main);
 
 	nix::set_z(false, false);
 	nix::set_projection_matrix(matrix::ID);
@@ -146,7 +146,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	if (using_view_space)
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	else
-		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
+		s->set_floats("eye_pos", &cam_main->get_owner<Entity3D>()->pos.x, 3); // NAH
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
@@ -206,7 +206,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *
 	PerformanceMonitor::end(ch_world);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
-	draw_particles();
+	draw_particles(cam);
 }
 
 void WorldRendererGLDeferred::draw_world(bool allow_material) {

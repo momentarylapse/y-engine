@@ -30,8 +30,7 @@ const kaba::Class *Camera::_class = nullptr;
 
 
 
-Camera *cam = nullptr; // "camera"
-Camera *cur_cam = nullptr; // currently rendering
+Camera *cam_main = nullptr; // "camera"
 
 Camera *add_camera(const vector &pos, const quaternion &ang, const rect &dest) {
 	auto o = world.create_entity(pos, ang);
@@ -48,8 +47,7 @@ void CameraInit() {
 }
 
 void CameraReset() {
-	cam = nullptr;
-	cur_cam = cam;
+	cam_main = nullptr;
 }
 
 Camera::Camera(const rect &_dest) {

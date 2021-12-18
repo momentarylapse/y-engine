@@ -335,18 +335,18 @@ bool World::load(const LevelData &ld) {
 
 	for (auto &c: ld.cameras) {
 		auto cc = add_camera(c.pos, quaternion::rotation(c.ang), rect::ID);
-		cam = cc;
+		cam_main = cc;
 		cc->min_depth = c.min_depth;
 		cc->max_depth = c.max_depth;
 		cc->exposure = c.exposure;
 		cc->fov = c.fov;
 
-		add_components(cam->owner, c.components);
+		add_components(cam_main->owner, c.components);
 	}
 	auto cameras = ComponentManager::get_listx<Camera>();
 	if (cameras->num == 0) {
 		msg_error("no camera defined... creating one");
-		cam = add_camera(v_0, quaternion::ID, rect::ID);
+		cam_main = add_camera(v_0, quaternion::ID, rect::ID);
 	}
 
 	// objects
@@ -864,7 +864,7 @@ void World::iterate(float dt) {
 			delete s;
 		}
 	}
-	audio::set_listener(cam->get_owner<Entity3D>()->pos, cam->get_owner<Entity3D>()->ang, v_0, 100000);
+	audio::set_listener(cam_main->get_owner<Entity3D>()->pos, cam_main->get_owner<Entity3D>()->ang, v_0, 100000);
 #endif
 
 	PerformanceMonitor::end(ch_iterate);

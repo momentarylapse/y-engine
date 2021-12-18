@@ -643,7 +643,7 @@ void PluginManager::export_kaba() {
 
 	kaba::link_external("tex_white", &tex_white);
 	kaba::link_external("world", &world);
-	kaba::link_external("cam", &cam);
+	kaba::link_external("cam", &cam_main);
 	kaba::link_external("engine", &engine);
 	kaba::link_external("load_model", (void*)&ModelManager::load);
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);

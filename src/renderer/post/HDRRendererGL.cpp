@@ -86,9 +86,9 @@ void HDRRendererGL::draw() {
 }
 
 void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis) {
-	float r = cam->bloom_radius * resolution_scale_x;
+	float r = cam_main->bloom_radius * resolution_scale_x;
 	shader_blur->set_float("radius", r);
-	shader_blur->set_float("threshold", threshold / cam->exposure);
+	shader_blur->set_float("threshold", threshold / cam_main->exposure);
 	shader_blur->set_floats("axis", &axis.x, 2);
 	process(weak(source->color_attachments), target, shader_blur.get());
 }
@@ -114,8 +114,8 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, bool flip_y)
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
 	nix::set_shader(shader_out.get());
-	shader_out->set_float("exposure", cam->exposure);
-	shader_out->set_float("bloom_factor", cam->bloom_factor);
+	shader_out->set_float("exposure", cam_main->exposure);
+	shader_out->set_float("bloom_factor", cam_main->bloom_factor);
 	shader_out->set_float("scale_x", resolution_scale_x);
 	shader_out->set_float("scale_y", resolution_scale_y);
 	nix::set_projection_matrix(flip_y ? matrix::scale(1,-1,1) : matrix::ID);

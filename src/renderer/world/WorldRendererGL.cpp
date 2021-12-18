@@ -104,7 +104,7 @@ void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant 
 	auto s = m->get_shader(t, v);
 	nix::set_shader(s);
 	if (using_view_space)
-		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
+		s->set_floats("eye_pos", &cam_main->get_owner<Entity3D>()->pos.x, 3); // NAH....
 	else
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
@@ -149,7 +149,7 @@ void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const col
 }
 
 
-void WorldRendererGL::draw_particles() {
+void WorldRendererGL::draw_particles(Camera *cam) {
 	PerformanceMonitor::begin(ch_fx);
 
 	// script injectors
@@ -261,7 +261,7 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 		} else {
 			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
-		t->prepare_draw(cam->get_owner<Entity3D>()->pos);
+		t->prepare_draw(cam_main->get_owner<Entity3D>()->pos);
 		nix::draw_triangles(t->vertex_buffer);
 	}
 }

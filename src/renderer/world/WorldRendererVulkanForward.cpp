@@ -67,7 +67,7 @@ void WorldRendererVulkanForward::prepare() {
 			render_into_cubemap(cb, cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
-	prepare_lights(cam, rvd_def);
+	prepare_lights(cam_main, rvd_def);
 
 	/*if (!shadow_cam) {
 		shadow_entity = new Entity3D;
@@ -93,11 +93,11 @@ void WorldRendererVulkanForward::draw() {
 
 	auto &rvd = rvd_def;
 
-	draw_skyboxes(cb, rp, cam, (float)width / (float)height, rvd);
+	draw_skyboxes(cb, rp, cam_main, (float)width / (float)height, rvd);
 
 	UBO ubo;
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
+	ubo.p = cam_main->m_projection;
+	ubo.v = cam_main->m_view;
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
@@ -105,7 +105,7 @@ void WorldRendererVulkanForward::draw() {
 	draw_objects_opaque(cb, rp, ubo, true, rvd);
 	draw_objects_transparent(cb, rp, ubo, rvd);
 
-	draw_particles(cb, rp, rvd);
+	draw_particles(cb, rp, cam_main, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
 }
@@ -132,7 +132,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	draw_objects_opaque(cb, rp, ubo, true, rvd);
 	draw_objects_transparent(cb, rp, ubo, rvd);
 
-	draw_particles(cb, rp, rvd);
+	draw_particles(cb, rp, cam, rvd);
 
 	cb->end_render_pass();
 
