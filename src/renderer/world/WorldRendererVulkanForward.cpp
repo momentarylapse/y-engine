@@ -93,10 +93,7 @@ void WorldRendererVulkanForward::draw() {
 
 	auto &rvd = rvd_def;
 
-	draw_skyboxes(cb, cam, rvd);
-
-
-	cam->update_matrices((float)width / (float)height);
+	draw_skyboxes(cb, rp, cam, (float)width / (float)height, rvd);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;
@@ -123,10 +120,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 
-	draw_skyboxes(cb, cam, rvd);
-
-
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	draw_skyboxes(cb, rp, cam, (float)fb->width / (float)fb->height, rvd);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;
@@ -147,12 +141,11 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
 
 	cb->begin_render_pass(render_pass_shadow, sfb);
-	cb->set_viewport(rect(0, shadow_resolution, 0, shadow_resolution));
+	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));
 
 	auto m = matrix::scale(scale, -scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 
-	//msg_write(shadow_proj.str());
 	UBO ubo;
 	ubo.p = m * shadow_proj;
 	ubo.v = matrix::ID;

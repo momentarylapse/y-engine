@@ -342,17 +342,15 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Rend
 	PerformanceMonitor::end(ch_fx);
 }
 
-void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam, RenderViewDataVK &rvd) {
+void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camera *cam, float aspect, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_sky;
-
-	auto rp = parent->render_pass();
 
 	int index = 0;
 	UBO ubo;
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices((float)width / (float)height);
+	cam->update_matrices(aspect);
 
 	ubo.p = cam->m_projection;
 	ubo.v = matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose();
@@ -387,6 +385,7 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, Camera *cam, RenderVi
 
 
 	cam->max_depth = max_depth;
+	cam->update_matrices(aspect);
 }
 
 void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
