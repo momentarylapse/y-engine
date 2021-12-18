@@ -140,6 +140,10 @@ void Texture::__init__() {
 	new(this) Texture();
 }
 
+void Texture::__init_ext__(int w, int h, const string &format) {
+	new(this) Texture(w, h, format);
+}
+
 void Texture::__delete__() {
 	this->~Texture();
 }

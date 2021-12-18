@@ -32,6 +32,7 @@ namespace vulkan {
 		~Texture();
 
 		void __init__();
+		void __init_ext__(int w, int h, const string &format);
 		void __delete__();
 
 		void _load(const Path &filename);
