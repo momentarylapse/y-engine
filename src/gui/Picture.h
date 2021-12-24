@@ -19,8 +19,7 @@ public:
 	Picture(const rect &r, Texture *tex, const rect &source = rect::ID);
 	virtual ~Picture();
 
-	void __init2__(const rect &r, Texture *tex);
-	void __init3__(const rect &r, Texture *tex, const rect &source);
+	void __init__(const rect &r, Texture *tex, const rect &source);
 	virtual void __delete__();
 
 	rect source;

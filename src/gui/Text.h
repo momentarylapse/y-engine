@@ -17,8 +17,7 @@ class Text : public Picture {
 public:
 	Text(const string &t, float h, const vec2 &p);
 	~Text() override;
-	void __init2__(const string &t, float h);
-	void __init4__(const string &t, float h, const vec2 &p);
+	void __init__(const string &t, float h, const vec2 &p);
 	void __delete__() override;
 
 	void rebuild();

@@ -58,11 +58,7 @@ Picture::~Picture() {
 	//dset->set({ubo}, {texture});
 //}
 
-void Picture::__init2__(const rect &r, Texture *tex) {
-	new(this) Picture(r, tex);
-}
-
-void Picture::__init3__(const rect &r, Texture *tex, const rect &s) {
+void Picture::__init__(const rect &r, Texture *tex, const rect &s) {
 	new(this) Picture(r, tex, s);
 	source = s;
 }

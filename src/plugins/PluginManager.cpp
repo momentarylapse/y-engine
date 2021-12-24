@@ -472,16 +472,14 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("ui.Picture.shader_data", &gui::Picture::shader_data);
 	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
 	kaba::declare_class_element("ui.Picture.angle", &gui::Picture::angle);
-	kaba::link_external_class_func("ui.Picture.__init__:Picture:rect:Texture", &gui::Picture::__init2__);
-	kaba::link_external_class_func("ui.Picture.__init__:Picture:rect:Texture:rect", &gui::Picture::__init3__);
+	kaba::link_external_class_func("ui.Picture.__init__", &gui::Picture::__init__);
 	kaba::link_external_virtual("ui.Picture.__delete__", &gui::Picture::__delete__, &picture);
 
 	gui::Text text(":::fake:::", 0, vec2::ZERO);
 	kaba::declare_class_size("ui.Text", sizeof(gui::Text));
 	kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
 	kaba::declare_class_element("ui.Text.text", &gui::Text::text);
-	kaba::link_external_class_func("ui.Text.__init__:Text:string:float", &gui::Text::__init2__);
-	kaba::link_external_class_func("ui.Text.__init__:Text:string:float:vec2", &gui::Text::__init4__);
+	kaba::link_external_class_func("ui.Text.__init__", &gui::Text::__init__);
 	kaba::link_external_virtual("ui.Text.__delete__", &gui::Text::__delete__, &text);
 	kaba::link_external_class_func("ui.Text.set_text", &gui::Text::set_text);
 

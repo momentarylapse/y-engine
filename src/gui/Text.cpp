@@ -29,11 +29,7 @@ Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p
 Text::~Text() {
 }
 
-void Text::__init2__(const string &t, float h) {
-	new(this) Text(t, h, vec2::ZERO);//h/6, h/6);
-}
-
-void Text::__init4__(const string &t, float h, const vec2 &p) {
+void Text::__init__(const string &t, float h, const vec2 &p) {
 	new(this) Text(t, h, p);
 }
 
