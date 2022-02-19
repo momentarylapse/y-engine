@@ -32,7 +32,7 @@ Node::Node(const rect &r) {
 Node::~Node() {
 }
 
-void Node::__init__(const rect &r) {
+void Node::__init_base__(const rect &r) {
 	new(this) Node(r);
 }
 

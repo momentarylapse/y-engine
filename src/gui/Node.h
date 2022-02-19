@@ -20,7 +20,7 @@ public:
 	Node(const rect &r);
 	virtual ~Node();
 
-	void __init__(const rect &r);
+	void __init_base__(const rect &r);
 	virtual void __delete__();
 
 
