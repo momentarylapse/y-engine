@@ -1121,9 +1121,6 @@
     <Filter Include="src\lib\nix">
       <UniqueIdentifier>{F2B28380-C7CD-DA9A-3F74-DD2903EC2A01}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\lib\sound">
-      <UniqueIdentifier>{5EA1CAA4-2FB1-9A0B-18B4-1F9FB1E00655}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\lib\vulkan">
       <UniqueIdentifier>{CA8DC7DE-188E-45F8-3DB9-3760FBE1DAAA}</UniqueIdentifier>
     </Filter>

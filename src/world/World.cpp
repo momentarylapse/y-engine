@@ -9,6 +9,7 @@
 \*----------------------------------------------------------------------------*/
 
 #include <algorithm>
+#include "../lib/config.h"
 #include "../lib/file/file.h"
 #include "../lib/nix/nix.h"
 #include "../lib/kaba/kaba.h"

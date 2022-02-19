@@ -7,6 +7,7 @@
 
 
 #include "EngineData.h"
+#include "../lib/config.h"
 #include "../lib/nix/nix.h"
 //#include "../lib/vulkan/vulkan.h"
 #include "../lib/kaba/kaba.h"
