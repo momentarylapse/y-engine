@@ -35,8 +35,9 @@ public:
 		foreachi (auto *cc, list, i)
 			if (cc == c) {
 				list.erase(i);
-				break;
+				return;
 			}
+		msg_error("failed to remove component from list: " + c->component_type->name);
 	}
 };
 

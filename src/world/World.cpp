@@ -641,32 +641,24 @@ void World::notify(const string &msg) {
 }
 
 void World::unregister_entity(Entity3D *e) {
-	msg_write("U1");
 	if (e->object_id >= 0)
 		unregister_object(e);
-	msg_write("U2");
 
 #if HAS_LIB_BULLET
 	if (auto sb = e->get_component<SolidBody>())
 		dynamicsWorld->removeRigidBody(sb->body);
 #endif
-	msg_write("U3");
 
 	if (auto m = e->get_component<Model>())
 		unregister_model(m);
-	msg_write("U4");
 
 	foreachi(auto *o, entities, i)
 		if (o == e) {
-			msg_write("UX1");
 			msg_data.e = o;
 			notify("entity-delete");
-			msg_write("UX2");
 			entities.erase(i);
-			msg_write("UX3");
 			return;
 		}
-	msg_write("U5");
 }
 
 bool World::unregister(Entity* x) {
@@ -748,11 +740,11 @@ void World::register_model(Model *m) {
 	m->registered = true;
 	
 	// sub models
-	msg_write("R sk");
-	msg_write(p2s(m->owner));
+	//msg_write("R sk");
+	//msg_write(p2s(m->owner));
 	if (m->owner)
 	if (auto sk = m->owner->get_component<Skeleton>()) {
-		msg_write("....sk");
+		//msg_write("....sk");
 		for (auto &b: sk->bones)
 			if (auto *mm = b.get_component<Model>())
 				register_model(mm);
@@ -774,7 +766,7 @@ void World::unregister_model(Model *m) {
 		}
 	foreachib (auto &s, sorted_opaque, i)
 		if (s.model == m) {
-			msg_write("R");
+			//msg_write("R");
 			s.clear();
 			sorted_opaque.erase(i);
 		}

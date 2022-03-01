@@ -11,7 +11,7 @@
 #include "../lib/kaba/syntax/Class.h"
 
 
-//#include "../lib/file/msg.h"
+#include "../lib/file/msg.h"
 
 
 Array<Entity*> EntityManager::selection;
@@ -34,7 +34,7 @@ Entity::~Entity() {
 		//msg_write("auto unreg...");
 		world.unregister(this);
 	}
-	//msg_write("/~Entity " + i2s((int)type));*/
+	msg_write("/~Entity " + i2s((int)type));*/
 }
 
 void Entity::on_init_rec() {
@@ -77,9 +77,13 @@ void Entity::_add_component_external_(Component *c) {
 }
 
 Component *Entity::_get_component_untyped_(const kaba::Class *type) const {
-	for (auto *c: components)
+	//msg_write("get " + type->name);
+	for (auto *c: components) {
+		//msg_write(p2s(c->component_type));
+		//msg_write("... " + c->component_type->name);
 		if (c->component_type->is_derived_from(type))
 			return c;
+	}
 	return nullptr;
 }
 
