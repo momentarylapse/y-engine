@@ -27,7 +27,7 @@ namespace kaba {
 		void *rip;
 		void *rsp;
 		void *rbp;
-		Script *s;
+		Module *m;
 		Function *f;
 		int64 offset;
 		string str() const;

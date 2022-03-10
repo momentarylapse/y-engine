@@ -653,8 +653,8 @@ void PluginManager::export_kaba() {
 }
 
 template<class C>
-void import_component_class(shared<kaba::Script> s, const string &name) {
-	for (auto c: s->classes()) {
+void import_component_class(shared<kaba::Module> m, const string &name) {
+	for (auto c: m->classes()) {
 		if (c->name == name)
 			C::_class = c;
 	}
@@ -830,7 +830,7 @@ string callable_name(const void *c) {
 					return "BIND:" + callable_name(*(const char**)((const char*)c + e.offset));
 			return "kaba:bind:" + t->name_space->name;
 		}
-		return t->name_space->owner->script->filename.basename();
+		return t->name_space->owner->module->filename.basename();
 	}
 	if (t->is_callable_fp()) {
 		if (EXTRACT_FUNCTION_NAME) {
@@ -841,7 +841,7 @@ string callable_name(const void *c) {
 				}
 			return "func:" + t->long_name();
 		}
-		return t->name_space->owner->script->filename.basename();//relative_to(engine.script_dir).str();
+		return t->name_space->owner->module->filename.basename();//relative_to(engine.script_dir).str();
 	}
 	return "callable:" + p2s(c);
 }
