@@ -288,6 +288,13 @@ void PluginManager::export_kaba() {
 
 	kaba::declare_class_size("Terrain", sizeof(Terrain));
 	//kaba::declare_class_element("Terrain.pos", &Terrain::pos);
+	kaba::declare_class_element("Terrain.material", &Terrain::material);
+	kaba::declare_class_element("Terrain.height", &Terrain::height);
+	kaba::declare_class_element("Terrain.vertex", &Terrain::vertex);
+	kaba::declare_class_element("Terrain.normal", &Terrain::normal);
+	kaba::declare_class_element("Terrain.pattern", &Terrain::pattern);
+	kaba::declare_class_element("Terrain.num_x", &Terrain::num_x);
+	kaba::declare_class_element("Terrain.num_z", &Terrain::num_z);
 	kaba::link_external_class_func("Terrain.get_height", &Terrain::gimme_height);
 
 	kaba::declare_class_size("CollisionData", sizeof(CollisionData));

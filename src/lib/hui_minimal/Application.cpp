@@ -47,15 +47,15 @@ Application::Application(const string &app_name, const string &def_lang, int fla
 	SetDefaultErrorHandler(nullptr);
 
 	if (file_exists(directory << "config.txt"))
-		Config.load(directory << "config.txt");
+		config.load(directory << "config.txt");
 
 }
 
 Application::~Application() {
 	//foreachb(Window *w, _all_windows_)
 	//	delete(w);
-	if (Config.changed)
-		Config.save(directory << "config.txt");
+	if (config.changed)
+		config.save(directory << "config.txt");
 	if ((msg_inited) /*&& (HuiMainLevel == 0)*/)
 		msg_end();
 }
