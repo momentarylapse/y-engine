@@ -153,6 +153,22 @@ void depthbuffer_init(DepthBuffer *t, int w, int h, const string &format) {
 #endif
 }
 
+void shader_set_float(Shader *s, const string &name, float f) {
+#ifdef USING_VULKAN
+	msg_error("unimplemented:  Shader.set_float()");
+#else
+	s->set_float(name, f);
+#endif
+}
+
+void shader_set_floats(Shader *s, const string &name, float *f, int num) {
+#ifdef USING_VULKAN
+	msg_error("unimplemented:  Shader.set_floats()");
+#else
+	s->set_floats(name, f, num);
+#endif
+}
+
 #pragma GCC pop_options
 
 
@@ -442,75 +458,75 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("audio.Sound.__del_override__", &global_delete);
 
 	gui::Node node(rect::ID);
-	kaba::declare_class_size("ui.Node", sizeof(gui::Node));
-	kaba::declare_class_element("ui.Node.x", &gui::Node::pos);
-	kaba::declare_class_element("ui.Node.y", _OFFSET(node, pos.y));
-	kaba::declare_class_element("ui.Node.pos", &gui::Node::pos);
-	kaba::declare_class_element("ui.Node.width", &gui::Node::width);
-	kaba::declare_class_element("ui.Node.height", &gui::Node::height);
-	kaba::declare_class_element("ui.Node._eff_area", &gui::Node::eff_area);
-	kaba::declare_class_element("ui.Node.margin", &gui::Node::margin);
-	kaba::declare_class_element("ui.Node.align", &gui::Node::align);
-	kaba::declare_class_element("ui.Node.dz", &gui::Node::dz);
-	kaba::declare_class_element("ui.Node.color", &gui::Node::col);
-	kaba::declare_class_element("ui.Node.visible", &gui::Node::visible);
-	kaba::declare_class_element("ui.Node.children", &gui::Node::children);
-	kaba::declare_class_element("ui.Node.parent", &gui::Node::parent);
-	kaba::link_external_class_func("ui.Node.__init__", &gui::Node::__init_base__);
-	kaba::link_external_virtual("ui.Node.__delete__", &gui::Node::__delete__, &node);
-	kaba::link_external_class_func("ui.Node.__del_override__", &gui::delete_node);
-	kaba::link_external_class_func("ui.Node.add", &gui::Node::add);
-	kaba::link_external_class_func("ui.Node.set_area", &gui::Node::set_area);
-	kaba::link_external_virtual("ui.Node.on_iterate", &gui::Node::on_iterate, &node);
-	kaba::link_external_virtual("ui.Node.on_enter", &gui::Node::on_enter, &node);
-	kaba::link_external_virtual("ui.Node.on_leave", &gui::Node::on_leave, &node);
-	kaba::link_external_virtual("ui.Node.on_left_button_down", &gui::Node::on_left_button_down, &node);
-	kaba::link_external_virtual("ui.Node.on_left_button_up", &gui::Node::on_left_button_up, &node);
-	kaba::link_external_virtual("ui.Node.on_middle_button_down", &gui::Node::on_middle_button_down, &node);
-	kaba::link_external_virtual("ui.Node.on_middle_button_up", &gui::Node::on_middle_button_up, &node);
-	kaba::link_external_virtual("ui.Node.on_right_button_down", &gui::Node::on_right_button_down, &node);
-	kaba::link_external_virtual("ui.Node.on_right_button_up", &gui::Node::on_right_button_up, &node);
+	kaba::declare_class_size("Node", sizeof(gui::Node));
+	kaba::declare_class_element("Node.x", &gui::Node::pos);
+	kaba::declare_class_element("Node.y", _OFFSET(node, pos.y));
+	kaba::declare_class_element("Node.pos", &gui::Node::pos);
+	kaba::declare_class_element("Node.width", &gui::Node::width);
+	kaba::declare_class_element("Node.height", &gui::Node::height);
+	kaba::declare_class_element("Node._eff_area", &gui::Node::eff_area);
+	kaba::declare_class_element("Node.margin", &gui::Node::margin);
+	kaba::declare_class_element("Node.align", &gui::Node::align);
+	kaba::declare_class_element("Node.dz", &gui::Node::dz);
+	kaba::declare_class_element("Node.color", &gui::Node::col);
+	kaba::declare_class_element("Node.visible", &gui::Node::visible);
+	kaba::declare_class_element("Node.children", &gui::Node::children);
+	kaba::declare_class_element("Node.parent", &gui::Node::parent);
+	kaba::link_external_class_func("Node.__init__", &gui::Node::__init_base__);
+	kaba::link_external_virtual("Node.__delete__", &gui::Node::__delete__, &node);
+	kaba::link_external_class_func("Node.__del_override__", &gui::delete_node);
+	kaba::link_external_class_func("Node.add", &gui::Node::add);
+	kaba::link_external_class_func("Node.set_area", &gui::Node::set_area);
+	kaba::link_external_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);
+	kaba::link_external_virtual("Node.on_enter", &gui::Node::on_enter, &node);
+	kaba::link_external_virtual("Node.on_leave", &gui::Node::on_leave, &node);
+	kaba::link_external_virtual("Node.on_left_button_down", &gui::Node::on_left_button_down, &node);
+	kaba::link_external_virtual("Node.on_left_button_up", &gui::Node::on_left_button_up, &node);
+	kaba::link_external_virtual("Node.on_middle_button_down", &gui::Node::on_middle_button_down, &node);
+	kaba::link_external_virtual("Node.on_middle_button_up", &gui::Node::on_middle_button_up, &node);
+	kaba::link_external_virtual("Node.on_right_button_down", &gui::Node::on_right_button_down, &node);
+	kaba::link_external_virtual("Node.on_right_button_up", &gui::Node::on_right_button_up, &node);
 
 	gui::Picture picture(rect::ID, nullptr);
-	kaba::declare_class_size("ui.Picture", sizeof(gui::Picture));
-	kaba::declare_class_element("ui.Picture.source", &gui::Picture::source);
-	kaba::declare_class_element("ui.Picture.texture", &gui::Picture::texture);
-	kaba::declare_class_element("ui.Picture.shader", &gui::Picture::shader);
-	kaba::declare_class_element("ui.Picture.shader_data", &gui::Picture::shader_data);
-	kaba::declare_class_element("ui.Picture.blur", &gui::Picture::bg_blur);
-	kaba::declare_class_element("ui.Picture.angle", &gui::Picture::angle);
-	kaba::link_external_class_func("ui.Picture.__init__", &gui::Picture::__init__);
-	kaba::link_external_virtual("ui.Picture.__delete__", &gui::Picture::__delete__, &picture);
+	kaba::declare_class_size("Picture", sizeof(gui::Picture));
+	kaba::declare_class_element("Picture.source", &gui::Picture::source);
+	kaba::declare_class_element("Picture.texture", &gui::Picture::texture);
+	kaba::declare_class_element("Picture.shader", &gui::Picture::shader);
+	kaba::declare_class_element("Picture.shader_data", &gui::Picture::shader_data);
+	kaba::declare_class_element("Picture.blur", &gui::Picture::bg_blur);
+	kaba::declare_class_element("Picture.angle", &gui::Picture::angle);
+	kaba::link_external_class_func("Picture.__init__", &gui::Picture::__init__);
+	kaba::link_external_virtual("Picture.__delete__", &gui::Picture::__delete__, &picture);
 
 	gui::Text text(":::fake:::", 0, vec2::ZERO);
-	kaba::declare_class_size("ui.Text", sizeof(gui::Text));
-	kaba::declare_class_element("ui.Text.font_size", &gui::Text::font_size);
-	kaba::declare_class_element("ui.Text.text", &gui::Text::text);
-	kaba::link_external_class_func("ui.Text.__init__", &gui::Text::__init__);
-	kaba::link_external_virtual("ui.Text.__delete__", &gui::Text::__delete__, &text);
-	kaba::link_external_class_func("ui.Text.set_text", &gui::Text::set_text);
+	kaba::declare_class_size("Text", sizeof(gui::Text));
+	kaba::declare_class_element("Text.font_size", &gui::Text::font_size);
+	kaba::declare_class_element("Text.text", &gui::Text::text);
+	kaba::link_external_class_func("Text.__init__", &gui::Text::__init__);
+	kaba::link_external_virtual("Text.__delete__", &gui::Text::__delete__, &text);
+	kaba::link_external_class_func("Text.set_text", &gui::Text::set_text);
 
-	kaba::link_external_class_func("ui.HBox.__init__", &gui::HBox::__init__);
-	kaba::link_external_class_func("ui.VBox.__init__", &gui::VBox::__init__);
+	kaba::link_external_class_func("HBox.__init__", &gui::HBox::__init__);
+	kaba::link_external_class_func("VBox.__init__", &gui::VBox::__init__);
 
-	kaba::link_external("ui.key", (void*)&input::get_key);
-	kaba::link_external("ui.key_down", (void*)&input::get_key_down);
-	kaba::link_external("ui.key_up", (void*)&input::get_key_up);
-	kaba::link_external("ui.button", (void*)&input::get_button);
-	kaba::link_external("ui.toplevel", &gui::toplevel);
-	kaba::link_external("ui.mouse", &input::mouse);
-	kaba::link_external("ui.dmouse", &input::dmouse);
-	kaba::link_external("ui.scroll", &input::scroll);
-	kaba::link_external("ui.link_mouse_and_keyboard_into_pad", &input::link_mouse_and_keyboard_into_pad);
-	kaba::link_external("ui.get_pad", (void*)&input::get_pad);
+	kaba::link_external("key_state", (void*)&input::get_key);
+	kaba::link_external("key_down", (void*)&input::get_key_down);
+	kaba::link_external("key_up", (void*)&input::get_key_up);
+	kaba::link_external("button", (void*)&input::get_button);
+	kaba::link_external("toplevel", &gui::toplevel);
+	kaba::link_external("mouse", &input::mouse);
+	kaba::link_external("dmouse", &input::dmouse);
+	kaba::link_external("scroll", &input::scroll);
+	kaba::link_external("link_mouse_and_keyboard_into_pad", &input::link_mouse_and_keyboard_into_pad);
+	kaba::link_external("get_pad", (void*)&input::get_pad);
 
-	kaba::declare_class_size("ui.Gamepad", sizeof(input::Gamepad));
-	kaba::declare_class_element("ui.Gamepad.deadzone", &input::Gamepad::deadzone);
-	kaba::link_external_class_func("ui.Gamepad.update", &input::Gamepad::update);
-	kaba::link_external_class_func("ui.Gamepad.is_present", &input::Gamepad::is_present);
-	kaba::link_external_class_func("ui.Gamepad.axis", &input::Gamepad::axis);
-	kaba::link_external_class_func("ui.Gamepad.button", &input::Gamepad::button);
-	kaba::link_external_class_func("ui.Gamepad.clicked", &input::Gamepad::clicked);
+	kaba::declare_class_size("Gamepad", sizeof(input::Gamepad));
+	kaba::declare_class_element("Gamepad.deadzone", &input::Gamepad::deadzone);
+	kaba::link_external_class_func("Gamepad.update", &input::Gamepad::update);
+	kaba::link_external_class_func("Gamepad.is_present", &input::Gamepad::is_present);
+	kaba::link_external_class_func("Gamepad.axis", &input::Gamepad::axis);
+	kaba::link_external_class_func("Gamepad.button", &input::Gamepad::button);
+	kaba::link_external_class_func("Gamepad.clicked", &input::Gamepad::clicked);
 
 	kaba::declare_class_size("NetworkManager", sizeof(NetworkManager));
 	kaba::declare_class_element("NewtorkManager.cur_con", &NetworkManager::cur_con);
@@ -644,6 +660,8 @@ void PluginManager::export_kaba() {
 
 	kaba::link_external_class_func("DepthBuffer.__init__", &depthbuffer_init);
 
+	kaba::link_external_class_func("Shader.set_float", &shader_set_float);
+	kaba::link_external_class_func("Shader.set_floats", &shader_set_floats);
 
 
 	kaba::link_external("tex_white", &tex_white);
@@ -672,7 +690,7 @@ void import_component_class(shared<kaba::Module> m, const string &name) {
 }
 
 void PluginManager::import_kaba() {
-	auto s = kaba::load("y.kaba");
+	auto s = kaba::load("y/y.kaba");
 	import_component_class<SolidBody>(s, "SolidBody");
 	import_component_class<Collider>(s, "Collider");
 	import_component_class<MeshCollider>(s, "MeshCollider");
