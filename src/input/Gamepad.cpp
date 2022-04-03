@@ -14,6 +14,8 @@
 #include <math.h>
 #include <GLFW/glfw3.h>
 
+#include "../lib/file/msg.h"
+
 namespace input {
 
 bool link_mouse_and_keyboard_into_pad = true;
@@ -32,6 +34,10 @@ Gamepad::~Gamepad() {
 
 bool Gamepad::is_present() const {
 	return glfwJoystickIsGamepad(index) == 1;
+}
+
+string Gamepad::name() const {
+	return glfwGetGamepadName(index);
 }
 
 
@@ -64,7 +70,7 @@ bool Gamepad::clicked(Button b) {
 
 
 void init_pads() {
-	main_pad = get_pad(0);
+	main_pad = get_pad(-1);
 }
 
 void iterate_pads() {
@@ -89,7 +95,16 @@ void iterate_pads() {
 	}
 }
 
+int find_best_pad() {
+	for (int i=0; i<16; i++)
+		if (glfwJoystickIsGamepad(i))
+			return i;
+	return -1;
+}
+
 shared<Gamepad> get_pad(int index) {
+	if (index < 0)
+		index = find_best_pad();
 	for (auto pad: weak(gamepads))
 		if (pad->index == index)
 			return pad;

@@ -524,6 +524,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Gamepad.deadzone", &input::Gamepad::deadzone);
 	kaba::link_external_class_func("Gamepad.update", &input::Gamepad::update);
 	kaba::link_external_class_func("Gamepad.is_present", &input::Gamepad::is_present);
+	kaba::link_external_class_func("Gamepad.name", &input::Gamepad::name);
 	kaba::link_external_class_func("Gamepad.axis", &input::Gamepad::axis);
 	kaba::link_external_class_func("Gamepad.button", &input::Gamepad::button);
 	kaba::link_external_class_func("Gamepad.clicked", &input::Gamepad::clicked);

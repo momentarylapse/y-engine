@@ -50,6 +50,7 @@ public:
 	~Gamepad();
 
 	bool is_present() const;
+	string name() const;
 	void update();
 	float axis(int i);
 	bool button(Button b);
