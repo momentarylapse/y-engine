@@ -99,7 +99,7 @@ int find_best_pad() {
 	for (int i=0; i<16; i++)
 		if (glfwJoystickIsGamepad(i))
 			return i;
-	return -1;
+	return 0;
 }
 
 shared<Gamepad> get_pad(int index) {
