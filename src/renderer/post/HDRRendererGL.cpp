@@ -12,6 +12,7 @@
 #include "../../lib/math/vec2.h"
 #include "../../lib/math/rect.h"
 #include "../../lib/file/msg.h"
+#include "../../lib/any/any.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../Config.h"
@@ -19,6 +20,8 @@
 
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
+
+void apply_shader_data(Shader *s, const Any &shader_data);
 
 
 HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", parent) {
@@ -60,17 +63,49 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", paren
 HDRRendererGL::~HDRRendererGL() {
 }
 
+
+void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, VertexBuffer *vb_2d) {
+	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+
+	nix::bind_frame_buffer(fb);
+	nix::set_viewport(dynamicly_scaled_area(fb));
+
+	if (r->child)
+		r->child->draw();
+}
+
+void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shader *shader, const Any &data, VertexBuffer *vb_2d) {
+
+	bool flip_y = r->rendering_into_window();
+
+	PerformanceMonitor::begin(r->channel);
+
+	nix::set_textures(source);
+	nix::set_shader(shader);
+	apply_shader_data(shader, data);
+	/*shader->set_float("exposure", cam_main->exposure);
+	shader->set_float("bloom_factor", cam_main->bloom_factor);
+	shader->set_float("scale_x", resolution_scale_x);
+	shader->set_float("scale_y", resolution_scale_y);*/
+	nix::set_projection_matrix(flip_y ? matrix::scale(1,-1,1) : matrix::ID);
+	nix::set_view_matrix(matrix::ID);
+	nix::set_model_matrix(matrix::ID);
+	nix::set_cull(nix::CullMode::NONE);
+
+	nix::set_z(false, false);
+
+	nix::draw_triangles(vb_2d);
+
+	nix::set_cull(nix::CullMode::DEFAULT);
+	break_point();
+	PerformanceMonitor::end(r->channel);
+}
+
 void HDRRendererGL::prepare() {
 	if (child)
 		child->prepare();
 
-	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-
-	nix::bind_frame_buffer(fb_main.get());
-	nix::set_viewport(dynamicly_scaled_area(fb_main.get()));
-
-	if (child)
-		child->draw();
+	render_source_into_framebuffer(this, fb_main.get(), vb_2d);
 
 
 	PerformanceMonitor::begin(ch_post_blur);
@@ -81,8 +116,15 @@ void HDRRendererGL::prepare() {
 }
 
 void HDRRendererGL::draw() {
-	bool flip_y = rendering_into_window();
-	render_out(fb_main.get(), fb_small2->color_attachments[0].get(), flip_y);
+	Any data;
+	data.map_set("exposure", cam_main->exposure);
+	data.map_set("bloom_factor", cam_main->bloom_factor);
+	data.map_set("scale_x", resolution_scale_x);
+	data.map_set("scale_y", resolution_scale_y);
+
+
+	render_out_through_shader(this, {fb_main->color_attachments[0].get(), fb_small2->color_attachments[0].get()}, shader_out.get(), data, vb_2d);
+	//render_out(fb_main.get(), fb_small2->color_attachments[0].get());
 }
 
 void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis) {
@@ -109,7 +151,10 @@ void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, 
 	//nix::set_scissor(rect::EMPTY);
 }
 
-void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, bool flip_y) {
+void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {
+
+	bool flip_y = rendering_into_window();
+
 	PerformanceMonitor::begin(ch_out);
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});

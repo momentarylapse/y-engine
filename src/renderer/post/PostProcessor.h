@@ -19,6 +19,8 @@ class PostProcessor;
 struct PostProcessorStage : public Renderer {
 	PostProcessorStage(const string &name, Renderer *parent);
 	PostProcessor *post = nullptr;
+
+	VertexBuffer *vb_2d;
 };
 
 struct PostProcessorStageUser : public PostProcessorStage {

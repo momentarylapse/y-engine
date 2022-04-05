@@ -20,10 +20,9 @@ public:
 	void prepare() override;
 	void draw() override;
 
-
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis);
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
-	void render_out(FrameBuffer *source, Texture *bloom, bool flip_y);
+	void render_out(FrameBuffer *source, Texture *bloom);
 
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_small1;

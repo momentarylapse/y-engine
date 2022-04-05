@@ -16,6 +16,8 @@ PostProcessorStage::PostProcessorStage(const string &name, Renderer *parent) : R
 
 PostProcessorStageUser::PostProcessorStageUser(const PostProcessorStageUser::Callback *p, const PostProcessorStageUser::Callback *d) :
 		PostProcessorStage(callable_name(d), nullptr) {
+	func_prepare = p;
+	func_draw = d;
 }
 
 void PostProcessorStageUser::prepare() {
@@ -40,15 +42,15 @@ void PostProcessor::add_stage(const PostProcessorStageUser::Callback *p, const P
 }
 void PostProcessor::reset() {
 	stages.clear();
-	if (hdr)
-		stages.add(hdr);
+	//if (hdr)
+	//	stages.add(hdr);
 	rebuild();
 }
 
 void PostProcessor::rebuild() {
 	auto stages_eff = stages;
-	if (hdr)
-		stages_eff.insert(hdr, 0);
+	//if (hdr)
+	//	stages_eff.insert(hdr, 0);
 
 	if (stages_eff.num > 0) {
 		stages_eff[0]->set_child(child);
@@ -63,6 +65,7 @@ void PostProcessor::rebuild() {
 }
 
 void PostProcessor::set_hdr(PostProcessorStage *_hdr) {
+	throw Exception("PostProcessor.set_hdr... nope");
 	hdr = _hdr;
 	rebuild();
 }
