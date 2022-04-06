@@ -41,6 +41,8 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 				s->set_float(key, val.as_float());
 			} else if (val.is_int()) {
 				s->set_float(key, val.as_int());
+			} else if (val.is_bool()) {
+				s->set_int(key, (int)val.as_bool());
 			} else if (val.is_array()) {
 				float ff[4];
 				for (int i=0; i<val.as_array().num; i++)
@@ -50,32 +52,7 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 				msg_write("invalid shader data item: " + val.str());
 			}
 		}
-	} else if (shader_data.is_array()) {
-		for (auto &x: shader_data.as_array()) {
-			if (!x.is_array()) {
-				msg_write("invalid shader data item: " + x.str());
-				continue;
-			}
-			auto key = x.array_get(0);
-			auto val = x.array_get(1);
-			if (!key.is_string()) {
-				msg_write("invalid shader data item: " + x.str());
-				continue;
-			}
-			if (val.is_float()) {
-				s->set_float(key.as_string(), val.as_float());
-			} else if (val.is_int()) {
-				s->set_float(key.as_string(), val.as_int());
-			} else if (val.is_array()) {
-				float ff[4];
-				for (int i=0; i<val.as_array().num; i++)
-					ff[i] = val.as_array()[i].as_float();
-				s->set_floats(key.as_string(), ff, val.as_array().num);
-			} else {
-				msg_write("invalid shader data item: " + x.str());
-			}
-		}
-	} else if (shader_data.is_array()) {
+	} else {
 		msg_write("invalid shader data: " + shader_data.str());
 	}
 }
