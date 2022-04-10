@@ -343,15 +343,18 @@ void SolidBody::update_data() {
 }
 
 
-void SolidBody::update_motion() {
+void SolidBody::update_motion(int mask) {
 #if HAS_LIB_BULLET
-	btTransform trans;
-	body->setLinearVelocity(bt_set_v(vel));
-	body->setAngularVelocity(bt_set_v(rot));
 	auto o = get_owner<Entity3D>();
-	trans.setRotation(bt_set_q(o->ang));
-	trans.setOrigin(bt_set_v(o->pos));
-	body->getMotionState()->setWorldTransform(trans);
+	btTransform trans;
+	if (mask & 1)
+		body->getWorldTransform().setOrigin(bt_set_v(o->pos));
+	if (mask & 2)
+		body->getWorldTransform().setRotation(bt_set_q(o->ang));
+	if (mask & 4)
+		body->setLinearVelocity(bt_set_v(vel));
+	if (mask & 8)
+		body->setAngularVelocity(bt_set_v(rot));
 #endif
 }
 
