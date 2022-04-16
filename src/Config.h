@@ -27,6 +27,7 @@ public:
 	string second_world;
 	string default_material;
 	string default_font;
+	Path game_dir;
 	AntialiasingMethod antialiasing_method = AntialiasingMethod::NONE;
 
 	float resolution_scale_min = 0;

@@ -218,7 +218,13 @@ public:
 
 		msg_write("on init...");
 
-		engine.set_dirs("Textures", "Maps", "Objects", "Sounds", "Scripts", "Materials", "Fonts");
+		engine.set_dirs(config.game_dir << "Textures",
+			config.game_dir << "Maps",
+			config.game_dir << "Objects",
+			config.game_dir << "Sounds",
+			config.game_dir << "Scripts",
+			config.game_dir << "Materials",
+			config.game_dir << "Fonts");
 
 		api_init(window);
 		create_full_renderer();
@@ -334,7 +340,7 @@ public:
 			if (input::get_key(hui::KEY_CONTROL) and input::get_key(hui::KEY_Q))
 				break;
 
-			if (!world.next_filename.is_empty()) {
+			if (world.next_filename) {
 				load_world(world.next_filename);
 				world.next_filename = "";
 			}

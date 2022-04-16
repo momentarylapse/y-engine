@@ -31,14 +31,16 @@ void Config::load(const Array<string> &arg) {
 		} else if (a == "--uncapped" or a == "-u") {
 			set_bool("renderer.uncapped-framerate", true);
 		} else if (a == "--debug" or a == "-D") {
-			set_str("debug", "2");
+			set_int("debug", 2);
+		} else if (a.head(11) == "--game-dir=") {
+			game_dir = a.sub_ref(11);
 		} else if (a == "--fw") {
 			set_str("renderer.path", "forward");
 		} else if (a == "--def") {
 			set_str("renderer.path", "deferred");
 		} else if (a == "--direct") {
 			set_str("renderer.path", "direct");
-		} else if (a.head(7) == "--scale") {
+		} else if (a.head(8) == "--scale=") {
 			set_str("renderer.resolution-scale-min", a.sub_ref(7));
 			set_str("renderer.resolution-scale-max", a.sub_ref(7));
 		} else if (a.head(1) != "-") {
