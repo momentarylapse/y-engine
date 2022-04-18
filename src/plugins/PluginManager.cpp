@@ -781,7 +781,7 @@ const kaba::Class *PluginManager::find_class(const Path &filename, const string 
 		}
 	} catch (kaba::Exception &e) {
 		msg_error(e.message());
-		throw Exception(e.message());
+		throw;
 	}
 	throw Exception(format("script does not contain a class named '%s'", name));
 	return nullptr;

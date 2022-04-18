@@ -289,7 +289,6 @@ void World::load_soon(const Path &filename) {
 }
 
 void add_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
-
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
@@ -357,7 +356,7 @@ bool World::load(const LevelData &ld) {
 	num_reserved_objects = ld.objects.num;
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()) {
-			try {
+			//try {
 				auto q = quaternion::rotation(o.ang);
 				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q);
 				add_components(oo, o.components);
@@ -368,9 +367,9 @@ bool World::load(const LevelData &ld) {
 				if (i % 5 == 0)
 					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
 
-			} catch (...) {
+			/*} catch (...) {
 				ok = false;
-			}
+			}*/
 		}
 
 	// terrains
