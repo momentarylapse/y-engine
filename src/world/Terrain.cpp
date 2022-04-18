@@ -369,8 +369,8 @@ inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const v
 	if ((dir==2) and (tp.x>p1.x))	return false;
 	if ((dir==3) and (tp.z>p1.z))	return false;
 
-	data.p= tp;
-	data.t = t;
+	data.pos= tp;
+	data.entity = t->get_owner<Entity3D>();
 	return true;
 }
 
@@ -390,8 +390,8 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 	if ((p2.x==p1.x) and (p2.z==p1.z) and (p2.y<p1.y)){
 		float h=gimme_height(p1);
 		if (p2.y < h){
-			data.p = vector(p1.x,h,p1.z);
-			data.t = this;
+			data.pos = vector(p1.x,h,p1.z);
+			data.entity = get_owner<Entity3D>();
 			return true;
 		}
 	}

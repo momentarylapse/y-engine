@@ -314,10 +314,9 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Terrain.get_height", &Terrain::gimme_height);
 
 	kaba::declare_class_size("CollisionData", sizeof(CollisionData));
-	kaba::declare_class_element("CollisionData.sb", &CollisionData::sb);
-	kaba::declare_class_element("CollisionData.sub", &CollisionData::sub);
-	kaba::declare_class_element("CollisionData.t", &CollisionData::t);
-	kaba::declare_class_element("CollisionData.p", &CollisionData::p);
+	kaba::declare_class_element("CollisionData.entity", &CollisionData::entity);
+	kaba::declare_class_element("CollisionData.body", &CollisionData::body);
+	kaba::declare_class_element("CollisionData.pos", &CollisionData::pos);
 	kaba::declare_class_element("CollisionData.n", &CollisionData::n);
 
 	kaba::declare_class_size("Material", sizeof(Material));

@@ -170,9 +170,9 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 			auto &pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() <= 0) {
 				if (a->active)
-					send_collision(a, {b, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(a, {b->get_owner<Entity3D>(), b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
 				if (b->active)
-					send_collision(b, {a, nullptr, nullptr, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(b, {a->get_owner<Entity3D>(), a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}
@@ -948,14 +948,15 @@ bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool sim
 	this->dynamicsWorld->getCollisionWorld()->rayTest(bt_set_v(p1), bt_set_v(p2), ray_callback);
 	if (ray_callback.hasHit()) {
 		auto sb = static_cast<SolidBody*>(ray_callback.m_collisionObject->getUserPointer());
-		d.p = bt_get_v(ray_callback.m_hitPointWorld);
+		d.pos = bt_get_v(ray_callback.m_hitPointWorld);
 		d.n = bt_get_v(ray_callback.m_hitNormalWorld);
-		d.sb = sb;
+		d.entity = sb->get_owner<Entity3D>();
+		d.body = sb;
 
 		// ignore...
-		if (d.sb and d.sb->get_owner<Entity3D>() == o_ignore) {
+		if (sb and sb->get_owner<Entity3D>() == o_ignore) {
 			vector dir = (p2 - p1).normalized();
-			return trace(d.p + dir * 2, p2, d, simple_test, o_ignore);
+			return trace(d.pos + dir * 2, p2, d, simple_test, o_ignore);
 		}
 		return true;
 	}

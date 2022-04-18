@@ -79,10 +79,9 @@ struct GodNetMessage {
 
 class CollisionData {
 public:
-	SolidBody *sb;
-	Model *sub;
-	Terrain *t;
-	vector p, n;
+	Entity3D *entity;
+	SolidBody *body;
+	vector pos, n;
 };
 
 
