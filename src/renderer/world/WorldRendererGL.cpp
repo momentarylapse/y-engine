@@ -363,9 +363,22 @@ void WorldRendererGL::prepare_lights(Camera *cam) {
 void WorldRendererGL::draw_user_mesh(VertexBuffer *vb, Shader *s, const matrix &m, const Array<Texture*> &tex, const Any &data) {
 	nix::set_textures(tex);
 	nix::set_model_matrix(m);
+	nix::set_z(true, true);
+	if (data.has("culling"))
+		if (!data["culling"].as_bool())
+			nix::set_cull(nix::CullMode::NONE);
+	if (data.has("alpha"))
+		if (data["alpha"].as_string() == "mix") {
+			nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+			nix::set_z(false, false);
+		}
 	apply_shader_data(s, data);
 	nix::set_shader(s);
 	nix::draw_triangles(vb);
+	//nix::set_cull(nix::CullMode::DEFAULT);
+	bool flip_y = false;
+	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
+	nix::disable_alpha();
 }
 
 #endif
