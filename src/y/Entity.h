@@ -26,6 +26,7 @@ public:
 		SOUND,
 		PARTICLE,
 		BEAM,
+		PARTICLE_EMITTER,
 		UI_NODE,
 		UI_TEXT,
 		UI_PICTURE,
