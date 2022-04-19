@@ -170,9 +170,9 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 			auto &pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() <= 0) {
 				if (a->active)
-					send_collision(a, {b->get_owner<Entity>(), b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(a, {b->owner, b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
 				if (b->active)
-					send_collision(b, {a->get_owner<Entity>(), a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(b, {a->owner, a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}
@@ -288,7 +288,7 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-void add_components(BaseClass *ent, const Array<LevelData::ScriptData> &components) {
+void add_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
@@ -376,7 +376,7 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &t, ld.terrains, i) {
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
 		auto tt = create_terrain_no_reg(t.filename, t.pos);
-		register_entity(tt->get_owner<Entity>());
+		register_entity(tt->owner);
 
 		add_components(tt->owner, t.components);
 		ok &= !tt->error;
@@ -422,7 +422,7 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vector &pos) {
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	auto t = create_terrain_no_reg(filename, pos);
-	register_entity(t->get_owner<Entity>());
+	register_entity(t->owner);
 	return t;
 }
 
@@ -618,14 +618,6 @@ void World::unregister_object(Entity *m) {
 	// remove from list
 	objects[m->object_id] = nullptr;
 	m->object_id = -1;
-}
-
-void World::_delete(BaseClass* x) {
-	if (unregister(x)) {
-		msg_error("DEL");
-		x->on_delete_rec();
-		delete x;
-	}
 }
 
 void World::subscribe(const string &msg, const Callback &f) {
@@ -856,7 +848,7 @@ void World::iterate(float dt) {
 			delete s;
 		}
 	}
-	audio::set_listener(cam_main->get_owner<Entity>()->pos, cam_main->get_owner<Entity>()->ang, v_0, 100000);
+	audio::set_listener(cam_main->owner->pos, cam_main->owner->ang, v_0, 100000);
 #endif
 
 	PerformanceMonitor::end(ch_iterate);
@@ -865,8 +857,7 @@ void World::iterate(float dt) {
 
 Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 #ifdef _X_ALLOW_X_
-	auto o = new Entity(v_0, ang);
-	entities.add(o);
+	auto o = create_entity(v_0, ang);
 
 	auto l = new Light(c, -1, -1);
 	o->_add_component_external_(l);
@@ -877,10 +868,9 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 #endif
 }
 
-Light *World::add_light_point(const vector &p, const color &c, float r) {
+Light *World::add_light_point(const vector &pos, const color &c, float r) {
 #ifdef _X_ALLOW_X_
-	auto o = new Entity(p, quaternion::ID);
-	entities.add(o);
+	auto o = create_entity(pos, quaternion::ID);
 
 	auto l = new Light(c, r, -1);
 	o->_add_component_external_(l);
@@ -891,10 +881,9 @@ Light *World::add_light_point(const vector &p, const color &c, float r) {
 #endif
 }
 
-Light *World::add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t) {
+Light *World::add_light_cone(const vector &pos, const quaternion &ang, const color &c, float r, float t) {
 #ifdef _X_ALLOW_X_
-	auto o = new Entity(p, ang);
-	entities.add(o);
+	auto o = create_entity(pos, ang);
 
 	auto l = new Light(c, r, t);
 	o->_add_component_external_(l);
@@ -949,11 +938,11 @@ bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool sim
 		auto sb = static_cast<SolidBody*>(ray_callback.m_collisionObject->getUserPointer());
 		d.pos = bt_get_v(ray_callback.m_hitPointWorld);
 		d.n = bt_get_v(ray_callback.m_hitNormalWorld);
-		d.entity = sb->get_owner<Entity>();
+		d.entity = sb->owner;
 		d.body = sb;
 
 		// ignore...
-		if (sb and sb->get_owner<Entity>() == o_ignore) {
+		if (sb and sb->owner == o_ignore) {
 			vector dir = (p2 - p1).normalized();
 			return trace(d.pos + dir * 2, p2, d, simple_test, o_ignore);
 		}

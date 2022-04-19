@@ -24,12 +24,12 @@
 #include "../../fx/ParticleManager.h"
 #include "../../world/Camera.h"
 #include "../../world/Light.h"
-#include "../../world/Entity3D.h"
 #include "../../world/Material.h"
 #include "../../world/Model.h"
 #include "../../world/Object.h" // meh
 #include "../../world/Terrain.h"
 #include "../../world/World.h"
+#include "../../y/Entity.h"
 #include "../../Config.h"
 #include "../../meta.h"
 

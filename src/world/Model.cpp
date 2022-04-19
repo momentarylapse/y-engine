@@ -549,7 +549,7 @@ Path Model::filename() {
 
 void Model::update_matrix() {
 	if (owner)
-		_matrix = get_owner<Entity>()->get_matrix();
+		_matrix = owner->get_matrix();
 }
 
 #if 0

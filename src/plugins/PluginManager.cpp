@@ -70,7 +70,10 @@ int ch_controller = -1;
 void global_delete(BaseClass *e) {
 	//msg_error("global delete... " + p2s(e));
 	world.unregister(e);
-	e->on_delete_rec();
+	if (e->type == BaseClass::Type::ENTITY)
+		reinterpret_cast<Entity*>(e)->on_delete_rec();
+	else
+		e->on_delete();
 	delete e;
 }
 
@@ -192,14 +195,14 @@ void PluginManager::export_kaba() {
 	kaba::link_external_virtual("BaseClass.on_delete", &BaseClass::on_delete, &entity);
 	kaba::link_external_virtual("BaseClass.on_iterate", &BaseClass::on_iterate, &entity);
 	kaba::link_external_class_func("BaseClass.__del_override__", &global_delete);
-	kaba::link_external_class_func("BaseClass.get_component", &BaseClass::_get_component_untyped_);
-	kaba::link_external_class_func("BaseClass.add_component", &BaseClass::add_component);
 
 	kaba::declare_class_size("Entity", sizeof(Entity));
 	kaba::declare_class_element("Entity.pos", &Entity::pos);
 	kaba::declare_class_element("Entity.ang", &Entity::ang);
 	kaba::declare_class_element("Entity.parent", &Entity::parent);
 	kaba::link_external_class_func("Entity.get_matrix", &Entity::get_matrix);
+	kaba::link_external_class_func("Entity.get_component", &Entity::_get_component_untyped_);
+	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
 
 	Component component;
 	kaba::declare_class_size("Component", sizeof(Component));
@@ -360,7 +363,6 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("World.shift_all", &World::shift_all);
 	kaba::link_external_class_func("World.get_g", &World::get_g);
 	kaba::link_external_class_func("World.trace", &World::trace);
-	kaba::link_external_class_func("World.delete", &World::_delete);
 	kaba::link_external_class_func("World.unregister", &World::unregister);
 	kaba::link_external_class_func("World.subscribe", &World::subscribe);
 

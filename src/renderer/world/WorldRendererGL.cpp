@@ -104,7 +104,7 @@ void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant 
 	auto s = m->get_shader(t, v);
 	nix::set_shader(s);
 	if (using_view_space)
-		s->set_floats("eye_pos", &cam_main->get_owner<Entity>()->pos.x, 3); // NAH....
+		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH....
 	else
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
@@ -162,7 +162,7 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	nix::set_z(false, true);
 
 	// particles
-	auto r = matrix::rotation_q(cam->get_owner<Entity>()->ang);
+	auto r = matrix::rotation_q(cam->owner->ang);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 
@@ -236,9 +236,9 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 void WorldRendererGL::draw_skyboxes(Camera *cam) {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(matrix::rotation_q(cam->get_owner<Entity>()->ang).transpose());
+	nix::set_view_matrix(matrix::rotation_q(cam->owner->ang).transpose());
 	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity>()->ang);
+		sb->_matrix = matrix::rotation_q(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
 			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
@@ -251,7 +251,7 @@ void WorldRendererGL::draw_skyboxes(Camera *cam) {
 }
 void WorldRendererGL::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
-		auto o = t->get_owner<Entity>();
+		auto o = t->owner;
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {
 			set_material(t->material, type, ShaderVariant::DEFAULT);
@@ -261,7 +261,7 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 		} else {
 			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
-		t->prepare_draw(cam_main->get_owner<Entity>()->pos);
+		t->prepare_draw(cam_main->owner->pos);
 		nix::draw_triangles(t->vertex_buffer);
 	}
 }

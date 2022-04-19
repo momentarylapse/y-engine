@@ -117,7 +117,6 @@ public:
 	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 
 	bool unregister(BaseClass *o);
-	void _delete(BaseClass *o);
 
 	void register_model(Model *m);
 	void unregister_model(Model *m);

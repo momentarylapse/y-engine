@@ -33,7 +33,7 @@ class UBOLight;
 class GLFWwindow;
 class rect;
 class Material;
-class Entity3D;
+class Entity;
 class Any;
 
 enum class ShaderVariant;

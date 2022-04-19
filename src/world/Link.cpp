@@ -33,13 +33,13 @@ Link::Link(LinkType t, Entity *_a, Entity *_b) : BaseClass(Type::LINK) {
 
 
 void Link::_create_link_data(vector &pa, vector &pb, quaternion &iqa, quaternion &iqb, const vector &pos) {
-	iqa = a->get_owner<Entity>()->ang.bar();
+	iqa = a->owner->ang.bar();
 	iqb = quaternion::ID;
-	pa = iqa * (pos - a->get_owner<Entity>()->pos);
+	pa = iqa * (pos - a->owner->pos);
 	pb = pos;
 	if (b) {
-		iqb = b->get_owner<Entity>()->ang.bar();
-		pb = iqb * (pos - b->get_owner<Entity>()->pos);
+		iqb = b->owner->ang.bar();
+		pb = iqb * (pos - b->owner->pos);
 	}
 }
 

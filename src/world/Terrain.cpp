@@ -193,7 +193,7 @@ void Terrain::update(int x1,int x2,int z1,int z2,int mode) {
 
 float Terrain::gimme_height(const vector &p) // liefert die interpolierte Hoehe zu einer Position
 {
-	auto o = get_owner<Entity>();
+	auto o = owner;
 	float x = p.x - o->pos.x;
 	float z = p.z - o->pos.z;
 	if ((x<=min.x)||(z<=min.z)||(x>=max.x)||(z>=max.z))
@@ -231,7 +231,7 @@ float Terrain::gimme_height_n(const vector &p, vector &n) {
 void Terrain::calc_detail(const vector &cam_pos) {
 	vector dpos = cam_pos;
 	if (owner) {
-		auto o = get_owner<Entity>();
+		auto o = owner;
 		dpos -= o->pos;
 	}
 	for (int x1=0;x1<(num_x-1)/32+1;x1++)
@@ -276,7 +276,7 @@ inline void add_edge(int &num, int e0, int e1)
 //    get a part of the terrain
 void Terrain::get_triangle_hull(TriangleHull *h, vector &_pos_, float _radius_)
 {
-	auto o = get_owner<Entity>();
+	auto o = owner;
 
 	h->p = &vertex[0];
 	h->index = TempVertexIndex;
@@ -370,7 +370,7 @@ inline bool TracePattern(Terrain *t, const vector &pos, const vector &p1,const v
 	if ((dir==3) and (tp.z>p1.z))	return false;
 
 	data.pos= tp;
-	data.entity = t->get_owner<Entity>();
+	data.entity = t->owner;
 	return true;
 }
 
@@ -379,7 +379,7 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 	vector pr2 = p2;
 	vector pos = v_0;
 	if (owner) {
-		auto o = get_owner<Entity>();
+		auto o = owner;
 		pr1 -= o->pos;
 		pr2 -= o->pos;
 		pos = o->pos;
@@ -391,7 +391,7 @@ bool Terrain::trace(const vector &p1, const vector &p2, const vector &dir, float
 		float h=gimme_height(p1);
 		if (p2.y < h){
 			data.pos = vector(p1.x,h,p1.z);
-			data.entity = get_owner<Entity>();
+			data.entity = owner;
 			return true;
 		}
 	}

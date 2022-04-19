@@ -108,7 +108,7 @@ matrix Camera::projection_matrix(float aspect_ratio) const {
 }
 
 matrix Camera::view_matrix() const {
-	auto o = get_owner<Entity>();
+	auto o = owner;
 	return matrix::rotation_q(o->ang).transpose() * matrix::translation(-o->pos);
 }
 
@@ -141,6 +141,6 @@ vector Camera::unproject(const vector &v) {
 void CameraShiftAll(const vector &dpos) {
 	auto cameras = ComponentManager::get_listx<Camera>();
 	for (auto c: *cameras)
-		c->get_owner<Entity>()->pos += dpos;
+		c->owner->pos += dpos;
 }
 

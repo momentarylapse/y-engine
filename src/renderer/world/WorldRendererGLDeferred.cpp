@@ -146,7 +146,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	if (using_view_space)
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	else
-		s->set_floats("eye_pos", &cam_main->get_owner<Entity>()->pos.x, 3); // NAH
+		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);

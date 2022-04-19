@@ -30,8 +30,8 @@
 #include "../../world/Terrain.h"
 #include "../../world/World.h"
 #include "../../world/Light.h"
-#include "../../world/Entity3D.h"
 #include "../../world/components/Animator.h"
+#include "../../y/Entity.h"
 #include "../../Config.h"
 #include "../../meta.h"
 
@@ -127,7 +127,7 @@ WorldRendererVulkan::~WorldRendererVulkan() {
 void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vector &pos) {
 	if (!fb_cube)
 		fb_cube = new FrameBuffer(render_pass_cube, {depth_cube.get()});
-	Entity3D o(pos, quaternion::ID);
+	Entity o(pos, quaternion::ID);
 	Camera cam(rect::ID);
 	cam.owner = &o;
 	cam.fov = pi/2;
@@ -182,7 +182,7 @@ void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descri
 
 	/*nix::set_shader(s);
 	if (using_view_space)
-		s->set_floats("eye_pos", &cam->get_owner<Entity3D>()->pos.x, 3);
+		s->set_floats("eye_pos", &cam->owner->pos.x, 3);
 	else
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
@@ -246,7 +246,7 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 	ubo.m = matrix::ID;
 
 	// particles
-	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
+	auto r = matrix::rotation_q(cam->owner->ang);
 	int index = 0;
 	for (auto g: world.particle_manager->groups) {
 
@@ -353,12 +353,12 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camer
 	cam->update_matrices(aspect);
 
 	ubo.p = cam->m_projection;
-	ubo.v = matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose();
+	ubo.v = matrix::rotation_q(cam->owner->ang).transpose();
 	ubo.m = matrix::ID;
 	ubo.num_lights = world.lights.num;
 
 	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
+		sb->_matrix = matrix::rotation_q(sb->owner->ang);
 		ubo.m = sb->_matrix * matrix::scale(10,10,10);
 
 
@@ -395,7 +395,7 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 	ubo.m = matrix::ID;
 
 	for (auto *t: world.terrains) {
-		auto o = t->get_owner<Entity3D>();
+		auto o = t->owner;
 		ubo.m = matrix::translation(o->pos);
 		ubo.albedo = t->material->albedo;
 		ubo.emission = t->material->emission;
@@ -419,7 +419,7 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
 
 		}
-		t->prepare_draw(cam_main->get_owner<Entity3D>()->pos);
+		t->prepare_draw(cam_main->owner->pos);
 		cb->draw(t->vertex_buffer);
 		index ++;
 	}
