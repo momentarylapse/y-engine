@@ -32,6 +32,7 @@
 #include "../../world/Light.h"
 #include "../../world/components/Animator.h"
 #include "../../y/Entity.h"
+#include "../../y/ComponentManager.h"
 #include "../../Config.h"
 #include "../../meta.h"
 
@@ -394,7 +395,8 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 
 	ubo.m = matrix::ID;
 
-	for (auto *t: world.terrains) {
+	auto terrains = ComponentManager::get_listx<Terrain>();
+	for (auto *t: *terrains) {
 		auto o = t->owner;
 		ubo.m = matrix::translation(o->pos);
 		ubo.albedo = t->material->albedo;

@@ -157,11 +157,9 @@ public:
 	Array<GodNetMessage> net_messages;
 
 	// content of the world
-	Array<Entity*> objects;
+	Array<Entity*> _objects;
 	Entity *ego;
 	int num_reserved_objects;
-
-	Array<Terrain*> terrains;
 
 	Array<PartialModel> sorted_opaque, sorted_trans;
 	Array<PartialModelMulti> sorted_multi;

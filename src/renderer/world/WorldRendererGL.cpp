@@ -33,6 +33,7 @@
 #include "../../world/Light.h"
 #include "../../world/components/Animator.h"
 #include "../../y/Entity.h"
+#include "../../y/ComponentManager.h"
 #include "../../meta.h"
 
 
@@ -250,7 +251,8 @@ void WorldRendererGL::draw_skyboxes(Camera *cam) {
 	break_point();
 }
 void WorldRendererGL::draw_terrains(bool allow_material) {
-	for (auto *t: world.terrains) {
+	auto terrains = ComponentManager::get_listx<Terrain>();
+	for (auto *t: *terrains) {
 		auto o = t->owner;
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {

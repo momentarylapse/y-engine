@@ -222,8 +222,7 @@ void World::reset() {
 		delete o;
 	entities.clear();
 
-	terrains.clear();
-	objects.clear();
+	_objects.clear();
 	num_reserved_objects = 0;
 	
 	for (auto &s: sorted_trans)
@@ -351,8 +350,8 @@ bool World::load(const LevelData &ld) {
 
 	// objects
 	ego = nullptr;
-	objects.clear(); // make sure the "missing" objects are NULL
-	objects.resize(ld.objects.num);
+	_objects.clear(); // make sure the "missing" objects are NULL
+	_objects.resize(ld.objects.num);
 	num_reserved_objects = ld.objects.num;
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()) {
@@ -385,8 +384,8 @@ bool World::load(const LevelData &ld) {
 	for (auto &l: ld.links) {
 		Entity *b = nullptr;
 		if (l.object[1] >= 0)
-			b = objects[l.object[1]];
-		add_link(Link::create(l.type, objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang)));
+			b = _objects[l.object[1]];
+		add_link(Link::create(l.type, _objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang)));
 	}
 
 	scripts = ld.scripts;
@@ -440,9 +439,6 @@ Entity *World::create_entity(const vector &pos, const quaternion &ang) {
 void World::register_entity(Entity *e) {
 	if (auto m = e->get_component<Model>())
 		register_object(e);
-
-	if (auto t = e->get_component<Terrain>())
-		terrains.add(t);
 
 	if (auto l = e->get_component<Light>())
 		lights.add(l);
@@ -550,22 +546,22 @@ void World::register_object(Entity *o) {
 	next_object_index = -1;
 	if (on < 0) {
 		// ..... better use a list of "empty" objects???
-		for (int i=num_reserved_objects; i<objects.num; i++)
-			if (!objects[i])
+		for (int i=num_reserved_objects; i<_objects.num; i++)
+			if (!_objects[i])
 				on = i;
 	} else {
-		if (on >= objects.num)
-			objects.resize(on+1);
-		if (objects[on]) {
+		if (on >= _objects.num)
+			_objects.resize(on+1);
+		if (_objects[on]) {
 			msg_error("register_object:  object index already in use " + i2s(on));
 			return;
 		}
 	}
 	if (on < 0) {
-		on = objects.num;
-		objects.add(nullptr);
+		on = _objects.num;
+		_objects.add(nullptr);
 	}
-	objects[on] = o;
+	_objects[on] = o;
 
 	o->object_id = on;
 
@@ -616,7 +612,7 @@ void World::unregister_object(Entity *m) {
 	AddNetMsg(NET_MSG_DELETE_OBJECT, m->object_id, "");
 
 	// remove from list
-	objects[m->object_id] = nullptr;
+	_objects[m->object_id] = nullptr;
 	m->object_id = -1;
 }
 

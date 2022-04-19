@@ -335,8 +335,6 @@ void PluginManager::export_kaba() {
 	kaba::link_external("Material.load", (void*)&LoadMaterial);
 
 
-	kaba::declare_class_element("World.objects", &World::objects);
-	kaba::declare_class_element("World.terrains", &World::terrains);
 	kaba::declare_class_element("World.background", &World::background);
 	kaba::declare_class_element("World.skyboxes", &World::skybox);
 	kaba::declare_class_element("World.lights", &World::lights);
