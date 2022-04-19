@@ -14,7 +14,6 @@
 #include "../lib/base/callable.h"
 #include "../lib/file/path.h"
 #include "../lib/image/color.h"
-#include "../y/Entity.h"
 #include "LevelData.h"
 
 
@@ -23,7 +22,7 @@ class Object;
 class Material;
 class Terrain;
 class SolidBody;
-class Entity3D;
+class Entity;
 class TemplateDataScriptVariable;
 class Light;
 class ParticleManager;
@@ -79,7 +78,7 @@ struct GodNetMessage {
 
 class CollisionData {
 public:
-	Entity3D *entity;
+	Entity *entity;
 	SolidBody *body;
 	vector pos, n;
 };
@@ -97,14 +96,14 @@ public:
 	void load_soon(const Path &filename);
 	void save(const Path &filename);
 
-	Entity3D *create_entity(const vector &pos, const quaternion &ang);
-	Array<Entity3D*> entities;
-	void register_entity(Entity3D *e);
-	void unregister_entity(Entity3D *e);
+	Entity *create_entity(const vector &pos, const quaternion &ang);
+	Array<Entity*> entities;
+	void register_entity(Entity *e);
+	void unregister_entity(Entity *e);
 
-	Entity3D *create_object(const Path &filename, const vector &pos, const quaternion &ang);
-	Entity3D *create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang);
-	Entity3D *create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang);
+	Entity *create_object(const Path &filename, const vector &pos, const quaternion &ang);
+	Entity *create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang);
+	Entity *create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang);
 	Terrain *create_terrain(const Path &filename, const vector &pos);
 	Terrain *create_terrain_no_reg(const Path &filename, const vector &pos);
 
@@ -113,9 +112,9 @@ public:
 	int next_object_index = -1;
 	void request_next_object_index(int i);
 
-	void register_object(Entity3D *o);
-	void unregister_object(Entity3D *o);
-	void set_active_physics(Entity3D *o, bool active, bool passive);//, bool test_collisions);
+	void register_object(Entity *o);
+	void unregister_object(Entity *o);
+	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 
 	bool unregister(BaseClass *o);
 	void _delete(BaseClass *o);
@@ -159,8 +158,8 @@ public:
 	Array<GodNetMessage> net_messages;
 
 	// content of the world
-	Array<Entity3D*> objects;
-	Entity3D *ego;
+	Array<Entity*> objects;
+	Entity *ego;
 	int num_reserved_objects;
 
 	Array<Terrain*> terrains;
@@ -183,7 +182,7 @@ public:
 	PhysicsMode physics_mode;
 
 
-	bool _cdecl trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Entity3D *o_ignore = nullptr);
+	bool _cdecl trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Entity *o_ignore = nullptr);
 
 	Array<audio::Sound*> sounds;
 	void add_sound(audio::Sound *s);
@@ -199,7 +198,7 @@ public:
 
 	Array<Observer> observers;
 	struct MessageData {
-		Entity3D *e;
+		Entity *e;
 		vector v;
 	} msg_data;
 

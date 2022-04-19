@@ -31,8 +31,8 @@
 #include "../../world/Terrain.h"
 #include "../../world/World.h"
 #include "../../world/Light.h"
-#include "../../world/Entity3D.h"
 #include "../../world/components/Animator.h"
+#include "../../y/Entity.h"
 #include "../../meta.h"
 
 
@@ -69,7 +69,7 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
-	Entity3D o(pos, quaternion::ID);
+	Entity o(pos, quaternion::ID);
 	Camera cam(rect::ID);
 	cam.owner = &o;
 	cam.fov = pi/2;
@@ -104,7 +104,7 @@ void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant 
 	auto s = m->get_shader(t, v);
 	nix::set_shader(s);
 	if (using_view_space)
-		s->set_floats("eye_pos", &cam_main->get_owner<Entity3D>()->pos.x, 3); // NAH....
+		s->set_floats("eye_pos", &cam_main->get_owner<Entity>()->pos.x, 3); // NAH....
 	else
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
@@ -162,7 +162,7 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	nix::set_z(false, true);
 
 	// particles
-	auto r = matrix::rotation_q(cam->get_owner<Entity3D>()->ang);
+	auto r = matrix::rotation_q(cam->get_owner<Entity>()->ang);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 
@@ -236,9 +236,9 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 void WorldRendererGL::draw_skyboxes(Camera *cam) {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(matrix::rotation_q(cam->get_owner<Entity3D>()->ang).transpose());
+	nix::set_view_matrix(matrix::rotation_q(cam->get_owner<Entity>()->ang).transpose());
 	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity3D>()->ang);
+		sb->_matrix = matrix::rotation_q(sb->get_owner<Entity>()->ang);
 		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
 			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
@@ -251,7 +251,7 @@ void WorldRendererGL::draw_skyboxes(Camera *cam) {
 }
 void WorldRendererGL::draw_terrains(bool allow_material) {
 	for (auto *t: world.terrains) {
-		auto o = t->get_owner<Entity3D>();
+		auto o = t->get_owner<Entity>();
 		nix::set_model_matrix(matrix::translation(o->pos));
 		if (allow_material) {
 			set_material(t->material, type, ShaderVariant::DEFAULT);
@@ -261,7 +261,7 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 		} else {
 			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
-		t->prepare_draw(cam_main->get_owner<Entity3D>()->pos);
+		t->prepare_draw(cam_main->get_owner<Entity>()->pos);
 		nix::draw_triangles(t->vertex_buffer);
 	}
 }

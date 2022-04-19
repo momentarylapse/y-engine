@@ -12,7 +12,7 @@
 
 extern Texture *tex_white;
 
-static Random random;
+static Random pe_random;
 
 ParticleEmitter::ParticleEmitter() : BaseClass(BaseClass::Type::PARTICLE_EMITTER) {
 	time_to_live = 1;
@@ -29,15 +29,12 @@ ParticleEmitter::ParticleEmitter() : BaseClass(BaseClass::Type::PARTICLE_EMITTER
 ParticleEmitter::~ParticleEmitter() {
 }
 
-void ParticleEmitter::on_create_particle(Particle *p) {
-}
-
 void ParticleEmitter::on_iterate_particle(Particle *p, float dt) {
 	p->pos += p->vel * dt;
 }
 
 void ParticleEmitter::on_iterate(float dt) {
-	int N = time_to_live * spawn_dt;
+	/*int N = time_to_live * spawn_dt;
 
 	phase += dt;
 	while (phase > spawn_dt) {
@@ -50,7 +47,7 @@ void ParticleEmitter::on_iterate(float dt) {
 		// new
 		p->texture = texture;
 		p->pos = pos;
-		p->vel = spawn_vel + random.in_ball(spawn_dvel);
+		p->vel = spawn_vel + pe_random.in_ball(spawn_dvel);
 		p->radius = spawn_radius + randf(spawn_dradius);
 		p->col = White;
 		on_create_particle(p);
@@ -62,6 +59,6 @@ void ParticleEmitter::on_iterate(float dt) {
 	}
 
 	for (auto &p: particles)
-		on_iterate_particle(&p, dt);
+		on_iterate_particle(&p, dt);*/
 }
 

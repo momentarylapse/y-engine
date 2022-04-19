@@ -9,13 +9,12 @@
 \*----------------------------------------------------------------------------*/
 
 #include "Camera.h"
-#include "Entity3D.h"
 #include "World.h"
 #include "../y/Entity.h"
 #include "../y/ComponentManager.h"
+#include "../y/EngineData.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/matrix.h"
-#include "../y/EngineData.h"
 
 
 const kaba::Class *Camera::_class = nullptr;
@@ -109,7 +108,7 @@ matrix Camera::projection_matrix(float aspect_ratio) const {
 }
 
 matrix Camera::view_matrix() const {
-	auto o = get_owner<Entity3D>();
+	auto o = get_owner<Entity>();
 	return matrix::rotation_q(o->ang).transpose() * matrix::translation(-o->pos);
 }
 
@@ -142,6 +141,6 @@ vector Camera::unproject(const vector &v) {
 void CameraShiftAll(const vector &dpos) {
 	auto cameras = ComponentManager::get_listx<Camera>();
 	for (auto c: *cameras)
-		c->get_owner<Entity3D>()->pos += dpos;
+		c->get_owner<Entity>()->pos += dpos;
 }
 

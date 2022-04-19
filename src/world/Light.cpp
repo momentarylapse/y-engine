@@ -7,7 +7,7 @@
 
 #include "Light.h"
 #include "Camera.h"
-#include "Entity3D.h"
+#include "../y/Entity.h"
 #include "../lib/file/msg.h"
 
 const kaba::Class *Light::_class = nullptr;
@@ -38,7 +38,7 @@ Light::Light(const color &c, float r, float t) {
 }
 
 void Light::on_init() {
-	auto o = get_owner<Entity3D>();
+	auto o = get_owner<Entity>();
 	light.pos = o->pos;
 	light.dir = o->ang * vector::EZ;
 }
@@ -55,15 +55,15 @@ void Light::__init_cone__(const vector &p, const quaternion &ang, const color &c
 
 
 void Light::set_direction(const vector &dir) {
-	get_owner<Entity3D>()->ang = quaternion::rotation(dir.dir2ang());
+	get_owner<Entity>()->ang = quaternion::rotation(dir.dir2ang());
 }
 
 void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
-	auto o = get_owner<Entity3D>();
+	auto o = get_owner<Entity>();
 	if (using_view_space) {
 		//light.pos = cam->m_view * o->pos;
 		light.pos = cam->view_matrix() * o->pos;
-		light.dir = cam->get_owner<Entity3D>()->ang.bar() * o->ang * vector::EZ;
+		light.dir = cam->get_owner<Entity>()->ang.bar() * o->ang * vector::EZ;
 	} else {
 		light.pos = o->pos;
 		light.dir = o->ang * vector::EZ;
@@ -72,7 +72,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 	if (allow_shadow) {
 		if (type == LightType::DIRECTIONAL) {
 			//msg_write(format("shadow dir: %s  %s", light.pos.str(), light.dir.str()));
-			vector center = cam->get_owner<Entity3D>()->pos + cam->get_owner<Entity3D>()->ang*vector::EZ * (shadow_box_size / 3.0f);
+			vector center = cam->get_owner<Entity>()->pos + cam->get_owner<Entity>()->ang*vector::EZ * (shadow_box_size / 3.0f);
 			float grid = shadow_box_size / 16;
 			center.x -= fmod(center.x, grid) - grid/2;
 			center.y -= fmod(center.y, grid) - grid/2;
@@ -89,7 +89,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 			//msg_write(shadow_projection.str());
 		} else {
 			auto t = matrix::translation(- o->pos);
-			auto ang = cam->get_owner<Entity3D>()->ang;
+			auto ang = cam->get_owner<Entity>()->ang;
 			if (type == LightType::CONE or user_shadow_control)
 				ang = o->ang;
 			auto r = matrix::rotation(ang).transpose();

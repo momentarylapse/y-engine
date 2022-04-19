@@ -1,5 +1,5 @@
 /*
- * Entity3D.h
+ * Entity.h
  *
  *  Created on: Jul 15, 2021
  *      Author: michi
@@ -9,15 +9,15 @@
 
 #include "../lib/math/vector.h"
 #include "../lib/math/quaternion.h"
-#include "../y/BaseClass.h"
+#include "BaseClass.h"
 
 class matrix;
 
 
-class Entity3D : public BaseClass {
+class Entity : public BaseClass {
 public:
-	Entity3D();
-	Entity3D(const vector &pos, const quaternion &ang);
+	Entity();
+	Entity(const vector &pos, const quaternion &ang);
 
 	vector pos;
 	quaternion ang;
@@ -25,7 +25,7 @@ public:
 	matrix get_matrix() const;
 
 	int object_id;
-	Entity3D *parent;
-	Entity3D *_cdecl root() const;
+	Entity *parent;
+	Entity *_cdecl root() const;
 };
 

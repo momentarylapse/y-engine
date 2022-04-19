@@ -36,7 +36,7 @@ public:
 	float spawn_radius;
 	float spawn_dradius;
 
-	Array<Particle> particles;
+	//Array<Particle> particles;
 };
 
 #endif /* SRC_FX_PARTICLEEMITTER_H_ */

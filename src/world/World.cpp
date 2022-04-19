@@ -16,9 +16,9 @@
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
+#include "../y/Entity.h"
 #include "../meta.h"
 #include "ModelManager.h"
-#include "Entity3D.h"
 #include "Link.h"
 #include "Material.h"
 #include "Model.h"
@@ -170,9 +170,9 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 			auto &pt = contactManifold->getContactPoint(j);
 			if (pt.getDistance() <= 0) {
 				if (a->active)
-					send_collision(a, {b->get_owner<Entity3D>(), b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(a, {b->get_owner<Entity>(), b, bt_get_v(pt.m_positionWorldOnB), bt_get_v(pt.m_normalWorldOnB)});
 				if (b->active)
-					send_collision(b, {a->get_owner<Entity3D>(), a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
+					send_collision(b, {a->get_owner<Entity>(), a, bt_get_v(pt.m_positionWorldOnA), -bt_get_v(pt.m_normalWorldOnB)});
 			}
 		}
 	}
@@ -312,7 +312,7 @@ bool World::load(const LevelData &ld) {
 
 #ifdef _X_ALLOW_X_
 	for (auto &l: ld.lights) {
-		auto o = new Entity3D(l.pos, quaternion::rotation(l.ang));
+		auto o = new Entity(l.pos, quaternion::rotation(l.ang));
 		auto *ll = new Light(l._color, l.radius, l.theta);
 		ll->light.harshness = l.harshness;
 		ll->enabled = l.enabled;
@@ -329,7 +329,7 @@ bool World::load(const LevelData &ld) {
 	for (int i=0; i<skybox.num; i++) {
 		skybox[i] = ModelManager::load(ld.skybox_filename[i]);
 		if (skybox[i])
-			skybox[i]->owner = new Entity3D(v_0, quaternion::rotation_v(ld.skybox_ang[i]));
+			skybox[i]->owner = new Entity(v_0, quaternion::rotation_v(ld.skybox_ang[i]));
 	}
 	background = ld.background_color;
 
@@ -376,14 +376,14 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &t, ld.terrains, i) {
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
 		auto tt = create_terrain_no_reg(t.filename, t.pos);
-		register_entity(tt->get_owner<Entity3D>());
+		register_entity(tt->get_owner<Entity>());
 
 		add_components(tt->owner, t.components);
 		ok &= !tt->error;
 	}
 
 	for (auto &l: ld.links) {
-		Entity3D *b = nullptr;
+		Entity *b = nullptr;
 		if (l.object[1] >= 0)
 			b = objects[l.object[1]];
 		add_link(Link::create(l.type, objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang)));
@@ -422,7 +422,7 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vector &pos) {
 
 Terrain *World::create_terrain(const Path &filename, const vector &pos) {
 	auto t = create_terrain_no_reg(filename, pos);
-	register_entity(t->get_owner<Entity3D>());
+	register_entity(t->get_owner<Entity>());
 	return t;
 }
 
@@ -433,11 +433,11 @@ bool GodLoadWorld(const Path &filename) {
 	return ok;
 }
 
-Entity3D *World::create_entity(const vector &pos, const quaternion &ang) {
-	return new Entity3D(pos, ang);
+Entity *World::create_entity(const vector &pos, const quaternion &ang) {
+	return new Entity(pos, ang);
 }
 
-void World::register_entity(Entity3D *e) {
+void World::register_entity(Entity *e) {
 	if (auto m = e->get_component<Model>())
 		register_object(e);
 
@@ -463,17 +463,17 @@ void World::register_entity(Entity3D *e) {
 	notify("entity-add");
 }
 
-Entity3D *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
+Entity *World::create_object(const Path &filename, const vector &pos, const quaternion &ang) {
 	auto o = create_object_no_reg_x(filename, "", pos, ang);
 	register_entity(o);
 	return o;
 }
 
-Entity3D *World::create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang) {
+Entity *World::create_object_no_reg(const Path &filename, const vector &pos, const quaternion &ang) {
 	return create_object_no_reg_x(filename, "", pos, ang);
 }
 
-Entity3D *World::create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang) {
+Entity *World::create_object_no_reg_x(const Path &filename, const string &name, const vector &pos, const quaternion &ang) {
 	if (engine.resetting_game)
 		throw Exception("create_object during game reset");
 
@@ -545,7 +545,7 @@ void World::request_next_object_index(int i) {
 	next_object_index = i;
 }
 
-void World::register_object(Entity3D *o) {
+void World::register_object(Entity *o) {
 	int on = next_object_index;
 	next_object_index = -1;
 	if (on < 0) {
@@ -573,7 +573,7 @@ void World::register_object(Entity3D *o) {
 }
 
 
-void World::set_active_physics(Entity3D *o, bool active, bool passive) { //, bool test_collisions) {
+void World::set_active_physics(Entity *o, bool active, bool passive) { //, bool test_collisions) {
 	auto sb = o->get_component<SolidBody>();
 	auto c = o->get_component<Collider>();
 
@@ -605,7 +605,7 @@ void World::set_active_physics(Entity3D *o, bool active, bool passive) { //, boo
 }
 
 // un-object a model
-void World::unregister_object(Entity3D *m) {
+void World::unregister_object(Entity *m) {
 	if (m->object_id < 0)
 		return;
 
@@ -639,7 +639,7 @@ void World::notify(const string &msg) {
 		}
 }
 
-void World::unregister_entity(Entity3D *e) {
+void World::unregister_entity(Entity *e) {
 	if (e->object_id >= 0)
 		unregister_object(e);
 
@@ -662,8 +662,8 @@ void World::unregister_entity(Entity3D *e) {
 
 bool World::unregister(BaseClass* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
-	if (x->type == BaseClass::Type::ENTITY3D) {
-		auto e = (Entity3D*)x;
+	if (x->type == BaseClass::Type::ENTITY) {
+		auto e = (Entity*)x;
 		unregister_entity(e);
 /*	} else if (x->type == Entity::Type::LIGHT) {
 #ifdef _X_ALLOW_X_
@@ -856,7 +856,7 @@ void World::iterate(float dt) {
 			delete s;
 		}
 	}
-	audio::set_listener(cam_main->get_owner<Entity3D>()->pos, cam_main->get_owner<Entity3D>()->ang, v_0, 100000);
+	audio::set_listener(cam_main->get_owner<Entity>()->pos, cam_main->get_owner<Entity>()->ang, v_0, 100000);
 #endif
 
 	PerformanceMonitor::end(ch_iterate);
@@ -865,7 +865,7 @@ void World::iterate(float dt) {
 
 Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 #ifdef _X_ALLOW_X_
-	auto o = new Entity3D(v_0, ang);
+	auto o = new Entity(v_0, ang);
 	entities.add(o);
 
 	auto l = new Light(c, -1, -1);
@@ -879,7 +879,7 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 
 Light *World::add_light_point(const vector &p, const color &c, float r) {
 #ifdef _X_ALLOW_X_
-	auto o = new Entity3D(p, quaternion::ID);
+	auto o = new Entity(p, quaternion::ID);
 	entities.add(o);
 
 	auto l = new Light(c, r, -1);
@@ -893,7 +893,7 @@ Light *World::add_light_point(const vector &p, const color &c, float r) {
 
 Light *World::add_light_cone(const vector &p, const quaternion &ang, const color &c, float r, float t) {
 #ifdef _X_ALLOW_X_
-	auto o = new Entity3D(p, ang);
+	auto o = new Entity(p, ang);
 	entities.add(o);
 
 	auto l = new Light(c, r, t);
@@ -938,7 +938,7 @@ vector World::get_g(const vector &pos) const {
 	return gravity;
 }
 
-bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Entity3D *o_ignore) {
+bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool simple_test, Entity *o_ignore) {
 #if HAS_LIB_BULLET
 	btCollisionWorld::ClosestRayResultCallback ray_callback(bt_set_v(p1), bt_set_v(p2));
 	//ray_callback.m_collisionFilterMask = FILTER_CAMERA;
@@ -949,11 +949,11 @@ bool World::trace(const vector &p1, const vector &p2, CollisionData &d, bool sim
 		auto sb = static_cast<SolidBody*>(ray_callback.m_collisionObject->getUserPointer());
 		d.pos = bt_get_v(ray_callback.m_hitPointWorld);
 		d.n = bt_get_v(ray_callback.m_hitNormalWorld);
-		d.entity = sb->get_owner<Entity3D>();
+		d.entity = sb->get_owner<Entity>();
 		d.body = sb;
 
 		// ignore...
-		if (sb and sb->get_owner<Entity3D>() == o_ignore) {
+		if (sb and sb->get_owner<Entity>() == o_ignore) {
 			vector dir = (p2 - p1).normalized();
 			return trace(d.pos + dir * 2, p2, d, simple_test, o_ignore);
 		}

@@ -20,10 +20,10 @@
 #include "../../helper/ResourceManager.h"
 #include "../../helper/Scheduler.h"
 #include "../../plugins/PluginManager.h"
-#include "../../world/Entity3D.h"
 #include "../../world/Camera.h"
 #include "../../world/Light.h"
 #include "../../world/World.h"
+#include "../../y/Entity.h"
 #include "../../Config.h"
 #include "../../meta.h"
 #include "../../graphics-impl.h"
@@ -146,7 +146,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	if (using_view_space)
 		s->set_floats("eye_pos", &vector::ZERO.x, 3);
 	else
-		s->set_floats("eye_pos", &cam_main->get_owner<Entity3D>()->pos.x, 3); // NAH
+		s->set_floats("eye_pos", &cam_main->get_owner<Entity>()->pos.x, 3); // NAH
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);

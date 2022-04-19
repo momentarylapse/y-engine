@@ -7,11 +7,11 @@
 
 #include "ModelManager.h"
 #include "Model.h"
-#include "Entity3D.h"
 #include "components/Collider.h"
 #include "components/Animator.h"
 #include "components/SolidBody.h"
 #include "components/Skeleton.h"
+#include "../y/Entity.h"
 #include "../y/EngineData.h"
 #include "../lib/math/complex.h"
 #include "../lib/kaba/kaba.h"

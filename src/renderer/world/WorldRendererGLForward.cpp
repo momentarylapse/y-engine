@@ -21,8 +21,8 @@
 #include "../../plugins/PluginManager.h"
 #include "../../world/Camera.h"
 #include "../../world/Light.h"
-#include "../../world/Entity3D.h"
 #include "../../world/World.h"
+#include "../../y/Entity.h"
 #include "../../Config.h"
 #include "../../meta.h"
 

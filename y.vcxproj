@@ -280,7 +280,6 @@
     <ClCompile Include="src\world\components\Skeleton.cpp" />
     <ClCompile Include="src\world\components\SolidBody.cpp" />
     <ClCompile Include="src\world\Camera.cpp" />
-    <ClCompile Include="src\world\Entity3D.cpp" />
     <ClCompile Include="src\world\LevelData.cpp" />
     <ClCompile Include="src\world\Light.cpp" />
     <ClCompile Include="src\world\Link.cpp" />
@@ -294,6 +293,7 @@
     <ClCompile Include="src\y\Component.cpp" />
     <ClCompile Include="src\y\ComponentManager.cpp" />
     <ClCompile Include="src\y\EngineData.cpp" />
+    <ClCompile Include="src\y\Entity.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -454,7 +454,6 @@
     <ClInclude Include="src\world\components\Skeleton.h" />
     <ClInclude Include="src\world\components\SolidBody.h" />
     <ClInclude Include="src\world\Camera.h" />
-    <ClInclude Include="src\world\Entity3D.h" />
     <ClInclude Include="src\world\LevelData.h" />
     <ClInclude Include="src\world\Light.h" />
     <ClInclude Include="src\world\Link.h" />
@@ -468,6 +467,7 @@
     <ClInclude Include="src\y\Component.h" />
     <ClInclude Include="src\y\ComponentManager.h" />
     <ClInclude Include="src\y\EngineData.h" />
+    <ClInclude Include="src\y\Entity.h" />
     <ClInclude Include="src\Config.h" />
     <ClInclude Include="src\graphics-fwd.h" />
     <ClInclude Include="src\graphics-impl.h" />

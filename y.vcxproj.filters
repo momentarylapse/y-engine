@@ -493,9 +493,6 @@
     <ClCompile Include="src\world\Camera.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
-    <ClCompile Include="src\world\Entity3D.cpp">
-      <Filter>src\world</Filter>
-    </ClCompile>
     <ClCompile Include="src\world\LevelData.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
@@ -533,6 +530,9 @@
       <Filter>src\y</Filter>
     </ClCompile>
     <ClCompile Include="src\y\EngineData.cpp">
+      <Filter>src\y</Filter>
+    </ClCompile>
+    <ClCompile Include="src\y\Entity.cpp">
       <Filter>src\y</Filter>
     </ClCompile>
     <ClCompile Include="src\Config.cpp">
@@ -1011,9 +1011,6 @@
     <ClInclude Include="src\world\Camera.h">
       <Filter>src\world</Filter>
     </ClInclude>
-    <ClInclude Include="src\world\Entity3D.h">
-      <Filter>src\world</Filter>
-    </ClInclude>
     <ClInclude Include="src\world\LevelData.h">
       <Filter>src\world</Filter>
     </ClInclude>
@@ -1051,6 +1048,9 @@
       <Filter>src\y</Filter>
     </ClInclude>
     <ClInclude Include="src\y\EngineData.h">
+      <Filter>src\y</Filter>
+    </ClInclude>
+    <ClInclude Include="src\y\Entity.h">
       <Filter>src\y</Filter>
     </ClInclude>
     <ClInclude Include="src\Config.h">

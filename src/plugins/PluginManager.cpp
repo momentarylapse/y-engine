@@ -54,7 +54,6 @@
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../world/Light.h"
-#include "../world/Entity3D.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
@@ -81,12 +80,12 @@ void global_delete(BaseClass *e) {
 #pragma GCC optimize("no-inline")
 #pragma GCC optimize("0")
 
-Entity3D* _create_object(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+Entity* _create_object(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object(filename, pos, ang); );
 	return nullptr;
 }
 
-Entity3D* _create_object_no_reg(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+Entity* _create_object_no_reg(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_no_reg(filename, pos, ang); );
 	return nullptr;
 }
@@ -196,11 +195,11 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("BaseClass.get_component", &BaseClass::_get_component_untyped_);
 	kaba::link_external_class_func("BaseClass.add_component", &BaseClass::add_component);
 
-	kaba::declare_class_size("Entity3D", sizeof(Entity3D));
-	kaba::declare_class_element("Entity3D.pos", &Entity3D::pos);
-	kaba::declare_class_element("Entity3D.ang", &Entity3D::ang);
-	kaba::declare_class_element("Entity3D.parent", &Entity3D::parent);
-	kaba::link_external_class_func("Entity3D.get_matrix", &Entity3D::get_matrix);
+	kaba::declare_class_size("Entity", sizeof(Entity));
+	kaba::declare_class_element("Entity.pos", &Entity::pos);
+	kaba::declare_class_element("Entity.ang", &Entity::ang);
+	kaba::declare_class_element("Entity.parent", &Entity::parent);
+	kaba::link_external_class_func("Entity.get_matrix", &Entity::get_matrix);
 
 	Component component;
 	kaba::declare_class_size("Component", sizeof(Component));

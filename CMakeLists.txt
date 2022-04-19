@@ -170,7 +170,6 @@ set(SOURCE
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/Camera.cpp
-	src/world/Entity3D.cpp
 	src/world/LevelData.cpp
 	src/world/Light.cpp
 	src/world/Link.cpp
@@ -184,6 +183,7 @@ set(SOURCE
 	src/y/Component.cpp
 	src/y/ComponentManager.cpp
 	src/y/EngineData.cpp
+	src/y/Entity.cpp
 	src/Config.cpp
 	src/main.cpp
 )

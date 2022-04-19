@@ -20,7 +20,7 @@ class BaseClass : public VirtualBase {
 public:
 	enum class Type {
 		NONE,
-		ENTITY3D,
+		ENTITY,
 		CONTROLLER,
 		LINK,
 		SOUND,
