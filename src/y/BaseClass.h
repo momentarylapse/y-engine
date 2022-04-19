@@ -1,5 +1,5 @@
 /*
- * Entity.h
+ * BaseClass.h
  *
  *  Created on: 16.08.2020
  *      Author: michi
@@ -16,7 +16,7 @@ namespace kaba {
 }
 
 
-class Entity : public VirtualBase {
+class BaseClass : public VirtualBase {
 public:
 	enum class Type {
 		NONE,
@@ -33,8 +33,8 @@ public:
 		UI_MODEL,
 	};
 
-	Entity(Type t);
-	virtual ~Entity();
+	BaseClass(Type t);
+	virtual ~BaseClass();
 	virtual void _cdecl on_iterate(float dt){}
 	virtual void _cdecl on_init(){}
 	virtual void _cdecl on_delete(){}
@@ -59,8 +59,8 @@ public:
 class EntityManager {
 public:
 	static void reset();
-	static void delete_later(Entity *p);
+	static void delete_later(BaseClass *p);
 	static void delete_selection();
 private:
-	static Array<Entity*> selection;
+	static Array<BaseClass*> selection;
 };

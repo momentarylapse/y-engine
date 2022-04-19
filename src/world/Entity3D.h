@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "../y/Entity.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/quaternion.h"
+#include "../y/BaseClass.h"
 
 class matrix;
 
 
-class Entity3D : public Entity {
+class Entity3D : public BaseClass {
 public:
 	Entity3D();
 	Entity3D(const vector &pos, const quaternion &ang);

@@ -12,11 +12,11 @@
 #include "../lib/base/base.h"
 #include "../lib/math/vector.h"
 #include "../lib/image/color.h"
-#include "../y/Entity.h"
+#include "../y/BaseClass.h"
 
 class Particle;
 
-class ParticleEmitter : public Entity {
+class ParticleEmitter : public BaseClass {
 public:
 	ParticleEmitter();
 	virtual ~ParticleEmitter();

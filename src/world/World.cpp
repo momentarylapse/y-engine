@@ -288,7 +288,7 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-void add_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
+void add_components(BaseClass *ent, const Array<LevelData::ScriptData> &components) {
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
@@ -620,7 +620,7 @@ void World::unregister_object(Entity3D *m) {
 	m->object_id = -1;
 }
 
-void World::_delete(Entity* x) {
+void World::_delete(BaseClass* x) {
 	if (unregister(x)) {
 		msg_error("DEL");
 		x->on_delete_rec();
@@ -660,9 +660,9 @@ void World::unregister_entity(Entity3D *e) {
 		}
 }
 
-bool World::unregister(Entity* x) {
+bool World::unregister(BaseClass* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
-	if (x->type == Entity::Type::ENTITY3D) {
+	if (x->type == BaseClass::Type::ENTITY3D) {
 		auto e = (Entity3D*)x;
 		unregister_entity(e);
 /*	} else if (x->type == Entity::Type::LIGHT) {
@@ -674,14 +674,14 @@ bool World::unregister(Entity* x) {
 				return true;
 			}
 #endif*/
-	} else if (x->type == Entity::Type::LINK) {
+	} else if (x->type == BaseClass::Type::LINK) {
 		foreachi(auto *l, links, i)
 			if (l == x) {
 				//msg_write(" -> LINK");
 				links.erase(i);
 				return true;
 			}
-	} else if (x->type == Entity::Type::SOUND) {
+	} else if (x->type == BaseClass::Type::SOUND) {
 #ifdef _X_ALLOW_X_
 		foreachi(auto *s, sounds, i)
 			if (s == x) {
@@ -690,7 +690,7 @@ bool World::unregister(Entity* x) {
 				return true;
 			}
 #endif
-	} else if (x->type == Entity::Type::PARTICLE or x->type == Entity::Type::BEAM) {
+	} else if (x->type == BaseClass::Type::PARTICLE or x->type == BaseClass::Type::BEAM) {
 #ifdef _X_ALLOW_X_
 		if (particle_manager->unregister((Particle*)x))
 			return true;

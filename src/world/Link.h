@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../y/Entity.h"
+#include "../y/BaseClass.h"
 
 class vector;
 class quaternion;
@@ -27,7 +27,7 @@ enum class LinkType {
 	SLIDER
 };
 
-class Link : public Entity {
+class Link : public BaseClass {
 public:
 	Link(LinkType type, Entity3D *a, Entity3D *b);
 	~Link();

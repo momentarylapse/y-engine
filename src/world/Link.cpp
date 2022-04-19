@@ -20,7 +20,7 @@ btQuaternion bt_set_q(const quaternion &q);
 
 
 
-Link::Link(LinkType t, Entity3D *_a, Entity3D *_b) : Entity(Type::LINK) {
+Link::Link(LinkType t, Entity3D *_a, Entity3D *_b) : BaseClass(Type::LINK) {
 	link_type = t;
 	a = nullptr;
 	b = nullptr;

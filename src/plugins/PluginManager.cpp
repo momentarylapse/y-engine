@@ -68,7 +68,7 @@ Array<Controller*> PluginManager::controllers;
 int ch_controller = -1;
 
 
-void global_delete(Entity *e) {
+void global_delete(BaseClass *e) {
 	//msg_error("global delete... " + p2s(e));
 	world.unregister(e);
 	e->on_delete_rec();
@@ -185,16 +185,16 @@ void PluginManager::init(int ch_iter) {
 
 void PluginManager::export_kaba() {
 
-	Entity entity(Entity::Type::NONE);
-	kaba::declare_class_size("Entity", sizeof(Entity));
-//	kaba::link_external_class_func("Entity.__init__", &Entity::__init__);
-	kaba::link_external_virtual("Entity.__delete__", &Entity::__delete__, &entity);
-	kaba::link_external_virtual("Entity.on_init", &Entity::on_init, &entity);
-	kaba::link_external_virtual("Entity.on_delete", &Entity::on_delete, &entity);
-	kaba::link_external_virtual("Entity.on_iterate", &Entity::on_iterate, &entity);
-	kaba::link_external_class_func("Entity.__del_override__", &global_delete);
-	kaba::link_external_class_func("Entity.get_component", &Entity::_get_component_untyped_);
-	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
+	BaseClass entity(BaseClass::Type::NONE);
+	kaba::declare_class_size("BaseClass", sizeof(BaseClass));
+//	kaba::link_external_class_func("BaseClass.__init__", &Entity::__init__);
+	kaba::link_external_virtual("BaseClass.__delete__", &BaseClass::__delete__, &entity);
+	kaba::link_external_virtual("BaseClass.on_init", &BaseClass::on_init, &entity);
+	kaba::link_external_virtual("BaseClass.on_delete", &BaseClass::on_delete, &entity);
+	kaba::link_external_virtual("BaseClass.on_iterate", &BaseClass::on_iterate, &entity);
+	kaba::link_external_class_func("BaseClass.__del_override__", &global_delete);
+	kaba::link_external_class_func("BaseClass.get_component", &BaseClass::_get_component_untyped_);
+	kaba::link_external_class_func("BaseClass.add_component", &BaseClass::add_component);
 
 	kaba::declare_class_size("Entity3D", sizeof(Entity3D));
 	kaba::declare_class_element("Entity3D.pos", &Entity3D::pos);

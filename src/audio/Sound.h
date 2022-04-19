@@ -3,11 +3,11 @@
 #include "../lib/config.h"
 #include "../lib/file/file.h"
 #include "../lib/math/vector.h"
-#include "../y/Entity.h"
+#include "../y/BaseClass.h"
 
 namespace audio {
 
-class Sound : public Entity {
+class Sound : public BaseClass {
 public:
 	bool loop, suicidal;
 	vector pos, vel;

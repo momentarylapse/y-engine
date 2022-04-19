@@ -10,7 +10,7 @@
 
 #include "../y/Entity.h"
 
-class Controller : public Entity {
+class Controller : public BaseClass {
 public:
 	Controller();
 	~Controller() override {};

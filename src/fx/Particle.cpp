@@ -11,7 +11,7 @@ Shader *shader_fx;
 
 //DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
 
-Particle::Particle(const vector &p, float r, Texture *t, float ttl) : Entity(Type::PARTICLE) {
+Particle::Particle(const vector &p, float r, Texture *t, float ttl) : BaseClass(Type::PARTICLE) {
 	pos = p;
 	vel = vector::ZERO;
 	col = White;

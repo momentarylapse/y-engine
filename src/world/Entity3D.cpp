@@ -11,7 +11,7 @@
 
 Entity3D::Entity3D() : Entity3D(vector::ZERO, quaternion::ID) {}
 
-Entity3D::Entity3D(const vector &_pos, const quaternion &_ang) : Entity(Entity::Type::ENTITY3D) {
+Entity3D::Entity3D(const vector &_pos, const quaternion &_ang) : BaseClass(BaseClass::Type::ENTITY3D) {
 	pos = _pos;
 	ang = _ang;
 	parent = nullptr;

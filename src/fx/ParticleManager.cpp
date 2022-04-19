@@ -40,14 +40,14 @@ void ParticleGroup::add(Particle *p) {
 }
 
 bool ParticleGroup::unregister(Particle *p) {
-	if (p->type == Entity::Type::PARTICLE) {
+	if (p->type == BaseClass::Type::PARTICLE) {
 		foreachi (auto *pp, particles, i)
 			if (pp == p) {
 				//msg_write("  -> PARTICLE");
 				particles.erase(i);
 				return true;
 			}
-	} else if (p->type == Entity::Type::BEAM) {
+	} else if (p->type == BaseClass::Type::BEAM) {
 		foreachi (auto *pp, beams, i)
 			if (pp == p) {
 				//msg_write("  -> BEAM");

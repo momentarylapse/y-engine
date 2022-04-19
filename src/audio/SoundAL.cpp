@@ -147,7 +147,7 @@ Sound *Sound::emit(const Path &filename, const vector &pos, float min_dist, floa
 	return s;
 }
 
-Sound::Sound() : Entity(Entity::Type::SOUND) {
+Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {
 	suicidal = false;
 	pos = v_0;
 	vel = v_0;
@@ -358,7 +358,7 @@ void init(){}
 void exit(){}
 Sound* Sound::load(const Path &filename){ return nullptr; }
 Sound* Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
-Sound::Sound() : Entity(Entity::Type::SOUND) {}
+Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {}
 Sound::~Sound(){}
 void Sound::__delete__(){}
 void SoundClearSmallCache(){}

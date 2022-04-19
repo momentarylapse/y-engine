@@ -12,7 +12,7 @@
 #include "../lib/math/vector.h"
 #include "../lib/math/rect.h"
 #include "../lib/image/color.h"
-#include "../y/Entity.h"
+#include "../y/BaseClass.h"
 
 
 /*struct ParticlePushData {
@@ -21,7 +21,7 @@
 	float fog_distance;
 };*/
 
-class Particle : public Entity {
+class Particle : public BaseClass {
 public:
 
 	Particle(const vector &pos, float r, Texture *tex, float ttl);

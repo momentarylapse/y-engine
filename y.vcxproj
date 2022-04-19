@@ -120,6 +120,7 @@
     <ClCompile Include="src\audio\SoundAL.cpp" />
     <ClCompile Include="src\fx\Beam.cpp" />
     <ClCompile Include="src\fx\Particle.cpp" />
+    <ClCompile Include="src\fx\ParticleEmitter.cpp" />
     <ClCompile Include="src\fx\ParticleManager.cpp" />
     <ClCompile Include="src\gui\Font.cpp" />
     <ClCompile Include="src\gui\gui.cpp" />
@@ -289,10 +290,10 @@
     <ClCompile Include="src\world\Object.cpp" />
     <ClCompile Include="src\world\Terrain.cpp" />
     <ClCompile Include="src\world\World.cpp" />
+    <ClCompile Include="src\y\BaseClass.cpp" />
     <ClCompile Include="src\y\Component.cpp" />
     <ClCompile Include="src\y\ComponentManager.cpp" />
     <ClCompile Include="src\y\EngineData.cpp" />
-    <ClCompile Include="src\y\Entity.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -300,6 +301,7 @@
     <ClInclude Include="src\audio\Sound.h" />
     <ClInclude Include="src\fx\Beam.h" />
     <ClInclude Include="src\fx\Particle.h" />
+    <ClInclude Include="src\fx\ParticleEmitter.h" />
     <ClInclude Include="src\fx\ParticleManager.h" />
     <ClInclude Include="src\gui\Font.h" />
     <ClInclude Include="src\gui\gui.h" />
@@ -462,10 +464,10 @@
     <ClInclude Include="src\world\Object.h" />
     <ClInclude Include="src\world\Terrain.h" />
     <ClInclude Include="src\world\World.h" />
+    <ClInclude Include="src\y\BaseClass.h" />
     <ClInclude Include="src\y\Component.h" />
     <ClInclude Include="src\y\ComponentManager.h" />
     <ClInclude Include="src\y\EngineData.h" />
-    <ClInclude Include="src\y\Entity.h" />
     <ClInclude Include="src\Config.h" />
     <ClInclude Include="src\graphics-fwd.h" />
     <ClInclude Include="src\graphics-impl.h" />

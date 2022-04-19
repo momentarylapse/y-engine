@@ -117,8 +117,8 @@ public:
 	void unregister_object(Entity3D *o);
 	void set_active_physics(Entity3D *o, bool active, bool passive);//, bool test_collisions);
 
-	bool unregister(Entity *o);
-	void _delete(Entity *o);
+	bool unregister(BaseClass *o);
+	void _delete(BaseClass *o);
 
 	void register_model(Model *m);
 	void unregister_model(Model *m);

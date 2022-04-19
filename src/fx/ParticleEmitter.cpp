@@ -14,7 +14,7 @@ extern Texture *tex_white;
 
 static Random random;
 
-ParticleEmitter::ParticleEmitter() : Entity(Entity::Type::PARTICLE_EMITTER) {
+ParticleEmitter::ParticleEmitter() : BaseClass(BaseClass::Type::PARTICLE_EMITTER) {
 	time_to_live = 1;
 	spawn_dt = 0.1f;
 	texture = tex_white;

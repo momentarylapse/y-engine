@@ -10,6 +10,7 @@ set(SOURCE
 	src/audio/SoundAL.cpp
 	src/fx/Beam.cpp
 	src/fx/Particle.cpp
+	src/fx/ParticleEmitter.cpp
 	src/fx/ParticleManager.cpp
 	src/gui/Font.cpp
 	src/gui/gui.cpp
@@ -179,10 +180,10 @@ set(SOURCE
 	src/world/Object.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
+	src/y/BaseClass.cpp
 	src/y/Component.cpp
 	src/y/ComponentManager.cpp
 	src/y/EngineData.cpp
-	src/y/Entity.cpp
 	src/Config.cpp
 	src/main.cpp
 )

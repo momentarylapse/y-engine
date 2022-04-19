@@ -11,10 +11,10 @@
 #include "../lib/base/base.h"
 #include "../lib/file/path.h"
 #include "../lib/math/vector.h"
-#include "../y/Entity.h"
 #include "../y/Component.h"
 #include "Material.h"
 #include "../graphics-fwd.h"
+#include "../y/BaseClass.h"
 class Material;
 class CollisionData;
 //class DescriptorSet;

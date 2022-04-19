@@ -7,7 +7,7 @@
 
 #include "Controller.h"
 
-Controller::Controller() : Entity(Type::CONTROLLER) {
+Controller::Controller() : BaseClass(Type::CONTROLLER) {
 	_class = nullptr;
 }
 

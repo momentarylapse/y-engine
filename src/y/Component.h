@@ -9,7 +9,7 @@
 
 #include "../lib/base/base.h"
 
-class Entity;
+class BaseClass;
 class CollisionData;
 namespace kaba {
 	class Class;
@@ -30,7 +30,7 @@ public:
 	void __init__();
 	virtual void __delete__();
 
-	Entity *owner;
+	BaseClass *owner;
 	const kaba::Class *component_type;
 
 	template<class Owner>
