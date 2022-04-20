@@ -31,7 +31,7 @@ void Config::load(const Array<string> &arg) {
 		} else if (a == "--uncapped" or a == "-u") {
 			set_bool("renderer.uncapped-framerate", true);
 		} else if (a == "--debug" or a == "-D") {
-			set_int("debug", 2);
+			set_int("debug.level", 2);
 		} else if (a.head(11) == "--game-dir=") {
 			game_dir = a.sub_ref(11);
 		} else if (a == "--fw") {
@@ -44,16 +44,28 @@ void Config::load(const Array<string> &arg) {
 			set_str("renderer.resolution-scale-min", a.sub_ref(7));
 			set_str("renderer.resolution-scale-max", a.sub_ref(7));
 		} else if (a.head(1) != "-") {
-			set_str("default-world", a);
+			set_str("default.world", a);
 		}
 	}
 
-	default_world = get_str("default-world", "");
-	second_world = get_str("second-world", "");
-	main_script = get_str("main-script", "");
-	default_font = get_str("default-font", "");
-	default_material = get_str("default-material", "");
-	debug = get_int("debug", 1);
+	// deprecated
+	if (has("default-world") and !has("default.world"))
+		set_str("default.world", get_str("default-world", ""));
+	if (has("second-world") and !has("default.second-world"))
+		set_str("default.second-world", get_str("second-world", ""));
+	if (has("default-font") and !has("default.font"))
+		set_str("default.font", get_str("default-font", ""));
+	if (has("default-material") and !has("default.material"))
+		set_str("default.material", get_str("default-material", ""));
+	if (has("main-script") and !has("default.main-script"))
+		set_str("default.main-script", get_str("main-script", ""));
+
+	default_world = get_str("default.world", "");
+	second_world = get_str("default.second-world", "");
+	main_script = get_str("default.main-script", "");
+	default_font = get_str("default.font", "");
+	default_material = get_str("default.material", "");
+	debug = get_int("debug.levelS", 1);
 
 	string aa = get_str("renderer.antialiasing", "");
 	if (aa == "") {

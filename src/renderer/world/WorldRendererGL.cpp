@@ -185,7 +185,7 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	}
 
 	// beams
-	Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
+	//Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_model_matrix(matrix::ID);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);

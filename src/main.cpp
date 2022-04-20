@@ -266,7 +266,7 @@ public:
 
 		for (auto &s: world.scripts)
 			PluginManager::add_controller(s.filename, s.variables);
-		for (auto &s: config.get_str("additional-scripts", "").explode(","))
+		for (auto &s: config.get_str("default.additional-scripts", "").explode(","))
 			PluginManager::add_controller(s, {});
 		if (config.debug >= 1)
 			for (auto &s: config.get_str("debug.scripts1", "").explode(","))
