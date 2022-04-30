@@ -313,6 +313,7 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Terrain.pattern", &Terrain::pattern);
 	kaba::declare_class_element("Terrain.num_x", &Terrain::num_x);
 	kaba::declare_class_element("Terrain.num_z", &Terrain::num_z);
+	kaba::link_external_class_func("Terrain.update", &Terrain::update);
 	kaba::link_external_class_func("Terrain.get_height", &Terrain::gimme_height);
 
 	kaba::declare_class_size("CollisionData", sizeof(CollisionData));
