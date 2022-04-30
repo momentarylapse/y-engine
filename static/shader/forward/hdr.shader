@@ -83,6 +83,7 @@ float brightness(vec3 c) {
 
 // TODO: smoother...
 vec3 tone_map(vec3 c) {
+	c*=exposure;
 	float b = brightness(c);
 	if (b < 0.8)
 		return c;
