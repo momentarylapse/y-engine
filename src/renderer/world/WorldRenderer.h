@@ -57,6 +57,7 @@ struct RenderInjector {
 	using Callback = Callable<void()>;
 	const Callback *func;
 	bool transparent;
+	bool shadow;
 };
 
 class WorldRenderer : public Renderer {
@@ -89,6 +90,8 @@ public:
 
 	float shadow_box_size;
 	int shadow_resolution;
+
+	bool wireframe = false;
 
 
 	bool using_view_space = false;

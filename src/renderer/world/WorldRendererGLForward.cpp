@@ -111,6 +111,7 @@ void WorldRendererGLForward::draw() {
 	nix::clear_color(world.background);
 	nix::clear_z();
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
+	nix::set_wire(wireframe);
 
 	draw_skyboxes(cam_main);
 	PerformanceMonitor::end(ch_bg);
@@ -136,6 +137,7 @@ void WorldRendererGLForward::draw() {
 	//nix::set_scissor(rect::EMPTY);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_wire(false);
 
 	PerformanceMonitor::end(channel);
 }
