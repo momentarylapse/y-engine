@@ -25,6 +25,7 @@ public:
 	void render_out(FrameBuffer *source, Texture *bloom);
 
 	shared<FrameBuffer> fb_main;
+	shared<FrameBuffer> fb_main_ms;
 	shared<FrameBuffer> fb_small1;
 	shared<FrameBuffer> fb_small2;
 
@@ -35,6 +36,7 @@ public:
 	DepthBuffer *_depth_buffer = nullptr;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
+	shared<Shader> shader_resolve_multisample;
 
 	VertexBuffer *vb_2d;
 

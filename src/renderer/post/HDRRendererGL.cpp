@@ -23,6 +23,10 @@ static float resolution_scale_y = 1.0f;
 
 void apply_shader_data(Shader *s, const Any &shader_data);
 
+namespace nix {
+	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
+}
+
 
 HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
@@ -32,24 +36,27 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", paren
 	_depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
-		fb_main = new nix::FrameBuffer({
+		fb_main_ms = new nix::FrameBuffer({
 			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
 			//_depth_buffer});
 			new nix::RenderBuffer(width, height, 4, "d24s8")});
+
+
+		shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
 	} else {
 		msg_error("no msaa");
-		fb_main = new nix::FrameBuffer({
+	}
+	fb_main = new nix::FrameBuffer({
 			new nix::Texture(width, height, "rgba:f16"),
 			_depth_buffer});
 			//new nix::RenderBuffer(width, height, "d24s8)});
-	}
+
 	fb_small1 = new nix::FrameBuffer({
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 	fb_small2 = new nix::FrameBuffer({
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 
-	if (fb_main->color_attachments[0]->type != nix::Texture::Type::MULTISAMPLE)
-		fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
+	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 
@@ -105,8 +112,23 @@ void HDRRendererGL::prepare() {
 	if (child)
 		child->prepare();
 
-	render_source_into_framebuffer(this, fb_main.get(), vb_2d);
 
+	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
+		render_source_into_framebuffer(this, fb_main_ms.get(), vb_2d);
+
+		// resolve
+		if (true) {
+			shader_resolve_multisample->set_float("width", fb_main_ms->width);
+			shader_resolve_multisample->set_float("height", fb_main_ms->height);
+			process({fb_main_ms->color_attachments[0].get()}, fb_main.get(), shader_resolve_multisample.get());
+		} else {
+			// not sure, why this does not work... :(
+			nix::resolve_multisampling(fb_main.get(), fb_main_ms.get());
+		}
+
+	} else {
+		render_source_into_framebuffer(this, fb_main.get(), vb_2d);
+	}
 
 	PerformanceMonitor::begin(ch_post_blur);
 	process_blur(fb_main.get(), fb_small1.get(), 1.0f, {2,0});

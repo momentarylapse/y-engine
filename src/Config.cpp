@@ -40,6 +40,8 @@ void Config::load(const Array<string> &arg) {
 			set_str("renderer.path", "deferred");
 		} else if (a == "--direct") {
 			set_str("renderer.path", "direct");
+		} else if (a == "--msaa") {
+			set_str("renderer.antialiasing", "MSAA");
 		} else if (a.head(8) == "--scale=") {
 			set_str("renderer.resolution-scale-min", a.sub_ref(7));
 			set_str("renderer.resolution-scale-max", a.sub_ref(7));

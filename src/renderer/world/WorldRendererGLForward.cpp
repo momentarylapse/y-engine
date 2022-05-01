@@ -75,18 +75,6 @@ void WorldRendererGLForward::prepare() {
 	}
 	PerformanceMonitor::end(ch_shadow);
 
-	/*render_into_texture(fb_main.get(), cam, dynamic_fb_area());
-
-	auto source = fb_main.get();
-	if (config.antialiasing_method == AntialiasingMethod::MSAA)
-		source = resolve_multisampling(source);
-
-	source = do_post_processing(source);
-
-
-	nix::bind_frame_buffer(parent->current_frame_buffer());
-	render_out(source, fb_small2->color_attachments[0].get());*/
-
 	PerformanceMonitor::end(channel);
 }
 
