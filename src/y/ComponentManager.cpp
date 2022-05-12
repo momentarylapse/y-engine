@@ -13,9 +13,9 @@
 #include "../meta.h"
 #include "../plugins/PluginManager.h"
 #include "../helper/PerformanceMonitor.h"
+#endif
 #include "../lib/kaba/syntax/Class.h"
 #include "../lib/kaba/syntax/Function.h"
-#endif
 
 #include "../lib/file/msg.h"
 

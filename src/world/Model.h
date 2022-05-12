@@ -24,7 +24,6 @@
 #pragma once
 
 
-//#include "Entity3D.h"
 #include "../graphics-fwd.h"
 #include "../y/Component.h"
 #include "../lib/base/base.h"
@@ -45,9 +44,6 @@ class ModelTemplate;
 class MeshCollider;
 class SolidBody;
 class Animator;
-namespace kaba {
-	class Script;
-}
 
 
 

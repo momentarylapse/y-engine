@@ -440,8 +440,10 @@ void World::register_entity(Entity *e) {
 	if (auto m = e->get_component<Model>())
 		register_object(e);
 
+#ifdef _X_ALLOW_X_
 	if (auto l = e->get_component<Light>())
 		lights.add(l);
+#endif
 
 	entities.add(e);
 	e->on_init_rec();

@@ -309,7 +309,6 @@ public:
 			//msg_write(format("%d  %d", parent->material[m]->textures.num, sub->num_triangles));
 			for (int i=0;i<num_uvs * sub->num_triangles * 3;i++){
 				int sv = f->read_int();
-
 				sub->skin_vertex[i * 2    ] = skin_vert[sv].x;
 				sub->skin_vertex[i * 2 + 1] = skin_vert[sv].y;
 			}
