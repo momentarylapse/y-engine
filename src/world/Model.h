@@ -142,6 +142,7 @@ public:
 
 	// material (own)
 	Array<Material*> material;
+	Array<int> num_uvs;
 
 	// properties
 	struct Properties {
