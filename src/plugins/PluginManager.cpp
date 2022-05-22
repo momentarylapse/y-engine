@@ -201,8 +201,8 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("Entity.ang", &Entity::ang);
 	kaba::declare_class_element("Entity.parent", &Entity::parent);
 	kaba::link_external_class_func("Entity.get_matrix", &Entity::get_matrix);
-	kaba::link_external_class_func("Entity.get_component", &Entity::_get_component_untyped_);
-	kaba::link_external_class_func("Entity.add_component", &Entity::add_component);
+	kaba::link_external_class_func("Entity.__get_component", &Entity::_get_component_untyped_);
+	kaba::link_external_class_func("Entity.__add_component", &Entity::add_component);
 
 	Component component;
 	kaba::declare_class_size("Component", sizeof(Component));
@@ -423,7 +423,7 @@ void PluginManager::export_kaba() {
 	//kaba::link_external_class_func("Link.set_axis", &Link::set_axis);
 
 
-	kaba::link_external("get_component_list", (void*)&ComponentManager::get_list);
+	kaba::link_external("__get_component_list", (void*)&ComponentManager::get_list);
 
 	Particle particle(vector::ZERO, 0, nullptr, -1);
 	kaba::declare_class_size("Particle", sizeof(Particle));
@@ -446,15 +446,15 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("Beam.__init__", &Beam::__init_beam__);
 
 
-	kaba::declare_class_size("audio.Sound", sizeof(audio::Sound));
-	kaba::link_external_class_func("audio.Sound.play", &audio::Sound::play);
-	kaba::link_external_class_func("audio.Sound.stop", &audio::Sound::stop);
-	kaba::link_external_class_func("audio.Sound.pause", &audio::Sound::pause);
-	kaba::link_external_class_func("audio.Sound.has_ended", &audio::Sound::has_ended);
-	kaba::link_external_class_func("audio.Sound.set", &audio::Sound::set_data);
-	kaba::link_external_class_func("audio.Sound.load", &audio::Sound::load);
-	kaba::link_external_class_func("audio.Sound.emit", &audio::Sound::emit);
-	kaba::link_external_class_func("audio.Sound.__del_override__", &global_delete);
+	kaba::declare_class_size("Sound", sizeof(audio::Sound));
+	kaba::link_external_class_func("Sound.play", &audio::Sound::play);
+	kaba::link_external_class_func("Sound.stop", &audio::Sound::stop);
+	kaba::link_external_class_func("Sound.pause", &audio::Sound::pause);
+	kaba::link_external_class_func("Sound.has_ended", &audio::Sound::has_ended);
+	kaba::link_external_class_func("Sound.set", &audio::Sound::set_data);
+	kaba::link_external_class_func("Sound.load", &audio::Sound::load);
+	kaba::link_external_class_func("Sound.emit", &audio::Sound::emit);
+	kaba::link_external_class_func("Sound.__del_override__", &global_delete);
 
 	gui::Node node(rect::ID);
 	kaba::declare_class_size("Node", sizeof(gui::Node));
@@ -534,12 +534,12 @@ void PluginManager::export_kaba() {
 	kaba::link_external_class_func("NetworkManager.event", &NetworkManager::event);
 
 
-	kaba::declare_class_size("NetworkManager.Connection", sizeof(NetworkManager::Connection));
-	kaba::declare_class_element("NetworkManager.Connection.s", &NetworkManager::Connection::s);
-	kaba::declare_class_element("NetworkManager.Connection.buffer", &NetworkManager::Connection::buffer);
-	kaba::link_external_class_func("NetworkManager.Connection.start_block", &NetworkManager::Connection::start_block);
-	kaba::link_external_class_func("NetworkManager.Connection.end_block", &NetworkManager::Connection::end_block);
-	kaba::link_external_class_func("NetworkManager.Connection.send", &NetworkManager::Connection::send);
+	kaba::declare_class_size("Connection", sizeof(NetworkManager::Connection));
+	kaba::declare_class_element("Connection.s", &NetworkManager::Connection::s);
+	kaba::declare_class_element("Connection.buffer", &NetworkManager::Connection::buffer);
+	kaba::link_external_class_func("Connection.start_block", &NetworkManager::Connection::start_block);
+	kaba::link_external_class_func("Connection.end_block", &NetworkManager::Connection::end_block);
+	kaba::link_external_class_func("Connection.send", &NetworkManager::Connection::send);
 
 	kaba::link_external("network", &network_manager);
 
@@ -673,7 +673,7 @@ void PluginManager::export_kaba() {
 	kaba::link_external("load_shader", (void*)&ResourceManager::load_shader);
 	kaba::link_external("create_shader", (void*)&ResourceManager::create_shader);
 	kaba::link_external("load_texture", (void*)&ResourceManager::load_texture);
-	kaba::link_external("get_controller", (void*)&PluginManager::get_controller);
+	kaba::link_external("__get_controller", (void*)&PluginManager::get_controller);
 	kaba::link_external("add_camera", (void*)&add_camera);
 	kaba::link_external("Scheduler.subscribe", (void*)&Scheduler::subscribe);
 }
@@ -686,7 +686,7 @@ void import_component_class(shared<kaba::Module> m, const string &name) {
 	}
 	if (!C::_class)
 		throw Exception(format("y.kaba: %s missing", name));
-	if (!C::_class->is_derived_from_s("y.Component"))
+	if (!C::_class->is_derived_from_s("ecs.Component"))
 		throw Exception(format("y.kaba: %s not derived from Component", name));
 }
 
@@ -826,7 +826,7 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 
 void PluginManager::add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables) {
 	msg_write("add controller: " + name.str());
-	auto type = find_class_derived(name, "y.Controller");;
+	auto type = find_class_derived(name, "ui.Controller");;
 	auto *c = (Controller*)create_instance(type, variables);
 	c->_class = type;
 	c->ch_iterate = PerformanceMonitor::create_channel(type->long_name(), ch_controller);
