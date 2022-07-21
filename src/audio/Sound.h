@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../lib/config.h"
-#include "../lib/file/file.h"
 #include "../lib/math/vector.h"
 #include "../y/BaseClass.h"
+
+class Path;
 
 namespace audio {
 

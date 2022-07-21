@@ -61,6 +61,7 @@
 #include "../meta.h"
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
+#include "../lib/os/msg.h"
 
 
 Array<Controller*> PluginManager::controllers;

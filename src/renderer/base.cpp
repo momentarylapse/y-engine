@@ -8,7 +8,7 @@
 #include "base.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
-#include "../lib/file/msg.h"
+#include "../lib/os/msg.h"
 #include "../Config.h"
 
 Texture *tex_white = nullptr;

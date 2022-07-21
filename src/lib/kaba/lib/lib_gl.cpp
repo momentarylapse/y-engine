@@ -1,17 +1,16 @@
-#include "../../file/file.h"
 #include "../kaba.h"
-#include "../../config.h"
 #include "lib.h"
 #include "../dynamic/exception.h"
 
-#ifdef _X_USE_NIX_
+#if __has_include("../../nix/nix.h") && HAS_LIB_GL
+	#define KABA_EXPORT_GL
 	#include "../../nix/nix.h"
 #endif
 
 namespace kaba {
 
 
-#if defined(_X_USE_NIX_) && HAS_LIB_GL
+#ifdef KABA_EXPORT_GL
 	#define gl_p(p)		p
 
 
@@ -61,6 +60,7 @@ struct FakeTexture {
 
 
 extern const Class *TypeMatrix;
+extern const Class *TypeVec2;
 extern const Class *TypeImage;
 extern const Class *TypeFloatList;
 extern const Class *TypeFloatP;
@@ -296,19 +296,15 @@ void SIAddPackageGl() {
 		func_add_param("param", TypeInt);
 	add_func("set_projection_perspective", TypeVoid, gl_p(&nix::set_projection_perspective), Flags::STATIC);
 	add_func("set_projection_perspective_ext", TypeVoid, gl_p(&nix::set_projection_perspective_ext), Flags::STATIC);
-		func_add_param("centerx", TypeFloat32);
-		func_add_param("centery", TypeFloat32);
-		func_add_param("width_1", TypeFloat32);
-		func_add_param("height_1", TypeFloat32);
+		func_add_param("center", TypeVec2);
+		func_add_param("size_1", TypeVec2);
 		func_add_param("zmin", TypeFloat32);
 		func_add_param("zmax", TypeFloat32);
 	add_func("set_projection_ortho_relative", TypeVoid, gl_p(&nix::set_projection_ortho_relative), Flags::STATIC);
 	add_func("set_projection_ortho_pixel", TypeVoid, gl_p(&nix::set_projection_ortho_pixel), Flags::STATIC);
 	add_func("set_projection_ortho_ext", TypeVoid, gl_p(&nix::set_projection_ortho_ext), Flags::STATIC);
-		func_add_param("centerx", TypeFloat32);
-		func_add_param("centery", TypeFloat32);
-		func_add_param("map_width", TypeFloat32);
-		func_add_param("map_height", TypeFloat32);
+		func_add_param("center", TypeVec2);
+		func_add_param("map_size", TypeVec2);
 		func_add_param("zmin", TypeFloat32);
 		func_add_param("zmax", TypeFloat32);
 	add_func("set_projection_matrix", TypeVoid, gl_p(&nix::set_projection_matrix), Flags::STATIC);

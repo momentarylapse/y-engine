@@ -16,9 +16,12 @@
 #include "Callback.h"
 #include "Application.h"
 #include "Event.h"
-#include "Config.h"
-#include "Timer.h"
 #include "error.h"
+
+class Configuration;
+namespace hui {
+	extern Configuration config;
+}
 
 
 #endif

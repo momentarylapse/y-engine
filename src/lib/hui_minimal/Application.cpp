@@ -7,7 +7,9 @@
 
 #include "Application.h"
 #include "hui.h"
-#include "../file/file.h"
+#include "../os/filesystem.h"
+#include "../os/msg.h"
+#include "../doc/config.h"
 
 #ifdef OS_WINDOWS
 #include <windows.h>
@@ -15,6 +17,8 @@
 
 namespace hui
 {
+
+Configuration config;
 
 extern Callback _idle_function_;
 
@@ -46,7 +50,7 @@ Application::Application(const string &app_name, const string &def_lang, int fla
 
 	SetDefaultErrorHandler(nullptr);
 
-	if (file_exists(directory << "config.txt"))
+	if (os::fs::exists(directory << "config.txt"))
 		config.load(directory << "config.txt");
 
 }
@@ -84,7 +88,7 @@ Path strip_dev_dirs(const Path &p) {
 //   initial_working_directory -> working dir before running this program
 void Application::guess_directories(const Array<string> &arg, const string &app_name) {
 
-	initial_working_directory = get_current_dir();
+	initial_working_directory = os::fs::current_directory();
 	installed = false;
 
 
@@ -121,7 +125,7 @@ void Application::guess_directories(const Array<string> &arg, const string &app_
 
 		if (installed) {
 			directory = format("%s/.%s/", getenv("HOME"), app_name);
-			dir_create(directory);
+			os::fs::create_directory(directory);
 		}
 	#endif
 }

@@ -12,7 +12,7 @@
 #ifdef USING_OPENGL
 #include "../base.h"
 #include "../../lib/nix/nix.h"
-#include "../../lib/file/msg.h"
+#include "../../lib/os/msg.h"
 #include "../../lib/math/random.h"
 #include "../../lib/math/vec4.h"
 

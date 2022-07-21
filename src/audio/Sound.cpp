@@ -9,7 +9,9 @@
 
 #include "Sound.h"
 #include "../y/EngineData.h"
- #include "../lib/math/math.h"
+#include "../lib/math/math.h"
+#include "../lib/os/file.h"
+#include "../lib/os/msg.h"
  
 
 #ifdef HAS_LIB_OGG
@@ -102,10 +104,10 @@ AudioFile load_wave_file(const Path &filename) {
 	AudioFile r;
 	r.buffer = NULL;
 //	ProgressStatus(_("lade wave"), 0);
-	File *f = FileOpen(filename);
+	auto f = os::fs::open(filename, "rb");
 	char *data = new char[f->get_size()];
 	char header[44];
-	f->read_buffer(header, 44);
+	f->read_basic(header, 44);
 	if ((header[0] != 'R') or (header[1] != 'I') or (header[2] != 'F') or (header[3] != 'F')){
 		msg_error("wave file does not start with \"RIFF\"");
 		return r;
@@ -144,7 +146,7 @@ AudioFile load_wave_file(const Path &filename) {
 		int toread = 65536;
 		if (toread > size - read)
 			toread = size - read;
-		int rr = f->read_buffer(&data[read], toread);
+		int rr = f->read_basic(&data[read], toread);
 		nn ++;
 /*		if (nn > 16){
 			ProgressStatus(_("lade wave"), perc_read + dperc_read * (float)read / (float)size);
@@ -158,7 +160,7 @@ AudioFile load_wave_file(const Path &filename) {
 		}
 	}
 
-	FileClose(f);
+	delete f;
 	r.buffer = data;
 	
 	return r;

@@ -9,9 +9,9 @@
 #define SRC_CONFIG_H_
 
 
-#include "lib/hui_minimal/Config.h"
-
 #include "lib/base/base.h"
+#include "lib/doc/config.h"
+#include "lib/os/path.h"
 
 enum class AntialiasingMethod {
 	NONE,
@@ -19,7 +19,7 @@ enum class AntialiasingMethod {
 	TAA
 };
 
-class Config : public hui::Configuration {
+class Config : public Configuration {
 public:
 	int debug = 0;
 	string main_script;

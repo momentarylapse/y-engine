@@ -9,7 +9,7 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 #include "../base.h"
-#include "../../lib/file/msg.h"
+#include "../../lib/os/msg.h"
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"

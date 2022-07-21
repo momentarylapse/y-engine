@@ -11,7 +11,7 @@
 #include "../../lib/nix/nix.h"
 #include "../../lib/math/vec2.h"
 #include "../../lib/math/rect.h"
-#include "../../lib/file/msg.h"
+#include "../../lib/os/msg.h"
 #include "../../lib/any/any.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"

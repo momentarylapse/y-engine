@@ -1,14 +1,13 @@
 #include "Material.h"
 #include "Model.h"
-#include "../lib/file/file.h"
 #include "../lib/config.h"
+#include "../lib/os/msg.h"
+#include "../lib/doc/config.h"
 #include "../graphics-impl.h"
-#ifdef _X_USE_HUI_
-	#include "../lib/hui/hui.h"
+#if __has_include("ResourceManager.h")
 	#include "ResourceManager.h"
 	#include "EngineData.h"
-#elif defined(_X_USE_HUI_MINIMAL_)
-	#include "../lib/hui_minimal/hui.h"
+#else
 	#include "../helper/ResourceManager.h"
 	#include "../y/EngineData.h"
 #endif
@@ -134,7 +133,7 @@ Material *LoadMaterial(const Path &filename) {
 
 	msg_write("loading material " + filename.str());
 
-	hui::Configuration c;
+	Configuration c;
 	if (!c.load(engine.material_dir << filename.with(".material"))) {
 		/*if (engine.ignore_missing_files) {
 			msg_error("material file missing: " + filename.str());

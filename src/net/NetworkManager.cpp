@@ -6,7 +6,7 @@
  */
 
 #include "NetworkManager.h"
-#include "../lib/file/msg.h"
+#include "../lib/os/msg.h"
 #include "../lib/net/net.h"
 #include "../lib/kaba/kaba.h"
 

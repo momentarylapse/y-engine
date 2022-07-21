@@ -8,16 +8,14 @@
 #include <chrono>
 
 
+#include "lib/os/msg.h"
+#include "lib/os/time.h"
 #include "lib/math/math.h"
 #include "lib/image/color.h"
 #include "lib/image/image.h"
 #include "lib/kaba/kaba.h"
 
-#ifdef _X_USE_HUI_
-	#include "lib/hui/hui.h"
-#elif defined(_X_USE_HUI_MINIMAL_)
-	#include "lib/hui_minimal/hui.h"
-#endif
+#include "lib/hui_minimal/hui.h"
 
 #include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
@@ -403,7 +401,7 @@ public:
 	}
 
 	static Array<float> render_times;
-	hui::Timer timer_render;
+	os::Timer timer_render;
 
 	void update_dynamic_resolution() {
 		static float drt_time = 0;

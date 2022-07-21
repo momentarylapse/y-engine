@@ -9,7 +9,7 @@
 #include "ParticleManager.h"
 #include "Particle.h"
 #include "Beam.h"
-#include "../lib/file/msg.h"
+#include "../lib/os/msg.h"
 
 
 ParticleGroup::ParticleGroup(Texture *t) {

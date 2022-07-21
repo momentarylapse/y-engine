@@ -13,6 +13,8 @@
 #include "../y/EngineData.h"
 #include "../lib/math/vector.h"
 #include "../lib/math/quaternion.h"
+#include "../lib/os/file.h"
+#include "../lib/os/msg.h"
  
 #if HAS_LIB_OPENAL
 

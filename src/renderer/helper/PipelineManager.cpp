@@ -9,7 +9,7 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 #include "../../lib/base/map.h"
-#include "../../lib/file/msg.h"
+#include "../../lib/os/msg.h"
 
 namespace PipelineManager {
 

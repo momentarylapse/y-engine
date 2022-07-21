@@ -9,7 +9,8 @@
 #include "gui.h"
 #include "../Config.h"
 #include "../lib/image/image.h"
-#include "../lib/file/file.h"
+#include "../lib/os/msg.h"
+#include "../lib/os/filesystem.h"
 
 //#define USE_CAIRO 1
 #define USE_FREETYPE 1
@@ -153,7 +154,7 @@ Path find_system_font_file(const string &name) {
 #else
 	Path base = "/usr/share/fonts";
 #endif
-	auto list = dir_search(base, "*.ttf", "fr");
+	auto list = os::fs::search(base, "*.ttf", "fr");
 	for (auto &f: list)
 		if ((f.basename_no_ext().lower() == name.lower()) or (f.basename_no_ext().lower() == name.lower() + "-regular"))
 			return base << f;

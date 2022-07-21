@@ -14,7 +14,7 @@
 #include <math.h>
 #include <GLFW/glfw3.h>
 
-#include "../lib/file/msg.h"
+#include "../lib/os/msg.h"
 
 namespace input {
 

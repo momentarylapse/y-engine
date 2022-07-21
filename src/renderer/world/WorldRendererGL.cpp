@@ -16,7 +16,7 @@
 #include "../../lib/math/vector.h"
 #include "../../lib/math/complex.h"
 #include "../../lib/math/rect.h"
-#include "../../lib/file/msg.h"
+#include "../../lib/os/msg.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../plugins/PluginManager.h"
 #include "../../fx/Particle.h"

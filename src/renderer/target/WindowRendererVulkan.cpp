@@ -9,7 +9,7 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 #include "../../helper/PerformanceMonitor.h"
-#include "../../lib/file/msg.h"
+#include "../../lib/os/msg.h"
 #include "../../lib/math/rect.h"
 #include "../../Config.h" // for timing experiment
 

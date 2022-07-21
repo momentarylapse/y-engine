@@ -6,7 +6,7 @@
  */
 
 #include "Config.h"
-#include "lib/file/file.h"
+#include "lib/os/msg.h"
 
 Config config;
 
@@ -15,10 +15,10 @@ Config::Config() {
 
 void Config::load(const Array<string> &arg) {
 	// fixed config
-	hui::Configuration::load("game.ini");
+	Configuration::load("game.ini");
 
 	// local config override
-	hui::Configuration local;
+	Configuration local;
 	local.load("game-local.ini");
 	for (auto &k: local.keys())
 		set_str(k, local.get_str(k, ""));

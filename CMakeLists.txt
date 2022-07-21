@@ -1,7 +1,7 @@
 # created by xmake
 
 project(y)
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
@@ -29,16 +29,14 @@ set(SOURCE
 	src/lib/base/array.cpp
 	src/lib/base/pointer.cpp
 	src/lib/base/strings.cpp
-	src/lib/file/file.cpp
-	src/lib/file/file_op.cpp
-	src/lib/file/msg.cpp
-	src/lib/file/path.cpp
+	src/lib/doc/chunked.cpp
+	src/lib/doc/config.cpp
+	src/lib/doc/pdf.cpp
+	src/lib/doc/xml.cpp
 	src/lib/hui_minimal/Application.cpp
 	src/lib/hui_minimal/Callback.cpp
-	src/lib/hui_minimal/Config.cpp
 	src/lib/hui_minimal/error.cpp
 	src/lib/hui_minimal/hui.cpp
-	src/lib/hui_minimal/Timer.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
 	src/lib/image/image_bmp.cpp
@@ -124,6 +122,15 @@ set(SOURCE
 	src/lib/nix/nix_textures.cpp
 	src/lib/nix/nix_vertexbuffer.cpp
 	src/lib/nix/nix_view.cpp
+	src/lib/os/CommandLineParser.cpp
+	src/lib/os/date.cpp
+	src/lib/os/file.cpp
+	src/lib/os/filesystem.cpp
+	src/lib/os/formatter.cpp
+	src/lib/os/msg.cpp
+	src/lib/os/path.cpp
+	src/lib/os/stream.cpp
+	src/lib/os/time.cpp
 	src/lib/vulkan/AccelerationStructure.cpp
 	src/lib/vulkan/Buffer.cpp
 	src/lib/vulkan/CommandBuffer.cpp
@@ -141,9 +148,6 @@ set(SOURCE
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
-	src/lib/xfile/chunked.cpp
-	src/lib/xfile/pdf.cpp
-	src/lib/xfile/xml.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/Controller.cpp
 	src/plugins/PluginManager.cpp
