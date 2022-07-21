@@ -131,6 +131,7 @@ bool Terrain::load(const Path &_filename_, bool deep) {
 	} else {
 		error = true;
 	}
+	msg_write("/terrain");
 	msg_left();
 	return !error;
 }

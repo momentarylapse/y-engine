@@ -264,13 +264,13 @@ public:
 
 		for (auto &s: world.scripts)
 			PluginManager::add_controller(s.filename, s.variables);
-		for (auto &s: config.get_str("default.additional-scripts", "").explode(","))
+		for (auto &s: config.get_str_array("default.additional-scripts"))
 			PluginManager::add_controller(s, {});
 		if (config.debug >= 1)
-			for (auto &s: config.get_str("debug.scripts1", "").explode(","))
+			for (auto &s: config.get_str_array("debug.scripts1"))
 				PluginManager::add_controller(s, {});
 		if (config.debug >= 2)
-			for (auto &s: config.get_str("debug.scripts2", "").explode(","))
+			for (auto &s: config.get_str_array("debug.scripts2"))
 				PluginManager::add_controller(s, {});
 
 		msg_left();
