@@ -11,9 +11,9 @@
 
 class Beam : public Particle{
 public:
-	Beam(const vector &pos, const vector &length, float r, Texture *tex, float ttl);
+	Beam(const vec3 &pos, const vec3 &length, float r, Texture *tex, float ttl);
 
-	void __init_beam__(const vector &pos, const vector &length, float r, Texture *tex, float ttl);
+	void __init_beam__(const vec3 &pos, const vec3 &length, float r, Texture *tex, float ttl);
 
-	vector length;
+	vec3 length;
 };

@@ -20,16 +20,16 @@
 
 
 struct GeoPush {
-	alignas(16) matrix model;
+	alignas(16) mat4 model;
 	alignas(16) color emission;
-	alignas(16) vector eye_pos;
+	alignas(16) vec3 eye_pos;
 	alignas(16) float xxx[4];
 };
 
 
-matrix mtr(const vector &t, const quaternion &a) {
-	auto mt = matrix::translation(t);
-	auto mr = matrix::rotation_q(a);
+mat4 mtr(const vec3 &t, const quaternion &a) {
+	auto mt = mat4::translation(t);
+	auto mr = mat4::rotation_q(a);
 	return mt * mr;
 }
 

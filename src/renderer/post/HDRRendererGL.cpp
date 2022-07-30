@@ -94,9 +94,9 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 	shader->set_float("bloom_factor", cam_main->bloom_factor);
 	shader->set_float("scale_x", resolution_scale_x);
 	shader->set_float("scale_y", resolution_scale_y);*/
-	nix::set_projection_matrix(flip_y ? matrix::scale(1,-1,1) : matrix::ID);
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);
+	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);
+	nix::set_view_matrix(mat4::ID);
+	nix::set_model_matrix(mat4::ID);
 	nix::set_cull(nix::CullMode::NONE);
 
 	nix::set_z(false, false);
@@ -185,9 +185,9 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {
 	shader_out->set_float("bloom_factor", cam_main->bloom_factor);
 	shader_out->set_float("scale_x", resolution_scale_x);
 	shader_out->set_float("scale_y", resolution_scale_y);
-	nix::set_projection_matrix(flip_y ? matrix::scale(1,-1,1) : matrix::ID);
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);
+	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);
+	nix::set_view_matrix(mat4::ID);
+	nix::set_model_matrix(mat4::ID);
 	nix::set_cull(nix::CullMode::NONE);
 
 	nix::set_z(false, false);

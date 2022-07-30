@@ -58,12 +58,12 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 	cb->bind_pipeline(pipeline_out);
 	cb->bind_descriptor_set(0, dset_out);
 	struct PCOut {
-		matrix p, m, v;
+		mat4 p, m, v;
 		float x[32];
 	};
-	PCOut pco = {matrix::ID, matrix::ID, matrix::ID, cam_main->exposure};
+	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, cam_main->exposure};
 	memcpy(&pco.x, &data[0], sizeof(float) * data.num);
-	cb->push_constant(0, sizeof(matrix) * 3 + sizeof(float) * data.num, &pco);
+	cb->push_constant(0, sizeof(mat4) * 3 + sizeof(float) * data.num, &pco);
 	cb->draw(vb_2d);
 }
 

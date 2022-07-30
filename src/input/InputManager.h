@@ -8,7 +8,7 @@
 #pragma once
 
 
-class vector;
+class vec3;
 struct GLFWwindow;
 
 namespace input {

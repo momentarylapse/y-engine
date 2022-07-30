@@ -86,7 +86,7 @@ void WorldRendererGLForward::draw() {
 
 	PerformanceMonitor::begin(ch_bg);
 
-	auto m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
+	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	if (config.antialiasing_method == AntialiasingMethod::TAA)
 		 m *= jitter(fb->width, fb->height, 0);
 
@@ -148,7 +148,7 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 
 	PerformanceMonitor::begin(ch_bg);
 
-	auto m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
+	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	if (config.antialiasing_method == AntialiasingMethod::TAA)
 		 m *= jitter(fb->width, fb->height, 0);
 
@@ -199,11 +199,11 @@ void WorldRendererGLForward::draw_world(bool allow_material) {
 void WorldRendererGLForward::render_shadow_map(FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
-	auto m = matrix::scale(scale, scale, 1);
+	auto m = mat4::scale(scale, scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 	nix::set_projection_matrix(m * shadow_proj);
-	nix::set_view_matrix(matrix::ID);
-	nix::set_model_matrix(matrix::ID);
+	nix::set_view_matrix(mat4::ID);
+	nix::set_model_matrix(mat4::ID);
 
 	nix::clear_z();
 

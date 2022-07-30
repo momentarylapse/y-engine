@@ -107,7 +107,7 @@ void ParticleManager::iterate(float dt) {
 	}
 }
 
-void ParticleManager::shift_all(const vector &dpos) {
+void ParticleManager::shift_all(const vec3 &dpos) {
 	for (auto g: groups) {
 		for (auto *p: g->particles)
 			p->pos += dpos;

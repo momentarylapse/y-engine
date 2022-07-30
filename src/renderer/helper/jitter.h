@@ -7,8 +7,8 @@
 
 #pragma once
 
-class matrix;
+class mat4;
 
-matrix jitter(float w, float h, int uid);
+mat4 jitter(float w, float h, int uid);
 void jitter_iterate();
 

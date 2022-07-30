@@ -9,7 +9,7 @@
 
 #include "../graphics-fwd.h"
 #include "../lib/base/base.h"
-#include "../lib/math/vector.h"
+#include "../lib/math/vec3.h"
 #include "../lib/math/rect.h"
 #include "../lib/image/color.h"
 #include "../y/BaseClass.h"
@@ -24,15 +24,15 @@
 class Particle : public BaseClass {
 public:
 
-	Particle(const vector &pos, float r, Texture *tex, float ttl);
+	Particle(const vec3 &pos, float r, Texture *tex, float ttl);
 	virtual ~Particle();
 
-	void __init__(const vector &pos, float r, Texture *tex, float ttl);
+	void __init__(const vec3 &pos, float r, Texture *tex, float ttl);
 	void __delete__() override;
 	virtual void on_iterate(float dt) {}
 
-	vector pos;
-	vector vel;
+	vec3 pos;
+	vec3 vel;
 	color col;
 	rect source;
 	Texture *texture;

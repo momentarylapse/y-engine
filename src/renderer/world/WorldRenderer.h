@@ -9,8 +9,8 @@
 
 #include "../Renderer.h"
 #include "../../graphics-fwd.h"
-#include "../../lib/math/matrix.h"
-#include "../../lib/math/vector.h"
+#include "../../lib/math/mat4.h"
+#include "../../lib/math/vec3.h"
 #include "../../lib/image/color.h"
 #include "../../lib/base/callable.h"
 #include "../../lib/base/pointer.h"
@@ -19,20 +19,20 @@ class ShadowMapRenderer;
 class PerformanceMonitor;
 class World;
 class Camera;
-class matrix;
-class vector;
+class mat4;
+class vec3;
 class quaternion;
 class Material;
 class UBOLight;
 
-matrix mtr(const vector &t, const quaternion &a);
+mat4 mtr(const vec3 &t, const quaternion &a);
 
 
 
 struct UBOMatrices {
-	alignas(16) matrix model;
-	alignas(16) matrix view;
-	alignas(16) matrix proj;
+	alignas(16) mat4 model;
+	alignas(16) mat4 view;
+	alignas(16) mat4 proj;
 };
 
 struct UBOFog {
@@ -41,7 +41,7 @@ struct UBOFog {
 };
 
 struct VertexFx {
-	vector pos;
+	vec3 pos;
 	color col;
 	float u, v;
 };
@@ -85,7 +85,7 @@ public:
 	shared<CubeMap> cube_map;
 
 	//Camera *shadow_cam;
-	matrix shadow_proj;
+	mat4 shadow_proj;
 	int shadow_index;
 
 	float shadow_box_size;

@@ -14,13 +14,13 @@
 #include "../../gui/Picture.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../lib/math/matrix.h"
+#include "../../lib/math/mat4.h"
 #include "../../lib/math/rect.h"
 
 
 
 struct UBOGUI {
-	matrix m,v,p;
+	mat4 m,v,p;
 	color col;
 	rect source;
 	float blur, exposure, gamma;
@@ -54,8 +54,8 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source) {
 	gui::update();
 
 	UBOGUI u;
-	u.v = matrix::ID;
-	u.p = matrix::scale(2.0f, 2.0f, 1) * matrix::translation(vector(-0.5f, -0.5f, 0)); // nix::set_projection_ortho_relative()
+	u.v = mat4::ID;
+	u.p = mat4::scale(2.0f, 2.0f, 1) * mat4::translation(vec3(-0.5f, -0.5f, 0)); // nix::set_projection_ortho_relative()
 	u.gamma = 2.2f;
 	u.exposure = 1.0f;
 
@@ -73,11 +73,11 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source) {
 			}
 
 			if (p->angle == 0) {
-				u.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(p->eff_area.width(), p->eff_area.height(), 0);
+				u.m = mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(p->eff_area.width(), p->eff_area.height(), 0);
 			} else {
 				// TODO this should use the physical ratio
 				float r = (float)width / (float)height;
-				u.m = matrix::translation(vector(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * matrix::scale(1/r, 1, 0) * matrix::rotation_z(p->angle) * matrix::scale(p->eff_area.width() * r, p->eff_area.height(), 0);
+				u.m = mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(1/r, 1, 0) * mat4::rotation_z(p->angle) * mat4::scale(p->eff_area.width() * r, p->eff_area.height(), 0);
 			}
 			u.blur = p->bg_blur;
 			u.col = p->eff_col;

@@ -8,17 +8,17 @@
 #pragma once
 
 #include "../lib/base/base.h"
-#include "../lib/math/vector.h"
-#include "../lib/math/matrix.h"
+#include "../lib/math/vec3.h"
+#include "../lib/math/mat4.h"
 #include "../lib/image/color.h"
 #include "../y/Component.h"
 
 class Camera;
 
 struct UBOLight {
-	alignas(16) matrix proj; // view -> texture
-	alignas(16) vector pos;
-	alignas(16) vector dir;
+	alignas(16) mat4 proj; // view -> texture
+	alignas(16) vec3 pos;
+	alignas(16) vec3 dir;
 	alignas(16) color col;
 	alignas(16) float radius;
 	float theta, harshness;
@@ -34,12 +34,12 @@ class Light : public Component {
 public:
 	Light(const color &c, float r, float t);
 	/*void __init_parallel__(const quaternion &ang, const color &c);
-	void __init_spherical__(const vector &p, const color &c, float r);
-	void __init_cone__(const vector &p, const quaternion &ang, const color &c, float r, float t);*/
+	void __init_spherical__(const vec3 &p, const color &c, float r);
+	void __init_cone__(const vec3 &p, const quaternion &ang, const color &c, float r, float t);*/
 
 	void on_init() override;
 
-	void set_direction(const vector &dir);
+	void set_direction(const vec3 &dir);
 
 	void update(Camera *cam, float shadow_box_size, bool using_view_space);
 
@@ -48,7 +48,7 @@ public:
 	bool allow_shadow;
 	bool user_shadow_control;
 	float user_shadow_theta;
-	matrix shadow_projection; // world -> texture
+	mat4 shadow_projection; // world -> texture
 	float shadow_dist_min, shadow_dist_max;
 
 	LightType type;

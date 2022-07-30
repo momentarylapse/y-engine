@@ -11,7 +11,7 @@
 #ifdef USING_VULKAN
 #include "../../lib/base/pointer.h"
 #include "../../lib/base/callable.h"
-#include "../../lib/math/vector.h"
+#include "../../lib/math/vec3.h"
 #include "../../lib/math/rect.h"
 
 namespace vulkan {
@@ -41,7 +41,7 @@ enum class ShaderVariant;
 
 struct UBO {
 	// matrix
-	matrix m,v,p;
+	mat4 m,v,p;
 	// material
 	color albedo, emission;
 	float roughness, metal;
@@ -57,7 +57,7 @@ struct RenderDataVK {
 };
 
 struct UBOFx {
-	matrix m,v,p;
+	mat4 m,v,p;
 };
 
 struct RenderDataFxVK {
@@ -100,7 +100,7 @@ public:
 
 	virtual void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) = 0;
 	virtual void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) = 0;
-	void render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vector &pos);
+	void render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vec3 &pos);
 
 
 	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
@@ -116,7 +116,7 @@ public:
 	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);
 
 
-	void draw_user_mesh(VertexBuffer *vb, Shader *s, const matrix &m, const Array<Texture*> &tex, const Any &data);
+	void draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data);
 };
 
 #endif

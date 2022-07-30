@@ -19,8 +19,8 @@ ParticleEmitter::ParticleEmitter() : BaseClass(BaseClass::Type::PARTICLE_EMITTER
 	spawn_dt = 0.1f;
 	texture = tex_white;
 
-	pos = vector::ZERO;
-	spawn_vel = vector(0,0,100);
+	pos = vec3::ZERO;
+	spawn_vel = vec3(0,0,100);
 	spawn_dvel = 20;
 	spawn_radius = 10;
 	spawn_dradius = 5;

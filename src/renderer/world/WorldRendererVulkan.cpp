@@ -11,7 +11,7 @@
 #include "../helper/PipelineManager.h"
 #include "../../graphics-impl.h"
 #include "../../lib/image/image.h"
-#include "../../lib/math/vector.h"
+#include "../../lib/math/vec3.h"
 #include "../../lib/math/complex.h"
 #include "../../lib/math/rect.h"
 #include "../../lib/os/msg.h"
@@ -125,7 +125,7 @@ WorldRendererVulkan::~WorldRendererVulkan() {
 }
 
 
-void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vector &pos) {
+void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vec3 &pos) {
 	if (!fb_cube)
 		fb_cube = new FrameBuffer(render_pass_cube, {depth_cube.get()});
 	Entity o(pos, quaternion::ID);
@@ -140,17 +140,17 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 			return;
 		}
 		if (i == 0)
-			o.ang = quaternion::rotation(vector(0,pi/2,0));
+			o.ang = quaternion::rotation(vec3(0,pi/2,0));
 		if (i == 1)
-			o.ang = quaternion::rotation(vector(0,-pi/2,0));
+			o.ang = quaternion::rotation(vec3(0,-pi/2,0));
 		if (i == 2)
-			o.ang = quaternion::rotation(vector(-pi/2,pi,pi));
+			o.ang = quaternion::rotation(vec3(-pi/2,pi,pi));
 		if (i == 3)
-			o.ang = quaternion::rotation(vector(pi/2,pi,pi));
+			o.ang = quaternion::rotation(vec3(pi/2,pi,pi));
 		if (i == 4)
-			o.ang = quaternion::rotation(vector(0,0,0));
+			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
-			o.ang = quaternion::rotation(vector(0,pi,0));
+			o.ang = quaternion::rotation(vec3(0,pi,0));
 		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cam, rvd_cube[i]);
 	}
 	cam.owner = nullptr;
@@ -185,7 +185,7 @@ void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descri
 	if (using_view_space)
 		s->set_floats("eye_pos", &cam->owner->pos.x, 3);
 	else
-		s->set_floats("eye_pos", &vector::ZERO.x, 3);
+		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	for (auto &u: m->uniforms)
@@ -244,10 +244,10 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 	UBOFx ubo;
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
-	ubo.m = matrix::ID;
+	ubo.m = mat4::ID;
 
 	// particles
-	auto r = matrix::rotation_q(cam->owner->ang);
+	auto r = mat4::rotation_q(cam->owner->ang);
 	int index = 0;
 	for (auto g: world.particle_manager->groups) {
 
@@ -264,14 +264,14 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 		Array<VertexFx> v;
 		for (auto p: g->particles)
 			if (p->enabled) {
-				auto m = matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius);
+				auto m = mat4::translation(p->pos) * r * mat4::scale(p->radius, p->radius, p->radius);
 
-				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
-				v.add({m * vector( 1, 1,0), p->col, p->source.x2, p->source.y1});
-				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
-				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
-				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
-				v.add({m * vector(-1,-1,0), p->col, p->source.x1, p->source.y2});
+				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vec3( 1, 1,0), p->col, p->source.x2, p->source.y1});
+				v.add({m * vec3( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vec3( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vec3(-1,-1,0), p->col, p->source.x1, p->source.y2});
 			}
 		rda[index].vb->update(v);
 
@@ -304,17 +304,17 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 			// TODO geometry shader!
 			auto pa = cam->project(p->pos);
 			auto pb = cam->project(p->pos + p->length);
-			auto pe = vector::cross(pb - pa, vector::EZ).normalized();
+			auto pe = vec3::cross(pb - pa, vec3::EZ).normalized();
 			auto uae = cam->unproject(pa + pe * 0.1f);
 			auto ube = cam->unproject(pb + pe * 0.1f);
 			auto _e1 = (p->pos - uae).normalized() * p->radius;
 			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
-			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
+			//vec3 e1 = -vec3::cross(cam->ang * vec3::EZ, p->length).normalized() * p->radius/2;
 
-			vector p00 = p->pos - _e1;
-			vector p01 = p->pos - _e2 + p->length;
-			vector p10 = p->pos + _e1;
-			vector p11 = p->pos + _e2 + p->length;
+			vec3 p00 = p->pos - _e1;
+			vec3 p01 = p->pos - _e2 + p->length;
+			vec3 p10 = p->pos + _e1;
+			vec3 p11 = p->pos + _e2 + p->length;
 
 			v.add({p00, p->col, p->source.x1, p->source.y1});
 			v.add({p01, p->col, p->source.x2, p->source.y1});
@@ -354,13 +354,13 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camer
 	cam->update_matrices(aspect);
 
 	ubo.p = cam->m_projection;
-	ubo.v = matrix::rotation_q(cam->owner->ang).transpose();
-	ubo.m = matrix::ID;
+	ubo.v = mat4::rotation_q(cam->owner->ang).transpose();
+	ubo.m = mat4::ID;
 	ubo.num_lights = world.lights.num;
 
 	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->owner->ang);
-		ubo.m = sb->_matrix * matrix::scale(10,10,10);
+		sb->_matrix = mat4::rotation_q(sb->owner->ang);
+		ubo.m = sb->_matrix * mat4::scale(10,10,10);
 
 
 		for (int i=0; i<sb->material.num; i++) {
@@ -393,12 +393,12 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 	auto &rda = rvd.rda_tr;
 	int index = 0;
 
-	ubo.m = matrix::ID;
+	ubo.m = mat4::ID;
 
 	auto terrains = ComponentManager::get_listx<Terrain>();
 	for (auto *t: *terrains) {
 		auto o = t->owner;
-		ubo.m = matrix::translation(o->pos);
+		ubo.m = mat4::translation(o->pos);
 		ubo.albedo = t->material->albedo;
 		ubo.emission = t->material->emission;
 		ubo.metal = t->material->metal;
@@ -448,7 +448,7 @@ void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp,
 	auto &rda = rvd.rda_ob;
 	int index = 0;
 
-	ubo.m = matrix::ID;
+	ubo.m = mat4::ID;
 
 	for (auto &s: world.sorted_opaque) {
 		if (!s.material->cast_shadow and !allow_material)
@@ -458,7 +458,7 @@ void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp,
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (index >= rda.num) {
-			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(matrix) * ani->dmatrix.num) : sizeof(UBO)),
+			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
 				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
@@ -495,7 +495,7 @@ void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass
 	auto &rda = rvd.rda_ob_trans;
 	int index = 0;
 
-	ubo.m = matrix::ID;
+	ubo.m = mat4::ID;
 
 	for (auto &s: world.sorted_trans) {
 		//if (!s.material->cast_shadow)
@@ -505,7 +505,7 @@ void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (index >= rda.num) {
-			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(matrix) * ani->dmatrix.num) : sizeof(UBO)),
+			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
 				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
@@ -561,7 +561,7 @@ void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 
-void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const matrix &m, const Array<Texture*> &tex, const Any &data) {
+void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data) {
 	auto cb = command_buffer();
 
 	static Map<VertexBuffer*,RenderDataVK> rdas;

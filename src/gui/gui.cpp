@@ -10,8 +10,8 @@
 #include "Font.h"
 #include "../meta.h"
 #include "../lib/math/rect.h"
-#include "../lib/math/vector.h"
-#include "../lib/math/matrix.h"
+#include "../lib/math/vec3.h"
+#include "../lib/math/mat4.h"
 #include "../lib/kaba/kaba.h"
 #include "../helper/PerformanceMonitor.h"
 #include <stdio.h>

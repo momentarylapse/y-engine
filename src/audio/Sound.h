@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../lib/config.h"
-#include "../lib/math/vector.h"
+#include "../lib/math/vec3.h"
 #include "../y/BaseClass.h"
 
 class Path;
@@ -11,7 +11,7 @@ namespace audio {
 class Sound : public BaseClass {
 public:
 	bool loop, suicidal;
-	vector pos, vel;
+	vec3 pos, vel;
 	float volume, speed;
 
 	unsigned int al_source, al_buffer;
@@ -25,11 +25,11 @@ public:
 	void _cdecl pause(bool pause);
 	bool _cdecl is_playing();
 	bool _cdecl has_ended();
-	void _cdecl set_data(const vector &pos, const vector &vel, float min_dist, float max_dist, float speed, float volume);
+	void _cdecl set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume);
 
 
 	static Sound *_cdecl load(const Path &filename);
-	static Sound *_cdecl emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
+	static Sound *_cdecl emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
 };
 
 class AudioFile {
@@ -84,7 +84,7 @@ extern float VolumeMusic, VolumeSound;
 void init();
 void exit();
 void calc_move();
-void _cdecl set_listener(const vector &pos, const quaternion &ang, const vector &vel, float v_sound);
+void _cdecl set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float v_sound);
 void reset();
 void clear_small_cache();
 

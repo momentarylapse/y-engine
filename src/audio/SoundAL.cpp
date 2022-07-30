@@ -11,7 +11,7 @@
 
 #include "Sound.h"
 #include "../y/EngineData.h"
-#include "../lib/math/vector.h"
+#include "../lib/math/vec3.h"
 #include "../lib/math/quaternion.h"
 #include "../lib/os/file.h"
 #include "../lib/os/msg.h"
@@ -141,7 +141,7 @@ Sound *Sound::load(const Path &filename) {
 }
 
 
-Sound *Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
+Sound *Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
 	Sound *s = Sound::load(filename);
 	s->suicidal = true;
 	s->set_data(pos, v_0, min_dist, max_dist, speed, volume);
@@ -207,7 +207,7 @@ bool Sound::has_ended() {
 	return !is_playing(); // TODO... (paused...)
 }
 
-void Sound::set_data(const vector &_pos, const vector &_vel, float min_dist, float max_dist, float _speed, float _volume) {
+void Sound::set_data(const vec3 &_pos, const vec3 &_vel, float min_dist, float max_dist, float _speed, float _volume) {
 	pos = _pos;
 	vel = _vel;
 	volume = _volume;
@@ -221,13 +221,13 @@ void Sound::set_data(const vector &_pos, const vector &_vel, float min_dist, flo
 	alSourcef (al_source, AL_MAX_DISTANCE, max_dist);
 }
 
-void set_listener(const vector &pos, const quaternion &ang, const vector &vel, float v_sound) {
+void set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float v_sound) {
 	ALfloat ListenerOri[6];
-	vector dir = ang * vector::EZ;
+	vec3 dir = ang * vec3::EZ;
 	ListenerOri[0] = dir.x;
 	ListenerOri[1] = dir.y;
 	ListenerOri[2] = dir.z;
-	vector up = ang * vector::EY;
+	vec3 up = ang * vec3::EY;
 	ListenerOri[3] = up.x;
 	ListenerOri[4] = up.y;
 	ListenerOri[5] = up.z;
@@ -359,7 +359,7 @@ namespace audio {
 void init(){}
 void exit(){}
 Sound* Sound::load(const Path &filename){ return nullptr; }
-Sound* Sound::emit(const Path &filename, const vector &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
+Sound* Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
 Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {}
 Sound::~Sound(){}
 void Sound::__delete__(){}
@@ -369,8 +369,8 @@ void Sound::stop(){}
 void Sound::pause(bool pause){}
 bool Sound::is_playing(){ return false; }
 bool Sound::has_ended(){ return false; }
-void Sound::set_data(const vector &pos, const vector &vel, float min_dist, float max_dist, float speed, float volume){}
-void set_listener(const vector& pos, const quaternion& ang, const vector& vel, float v_sound) {}
+void Sound::set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume){}
+void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {}
 Music *Music::load(const Path &filename){ return nullptr; }
 Music::~Music(){}
 void Music::play(bool repeat){}

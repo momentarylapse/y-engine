@@ -12,7 +12,7 @@
 
 class Particle;
 class Beam;
-class vector;
+class vec3;
 
 class ParticleGroup {
 public:
@@ -35,7 +35,7 @@ public:
 	bool unregister(Particle *p);
 	void clear();
 	void iterate(float dt);
-	void shift_all(const vector &dpos);
+	void shift_all(const vec3 &dpos);
 };
 
 

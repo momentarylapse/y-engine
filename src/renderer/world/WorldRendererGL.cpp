@@ -13,7 +13,7 @@
 #include "../base.h"
 #include "../../graphics-impl.h"
 #include "../../lib/image/image.h"
-#include "../../lib/math/vector.h"
+#include "../../lib/math/vec3.h"
 #include "../../lib/math/complex.h"
 #include "../../lib/math/rect.h"
 #include "../../lib/os/msg.h"
@@ -67,7 +67,7 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 	ubo_multi_matrix = new nix::UniformBuffer();
 }
 
-void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vector &pos) {
+void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity o(pos, quaternion::ID);
@@ -82,17 +82,17 @@ void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, con
 			return;
 		}
 		if (i == 0)
-			o.ang = quaternion::rotation(vector(0,pi/2,0));
+			o.ang = quaternion::rotation(vec3(0,pi/2,0));
 		if (i == 1)
-			o.ang = quaternion::rotation(vector(0,-pi/2,0));
+			o.ang = quaternion::rotation(vec3(0,-pi/2,0));
 		if (i == 2)
-			o.ang = quaternion::rotation(vector(-pi/2,pi,pi));
+			o.ang = quaternion::rotation(vec3(-pi/2,pi,pi));
 		if (i == 3)
-			o.ang = quaternion::rotation(vector(pi/2,pi,pi));
+			o.ang = quaternion::rotation(vec3(pi/2,pi,pi));
 		if (i == 4)
-			o.ang = quaternion::rotation(vector(0,0,0));
+			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
-			o.ang = quaternion::rotation(vector(0,pi,0));
+			o.ang = quaternion::rotation(vec3(0,pi,0));
 		prepare_lights(&cam);
 		render_into_texture(fb_cube.get(), &cam);
 	}
@@ -107,7 +107,7 @@ void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant 
 	if (using_view_space)
 		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH....
 	else
-		s->set_floats("eye_pos", &vector::ZERO.x, 3);
+		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	for (auto &u: m->uniforms)
@@ -163,30 +163,30 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	nix::set_z(false, true);
 
 	// particles
-	auto r = matrix::rotation_q(cam->owner->ang);
+	auto r = mat4::rotation_q(cam->owner->ang);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 
 		Array<VertexFx> v;
 		for (auto p: g->particles)
 			if (p->enabled) {
-				auto m = matrix::translation(p->pos) * r * matrix::scale(p->radius, p->radius, p->radius);
+				auto m = mat4::translation(p->pos) * r * mat4::scale(p->radius, p->radius, p->radius);
 
-				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
-				v.add({m * vector( 1, 1,0), p->col, p->source.x2, p->source.y1});
-				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
-				v.add({m * vector(-1, 1,0), p->col, p->source.x1, p->source.y1});
-				v.add({m * vector( 1,-1,0), p->col, p->source.x2, p->source.y2});
-				v.add({m * vector(-1,-1,0), p->col, p->source.x1, p->source.y2});
+				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vec3( 1, 1,0), p->col, p->source.x2, p->source.y1});
+				v.add({m * vec3( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
+				v.add({m * vec3( 1,-1,0), p->col, p->source.x2, p->source.y2});
+				v.add({m * vec3(-1,-1,0), p->col, p->source.x1, p->source.y2});
 			}
 		vb_fx->update(v);
-		nix::set_model_matrix(matrix::ID);
+		nix::set_model_matrix(mat4::ID);
 		nix::draw_triangles(vb_fx);
 	}
 
 	// beams
 	//Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
-	nix::set_model_matrix(matrix::ID);
+	nix::set_model_matrix(mat4::ID);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 
@@ -198,17 +198,17 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 			// TODO geometry shader!
 			auto pa = cam->project(p->pos);
 			auto pb = cam->project(p->pos + p->length);
-			auto pe = vector::cross(pb - pa, vector::EZ).normalized();
+			auto pe = vec3::cross(pb - pa, vec3::EZ).normalized();
 			auto uae = cam->unproject(pa + pe * 0.1f);
 			auto ube = cam->unproject(pb + pe * 0.1f);
 			auto _e1 = (p->pos - uae).normalized() * p->radius;
 			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
-			//vector e1 = -vector::cross(cam->ang * vector::EZ, p->length).normalized() * p->radius/2;
+			//vec3 e1 = -vec3::cross(cam->ang * vec3::EZ, p->length).normalized() * p->radius/2;
 
-			vector p00 = p->pos - _e1;
-			vector p01 = p->pos - _e2 + p->length;
-			vector p10 = p->pos + _e1;
-			vector p11 = p->pos + _e2 + p->length;
+			vec3 p00 = p->pos - _e1;
+			vec3 p01 = p->pos - _e2 + p->length;
+			vec3 p10 = p->pos + _e1;
+			vec3 p11 = p->pos + _e2 + p->length;
 
 			v.add({p00, p->col, p->source.x1, p->source.y1});
 			v.add({p01, p->col, p->source.x2, p->source.y1});
@@ -237,10 +237,10 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 void WorldRendererGL::draw_skyboxes(Camera *cam) {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(matrix::rotation_q(cam->owner->ang).transpose());
+	nix::set_view_matrix(mat4::rotation_q(cam->owner->ang).transpose());
 	for (auto *sb: world.skybox) {
-		sb->_matrix = matrix::rotation_q(sb->owner->ang);
-		nix::set_model_matrix(sb->_matrix * matrix::scale(10,10,10));
+		sb->_matrix = mat4::rotation_q(sb->owner->ang);
+		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
 			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
@@ -254,7 +254,7 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 	auto terrains = ComponentManager::get_listx<Terrain>();
 	for (auto *t: *terrains) {
 		auto o = t->owner;
-		nix::set_model_matrix(matrix::translation(o->pos));
+		nix::set_model_matrix(mat4::translation(o->pos));
 		if (allow_material) {
 			set_material(t->material, type, ShaderVariant::DEFAULT);
 			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
@@ -362,7 +362,7 @@ void WorldRendererGL::prepare_lights(Camera *cam) {
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 
-void WorldRendererGL::draw_user_mesh(VertexBuffer *vb, Shader *s, const matrix &m, const Array<Texture*> &tex, const Any &data) {
+void WorldRendererGL::draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data) {
 	nix::set_textures(tex);
 	nix::set_model_matrix(m);
 	nix::set_z(true, true);

@@ -84,17 +84,17 @@ void global_delete(BaseClass *e) {
 #pragma GCC optimize("no-inline")
 #pragma GCC optimize("0")
 
-Entity* _create_object(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+Entity* _create_object(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object(filename, pos, ang); );
 	return nullptr;
 }
 
-Entity* _create_object_no_reg(World *w, const Path &filename, const vector &pos, const quaternion &ang) {
+Entity* _create_object_no_reg(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_no_reg(filename, pos, ang); );
 	return nullptr;
 }
 
-Model* _create_object_multi(World *w, const Path &filename, const Array<vector> &pos, const Array<quaternion> &ang) {
+Model* _create_object_multi(World *w, const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_multi(filename, pos, ang); );
 	return nullptr;
 }
@@ -426,7 +426,7 @@ void PluginManager::export_kaba() {
 
 	kaba::link_external("__get_component_list", (void*)&ComponentManager::get_list);
 
-	Particle particle(vector::ZERO, 0, nullptr, -1);
+	Particle particle(vec3::ZERO, 0, nullptr, -1);
 	kaba::declare_class_size("Particle", sizeof(Particle));
 	kaba::declare_class_element("Particle.pos", &Particle::pos);
 	kaba::declare_class_element("Particle.vel", &Particle::vel);

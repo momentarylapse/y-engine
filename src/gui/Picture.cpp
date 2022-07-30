@@ -7,8 +7,8 @@
 
 #include "Picture.h"
 #include "../lib/math/rect.h"
-#include "../lib/math/vector.h"
-#include "../lib/math/matrix.h"
+#include "../lib/math/vec3.h"
+#include "../lib/math/mat4.h"
 #include "../graphics-impl.h"
 #include <iostream>
 
@@ -21,9 +21,9 @@ vulkan::RenderPass *Picture::render_pass = nullptr;*/
 
 
 struct UBOMatrices {
-	alignas(16) matrix model;
-	alignas(16) matrix view;
-	alignas(16) matrix proj;
+	alignas(16) mat4 model;
+	alignas(16) mat4 view;
+	alignas(16) mat4 proj;
 };
 
 

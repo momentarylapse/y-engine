@@ -143,12 +143,12 @@ void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffe
 	cb->begin_render_pass(render_pass_shadow, sfb);
 	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));
 
-	auto m = matrix::scale(scale, -scale, 1);
+	auto m = mat4::scale(scale, -scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 
 	UBO ubo;
 	ubo.p = m * shadow_proj;
-	ubo.v = matrix::ID;
+	ubo.v = mat4::ID;
 	ubo.num_lights = 0;
 	ubo.shadow_index = -1;
 

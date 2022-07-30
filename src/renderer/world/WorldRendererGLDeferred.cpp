@@ -104,7 +104,7 @@ void WorldRendererGLDeferred::draw() {
 
 	PerformanceMonitor::begin(ch_trans);
 	bool flip_y = rendering_into_window();
-	matrix m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
+	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	cam_main->update_matrices((float)target->width / (float)target->height);
 	nix::set_projection_matrix(m * cam_main->m_projection);
 	nix::bind_buffer(ubo_light, 1);
@@ -115,8 +115,8 @@ void WorldRendererGLDeferred::draw() {
 	draw_particles(cam_main);
 
 	nix::set_z(false, false);
-	nix::set_projection_matrix(matrix::ID);
-	nix::set_view_matrix(matrix::ID);
+	nix::set_projection_matrix(mat4::ID);
+	nix::set_view_matrix(mat4::ID);
 	PerformanceMonitor::end(ch_trans);
 
 	PerformanceMonitor::end(channel);
@@ -128,7 +128,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, Camera *cam)
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	bool flip_y = rendering_into_window();
-	matrix m = flip_y ? matrix::scale(1,-1,1) : matrix::ID;
+	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
 
@@ -144,7 +144,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	PerformanceMonitor::begin(ch_gbuf_out);
 	auto s = shader_gbuffer_out.get();
 	if (using_view_space)
-		s->set_floats("eye_pos", &vector::ZERO.x, 3);
+		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	else
 		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH
 	s->set_int("num_lights", lights.num);
@@ -183,7 +183,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,-1,1) * cam->m_projection);
+	nix::set_projection_matrix(mat4::scale(1,-1,1) * cam->m_projection);
 
 	//nix::clear_color(Green);//world.background);
 	nix::clear_z();
@@ -193,7 +193,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *
 
 	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(matrix::scale(1,1,1) * cam->m_projection);
+	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
 
 	nix::bind_buffer(ubo_light, 1);
 	nix::set_view_matrix(cam->view_matrix());
@@ -218,8 +218,8 @@ void WorldRendererGLDeferred::draw_world(bool allow_material) {
 void WorldRendererGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
-	nix::set_projection_matrix(matrix::translation(vector(0,0,0.5f)) * matrix::scale(1,1,0.5f) * matrix::scale(scale, scale, 1) * shadow_proj);
-	nix::set_view_matrix(matrix::ID);
+	nix::set_projection_matrix(mat4::translation(vec3(0,0,0.5f)) * mat4::scale(1,1,0.5f) * mat4::scale(scale, scale, 1) * shadow_proj);
+	nix::set_view_matrix(mat4::ID);
 
 	nix::clear_z();
 

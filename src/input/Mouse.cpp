@@ -86,7 +86,7 @@ void iterate_mouse() {
 
 	auto mouse01_prev = mouse01;
 
-	//mouse = vector(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
+	//mouse = vec3(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
 	dmouse = mouse_state.d / 500.0f;
 	mouse += dmouse;
 	mouse.x = clamp(mouse.x, 0.0f, engine.physical_aspect_ratio);

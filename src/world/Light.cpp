@@ -14,8 +14,8 @@ const kaba::Class *Light::_class = nullptr;
 
 Light::Light(const color &c, float r, float t) {
 	component_type = _class;
-	light.pos = vector(0,0,0);
-	light.dir = vector::EZ;
+	light.pos = vec3(0,0,0);
+	light.dir = vec3::EZ;
 	light.col = c;
 	light.radius = r;
 	light.theta = t;
@@ -40,21 +40,21 @@ Light::Light(const color &c, float r, float t) {
 void Light::on_init() {
 	auto o = owner;
 	light.pos = o->pos;
-	light.dir = o->ang * vector::EZ;
+	light.dir = o->ang * vec3::EZ;
 }
 
 /*void Light::__init_parallel__(const quaternion &ang, const color &c) {
 	new(this) Light(v_0, ang, c, -1, -1);
 }
-void Light::__init_spherical__(const vector &p, const color &c, float r) {
+void Light::__init_spherical__(const vec3 &p, const color &c, float r) {
 	new(this) Light(p, quaternion::ID, c, r, -1);
 }
-void Light::__init_cone__(const vector &p, const quaternion &ang, const color &c, float r, float t) {
+void Light::__init_cone__(const vec3 &p, const quaternion &ang, const color &c, float r, float t) {
 	new(this) Light(p, ang, c, r, t);
 }*/
 
 
-void Light::set_direction(const vector &dir) {
+void Light::set_direction(const vec3 &dir) {
 	owner->ang = quaternion::rotation(dir.dir2ang());
 }
 
@@ -63,36 +63,36 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 	if (using_view_space) {
 		//light.pos = cam->m_view * o->pos;
 		light.pos = cam->view_matrix() * o->pos;
-		light.dir = cam->owner->ang.bar() * o->ang * vector::EZ;
+		light.dir = cam->owner->ang.bar() * o->ang * vec3::EZ;
 	} else {
 		light.pos = o->pos;
-		light.dir = o->ang * vector::EZ;
+		light.dir = o->ang * vec3::EZ;
 	}
 
 	if (allow_shadow) {
 		if (type == LightType::DIRECTIONAL) {
 			//msg_write(format("shadow dir: %s  %s", light.pos.str(), light.dir.str()));
-			vector center = cam->owner->pos + cam->owner->ang*vector::EZ * (shadow_box_size / 3.0f);
+			vec3 center = cam->owner->pos + cam->owner->ang*vec3::EZ * (shadow_box_size / 3.0f);
 			float grid = shadow_box_size / 16;
 			center.x -= fmod(center.x, grid) - grid/2;
 			center.y -= fmod(center.y, grid) - grid/2;
 			center.z -= fmod(center.z, grid) - grid/2;
-			//center = vector(0,200,0);
-			auto t = matrix::translation(- center);
-			//auto r = matrix::rotation({pi/2,0,0}).transpose();
+			//center = vec3(0,200,0);
+			auto t = mat4::translation(- center);
+			//auto r = mat4::rotation({pi/2,0,0}).transpose();
 			//o->ang = quaternion(pi/2, {1,0,0});
-			auto r = matrix::rotation(o->ang).transpose();
+			auto r = mat4::rotation(o->ang).transpose();
 			float f = 1 / shadow_box_size;
-			auto s = matrix::scale(f, f, f);
+			auto s = mat4::scale(f, f, f);
 			// map onto [-1,1]x[-1,1]x[0,1]
-			shadow_projection = matrix::translation(vector(0,0,0.5f)) * matrix::scale(1,1,0.5f) * matrix::translation(vector(0,0,-0.5f)) * s * r * t;
+			shadow_projection = mat4::translation(vec3(0,0,0.5f)) * mat4::scale(1,1,0.5f) * mat4::translation(vec3(0,0,-0.5f)) * s * r * t;
 			//msg_write(shadow_projection.str());
 		} else {
-			auto t = matrix::translation(- o->pos);
+			auto t = mat4::translation(- o->pos);
 			auto ang = cam->owner->ang;
 			if (type == LightType::CONE or user_shadow_control)
 				ang = o->ang;
-			auto r = matrix::rotation(ang).transpose();
+			auto r = mat4::rotation(ang).transpose();
 			float theta = 1.35f;
 			if (type == LightType::CONE)
 				theta = light.theta;
@@ -100,7 +100,7 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 				theta = user_shadow_theta;
 			float dist_min = (shadow_dist_min > 0) ? shadow_dist_min : light.radius * 0.01f;
 			float dist_max = (shadow_dist_max > 0) ? shadow_dist_max : light.radius;
-			auto p = matrix::perspective(2 * theta, 1.0f, dist_min, dist_max, false);
+			auto p = mat4::perspective(2 * theta, 1.0f, dist_min, dist_max, false);
 			shadow_projection = p * r * t;
 		}
 		if (using_view_space)
