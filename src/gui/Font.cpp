@@ -161,8 +161,17 @@ Path find_system_font_file(const string &name) {
 #ifdef OS_WINDOWS
 	return "c:\\Windows\\Fonts\\arial.ttf";
 #else
+	if (os::fs::exists(base << "truetype/noto/NotoSans-Regular.ttf"))
+		return base << "truetype/noto/NotoSans-Regular.ttf";
 	//return "/usr/share/fonts/TTF/DejaVuSansMono.ttf";
-	return "/usr/share/fonts/noto/NotoSans-Regular.ttf";
+	if (os::fs::exists(base << "noto/NotoSans-Regular.ttf"))
+		return base << "noto/NotoSans-Regular.ttf";
+	if (os::fs::exists(base << "truetype/freefont/FreeSans.ttf"))
+		return base << "truetype/freefont/FreeSans.ttf";
+	list = os::fs::search(base, "*Sans*.ttf", "rf");
+	if (list.num > 0)
+		return base << list[0];
+	return "?";
 #endif
 }
 
