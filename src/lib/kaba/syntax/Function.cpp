@@ -165,13 +165,20 @@ void Function::update_parameters_after_parsing() {
 	if (is_member()) {
 		if (!__get_var(IDENTIFIER_SELF))
 			add_self_parameter();
-		if (!is_const())
-			flags_clear(__get_var(IDENTIFIER_SELF)->flags, Flags::CONST);
+		/*if (flags_has(flags, Flags::CONST))
+			flags_set(__get_var(IDENTIFIER_SELF)->flags, Flags::CONST);
+		if (flags_has(flags, Flags::REF))
+			flags_set(__get_var(IDENTIFIER_SELF)->flags, Flags::REF);*/
 	}
 }
 
 void Function::add_self_parameter() {
-	block->insert_var(0, IDENTIFIER_SELF, name_space, is_const() ? Flags::CONST : Flags::NONE);
+	auto _flags = Flags::NONE;
+	if (flags_has(flags, Flags::CONST))
+		flags_set(_flags, Flags::CONST);
+	if (flags_has(flags, Flags::REF))
+		flags_set(_flags, Flags::REF);
+	block->insert_var(0, IDENTIFIER_SELF, name_space, _flags);
 	literal_param_type.insert(name_space, 0);
 	abstract_param_types.insert(nullptr, 0);
 	num_params ++;
@@ -227,10 +234,18 @@ bool Function::is_member() const {
 
 bool Function::is_const() const {
 	return flags_has(flags, Flags::CONST);
+
+	// hmmm, might be better, to use self:
+	if (is_static())
+		return false;
+	return __get_var(IDENTIFIER_SELF)->is_const();
 }
 
 bool Function::is_selfref() const {
-	return flags_has(flags, Flags::SELFREF);
+	if (is_static())
+		return false;
+	return flags_has(flags, Flags::REF);
+	return flags_has(__get_var(IDENTIFIER_SELF)->flags, Flags::REF);
 }
 
 bool Function::throws_exceptions() const {

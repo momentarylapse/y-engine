@@ -1,4 +1,5 @@
 #include "../../base/base.h"
+#include "../../base/iter.h"
 #include "../kaba.h"
 #include "../../os/msg.h"
 #include "Class.h"
@@ -558,7 +559,7 @@ void Class::add_function(SyntaxTree *s, Function *f, bool as_virtual, bool overr
 		// override?
 		Function *orig = nullptr;
 		int orig_index = -1;
-		foreachi (auto *ocf, weak(functions), i)
+		for (auto&& [i,ocf]: enumerate(weak(functions)))
 			if (member_func_override_match(f, ocf)) {
 				orig = ocf;
 				orig_index = i;
@@ -581,8 +582,8 @@ void Class::add_function(SyntaxTree *s, Function *f, bool as_virtual, bool overr
 				flags_set(f->flags, Flags::CONST);
 			else
 				flags_clear(f->flags, Flags::CONST);
-			if (flags_has(orig->flags, Flags::SELFREF))
-				flags_set(f->flags, Flags::SELFREF);
+			if (flags_has(orig->flags, Flags::REF))
+				flags_set(f->flags, Flags::REF);
 
 			if (auto self = f->__get_var(IDENTIFIER_SELF)) {
 				if (flags_has(f->flags, Flags::CONST))

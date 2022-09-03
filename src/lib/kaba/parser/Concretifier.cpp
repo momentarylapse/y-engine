@@ -10,6 +10,7 @@
 #include "template.h"
 #include "../lib/lib.h"
 #include "../../base/set.h"
+#include "../../base/iter.h"
 #include "../../os/msg.h"
 
 namespace kaba {
@@ -165,7 +166,7 @@ bool type_match_tuple_as_contructor(shared<Node> node, Function *f_constructor, 
 		return false;
 
 	penalty = 20;
-	foreachi (auto *e, weak(node->params).sub_ref(1), i) {
+	for (auto&& [i,e]: enumerate(weak(node->params).sub_ref(1))) {
 		CastingData cast;
 		if (!type_match_with_cast(e, false, f_constructor->literal_param_type[i], cast))
 			return false;
@@ -279,7 +280,7 @@ bool type_match_with_cast(shared<Node> node, bool is_modifiable, const Class *wa
 			return true;
 		//}
 	}
-	foreachi(auto &c, TypeCasts, i)
+	for (auto&& [i,c]: enumerate(TypeCasts))
 		if (type_match(given, c.source) and type_match(c.dest, wanted)) {
 			cd.penalty = c.penalty;
 			cd.cast = i;
@@ -301,7 +302,7 @@ shared<Node> Concretifier::apply_type_cast(const CastingData &cast, shared<Node>
 		if (wanted == TypeDynamicArray)
 			return force_concrete_type(node);
 		CastingData cd2;
-		foreachi (auto e, node->params, i) {
+		for (auto&& [i,e]: enumerate(node->params)) {
 			if (!type_match_with_cast(e, false, wanted->get_array_element(), cd2)) {
 				do_error("nope????", node);
 			}
@@ -323,14 +324,14 @@ shared<Node> Concretifier::apply_type_cast(const CastingData &cast, shared<Node>
 		Array<CastingData> c;
 		c.resize(node->params.num);
 		auto f = cast.f;
-		foreachi (auto e, node->params, i)
+		for (auto&& [i,e]: enumerate(node->params))
 			if (!type_match_with_cast(e, false, f->literal_param_type[i+1], c[i])) { do_error("aaaaa", e); }
 		auto cmd = add_node_constructor(f);
 		return apply_params_with_cast(cmd, node->params, c, f->literal_param_type, 1);
 	}
 	if ((cast.cast == TYPE_CAST_MAKE_SHARED) or (cast.cast == TYPE_CAST_MAKE_OWNED)) {
 		if (!cast.f)
-			do_error(format("internal: make shared... %s._create() missing...", wanted->name), node);
+			do_error(format("internal: make shared... %s.() missing...", wanted->name, IDENTIFIER_FUNC_SHARED_CREATE), node);
 		auto nn = add_node_call(cast.f, node->token_id);
 		nn->set_param(0, node);
 		return nn;
@@ -368,9 +369,9 @@ shared<Node> Concretifier::link_special_operator_is(shared<Node> param1, shared<
 
 shared<Node> Concretifier::link_special_operator_in(shared<Node> param1, shared<Node> param2, int token_id) {
 	param2 = force_concrete_type(param2);
-	auto *f = param2->type->get_member_func("__contains__", TypeBool, {param1->type});
+	auto *f = param2->type->get_member_func(IDENTIFIER_FUNC_CONTAINS, TypeBool, {param1->type});
 	if (!f)
-		do_error(format("no 'bool %s.__contains__(%s)' found", param2->type->long_name(), param1->type->long_name()), token_id);
+		do_error(format("no 'bool %s.%s(%s)' found", param2->type->long_name(), IDENTIFIER_FUNC_CONTAINS, param1->type->long_name()), token_id);
 
 	auto n = add_node_member_call(f, param2, token_id);
 	n->set_param(1, param1);
@@ -577,9 +578,12 @@ shared<Node> Concretifier::concretify_call(shared<Node> node, Block *block, cons
 
 
 	// make links callable
-	foreachi (auto l, weak(links), i) {
+	for (auto&& [i,l]: enumerate(weak(links))) {
 		if (l->kind == NodeKind::FUNCTION) {
-			links[i] = make_func_node_callable(l);
+			if (l->as_func()->is_template())
+				links[i] = make_func_node_callable(match_template_params(l, params, block, ns));
+			else
+				links[i] = make_func_node_callable(l);
 		} else if (l->kind == NodeKind::CLASS) {
 			auto *t = l->as_class();
 			return try_to_match_apply_params(turn_class_into_constructor(t, params, node->token_id), params);
@@ -642,12 +646,14 @@ shared<Node> Concretifier::concretify_array(shared<Node> node, Block *block, con
 	// int[3]
 	if (operand->kind == NodeKind::CLASS) {
 		// find array index
-		index = tree->transform_node(index, [&] (shared<Node> n) {
+		index = tree->transform_node(index, [this] (shared<Node> n) {
 			return tree->conv_eval_const_func(n);
 		});
 
-		if ((index->kind != NodeKind::CONSTANT) or (index->type != TypeInt))
-			do_error("only constants of type 'int' allowed for size of arrays", index);
+		if (index->type != TypeInt)
+			do_error(format("array size must be of type 'int', not '%s'", index->type->name), index);
+		if (index->kind != NodeKind::CONSTANT)
+			do_error("array size must be compile-time constant", index);
 		int array_size = index->as_const()->as_int();
 		auto t = tree->make_class_array(operand->as_class(), array_size, operand->token_id);
 		return add_node_class(t);
@@ -681,7 +687,7 @@ shared<Node> Concretifier::concretify_array(shared<Node> node, Block *block, con
 	}
 
 
-	// subarray() ?
+	// __subarray__() ?
 	if (index2) {
 		auto *cf = operand->type->get_member_func(IDENTIFIER_FUNC_SUBARRAY, operand->type, {index->type, index->type});
 		if (cf) {
@@ -706,7 +712,7 @@ shared<Node> Concretifier::concretify_array(shared<Node> node, Block *block, con
 
 	// allowed?
 	if (!operand->type->is_array() and !operand->type->usable_as_super_array())
-		do_error(format("type '%s' is neither an array nor does it have a function __get__(%s)", operand->type->long_name(), index->type->long_name()), index);
+		do_error(format("type '%s' is neither an array nor does it have a function %s(%s)", operand->type->long_name(), IDENTIFIER_FUNC_GET, index->type->long_name()), index);
 
 
 	if (index->type != TypeInt)
@@ -1282,7 +1288,7 @@ shared<Node> Concretifier::concretify_statement_lambda(shared<Node> node, Block 
 	auto create_inner_lambda = wrap_function_into_callable(f, node->token_id);
 
 	shared_array<Node> capture_nodes;
-	foreachi (auto &c, captures, i) {
+	for (auto&& [i,c]: enumerate(captures)) {
 		if (capture_via_ref[i])
 			capture_nodes.add(add_node_local(c)->ref());
 		else
@@ -1385,7 +1391,7 @@ shared<Node> Concretifier::concretify_var_declaration(shared<Node> node, Block *
 
 	if (node->params[1]->kind == NodeKind::TUPLE) {
 		auto etypes = tuple_get_element_types(type);
-		foreachi (auto t, etypes, i) {
+		for (auto&& [i,t]: enumerate(etypes)) {
 			if (t->needs_constructor() and !t->get_default_constructor())
 				do_error(format("declaring a variable of type '%s' requires a constructor but no default constructor exists", t->long_name()), node);
 			block->add_var(node->params[1]->params[i]->as_token(), t);
@@ -1494,15 +1500,21 @@ shared<Node> Concretifier::concretify_node(shared<Node> node, Block *block, cons
 		return concretify_array(node, block, ns);
 	} else if (node->kind == NodeKind::TUPLE) {
 		concretify_all_params(node, block, ns);
+		// NOT specifying the type
 		return node;
 	} else if (node->kind == NodeKind::ARRAY_BUILDER) {
 		concretify_all_params(node, block, ns);
+		// NOT specifying the type
 		return node;
 	} else if (node->kind == NodeKind::DICT_BUILDER) {
 		concretify_all_params(node, block, ns);
-		for (int p=0; p<node->params.num; p+=2)
-			if (node->params[p]->type != TypeString or node->params[p]->kind != NodeKind::CONSTANT)
-				do_error("key needs to be a constant string", node->params[p]);
+		for (int p=0; p<node->params.num; p+=2) {
+			if (node->params[p]->type != TypeString)
+				do_error(format("key type needs to be 'string', not '%s'", node->params[p]->type->long_name()), node->params[p]);
+			if (node->params[p]->kind != NodeKind::CONSTANT)
+				do_error("key needs to be a compile-time constant", node->params[p]);
+		}
+		// NOT specifying the type
 		return node;
 	} else if (node->kind == NodeKind::FUNCTION) {
 		return node;
@@ -1738,6 +1750,14 @@ shared<Node> Concretifier::make_func_node_callable(const shared<Node> l) {
 	return r;
 }
 
+shared<Node> Concretifier::match_template_params(const shared<Node> l, const shared_array<Node> &params, Block *block, const Class *ns) {
+	auto f0 = l->as_func();
+	auto ff = TemplateManager::get_instantiated_matching(parser, f0, params, block, ns, l->token_id);
+	auto r = l->shallow_copy();
+	r->link_no = (int_p)ff;
+	return r;
+}
+
 shared<Node> Concretifier::make_func_pointer_node_callable(const shared<Node> l) {
 	auto f = l->type->param[0]->get_call();
 
@@ -1841,9 +1861,9 @@ void Concretifier::concretify_function_header(Function *f) {
 		f->set_return_type(concretify_as_type(f->abstract_return_type, block, f->name_space));
 	}
 	f->literal_param_type.resize(f->abstract_param_types.num);
-	foreachi (auto at, weak(f->abstract_param_types), i) {
+	for (auto&& [i,at]: enumerate(weak(f->abstract_param_types))) {
 		auto t = concretify_as_type(at, block, f->name_space);
-		auto v = f->var[i];
+		auto v = f->var[i].get();
 		v->type = t;
 		f->literal_param_type[i] = t;
 
@@ -1876,14 +1896,18 @@ shared<Node> check_const_params(SyntaxTree *tree, shared<Node> n) {
 	if ((n->kind == NodeKind::CALL_FUNCTION) or (n->kind == NodeKind::CALL_VIRTUAL)) {
 		auto f = n->as_func();
 		int offset = 0;
+
+		// "ref" parameter -> return mut/const depends on param!
+		if (f->num_params >= 1)
+			if (flags_has(f->var[0]->flags, Flags::REF))
+				n->is_const = n->params[0]->is_const;
+
+		// const check
 		if (f->is_member()) {
 			offset = 1;
 			if (f->is_selfref()) {
-				// const(return) = const(instance)
-				n->is_const = n->params[0]->is_const;
 			} else if (n->params[0]->is_const and !f->is_const()) {
-				//n->show();
-				tree->do_error(f->long_name() + ": member function expects a mutable instance, because it is declared without 'const'", n->token_id);
+				tree->do_error(f->long_name() + ": member function expects a mutable instance, because it is declared 'mut'", n->token_id);
 			}
 		}
 		for (int i=offset; i<f->num_params; i++)

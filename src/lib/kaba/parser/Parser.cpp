@@ -3,6 +3,7 @@
 #include "../../os/msg.h"
 #include "../../base/set.h"
 #include "../../base/algo.h"
+#include "../../base/iter.h"
 #include "Parser.h"
 #include "template.h"
 
@@ -254,7 +255,7 @@ shared<Node> Parser::parse_abstract_operand_extension_call(shared<Node> link, Bl
 	auto node = new Node(NodeKind::ABSTRACT_CALL, 0, TypeUnknown);
 	node->set_num_params(params.num + 1);
 	node->set_param(0, link);
-	foreachi (auto p, params, i)
+	for (auto&& [i,p]: enumerate(params))
 		node->set_param(i + 1, p);
 
 	return node;
@@ -431,9 +432,9 @@ shared<Node> Parser::parse_abstract_set_builder(Block *block) {
 
 
 shared<Node> Parser::apply_format(shared<Node> n, const string &fmt) {
-	auto f = n->type->get_member_func("format", TypeString, {TypeString});
+	auto f = n->type->get_member_func(IDENTIFIER_FUNC_FORMAT, TypeString, {TypeString});
 	if (!f)
-		do_error(format("format string: no '%s.format(string)' function found", n->type->long_name()), n);
+		do_error(format("format string: no '%s.%s(string)' function found", n->type->long_name(), IDENTIFIER_FUNC_FORMAT), n);
 	auto *c = tree->add_constant(TypeString);
 	c->as_string() = fmt;
 	auto nf = add_node_call(f, n->token_id);
@@ -572,7 +573,7 @@ const Class *merge_type_tuple_into_product(SyntaxTree *tree, const Array<const C
 	auto c = const_cast<Class*>(tree->make_class("("+name+")", Class::Type::PRODUCT, size, -1, nullptr, classes, tree->_base_class.get(), token_id));
 	if (c->elements.num == 0) {
 		int offset = 0;
-		foreachi (auto &cc, classes, i) {
+		for (auto&& [i,cc]: enumerate(classes)) {
 			c->elements.add(ClassElement("e" + i2s(i), cc, offset));
 			offset += cc->size;
 		}
@@ -781,9 +782,14 @@ shared<Node> Parser::parse_abstract_for_header(Block *block) {
 	auto var = parse_abstract_token();
 
 	// index
-	shared<Node> index;
-	if (try_consume(","))
-		index = parse_abstract_token();
+	shared<Node> key;
+	if (try_consume("=>")) {
+		// key => value
+		key = var;
+		var = parse_abstract_token();
+	} else if (try_consume(",")) {
+		key = parse_abstract_token();
+	}
 
 
 	expect_identifier(IDENTIFIER_IN, "'in' expected after variable in 'for ...'");
@@ -794,6 +800,9 @@ shared<Node> Parser::parse_abstract_for_header(Block *block) {
 
 	if (try_consume(":")) {
 		// range
+
+		if (key)
+			do_error("no key=>value allowed in START:END for loop", key);
 
 		auto val1 = parse_abstract_operand_greedy(block);
 
@@ -817,10 +826,10 @@ shared<Node> Parser::parse_abstract_for_header(Block *block) {
 
 
 		auto cmd_for = add_node_statement(StatementID::FOR_ARRAY, token0, TypeUnknown);
-		// [VAR, INDEX, ARRAY, BLOCK]
+		// [VAR, KEY, ARRAY, BLOCK]
 
 		cmd_for->set_param(0, var);
-		cmd_for->set_param(1, index);
+		cmd_for->set_param(1, key);
 		cmd_for->set_param(2, array);
 		//cmd_for->set_uparam(3, loop_block);
 
@@ -1174,7 +1183,7 @@ shared_array<Node> parse_comma_sep_token_list(Parser *p) {
 
 // local (variable) definitions...
 shared<Node> Parser::parse_abstract_statement_var(Block *block) {
-	Exp.next(); // "var"
+	Exp.next(); // "var"/"let"
 
 	// tuple "var (x,y) = ..."
 	if (try_consume("(")) {
@@ -1385,9 +1394,7 @@ shared<Node> Parser::parse_abstract_statement(Block *block) {
 		return parse_abstract_statement_repr(block);
 	} else if (Exp.cur == IDENTIFIER_LEN) {
 		return parse_abstract_statement_len(block);
-	} else if (Exp.cur == IDENTIFIER_LET) {
-		return parse_abstract_statement_let(block);
-	} else if (Exp.cur == IDENTIFIER_VAR) {
+	} else if (Exp.cur == IDENTIFIER_LET or Exp.cur == IDENTIFIER_VAR) {
 		return parse_abstract_statement_var(block);
 	} else if (Exp.cur == IDENTIFIER_MAP) {
 		return parse_abstract_statement_map(block);
@@ -1722,7 +1729,7 @@ void Parser::post_process_newly_parsed_class(Class *_class, int size) {
 
 	// virtual functions?     (derived -> _class->num_virtual)
 //	_class->vtable = cur_virtual_index;
-	//foreach(ClassFunction &cf, _class->function)
+	//for (ClassFunction &cf, _class->function)
 	//	_class->num_virtual = max(_class->num_virtual, cf.virtual_index);
 	if (_class->vtable.num > 0) {
 		if (_class->parent) {
@@ -1817,13 +1824,13 @@ shared<Node> Parser::parse_and_eval_const(Block *block, const Class *type) {
 		type = cv->type;
 	}
 
-	cv = tree->transform_node(cv, [&] (shared<Node> n) {
-		return tree->conv_eval_const_func(n);
+	cv = tree->transform_node(cv, [this] (shared<Node> n) {
+		return tree->conv_eval_const_func(tree->conv_fake_constructors(n));
 	});
 
 	if (cv->kind != NodeKind::CONSTANT) {
 		//cv->show(TypeVoid);
-		do_error("constant value expected", cv);
+		do_error("constant value expected, but expression can not be evaluated at compile time", cv);
 	}
 	return cv;
 }
@@ -2169,8 +2176,8 @@ Flags Parser::parse_flags(Flags initial) {
 			flags_set(flags, Flags::VIRTUAL);
 		} else if (Exp.cur == IDENTIFIER_OVERRIDE) {
 			flags_set(flags, Flags::OVERRIDE);
-		} else if (Exp.cur == IDENTIFIER_SELFREF) {
-			flags_set(flags, Flags::SELFREF);
+		} else if (Exp.cur == IDENTIFIER_SELFREF or Exp.cur == IDENTIFIER_REF) {
+			flags_set(flags, Flags::REF);
 		//} else if (Exp.cur == IDENTIFIER_SHARED) {
 		//	flags = flags_mix({flags, Flags::SHARED});
 		//} else if (Exp.cur == IDENTIFIER_OWNED) {
