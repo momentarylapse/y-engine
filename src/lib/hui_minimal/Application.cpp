@@ -9,7 +9,7 @@
 #include "hui.h"
 #include "../os/filesystem.h"
 #include "../os/msg.h"
-#include "../doc/config.h"
+#include "../os/config.h"
 
 #ifdef OS_WINDOWS
 #include <windows.h>

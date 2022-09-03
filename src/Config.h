@@ -10,7 +10,7 @@
 
 
 #include "lib/base/base.h"
-#include "lib/doc/config.h"
+#include "lib/os/config.h"
 #include "lib/os/path.h"
 
 enum class AntialiasingMethod {
