@@ -10,7 +10,7 @@
 #if HAS_LIB_VULKAN
 
 #include "../base/base.h"
-#include <optional>
+#include "../base/optional.h"
 
 namespace vulkan {
 
@@ -29,8 +29,8 @@ public:
 
 
 	struct QueueFamilyIndices {
-		std::optional<uint32_t> graphics_family;
-		std::optional<uint32_t> present_family;
+		base::optional<uint32_t> graphics_family;
+		base::optional<uint32_t> present_family;
 
 		bool is_complete();
 	};

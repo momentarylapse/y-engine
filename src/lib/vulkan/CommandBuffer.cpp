@@ -31,16 +31,15 @@ namespace vulkan{
 
 
 void create_command_pool() {
-	QueueFamilyIndices queue_family_indices = find_queue_families(default_device->physical_device);
+	QueueFamilyIndices queue_family_indices = default_device->indices;
 
 	VkCommandPoolCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	info.queueFamilyIndex = queue_family_indices.graphics_family.value();
 	info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-	if (vkCreateCommandPool(default_device->device, &info, nullptr, &command_pool) != VK_SUCCESS) {
+	if (vkCreateCommandPool(default_device->device, &info, nullptr, &command_pool) != VK_SUCCESS)
 		throw Exception("failed to create command pool!");
-	}
 }
 
 void destroy_command_pool() {

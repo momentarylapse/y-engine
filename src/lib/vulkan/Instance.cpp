@@ -205,10 +205,10 @@ VkSurfaceKHR Instance::create_surface(GLFWwindow* window) {
 
 
 Device *Instance::pick_device() {
-	auto dev = new Device();
-	dev->pick_physical_device(this);
-	dev->create_logical_device(using_validation_layers);
-	return dev;
+	auto device = new Device();
+	device->pick_physical_device(this);
+	device->create_logical_device(using_validation_layers);
+	return device;
 }
 
 

@@ -22,18 +22,13 @@ public:
 	Device();
 	~Device();
 
-	VkPhysicalDevice physical_device = VK_NULL_HANDLE;
 	VkDevice device;
+	VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+	VkPhysicalDeviceProperties physical_device_properties;
+	QueueFamilyIndices indices;
 
 	Queue graphics_queue;
 	Queue present_queue;
-
-	VkPhysicalDeviceProperties device_properties;
-
-
-
-	void wait_idle();
-
 
 	void pick_physical_device(Instance *instance);
 	void create_logical_device(bool validation);
@@ -42,6 +37,12 @@ public:
 	uint32_t find_memory_type(const VkMemoryRequirements &requirements, VkMemoryPropertyFlags properties);
 	VkFormat find_supported_format(const Array<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 	VkFormat find_depth_format();
+
+
+	int make_aligned(int size);
+
+	void wait_idle();
+
 
 	VkQueryPool query_pool;
 	void create_query_pool(int count);

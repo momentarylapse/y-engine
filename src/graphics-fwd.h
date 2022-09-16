@@ -39,6 +39,7 @@
 		class Fence;
 		class SwapChain;
 		class DescriptorPool;
+		class Device;
 	}
 
 	using Texture = vulkan::Texture;

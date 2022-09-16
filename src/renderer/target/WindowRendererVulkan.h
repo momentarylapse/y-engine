@@ -17,6 +17,7 @@ using Semaphore = vulkan::Semaphore;
 using Fence = vulkan::Fence;
 using SwapChain = vulkan::SwapChain;
 using RenderPass = vulkan::RenderPass;
+using Device = vulkan::Device;
 
 class WindowRendererVulkan : public TargetRenderer {
 public:
@@ -39,6 +40,7 @@ public:
 	Array<CommandBuffer*> _command_buffers;
 	//var cb: vulkan::CommandBuffer*
 
+	Device *device;
 	SwapChain *swap_chain;
 	RenderPass* _default_render_pass;
 	DepthBuffer* _depth_buffer;

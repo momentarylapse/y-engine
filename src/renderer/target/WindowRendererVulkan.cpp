@@ -21,6 +21,8 @@ WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) : Targ
 	width = w;
 	height = h;
 
+	device = vulkan::default_device;
+
 
 	image_available_semaphore = new vulkan::Semaphore();
 	render_finished_semaphore = new vulkan::Semaphore();
@@ -37,7 +39,7 @@ WindowRendererVulkan::~WindowRendererVulkan() {
 
 
 void WindowRendererVulkan::_create_swap_chain_and_stuff() {
-	swap_chain = new vulkan::SwapChain(window);
+	swap_chain = new vulkan::SwapChain(window, device);
 	auto swap_images = swap_chain->create_textures();
 	for (auto t: swap_images)
 		wait_for_frame_fences.add(new vulkan::Fence());
@@ -63,7 +65,7 @@ void WindowRendererVulkan::_create_swap_chain_and_stuff() {
 void WindowRendererVulkan::rebuild_default_stuff() {
 	msg_write("recreate swap chain");
 
-	vulkan::default_device->wait_idle();
+	device->wait_idle();
 
 	//_delete_swap_chain_and_stuff();
 	_create_swap_chain_and_stuff();
@@ -105,22 +107,22 @@ bool WindowRendererVulkan::start_frame() {
 void WindowRendererVulkan::end_frame() {
 	//PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
-	vulkan::default_device->present_queue.submit(_command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
+	device->present_queue.submit(_command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
 
 	swap_chain->present(image_index, {render_finished_semaphore});
 
-	vulkan::default_device->wait_idle();
+	device->wait_idle();
 	//PerformanceMonitor::end(ch_end);
 
 	static int frame = 0;
 	frame ++;
 	if ((frame%100 == 0) and (config.debug >= 2)) {
-		auto tt = vulkan::default_device->get_timestamps(0, 3);
+		auto tt = device->get_timestamps(0, 3);
 		//msg_write(ia2s(tt));
-		//msg_write(f2s(vulkan::default_device->device_properties.limits.timestampPeriod, 9));
+		//msg_write(f2s(device->device_properties.limits.timestampPeriod, 9));
 		msg_write("vulkan timing:");
-		msg_write(f2s(vulkan::default_device->device_properties.limits.timestampPeriod * (tt[1] - tt[0]) * 0.000001f, 3));
-		msg_write(f2s(vulkan::default_device->device_properties.limits.timestampPeriod * (tt[2] - tt[0]) * 0.000001f, 3));
+		msg_write(f2s(device->physical_device_properties.limits.timestampPeriod * (tt[1] - tt[0]) * 0.000001f, 3));
+		msg_write(f2s(device->physical_device_properties.limits.timestampPeriod * (tt[2] - tt[0]) * 0.000001f, 3));
 	}
 }
 

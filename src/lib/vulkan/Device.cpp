@@ -85,9 +85,8 @@ void Device::pick_physical_device(Instance *instance) {
 	uint32_t device_count = 0;
 	vkEnumeratePhysicalDevices(instance->instance, &device_count, nullptr);
 
-	if (device_count == 0) {
+	if (device_count == 0)
 		throw Exception("failed to find GPUs with Vulkan support!");
-	}
 
 	std::vector<VkPhysicalDevice> devices(device_count);
 	vkEnumeratePhysicalDevices(instance->instance, &device_count, devices.data());
@@ -95,6 +94,7 @@ void Device::pick_physical_device(Instance *instance) {
 	if (verbose)
 		std::cout << device_count << " devices found\n";
 
+	physical_device = VK_NULL_HANDLE;
 	for (const auto& dev: devices) {
 		if (is_device_suitable(dev)) {
 			if (verbose)
@@ -107,20 +107,20 @@ void Device::pick_physical_device(Instance *instance) {
 	if (physical_device == VK_NULL_HANDLE)
 		throw Exception("failed to find a suitable GPU!");
 
-	vkGetPhysicalDeviceProperties(physical_device, &device_properties);
+	vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
 	if (verbose) {
 		std::cout << " props\n";
-		std::cout << "  minUniformBufferOffsetAlignment  " << device_properties.limits.minUniformBufferOffsetAlignment << "\n";
-		std::cout << "  maxPushConstantsSize  " << device_properties.limits.maxPushConstantsSize << "\n";
-		std::cout << "  maxImageDimension2D  " << device_properties.limits.maxImageDimension2D << "\n";
-		std::cout << "  maxUniformBufferRange  " << device_properties.limits.maxUniformBufferRange << "\n";
-		std::cout << "  maxPerStageDescriptorUniformBuffers  " << device_properties.limits.maxPerStageDescriptorUniformBuffers << "\n";
-		std::cout << "  maxPerStageDescriptorSamplers  " << device_properties.limits.maxPerStageDescriptorSamplers << "\n";
-		std::cout << "  maxDdevice->escriptorSetSamplers  " << device_properties.limits.maxDescriptorSetSamplers << "\n";
-		std::cout << "  maxDescriptorSetUniformBuffers  " << device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
-		std::cout << "  maxDescriptorSetUniformBuffersDynamic  " << device_properties.limits.maxDescriptorSetUniformBuffersDynamic << "\n";
-		//std::cout << "  maxDescriptorSetUniformBuffers  " << device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
-		//std::cout << "  maxDescriptorSetUniformBuffers  " << device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
+		std::cout << "  minUniformBufferOffsetAlignment  " << physical_device_properties.limits.minUniformBufferOffsetAlignment << "\n";
+		std::cout << "  maxPushConstantsSize  " << physical_device_properties.limits.maxPushConstantsSize << "\n";
+		std::cout << "  maxImageDimension2D  " << physical_device_properties.limits.maxImageDimension2D << "\n";
+		std::cout << "  maxUniformBufferRange  " << physical_device_properties.limits.maxUniformBufferRange << "\n";
+		std::cout << "  maxPerStageDescriptorUniformBuffers  " << physical_device_properties.limits.maxPerStageDescriptorUniformBuffers << "\n";
+		std::cout << "  maxPerStageDescriptorSamplers  " << physical_device_properties.limits.maxPerStageDescriptorSamplers << "\n";
+		std::cout << "  maxDdevice->escriptorSetSamplers  " << physical_device_properties.limits.maxDescriptorSetSamplers << "\n";
+		std::cout << "  maxDescriptorSetUniformBuffers  " << physical_device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
+		std::cout << "  maxDescriptorSetUniformBuffersDynamic  " << physical_device_properties.limits.maxDescriptorSetUniformBuffersDynamic << "\n";
+		//std::cout << "  maxDescriptorSetUniformBuffers  " << physical_device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
+		//std::cout << "  maxDescriptorSetUniformBuffers  " << physical_device_properties.limits.maxDescriptorSetUniformBuffers << "\n";
 	}
 
 	/*VkPhysicalDeviceRayTracingFeaturesKHR rtf = {};
@@ -133,7 +133,7 @@ void Device::pick_physical_device(Instance *instance) {
 }
 
 void Device::create_logical_device(bool validation) {
-	QueueFamilyIndices indices = find_queue_families(physical_device);
+	indices = find_queue_families(physical_device);
 
 	Array<VkDeviceQueueCreateInfo> queue_create_infos;
 	std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
@@ -169,9 +169,8 @@ void Device::create_logical_device(bool validation) {
 		create_info.enabledLayerCount = 0;
 	}
 
-	if (vkCreateDevice(physical_device, &create_info, nullptr, &device) != VK_SUCCESS) {
+	if (vkCreateDevice(physical_device, &create_info, nullptr, &device) != VK_SUCCESS)
 		throw Exception("failed to create logical device!");
-	}
 
 	vkGetDeviceQueue(device, indices.graphics_family.value(), 0, &graphics_queue.queue);
 	vkGetDeviceQueue(device, indices.present_family.value(), 0, &present_queue.queue);
@@ -227,30 +226,29 @@ VkFormat Device::find_depth_format() {
 
 
 QueueFamilyIndices find_queue_families(VkPhysicalDevice device) {
-	QueueFamilyIndices indices;
 
 	uint32_t queue_family_count = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, nullptr);
 
-	std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families.data());
+	Array<VkQueueFamilyProperties> queue_families;
+	queue_families.resize(queue_family_count);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, &queue_families[0]);
 
+	QueueFamilyIndices indices;
 	int i = 0;
-	for (const auto& queueFamily: queue_families) {
-		if ((queueFamily.queueCount > 0) and (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+	for (const auto& family: queue_families) {
+		if ((family.queueCount > 0) and (family.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
 			indices.graphics_family = i;
 		}
 
-		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, default_surface, &presentSupport);
+		VkBool32 present_support = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, default_surface, &present_support);
 
-		if ((queueFamily.queueCount > 0) and presentSupport) {
+		if ((family.queueCount > 0) and present_support)
 			indices.present_family = i;
-		}
 
-		if (indices.is_complete()) {
+		if (indices.is_complete())
 			break;
-		}
 
 		i ++;
 	}
@@ -275,6 +273,13 @@ Array<int> Device::get_timestamps(int first, int count) {
 	tt.resize(count);
 	vkGetQueryPoolResults(device, query_pool, first, count, sizeof(tt[0]) * tt.num, &tt[0], 4, VK_QUERY_RESULT_PARTIAL_BIT);//VK_QUERY_RESULT_WAIT_BIT);
 	return tt;
+}
+
+
+int Device::make_aligned(int size) {
+	if (physical_device_properties.limits.minUniformBufferOffsetAlignment == 0)
+		return 0;
+	return (size + physical_device_properties.limits.minUniformBufferOffsetAlignment - 1) & ~(size - 1);
 }
 
 
