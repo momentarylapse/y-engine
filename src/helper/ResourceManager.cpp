@@ -16,8 +16,8 @@
 Path ResourceManager::shader_dir;
 Path ResourceManager::texture_dir;
 Path ResourceManager::default_shader;
-static Map<Path,Shader*> shaders;
-static Map<Path,Texture*> textures;
+static base::map<Path,Shader*> shaders;
+static base::map<Path,Texture*> textures;
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	if (filename.is_absolute())
@@ -37,11 +37,11 @@ Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 }
 
 Shader* ResourceManager::load_shader(const Path& filename) {
-	if (filename.is_empty())
+	if (!filename)
 		return Shader::load("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static << "shader"});
-	if (fn.is_empty()) {
+	if (!fn) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + filename.str());
 			return Shader::load("");
@@ -92,12 +92,12 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;
-	if (filename.is_empty())
+	if (!filename)
 		filename = default_shader;
 
 
 
-	if (filename.is_empty())
+	if (!filename)
 		return Shader::load("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static << "shader"});

@@ -163,7 +163,7 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	nix::set_z(false, true);
 
 	// particles
-	auto r = mat4::rotation_q(cam->owner->ang);
+	auto r = mat4::rotation(cam->owner->ang);
 	for (auto g: world.particle_manager->groups) {
 		nix::set_texture(g->texture);
 
@@ -237,9 +237,9 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 void WorldRendererGL::draw_skyboxes(Camera *cam) {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(mat4::rotation_q(cam->owner->ang).transpose());
+	nix::set_view_matrix(mat4::rotation(cam->owner->ang).transpose());
 	for (auto *sb: world.skybox) {
-		sb->_matrix = mat4::rotation_q(sb->owner->ang);
+		sb->_matrix = mat4::rotation(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
 			set_material(sb->material[i], type, ShaderVariant::DEFAULT);

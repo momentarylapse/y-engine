@@ -29,7 +29,7 @@ struct GeoPush {
 
 mat4 mtr(const vec3 &t, const quaternion &a) {
 	auto mt = mat4::translation(t);
-	auto mr = mat4::rotation_q(a);
+	auto mr = mat4::rotation(a);
 	return mt * mr;
 }
 

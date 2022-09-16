@@ -14,7 +14,7 @@
 namespace PipelineManager {
 
 Pipeline *get(Shader *s, RenderPass *rp) {
-	static Map<Shader*,Pipeline*> ob_pipelines;
+	static base::map<Shader*,Pipeline*> ob_pipelines;
 	if (ob_pipelines.contains(s))
 		return ob_pipelines[s];
 	msg_write("NEW PIPELINE");
@@ -23,7 +23,7 @@ Pipeline *get(Shader *s, RenderPass *rp) {
 	return p;
 }
 Pipeline *get_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
-	static Map<Shader*,Pipeline*> ob_pipelines_alpha;
+	static base::map<Shader*,Pipeline*> ob_pipelines_alpha;
 	if (ob_pipelines_alpha.contains(s))
 		return ob_pipelines_alpha[s];
 	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
@@ -37,7 +37,7 @@ Pipeline *get_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
 }
 
 Pipeline *get_ani(Shader *s, RenderPass *rp) {
-	static Map<Shader*,Pipeline*> ob_ani_pipelines;
+	static base::map<Shader*,Pipeline*> ob_ani_pipelines;
 	if (ob_ani_pipelines.contains(s))
 		return ob_ani_pipelines[s];
 	msg_write("NEW PIPELINE ANIMATED");
@@ -47,7 +47,7 @@ Pipeline *get_ani(Shader *s, RenderPass *rp) {
 }
 
 Pipeline *get_user(Shader *s, RenderPass *rp, const string &format) {
-	static Map<Shader*,Pipeline*> ob_pipelines;
+	static base::map<Shader*,Pipeline*> ob_pipelines;
 	if (ob_pipelines.contains(s))
 		return ob_pipelines[s];
 	msg_write("NEW PIPELINE USER");
@@ -57,7 +57,7 @@ Pipeline *get_user(Shader *s, RenderPass *rp, const string &format) {
 }
 
 Pipeline *get_gui(Shader *s, RenderPass *rp, const string &format) {
-	static Map<Shader*,Pipeline*> ob_pipelines;
+	static base::map<Shader*,Pipeline*> ob_pipelines;
 	if (ob_pipelines.contains(s))
 		return ob_pipelines[s];
 	msg_write("NEW PIPELINE GUI");

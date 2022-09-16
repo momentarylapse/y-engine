@@ -247,7 +247,7 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 	ubo.m = mat4::ID;
 
 	// particles
-	auto r = mat4::rotation_q(cam->owner->ang);
+	auto r = mat4::rotation(cam->owner->ang);
 	int index = 0;
 	for (auto g: world.particle_manager->groups) {
 
@@ -354,12 +354,12 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camer
 	cam->update_matrices(aspect);
 
 	ubo.p = cam->m_projection;
-	ubo.v = mat4::rotation_q(cam->owner->ang).transpose();
+	ubo.v = mat4::rotation(cam->owner->ang).transpose();
 	ubo.m = mat4::ID;
 	ubo.num_lights = world.lights.num;
 
 	for (auto *sb: world.skybox) {
-		sb->_matrix = mat4::rotation_q(sb->owner->ang);
+		sb->_matrix = mat4::rotation(sb->owner->ang);
 		ubo.m = sb->_matrix * mat4::scale(10,10,10);
 
 
@@ -564,7 +564,7 @@ void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {
 void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data) {
 	auto cb = command_buffer();
 
-	static Map<VertexBuffer*,RenderDataVK> rdas;
+	static base::map<VertexBuffer*,RenderDataVK> rdas;
 	RenderDataVK *rda;
 	if (rdas.contains(vb)) {
 		rda = &rdas[vb];

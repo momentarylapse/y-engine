@@ -20,7 +20,7 @@ public:
 };*/
 
 
-class Gamepad: public Sharable<Empty> {
+class Gamepad: public Sharable<base::Empty> {
 public:
 	enum class Button {
 		CROSS,

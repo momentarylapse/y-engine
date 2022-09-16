@@ -117,9 +117,10 @@ const int TYPE_CAST_DEREFERENCE = -2;
 const int TYPE_CAST_REFERENCE = -3;
 const int TYPE_CAST_OWN_STRING = -10;
 const int TYPE_CAST_ABSTRACT_LIST = -20;
-const int TYPE_CAST_ABSTRACT_TUPLE = -30;
-const int TYPE_CAST_TUPLE_AS_CONSTRUCTOR = -31;
-const int TYPE_CAST_FUNCTION_AS_CALLABLE = -32;
+const int TYPE_CAST_ABSTRACT_TUPLE = -21;
+const int TYPE_CAST_ABSTRACT_DICT = -22;
+const int TYPE_CAST_TUPLE_AS_CONSTRUCTOR = -23;
+const int TYPE_CAST_FUNCTION_AS_CALLABLE = -30;
 const int TYPE_CAST_MAKE_SHARED = -40;
 const int TYPE_CAST_MAKE_OWNED = -41;
 
@@ -263,6 +264,21 @@ bool type_match_with_cast(shared<Node> node, bool is_modifiable, const Class *wa
 		cd.cast = TYPE_CAST_ABSTRACT_TUPLE;
 		return true;
 	}
+	if (node->kind == NodeKind::DICT_BUILDER and given == TypeUnknown) {
+		if (wanted->is_dict()) {
+			auto t = wanted->get_array_element();
+			CastingData cast;
+			for (auto&& [i,e]: enumerate(node->params)) {
+				if ((i % 2) == 1) {
+					if (!type_match_with_cast(e, false, t, cast))
+						return false;
+					cd.penalty += cast.penalty;
+				}
+			}
+			cd.cast = TYPE_CAST_ABSTRACT_DICT;
+			return true;
+		}
+	}
 	if (wanted->is_callable() and (given == TypeUnknown)) {
 		if (node->kind == NodeKind::FUNCTION) {
 			auto ft = make_effective_class_callable(node);
@@ -313,6 +329,21 @@ shared<Node> Concretifier::apply_type_cast(const CastingData &cast, shared<Node>
 	}
 	if (cast.cast == TYPE_CAST_ABSTRACT_TUPLE) {
 		msg_error("AUTO TUPLE");
+		node->type = wanted;
+		return node;
+	}
+	if (cast.cast == TYPE_CAST_ABSTRACT_DICT) {
+		//if (wanted == TypeDict)
+		//	return force_concrete_type(node);
+		CastingData cd2;
+		for (auto&& [i,e]: enumerate(node->params)) {
+			if ((i % 2) == 1) {
+				if (!type_match_with_cast(e, false, wanted->get_array_element(), cd2)) {
+					do_error("nope????", node);
+				}
+				node->params[i] = apply_type_cast(cd2, e, wanted->get_array_element());
+			}
+		}
 		node->type = wanted;
 		return node;
 	}
@@ -996,6 +1027,9 @@ shared<Node> Concretifier::concretify_statement_dyn(shared<Node> node, Block *bl
 
 shared<Node> Concretifier::concretify_statement_sorted(shared<Node> node, Block *block, const Class *ns) {
 	concretify_all_params(node, block, ns);
+	if (node->params.num < 2)
+		return node;
+		//do_error("'(' expected after 'sorted'", node);
 	auto array = force_concrete_type(node->params[0]);
 	auto crit = force_concrete_type(node->params[1]);
 
@@ -1035,6 +1069,21 @@ shared<Node> Concretifier::concretify_statement_weak(shared<Node> node, Block *b
 	return nullptr;
 }
 
+shared<Node> create_map_call(SyntaxTree *tree, shared<Node> func, shared<Node> array, int token_id) {
+	auto *f = tree->required_func_global("@xmap", token_id);
+
+	auto p = node_call_effective_params(func);
+	auto rt = node_call_return_type(func);
+
+	auto cmd = add_node_call(f, token_id);
+	cmd->set_param(0, func);
+	cmd->set_param(1, array);
+	cmd->set_param(2, add_node_class(p[0]));
+	cmd->set_param(3, add_node_class(rt));
+	cmd->type = tree->make_class_super_array(rt, token_id);
+	return cmd;
+}
+
 shared<Node> Concretifier::concretify_statement_map(shared<Node> node, Block *block, const Class *ns) {
 	auto func = concretify_node(node->params[0], block, block->name_space());
 	auto array = concretify_node(node->params[1], block, block->name_space());
@@ -1054,7 +1103,9 @@ shared<Node> Concretifier::concretify_statement_map(shared<Node> node, Block *bl
 	if (p[0] != array->type->param[0])
 		do_error("map(): function parameter does not match list type", array);
 
-	auto *f = tree->required_func_global("@xmap", node->token_id);
+	return create_map_call(tree, func, array, node->token_id);
+
+	/*auto *f = tree->required_func_global("@xmap", node->token_id);
 
 	auto cmd = add_node_call(f, node->token_id);
 	cmd->set_param(0, func);
@@ -1062,7 +1113,7 @@ shared<Node> Concretifier::concretify_statement_map(shared<Node> node, Block *bl
 	cmd->set_param(2, add_node_class(p[0]));
 	cmd->set_param(3, add_node_class(p[1]));
 	cmd->type = tree->make_class_super_array(rt, node->token_id);
-	return cmd;
+	return cmd;*/
 }
 
 shared<Node> Concretifier::concretify_statement_raw_function_pointer(shared<Node> node, Block *block, const Class *ns) {
@@ -1215,7 +1266,7 @@ shared<Node> Concretifier::concretify_statement_lambda(shared<Node> node, Block 
 	tree->base_class->add_function(tree, f, false, false);
 
 	// find captures
-	Set<Variable*> captures;
+	base::set<Variable*> captures;
 	auto find_captures = [block, &captures](shared<Node> n) {
 		if (n->kind == NodeKind::VAR_LOCAL) {
 			auto v = n->as_local();
@@ -1353,9 +1404,9 @@ shared<Node> Concretifier::concretify_operator(shared<Node> node, Block *block, 
 	auto op_no = node->as_abstract_op();
 
 	if (op_no->id == OperatorID::FUNCTION_PIPE) {
-		concretify_all_params(node, block, ns);
+		// concretify_all_params(..); NO, the parameters' types will influence each other
 		// well... we're abusing that we will always get the FIRST 2 pipe elements!!!
-		return build_function_pipe(node->params[0], node->params[1]);
+		return build_function_pipe(node->params[0], node->params[1], block, ns, node->token_id);
 	} else if (op_no->id == OperatorID::MAPS_TO) {
 		return build_lambda_new(node->params[0], node->params[1]);
 	}
@@ -1375,6 +1426,9 @@ shared<Node> Concretifier::concretify_operator(shared<Node> node, Block *block, 
 }
 
 shared<Node> Concretifier::concretify_var_declaration(shared<Node> node, Block *block, const Class *ns) {
+	bool as_const = (node->link_no == 1);
+
+	// type?
 	const Class *type = nullptr;
 	if (node->params[0]) {
 		// explicit type
@@ -1389,21 +1443,29 @@ shared<Node> Concretifier::concretify_var_declaration(shared<Node> node, Block *
 		type = rhs->type;
 	}
 
-	if (node->params[1]->kind == NodeKind::TUPLE) {
-		auto etypes = tuple_get_element_types(type);
-		for (auto&& [i,t]: enumerate(etypes)) {
-			if (t->needs_constructor() and !t->get_default_constructor())
-				do_error(format("declaring a variable of type '%s' requires a constructor but no default constructor exists", t->long_name()), node);
-			block->add_var(node->params[1]->params[i]->as_token(), t);
-		}
-	} else {
+	//as_const
+	auto create_var= [block, &node, this] (const Class *type, const string &name) {
 		if (type->needs_constructor() and !type->get_default_constructor())
 			do_error(format("declaring a variable of type '%s' requires a constructor but no default constructor exists", type->long_name()), node);
-		block->add_var(node->params[1]->as_token(), type);
+		return block->add_var(name, type);
+	};
+	Array<Variable*> vars;
+
+	// add variable(s)
+	if (node->params[1]->kind == NodeKind::TUPLE) {
+		auto etypes = tuple_get_element_types(type);
+		for (auto&& [i,t]: enumerate(etypes))
+			vars.add(create_var(t, node->params[1]->params[i]->as_token()));
+	} else {
+		vars.add(create_var(type, node->params[1]->as_token()));
 	}
 
+	// assign?
 	if (node->params.num == 3)
-		return concretify_node(node->params[2], block, ns);
+		node = concretify_node(node->params[2], block, ns);
+	if (as_const)
+		for (auto v: vars)
+			flags_set(v->flags, Flags::CONST);
 	return node;
 }
 
@@ -1478,6 +1540,12 @@ const Class *make_pointer_owned(SyntaxTree *tree, const Class *parent, int token
 	return tree->make_class(parent->name + " " + IDENTIFIER_OWNED, Class::Type::POINTER_OWNED, config.pointer_size, 0, nullptr, {parent}, parent->name_space, token_id);
 }
 
+// concretify as far as possible
+// will leave FLEXIBLE:
+//  * list [...]
+//  * dict {...}
+//  * tuple (...)
+//  * function name
 shared<Node> Concretifier::concretify_node(shared<Node> node, Block *block, const Class *ns) {
 	if (node->type != TypeUnknown)
 		return node;
@@ -1611,7 +1679,7 @@ const Class *Concretifier::concretify_as_type(shared<Node> node, Block *block, c
 }
 
 
-const Class *type_more_abstract(const Class *a, const Class *b) {
+const Class *type_more_dominant(const Class *a, const Class *b) {
 	if (a == b)
 		return a;
 	if (a == TypeInt and b == TypeFloat32)
@@ -1689,7 +1757,7 @@ shared<Node> Concretifier::force_concrete_type(shared<Node> node) {
 
 		auto t = node->params[0]->type;
 		for (int i=1; i<node->params.num; i++)
-			t = type_more_abstract(t, node->params[i]->type);
+			t = type_more_dominant(t, node->params[i]->type);
 		if (!t)
 			do_error("inhomogeneous abstract array", node);
 
@@ -1711,7 +1779,7 @@ shared<Node> Concretifier::force_concrete_type(shared<Node> node) {
 
 		auto t = node->params[1]->type;
 		for (int i=3; i<node->params.num; i+=2)
-			t = type_more_abstract(t, node->params[i]->type);
+			t = type_more_dominant(t, node->params[i]->type);
 		if (!t)
 			do_error("inhomogeneous abstract dict", node);
 
@@ -1931,13 +1999,12 @@ string type_list_to_str(const Array<const Class*> &tt) {
 }
 
 shared<Node> Concretifier::try_to_match_apply_params(const shared_array<Node> &links, shared_array<Node> &_params) {
-
 	//force_concrete_types(params);
-	auto params = _params;
-	if (node_is_member_function_with_instance(links[0])) {
-		params.insert(links[0]->params[0], 0);
+	// no, keep params FLEXIBLE
 
-	}
+	auto params = _params;
+	if (node_is_member_function_with_instance(links[0]))
+		params.insert(links[0]->params[0], 0);
 
 	// direct match...
 	for (shared<Node> operand: links) {
@@ -1992,30 +2059,70 @@ shared<Node> Concretifier::try_to_match_apply_params(const shared_array<Node> &l
 	return shared<Node>();
 }
 
-shared<Node> Concretifier::build_function_pipe(const shared<Node> &input, const shared<Node> &func) {
+shared<Node> Concretifier::build_function_pipe(const shared<Node> &abs_input, const shared<Node> &abs_func, Block *block, const Class *ns, int token_id) {
+//	auto func = force_concrete_type(_func);
+	auto input = abs_input;
+	if (input->type == TypeUnknown)
+		input = concretify_node(input, block, ns);
+	input = force_concrete_type(input);
 
-	if (func->kind != NodeKind::FUNCTION)
-		do_error("function expected after '|>", func);
-	auto f = func->as_func();
-	if (f->num_params != 1)
-		do_error("function after '|>' needs exactly 1 parameter (including self)", func);
-	//if (f->literal_param_type[0] != input->type)
-	//	do_error("pipe type mismatch...");
+	if (abs_func->kind == NodeKind::STATEMENT)
+		if (abs_func->as_statement()->id == StatementID::SORTED) {
+			if (!input->type->is_super_array())
+				do_error("'|> sorted' only allowed for lists", input);
+			Function *f = tree->required_func_global("@sorted", token_id);
+			auto crit = tree->add_constant(TypeString);
 
-	auto out = add_node_call(f, func->token_id);
+			auto cmd = add_node_call(f, token_id);
+			cmd->set_param(0, input);
+			cmd->set_param(1, add_node_class(input->type));
+			cmd->set_param(2, add_node_const(crit));
+			cmd->type = input->type;
+			return cmd;
+		}
 
-	shared_array<Node> inputs;
-	inputs.add(input);
+	auto funcs = concretify_node_multi(abs_func, block, ns);
+	for (auto f: weak(funcs)) {
 
-	Array<CastingData> casts;
-	Array<const Class*> wanted;
-	int penalty;
-	if (!param_match_with_cast(out, {input}, casts, wanted, &penalty))
-		do_error("pipe: " + param_match_with_cast_error({input}, wanted), func);
-	return check_const_params(tree, apply_params_with_cast(out, {input}, casts, wanted));
-	//auto out = p->add_node_call(f);
-	//out->set_param(0, input);
-	//return out;
+
+		//if (!func->type->is_callable())
+		//	do_error("operand after '|>' must be callable", func);
+		if (f->kind != NodeKind::FUNCTION)
+			do_error("operand after '|>' must be a function", f);
+
+		auto p = node_call_effective_params(f);
+		auto rt = node_call_return_type(f);
+
+		if (p.num != 1)
+			continue;//do_error("function after '|>' needs exactly 1 parameter (including self)", f);
+		//if (f->literal_param_type[0] != input->type)
+		//	do_error("pipe type mismatch...");
+
+
+		// array |> func
+		if (input->type->is_super_array() and input->type->param[0] == p[0]) {
+			// -> map(func, array)
+			auto fp = wrap_node_into_callable(f);
+			return create_map_call(tree, fp, input, input->token_id);
+		}
+
+		auto out = add_node_call(f->as_func(), f->token_id);
+
+		Array<CastingData> casts;
+		Array<const Class*> wanted;
+		int penalty;
+		if (!param_match_with_cast(out, {input}, casts, wanted, &penalty))
+			continue;//do_error("pipe: " + param_match_with_cast_error({input}, wanted), f);
+		return check_const_params(tree, apply_params_with_cast(out, {input}, casts, wanted));
+		//auto out = p->add_node_call(f);
+		//out->set_param(0, input);
+		//return out;
+	}
+	if (input->type->is_super_array())
+		do_error(format("'|>' type mismatch: can not call right side with type '%s' or '%s'", input->type->long_name(), input->type->param[0]->long_name()), abs_func);
+	else
+		do_error(format("'|>' type mismatch: can not call right side with type '%s'", input->type->long_name()), abs_func);
+	return nullptr;
 }
 
 
