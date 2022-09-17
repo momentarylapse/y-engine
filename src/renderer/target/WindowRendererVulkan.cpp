@@ -14,14 +14,14 @@
 #include "../../Config.h" // for timing experiment
 
 
-WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
-	window = win;
+WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, int w, int h, Device *_device) : TargetRenderer("win") {
+	window = _window;
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
 	width = w;
 	height = h;
 
-	device = vulkan::default_device;
+	device = _device;
 
 
 	image_available_semaphore = new vulkan::Semaphore();

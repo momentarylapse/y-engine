@@ -34,7 +34,8 @@
 #include "../../meta.h"
 
 
-WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
+WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
+	device = _device;
 	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
 	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
@@ -51,7 +52,7 @@ void WorldRendererVulkanForward::prepare() {
 	static int pool_no = 0;
 	pool_no = (pool_no + 1) % 16;
 	cur_query_offset = pool_no * 8;
-	vulkan::default_device->reset_query_pool(cur_query_offset, 8);
+	device->reset_query_pool(cur_query_offset, 8);
 
 	auto cb = command_buffer();
 

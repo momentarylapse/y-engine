@@ -17,13 +17,15 @@ struct UBO;
 class WorldRendererVulkanForward : public WorldRendererVulkan {
 public:
 
-	WorldRendererVulkanForward(Renderer *parent);
+	WorldRendererVulkanForward(Renderer *parent, vulkan::Device *device);
 
 	void prepare() override;
 	void draw() override;
 
 	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
 	void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) override;
+
+	vulkan::Device *device;
 };
 
 #endif

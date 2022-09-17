@@ -23,4 +23,5 @@ extern Texture *tex_black;
 
 #ifdef USING_VULKAN
 extern vulkan::DescriptorPool *pool;
+extern vulkan::Device *device;
 #endif

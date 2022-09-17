@@ -136,7 +136,7 @@ public:
 
 	TargetRenderer *create_window_renderer() {
 #ifdef USING_VULKAN
-		return new WindowRendererVulkan(window, engine.width, engine.height);
+		return new WindowRendererVulkan(window, engine.width, engine.height, device);
 #else
 		return new WindowRendererGL(window, engine.width, engine.height);
 #endif
@@ -168,7 +168,7 @@ public:
 
 	WorldRenderer *create_world_renderer(Renderer *parent) {
 #ifdef USING_VULKAN
-		return new WorldRendererVulkanForward(parent);
+		return new WorldRendererVulkanForward(parent, device);
 #else
 		if (config.get_str("renderer.path", "forward") == "deferred")
 			return new WorldRendererGLDeferred(parent);
@@ -345,7 +345,7 @@ public:
 		}
 
 #ifdef USING_VULKAN
-		vulkan::default_device->wait_idle();
+		device->wait_idle();
 #endif
 	}
 
@@ -395,7 +395,7 @@ public:
 
 	void update_statistics() {
 #ifdef USING_VULKAN
-		vulkan::default_device->wait_idle();
+		device->wait_idle();
 #endif
 		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
 	}
