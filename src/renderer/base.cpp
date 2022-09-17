@@ -19,9 +19,12 @@ Texture *tex_black = nullptr;
 
 vulkan::Instance *instance = nullptr;
 vulkan::DescriptorPool *pool = nullptr;
+vulkan::Device *device = nullptr;
 
 void api_init(GLFWwindow* window) {
-	instance = vulkan::init(window, {"glfw", "validation", "api=1.2"});
+	instance = vulkan::init({"glfw", "validation", "api=1.2"});
+	device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy"});
+	device->create_query_pool(16384);
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	tex_white = new Texture();

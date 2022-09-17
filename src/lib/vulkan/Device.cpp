@@ -23,6 +23,7 @@ namespace vulkan {
 extern bool verbose;
 
 Device *default_device;
+extern VkSurfaceKHR default_surface;
 
 	bool check_device_extension_support(VkPhysicalDevice device, Requirements req);
 
@@ -272,6 +273,44 @@ int Device::make_aligned(int size) {
 		return 0;
 	return (size + physical_device_properties.limits.minUniformBufferOffsetAlignment - 1) & ~(size - 1);
 }
+
+
+
+Device *Device::create_simple(Instance *instance, GLFWwindow* window, const Array<string> &op) {
+	default_surface = instance->create_surface(window);
+	//op.append({"graphics", "present", "swapchain", "anisotropy"});
+	auto device = instance->pick_device(default_surface, op);
+	create_command_pool(device);
+	//device->create_query_pool(16384);
+
+	if (sa_contains(op, "rtx"))
+		device->get_rtx_properties();
+
+	default_device = device;
+	return device;
+}
+
+
+
+void Device::get_rtx_properties() {
+
+	ray_tracing_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV;
+
+	VkPhysicalDeviceProperties2 dev_props;
+	dev_props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+	dev_props.pNext = &ray_tracing_properties;
+	dev_props.properties = { };
+
+	//pvkGetPhysicalDeviceProperties2() FIXME
+	vkGetPhysicalDeviceProperties2(physical_device, &dev_props);
+	if (verbose) {
+		msg_write("PROPS");
+		msg_write(ray_tracing_properties.maxShaderGroupStride);
+		msg_write(ray_tracing_properties.shaderGroupBaseAlignment);
+		msg_write(ray_tracing_properties.shaderGroupHandleSize);
+	}
+}
+
 
 
 } /* namespace vulkan */

@@ -106,7 +106,7 @@ Instance::~Instance() {
 	if (verbose)
 		std::cout << "vulkan destroy\n";
 
-	destroy_command_pool();
+	destroy_command_pool(default_device);
 
 	vkDestroyDevice(default_device->device, nullptr);
 

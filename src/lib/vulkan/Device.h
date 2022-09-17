@@ -9,6 +9,9 @@
 
 #if HAS_LIB_VULKAN
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include "../base/base.h"
 #include "Queue.h"
 
@@ -26,14 +29,21 @@ public:
 	VkDevice device;
 	VkPhysicalDevice physical_device = VK_NULL_HANDLE;
 	VkPhysicalDeviceProperties physical_device_properties;
-	QueueFamilyIndices indices;
+	VkPhysicalDeviceRayTracingPropertiesNV ray_tracing_properties;
 
+	QueueFamilyIndices indices;
 	Queue graphics_queue;
 	Queue present_queue;
+
+
+	static Device *create_simple(Instance *instance, GLFWwindow* window, const Array<string> &op);
 
 	void pick_physical_device(Instance *instance, VkSurfaceKHR surface, Requirements req);
 	void create_logical_device(VkSurfaceKHR surface, Requirements req);
 
+
+
+	void get_rtx_properties();
 
 	uint32_t find_memory_type(const VkMemoryRequirements &requirements, VkMemoryPropertyFlags properties);
 	VkFormat find_supported_format(const Array<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

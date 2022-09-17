@@ -13,6 +13,7 @@
 #include "helper.h"
 
 #include <iostream>
+#include "../os/msg.h"
 
 namespace vulkan {
 
@@ -102,7 +103,6 @@ Array<FrameBuffer*> SwapChain::create_frame_buffers(RenderPass *render_pass, Dep
 
 SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device) {
 	SwapChainSupportDetails details;
-
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, default_surface, &details.capabilities);
 
 	uint32_t format_count;
