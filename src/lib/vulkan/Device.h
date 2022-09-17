@@ -32,7 +32,7 @@ public:
 	Queue present_queue;
 
 	void pick_physical_device(Instance *instance, VkSurfaceKHR surface, Requirements req);
-	void create_logical_device(bool validation, VkSurfaceKHR surface);
+	void create_logical_device(VkSurfaceKHR surface, Requirements req);
 
 
 	uint32_t find_memory_type(const VkMemoryRequirements &requirements, VkMemoryPropertyFlags properties);

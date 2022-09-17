@@ -13,9 +13,9 @@
 #include "vulkan.h"
 #include "helper.h"
 #include "common.h"
+#include "../base/set.h"
 
 #include <iostream>
-#include <set>
 
 namespace vulkan {
 
@@ -96,6 +96,17 @@ bool QueueFamilyIndices::is_complete(Requirements req) const {
 		if (!present_family)
 			return false;
 	return true;
+}
+
+Array<uint32_t> QueueFamilyIndices::unique() const {
+	base::set<uint32_t> unique_queue_families;
+	if (graphics_family)
+		unique_queue_families.add(*graphics_family);
+	if (present_family)
+		unique_queue_families.add(*present_family);
+	if (compute_family)
+		unique_queue_families.add(*compute_family);
+	return unique_queue_families;
 }
 
 

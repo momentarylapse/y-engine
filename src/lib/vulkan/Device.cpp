@@ -15,7 +15,7 @@
 #include "common.h"
 
 #include <iostream>
-#include <set>
+#include "../base/set.h"
 #include "../os/msg.h"
 
 namespace vulkan {
@@ -24,13 +24,20 @@ extern bool verbose;
 
 Device *default_device;
 
-	bool check_device_extension_support(VkPhysicalDevice device);
+	bool check_device_extension_support(VkPhysicalDevice device, Requirements req);
 
 
 
-	std::vector<const char*> device_extensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-	};
+	Array<const char*> device_extensions(Requirements req) {
+		Array<const char*> ext;
+		if (req & Requirements::SWAP_CHAIN)
+			ext.add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		if (req & Requirements::RTX) {
+			ext.add(VK_NV_RAY_TRACING_EXTENSION_NAME);
+			ext.add(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+		}
+		return ext;
+	}
 
 	extern Array<const char*> validation_layers;
 
@@ -40,7 +47,7 @@ bool is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface, Requireme
 	if (!indices.is_complete(req))
 		return false;
 
-	if (!check_device_extension_support(device))
+	if (!check_device_extension_support(device, req))
 		return false;
 
 	SwapChainSupportDetails swapChainSupport = query_swap_chain_support(device);
@@ -63,14 +70,17 @@ bool is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface, Requireme
 	return true;
 }
 
-bool check_device_extension_support(VkPhysicalDevice device) {
+bool check_device_extension_support(VkPhysicalDevice device, Requirements req) {
 	uint32_t extension_count;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
 
-	std::vector<VkExtensionProperties> available_extensions(extension_count);
-	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, available_extensions.data());
+	Array<VkExtensionProperties> available_extensions;
+	available_extensions.resize(extension_count);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, &available_extensions[0]);
 
-	std::set<std::string> required_extensions(device_extensions.begin(), device_extensions.end());
+	base::set<string> required_extensions;
+	for (auto e: device_extensions(req))
+		required_extensions.add(e);
 
 	if (verbose)
 		std::cout << "---- GPU-----\n";
@@ -80,7 +90,7 @@ bool check_device_extension_support(VkPhysicalDevice device) {
 		required_extensions.erase(extension.extensionName);
 	}
 
-	return required_extensions.empty();
+	return required_extensions.num == 0;
 }
 
 
@@ -143,11 +153,11 @@ void Device::pick_physical_device(Instance *instance, VkSurfaceKHR surface, Requ
 		std::cout << " done\n";
 }
 
-void Device::create_logical_device(bool validation, VkSurfaceKHR surface) {
+void Device::create_logical_device(VkSurfaceKHR surface, Requirements req) {
 	indices = QueueFamilyIndices::query(physical_device, surface);
 
 	Array<VkDeviceQueueCreateInfo> queue_create_infos;
-	std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
+	auto unique_queue_families = indices.unique();
 
 	float queue_priority = 1.0f;
 	for (uint32_t queue_family : unique_queue_families) {
@@ -170,10 +180,11 @@ void Device::create_logical_device(bool validation, VkSurfaceKHR surface) {
 
 	create_info.pEnabledFeatures = &device_features;
 
-	create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
-	create_info.ppEnabledExtensionNames = device_extensions.data();
+	auto extensions = device_extensions(req);
+	create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.num);
+	create_info.ppEnabledExtensionNames = &extensions[0];
 
-	if (validation) {
+	if (req & Requirements::VALIDATION) {
 		create_info.enabledLayerCount = static_cast<uint32_t>(validation_layers.num);
 		create_info.ppEnabledLayerNames = &validation_layers[0];
 	} else {

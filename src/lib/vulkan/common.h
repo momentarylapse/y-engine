@@ -11,11 +11,14 @@
 namespace vulkan {
 
 enum class Requirements {
+	NONE = 0,
 	ANISOTROPY = 1,
 	SWAP_CHAIN = 2,
 	PRESENT = 4,
 	GRAPHICS = 8,
-	COMPUTE = 16
+	COMPUTE = 16,
+    VALIDATION = 32,
+    RTX = 64
 };
 inline bool operator&(Requirements a, Requirements b) {
 	return ((int)a & (int)b);

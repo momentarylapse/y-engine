@@ -35,7 +35,7 @@ public:
 		base::optional<uint32_t> compute_family;
 
 		bool is_complete(Requirements req) const;
-
+		Array<uint32_t> unique() const;
 
 		static QueueFamilyIndices query(VkPhysicalDevice device, VkSurfaceKHR surface);
 	};

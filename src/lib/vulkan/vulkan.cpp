@@ -10,14 +10,6 @@
 
 //#define NDEBUG
 
-Array<const char*> sa2pa(const Array<string> &sa) {
-	Array<const char*> pa;
-	for (string &s: sa)
-		pa.add((const char*)s.data);
-	return pa;
-}
-
-
 
 
 namespace vulkan {
@@ -37,7 +29,9 @@ Instance *init(GLFWwindow* window, const Array<string> &op) {
 
 	auto instance = Instance::create(op);
 	default_surface = instance->create_surface(window);
-	default_device = instance->pick_device(default_surface);
+	auto dev_op = op;
+	dev_op.append({"graphics", "present", "swapchain", "anisotropy"});
+	default_device = instance->pick_device(default_surface, dev_op);
 	create_command_pool();
 	default_device->create_query_pool(16384);
 
