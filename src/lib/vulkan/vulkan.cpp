@@ -37,7 +37,7 @@ Instance *init(GLFWwindow* window, const Array<string> &op) {
 
 	auto instance = Instance::create(op);
 	default_surface = instance->create_surface(window);
-	default_device = instance->pick_device();
+	default_device = instance->pick_device(default_surface);
 	create_command_pool();
 	default_device->create_query_pool(16384);
 

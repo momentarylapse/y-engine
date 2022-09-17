@@ -10,7 +10,9 @@
 #include <vulkan/vulkan.h>
 #include "Device.h"
 #include "vulkan.h"
+#include "Queue.h"
 #include "helper.h"
+#include "common.h"
 
 #include <iostream>
 #include <set>
@@ -21,8 +23,6 @@ namespace vulkan {
 extern bool verbose;
 
 Device *default_device;
-
-	extern VkSurfaceKHR default_surface;
 
 	bool check_device_extension_support(VkPhysicalDevice device);
 
@@ -35,22 +35,32 @@ Device *default_device;
 	extern Array<const char*> validation_layers;
 
 
-
-bool is_device_suitable(VkPhysicalDevice device) {
-	QueueFamilyIndices indices = find_queue_families(device);
-	if (!indices.is_complete())
+bool is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface, Requirements req) {
+	QueueFamilyIndices indices = QueueFamilyIndices::query(device, surface);
+	if (!indices.is_complete(req))
 		return false;
 
 	if (!check_device_extension_support(device))
 		return false;
 
 	SwapChainSupportDetails swapChainSupport = query_swap_chain_support(device);
-	if ((swapChainSupport.formats.num == 0) or (swapChainSupport.present_modes.num == 0))
-		return false;
 
-	VkPhysicalDeviceFeatures supported_features;
-	vkGetPhysicalDeviceFeatures(device, &supported_features);
-	return supported_features.samplerAnisotropy;
+	if (req & Requirements::SWAP_CHAIN)
+		if (swapChainSupport.formats.num == 0)
+			return false;
+
+	if (req & Requirements::PRESENT)
+		if (swapChainSupport.present_modes.num == 0)
+			return false;
+
+	if (req & Requirements::ANISOTROPY) {
+		VkPhysicalDeviceFeatures supported_features;
+		vkGetPhysicalDeviceFeatures(device, &supported_features);
+		if (!supported_features.samplerAnisotropy)
+			return false;
+	}
+
+	return true;
 }
 
 bool check_device_extension_support(VkPhysicalDevice device) {
@@ -81,22 +91,23 @@ Device::~Device() {
 }
 
 
-void Device::pick_physical_device(Instance *instance) {
+void Device::pick_physical_device(Instance *instance, VkSurfaceKHR surface, Requirements req) {
 	uint32_t device_count = 0;
 	vkEnumeratePhysicalDevices(instance->instance, &device_count, nullptr);
 
 	if (device_count == 0)
 		throw Exception("failed to find GPUs with Vulkan support!");
 
-	std::vector<VkPhysicalDevice> devices(device_count);
-	vkEnumeratePhysicalDevices(instance->instance, &device_count, devices.data());
+	Array<VkPhysicalDevice> devices;
+	devices.resize(device_count);
+	vkEnumeratePhysicalDevices(instance->instance, &device_count, &devices[0]);
 
 	if (verbose)
 		std::cout << device_count << " devices found\n";
 
 	physical_device = VK_NULL_HANDLE;
 	for (const auto& dev: devices) {
-		if (is_device_suitable(dev)) {
+		if (is_device_suitable(dev, surface, req)) {
 			if (verbose)
 				std::cout << " ok\n";
 			physical_device = dev;
@@ -132,8 +143,8 @@ void Device::pick_physical_device(Instance *instance) {
 		std::cout << " done\n";
 }
 
-void Device::create_logical_device(bool validation) {
-	indices = find_queue_families(physical_device);
+void Device::create_logical_device(bool validation, VkSurfaceKHR surface) {
+	indices = QueueFamilyIndices::query(physical_device, surface);
 
 	Array<VkDeviceQueueCreateInfo> queue_create_infos;
 	std::set<uint32_t> unique_queue_families = {indices.graphics_family.value(), indices.present_family.value()};
@@ -224,37 +235,6 @@ VkFormat Device::find_depth_format() {
 
 
 
-
-QueueFamilyIndices find_queue_families(VkPhysicalDevice device) {
-
-	uint32_t queue_family_count = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, nullptr);
-
-	Array<VkQueueFamilyProperties> queue_families;
-	queue_families.resize(queue_family_count);
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, &queue_families[0]);
-
-	QueueFamilyIndices indices;
-	int i = 0;
-	for (const auto& family: queue_families) {
-		if ((family.queueCount > 0) and (family.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
-			indices.graphics_family = i;
-		}
-
-		VkBool32 present_support = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, default_surface, &present_support);
-
-		if ((family.queueCount > 0) and present_support)
-			indices.present_family = i;
-
-		if (indices.is_complete())
-			break;
-
-		i ++;
-	}
-
-	return indices;
-}
 
 void Device::create_query_pool(int count) {
 	VkQueryPoolCreateInfo info = {};

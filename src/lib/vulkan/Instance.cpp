@@ -9,6 +9,7 @@
 
 #include "vulkan.h"
 #include "Instance.h"
+#include "common.h"
 
 #include "../os/msg.h"
 #include <iostream>
@@ -204,10 +205,11 @@ VkSurfaceKHR Instance::create_surface(GLFWwindow* window) {
 }
 
 
-Device *Instance::pick_device() {
+Device *Instance::pick_device(VkSurfaceKHR surface) {
+	Requirements req = Requirements::GRAPHICS | Requirements::PRESENT | Requirements::SWAP_CHAIN | Requirements::ANISOTROPY;
 	auto device = new Device();
-	device->pick_physical_device(this);
-	device->create_logical_device(using_validation_layers);
+	device->pick_physical_device(this, surface, req);
+	device->create_logical_device(using_validation_layers, surface);
 	return device;
 }
 

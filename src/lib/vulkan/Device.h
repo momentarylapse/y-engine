@@ -15,6 +15,7 @@
 namespace vulkan {
 
 	class Instance;
+	enum class Requirements;
 
 
 class Device {
@@ -30,8 +31,8 @@ public:
 	Queue graphics_queue;
 	Queue present_queue;
 
-	void pick_physical_device(Instance *instance);
-	void create_logical_device(bool validation);
+	void pick_physical_device(Instance *instance, VkSurfaceKHR surface, Requirements req);
+	void create_logical_device(bool validation, VkSurfaceKHR surface);
 
 
 	uint32_t find_memory_type(const VkMemoryRequirements &requirements, VkMemoryPropertyFlags properties);
@@ -51,8 +52,6 @@ public:
 };
 
 extern Device *default_device;
-
-QueueFamilyIndices find_queue_families(VkPhysicalDevice device);
 
 
 } /* namespace vulkan */
