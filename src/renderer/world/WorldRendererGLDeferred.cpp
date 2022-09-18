@@ -107,7 +107,7 @@ void WorldRendererGLDeferred::draw() {
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	cam_main->update_matrices((float)target->width / (float)target->height);
 	nix::set_projection_matrix(m * cam_main->m_projection);
-	nix::bind_buffer(ubo_light, 1);
+	nix::bind_buffer(1, ubo_light);
 	nix::set_view_matrix(cam_main->view_matrix());
 	nix::set_z(true, true);
 
@@ -150,9 +150,9 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
-	nix::bind_buffer(ssao_sample_buffer, 13);
+	nix::bind_buffer(13, ssao_sample_buffer);
 
-	nix::bind_buffer(ubo_light, 1);
+	nix::bind_buffer(1, ubo_light);
 	auto tex = weak(source->color_attachments);
 	tex.add(source->depth_buffer.get());
 	tex.add(fb_shadow1->depth_buffer.get());
@@ -195,7 +195,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
 
-	nix::bind_buffer(ubo_light, 1);
+	nix::bind_buffer(1, ubo_light);
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 	nix::set_cull(nix::CullMode::CW);

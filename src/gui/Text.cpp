@@ -48,7 +48,7 @@ void Text::rebuild() {
 	if (texture == nullptr)
 		texture = new Texture();
 
-	texture->override(im);
+	texture->write(im);
 	//texture->set_options("magfilter=nearest,wrap=clamp");
 	texture->set_options("magfilter=linear,wrap=clamp");
 

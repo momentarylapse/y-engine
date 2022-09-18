@@ -278,7 +278,7 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 			set_material(s.material, type, ShaderVariant::INSTANCED);
 		else
 			set_material(material_shadow, type, ShaderVariant::INSTANCED);
-		nix::bind_buffer(ubo_multi_matrix, 5);
+		nix::bind_buffer(5, ubo_multi_matrix);
 		//msg_write(s.matrices.num);
 		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
 		//s.material->shader = ss;
@@ -301,7 +301,7 @@ void WorldRendererGL::draw_objects_opaque(bool allow_material) {
 			else
 				set_material(material_shadow, type, ShaderVariant::ANIMATED);
 			ani->buf->update_array(ani->dmatrix);
-			nix::bind_buffer(ani->buf, 7);
+			nix::bind_buffer(7, ani->buf);
 		} else {
 			if (allow_material)
 				set_material(s.material, type, ShaderVariant::DEFAULT);

@@ -111,7 +111,7 @@ void WorldRendererGLForward::draw() {
 	cam_main->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam_main->m_projection);
 
-	nix::bind_buffer(ubo_light, 1);
+	nix::bind_buffer(1, ubo_light);
 	nix::set_view_matrix(cam_main->view_matrix());
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
@@ -172,7 +172,7 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(m * cam->m_projection);
 
-	nix::bind_buffer(ubo_light, 1);
+	nix::bind_buffer(1, ubo_light);
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);

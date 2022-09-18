@@ -32,9 +32,9 @@ void api_init(GLFWwindow* window) {
 
 	Image im;
 	im.create(16, 16, White);
-	tex_white->override(im);
+	tex_white->write(im);
 	im.create(16, 16, Black);
-	tex_black->override(im);
+	tex_black->write(im);
 }
 
 void api_end() {
@@ -67,9 +67,9 @@ void api_init(GLFWwindow* window) {
 	tex_black = new nix::Texture(16, 16, "rgba:i8");
 	Image im;
 	im.create(16, 16, White);
-	tex_white->override(im);
+	tex_white->write(im);
 	im.create(16, 16, Black);
-	tex_black->override(im);
+	tex_black->write(im);
 }
 
 void api_end() {
