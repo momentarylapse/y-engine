@@ -61,7 +61,7 @@ Pipeline *get_gui(Shader *s, RenderPass *rp, const string &format) {
 	if (ob_pipelines.contains(s))
 		return ob_pipelines[s];
 	msg_write("NEW PIPELINE GUI");
-	auto p = new vulkan::Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
+	auto p = new Pipeline(s, rp, 0, "triangles", "3f,3f,2f");
 	p->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	p->set_z(false, false);
 	p->rebuild();

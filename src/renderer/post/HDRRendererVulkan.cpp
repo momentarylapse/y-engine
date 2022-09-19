@@ -37,8 +37,8 @@ static int BLUR_SCALE = 4;
 
 HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex) {
 	shader_out = s;
-	pipeline_out = new vulkan::Pipeline(s, r->parent->render_pass(), 0, "triangles", "3f,3f,2f");
-	pipeline_out->set_culling(0);
+	pipeline_out = new vulkan::GraphicsPipeline(s, r->parent->render_pass(), 0, "triangles", "3f,3f,2f");
+	pipeline_out->set_culling(CullMode::NONE);
 	pipeline_out->rebuild();
 	dset_out = pool->create_set("buffer,sampler,sampler");
 
@@ -115,7 +115,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
 	// without clear, we get artifacts from dynamic resolution scaling
 	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	blur_pipeline = new vulkan::Pipeline(shader_blur.get(), blur_render_pass, 0, "triangles", "3f,3f,2f");
+	blur_pipeline = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass, 0, "triangles", "3f,3f,2f");
 	blur_pipeline->set_z(false, false);
 	blur_pipeline->rebuild();
 	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));

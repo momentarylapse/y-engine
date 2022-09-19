@@ -40,7 +40,7 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_fx->set_z(true, false);
-	pipeline_fx->set_culling(0);
+	pipeline_fx->set_culling(CullMode::NONE);
 	pipeline_fx->rebuild();
 }
 

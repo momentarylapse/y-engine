@@ -31,7 +31,8 @@
 		class UniformBuffer;
 		enum class Alpha;
 		enum class AlphaMode;
-		class Pipeline;
+		enum class CullMode;
+		class GraphicsPipeline;
 		class DescriptorSet;
 		class RenderPass;
 		class CommandBuffer;
@@ -51,13 +52,14 @@
 	using VolumeTexture = vulkan::VolumeTexture;
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
-	using Pipeline = vulkan::Pipeline;
+	using Pipeline = vulkan::GraphicsPipeline;
 	using CommandBuffer = vulkan::CommandBuffer;
 	using DescriptorSet = vulkan::DescriptorSet;
 	using RenderPass = vulkan::RenderPass;
 
 	using Alpha = vulkan::Alpha;
 	using AlphaMode = vulkan::AlphaMode;
+	using CullMode = vulkan::CullMode;
 
 #endif
 #ifdef USING_OPENGL
