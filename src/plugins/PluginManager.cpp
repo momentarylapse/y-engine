@@ -141,11 +141,7 @@ void texture_delete(Texture *t) {
 }
 
 void texture_update(Texture *t, const Image &im) {
-#ifdef USING_VULKAN
-	t->override(im);
-#else
 	t->write(im);
-#endif
 }
 
 void cubemap_init(CubeMap *t, int size, const string &format) {

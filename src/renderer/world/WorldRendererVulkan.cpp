@@ -72,11 +72,11 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	if (false) {
 		Image im;
 		im.create(CUBE_SIZE, CUBE_SIZE, Red);
-		cube_map->override_side(0, im);
+		cube_map->write_side(0, im);
 		im.create(CUBE_SIZE, CUBE_SIZE, color(1, 1,0.5f,0));
-		cube_map->override_side(1, im);
+		cube_map->write_side(1, im);
 		im.create(CUBE_SIZE, CUBE_SIZE, color(1, 1,0,1));
-		cube_map->override_side(2, im);
+		cube_map->write_side(2, im);
 	}
 
 	depth_cube = new DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d:f32", true);
