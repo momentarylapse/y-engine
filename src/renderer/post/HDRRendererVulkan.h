@@ -39,7 +39,7 @@ public:
 		RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex);
 		void render_out(CommandBuffer *cb, const Array<float> &data);
 		shared<Shader> shader_out;
-		Pipeline* pipeline_out;
+		GraphicsPipeline* pipeline_out;
 		DescriptorSet *dset_out;
 		VertexBuffer *vb_2d;
 	} out;

@@ -20,7 +20,7 @@ public:
 	int ch_gui = -1;
 
 	Shader *shader;
-	Pipeline* pipeline;
+	GraphicsPipeline* pipeline;
 	Array<DescriptorSet*> dset;
 	Array<UniformBuffer*> ubo;
 	VertexBuffer* vb;

@@ -27,7 +27,7 @@ struct UBOBlur{
 
 UniformBuffer *blur_ubo[2];
 DescriptorSet *blur_dset[2];
-Pipeline *blur_pipeline;
+GraphicsPipeline *blur_pipeline;
 RenderPass *blur_render_pass;
 
 static float resolution_scale_x = 1.0f;

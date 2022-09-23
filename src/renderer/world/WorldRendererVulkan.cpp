@@ -160,7 +160,7 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 
 void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
-	Pipeline *p;
+	GraphicsPipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
 		p = PipelineManager::get_alpha(s, rp, m->alpha.source, m->alpha.destination);

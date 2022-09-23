@@ -92,7 +92,7 @@ public:
 	RenderViewDataVK rvd_cube[6];
 	RenderViewDataVK rvd_shadow1, rvd_shadow2;
 
-	Pipeline *pipeline_fx = nullptr;
+	GraphicsPipeline *pipeline_fx = nullptr;
 
 
 	WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType type);

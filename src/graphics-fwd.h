@@ -22,6 +22,7 @@
 	namespace vulkan {
 		class Texture;
 		class VolumeTexture;
+		class StorageTexture;
 		class CubeMap;
 		class Shader;
 		class VertexBuffer;
@@ -33,6 +34,7 @@
 		enum class AlphaMode;
 		enum class CullMode;
 		class GraphicsPipeline;
+		class ComputePipeline;
 		class DescriptorSet;
 		class RenderPass;
 		class CommandBuffer;
@@ -52,7 +54,8 @@
 	using VolumeTexture = vulkan::VolumeTexture;
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
-	using Pipeline = vulkan::GraphicsPipeline;
+	using GraphicsPipeline = vulkan::GraphicsPipeline;
+	using ComputePipeline = vulkan::ComputePipeline;
 	using CommandBuffer = vulkan::CommandBuffer;
 	using DescriptorSet = vulkan::DescriptorSet;
 	using RenderPass = vulkan::RenderPass;

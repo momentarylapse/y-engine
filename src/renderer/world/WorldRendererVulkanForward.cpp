@@ -37,7 +37,7 @@
 WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
 	device = _device;
 	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
-	pipeline_fx = new Pipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
+	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_fx->set_z(true, false);
 	pipeline_fx->set_culling(CullMode::NONE);
