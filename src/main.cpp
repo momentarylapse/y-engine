@@ -47,6 +47,7 @@
 #ifdef USING_VULKAN
 	#include "renderer/world/WorldRendererVulkan.h"
 	#include "renderer/world/WorldRendererVulkanForward.h"
+	#include "renderer/world/WorldRendererVulkanRayTracing.h"
 	#include "renderer/gui/GuiRendererVulkan.h"
 	#include "renderer/post/HDRRendererVulkan.h"
 	#include "renderer/post/PostProcessorVulkan.h"
@@ -168,7 +169,10 @@ public:
 
 	WorldRenderer *create_world_renderer(Renderer *parent) {
 #ifdef USING_VULKAN
-		return new WorldRendererVulkanForward(parent, device);
+		if (config.get_str("renderer.path", "forward") == "raytracing")
+			return new WorldRendererVulkanRayTracing(parent, device);
+		else
+			return new WorldRendererVulkanForward(parent, device);
 #else
 		if (config.get_str("renderer.path", "forward") == "deferred")
 			return new WorldRendererGLDeferred(parent);

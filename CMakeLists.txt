@@ -171,6 +171,7 @@ set(SOURCE
 	src/renderer/world/WorldRendererGLForward.cpp
 	src/renderer/world/WorldRendererVulkan.cpp
 	src/renderer/world/WorldRendererVulkanForward.cpp
+	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/base.cpp
 	src/renderer/Renderer.cpp
 	src/world/components/Animator.cpp

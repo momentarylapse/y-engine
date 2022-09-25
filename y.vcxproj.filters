@@ -496,6 +496,9 @@
     <ClCompile Include="src\renderer\world\WorldRendererVulkanForward.cpp">
       <Filter>src\renderer\world</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\world\WorldRendererVulkanRayTracing.cpp">
+      <Filter>src\renderer\world</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\base.cpp">
       <Filter>src\renderer</Filter>
     </ClCompile>
@@ -948,6 +951,9 @@
     <ClInclude Include="src\lib\vulkan\CommandBuffer.h">
       <Filter>src\lib\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\lib\vulkan\common.h">
+      <Filter>src\lib\vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\lib\vulkan\DescriptorSet.h">
       <Filter>src\lib\vulkan</Filter>
     </ClInclude>
@@ -1057,6 +1063,9 @@
       <Filter>src\renderer\world</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\world\WorldRendererVulkanForward.h">
+      <Filter>src\renderer\world</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\WorldRendererVulkanRayTracing.h">
       <Filter>src\renderer\world</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\base.h">

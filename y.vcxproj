@@ -281,6 +281,7 @@
     <ClCompile Include="src\renderer\world\WorldRendererGLForward.cpp" />
     <ClCompile Include="src\renderer\world\WorldRendererVulkan.cpp" />
     <ClCompile Include="src\renderer\world\WorldRendererVulkanForward.cpp" />
+    <ClCompile Include="src\renderer\world\WorldRendererVulkanRayTracing.cpp" />
     <ClCompile Include="src\renderer\base.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\world\components\Animator.cpp" />
@@ -433,6 +434,7 @@
     <ClInclude Include="src\lib\vulkan\AccelerationStructure.h" />
     <ClInclude Include="src\lib\vulkan\Buffer.h" />
     <ClInclude Include="src\lib\vulkan\CommandBuffer.h" />
+    <ClInclude Include="src\lib\vulkan\common.h" />
     <ClInclude Include="src\lib\vulkan\DescriptorSet.h" />
     <ClInclude Include="src\lib\vulkan\Device.h" />
     <ClInclude Include="src\lib\vulkan\FrameBuffer.h" />
@@ -470,6 +472,7 @@
     <ClInclude Include="src\renderer\world\WorldRendererGLForward.h" />
     <ClInclude Include="src\renderer\world\WorldRendererVulkan.h" />
     <ClInclude Include="src\renderer\world\WorldRendererVulkanForward.h" />
+    <ClInclude Include="src\renderer\world\WorldRendererVulkanRayTracing.h" />
     <ClInclude Include="src\renderer\base.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\world\components\Animator.h" />
