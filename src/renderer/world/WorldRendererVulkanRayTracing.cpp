@@ -10,7 +10,6 @@
 #include "../../graphics-impl.h"
 #include "../base.h"
 #include "../../lib/os/msg.h"
-
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../helper/Scheduler.h"
@@ -36,15 +35,10 @@
 
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("rt", parent, RenderPathType::FORWARD) {
 	device = _device;
-	/*shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
-	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
-	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
-	pipeline_fx->set_z(true, false);
-	pipeline_fx->set_culling(CullMode::NONE);
-	pipeline_fx->rebuild();*/
-
 
     offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:i8");
+
+    offscreen_image2 = new vulkan::Texture(width, height, "rgba:i8");
 
     auto rt_pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:1,sampler:1", 1);
 
@@ -52,6 +46,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
     pipeline = new vulkan::ComputePipeline("[[image]]", shader);
     dset = rt_pool->create_set("image");
     dset->set_storage_image(0, offscreen_image);
+    dset->update();
 
 
 
@@ -59,9 +54,9 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 	pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), parent->render_pass(), 0, "triangles", "3f,3f,2f");
 	pipeline_out->set_culling(CullMode::NONE);
 	pipeline_out->rebuild();
-	dset_out = pool->create_set("buffer,sampler,sampler");
+	dset_out = pool->create_set("sampler");
 
-	dset_out->set_texture(1, offscreen_image);
+	dset_out->set_texture(0, offscreen_image2);
 	dset_out->update();
 
 	vb_2d = new VertexBuffer("3f,3f,2f");
@@ -80,9 +75,6 @@ void WorldRendererVulkanRayTracing::prepare() {
 	auto cb = command_buffer();
 
 	cb->timestamp(cur_query_offset + 0);
-
-
-
 
 	prepare_lights(cam_main, rvd_def);
 
@@ -107,8 +99,8 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 	auto cb = command_buffer();
 	cb->image_barrier(offscreen_image,
-    vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
-    vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
+        vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
+        vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
     cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
     cb->bind_pipeline(pipeline);
@@ -116,6 +108,15 @@ void WorldRendererVulkanRayTracing::prepare() {
     cb->dispatch(width, height, 1);
 
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
+
+    /*cb->image_barrier(offscreen_image,
+        vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
+        vulkan::ImageLayout::GENERAL, vulkan::ImageLayout::SHADER_READ_ONLY_OPTIMAL);*/
+	cb->copy_image(offscreen_image, offscreen_image2, {0,0,width,height,0,0});
+
+    cb->image_barrier(offscreen_image,
+        vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
+        vulkan::ImageLayout::GENERAL, vulkan::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 
 }
 
@@ -144,13 +145,7 @@ void WorldRendererVulkanRayTracing::draw() {
 
 	auto cb = command_buffer();
 
-    vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-
-
-    cb->image_barrier(offscreen_image,
-        vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
-            vulkan::ImageLayout::GENERAL, vulkan::ImageLayout::GENERAL);
-
+    //vb_2d->create_quad(rect::ID_SYM, rect::ID);//dynamicly_scaled_source());
 
 	cb->bind_pipeline(pipeline_out);
 	cb->bind_descriptor_set(0, dset_out);

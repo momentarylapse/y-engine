@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler,sampler]]
+	bindings = [[sampler]]
 	pushsize = 20
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -68,7 +68,7 @@ uniform float scale_y = 1.0;
 
 #endif
 
-layout(binding = 1) uniform sampler2D tex0;
+layout(binding = 0) uniform sampler2D tex0;
 
 //layout(location = 0) in vec4 outPos;
 layout(location = 0) in vec2 in_uv;
@@ -80,6 +80,8 @@ void main() {
 	vec2 uv = in_uv * vec2(scale_x, scale_y);
 	uv.y += 1 - scale_y;
 	out_color.rgb = textureLod(tex0, uv, 0).rgb;
+	//out_color.rgb = vec3(uv,0);
+	out_color.b += 0.1;
 	out_color.a = 1;
 }
 </FragmentShader>

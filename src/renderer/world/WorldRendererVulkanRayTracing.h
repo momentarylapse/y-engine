@@ -25,6 +25,7 @@ public:
 	vulkan::Device *device;
 
     vulkan::StorageTexture *offscreen_image;
+    vulkan::Texture *offscreen_image2;
     vulkan::ComputePipeline *pipeline;
     vulkan::DescriptorSet *dset;
 

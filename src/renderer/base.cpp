@@ -23,18 +23,14 @@ vulkan::Device *device = nullptr;
 
 void api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.2", "verbose"});
-	device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "compute"});
+	device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "compute", "validation"});
 	device->create_query_pool(16384);
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
 	tex_white = new Texture();
 	tex_black = new Texture();
-
-	Image im;
-	im.create(16, 16, White);
-	tex_white->write(im);
-	im.create(16, 16, Black);
-	tex_black->write(im);
+	tex_white->write(Image(16, 16, White));
+	tex_black->write(Image(16, 16, Black));
 }
 
 void api_end() {
@@ -65,11 +61,8 @@ void api_init(GLFWwindow* window) {
 
 	tex_white = new nix::Texture(16, 16, "rgba:i8");
 	tex_black = new nix::Texture(16, 16, "rgba:i8");
-	Image im;
-	im.create(16, 16, White);
-	tex_white->write(im);
-	im.create(16, 16, Black);
-	tex_black->write(im);
+	tex_white->write(Image(16, 16, White));
+	tex_black->write(Image(16, 16, Black));
 }
 
 void api_end() {

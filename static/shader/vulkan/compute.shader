@@ -16,6 +16,12 @@ void main() {
 	float localCoef = length(vec2(ivec2(gl_LocalInvocationID.xy)-8)/8.0);
 	float globalCoef = sin(float(gl_WorkGroupID.x+gl_WorkGroupID.y)*0.1 + roll)*0.5;
 	imageStore(image, storePos, vec4(1.0-globalCoef*localCoef, 0.0, 0.0, 0.0));
+	
+	/*float x = 0.0;
+	for (int i=0;i<10; i++)
+		if (i < cos(i))
+			x += sin(gl_GlobalInvocationID.x * 0.02);
+	imageStore(image, storePos, vec4(x, x, 0, 0.0));*/
 	//imageStore(image, storePos, vec4(0, 1, 0, 0.0));
 }
 </ComputeShader>
