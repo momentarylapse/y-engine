@@ -69,19 +69,13 @@ uniform float scale_y = 1.0;
 #endif
 
 layout(binding = 0) uniform sampler2D tex0;
-
-//layout(location = 0) in vec4 outPos;
 layout(location = 0) in vec2 in_uv;
-
 layout(location = 0) out vec4 out_color;
 
 void main() {
-	// hmmm, texture() is faster than texelFetch()...???
 	vec2 uv = in_uv * vec2(scale_x, scale_y);
 	uv.y += 1 - scale_y;
 	out_color.rgb = textureLod(tex0, uv, 0).rgb;
-	//out_color.rgb = vec3(uv,0);
-	out_color.b += 0.1;
 	out_color.a = 1;
 }
 </FragmentShader>

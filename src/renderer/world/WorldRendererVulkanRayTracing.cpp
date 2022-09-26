@@ -32,6 +32,7 @@
 #include "../../Config.h"
 #include "../../meta.h"
 
+static const int MAX_RT_TRIAS = 65536;
 
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("rt", parent, RenderPathType::FORWARD) {
 	device = _device;
@@ -40,12 +41,15 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
     offscreen_image2 = new vulkan::Texture(width, height, "rgba:i8");
 
+	buffer = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS);
+
     auto rt_pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:1,sampler:1", 1);
 
     auto shader = ResourceManager::load_shader("vulkan/compute.shader");
-    pipeline = new vulkan::ComputePipeline("[[image]]", shader);
-    dset = rt_pool->create_set("image");
+    pipeline = new vulkan::ComputePipeline("[[image,buffer]]", shader);
+    dset = rt_pool->create_set("image,buffer");
     dset->set_storage_image(0, offscreen_image);
+    dset->set_buffer(1, buffer);
     dset->update();
 
 
@@ -97,6 +101,32 @@ void WorldRendererVulkanRayTracing::prepare() {
     #endif
 
 
+	Array<vec4> vertices;
+
+	for (auto &s: world.sorted_opaque) {
+		Model *m = s.model;
+		auto& vb = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer;
+		//msg_write(m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.size);
+		auto p = (vulkan::Vertex1*)vb.map();
+		for (int i=0; i<vb.size / sizeof(vulkan::Vertex1); i++)
+			vertices.add(*(vec4*)&p[i].pos);
+		if (vertices.num > 300)
+			vertices.resize(300);
+		msg_write(vertices.num);
+		vb.unmap();
+		break;
+	}
+	/*vertices.add({0,0.5,0,0});
+	vertices.add({1,-0.5,0,0});
+	vertices.add({-1,-0.5,0,0});*/
+
+
+	buffer->update_array(vertices, 0);
+	int num_trias = vertices.num / 3;
+
+
+
+
 	auto cb = command_buffer();
 	cb->image_barrier(offscreen_image,
         vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
@@ -105,6 +135,7 @@ void WorldRendererVulkanRayTracing::prepare() {
     cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
     cb->bind_pipeline(pipeline);
     cb->bind_descriptor_set(0, dset);
+	cb->push_constant(0, 4, &num_trias);
     cb->dispatch(width, height, 1);
 
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
