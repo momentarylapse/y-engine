@@ -112,7 +112,7 @@ void WorldRendererVulkanRayTracing::prepare() {
 			vertices.add(*(vec4*)&p[i].pos);
 		if (vertices.num > 300)
 			vertices.resize(300);
-		msg_write(vertices.num);
+		//msg_write(vertices.num);
 		vb.unmap();
 		break;
 	}
@@ -135,7 +135,14 @@ void WorldRendererVulkanRayTracing::prepare() {
     cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
     cb->bind_pipeline(pipeline);
     cb->bind_descriptor_set(0, dset);
-	cb->push_constant(0, 4, &num_trias);
+	struct PushConst {
+		vec3 cam_pos;
+		float _dummy;
+		int num_trias;
+	} pc;
+	pc.cam_pos = cam_main->owner->pos;
+	pc.num_trias = num_trias;
+	cb->push_constant(0, sizeof(pc), &pc);
     cb->dispatch(width, height, 1);
 
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
