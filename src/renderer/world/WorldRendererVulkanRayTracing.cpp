@@ -37,9 +37,9 @@ static const int MAX_RT_TRIAS = 65536;
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("rt", parent, RenderPathType::FORWARD) {
 	device = _device;
 
-    offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:i8");
+    offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:f16");
 
-    offscreen_image2 = new vulkan::Texture(width, height, "rgba:i8");
+    offscreen_image2 = new vulkan::Texture(width, height, "rgba:f16");
 
 	buffer = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS);
 
@@ -136,11 +136,10 @@ void WorldRendererVulkanRayTracing::prepare() {
     cb->bind_pipeline(pipeline);
     cb->bind_descriptor_set(0, dset);
 	struct PushConst {
-		vec3 cam_pos;
-		float _dummy;
+		mat4 iview;
 		int num_trias;
 	} pc;
-	pc.cam_pos = cam_main->owner->pos;
+	pc.iview = cam_main->view_matrix().inverse();
 	pc.num_trias = num_trias;
 	cb->push_constant(0, sizeof(pc), &pc);
     cb->dispatch(width, height, 1);

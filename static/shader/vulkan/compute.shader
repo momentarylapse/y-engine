@@ -6,10 +6,10 @@
 <ComputeShader>
 
 layout(push_constant) uniform PushConstants {
-	vec4 cam_pos;
+	mat4 iview;
 	int num_triangles;
 } push;
-layout(set=0, binding=0, rgba8) uniform writeonly image2D image;
+layout(set=0, binding=0, rgba16f) uniform writeonly image2D image;
 //layout(rgba8,location=0) uniform writeonly image2D tex;
 layout(binding=1) uniform Triangles { vec4 vertex[65536]; };
 layout(local_size_x=16, local_size_y=16) in;
@@ -67,6 +67,7 @@ struct HitData {
 };
 
 bool trace(vec3 p0, vec3 dir, out HitData hd) {
+	hd.thd.t = 1000000;
 	bool hit = false;
 	TriaHitData thd;
 	for (int i=0; i<push.num_triangles; i++) {
@@ -74,38 +75,73 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 		vec3 b = vertex[i*3+1].xyz;
 		vec3 c = vertex[i*3+2].xyz;
 		if (trace_tria(p0, dir, a, b, c, thd)) {
-			hit = true;
-			hd.thd = thd;
+			if (thd.t < hd.thd.t) {
+				hit = true;
+				hd.thd = thd;
+				hd.index = i;
+			}
 		}
 	}
 	return hit;
+}
+
+vec3 get_emission(int index) {
+	if (index == 7 || index == 6)
+		return vec3(2,0,0);
+	return vec3(0);
+}
+
+float calc_light_visibility(vec3 p, vec3 sun_dir) {
+	int N = 10;
+	
+	HitData hd_temp;
+	float light_visibility = 0.0;
+	for (int i=0; i<N; i++)
+		if (!trace(p, -normalize(sun_dir + 0.02 * rand3d(p + vec3(i,2*i,3*i))), hd_temp))
+			light_visibility += 1.0 / N;
+	return light_visibility;
+}
+
+vec3 calc_bounced_emission(vec3 p, vec3 n) {
+	int N = 50;
+	
+	HitData hd_temp;
+	vec3 color = vec3(0);
+	for (int i=0; i<N; i++)
+		if (trace(p, normalize(n + 0.7 * rand3d(p + vec3(i,2*i,3*i))), hd_temp))
+			color += get_emission(hd_temp.index) / N;	
+	return color;
 }
 
 void main() {
 	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
 		
 	vec2 r = vec2(gl_GlobalInvocationID.xy) / imageSize(image);
-	//vec3 cam_pos = vec3(0,0,-500);
 	vec3 dir = normalize(vec3(r.x - 0.5, 0.5 - r.y, 1));
+	dir = (push.iview * vec4(dir,0)).xyz;
+	vec3 cam_pos = (push.iview * vec4(0,0,0,1)).xyz;
 	
-	vec3 sun_dir = normalize(vec3(0.2,0.1,1));
+	vec3 sun_dir = normalize(vec3(0.3,0.05,1));
+	vec3 sun_color = vec3(1,1,1);
 	
 	HitData hd;
-	if (trace(push.cam_pos.xyz, dir, hd)) {
+	if (trace(cam_pos, dir, hd)) {
 		//imageStore(image, storePos, vec4(hd.thd.p/100,1));
-		float light_visibility = 0.0;
+		vec3 albedo = vec3(1,1,1);
 		
-		HitData hd2;
-		int N = 5;
-		for (int i=0; i<N; i++)
-			if (!trace(hd.thd.p + hd.thd.n * 0.1, -normalize(sun_dir + 0.05 * rand3d(hd.thd.p)), hd2))
-				light_visibility += 0.2;//1.0 / N;
+		// direct sunlight
+		float light_visibility = calc_light_visibility(hd.thd.p + hd.thd.n * 0.2, sun_dir);
 		
-		float f = max(-dot(hd.thd.n, sun_dir), 0.2) * light_visibility;
-		imageStore(image, storePos, vec4(f,f,f,1));
+		vec3 color = get_emission(hd.index);
+		float f = max(-dot(hd.thd.n, sun_dir), 0.1) * light_visibility;
+		color += f * albedo * sun_color;
+		
+		color += calc_bounced_emission(hd.thd.p + hd.thd.n * 0.1, hd.thd.n);
+		
+		imageStore(image, storePos, vec4(color,1));
 	} else {
 		// background
-		imageStore(image, storePos, vec4(0.2,0,0,1));
+		imageStore(image, storePos, vec4(0.1,0,0,1));
 	}
 }
 </ComputeShader>
