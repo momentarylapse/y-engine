@@ -23,7 +23,12 @@ vulkan::Device *device = nullptr;
 
 void api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.2", "verbose"});
-	device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "compute", "validation"});
+	try {
+		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "compute", "validation"});
+	} catch (...) {
+		msg_error("warning: no vulkan compute device found. Trying without...");
+		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation"});
+	}
 	device->create_query_pool(16384);
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 
