@@ -105,15 +105,12 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 	for (auto &s: world.sorted_opaque) {
 		Model *m = s.model;
-		auto& vb = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer;
-		//msg_write(m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.size);
-		auto p = (vulkan::Vertex1*)vb.map();
-		for (int i=0; i<vb.size / sizeof(vulkan::Vertex1); i++)
-			vertices.add(*(vec4*)&p[i].pos);
+		for (int t: m->mesh[0]->sub[s.mat_index].triangle_index)
+			vertices.add(vec4(m->mesh[0]->vertex[t], 0));
+
 		if (vertices.num > 300)
 			vertices.resize(300);
 		//msg_write(vertices.num);
-		vb.unmap();
 		break;
 	}
 	/*vertices.add({0,0.5,0,0});

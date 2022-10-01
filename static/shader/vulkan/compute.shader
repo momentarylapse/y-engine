@@ -1,17 +1,17 @@
 <Layout>
 	version = 430
 	bindings = [[image,buffer]]
-	pushsize = 4
+	pushsize = 68
 </Layout>
 <ComputeShader>
 
-layout(push_constant) uniform PushConstants {
+layout(push_constant, std140) uniform PushConstants {
 	mat4 iview;
 	int num_triangles;
 } push;
 layout(set=0, binding=0, rgba16f) uniform writeonly image2D image;
 //layout(rgba8,location=0) uniform writeonly image2D tex;
-layout(binding=1) uniform Triangles { vec4 vertex[65536]; };
+layout(binding=1, std140) uniform Vertices { vec4 vertex[256]; };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
@@ -87,18 +87,26 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 
 vec3 get_emission(int index) {
 	if (index == 7 || index == 6)
-		return vec3(2,0,0);
+		return vec3(0,0,2);
 	return vec3(0);
 }
 
+vec3 get_albedo(int index) {
+	if (index == 7 || index == 6)
+		return vec3(0);
+	return vec3(1);
+}
+
 float calc_light_visibility(vec3 p, vec3 sun_dir) {
-	int N = 10;
+	int N = 20;
 	
 	HitData hd_temp;
 	float light_visibility = 0.0;
 	for (int i=0; i<N; i++)
 		if (!trace(p, -normalize(sun_dir + 0.02 * rand3d(p + vec3(i,2*i,3*i))), hd_temp))
 			light_visibility += 1.0 / N;
+		else if (i == 8 && light_visibility == 0.0)
+			break;
 	return light_visibility;
 }
 
@@ -123,14 +131,14 @@ void main() {
 	
 	vec3 sun_dir = normalize(vec3(0.3,0.05,1));
 	vec3 sun_color = vec3(1,1,1);
-	
+
 	HitData hd;
 	if (trace(cam_pos, dir, hd)) {
 		//imageStore(image, storePos, vec4(hd.thd.p/100,1));
-		vec3 albedo = vec3(1,1,1);
+		vec3 albedo = get_albedo(hd.index);
 		
 		// direct sunlight
-		float light_visibility = calc_light_visibility(hd.thd.p + hd.thd.n * 0.2, sun_dir);
+		float light_visibility = calc_light_visibility(hd.thd.p + hd.thd.n * 0.1, sun_dir);
 		
 		vec3 color = get_emission(hd.index);
 		float f = max(-dot(hd.thd.n, sun_dir), 0.1) * light_visibility;
