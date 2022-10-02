@@ -16,8 +16,10 @@
 Path ResourceManager::shader_dir;
 Path ResourceManager::texture_dir;
 Path ResourceManager::default_shader;
-static base::map<Path,shared<Shader>> shaders;
-static base::map<Path,shared<Texture>> textures;
+static shared_array<Shader> shaders;
+static shared_array<Texture> textures;
+static base::map<Path,Shader*> shader_map;
+static base::map<Path,Texture*> texture_map;
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	if (filename.is_absolute())
@@ -50,12 +52,12 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 		//fn = shader_dir << filename;
 	}
 
-	for (auto s: shaders)
+	for (auto s: shader_map)
 		if (s.key == fn) {
 #ifdef USING_VULKAN
-			return s.value.get();
+			return s.value;
 #else
-			return (s.value->program >= 0) ? s.value.get() : nullptr;
+			return (s.value->program >= 0) ? s.value : nullptr;
 #endif
 		}
 
@@ -70,7 +72,8 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 	s->link_uniform_block("BoneData", 7);
 #endif
 
-	shaders.add({fn, s});
+	shaders.add(s);
+	shader_map.add({fn, s});
 	return s;
 }
 
@@ -111,12 +114,12 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	}
 
 	Path fnx = fn.with(":" + variant + ":" + render_path);
-	for (auto s: shaders)
+	for (auto s: shader_map)
 		if (s.key == fnx) {
 #ifdef USING_VULKAN
-			return s.value.get();
+			return s.value;
 #else
-			return (s.value->program >= 0) ? s.value.get() : nullptr;
+			return (s.value->program >= 0) ? s.value : nullptr;
 #endif
 		}
 
@@ -141,7 +144,8 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 #endif
 
 
-	shaders.add({filename, shader});
+	shaders.add(shader);
+	shader_map.add({filename, shader});
 	return shader;
 }
 
@@ -162,12 +166,12 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 		throw Exception("missing texture: " + filename.str());
 	}
 
-	for (auto t: textures)
+	for (auto t: texture_map)
 		if (fn == t.key) {
 #ifdef USING_VULKAN
-			return t.value.get();
+			return t.value;
 #else
-			return t.value->valid ? t.value.get() : nullptr;
+			return t.value->valid ? t.value : nullptr;
 #endif
 		}
 
@@ -176,7 +180,8 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 		msg_write("loading texture: " + fn.str());
 #endif
 		auto t = Texture::load(fn);
-		textures.add({fn, t});
+		textures.add(t);
+		texture_map.add({fn, t});
 		return t;
 	} catch(Exception &e) {
 		if (!engine.ignore_missing_files)
@@ -188,6 +193,8 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 
 void ResourceManager::clear() {
 	shaders.clear();
+	shader_map.clear();
 	textures.clear();
+	texture_map.clear();
 }
 
