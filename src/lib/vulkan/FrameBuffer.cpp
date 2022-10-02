@@ -11,7 +11,6 @@
 #include "vulkan.h"
 #include "FrameBuffer.h"
 #include "helper.h"
-#include <iostream>
 
 namespace vulkan {
 
@@ -112,9 +111,8 @@ void FrameBuffer::_create(RenderPass *rp, const Array<Texture*> &_attachments, i
 	info.height = height;
 	info.layers = 1;
 
-	if (vkCreateFramebuffer(default_device->device, &info, nullptr, &frame_buffer) != VK_SUCCESS) {
+	if (vkCreateFramebuffer(default_device->device, &info, nullptr, &frame_buffer) != VK_SUCCESS)
 		throw Exception("failed to create framebuffer!");
-	}
 }
 
 void FrameBuffer::_destroy() {

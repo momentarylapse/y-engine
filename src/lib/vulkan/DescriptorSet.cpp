@@ -17,9 +17,6 @@
 #include "Texture.h"
 #include <vulkan/vulkan.h>
 
-#include <array>
-#include <iostream>
-
 #include "helper.h"
 
 namespace vulkan {
@@ -221,11 +218,10 @@ VkDescriptorType descriptor_type(const string &s) {
 			lb.descriptorCount = 1;
 			lb.binding = binding_no[i];
 			lb.pImmutableSamplers = nullptr;
-			if (types[i] == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+			if (types[i] == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 				lb.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV;
-			} else {
+			else
 				lb.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_RAYGEN_BIT_NV | VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV | VK_SHADER_STAGE_MISS_BIT_NV;
-			}
 			lb.stageFlags = VK_SHADER_STAGE_ALL;
 			bindings.add(lb);
 		}

@@ -19,9 +19,8 @@ Fence::Fence() {
 	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-	if (vkCreateFence(default_device->device, &info, nullptr, &fence) != VK_SUCCESS) {
+	if (vkCreateFence(default_device->device, &info, nullptr, &fence) != VK_SUCCESS)
 		throw Exception("failed to create fence");
-	}
 }
 
 Fence::~Fence() {
@@ -50,9 +49,8 @@ Semaphore::Semaphore() {
 	VkSemaphoreCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	if (vkCreateSemaphore(default_device->device, &info, nullptr, &semaphore) != VK_SUCCESS) {
+	if (vkCreateSemaphore(default_device->device, &info, nullptr, &semaphore) != VK_SUCCESS)
 		throw Exception("failed to create semaphore");
-	}
 }
 
 Semaphore::~Semaphore() {

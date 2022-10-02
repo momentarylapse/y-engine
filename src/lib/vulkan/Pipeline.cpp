@@ -11,17 +11,15 @@
 
 #include "Pipeline.h"
 #include "vulkan.h"
+#include "common.h"
 #include "Shader.h"
 #include "helper.h"
 #include "RenderPass.h"
 #include "VertexBuffer.h"
-#include <iostream>
 #include "../os/msg.h"
 #include "../math/rect.h"
 
 namespace vulkan {
-
-	extern bool verbose;
 
 VkPrimitiveTopology parse_topology(const string &t) {
 	if (t == "points")
@@ -64,8 +62,8 @@ VkPipelineLayout create_pipeline_layout(Shader *shader, const Array<VkDescriptor
 	}
 	info.setLayoutCount = dset_layouts.num;
 	info.pSetLayouts = &dset_layouts[0];
-	if (verbose)
-		std::cout << "create pipeline with " << dset_layouts.num << " layouts, " << shader->push_size << " push size\n";
+	if (verbosity >= 2)
+		msg_write(format("create pipeline with %d layouts, %d push size", dset_layouts.num, shader->push_size));
 
 	VkPipelineLayout layout = VK_NULL_HANDLE;
 	if (vkCreatePipelineLayout(default_device->device, &info, nullptr, &layout) != VK_SUCCESS)
@@ -259,7 +257,7 @@ VkDynamicState parse_dynamic_state(const string &d) {
 		return VK_DYNAMIC_STATE_SCISSOR;
 	if (d == "linewidth")
 		return VK_DYNAMIC_STATE_LINE_WIDTH;
-	std::cerr << "unknown dynamic state: " << d.c_str() << "\n";
+	msg_error("unknown dynamic state: " + d);
 	return VK_DYNAMIC_STATE_MAX_ENUM;
 }
 
@@ -318,7 +316,7 @@ void GraphicsPipeline::rebuild() {
 
 
 ComputePipeline::ComputePipeline(const string &dset_layouts, Shader *shader) : BasePipeline(VK_PIPELINE_BIND_POINT_COMPUTE, shader) { //DescriptorSet::parse_bindings(dset_layouts)) {
-	if (verbose)
+	if (verbosity >= 2)
 		msg_write("creating compute pipeline...");
 	
 	VkComputePipelineCreateInfo info = {};
@@ -337,7 +335,7 @@ void ComputePipeline::__init__(const string &dset_layouts, Shader *shader) {
 
 
 RayPipeline::RayPipeline(const string &dset_layouts, const Array<Shader*> &shaders, int recursion_depth) : BasePipeline(VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, DescriptorSet::parse_bindings(dset_layouts)) {
-	if (verbose)
+	if (verbosity >= 2)
 		msg_write("creating RTX pipeline...");
 
 	create_groups(shaders);
@@ -357,7 +355,7 @@ RayPipeline::RayPipeline(const string &dset_layouts, const Array<Shader*> &shade
 	if (_vkCreateRayTracingPipelinesNV(default_device->device, VK_NULL_HANDLE, 1, &info, nullptr, &pipeline) != VK_SUCCESS) {
 		throw Exception("failed to create graphics pipeline!");
 	}
-	if (verbose)
+	if (verbosity >= 2)
 		msg_write("...done");
 }
 
@@ -428,8 +426,8 @@ void RayPipeline::create_groups(const Array<Shader*> &shaders) {
 }
 
 void RayPipeline::create_sbt() {
-	if (verbose)
-		std::cout << "SBT\n";
+	if (verbosity >= 2)
+		msg_write("SBT");
 	const size_t sbt_size = groups.num * default_device->ray_tracing_properties.shaderGroupHandleSize;
 
 	sbt.create(sbt_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_RAY_TRACING_BIT_NV, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
@@ -438,8 +436,8 @@ void RayPipeline::create_sbt() {
 	if (_vkGetRayTracingShaderGroupHandlesNV(default_device->device, pipeline, 0, groups.num, sbt_size, mem))
 		throw Exception("vkGetRayTracingShaderGroupHandlesNV");
 	sbt.unmap();
-	if (verbose)
-		std::cout << "   ok\n";
+	if (verbosity >= 2)
+		msg_write("   ok");
 }
 
 };

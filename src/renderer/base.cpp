@@ -22,7 +22,7 @@ vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
 
 void api_init(GLFWwindow* window) {
-	instance = vulkan::init({"glfw", "validation", "api=1.2", "verbose"});
+	instance = vulkan::init({"glfw", "validation", "api=1.2", "rtx?", "verbosity=1"});
 	try {
 		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "compute", "validation"});
 	} catch (...) {

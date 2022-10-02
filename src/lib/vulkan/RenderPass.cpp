@@ -10,8 +10,7 @@
 #include "Device.h"
 #include "Texture.h"
 #include "helper.h"
-
-#include <iostream>
+#include "../os/msg.h"
 
 #if HAS_LIB_VULKAN
 
@@ -58,7 +57,7 @@ VkPipelineStageFlagBits parse_pipeline_stage(const string &s) {
 		return VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
 	if (s == "ALL_COMMANDS")
 		return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-	std::cerr << " UNHANDLED PIPELINE STAGE: " << s.c_str() << "\n";
+	msg_error(" UNHANDLED PIPELINE STAGE: " + s);
 	return (VkPipelineStageFlagBits)0;
 }
 
@@ -97,7 +96,7 @@ VkAccessFlags parse_access(const string &s) {
 		return VK_ACCESS_MEMORY_READ_BIT;
 	if (s == "MEMORY_WRITE")
 		return VK_ACCESS_MEMORY_WRITE_BIT;
-	std::cerr << " UNHANDLED ACCESS FLAGS: " << s.c_str() << "\n";
+	msg_error(" UNHANDLED ACCESS FLAGS: " + s);
 	return (VkAccessFlags)0;
 }
 
@@ -233,9 +232,8 @@ namespace vulkan {
 		info.dependencyCount = dependencies.num;
 		info.pDependencies = &dependencies[0];
 
-		if (vkCreateRenderPass(default_device->device, &info, nullptr, &render_pass) != VK_SUCCESS) {
+		if (vkCreateRenderPass(default_device->device, &info, nullptr, &render_pass) != VK_SUCCESS)
 			throw Exception("failed to create render pass!");
-		}
 	}
 
 	void RenderPass::destroy() {

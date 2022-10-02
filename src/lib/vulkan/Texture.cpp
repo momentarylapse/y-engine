@@ -4,8 +4,8 @@
 #include <vulkan/vulkan.h>
 
 #include <cmath>
-#include <iostream>
 
+#include "common.h"
 #include "helper.h"
 #include "CommandBuffer.h"
 #include "Buffer.h"
@@ -14,8 +14,6 @@
 #include "../os/msg.h"
 
 namespace vulkan {
-
-extern bool verbose;
 
 Array<Texture*> textures;
 
@@ -210,8 +208,8 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	result = vkBindImageMemory(default_device->device, image.image, image.memory, 0);
 	if (VK_SUCCESS != result)
 		throw Exception("vkBindImageMemory failed");
-	if (verbose)
-		std::cout << "  storage image ok\n";
+	if (verbosity >= 2)
+		msg_write("  storage image ok");
 
 	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D, mip_levels, 0, 1);
 	//_create_sampler();
@@ -234,9 +232,9 @@ void Texture::_destroy() {
 }
 
 Texture* Texture::load(const Path &filename) {
-	if (verbose)
-		std::cout << " load texture " << filename.str().c_str() << "\n";
-	if (filename.is_empty())
+	if (verbosity >= 1)
+		msg_write(" load texture " + filename.str());
+	if (!filename)
 		return new Texture(16, 16, "rgba:i8");
 	Texture *t = new Texture();
 	t->_load(filename);

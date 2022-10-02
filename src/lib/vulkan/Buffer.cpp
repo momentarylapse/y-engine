@@ -12,9 +12,6 @@
 #include "Device.h"
 #include <vulkan/vulkan.h>
 
-#include <array>
-#include <iostream>
-
 #include "helper.h"
 
 
@@ -43,9 +40,8 @@ void Buffer::create(VkDeviceSize _size, VkBufferUsageFlags usage, VkMemoryProper
 	info.usage = usage;
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	if (vkCreateBuffer(default_device->device, &info, nullptr, &buffer) != VK_SUCCESS) {
+	if (vkCreateBuffer(default_device->device, &info, nullptr, &buffer) != VK_SUCCESS)
 		throw Exception("failed to create buffer!");
-	}
 
 	VkMemoryRequirements mem_requirements;
 	vkGetBufferMemoryRequirements(default_device->device, buffer, &mem_requirements);
@@ -55,9 +51,8 @@ void Buffer::create(VkDeviceSize _size, VkBufferUsageFlags usage, VkMemoryProper
 	alloc_info.allocationSize = mem_requirements.size;
 	alloc_info.memoryTypeIndex = default_device->find_memory_type(mem_requirements, properties);
 
-	if (vkAllocateMemory(default_device->device, &alloc_info, nullptr, &memory) != VK_SUCCESS) {
+	if (vkAllocateMemory(default_device->device, &alloc_info, nullptr, &memory) != VK_SUCCESS)
 		throw Exception("failed to allocate buffer memory!");
-	}
 
 	vkBindBufferMemory(default_device->device, buffer, memory, 0);
 }
@@ -127,9 +122,11 @@ UniformBuffer::UniformBuffer(int _size, int _count) {
 
 UniformBuffer::~UniformBuffer() {
 }
+
 void UniformBuffer::__init__(int size) {
 	new(this) UniformBuffer(size);
 }
+
 void UniformBuffer::__delete__() {
 	this->~UniformBuffer();
 }

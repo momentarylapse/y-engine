@@ -19,6 +19,7 @@ namespace vulkan {
 	public:
 		VkInstance instance;
 		bool using_validation_layers;
+		bool rtx_extensions_loaded = false;
 
 		Instance();
 		~Instance();
@@ -28,7 +29,7 @@ namespace vulkan {
 		VkSurfaceKHR create_surface(GLFWwindow* window);
 
 		void setup_debug_messenger();
-		void _ensure_rtx();
+		void _ensure_rtx_extensions();
 
 		static Instance *create(const Array<string> &op);
 	};

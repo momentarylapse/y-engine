@@ -2,7 +2,6 @@
 
 #include "VertexBuffer.h"
 #include <vulkan/vulkan.h>
-#include <iostream>
 
 #include "helper.h"
 #include "../os/msg.h"
