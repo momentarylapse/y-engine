@@ -1,7 +1,7 @@
 <Layout>
 	version = 430
-	bindings = [[image,buffer,buffer]]
-	pushsize = 84
+	bindings = [[image,buffer,buffer,buffer]]
+	pushsize = 88
 </Layout>
 <ComputeShader>
 
@@ -9,11 +9,24 @@ layout(push_constant, std140) uniform PushConstants {
 	mat4 iview;
 	vec4 background;
 	int num_triangles;
+	int num_lights;
 } push;
+
+
+
+struct Light {
+	mat4 proj;
+	vec4 pos;
+	vec4 dir;
+	vec4 color;
+	float radius, theta, harshness;
+};
+
 layout(set=0, binding=0, rgba16f) uniform writeonly image2D image;
 //layout(rgba8,location=0) uniform writeonly image2D tex;
 layout(binding=1, std140) uniform Vertices { vec4 vertex[256]; };
 layout(binding=2, std140) uniform Materials { vec4 material[256*2]; };
+layout(binding=3) uniform LightData { Light light[32]; };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
@@ -95,9 +108,11 @@ vec3 get_albedo(int index) {
 	return material[index * 2].rgb;
 }
 
-float calc_light_visibility(vec3 p, vec3 sun_dir) {
-	int N = 20;
-	
+float get_roughness(int index) {
+	return material[index * 2].a;
+}
+
+float calc_light_visibility(vec3 p, vec3 sun_dir, int N) {
 	HitData hd_temp;
 	float light_visibility = 0.0;
 	for (int i=0; i<N; i++)
@@ -108,14 +123,34 @@ float calc_light_visibility(vec3 p, vec3 sun_dir) {
 	return light_visibility;
 }
 
-vec3 calc_bounced_emission(vec3 p, vec3 n) {
+vec3 calc_direct_light(vec3 albedo, vec3 p, vec3 n, int N) {
+	vec3 color = vec3(0);
+
+	for (int i=0; i<push.num_lights; i++) {
+		if (light[i].radius < 0) {
+			// directional
+			float light_visibility = calc_light_visibility(p + n * 0.1, light[i].dir.xyz, N);
+			float f = max(-dot(n, light[i].dir.xyz), 0.1) * light_visibility;
+			color += f * albedo * light[i].color.rgb;
+		}
+	}
+	return color;
+}
+
+vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughness) {
 	int N = 50;
 	
-	HitData hd_temp;
+	vec3 refl = reflect(eye_dir, n);
+	
+	HitData hd;
 	vec3 color = vec3(0);
-	for (int i=0; i<N; i++)
-		if (trace(p, normalize(n + 0.7 * rand3d(p + vec3(i,2*i,3*i))), hd_temp))
-			color += get_emission(hd_temp.index) / N;	
+	for (int i=0; i<N; i++) {
+		vec3 dir = mix(refl, normalize(n + 0.7 * rand3d(p + vec3(i,2*i,3*i))), roughness);
+		if (trace(p, dir, hd)) {
+			color += albedo * calc_direct_light(get_albedo(hd.index), hd.thd.p, hd.thd.n, 1) / N;
+			color += get_emission(hd.index) / N;
+		}
+	}
 	return color;
 }
 
@@ -126,23 +161,18 @@ void main() {
 	vec3 dir = normalize(vec3(r.x - 0.5, 0.5 - r.y, 1));
 	dir = (push.iview * vec4(dir,0)).xyz;
 	vec3 cam_pos = (push.iview * vec4(0,0,0,1)).xyz;
-	
-	vec3 sun_dir = normalize(vec3(0.3,0.05,1));
-	vec3 sun_color = vec3(1,1,1);
 
 	HitData hd;
 	if (trace(cam_pos, dir, hd)) {
 		//imageStore(image, storePos, vec4(hd.thd.p/100,1));
 		vec3 albedo = get_albedo(hd.index);
 		
-		// direct sunlight
-		float light_visibility = calc_light_visibility(hd.thd.p + hd.thd.n * 0.1, sun_dir);
-		
 		vec3 color = get_emission(hd.index);
-		float f = max(-dot(hd.thd.n, sun_dir), 0.1) * light_visibility;
-		color += f * albedo * sun_color;
 		
-		color += calc_bounced_emission(hd.thd.p + hd.thd.n * 0.1, hd.thd.n);
+		// direct sunlight
+		color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 20);
+		
+		color += calc_bounced_light(hd.thd.p + hd.thd.n * 0.1, hd.thd.n, dir, albedo, get_roughness(hd.index));
 		
 		imageStore(image, storePos, vec4(color,1));
 	} else {

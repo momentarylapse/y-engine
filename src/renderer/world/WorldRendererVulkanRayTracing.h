@@ -36,6 +36,9 @@ public:
     GraphicsPipeline* pipeline_out;
     DescriptorSet *dset_out;
     VertexBuffer *vb_2d;
+
+    Entity *dummy_cam_entity;
+    Camera *dummy_cam;
 };
 
 #endif

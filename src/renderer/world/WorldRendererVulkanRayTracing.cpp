@@ -47,11 +47,12 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
     auto rt_pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
     auto shader = ResourceManager::load_shader("vulkan/compute.shader");
-    pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader);
-    dset = rt_pool->create_set("image,buffer,buffer");
+    pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer,buffer]]", shader);
+    dset = rt_pool->create_set("image,buffer,buffer,buffer");
     dset->set_storage_image(0, offscreen_image);
     dset->set_buffer(1, buffer_vertices);
     dset->set_buffer(2, buffer_materials);
+    dset->set_buffer(3, rvd_def.ubo_light);
     dset->update();
 
 
@@ -67,40 +68,20 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
+
+
+	dummy_cam_entity = new Entity;
+	dummy_cam = new Camera(rect::ID);
+	dummy_cam_entity->components.add(dummy_cam);
+	dummy_cam->owner = dummy_cam_entity;
 }
 
 static int cur_query_offset;
 
 void WorldRendererVulkanRayTracing::prepare() {
-    #if 0
-	static int pool_no = 0;
-	pool_no = (pool_no + 1) % 16;
-	cur_query_offset = pool_no * 8;
-	device->reset_query_pool(cur_query_offset, 8);
+	
 
-	auto cb = command_buffer();
-
-	cb->timestamp(cur_query_offset + 0);
-
-	prepare_lights(cam_main, rvd_def);
-
-	/*if (!shadow_cam) {
-		shadow_entity = new Entity3D;
-		shadow_cam = new Camera(rect::ID);
-		shadow_entity->_add_component_external_(shadow_cam);
-		shadow_entity->pos = cam->get_owner<Entity3D>()->pos;
-		shadow_entity->ang = cam->get_owner<Entity3D>()->ang;
-	}*/
-
-
-	PerformanceMonitor::begin(ch_shadow);
-	if (shadow_index >= 0) {
-		render_shadow_map(cb, fb_shadow1.get(), 4, rvd_shadow1);
-		render_shadow_map(cb, fb_shadow2.get(), 1, rvd_shadow2);
-	}
-	PerformanceMonitor::end(ch_shadow);
-	cb->timestamp(cur_query_offset + 1);
-    #endif
+	prepare_lights(dummy_cam, rvd_def);
 
 
 	Array<vec4> vertices;
@@ -142,10 +123,12 @@ void WorldRendererVulkanRayTracing::prepare() {
 		mat4 iview;
 		color background;
 		int num_trias;
+		int num_lights;
 	} pc;
 	pc.iview = cam_main->view_matrix().inverse();
 	pc.background = background();
 	pc.num_trias = num_trias;
+	pc.num_lights = lights.num;
 	cb->push_constant(0, sizeof(pc), &pc);
     cb->dispatch(width, height, 1);
 
@@ -163,27 +146,6 @@ void WorldRendererVulkanRayTracing::prepare() {
 }
 
 void WorldRendererVulkanRayTracing::draw() {
-
-	/*auto cb = command_buffer();
-	auto rp = render_pass();
-
-	auto &rvd = rvd_def;
-
-	draw_skyboxes(cb, rp, cam_main, (float)width / (float)height, rvd);
-
-	UBO ubo;
-	ubo.p = cam_main->m_projection;
-	ubo.v = cam_main->m_view;
-	ubo.num_lights = lights.num;
-	ubo.shadow_index = shadow_index;
-
-	draw_terrains(cb, rp, ubo, true, rvd);
-	draw_objects_opaque(cb, rp, ubo, true, rvd);
-	draw_objects_transparent(cb, rp, ubo, rvd);
-
-	draw_particles(cb, rp, cam_main, rvd);
-
-	cb->timestamp(cur_query_offset + 2);*/
 
 	auto cb = command_buffer();
 
@@ -203,31 +165,6 @@ void WorldRendererVulkanRayTracing::draw() {
 }
 
 void WorldRendererVulkanRayTracing::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) {
-
-	/*prepare_lights(cam, rvd);
-
-	rp->clear_color[0] = background();
-
-	cb->begin_render_pass(rp, fb);
-	cb->set_viewport(rect(0, fb->width, 0, fb->height));
-
-
-	draw_skyboxes(cb, rp, cam, (float)fb->width / (float)fb->height, rvd);
-
-	UBO ubo;
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
-	ubo.num_lights = lights.num;
-	ubo.shadow_index = shadow_index;
-
-	draw_terrains(cb, rp, ubo, true, rvd);
-	draw_objects_opaque(cb, rp, ubo, true, rvd);
-	draw_objects_transparent(cb, rp, ubo, rvd);
-
-	draw_particles(cb, rp, cam, rvd);
-
-	cb->end_render_pass();*/
-
 }
 
 #endif
