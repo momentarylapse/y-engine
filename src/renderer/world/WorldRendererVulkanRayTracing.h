@@ -28,7 +28,8 @@ public:
     vulkan::Texture *offscreen_image2;
     vulkan::ComputePipeline *pipeline;
     vulkan::DescriptorSet *dset;
-    vulkan::UniformBuffer *buffer;
+    vulkan::UniformBuffer *buffer_vertices;
+    vulkan::UniformBuffer *buffer_materials;
 
 
     shared<Shader> shader_out;

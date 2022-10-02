@@ -41,15 +41,17 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
     offscreen_image2 = new vulkan::Texture(width, height, "rgba:f16");
 
-	buffer = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS);
+	buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS);
+	buffer_materials = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS * 2);
 
-    auto rt_pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:1,sampler:1", 1);
+    auto rt_pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
     auto shader = ResourceManager::load_shader("vulkan/compute.shader");
-    pipeline = new vulkan::ComputePipeline("[[image,buffer]]", shader);
-    dset = rt_pool->create_set("image,buffer");
+    pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader);
+    dset = rt_pool->create_set("image,buffer,buffer");
     dset->set_storage_image(0, offscreen_image);
-    dset->set_buffer(1, buffer);
+    dset->set_buffer(1, buffer_vertices);
+    dset->set_buffer(2, buffer_materials);
     dset->update();
 
 
@@ -102,23 +104,27 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 
 	Array<vec4> vertices;
+	Array<color> materials;
 
 	for (auto &s: world.sorted_opaque) {
 		Model *m = s.model;
+		m->update_matrix();
 		for (int t: m->mesh[0]->sub[s.mat_index].triangle_index)
-			vertices.add(vec4(m->mesh[0]->vertex[t], 0));
+			vertices.add(vec4(m->_matrix * m->mesh[0]->vertex[t], 0));
+		for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
+			materials.add(s.material->albedo.with_alpha(s.material->roughness));
+			materials.add(s.material->emission.with_alpha(s.material->metal));
+		}
 
-		if (vertices.num > 300)
-			vertices.resize(300);
-		//msg_write(vertices.num);
-		break;
+		if (vertices.num > 1000) {
+			vertices.resize(1000);
+			break;
+		}
 	}
-	/*vertices.add({0,0.5,0,0});
-	vertices.add({1,-0.5,0,0});
-	vertices.add({-1,-0.5,0,0});*/
 
 
-	buffer->update_array(vertices, 0);
+	buffer_vertices->update_array(vertices, 0);
+	buffer_materials->update_array(materials, 0);
 	int num_trias = vertices.num / 3;
 
 
@@ -134,9 +140,11 @@ void WorldRendererVulkanRayTracing::prepare() {
     cb->bind_descriptor_set(0, dset);
 	struct PushConst {
 		mat4 iview;
+		color background;
 		int num_trias;
 	} pc;
 	pc.iview = cam_main->view_matrix().inverse();
+	pc.background = background();
 	pc.num_trias = num_trias;
 	cb->push_constant(0, sizeof(pc), &pc);
     cb->dispatch(width, height, 1);

@@ -1,17 +1,19 @@
 <Layout>
 	version = 430
-	bindings = [[image,buffer]]
-	pushsize = 68
+	bindings = [[image,buffer,buffer]]
+	pushsize = 84
 </Layout>
 <ComputeShader>
 
 layout(push_constant, std140) uniform PushConstants {
 	mat4 iview;
+	vec4 background;
 	int num_triangles;
 } push;
 layout(set=0, binding=0, rgba16f) uniform writeonly image2D image;
 //layout(rgba8,location=0) uniform writeonly image2D tex;
 layout(binding=1, std140) uniform Vertices { vec4 vertex[256]; };
+layout(binding=2, std140) uniform Materials { vec4 material[256*2]; };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
@@ -86,15 +88,11 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 }
 
 vec3 get_emission(int index) {
-	if (index == 7 || index == 6)
-		return vec3(0,0,2);
-	return vec3(0);
+	return material[index * 2 + 1].rgb;
 }
 
 vec3 get_albedo(int index) {
-	if (index == 7 || index == 6)
-		return vec3(0);
-	return vec3(1);
+	return material[index * 2].rgb;
 }
 
 float calc_light_visibility(vec3 p, vec3 sun_dir) {
@@ -149,7 +147,7 @@ void main() {
 		imageStore(image, storePos, vec4(color,1));
 	} else {
 		// background
-		imageStore(image, storePos, vec4(0.1,0,0,1));
+		imageStore(image, storePos, push.background);
 	}
 }
 </ComputeShader>
