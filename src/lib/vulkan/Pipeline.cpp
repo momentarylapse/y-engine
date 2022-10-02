@@ -322,7 +322,10 @@ ComputePipeline::ComputePipeline(const string &dset_layouts, Shader *shader) : B
 
 
 
-RayPipeline::RayPipeline(const string &dset_layouts, const Array<Shader*> &shaders, int recursion_depth) : BasePipeline(VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, DescriptorSet::parse_bindings(dset_layouts)) {
+RayPipeline::RayPipeline(const string &dset_layouts, const Array<Shader*> &shaders, int recursion_depth) :
+		BasePipeline(VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, DescriptorSet::parse_bindings(dset_layouts)),
+		sbt(default_device)
+{
 	if (verbosity >= 2)
 		msg_write("creating RTX pipeline...");
 

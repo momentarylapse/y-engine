@@ -104,9 +104,6 @@ public:
 
 class VulkanCommandBuffer : public vulkan::CommandBuffer {
 public:
-	void __init__() {
-		new(this) vulkan::CommandBuffer;
-	}
 	void __delete__() {
 		this->~CommandBuffer();
 	}
@@ -146,6 +143,16 @@ class VulkanInstance : public vulkan::Instance {
 public:
 	void __delete__() {
 		this->~Instance();
+	}
+};
+
+class VulkanVertexBuffer : public vulkan::VertexBuffer {
+public:
+	void __init__(const string &format) {
+		new(this) vulkan::VertexBuffer(format);
+	}
+	void __delete__() {
+		this->~VertexBuffer();
 	}
 };
 
@@ -195,8 +202,8 @@ public:
 
 class VulkanFence : public vulkan::Fence {
 public:
-	void __init__() {
-		new(this) vulkan::Fence();
+	void __init__(vulkan::Device *device) {
+		new(this) vulkan::Fence(device);
 	}
 	void __delete__() {
 		this->~Fence();
@@ -205,8 +212,8 @@ public:
 
 class VulkanSemaphore : public vulkan::Semaphore {
 public:
-	void __init__() {
-		new(this) vulkan::Semaphore();
+	void __init__(vulkan::Device *device) {
+		new(this) vulkan::Semaphore(device);
 	}
 	void __delete__() {
 		this->~Semaphore();
@@ -263,6 +270,7 @@ public:
 		typedef int DescriptorPool;
 		typedef int DescriptorSet;
 		typedef int CommandBuffer;
+		typedef int CommandPool;
 		typedef int SwapChain;
 		typedef int Fence;
 		typedef int Semaphore;
@@ -315,6 +323,8 @@ void SIAddPackageVulkan() {
 	auto TypeShaderPList	= add_type_l(TypeShaderP);
 	auto TypeCommandBuffer	= add_type  ("CommandBuffer", sizeof(vulkan::CommandBuffer));
 	auto TypeCommandBufferP	= add_type_p(TypeCommandBuffer);
+	auto TypeCommandPool	= add_type  ("CommandPool", sizeof(vulkan::CommandPool));
+	auto TypeCommandPoolP	= add_type_p(TypeCommandPool);
 	auto TypePipeline       = add_type  ("Pipeline", sizeof(vulkan::BasePipeline));
 	auto TypeGraphicsPipeline = add_type  ("GraphicsPipeline", sizeof(vulkan::GraphicsPipeline));
 	auto TypeComputePipeline = add_type  ("ComputePipeline", sizeof(vulkan::ComputePipeline));
@@ -348,6 +358,7 @@ void SIAddPackageVulkan() {
 		class_add_element("graphics_queue", TypeQueue, vul_p(&vulkan::Device::graphics_queue));
 		class_add_element("present_queue", TypeQueue, vul_p(&vulkan::Device::present_queue));
 		class_add_element("compute_queue", TypeQueue, vul_p(&vulkan::Device::compute_queue));
+		class_add_element("command_pool", TypeCommandPoolP, vul_p(&vulkan::Device::command_pool));
 		class_add_func("wait_idle", TypeVoid, vul_p(&vulkan::Device::wait_idle));
 		class_add_func("create_simple", TypeDeviceP, vul_p(&__vulkan_device_create_simple), Flags::_STATIC__RAISES_EXCEPTIONS);
 			func_add_param("instance", TypeInstanceP);
@@ -358,9 +369,9 @@ void SIAddPackageVulkan() {
 	add_class(TypeVertexBuffer);
 		class_add_element("vertex", TypeBuffer, vul_p(&vulkan::VertexBuffer::vertex_buffer));
 		class_add_element("index", TypeBuffer, vul_p(&vulkan::VertexBuffer::index_buffer));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::VertexBuffer::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanVertexBuffer::__init__));
 			func_add_param("format", TypeString);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::VertexBuffer::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanVertexBuffer::__delete__));
 		class_add_func("update", TypeVoid, vul_p(&vulkan::VertexBuffer::update));
 			func_add_param("vertices", TypeDynamicArray);
 		class_add_func("update_index", TypeVoid, vul_p(&vulkan::VertexBuffer::update_index));
@@ -579,6 +590,7 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeFence);
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanFence::__init__));
+			func_add_param("device", TypeDevice);
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanFence::__delete__));
 		class_add_func("wait", TypeVoid, vul_p(&vulkan::Fence::wait));
 		class_add_func("reset", TypeVoid, vul_p(&vulkan::Fence::reset));
@@ -586,11 +598,16 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeSemaphore);
 		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanSemaphore::__init__));
+			func_add_param("device", TypeDevice);
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanSemaphore::__delete__));
 
 
+	add_class(TypeCommandPool);
+		//class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanCommandPool::__delete__));
+		class_add_func("create_command_buffer", TypeCommandBufferP, vul_p(&vulkan::CommandPool::create_command_buffer));
+
+
 	add_class(TypeCommandBuffer);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanCommandBuffer::__init__));
 		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanCommandBuffer::__delete__));
 		class_add_func("begin", TypeVoid, vul_p(&vulkan::CommandBuffer::begin));
 		class_add_func("end", TypeVoid, vul_p(&vulkan::CommandBuffer::end));

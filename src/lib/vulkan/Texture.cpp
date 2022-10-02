@@ -268,7 +268,7 @@ void Texture::_create_image(const void *image_data, VkImageType type, VkFormat f
 
 
 	if (image_data) {
-		Buffer staging;
+		Buffer staging(default_device);
 		staging.create(layer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		for (int k=0; k<num_layers; k++) {
@@ -387,7 +387,7 @@ void CubeMap::write_side(int side, const Image &_image) {
 	int layer_size = width * height * 4;
 
 
-	Buffer staging;
+	Buffer staging(default_device);
 	staging.create(layer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 	staging.update_part(&_image.data[0], 0, layer_size);

@@ -96,6 +96,8 @@ Device::Device() {
 }
 
 Device::~Device() {
+	if (command_pool)
+		delete command_pool;
 	if (surface)
 		vkDestroySurfaceKHR(instance->instance, surface, nullptr);
 	if (device)
@@ -340,7 +342,7 @@ Device *Device::create_simple(Instance *instance, GLFWwindow* window, const Arra
 	device->pick_physical_device(instance, surface, req);
 	device->create_logical_device(surface, req);
 
-	create_command_pool(device);
+	device->command_pool = new CommandPool(device);
 
 	if (sa_contains(op, "rtx"))
 		device->get_rtx_properties();

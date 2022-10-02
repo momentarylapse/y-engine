@@ -39,6 +39,9 @@ void api_init(GLFWwindow* window) {
 }
 
 void api_end() {
+	delete pool;
+	if (device)
+		delete device;
 	delete instance;
 }
 

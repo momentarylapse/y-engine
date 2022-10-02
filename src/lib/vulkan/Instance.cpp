@@ -97,8 +97,6 @@ Instance::~Instance() {
 	if (verbosity >= 1)
 		msg_write("vulkan destroy");
 
-	destroy_command_pool(default_device);
-
 	if (default_device)
 		delete default_device;
 	default_device = nullptr;
