@@ -24,8 +24,6 @@ namespace vulkan {
 		Instance();
 		~Instance();
 
-		void __delete__();
-
 		VkSurfaceKHR create_surface(GLFWwindow* window);
 
 		void setup_debug_messenger();

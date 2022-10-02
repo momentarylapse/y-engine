@@ -27,14 +27,6 @@ Fence::~Fence() {
 	vkDestroyFence(default_device->device, fence, nullptr);
 }
 
-void Fence::__init__() {
-	new(this) Fence;
-}
-
-void Fence::__delete__() {
-	this->~Fence();
-}
-
 void Fence::reset() {
 	vkResetFences(default_device->device, 1, &fence);
 }
@@ -55,14 +47,6 @@ Semaphore::Semaphore() {
 
 Semaphore::~Semaphore() {
 	vkDestroySemaphore(default_device->device, semaphore, nullptr);
-}
-
-void Semaphore::__init__() {
-	new(this) Semaphore;
-}
-
-void Semaphore::__delete__() {
-	this->~Semaphore();
 }
 
 

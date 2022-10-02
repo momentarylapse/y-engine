@@ -61,9 +61,6 @@ namespace vulkan{
 		CommandBuffer();
 		~CommandBuffer();
 
-		void __init__();
-		void __delete__();
-
 		void _create();
 		void _destroy();
 		VkCommandBuffer buffer;

@@ -21,9 +21,6 @@ public:
 	Fence();
 	~Fence();
 
-	void __init__();
-	void __delete__();
-
 	VkFence fence;
 
 	void reset();
@@ -34,9 +31,6 @@ class Semaphore {
 public:
 	Semaphore();
 	~Semaphore();
-
-	void __init__();
-	void __delete__();
 
 	VkSemaphore semaphore;
 };

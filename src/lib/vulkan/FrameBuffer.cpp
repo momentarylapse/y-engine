@@ -24,10 +24,6 @@ DepthBuffer::DepthBuffer(int w, int h, VkFormat _format, bool _with_sampler) {
 
 DepthBuffer::DepthBuffer(int w, int h, const string &format, bool _with_sampler) : DepthBuffer(w, h, parse_format(format), _with_sampler) {}
 
-void DepthBuffer::__init__(int w, int h, const string &format, bool _with_sampler) {
-	new(this) DepthBuffer(w, h, format, _with_sampler);
-}
-
 void DepthBuffer::create(int w, int h, VkFormat format) {
 	width = w;
 	height = h;
@@ -60,14 +56,6 @@ FrameBuffer::~FrameBuffer() {
 }
 
 
-
-void FrameBuffer::__init__(RenderPass *rp, const Array<Texture*> &attachments) {
-	new(this) FrameBuffer(rp, attachments);
-}
-
-void FrameBuffer::__delete__() {
-	this->~FrameBuffer();
-}
 
 void FrameBuffer::update(RenderPass *rp, const Array<Texture*> &_attachments) {
 	update_x(rp, _attachments, 0);

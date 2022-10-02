@@ -123,14 +123,6 @@ UniformBuffer::UniformBuffer(int _size, int _count) {
 UniformBuffer::~UniformBuffer() {
 }
 
-void UniformBuffer::__init__(int size) {
-	new(this) UniformBuffer(size);
-}
-
-void UniformBuffer::__delete__() {
-	this->~UniformBuffer();
-}
-
 bool UniformBuffer::is_dynamic() {
 	return count > 0;
 }

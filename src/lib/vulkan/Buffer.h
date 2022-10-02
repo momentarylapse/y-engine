@@ -36,10 +36,6 @@ namespace vulkan {
 		UniformBuffer(int size, int count);
 		~UniformBuffer();
 
-		void __init__(int size);
-		void __init_multi__(int size, int count);
-		void __delete__();
-
 		void update_single(void *source, int index);
 
 		bool is_dynamic();

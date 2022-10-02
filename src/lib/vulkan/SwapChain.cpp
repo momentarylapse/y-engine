@@ -206,15 +206,6 @@ SwapChain::~SwapChain() {
 	cleanup();
 }
 
-
-void SwapChain::__init__(GLFWwindow* window, Device *device) {
-	new(this) SwapChain(window, device);
-}
-
-void SwapChain::__delete__() {
-	this->~SwapChain();
-}
-
 void SwapChain::cleanup() {
 /*	for (auto frame_buffer: frame_buffers)
 		delete frame_buffer;

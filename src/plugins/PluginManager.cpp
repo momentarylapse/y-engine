@@ -103,7 +103,7 @@ void framebuffer_init(FrameBuffer *fb, const Array<Texture*> &tex) {
 #ifdef USING_VULKAN
 	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__() for vulkan"));
 #else
-	fb->__init__(tex);
+	new(fb) FrameBuffer(tex);
 #endif
 }
 
@@ -125,7 +125,7 @@ Array<Texture*> framebuffer_color_attachments(FrameBuffer *fb) {
 
 
 void vertexbuffer_init(VertexBuffer *vb, const string &format) {
-	vb->__init__(format);
+	new(vb) VertexBuffer(format);
 }
 
 void vertexbuffer_update(VertexBuffer *vb, const DynamicArray &vertices) {
@@ -137,7 +137,7 @@ void texture_init(Texture *t, int w, int h, const string &format) {
 }
 
 void texture_delete(Texture *t) {
-	t->__delete__();
+	t->~Texture();
 }
 
 void texture_update(Texture *t, const Image &im) {

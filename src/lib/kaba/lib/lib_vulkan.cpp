@@ -44,10 +44,183 @@ void* __vulkan_device_create_simple(vulkan::Instance *instance, GLFWwindow* wind
 
 #pragma GCC pop_options
 
+class VulkanTexture : vulkan::Texture {
+	public:
+	void __init__() {
+		new(this) vulkan::Texture();
+	}
+	void __init_ext__(int w, int h, const string &format) {
+		new(this) vulkan::Texture(w, h, format);
+	}
+	void __delete__() {
+		this->~Texture();
+	}
+};
+
+class VulkanVolumeTexture : public vulkan::VolumeTexture {
+public:
+	void __init__(int nx, int ny, int nz, const string &format) {
+		new(this) vulkan::VolumeTexture(nx, ny, nz, format);
+	}
+};
+
+class VulkanStorageTexture : public vulkan::StorageTexture {
+public:
+	void __init__(int nx, int ny, int nz, const string &format) {
+		new(this) vulkan::StorageTexture(nx, ny, nz, format);
+	}
+};
+
+class VulkanCubeMap : public vulkan::CubeMap {
+public:
+	void __init__(int size, const string &format) {
+		new(this) vulkan::CubeMap(size, format);
+	}
+};
+
 class VulkanVertexList : public Array<vulkan::Vertex1> {
 public:
 	void __init__() {
 		new(this) VulkanVertexList;
+	}
+};
+
+class VulkanDepthBuffer : public vulkan::DepthBuffer {
+public:
+	void __init__(int w, int h, const string &format, bool with_sampler) {
+		new(this) vulkan::DepthBuffer(w, h, format, with_sampler);
+	}
+};
+
+class VulkanFrameBuffer : public vulkan::FrameBuffer {
+public:
+	void __init__(vulkan::RenderPass *rp, const Array<vulkan::Texture*> &attachments) {
+		new(this) vulkan::FrameBuffer(rp, attachments);
+	}
+	void __delete__() {
+		this->~FrameBuffer();
+	}
+};
+
+class VulkanCommandBuffer : public vulkan::CommandBuffer {
+public:
+	void __init__() {
+		new(this) vulkan::CommandBuffer;
+	}
+	void __delete__() {
+		this->~CommandBuffer();
+	}
+};
+
+class VulkanUniformBuffer : public vulkan::UniformBuffer {
+public:
+	void __init__(int size) {
+		new(this) vulkan::UniformBuffer(size);
+	}
+	void __init_multi__(int size, int count) {
+		new(this) vulkan::UniformBuffer(size, count);
+	}
+	void __delete__() {
+		this->~UniformBuffer();
+	}
+};
+
+class VulkanDescriptorPool : public vulkan::DescriptorPool {
+public:
+	void __init__(const string &s, int max_sets) {
+		new(this) DescriptorPool(s, max_sets);
+	}
+	void __delete__() {
+		this->~DescriptorPool();
+	}
+};
+
+class VulkanDescriptorSet : public vulkan::DescriptorSet {
+public:
+	void __delete__() {
+		this->~DescriptorSet();
+	}
+};
+
+class VulkanInstance : public vulkan::Instance {
+public:
+	void __delete__() {
+		this->~Instance();
+	}
+};
+
+class VulkanGraphicsPipeline : public vulkan::GraphicsPipeline {
+public:
+	void __init__(vulkan::Shader *shader, vulkan::RenderPass *render_pass, int subpass, const string &topology, const string &format) {
+		new(this) vulkan::GraphicsPipeline(shader, render_pass, subpass, topology, format);
+	}
+	void __delete__() {
+		this->~GraphicsPipeline();
+	}
+};
+
+class VulkanComputePipeline : public vulkan::ComputePipeline {
+public:
+	void __init__(const string &dset_layouts, vulkan::Shader *shaders) {
+		new(this) vulkan::ComputePipeline(dset_layouts, shaders);
+	}
+};
+
+class VulkanRayPipeline : public vulkan::RayPipeline {
+public:
+	void __init__(const string &dset_layouts, const Array<vulkan::Shader*> &shaders, int recursion_depth) {
+		new (this) vulkan::RayPipeline(dset_layouts, shaders, recursion_depth);
+	}
+};
+
+class VulkanRenderPass : public vulkan::RenderPass {
+public:
+	void __init__(const Array<string> &formats, const string &options) {
+		new(this) vulkan::RenderPass(formats, options);
+	}
+	void __delete__() {
+		this->~RenderPass();
+	}
+};
+
+class VulkanSwapChain : public vulkan::SwapChain {
+public:
+	void __init__(GLFWwindow* window, vulkan::Device *device) {
+		new(this) vulkan::SwapChain(window, device);
+	}
+	void __delete__() {
+		this->~SwapChain();
+	}
+};
+
+class VulkanFence : public vulkan::Fence {
+public:
+	void __init__() {
+		new(this) vulkan::Fence();
+	}
+	void __delete__() {
+		this->~Fence();
+	}
+};
+
+class VulkanSemaphore : public vulkan::Semaphore {
+public:
+	void __init__() {
+		new(this) vulkan::Semaphore();
+	}
+	void __delete__() {
+		this->~Semaphore();
+	}
+};
+
+
+class VulkanShader : public vulkan::Shader {
+public:
+	void __init__() {
+		new(this) vulkan::Shader();
+	}
+	void __delete__() {
+		this->~Shader();
 	}
 };
 
@@ -168,7 +341,7 @@ void SIAddPackageVulkan() {
 
 
 	add_class(TypeInstance);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::Instance::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanInstance::__delete__));
 
 
 	add_class(TypeDevice);
@@ -204,12 +377,12 @@ void SIAddPackageVulkan() {
 		class_add_element("height", TypeInt, vul_p(&vulkan::Texture::height));
 		class_add_element("view", TypePointer, vul_p(&vulkan::Texture::view));
 		//class_add_element("format", TypeInt, vul_p(&vulkan::Texture::format));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::Texture::__init__));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::Texture::__init_ext__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanTexture::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanTexture::__init_ext__));
 			func_add_param("w", TypeInt);
 			func_add_param("h", TypeInt);
 			func_add_param("format", TypeString);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::Texture::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanTexture::__delete__));
 		class_add_func("write", TypeVoid, vul_p(&vulkan::Texture::write));
 			func_add_param("image", TypeImage);
 		class_add_func("write", TypeVoid, vul_p(&vulkan::Texture::writex));
@@ -224,7 +397,7 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeVolumeTexture);
 		class_derive_from(TypeTexture, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::VolumeTexture::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanVolumeTexture::__init__));
 			func_add_param("nx", TypeInt);
 			func_add_param("ny", TypeInt);
 			func_add_param("nz", TypeInt);
@@ -233,14 +406,14 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeCubeMap);
 		class_derive_from(TypeTexture, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::CubeMap::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanCubeMap::__init__));
 			func_add_param("size", TypeInt);
 			func_add_param("format", TypeString);
 
 
 	add_class(TypeStorageTexture);
 		class_derive_from(TypeTexture, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::StorageTexture::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanStorageTexture::__init__));
 			func_add_param("nx", TypeInt);
 			func_add_param("ny", TypeInt);
 			func_add_param("nz", TypeInt);
@@ -249,53 +422,52 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeDepthBuffer);
 		class_derive_from(TypeTexture, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::DepthBuffer::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanDepthBuffer::__init__));
 			func_add_param("w", TypeInt);
 			func_add_param("h", TypeInt);
 			func_add_param("format", TypeString);
 			func_add_param("with_sampler", TypeBool);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::DepthBuffer::__delete__), Flags::OVERRIDE);
 
 
 	add_class(TypeFrameBuffer);
 		class_add_element(IDENTIFIER_SHARED_COUNT, TypeInt, vul_p(&vulkan::FrameBuffer::_pointer_ref_counter));
 		class_add_element("width", TypeInt, vul_p(&vulkan::FrameBuffer::width));
 		class_add_element("height", TypeInt, vul_p(&vulkan::FrameBuffer::height));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::FrameBuffer::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanFrameBuffer::__init__));
 			func_add_param("rp", TypeRenderPass);
 			func_add_param("attachments", TypePointerList);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::FrameBuffer::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanFrameBuffer::__delete__));
 
 
 	add_class(TypeShader);
 		class_add_element(IDENTIFIER_SHARED_COUNT, TypeInt, vul_p(&vulkan::Shader::_pointer_ref_counter));
 		//class_add_element("descr_layout", TypePointerList, vul_p(&vulkan::Shader::descr_layouts));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::Shader::__init__));
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::Shader::__delete__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanShader::__init__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanShader::__delete__));
 		class_add_func("load", TypeShaderP, vul_p(&__vulkan_load_shader), Flags::STATIC);
 			func_add_param("filename", TypePath);
 
 
 	add_class(TypeUniformBuffer);
 		class_derive_from(TypeBuffer, false, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::UniformBuffer::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanUniformBuffer::__init__));
 			func_add_param("size", TypeInt);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::UniformBuffer::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanUniformBuffer::__delete__));
 		class_add_func("update", TypeVoid, vul_p(&vulkan::UniformBuffer::update));
 			func_add_param("source", TypePointer);
 
 
 	add_class(TypeDescriptorPool);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::DescriptorPool::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanDescriptorPool::__init__));
 			func_add_param("s", TypeString);
 			func_add_param("max_sets", TypeInt);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::DescriptorPool::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanDescriptorPool::__delete__));
 		class_add_func("create_set", TypeDescriptorSetP, vul_p(&vulkan::DescriptorPool::_create_set_str), Flags::CONST);
 			func_add_param("bindings", TypeString);
 
 
 	add_class(TypeDescriptorSet);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::DescriptorSet::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanDescriptorSet::__delete__));
 		class_add_func("update", TypeVoid, vul_p(&vulkan::DescriptorSet::update));
 		class_add_func("set_texture", TypeVoid, vul_p(&vulkan::DescriptorSet::set_texture));
 			func_add_param("binding", TypeInt);
@@ -313,13 +485,13 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeGraphicsPipeline);
 		class_derive_from(TypePipeline, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::GraphicsPipeline::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanGraphicsPipeline::__init__));
 			func_add_param("shader", TypeShader);
 			func_add_param("pass", TypeRenderPass);
 			func_add_param("subpass", TypeInt);
 			func_add_param("topology", TypeString);
 			func_add_param("format", TypeString);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::GraphicsPipeline::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanGraphicsPipeline::__delete__));
 		class_add_func("set_wireframe", TypeVoid, vul_p(&vulkan::GraphicsPipeline::set_wireframe));
 			func_add_param("w", TypeBool);
 		class_add_func("set_line_width", TypeVoid, vul_p(&vulkan::GraphicsPipeline::set_line_width));
@@ -349,14 +521,14 @@ void SIAddPackageVulkan() {
 
 	add_class(TypeComputePipeline);
 		class_derive_from(TypePipeline, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::ComputePipeline::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanComputePipeline::__init__));
 			func_add_param("layout", TypeString);
 			func_add_param("shader", TypeShader);
 
 
 	add_class(TypeRayPipeline);
 		class_derive_from(TypePipeline, true, false);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::RayPipeline::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanRayPipeline::__init__));
 			func_add_param("layout", TypeString);
 			func_add_param("shader", TypeShaderPList);
 			func_add_param("recursion_depth", TypeInt);
@@ -366,10 +538,10 @@ void SIAddPackageVulkan() {
 	add_class(TypeRenderPass);
 		class_add_element("clear_color", TypeColorList, vul_p(&vulkan::RenderPass::clear_color));
 		class_add_element("clear_z", TypeFloat32, vul_p(&vulkan::RenderPass::clear_z));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::RenderPass::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanRenderPass::__init__));
 			func_add_param("formats", TypeStringList);
 			func_add_param("options", TypeString);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::RenderPass::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanRenderPass::__delete__));
 		class_add_func("rebuild", TypeVoid, vul_p(&vulkan::RenderPass::rebuild));
 		class_add_func("add_subpass", TypeVoid, vul_p(&vulkan::RenderPass::add_subpass));
 			func_add_param("color_att", TypeIntList);
@@ -385,10 +557,10 @@ void SIAddPackageVulkan() {
 		class_add_element("width", TypeInt, vul_p(&vulkan::SwapChain::width));
 		class_add_element("height", TypeInt, vul_p(&vulkan::SwapChain::height));
 		class_add_element("format", TypeInt, vul_p(&vulkan::SwapChain::image_format));
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::SwapChain::__init__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanSwapChain::__init__));
 			func_add_param("win", TypePointer);
 			func_add_param("device", TypeDeviceP);
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::SwapChain::__delete__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanSwapChain::__delete__));
 		class_add_func("create_depth_buffer", TypeDepthBufferP, vul_p(&vulkan::SwapChain::create_depth_buffer));
 		class_add_func("create_render_pass", TypeRenderPassP, vul_p(&vulkan::SwapChain::create_render_pass));
 			func_add_param("depth_buffer", TypeDepthBufferP);
@@ -406,20 +578,20 @@ void SIAddPackageVulkan() {
 
 
 	add_class(TypeFence);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::Fence::__init__));
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::Fence::__delete__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanFence::__init__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanFence::__delete__));
 		class_add_func("wait", TypeVoid, vul_p(&vulkan::Fence::wait));
 		class_add_func("reset", TypeVoid, vul_p(&vulkan::Fence::reset));
 
 
 	add_class(TypeSemaphore);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::Semaphore::__init__));
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::Semaphore::__delete__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanSemaphore::__init__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanSemaphore::__delete__));
 
 
 	add_class(TypeCommandBuffer);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&vulkan::CommandBuffer::__init__));
-		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&vulkan::CommandBuffer::__delete__));
+		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, vul_p(&VulkanCommandBuffer::__init__));
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanCommandBuffer::__delete__));
 		class_add_func("begin", TypeVoid, vul_p(&vulkan::CommandBuffer::begin));
 		class_add_func("end", TypeVoid, vul_p(&vulkan::CommandBuffer::end));
 		class_add_func("set_bind_point", TypeVoid, vul_p(&vulkan::CommandBuffer::set_bind_point));

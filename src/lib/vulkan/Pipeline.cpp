@@ -180,14 +180,6 @@ GraphicsPipeline::~GraphicsPipeline() {
 
 
 
-void GraphicsPipeline::__init__(Shader *_shader, RenderPass *_render_pass, int _subpass, const string &topology, const string &format) {
-	new(this) GraphicsPipeline(_shader, _render_pass, _subpass, topology, format);
-}
-
-void GraphicsPipeline::__delete__() {
-	this->~GraphicsPipeline();
-}
-
 void GraphicsPipeline::disable_blend() {
 	color_blend_attachments[0].blendEnable = VK_FALSE;
 }
@@ -328,10 +320,6 @@ ComputePipeline::ComputePipeline(const string &dset_layouts, Shader *shader) : B
 		throw Exception("failed to create compute pipeline!");
 }
 
-void ComputePipeline::__init__(const string &dset_layouts, Shader *shader) {
-	new(this) ComputePipeline(dset_layouts, shader);
-}
-
 
 
 RayPipeline::RayPipeline(const string &dset_layouts, const Array<Shader*> &shaders, int recursion_depth) : BasePipeline(VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, DescriptorSet::parse_bindings(dset_layouts)) {
@@ -357,10 +345,6 @@ RayPipeline::RayPipeline(const string &dset_layouts, const Array<Shader*> &shade
 	}
 	if (verbosity >= 2)
 		msg_write("...done");
-}
-
-void RayPipeline::__init__(const string &dset_layouts, const Array<Shader*> &shaders, int recursion_depth) {
-	new(this) RayPipeline(dset_layouts, shaders, recursion_depth);
 }
 
 void RayPipeline::create_groups(const Array<Shader*> &shaders) {

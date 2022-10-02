@@ -66,13 +66,6 @@ VkDescriptorType descriptor_type(const string &s) {
 		vkDestroyDescriptorPool(default_device->device, pool, nullptr);
 	}
 
-	void DescriptorPool::__init__(const string &s, int max_sets) {
-		new(this) DescriptorPool(s, max_sets);
-	}
-	void DescriptorPool::__delete__() {
-		this->~DescriptorPool();
-	}
-
 	DescriptorSet *DescriptorPool::create_set(const string &s) {
 		Array<VkDescriptorType> types;
 		Array<int> binding_no;
@@ -109,10 +102,6 @@ VkDescriptorType descriptor_type(const string &s) {
 		// no VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT...
 		//vkFreeDescriptorSets(device, descriptor_pool, 1, &descriptor_set);
 		destroy_layout(layout);
-	}
-
-	void DescriptorSet::__delete__() {
-		this->~DescriptorSet();
 	}
 
 	template<class T>

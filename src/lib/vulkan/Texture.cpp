@@ -134,18 +134,6 @@ Texture::~Texture() {
 			textures.erase(i);
 }
 
-void Texture::__init__() {
-	new(this) Texture();
-}
-
-void Texture::__init_ext__(int w, int h, const string &format) {
-	new(this) Texture(w, h, format);
-}
-
-void Texture::__delete__() {
-	this->~Texture();
-}
-
 VolumeTexture::VolumeTexture(int nx, int ny, int nz, const string &format) {
 	type = Type::VOLUME;
 	width = nx;
@@ -154,10 +142,6 @@ VolumeTexture::VolumeTexture(int nx, int ny, int nz, const string &format) {
 	_create_image(nullptr, VK_IMAGE_TYPE_3D, parse_format(format), false, false, false);
 	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_3D, mip_levels, 0, 1);
 	_create_sampler();
-}
-
-void VolumeTexture::__init__(int nx, int ny, int nz, const string &format) {
-	new(this) VolumeTexture(nx, ny, nz, format);
 }
 
 StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
@@ -213,10 +197,6 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 
 	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D, mip_levels, 0, 1);
 	//_create_sampler();
-}
-
-void StorageTexture::__init__(int nx, int ny, int nz, const string &format) {
-	new(this) StorageTexture(nx, ny, nz, format);
 }
 
 void Texture::_destroy() {
@@ -387,10 +367,6 @@ CubeMap::CubeMap(int size, const string &format) {
 	_create_image(nullptr, VK_IMAGE_TYPE_2D, parse_format(format), false, false, true);
 	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_CUBE, mip_levels, 0, 6);
 	_create_sampler();
-}
-
-void CubeMap::__init__(int size, const string &format) {
-	new(this) CubeMap(size, format);
 }
 
 void CubeMap::write_side(int side, const Image &_image) {

@@ -202,14 +202,6 @@ namespace vulkan {
 	}
 
 
-	void RenderPass::__init__(const Array<string> &format, const string &options) {
-		new(this) RenderPass(format, options);
-	}
-
-	void RenderPass::__delete__() {
-		this->~RenderPass();
-	}
-
 	void RenderPass::create() {
 
 		subpasses.clear();

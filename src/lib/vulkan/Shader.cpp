@@ -320,14 +320,6 @@ static shaderc_compiler_t shaderc = nullptr;
 	}
 
 
-	void Shader::__init__() {
-		new(this) Shader();
-	}
-
-	void Shader::__delete__() {
-		this->~Shader();
-	}
-
 	Shader* Shader::load(const Path &_filename) {
 		if (_filename.is_empty())
 			return nullptr;

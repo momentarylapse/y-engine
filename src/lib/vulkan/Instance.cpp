@@ -109,10 +109,6 @@ Instance::~Instance() {
 	vkDestroyInstance(instance, nullptr);
 }
 
-void Instance::__delete__() {
-	this->Instance::~Instance();
-}
-
 
 
 int parse_version(const string &v) {

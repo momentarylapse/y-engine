@@ -79,14 +79,6 @@ CommandBuffer::~CommandBuffer() {
 	_destroy();
 }
 
-void CommandBuffer::__init__() {
-	new(this) CommandBuffer();
-}
-
-void CommandBuffer::__delete__() {
-	this->~CommandBuffer();
-}
-
 void CommandBuffer::_create() {
 	VkCommandBufferAllocateInfo ai = {};
 	ai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
