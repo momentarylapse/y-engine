@@ -6,6 +6,8 @@
  */
 
 #include "base.h"
+#include "helper/PipelineManager.h"
+#include "../helper/ResourceManager.h"
 #include "../graphics-impl.h"
 #include "../lib/image/image.h"
 #include "../lib/os/msg.h"
@@ -39,6 +41,8 @@ void api_init(GLFWwindow* window) {
 }
 
 void api_end() {
+	PipelineManager::clear();
+	ResourceManager::clear();
 	delete pool;
 	if (device)
 		delete device;

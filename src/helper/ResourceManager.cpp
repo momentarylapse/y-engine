@@ -16,8 +16,8 @@
 Path ResourceManager::shader_dir;
 Path ResourceManager::texture_dir;
 Path ResourceManager::default_shader;
-static base::map<Path,Shader*> shaders;
-static base::map<Path,Texture*> textures;
+static base::map<Path,shared<Shader>> shaders;
+static base::map<Path,shared<Texture>> textures;
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	if (filename.is_absolute())
@@ -53,9 +53,9 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 	for (auto s: shaders)
 		if (s.key == fn) {
 #ifdef USING_VULKAN
-			return s.value;
+			return s.value.get();
 #else
-			return (s.value->program >= 0) ? s.value : nullptr;
+			return (s.value->program >= 0) ? s.value.get() : nullptr;
 #endif
 		}
 
@@ -114,9 +114,9 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	for (auto s: shaders)
 		if (s.key == fnx) {
 #ifdef USING_VULKAN
-			return s.value;
+			return s.value.get();
 #else
-			return (s.value->program >= 0) ? s.value : nullptr;
+			return (s.value->program >= 0) ? s.value.get() : nullptr;
 #endif
 		}
 
@@ -165,9 +165,9 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 	for (auto t: textures)
 		if (fn == t.key) {
 #ifdef USING_VULKAN
-			return t.value;
+			return t.value.get();
 #else
-			return t.value->valid ? t.value : nullptr;
+			return t.value->valid ? t.value.get() : nullptr;
 #endif
 		}
 
@@ -184,5 +184,10 @@ Texture* ResourceManager::load_texture(const Path& filename) {
 		msg_error(e.message());
 		return nullptr;
 	}
+}
+
+void ResourceManager::clear() {
+	shaders.clear();
+	textures.clear();
 }
 

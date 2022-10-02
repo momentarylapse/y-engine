@@ -72,8 +72,6 @@ namespace vulkan {
 		CubeMap(int size, const string &format);
 		void write_side(int side, const Image &image);
 	};
-
-	extern Array<Texture*> textures;
 };
 
 #endif

@@ -54,8 +54,6 @@ static shaderc_compiler_t shaderc = nullptr;
 
 	string vertex_module_default = "vertex-default-nix";
 
-	static shared_array<Shader> shaders;
-
 	string shader_error;
 
 #if HAS_LIB_SHADERC
@@ -292,8 +290,6 @@ static shaderc_compiler_t shaderc = nullptr;
 
 		s->push_size = meta.push_size;
 		s->descr_layouts = DescriptorSet::parse_bindings(meta.bindings);
-
-		shaders.add(s);
 		return s;
 	}
 #else

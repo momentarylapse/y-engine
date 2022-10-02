@@ -17,5 +17,6 @@ public:
 	static Path texture_dir;
 	static Path shader_dir;
 	static Path default_shader;
+	static void clear();
 };
 

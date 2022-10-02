@@ -19,6 +19,8 @@ GraphicsPipeline *get_ani(Shader *s, RenderPass *rp);
 GraphicsPipeline *get_user(Shader *s, RenderPass *rp, const string &format);
 GraphicsPipeline *get_gui(Shader *s, RenderPass *rp, const string &format);
 
+void clear();
+
 }
 
 #endif

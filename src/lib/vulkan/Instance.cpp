@@ -97,10 +97,6 @@ Instance::~Instance() {
 	if (verbosity >= 1)
 		msg_write("vulkan destroy");
 
-	if (default_device)
-		delete default_device;
-	default_device = nullptr;
-
 	if (using_validation_layers)
 		destroy_debug_utils_messenger_ext(instance, debug_messenger, nullptr);
 
