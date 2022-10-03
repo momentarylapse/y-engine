@@ -26,11 +26,29 @@ vulkan::Device *device = nullptr;
 void api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.2", "rtx?", "verbosity=1"});
 	try {
-		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "compute", "validation"});
-	} catch (...) {
-		msg_error("warning: no vulkan compute device found. Trying without...");
-		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation"});
+		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx", "compute"});
+		msg_write("device found: RTX + COMPUTE");
+	} catch (...) {}
+
+	if (!device) {
+		try {
+			device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx"});
+			msg_write("device found: RTX");
+		} catch (...) {}
 	}
+
+	if (!device) {
+		try {
+			device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "compute"});
+			msg_write("device found: COMPUTE");
+		} catch (...) {}
+	}
+
+	if (!device) {
+		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation"});
+		msg_write("WARNING:  device found: neither RTX not COMPUTE");
+	}
+
 	device->create_query_pool(16384);
 	pool = new vulkan::DescriptorPool("buffer:1024,sampler:1024", 1024);
 

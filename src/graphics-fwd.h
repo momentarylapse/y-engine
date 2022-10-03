@@ -35,6 +35,7 @@
 		enum class CullMode;
 		class GraphicsPipeline;
 		class ComputePipeline;
+		class RayPipeline;
 		class DescriptorSet;
 		class RenderPass;
 		class CommandBuffer;
@@ -56,6 +57,7 @@
 	using UniformBuffer = vulkan::UniformBuffer;
 	using GraphicsPipeline = vulkan::GraphicsPipeline;
 	using ComputePipeline = vulkan::ComputePipeline;
+	using RayPipeline = vulkan::RayPipeline;
 	using CommandBuffer = vulkan::CommandBuffer;
 	using DescriptorSet = vulkan::DescriptorSet;
 	using RenderPass = vulkan::RenderPass;

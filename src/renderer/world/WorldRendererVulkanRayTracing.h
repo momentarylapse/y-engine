@@ -22,6 +22,12 @@ public:
 	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
     void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) override {}
 
+    enum class Mode {
+        NONE,
+        COMPUTE,
+        RTX
+    } mode = Mode::NONE;
+
 	vulkan::Device *device;
 
     vulkan::StorageTexture *offscreen_image;
@@ -30,6 +36,8 @@ public:
     vulkan::DescriptorSet *dset;
     vulkan::UniformBuffer *buffer_vertices;
     vulkan::UniformBuffer *buffer_materials;
+
+    vulkan::RayPipeline *pipeline_rtx;
 
 
     shared<Shader> shader_out;

@@ -438,6 +438,7 @@ void SIAddPackageVulkan() {
 			func_add_param("h", TypeInt);
 			func_add_param("format", TypeString);
 			func_add_param("with_sampler", TypeBool);
+		class_add_func(IDENTIFIER_FUNC_DELETE, TypeVoid, vul_p(&VulkanTexture::__delete__), Flags::OVERRIDE);
 
 
 	add_class(TypeFrameBuffer);
@@ -659,8 +660,10 @@ void SIAddPackageVulkan() {
 	add_class(TypeAccelerationStructure);
 		//class_add_func("create_top", TypeAccelerationStructureP, vul_p(&vulkan::AccelerationStructure::create_top), Flags::STATIC);
 		class_add_func("create_top", TypeAccelerationStructureP, vul_p(&vulkan::AccelerationStructure::create_top_simple), Flags::STATIC);
+			func_add_param("device", TypeDevice);
 			func_add_param("instances", TypeDynamicArray);
 		class_add_func("create_bottom", TypeAccelerationStructureP, vul_p(&vulkan::AccelerationStructure::create_bottom), Flags::STATIC);
+			func_add_param("device", TypeDevice);
 			func_add_param("vb", TypeVertexBuffer);
 
 
