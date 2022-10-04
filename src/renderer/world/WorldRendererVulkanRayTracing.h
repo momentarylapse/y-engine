@@ -38,6 +38,8 @@ public:
     vulkan::UniformBuffer *buffer_materials;
 
     vulkan::RayPipeline *pipeline_rtx;
+    vulkan::AccelerationStructure *tlas = nullptr;
+    vulkan::AccelerationStructure *blas = nullptr;
 
 
     shared<Shader> shader_out;

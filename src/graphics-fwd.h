@@ -44,6 +44,7 @@
 		class SwapChain;
 		class DescriptorPool;
 		class Device;
+		class AccelerationStructure;
 	}
 
 	using Texture = vulkan::Texture;

@@ -107,7 +107,14 @@ void WorldRendererVulkanRayTracing::prepare() {
 			Model *m = s.model;
 			m->update_matrix();
 
-			m->mesh[0]->sub[s.mat_index].vertex_buffer
+			if (!tlas) {
+				for (auto &s: world.sorted_opaque) {
+					Model *m = s.model;
+					m->update_matrix();
+					blas = vulkan::AccelerationStructure::create_bottom(device, m->mesh[0]->sub[s.mat_index].vertex_buffer);
+				}
+				tlas = vulkan::AccelerationStructure::create_top(device, {blas});
+			}
 			
 			/*for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
 				materials.add(s.material->albedo.with_alpha(s.material->roughness));
