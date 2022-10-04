@@ -1,6 +1,7 @@
 <Layout>
 	version = 460
 	extensions = GL_NV_ray_tracing
+	bindings = [[acceleration-structure,image,buffer,buffer]]
 </Layout>
 
 <RayGenShader>
@@ -25,8 +26,13 @@ struct UniformParams {
 
 
 layout(set=0, binding=0)         uniform accelerationStructureNV scene;
-layout(set=0, binding=1, rgba8)  uniform image2D image;
-layout(set=0, binding=2)         uniform Camera { mat4 view; };
+layout(set=0, binding=1, rgba16f) uniform image2D image;
+layout(set=0, binding=2, std140) uniform MoreData {
+	mat4 iview;
+	vec4 background;
+	int num_triangles;
+	int num_lights;
+} push;
 layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
 
 /*layout(set = 0,      binding = 2)     uniform AppData {
@@ -44,9 +50,9 @@ const int NUM_SHADOW_SAMPLES = 10;
 
 
 vec3 CalcRayDir(vec2 screenUV, float aspect) {
-	vec3 u = (view * vec4(1,0,0,0)).xyz;
-	vec3 v = (view * vec4(0,1,0,0)).xyz;
-	vec3 dir = (view * vec4(0,0,1,0)).xyz;
+	vec3 u = (push.iview * vec4(1,0,0,0)).xyz;
+	vec3 v = (push.iview * vec4(0,1,0,0)).xyz;
+	vec3 dir = (push.iview * vec4(0,0,1,0)).xyz;
 
 	const float planeWidth = 0.7;//tan(Params.camNearFarFov.z * 0.5f);
 
@@ -66,14 +72,6 @@ vec3 rand_dir(vec3 p) {
 	return normalize(v);
 }
 
-const float gamma = 1.2;
-const float exposure = 1.0;
-
-vec3 tone_map(vec3 c) {
-	return vec3(1.0) - exp(-c * exposure*0.5);
-	//return pow(c * exposure, vec3(1,1,1)*0.2);
-}
-
 void main() {
 	const vec2 curPixel = vec2(gl_LaunchIDNV.xy);
 	const vec2 bottomRight = vec2(gl_LaunchSizeNV.xy - 1);
@@ -82,20 +80,21 @@ void main() {
 
 	const float aspect = float(gl_LaunchSizeNV.x) / float(gl_LaunchSizeNV.y);
 	
-	const float max_depth = 20.0;
+	const float max_depth = 20000.0;
 
-	vec3 origin = (view * vec4(0,0,0,1)).xyz;
+	vec3 origin = (push.iview * vec4(0,0,0,1)).xyz;
 	vec3 direction = CalcRayDir(uv, aspect);
 #if 1
-	vec3 out_color = vec3(0.0);
+	vec3 out_color = push.background.rgb;
 	
 
 	// scene,flags,cull mask, hit, stride, miss, origin, t0, dir, t1, payload location
 	
 	traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, origin, 0.0, direction, max_depth, 0);
-	out_color = ray.emission.rgb;
 	if (ray.pos_and_dist.w > 0) {
+		out_color = vec3(1,0,0);//ray.emission.rgb;
 	
+		#if 0
 		vec3 p = ray.pos_and_dist.xyz;
 		vec3 n = ray.normal_and_id.xyz;
 		vec3 albedo = ray.albedo.rgb;
@@ -126,15 +125,13 @@ void main() {
 		vec3 L = normalize(light_pos - p);
 		float d = length(light_pos - p);
 		out_color += light_visibility * (albedo.rgb * light_rad) / pow(d, 2) * abs(dot(n, L));
+		#endif
 	}
-		
-
-	out_color = tone_map(out_color);
-	out_color = pow(out_color, vec3(1.0 / gamma));
 	
 	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(out_color,1.0));
 #else
-	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(1,1,1,1.0));
+	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(direction,1.0));
+	//imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(push.background.rgb,1.0));
 #endif
 }
 </RayGenShader>

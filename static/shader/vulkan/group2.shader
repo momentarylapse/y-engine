@@ -12,11 +12,11 @@ struct RayPayload {
 	vec4 emission;
 };
 
-layout(set = 0, binding = 0)        uniform accelerationStructureNV scene;
+//layout(set=0, binding=0)        uniform accelerationStructureNV scene;
 
 // argh, using float[], each float uses up 4x space... (losing 3x data)
 //layout(set=0, binding=3) uniform Vertices { float v[99]; } vertices;
-layout(set=0, binding=3) uniform Vertices { vec4 v[66]; } vertices;
+//layout(set=0, binding=3) uniform Vertices { vec4 v[66]; } vertices;
 
 layout(location = 0) rayPayloadInNV RayPayload ray;
                      hitAttributeNV vec2 hit_attribs;
@@ -26,18 +26,18 @@ struct Vertex {
 	vec3 em;
 };
 
-Vertex unpack(int index) {
+/*Vertex unpack(int index) {
 	Vertex v;
 	v.p = vertices.v[index*2].xyz;
 	v.em = vertices.v[index*2+1].rgb;
 	return v;
-}
+}*/
 
 
-layout(location = 1) rayPayloadNV RayPayload SecondaryRay;
+layout(location=1) rayPayloadNV RayPayload SecondaryRay;
 
 void main() {
-	Vertex A = unpack(3*gl_PrimitiveID);
+	/*Vertex A = unpack(3*gl_PrimitiveID);
 	Vertex B = unpack(3*gl_PrimitiveID + 1);
 	Vertex C = unpack(3*gl_PrimitiveID + 2);
 	vec3 n = normalize(cross(B.p-A.p, C.p-A.p));
@@ -50,7 +50,8 @@ void main() {
 	ray.pos_and_dist = vec4(p, gl_HitTNV);
 	ray.albedo = vec4(0.7,0.7,0.7, 1);
 	ray.emission = vec4(A.em, 1);
-	ray.normal_and_id = vec4(n, id);
+	ray.normal_and_id = vec4(n, id);*/
+	ray.pos_and_dist = vec4(0,0,0, 10);//gl_HitTNV);
 }
 </RayClosestHitShader>
 
