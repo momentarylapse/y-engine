@@ -55,65 +55,12 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 
 		rtx.buffer_cam = new vulkan::UniformBuffer(sizeof(PushConst));
-
-
-		// dummy...
-		compute.buffer_materials = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS * 2);
-
-		Array<vec3> vertices;
-		//vertices4: (vec3,float,color)[]
-		Array<int> indices;
-
-
-		auto add_quad = [&vertices, &indices] (const Array<vec3>& v, const color &al, const color &em) {
-			int n0 = vertices.num;
-			Array<int> aa = {0,1,2, 0,2,3};
-			for (auto&& [k,i]: enumerate(aa)) {
-				vertices.add(v[i]);
-				//vertices4.add([v[i],0,em])
-				indices.add(n0 + k);
-			}
-		};
-	
-
-		auto add_tria = [&vertices, &indices] (const Array<vec3> &v, const color &al, const color &em) {
-			int n0 = vertices.num;
-			for (auto p: v) {
-				vertices.add(p);
-				//vertices4.add([p,0,em])
-			}
-			for (auto i: Array<int>({0,1,2}))
-				indices.add(n0 + i);
-		};
-
-
-		color em = {0,0,0,1};
-		color al = {1,1,1,1};
-		add_quad({{-2,-2,2}, {2,-2,2}, {2,2,2}, {-2,2,2}}, al, em);
-		add_quad({{2,-2,2}, {2,-2,-2}, {2,2,-2}, {2,2,2}}, al, {10,0,0,1});
-		add_quad({{-2,-2,-2}, {-2,-2,2}, {-2,2,2}, {-2,2,-2}}, al, em);
-		add_quad({{-2,2,2}, {-2,2,-2}, {2,2,-2}, {2,2,2}}, al, em);
-		add_quad({{-2,-2,-2}, {-2,-2,2}, {2,-2,2}, {2,-2,-2}}, al, em);
-		add_tria({{-1,0,2}, {-1,-1,0}, {-1,1,0}}, {0,1,1,1}, {0,0,0,1});
-
-
-		auto vb = new vulkan::VertexBuffer("3f");
-		vb->update(vertices);
-		vb->update_index(indices);
-
-		rtx.blas = vulkan::AccelerationStructure::create_bottom(device, vb);
-
-		rtx.tlas = vulkan::AccelerationStructure::create_top(device, {rtx.blas});
+		rtx.buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS * 3);
 
 
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer");
-		rtx.dset->set_acceleration_structure(0, rtx.tlas);
 		rtx.dset->set_storage_image(1, offscreen_image);
 		rtx.dset->set_buffer(2, rtx.buffer_cam);
-		//rtx.dset->set_buffer(3, vertex_buffer);
-		//rtx.dset->set_buffer(3, vb.vertex);
-		rtx.dset->set_buffer(3, compute.buffer_materials);
-		rtx.dset->update();
 
 		auto shader_gen = ResourceManager::load_shader("vulkan/gen.shader");
 		auto shader1 = ResourceManager::load_shader("vulkan/group1.shader");
@@ -171,14 +118,17 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 
 	if (mode == Mode::RTX) {
-	pc.iview = mat4::translation({0,0,-5});
-		for (auto &s: world.sorted_opaque) {
-			Model *m = s.model;
-			m->update_matrix();
 
-			if (!rtx.tlas) {
+		if (!rtx.tlas) {
 
-				/*for (auto &s: world.sorted_opaque) {
+			Array<vec4> vertices;
+
+			for (auto &s: world.sorted_opaque) {
+				Model *m = s.model;
+				m->update_matrix();
+
+
+				for (auto &s: world.sorted_opaque) {
 					Model *m = s.model;
 					m->update_matrix();
 					auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
@@ -188,27 +138,34 @@ void WorldRendererVulkanRayTracing::prepare() {
 							index.add(i);
 						vb->update_index(index);
 					}
-					rtx.blas = vulkan::AccelerationStructure::create_bottom(device, vb);
-					msg_error(i2s(m->mesh[0]->sub[s.mat_index].num_triangles));
-					break;
+					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
 				}
 
-				rtx.blas = vulkan::AccelerationStructure::create_bottom(device, vb);
+				auto c2v4 = [] (const color &c) {
+					return *(const vec4*)&c;
+				};
 
-				rtx.tlas = vulkan::AccelerationStructure::create_top(device, {rtx.blas});*/
+				auto v32v4 = [] (const vec3 &v, float w) {
+					return vec4(v.x, v.y, v.z, w);
+				};
+				
+				for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
+					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3]], 0));
+					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3+1]], 0));
+					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3+2]], 0));
+					vertices.add(c2v4(s.material->albedo.with_alpha(s.material->roughness)));
+					vertices.add(c2v4(s.material->emission.with_alpha(s.material->metal)));
+				}
 			}
-			
-			/*for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
-				materials.add(s.material->albedo.with_alpha(s.material->roughness));
-				materials.add(s.material->emission.with_alpha(s.material->metal));
-			}*/
-			break;
+			rtx.tlas = vulkan::AccelerationStructure::create_top_simple(device, rtx.blas);
+
+			rtx.buffer_vertices->update_array(vertices, 0);
 		}
+
 		rtx.buffer_cam->update(&pc);
-		//rtx.dset->set_acceleration_structure(0, rtx.tlas);
-		//rtx.dset->set_buffer(3, vertex_buffer);
-		//rtx.dset->set_buffer(3, vb.vertex);
-		//rtx.dset->update();
+		rtx.dset->set_acceleration_structure(0, rtx.tlas);
+		rtx.dset->set_buffer(3, rtx.buffer_vertices);
+		rtx.dset->update();
 	}
 
 	auto cb = command_buffer();

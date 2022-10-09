@@ -22,6 +22,7 @@ void main() {
 	ray.pos_and_dist = vec4(0,0,0, gl_HitTNV);
 	//ray.color = barycentrics;
 	//ray.normal_and_id = vec4(0,0,0, id);
+	ray.emission.rgb = vec3(0,0,0);
 }
 </RayClosestHitShader>
 

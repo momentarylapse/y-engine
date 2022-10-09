@@ -33,7 +33,7 @@ layout(set=0, binding=2, std140) uniform MoreData {
 	int num_triangles;
 	int num_lights;
 } push;
-layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
+//layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
 
 /*layout(set = 0,      binding = 2)     uniform AppData {
     UniformParams Params;
@@ -41,9 +41,9 @@ layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
 
 layout(location = 0) rayPayloadNV RayPayload ray;
 
-const vec3 light_pos = vec3(-1.7, 1.6, -1.1);
-const vec3 light_rad = vec3(0,0,10);
-const float light_radius = 0.1; // for shadow
+const vec3 light_pos = vec3(-170, 160, -110) / 2;
+const vec3 light_rad = vec3(0,0,12000);
+const float light_radius = 10.1; // for shadow
 
 const int NUM_REFLECTIONS = 15;
 const int NUM_SHADOW_SAMPLES = 10;
@@ -85,20 +85,18 @@ void main() {
 	vec3 origin = (push.iview * vec4(0,0,0,1)).xyz;
 	vec3 direction = CalcRayDir(uv, aspect);
 #if 1
-	vec3 out_color = push.background.rgb;
+	vec3 out_color;
 	
 
 	// scene,flags,cull mask, hit, stride, miss, origin, t0, dir, t1, payload location
 	
 	traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, origin, 0.0, direction, max_depth, 0);
 	if (ray.pos_and_dist.w > 0) {
-		out_color = vec3(1,0,0);//ray.emission.rgb;
+		out_color = ray.emission.rgb;
 	
-		#if 0
 		vec3 p = ray.pos_and_dist.xyz;
 		vec3 n = ray.normal_and_id.xyz;
 		vec3 albedo = ray.albedo.rgb;
-	
 	
 		// reflections...
 		for (int i=0; i<NUM_REFLECTIONS; i++) {
@@ -125,13 +123,13 @@ void main() {
 		vec3 L = normalize(light_pos - p);
 		float d = length(light_pos - p);
 		out_color += light_visibility * (albedo.rgb * light_rad) / pow(d, 2) * abs(dot(n, L));
-		#endif
+	} else {
+		out_color = push.background.rgb;
 	}
 	
 	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(out_color,1.0));
 #else
 	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(direction,1.0));
-	//imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(push.background.rgb,1.0));
 #endif
 }
 </RayGenShader>

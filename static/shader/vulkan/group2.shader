@@ -16,42 +16,55 @@ struct RayPayload {
 
 // argh, using float[], each float uses up 4x space... (losing 3x data)
 //layout(set=0, binding=3) uniform Vertices { float v[99]; } vertices;
-//layout(set=0, binding=3) uniform Vertices { vec4 v[66]; } vertices;
+layout(set=0, binding=3) uniform Vertices { vec4 v[500]; } vertices;
 
 layout(location = 0) rayPayloadInNV RayPayload ray;
-                     hitAttributeNV vec2 hit_attribs;
+                     hitAttributeNV vec2 bary_coord; // automatically filled
 
-struct Vertex {
-	vec3 p;
-	vec3 em;
+struct Triangle {
+	vec3 a;
+	vec3 b;
+	vec3 c;
+	vec4 albedo;
+	vec4 emission;
 };
 
-/*Vertex unpack(int index) {
-	Vertex v;
-	v.p = vertices.v[index*2].xyz;
-	v.em = vertices.v[index*2+1].rgb;
-	return v;
-}*/
+Triangle unpack(int index) {
+	Triangle t;
+	t.a = vertices.v[index*5].xyz;
+	t.b = vertices.v[index*5+1].xyz;
+	t.c = vertices.v[index*5+2].xyz;
+	t.albedo = vertices.v[index*5+3];
+	t.emission = vertices.v[index*5+4];
+	return t;
+}
 
 
-layout(location=1) rayPayloadNV RayPayload SecondaryRay;
+//layout(location=1) rayPayloadNV RayPayload SecondaryRay;
 
 void main() {
-	/*Vertex A = unpack(3*gl_PrimitiveID);
-	Vertex B = unpack(3*gl_PrimitiveID + 1);
-	Vertex C = unpack(3*gl_PrimitiveID + 2);
-	vec3 n = normalize(cross(B.p-A.p, C.p-A.p));
+	// TODO get REAL triangle index
+	int index = gl_PrimitiveID;
+	if (gl_InstanceID == 1)
+		index += 6;
+	if (gl_InstanceID == 2)
+		index += 8;
+	if (gl_InstanceID == 3)
+		index += 10;
+	Triangle t = unpack(index);
+
+	vec3 n = normalize(cross(t.b-t.a, t.c-t.a));
 	if (dot(n, gl_WorldRayDirectionNV) > 0)
 		n = -n;
 	
-	vec3 p = A.p * (1 - hit_attribs.x - hit_attribs.y) + B.p * hit_attribs.x + C.p * hit_attribs.y;
+	vec3 p = t.a * (1 - bary_coord.x - bary_coord.y) + t.b * bary_coord.x + t.c * bary_coord.y;
 	const float id = float(gl_InstanceCustomIndexNV);
 	
 	ray.pos_and_dist = vec4(p, gl_HitTNV);
-	ray.albedo = vec4(0.7,0.7,0.7, 1);
-	ray.emission = vec4(A.em, 1);
-	ray.normal_and_id = vec4(n, id);*/
-	ray.pos_and_dist = vec4(0,0,0, 10);//gl_HitTNV);
+	ray.albedo = t.albedo;
+	ray.emission = t.emission;
+//	ray.emission.rg = bary_coord;
+	ray.normal_and_id = vec4(n, id);
 }
 </RayClosestHitShader>
 
@@ -69,6 +82,7 @@ layout(location = 0) rayPayloadInNV RayPayload ray;
 void main() {
 	ray.pos_and_dist = vec4(0,0,0, -1);
 	ray.albedo = vec4(0,0,0, 1);
+	ray.emission = vec4(0,0,0, 1);
 	ray.normal_and_id = vec4(0.0);
 }
 </RayMissShader>

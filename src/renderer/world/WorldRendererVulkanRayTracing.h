@@ -52,9 +52,10 @@ public:
 		vulkan::DescriptorPool *pool;
 		vulkan::RayPipeline *pipeline;
 		vulkan::AccelerationStructure *tlas = nullptr;
-		vulkan::AccelerationStructure *blas = nullptr;
+		Array<vulkan::AccelerationStructure*> blas;
 		vulkan::DescriptorSet *dset;
 		vulkan::UniformBuffer *buffer_cam;
+		vulkan::UniformBuffer *buffer_vertices;
 	} rtx;
 
 
