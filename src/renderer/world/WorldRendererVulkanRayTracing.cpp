@@ -58,14 +58,15 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		rtx.buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS * 3);
 
 
-		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer");
+		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer");
 		rtx.dset->set_storage_image(1, offscreen_image);
 		rtx.dset->set_buffer(2, rtx.buffer_cam);
+		rtx.dset->set_buffer(4, rvd_def.ubo_light);
 
 		auto shader_gen = ResourceManager::load_shader("vulkan/gen.shader");
 		auto shader1 = ResourceManager::load_shader("vulkan/group1.shader");
 		auto shader2 = ResourceManager::load_shader("vulkan/group2.shader");
-		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer]]", {shader_gen, shader1, shader2}, 2);
+		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer]]", {shader_gen, shader1, shader2}, 2);
 		rtx.pipeline->create_sbt();
 
 
@@ -116,6 +117,11 @@ void WorldRendererVulkanRayTracing::prepare() {
 	pc.background = background();
 	pc.num_lights = lights.num;
 
+	auto cb = command_buffer();
+
+	cb->image_barrier(offscreen_image,
+		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
+		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
 	if (mode == Mode::RTX) {
 
@@ -166,15 +172,6 @@ void WorldRendererVulkanRayTracing::prepare() {
 		rtx.dset->set_acceleration_structure(0, rtx.tlas);
 		rtx.dset->set_buffer(3, rtx.buffer_vertices);
 		rtx.dset->update();
-	}
-
-	auto cb = command_buffer();
-
-	cb->image_barrier(offscreen_image,
-		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
-		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
-
-	if (mode == Mode::RTX) {
 		
 		cb->set_bind_point(vulkan::PipelineBindPoint::RAY_TRACING);
 		cb->bind_pipeline(rtx.pipeline);

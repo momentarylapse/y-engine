@@ -1,7 +1,7 @@
 <Layout>
 	version = 460
 	extensions = GL_NV_ray_tracing
-	bindings = [[acceleration-structure,image,buffer,buffer]]
+	bindings = [[acceleration-structure,image,buffer,buffer,buffer]]
 </Layout>
 
 <RayGenShader>
@@ -24,6 +24,13 @@ struct RayPayload {
 	mat4 m;
 };*/
 
+struct Light {
+	mat4 proj;
+	vec4 pos;
+	vec4 dir;
+	vec4 color;
+	float radius, theta, harshness;
+};
 
 layout(set=0, binding=0)          uniform accelerationStructureNV scene;
 layout(set=0, binding=1, rgba16f) uniform image2D image;
@@ -33,6 +40,7 @@ layout(set=0, binding=2, std140)  uniform MoreData {
 	int num_triangles;
 	int num_lights;
 } push;
+layout(set=0, binding=4) uniform LightData { Light light[32]; };
 //layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
 
 /*layout(set = 0,      binding = 2)     uniform AppData {
@@ -40,10 +48,6 @@ layout(set=0, binding=2, std140)  uniform MoreData {
 };*/
 
 layout(location = 0) rayPayloadNV RayPayload ray;
-
-const vec3 light_pos = vec3(-170, 160, -110) / 2;
-const vec3 light_rad = vec3(0,0,12000);
-const float light_radius = 10.1; // for shadow
 
 const int NUM_REFLECTIONS = 50;
 const int NUM_SHADOW_SAMPLES = 10;
@@ -74,21 +78,52 @@ vec3 rand_dir(vec3 p) {
 	return normalize(v);
 }
 
-vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel) {
-	vec3 color = vec3(0);	
-	// direct lighting
+float calc_light_visibility_point(vec3 p, vec3 LP, float light_radius, int N) {
 	float light_visibility = 0.0;
-	for (int i=0; i<NUM_SHADOW_SAMPLES; i++) {
-		vec3 lsp = light_pos + rand_dir(p + vec3(cur_pixel,1)*i*0.27409435) * light_radius;
+	for (int i=0; i<N; i++) {
+		vec3 lsp = LP + rand_dir(p + vec3(i,2*i,3*i)) * light_radius;
 		vec3 L = normalize(lsp - p);
 		float d = length(lsp - p);
-		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p + n * 0.01, 0.0, L, d, 0);
+		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p, 0.0, L, d, 0);
 		if (ray.pos_and_dist.w < 0)
-			light_visibility += 1.0 / NUM_SHADOW_SAMPLES;
+			light_visibility += 1.0 / N;
 	}
-	vec3 L = normalize(light_pos - p);
-	float d = length(light_pos - p);
-	color += light_visibility * (albedo * light_rad) / pow(d, 2) * abs(dot(n, L));
+	return light_visibility;
+}
+
+float calc_light_visibility_directional(vec3 p, vec3 L, float fuzzyness, int N) {
+	float light_visibility = 0.0;
+	for (int i=0; i<N; i++) {
+		vec3 LL = -normalize(L + fuzzyness * rand3d(p + vec3(i,2*i,3*i)));
+		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p, 0.0, LL, MAX_DEPTH, 0);
+		if (ray.pos_and_dist.w < 0)
+			light_visibility += 1.0 / N;
+	}
+	return light_visibility;
+}
+
+
+vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel, int N) {
+	vec3 color = vec3(0);
+	for (int i=0; i<push.num_lights; i++) {
+		float f;
+		if (light[i].radius > 0) {
+			// point light
+			vec3 LP = light[i].pos.xyz;
+			vec3 L = normalize(LP - p);
+			float d = length(LP - p);
+			float light_radius = 10.0;
+			float light_visibility = calc_light_visibility_point(p + n * 0.01, LP, light_radius, N);
+			f = max(-dot(n, L), 0.05) * light_visibility / pow(d, 2);
+
+		} else {
+			// directional
+			vec3 L = light[i].dir.xyz;
+			float light_visibility = calc_light_visibility_directional(p + n * 0.01, L, 0.02, N);
+			f = max(-dot(n, L), 0.05) * light_visibility;
+		}
+		color += f * albedo * light[i].color.rgb;
+	}
 	return color;
 }
 
@@ -100,14 +135,13 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 	vec3 color = vec3(0);
 	for (int i=0; i<NUM_REFLECTIONS; i++) {
 		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(cur_pixel,1)*i*0.732538)), roughness);
-		/*vec3 dir = rand_dir(p + vec3(i));
-		if (dot(dir, n) < 0)
-			dir = -dir;*/
 		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, MAX_DEPTH, 0);
-		if (ray.pos_and_dist.w > 0)
-			color += albedo * ray.emission.rgb / NUM_REFLECTIONS;
+		if (ray.pos_and_dist.w > 0) {
+			color += albedo * ray.emission.rgb;
+			color += albedo * calc_direct_light(ray.pos_and_dist.xyz, ray.normal_and_id.xyz, ray.albedo.rgb, cur_pixel, 1);
+		}
 	}
-	return color;
+	return color / NUM_REFLECTIONS;
 }
 
 
@@ -138,7 +172,7 @@ void main() {
 		vec3 albedo = ray.albedo.rgb;
 		float roughness = ray.albedo.a;
 
-		out_color += calc_direct_light(p, n, albedo, cur_pixel);
+		out_color += calc_direct_light(p, n, albedo, cur_pixel, NUM_SHADOW_SAMPLES);
 
 		out_color += calc_bounced_light(p, n, direction, albedo, roughness, cur_pixel);
 	} else {
