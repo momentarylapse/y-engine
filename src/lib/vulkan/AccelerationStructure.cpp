@@ -177,26 +177,26 @@ AccelerationStructure *AccelerationStructure::create_top(Device *device, const D
 
 
 AccelerationStructure *AccelerationStructure::create_top_simple(Device *device, const Array<AccelerationStructure*> &blas) {
-	struct VkGeometryInstance {
+	/*struct VkGeometryInstance {
 	    float transform[12];
 	    uint32_t instanceId : 24;
 	    uint32_t mask : 8;
 	    uint32_t instanceOffset : 24;
 	    uint32_t flags : 8;
 	    uint64_t accelerationStructureHandle;
-	};
+	};*/
 
-    Array<VkGeometryInstance> instances;
+    Array<VkAccelerationStructureInstanceKHR> instances;
     instances.resize(blas.num);
 
     for (size_t i = 0; i < blas.num; ++i) {
-        VkGeometryInstance& instance = instances[i];
-        memcpy(instance.transform, &mat4::ID, 12*4);
-        instance.instanceId = static_cast<uint32_t>(i);
+        auto &instance = instances[i];
+        memcpy(&instance.transform, &mat4::ID, 12*4);
+        instance.instanceCustomIndex = static_cast<uint32_t>(i);
         instance.mask = 0xff;
-        instance.instanceOffset = 0;
+        instance.instanceShaderBindingTableRecordOffset = 0;
         instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_CULL_DISABLE_BIT_NV;
-        instance.accelerationStructureHandle = blas[i]->handle;
+        instance.accelerationStructureReference = blas[i]->handle;
     }
 
     return create_top(device, instances);

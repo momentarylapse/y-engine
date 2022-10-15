@@ -14,7 +14,7 @@ struct RayPayload {
 };
 
 // packed std140
-struct UniformParams {
+/*struct UniformParams {
 	// Camera
 	vec4 camPos;
 	vec4 camDir;
@@ -22,12 +22,12 @@ struct UniformParams {
 	vec4 camSide;
 	vec4 camNearFarFov;
 	mat4 m;
-};
+};*/
 
 
-layout(set=0, binding=0)         uniform accelerationStructureNV scene;
+layout(set=0, binding=0)          uniform accelerationStructureNV scene;
 layout(set=0, binding=1, rgba16f) uniform image2D image;
-layout(set=0, binding=2, std140) uniform MoreData {
+layout(set=0, binding=2, std140)  uniform MoreData {
 	mat4 iview;
 	vec4 background;
 	int num_triangles;
@@ -45,22 +45,24 @@ const vec3 light_pos = vec3(-170, 160, -110) / 2;
 const vec3 light_rad = vec3(0,0,12000);
 const float light_radius = 10.1; // for shadow
 
-const int NUM_REFLECTIONS = 15;
+const int NUM_REFLECTIONS = 50;
 const int NUM_SHADOW_SAMPLES = 10;
 
+const float MAX_DEPTH = 20000;
 
-vec3 CalcRayDir(vec2 screenUV, float aspect) {
+
+vec3 calc_ray_dir(vec2 screen_uv, float aspect) {
 	vec3 u = (push.iview * vec4(1,0,0,0)).xyz;
 	vec3 v = (push.iview * vec4(0,1,0,0)).xyz;
 	vec3 dir = (push.iview * vec4(0,0,1,0)).xyz;
 
-	const float planeWidth = 0.7;//tan(Params.camNearFarFov.z * 0.5f);
+	const float plane_width = 0.7;//tan(Params.camNearFarFov.z * 0.5f);
 
-	u *= (planeWidth * aspect);
-	v *= planeWidth;
+	u *= (plane_width * aspect);
+	v *= plane_width;
 
-	const vec3 rayDir = normalize(dir + (u * screenUV.x) - (v * screenUV.y));
-	return rayDir;
+	const vec3 ray_dir = normalize(dir + (u * screen_uv.x) - (v * screen_uv.y));
+	return ray_dir;
 }
 
 float rand3d(vec3 p) {
@@ -72,18 +74,55 @@ vec3 rand_dir(vec3 p) {
 	return normalize(v);
 }
 
-void main() {
-	const vec2 curPixel = vec2(gl_LaunchIDNV.xy);
-	const vec2 bottomRight = vec2(gl_LaunchSizeNV.xy - 1);
+vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel) {
+	vec3 color = vec3(0);	
+	// direct lighting
+	float light_visibility = 0.0;
+	for (int i=0; i<NUM_SHADOW_SAMPLES; i++) {
+		vec3 lsp = light_pos + rand_dir(p + vec3(cur_pixel,1)*i*0.27409435) * light_radius;
+		vec3 L = normalize(lsp - p);
+		float d = length(lsp - p);
+		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p + n * 0.01, 0.0, L, d, 0);
+		if (ray.pos_and_dist.w < 0)
+			light_visibility += 1.0 / NUM_SHADOW_SAMPLES;
+	}
+	vec3 L = normalize(light_pos - p);
+	float d = length(light_pos - p);
+	color += light_visibility * (albedo * light_rad) / pow(d, 2) * abs(dot(n, L));
+	return color;
+}
 
-	const vec2 uv = (curPixel / bottomRight) * 2.0 - 1.0;
+
+vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughness, vec2 cur_pixel) {
+
+	vec3 refl = reflect(eye_dir, n);
+
+	vec3 color = vec3(0);
+	for (int i=0; i<NUM_REFLECTIONS; i++) {
+		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(cur_pixel,1)*i*0.732538)), roughness);
+		/*vec3 dir = rand_dir(p + vec3(i));
+		if (dot(dir, n) < 0)
+			dir = -dir;*/
+		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, MAX_DEPTH, 0);
+		if (ray.pos_and_dist.w > 0)
+			color += albedo * ray.emission.rgb / NUM_REFLECTIONS;
+	}
+	return color;
+}
+
+
+void main() {
+	const vec2 cur_pixel = vec2(gl_LaunchIDNV.xy);
+	const vec2 bottom_right = vec2(gl_LaunchSizeNV.xy - 1);
+
+	const vec2 uv = (cur_pixel / bottom_right) * 2.0 - 1.0;
 
 	const float aspect = float(gl_LaunchSizeNV.x) / float(gl_LaunchSizeNV.y);
 	
 	const float max_depth = 20000.0;
 
 	vec3 origin = (push.iview * vec4(0,0,0,1)).xyz;
-	vec3 direction = CalcRayDir(uv, aspect);
+	vec3 direction = calc_ray_dir(uv, aspect);
 #if 1
 	vec3 out_color;
 	
@@ -97,32 +136,11 @@ void main() {
 		vec3 p = ray.pos_and_dist.xyz;
 		vec3 n = ray.normal_and_id.xyz;
 		vec3 albedo = ray.albedo.rgb;
-	
-		// reflections...
-		for (int i=0; i<NUM_REFLECTIONS; i++) {
-			vec3 dir = normalize(rand_dir(p + vec3(curPixel,1)*i*0.732538) + n);
-			/*vec3 dir = rand_dir(p + vec3(i));
-			if (dot(dir, n) < 0)
-				dir = -dir;*/
-			traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, max_depth, 0);
-			if (ray.pos_and_dist.w > 0)
-				out_color += albedo.rgb * ray.emission.rgb / NUM_REFLECTIONS;
-		}
-		
-	
-		// direct lighting
-		float light_visibility = 0.0;
-		for (int i=0; i<NUM_SHADOW_SAMPLES; i++) {
-			vec3 lsp = light_pos + rand_dir(p + vec3(curPixel,1)*i*0.27409435) * light_radius;
-			vec3 L = normalize(lsp - p);
-			float d = length(lsp - p);
-			traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p + n * 0.01, 0.0, L, d, 0);
-			if (ray.pos_and_dist.w < 0)
-				light_visibility += 1.0 / NUM_SHADOW_SAMPLES;
-		}
-		vec3 L = normalize(light_pos - p);
-		float d = length(light_pos - p);
-		out_color += light_visibility * (albedo.rgb * light_rad) / pow(d, 2) * abs(dot(n, L));
+		float roughness = ray.albedo.a;
+
+		out_color += calc_direct_light(p, n, albedo, cur_pixel);
+
+		out_color += calc_bounced_light(p, n, direction, albedo, roughness, cur_pixel);
 	} else {
 		out_color = push.background.rgb;
 	}
