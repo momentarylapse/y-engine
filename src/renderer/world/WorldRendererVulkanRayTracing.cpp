@@ -55,7 +55,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 
 		rtx.buffer_cam = new vulkan::UniformBuffer(sizeof(PushConst));
-		rtx.buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS * 3);
+		rtx.buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * 5 * MAX_RT_TRIAS * 3);
 
 
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer");
@@ -125,35 +125,41 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 	if (mode == Mode::RTX) {
 
-		if (!rtx.tlas) {
+		Array<mat4> matrices;
+
+		if (rtx.tlas) {
+			// update
+			for (auto &s: world.sorted_opaque) {
+				Model *m = s.model;
+				m->update_matrix();
+				matrices.add(m->owner->get_matrix().transpose());
+			}
+			rtx.tlas->update_top(rtx.blas, matrices);
+
+		} else {
+
+			auto c2v4 = [] (const color &c) {
+				return *(const vec4*)&c;
+			};
+
+			auto v32v4 = [] (const vec3 &v, float w) {
+				return vec4(v.x, v.y, v.z, w);
+			};
 
 			Array<vec4> vertices;
 
 			for (auto &s: world.sorted_opaque) {
 				Model *m = s.model;
 				m->update_matrix();
-
-
-				for (auto &s: world.sorted_opaque) {
-					Model *m = s.model;
-					m->update_matrix();
-					auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-					if (!vb->is_indexed()) {
-						Array<int> index;
-						for (int i=0; i<m->mesh[0]->sub[s.mat_index].num_triangles*3; i++)
-							index.add(i);
-						vb->update_index(index);
-					}
-					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
+				auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
+				if (!vb->is_indexed()) {
+					Array<int> index;
+					for (int i=0; i<m->mesh[0]->sub[s.mat_index].num_triangles*3; i++)
+						index.add(i);
+					vb->update_index(index);
 				}
-
-				auto c2v4 = [] (const color &c) {
-					return *(const vec4*)&c;
-				};
-
-				auto v32v4 = [] (const vec3 &v, float w) {
-					return vec4(v.x, v.y, v.z, w);
-				};
+				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
+				matrices.add(m->owner->get_matrix().transpose());
 				
 				for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
 					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3]], 0));
@@ -163,7 +169,8 @@ void WorldRendererVulkanRayTracing::prepare() {
 					vertices.add(c2v4(s.material->emission.with_alpha(s.material->metal)));
 				}
 			}
-			rtx.tlas = vulkan::AccelerationStructure::create_top_simple(device, rtx.blas);
+			msg_write(vertices.num);
+			rtx.tlas = vulkan::AccelerationStructure::create_top(device, rtx.blas, matrices);
 
 			rtx.buffer_vertices->update_array(vertices, 0);
 		}

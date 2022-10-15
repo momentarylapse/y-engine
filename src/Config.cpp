@@ -34,13 +34,13 @@ void Config::load(const Array<string> &arg) {
 			set_int("debug.level", 2);
 		} else if (a.head(11) == "--game-dir=") {
 			game_dir = a.sub_ref(11);
-		} else if (a == "--fw") {
+		} else if (a == "--forward" or a == "--fw") {
 			set_str("renderer.path", "forward");
-		} else if (a == "--def") {
+		} else if (a == "--deferred" or a == "--def") {
 			set_str("renderer.path", "deferred");
 		} else if (a == "--direct") {
 			set_str("renderer.path", "direct");
-		} else if (a == "--raytracing") {
+		} else if (a == "--rt" or a == "--raytracing") {
 			set_str("renderer.path", "raytracing");
 		} else if (a == "--msaa") {
 			set_str("renderer.antialiasing", "MSAA");

@@ -16,7 +16,7 @@ struct RayPayload {
 
 // argh, using float[], each float uses up 4x space... (losing 3x data)
 //layout(set=0, binding=3) uniform Vertices { float v[99]; } vertices;
-layout(set=0, binding=3) uniform Vertices { vec4 v[500]; } vertices;
+layout(set=0, binding=3) uniform Vertices { vec4 v[100000]; } vertices;
 
 layout(location = 0) rayPayloadInNV RayPayload ray;
                      hitAttributeNV vec2 bary_coord; // automatically filled
@@ -31,9 +31,9 @@ struct Triangle {
 
 Triangle unpack(int index) {
 	Triangle t;
-	t.a = vertices.v[index*5].xyz;
-	t.b = vertices.v[index*5+1].xyz;
-	t.c = vertices.v[index*5+2].xyz;
+	t.a = gl_ObjectToWorldNV * vec4(vertices.v[index*5].xyz, 1);
+	t.b = gl_ObjectToWorldNV * vec4(vertices.v[index*5+1].xyz, 1);
+	t.c = gl_ObjectToWorldNV * vec4(vertices.v[index*5+2].xyz, 1);
 	t.albedo = vertices.v[index*5+3];
 	t.emission = vertices.v[index*5+4];
 	return t;
@@ -43,14 +43,7 @@ Triangle unpack(int index) {
 //layout(location=1) rayPayloadNV RayPayload SecondaryRay;
 
 void main() {
-	// TODO get REAL triangle index
-	int index = gl_PrimitiveID;
-	if (gl_InstanceID == 1)
-		index += 6;
-	if (gl_InstanceID == 2)
-		index += 8;
-	if (gl_InstanceID == 3)
-		index += 10;
+	int index = gl_PrimitiveID + gl_InstanceCustomIndexNV;
 	Triangle t = unpack(index);
 
 	vec3 n = normalize(cross(t.b-t.a, t.c-t.a));

@@ -24,7 +24,7 @@ vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
 
 void api_init(GLFWwindow* window) {
-	instance = vulkan::init({"glfw", "validation", "api=1.2", "rtx?", "verbosity=3"});
+	instance = vulkan::init({"glfw", "validation", "api=1.2", "rtx?", "verbosity=2"});
 	try {
 		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx", "compute"});
 		msg_write("device found: RTX + COMPUTE");
