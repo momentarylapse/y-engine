@@ -1,15 +1,39 @@
 <Layout>
 	version = 430
+	extensions = GL_EXT_buffer_reference2
 	bindings = [[image,buffer,buffer,buffer]]
-	pushsize = 88
+	pushsize = 104
 </Layout>
 <ComputeShader>
+
+struct Vertex {
+	//vec3 p;
+	//vec3 n;
+	//vec2 uv;
+	vec4 p;
+};
+layout(buffer_reference, std430, buffer_reference_align=4) readonly buffer XVertices { Vertex v[]; };
+layout(buffer_reference, std430, buffer_reference_align=4) readonly buffer XMaterials { vec4 material[8]; };
+
+struct Mesh {
+	mat4 matrix;
+	vec4 albedo;
+	vec4 emission;
+	XVertices vertices;
+	XVertices indices_dummy;
+	int num_triangles, _a, _b, _c;
+};
+layout(buffer_reference, std430, buffer_reference_align=4) readonly buffer XMeshes { Mesh mesh[8]; };
 
 layout(push_constant, std140) uniform PushConstants {
 	mat4 iview;
 	vec4 background;
 	int num_triangles;
 	int num_lights;
+	int _a, _b;
+	//XVertices vertices;
+	//XMaterials materials;
+	XMeshes meshes;
 } push;
 
 
@@ -77,7 +101,8 @@ bool trace_tria(vec3 p0, vec3 dir, vec3 a, vec3 b, vec3 c, out TriaHitData thd) 
 }
 
 struct HitData {
-	int index;
+	int index; // tria
+	int mesh;
 	TriaHitData thd;
 };
 
@@ -86,9 +111,16 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 	bool hit = false;
 	TriaHitData thd;
 	for (int i=0; i<push.num_triangles; i++) {
+#if 1
 		vec3 a = vertex[i*3].xyz;
 		vec3 b = vertex[i*3+1].xyz;
 		vec3 c = vertex[i*3+2].xyz;
+#else
+		XVertices xv = push.vertices;
+		vec3 a = xv.v[i*3].p.xyz;
+		vec3 b = xv.v[i*3+1].p.xyz;
+		vec3 c = xv.v[i*3+2].p.xyz;
+#endif
 		if (trace_tria(p0, dir, a, b, c, thd)) {
 			if (thd.t < hd.thd.t) {
 				hit = true;
@@ -101,15 +133,19 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 }
 
 vec3 get_emission(int index) {
-	return material[index * 2 + 1].rgb;
+	return push.meshes.mesh[index].emission.rgb;
+//	return push.materials.material[index * 2 + 1].rgb;
+//	return material[index * 2 + 1].rgb;
 }
 
 vec3 get_albedo(int index) {
-	return material[index * 2].rgb;
+	return push.meshes.mesh[index].albedo.rgb;
+	//return material[index * 2].rgb;
 }
 
 float get_roughness(int index) {
-	return material[index * 2].a;
+	return 1;//push.meshes.mesh[index].albedo.a;
+	//return material[index * 2].a;
 }
 
 float calc_light_visibility(vec3 p, vec3 sun_dir, int N) {
@@ -156,10 +192,11 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 }
 
 void main() {
-	ivec2 storePos = ivec2(gl_GlobalInvocationID.xy);
+	ivec2 store_pos = ivec2(gl_GlobalInvocationID.xy);
+	float aspect = float(imageSize(image).x) / float(imageSize(image).y);
 		
 	vec2 r = vec2(gl_GlobalInvocationID.xy) / imageSize(image);
-	vec3 dir = normalize(vec3(r.x - 0.5, 0.5 - r.y, 1));
+	vec3 dir = normalize(vec3((r.x - 0.5) * aspect, 0.5 - r.y, 1));
 	dir = (push.iview * vec4(dir,0)).xyz;
 	vec3 cam_pos = (push.iview * vec4(0,0,0,1)).xyz;
 
@@ -175,10 +212,10 @@ void main() {
 		
 		color += calc_bounced_light(hd.thd.p + hd.thd.n * 0.1, hd.thd.n, dir, albedo, get_roughness(hd.index));
 		
-		imageStore(image, storePos, vec4(color,1));
+		imageStore(image, store_pos, vec4(color,1));
 	} else {
 		// background
-		imageStore(image, storePos, push.background);
+		imageStore(image, store_pos, push.background);
 	}
 }
 </ComputeShader>

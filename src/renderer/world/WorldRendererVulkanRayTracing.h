@@ -33,11 +33,24 @@ public:
 	vulkan::StorageTexture *offscreen_image;
 	vulkan::Texture *offscreen_image2;
 
+	struct MeshDescription {
+		mat4 matrix;
+		color albedo;
+		color emission;
+		int64 address_vertices;
+		int64 address_indices;
+		int num_triangles;
+		int _a, _b, _c;
+	};
+
 	struct PushConst {
 		mat4 iview;
 		color background;
 		int num_trias;
 		int num_lights;
+		int num_meshes;
+		int _a;
+		int64 address_meshes;
 	} pc;
 
 	struct ComputeModeData {
@@ -46,6 +59,7 @@ public:
 		vulkan::DescriptorSet *dset;
 		vulkan::UniformBuffer *buffer_vertices;
 		vulkan::UniformBuffer *buffer_materials;
+		vulkan::UniformBuffer *buffer_meshes;
 	} compute;
 
 	struct RtxModeData {
