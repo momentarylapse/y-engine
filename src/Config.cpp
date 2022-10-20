@@ -42,6 +42,8 @@ void Config::load(const Array<string> &arg) {
 			set_str("renderer.path", "direct");
 		} else if (a == "--rt" or a == "--raytracing") {
 			set_str("renderer.path", "raytracing");
+		} else if (a == "--nortx") {
+			allow_rtx = false;
 		} else if (a == "--msaa") {
 			set_str("renderer.antialiasing", "MSAA");
 		} else if (a.head(8) == "--scale=") {

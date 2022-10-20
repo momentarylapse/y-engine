@@ -29,6 +29,7 @@ public:
 	string default_font;
 	Path game_dir;
 	AntialiasingMethod antialiasing_method = AntialiasingMethod::NONE;
+	bool allow_rtx = true;
 
 	float resolution_scale_min = 0;
 	float resolution_scale_max = 0;

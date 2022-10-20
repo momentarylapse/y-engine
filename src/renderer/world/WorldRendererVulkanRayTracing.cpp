@@ -39,12 +39,12 @@ static const int MAX_RT_MESHES = 1024;
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("rt", parent, RenderPathType::FORWARD) {
 	device = _device;
 
-	if (device->has_rtx())
+	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;
 	else if (device->has_compute())
 		mode = Mode::COMPUTE;
 	else
-		throw Exception("");
+		throw Exception("neither RTX nor compute shader support");
 
 	offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:f16");
 	offscreen_image2 = new vulkan::Texture(width, height, "rgba:f16");
