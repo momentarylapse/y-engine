@@ -29,6 +29,7 @@
 #include "../../world/Object.h" // meh
 #include "../../world/Terrain.h"
 #include "../../world/World.h"
+#include "../../y/ComponentManager.h"
 #include "../../y/Entity.h"
 #include "../../Config.h"
 #include "../../meta.h"
@@ -120,6 +121,9 @@ void WorldRendererVulkanRayTracing::prepare() {
 		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
 		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
+	auto terrains = ComponentManager::get_listx<Terrain>();
+
+
 	Array<MeshDescription> meshes;
 
 	for (auto &s: world.sorted_opaque) {
@@ -134,9 +138,20 @@ void WorldRendererVulkanRayTracing::prepare() {
 		md.address_vertices = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer.get_device_address();
 		//md.address_indices = m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.get_device_address();
 		meshes.add(md);
-		if (meshes.num > 10)
-			break;
 	}
+	for (auto *t: *terrains) {
+		auto o = t->owner;
+
+		MeshDescription md;
+		md.matrix = mat4::translation(o->pos);
+		md.albedo = t->material->albedo.with_alpha(t->material->roughness);
+		md.emission = t->material->emission.with_alpha(t->material->metal);
+		t->prepare_draw(cam_main->owner->pos);
+		md.num_triangles = t->vertex_buffer->output_count / 3;
+		md.address_vertices = t->vertex_buffer->vertex_buffer.get_device_address();
+		meshes.add(md);
+	}
+
 
 	buffer_meshes->update_array(meshes, 0);
 
@@ -151,23 +166,39 @@ void WorldRendererVulkanRayTracing::prepare() {
 				m->update_matrix();
 				matrices.add(m->owner->get_matrix().transpose());
 			}
+			for (auto *t: *terrains) {
+				auto o = t->owner;
+				matrices.add(mat4::translation(o->pos));
+			}
 			rtx.tlas->update_top(rtx.blas, matrices);
 
 		} else {
+
+			auto make_indexed = [] (VertexBuffer *vb) {
+				if (!vb->is_indexed()) {
+					Array<int> index;
+					for (int i=0; i<vb->output_count; i++)
+						index.add(i);
+					vb->update_index(index);
+				}
+			};
 
 			for (auto &s: world.sorted_opaque) {
 				Model *m = s.model;
 				m->update_matrix();
 				auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-				if (!vb->is_indexed()) {
-					Array<int> index;
-					for (int i=0; i<m->mesh[0]->sub[s.mat_index].num_triangles*3; i++)
-						index.add(i);
-					vb->update_index(index);
-				}
+				make_indexed(vb);
 				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
 				matrices.add(m->owner->get_matrix().transpose());
 			}
+
+			for (auto *t: *terrains) {
+				auto o = t->owner;
+				make_indexed(t->vertex_buffer);
+				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, t->vertex_buffer));
+				matrices.add(mat4::translation(o->pos));
+			}
+
 			rtx.tlas = vulkan::AccelerationStructure::create_top(device, rtx.blas, matrices);
 		}
 
