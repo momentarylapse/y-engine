@@ -50,15 +50,12 @@ public:
 		int num_lights;
 		int num_meshes;
 		int _a;
-		int64 address_meshes;
 	} pc;
 
 	struct ComputeModeData {
 		vulkan::DescriptorPool *pool;
 		vulkan::ComputePipeline *pipeline;
 		vulkan::DescriptorSet *dset;
-		vulkan::UniformBuffer *buffer_vertices;
-		vulkan::UniformBuffer *buffer_materials;
 		vulkan::UniformBuffer *buffer_meshes;
 	} compute;
 

@@ -73,19 +73,15 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 	} else if (mode == Mode::COMPUTE) {
 		compute.buffer_meshes = new vulkan::UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
-		compute.buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS);
-		compute.buffer_materials = new vulkan::UniformBuffer(sizeof(vec4) * MAX_RT_TRIAS * 2);
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
 		auto shader = ResourceManager::load_shader("vulkan/compute.shader");
-		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer,buffer,buffer]]", shader);
-		compute.dset = compute.pool->create_set("image,buffer,buffer,buffer,buffer");
+		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader);
+		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
-		compute.dset->set_buffer(1, compute.buffer_vertices);
-		compute.dset->set_buffer(2, compute.buffer_materials);
-		compute.dset->set_buffer(3, rvd_def.ubo_light);
-		compute.dset->set_buffer(4, compute.buffer_meshes);
+		compute.dset->set_buffer(1, compute.buffer_meshes);
+		compute.dset->set_buffer(2, rvd_def.ubo_light);
 		compute.dset->update();
 	}
 
@@ -193,47 +189,28 @@ void WorldRendererVulkanRayTracing::prepare() {
 		
 	} else if (mode == Mode::COMPUTE) {
 
-		Array<vec4> vertices;
-		Array<color> materials;
 		Array<MeshDescription> meshes;
 
 		for (auto &s: world.sorted_opaque) {
 			Model *m = s.model;
 			m->update_matrix();
-			for (int t: m->mesh[0]->sub[s.mat_index].triangle_index)
-				vertices.add(vec4(m->_matrix * m->mesh[0]->vertex[t], 0));
-			for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
-				materials.add(s.material->albedo.with_alpha(s.material->roughness));
-				materials.add(s.material->emission.with_alpha(s.material->metal));
-			}
 
 			MeshDescription md;
 			md.matrix = m->_matrix;
 			md.num_triangles = m->mesh[0]->sub[s.mat_index].triangle_index.num / 3;
 			md.albedo = s.material->albedo.with_alpha(s.material->roughness);
 			md.emission = s.material->emission.with_alpha(s.material->metal);
-			//msg_write(p2s(m->mesh[0]->sub[s.mat_index].vertex_buffer));
 			md.address_vertices = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer.get_device_address();
 			//md.address_indices = m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.get_device_address();
 			meshes.add(md);
-
-			if (vertices.num > 1000) {
-				vertices.resize(1000);
+			if (meshes.num > 10)
 				break;
-			}
 		}
 
-		compute.buffer_vertices->update_array(vertices, 0);
-		compute.buffer_materials->update_array(materials, 0);
-		int num_trias = vertices.num / 3;
-		pc.num_trias = num_trias;
+		pc.num_trias = 0;
 		pc.num_meshes = meshes.num;
 
 		compute.buffer_meshes->update_array(meshes, 0);
-
-		//vb->vertex_buffer.get_device_address();
-		//pc.vertices_address = compute.buffer_vertices->get_device_address();
-		pc.address_meshes = compute.buffer_meshes->get_device_address();
 
 
 		cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);

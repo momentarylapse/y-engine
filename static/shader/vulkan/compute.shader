@@ -1,8 +1,8 @@
 <Layout>
 	version = 430
-	extensions = GL_EXT_buffer_reference2
-	bindings = [[image,buffer,buffer,buffer]]
-	pushsize = 104
+	extensions = GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
+	bindings = [[image,buffer,buffer]]
+	pushsize = 96
 </Layout>
 <ComputeShader>
 
@@ -11,8 +11,7 @@ struct Vertex {
 	vec3 n;
 	vec2 uv;
 };
-layout(buffer_reference, std430, buffer_reference_align=1) readonly buffer XVertices { Vertex v[256]; };
-layout(buffer_reference, std430, buffer_reference_align=4) readonly buffer XMaterials { vec4 material[8]; };
+layout(buffer_reference, scalar) readonly buffer XVertices { Vertex v[256]; };
 
 struct Mesh {
 	mat4 matrix;
@@ -22,7 +21,6 @@ struct Mesh {
 	XVertices indices_dummy;
 	int num_triangles, _a, _b, _c;
 };
-layout(buffer_reference, std430, buffer_reference_align=4) readonly buffer XMeshes { Mesh mesh[8]; };
 
 layout(push_constant, std140) uniform PushConstants {
 	mat4 iview;
@@ -31,9 +29,6 @@ layout(push_constant, std140) uniform PushConstants {
 	int num_lights;
 	int num_meshes;
 	int _a;
-	//XVertices vertices;
-	//XMaterials materials;
-	XMeshes meshes;
 } push;
 
 
@@ -46,11 +41,9 @@ struct Light {
 	float radius, theta, harshness;
 };
 
-layout(set=0, binding=0, rgba16f) uniform writeonly image2D image;
-//layout(rgba8,location=0) uniform writeonly image2D tex;
-layout(binding=1, std140) uniform Vertices { vec4 vertex[256]; };
-layout(binding=2, std140) uniform Materials { vec4 material[256*2]; };
-layout(binding=3) uniform LightData { Light light[32]; };
+layout(binding=0, rgba16f) uniform writeonly image2D image;
+layout(binding=1, std430) uniform MeshData { Mesh mesh[256]; };
+layout(binding=2) uniform LightData { Light light[32]; };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
@@ -110,49 +103,39 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 	hd.thd.t = 1000000;
 	bool hit = false;
 	TriaHitData thd;
-#if 0
 	for (int k=0; k<push.num_meshes; k++) {
-		Mesh m = push.meshes.mesh[k];
+		Mesh m = mesh[k];
 		for (int i=0; i<m.num_triangles; i++) {
-			vec3 a = m.vertices.v[i*3].p;
-			vec3 b = vec3(100,100,0);//m.vertices.v[i*3+1].p;
-			vec3 c = m.vertices.v[i*3+2].p;
-#else
-	for (int k=0; k<1; k++) {
-		for (int i=0; i<push.num_triangles; i++) {
-			vec3 a = vertex[i*3].xyz;
-			vec3 b = vertex[i*3+1].xyz;
-			vec3 c = vertex[i*3+2].xyz;
-#endif
+			vec3 a = (m.matrix * vec4(m.vertices.v[i*3].p, 1)).xyz;
+			vec3 b = (m.matrix * vec4(m.vertices.v[i*3+1].p, 1)).xyz;
+			vec3 c = (m.matrix * vec4(m.vertices.v[i*3+2].p, 1)).xyz;
 			if (trace_tria(p0, dir, a, b, c, thd)) {
 				if (thd.t < hd.thd.t) {
 					hit = true;
+					vec3 n = (m.matrix * vec4(m.vertices.v[i*3].n, 0)).xyz;
+					if (dot(n, dir) > 0)
+						n = -n;
+					thd.n = n;
 					hd.thd = thd;
 					hd.index = i;
 					hd.mesh = k;
 				}
 			}
 		}
-//		break;
 	}
 	return hit;
 }
 
-vec3 get_emission(int mesh, int index) {
-	return abs(push.meshes.mesh[mesh].vertices.v[index].n / 200);
-//	return push.meshes.mesh[index].emission.rgb;
-//	return push.materials.material[index * 2 + 1].rgb;
-//	return material[index * 2 + 1].rgb;
+vec3 get_emission(int index) {
+	return mesh[index].emission.rgb;
 }
 
 vec3 get_albedo(int index) {
-	return push.meshes.mesh[index].albedo.rgb;
-	//return material[index * 2].rgb;
+	return mesh[index].albedo.rgb;
 }
 
 float get_roughness(int index) {
-	return push.meshes.mesh[index].albedo.a;
-	//return material[index * 2].a;
+	return mesh[index].albedo.a;
 }
 
 float calc_light_visibility(vec3 p, vec3 sun_dir, int N) {
@@ -192,7 +175,7 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 		vec3 dir = mix(refl, normalize(n + 0.7 * rand3d(p + vec3(i,2*i,3*i))), roughness);
 		if (trace(p, dir, hd)) {
 			color += albedo * calc_direct_light(get_albedo(hd.mesh), hd.thd.p, hd.thd.n, 1) / N;
-			color += get_emission(hd.mesh, hd.index) / N;
+			color += get_emission(hd.mesh) / N;
 		}
 	}
 	return color;
@@ -209,10 +192,9 @@ void main() {
 
 	HitData hd;
 	if (trace(cam_pos, dir, hd)) {
-		//imageStore(image, storePos, vec4(hd.thd.p/100,1));
 		vec3 albedo = get_albedo(hd.mesh);
 		
-		vec3 color = get_emission(hd.mesh, hd.index);
+		vec3 color = get_emission(hd.mesh);
 		
 		// direct sunlight
 		color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 20);
