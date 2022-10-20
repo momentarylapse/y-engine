@@ -49,30 +49,28 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 	offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:f16");
 	offscreen_image2 = new vulkan::Texture(width, height, "rgba:f16");
 
+	buffer_meshes = new vulkan::UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
 
 	if (mode == Mode::RTX) {
 		msg_error("RTX!!!");
 		rtx.pool = new vulkan::DescriptorPool("acceleration-structure:1,image:1,storage-buffer:1,buffer:1024,sampler:1024", 1024);
 
-
 		rtx.buffer_cam = new vulkan::UniformBuffer(sizeof(PushConst));
-		rtx.buffer_vertices = new vulkan::UniformBuffer(sizeof(vec4) * 5 * MAX_RT_TRIAS * 3);
 
-
-		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer");
+		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer,buffer");
 		rtx.dset->set_storage_image(1, offscreen_image);
 		rtx.dset->set_buffer(2, rtx.buffer_cam);
 		rtx.dset->set_buffer(4, rvd_def.ubo_light);
+		rtx.dset->set_buffer(5, buffer_meshes);
 
 		auto shader_gen = ResourceManager::load_shader("vulkan/gen.shader");
 		auto shader1 = ResourceManager::load_shader("vulkan/group1.shader");
 		auto shader2 = ResourceManager::load_shader("vulkan/group2.shader");
-		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer]]", {shader_gen, shader1, shader2}, 2);
+		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer,buffer]]", {shader_gen, shader1, shader2}, 2);
 		rtx.pipeline->create_sbt();
 
 
 	} else if (mode == Mode::COMPUTE) {
-		compute.buffer_meshes = new vulkan::UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
@@ -80,7 +78,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader);
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
-		compute.dset->set_buffer(1, compute.buffer_meshes);
+		compute.dset->set_buffer(1, buffer_meshes);
 		compute.dset->set_buffer(2, rvd_def.ubo_light);
 		compute.dset->update();
 	}
@@ -122,6 +120,26 @@ void WorldRendererVulkanRayTracing::prepare() {
 		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
 		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
+	Array<MeshDescription> meshes;
+
+	for (auto &s: world.sorted_opaque) {
+		Model *m = s.model;
+		m->update_matrix();
+
+		MeshDescription md;
+		md.matrix = m->_matrix;
+		md.num_triangles = m->mesh[0]->sub[s.mat_index].triangle_index.num / 3;
+		md.albedo = s.material->albedo.with_alpha(s.material->roughness);
+		md.emission = s.material->emission.with_alpha(s.material->metal);
+		md.address_vertices = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer.get_device_address();
+		//md.address_indices = m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.get_device_address();
+		meshes.add(md);
+		if (meshes.num > 10)
+			break;
+	}
+
+	buffer_meshes->update_array(meshes, 0);
+
 	if (mode == Mode::RTX) {
 
 		Array<mat4> matrices;
@@ -137,16 +155,6 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 		} else {
 
-			auto c2v4 = [] (const color &c) {
-				return *(const vec4*)&c;
-			};
-
-			auto v32v4 = [] (const vec3 &v, float w) {
-				return vec4(v.x, v.y, v.z, w);
-			};
-
-			Array<vec4> vertices;
-
 			for (auto &s: world.sorted_opaque) {
 				Model *m = s.model;
 				m->update_matrix();
@@ -159,24 +167,12 @@ void WorldRendererVulkanRayTracing::prepare() {
 				}
 				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
 				matrices.add(m->owner->get_matrix().transpose());
-				
-				for (int i=0; i<m->mesh[0]->sub[s.mat_index].triangle_index.num/3; i++) {
-					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3]], 0));
-					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3+1]], 0));
-					vertices.add(v32v4(m->mesh[0]->vertex[m->mesh[0]->sub[s.mat_index].triangle_index[i*3+2]], 0));
-					vertices.add(c2v4(s.material->albedo.with_alpha(s.material->roughness)));
-					vertices.add(c2v4(s.material->emission.with_alpha(s.material->metal)));
-				}
 			}
-			msg_write(vertices.num);
 			rtx.tlas = vulkan::AccelerationStructure::create_top(device, rtx.blas, matrices);
-
-			rtx.buffer_vertices->update_array(vertices, 0);
 		}
 
 		rtx.buffer_cam->update(&pc);
 		rtx.dset->set_acceleration_structure(0, rtx.tlas);
-		rtx.dset->set_buffer(3, rtx.buffer_vertices);
 		rtx.dset->update();
 		
 		cb->set_bind_point(vulkan::PipelineBindPoint::RAY_TRACING);
@@ -189,28 +185,8 @@ void WorldRendererVulkanRayTracing::prepare() {
 		
 	} else if (mode == Mode::COMPUTE) {
 
-		Array<MeshDescription> meshes;
-
-		for (auto &s: world.sorted_opaque) {
-			Model *m = s.model;
-			m->update_matrix();
-
-			MeshDescription md;
-			md.matrix = m->_matrix;
-			md.num_triangles = m->mesh[0]->sub[s.mat_index].triangle_index.num / 3;
-			md.albedo = s.material->albedo.with_alpha(s.material->roughness);
-			md.emission = s.material->emission.with_alpha(s.material->metal);
-			md.address_vertices = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer.get_device_address();
-			//md.address_indices = m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.get_device_address();
-			meshes.add(md);
-			if (meshes.num > 10)
-				break;
-		}
-
 		pc.num_trias = 0;
 		pc.num_meshes = meshes.num;
-
-		compute.buffer_meshes->update_array(meshes, 0);
 
 
 		cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);

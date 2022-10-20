@@ -52,21 +52,21 @@ public:
 		int _a;
 	} pc;
 
+	vulkan::UniformBuffer *buffer_meshes;
+
 	struct ComputeModeData {
 		vulkan::DescriptorPool *pool;
-		vulkan::ComputePipeline *pipeline;
 		vulkan::DescriptorSet *dset;
-		vulkan::UniformBuffer *buffer_meshes;
+		vulkan::ComputePipeline *pipeline;
 	} compute;
 
 	struct RtxModeData {
 		vulkan::DescriptorPool *pool;
+		vulkan::DescriptorSet *dset;
 		vulkan::RayPipeline *pipeline;
 		vulkan::AccelerationStructure *tlas = nullptr;
 		Array<vulkan::AccelerationStructure*> blas;
-		vulkan::DescriptorSet *dset;
 		vulkan::UniformBuffer *buffer_cam;
-		vulkan::UniformBuffer *buffer_vertices;
 	} rtx;
 
 

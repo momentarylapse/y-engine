@@ -1,9 +1,25 @@
 <Layout>
 	version = 460
-	extensions = GL_NV_ray_tracing,GL_EXT_nonuniform_qualifier
+	extensions = GL_NV_ray_tracing,GL_EXT_nonuniform_qualifier,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
 </Layout>
 
 <RayClosestHitShader>
+
+struct Vertex {
+	vec3 p;
+	vec3 n;
+	vec2 uv;
+};
+layout(buffer_reference, scalar) readonly buffer XVertices { Vertex v[256]; };
+
+struct Mesh {
+	mat4 matrix;
+	vec4 albedo;
+	vec4 emission;
+	XVertices vertices;
+	XVertices indices_dummy;
+	int num_triangles, _a, _b, _c;
+};
 
 struct RayPayload {
 	vec4 pos_and_dist;
@@ -12,30 +28,33 @@ struct RayPayload {
 	vec4 emission;
 };
 
-//layout(set=0, binding=0)        uniform accelerationStructureNV scene;
-
-// argh, using float[], each float uses up 4x space... (losing 3x data)
-//layout(set=0, binding=3) uniform Vertices { float v[99]; } vertices;
-layout(set=0, binding=3) uniform Vertices { vec4 v[100000]; } vertices;
-
 layout(location = 0) rayPayloadInNV RayPayload ray;
                      hitAttributeNV vec2 bary_coord; // automatically filled
+layout(binding=5, std430) uniform MeshData { Mesh mesh[256]; };
 
 struct Triangle {
 	vec3 a;
 	vec3 b;
 	vec3 c;
+	vec3 na;
+	vec3 nb;
+	vec3 nc;
 	vec4 albedo;
 	vec4 emission;
 };
 
-Triangle unpack(int index) {
+Triangle unpack(int mid, int index) {
+	Mesh m = mesh[mid];
+	
 	Triangle t;
-	t.a = gl_ObjectToWorldNV * vec4(vertices.v[index*5].xyz, 1);
-	t.b = gl_ObjectToWorldNV * vec4(vertices.v[index*5+1].xyz, 1);
-	t.c = gl_ObjectToWorldNV * vec4(vertices.v[index*5+2].xyz, 1);
-	t.albedo = vertices.v[index*5+3];
-	t.emission = vertices.v[index*5+4];
+	t.a = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3].p, 1);
+	t.b = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+1].p, 1);
+	t.c = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+2].p, 1);
+	t.na = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3].n, 0);
+	t.nb = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+1].n, 0);
+	t.nc = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+2].n, 0);
+	t.albedo = m.albedo;
+	t.emission = m.emission;
 	return t;
 }
 
@@ -43,20 +62,19 @@ Triangle unpack(int index) {
 //layout(location=1) rayPayloadNV RayPayload SecondaryRay;
 
 void main() {
-	int index = gl_PrimitiveID + gl_InstanceCustomIndexNV;
-	Triangle t = unpack(index);
+	Triangle t = unpack(gl_InstanceID, gl_PrimitiveID);
 
-	vec3 n = normalize(cross(t.b-t.a, t.c-t.a));
-	if (dot(n, gl_WorldRayDirectionNV) > 0)
-		n = -n;
 	
 	vec3 p = t.a * (1 - bary_coord.x - bary_coord.y) + t.b * bary_coord.x + t.c * bary_coord.y;
+	vec3 n = t.na * (1 - bary_coord.x - bary_coord.y) + t.nb * bary_coord.x + t.nc * bary_coord.y;
 	const float id = float(gl_InstanceCustomIndexNV);
 	
+	if (dot(n, gl_WorldRayDirectionNV) > 0)
+		n = -n;
+
 	ray.pos_and_dist = vec4(p, gl_HitTNV);
 	ray.albedo = t.albedo;
 	ray.emission = t.emission;
-//	ray.emission.rg = bary_coord;
 	ray.normal_and_id = vec4(n, id);
 }
 </RayClosestHitShader>
@@ -72,10 +90,18 @@ struct RayPayload {
 
 layout(location = 0) rayPayloadInNV RayPayload ray;
 
+layout(set=0, binding=2, std140)  uniform MoreData {
+	mat4 iview;
+	vec4 background;
+	int num_triangles;
+	int num_lights;
+} push;
+
 void main() {
 	ray.pos_and_dist = vec4(0,0,0, -1);
 	ray.albedo = vec4(0,0,0, 1);
-	ray.emission = vec4(0,0,0, 1);
+	ray.emission = //vec4(0,0,0, 1);
+		push.background;
 	ray.normal_and_id = vec4(0.0);
 }
 </RayMissShader>

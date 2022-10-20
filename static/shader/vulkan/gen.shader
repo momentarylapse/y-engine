@@ -1,7 +1,7 @@
 <Layout>
 	version = 460
-	extensions = GL_NV_ray_tracing
-	bindings = [[acceleration-structure,image,buffer,buffer,buffer]]
+	extensions = GL_NV_ray_tracing,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
+	bindings = [[acceleration-structure,image,buffer,buffer,buffer,buffer]]
 </Layout>
 
 <RayGenShader>
@@ -136,8 +136,8 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 	for (int i=0; i<NUM_REFLECTIONS; i++) {
 		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(cur_pixel,1)*i*0.732538)), roughness);
 		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, MAX_DEPTH, 0);
+		color += albedo * ray.emission.rgb;
 		if (ray.pos_and_dist.w > 0) {
-			color += albedo * ray.emission.rgb;
 			color += albedo * calc_direct_light(ray.pos_and_dist.xyz, ray.normal_and_id.xyz, ray.albedo.rgb, cur_pixel, 1);
 		}
 	}
