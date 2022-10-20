@@ -47,8 +47,13 @@ void Config::load(const Array<string> &arg) {
 		} else if (a == "--msaa") {
 			set_str("renderer.antialiasing", "MSAA");
 		} else if (a.head(8) == "--scale=") {
-			set_str("renderer.resolution-scale-min", a.sub_ref(7));
-			set_str("renderer.resolution-scale-max", a.sub_ref(7));
+			set_str("renderer.resolution-scale-min", a.sub_ref(8));
+			set_str("renderer.resolution-scale-max", a.sub_ref(8));
+		} else if (a.head(7) == "--size=") {
+			auto xx = a.sub_ref(7).explode("x");
+			set_int("screen.width", xx[0]._int());
+			set_int("screen.height", xx[1]._int());
+			set_str("screen.mode", "windowed");
 		} else if (a.head(1) != "-") {
 			set_str("default.world", a);
 		}
