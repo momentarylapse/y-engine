@@ -168,7 +168,7 @@ void WorldRendererVulkanRayTracing::prepare() {
 			}
 			for (auto *t: *terrains) {
 				auto o = t->owner;
-				matrices.add(mat4::translation(o->pos));
+				matrices.add(mat4::translation(o->pos).transpose());
 			}
 			rtx.tlas->update_top(rtx.blas, matrices);
 
@@ -196,7 +196,7 @@ void WorldRendererVulkanRayTracing::prepare() {
 				auto o = t->owner;
 				make_indexed(t->vertex_buffer);
 				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, t->vertex_buffer));
-				matrices.add(mat4::translation(o->pos));
+				matrices.add(mat4::translation(o->pos).transpose());
 			}
 
 			rtx.tlas = vulkan::AccelerationStructure::create_top(device, rtx.blas, matrices);
