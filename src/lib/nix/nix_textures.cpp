@@ -66,8 +66,12 @@ unsigned int parse_format(const string &_format) {
 		return GL_R8;
 	if (_format == "rgb:i8")
 		return GL_RGB8;
+	if (_format == "srgb:i8")
+		return GL_SRGB8;
 	if (_format == "rgba:i8")
 		return GL_RGBA8;
+	if (_format == "srgba:i8")
+		return GL_SRGB8_ALPHA8;
 	if (_format == "rgba:i4")
 		return GL_RGBA4;
 	if (_format == "r:f32")

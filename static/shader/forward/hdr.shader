@@ -102,7 +102,7 @@ void main() {
 	out_color.rgb += bloom * bloom_factor;
 	out_color.rgb = tone_map(out_color.rgb);
 	
-	out_color.rgb = pow(out_color.rgb, vec3(1.0 / gamma));
+//	out_color.rgb = pow(out_color.rgb, vec3(1.0 / gamma));
 //	out_color.rgb = vec3(in_uv,0);
 	out_color.a = 1;
 }

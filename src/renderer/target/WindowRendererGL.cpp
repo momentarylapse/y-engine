@@ -12,7 +12,6 @@
 #include "../../lib/nix/nix.h"
 #include "../../helper/PerformanceMonitor.h"
 
-
 WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
 	window = win;
 	glfwMakeContextCurrent(window);
@@ -55,10 +54,14 @@ void WindowRendererGL::draw() {
 	if (child)
 		child->prepare();
 
+	bool prev_srgb = nix::get_srgb();
+	nix::set_srgb(true);
 	nix::bind_frame_buffer(_frame_buffer);
 
 	if (child)
 		child->draw();
+
+	nix::set_srgb(prev_srgb);
 }
 
 #endif

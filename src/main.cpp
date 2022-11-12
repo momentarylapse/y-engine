@@ -309,6 +309,8 @@ public:
 		glfwWindowHint(GLFW_BLUE_BITS, vidmode->blueBits);
 		glfwWindowHint(GLFW_REFRESH_RATE, vidmode->refreshRate);
 
+		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+
 		if (!fullscreen and !windowed_fullscreen)
 			monitor = nullptr;
 
