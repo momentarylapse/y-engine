@@ -43,7 +43,6 @@
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
 #include "../y/EngineData.h"
-#include "../y/Entity.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
 #include "../world/Camera.h"
@@ -58,6 +57,7 @@
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
 #include "../world/components/Skeleton.h"
+#include "../world/components/LineMesh.h"
 #include "../meta.h"
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
@@ -268,6 +268,14 @@ void PluginManager::export_kaba() {
 	kaba::link_external_virtual("Model.on_init", &Model::on_init, &model);
 	kaba::link_external_virtual("Model.on_delete", &Model::on_delete, &model);
 	kaba::link_external_virtual("Model.on_iterate", &Model::on_iterate, &model);
+
+
+	kaba::declare_class_size("LineMesh", sizeof(LineMesh));
+	kaba::link_external_class_func("LineMesh.update", &LineMesh::update);
+	kaba::declare_class_element("LineMesh.contiguous", &LineMesh::contiguous);
+	kaba::declare_class_element("LineMesh.width_in_screen_space", &LineMesh::width_in_screen_space);
+	kaba::declare_class_element("LineMesh.vertices", &LineMesh::vertices);
+	kaba::declare_class_element("LineMesh.material", &LineMesh::material);
 
 
 	kaba::declare_class_size("Animator", sizeof(Animator));
@@ -699,6 +707,7 @@ void PluginManager::import_kaba() {
 	import_component_class<SphereCollider>(s, "SphereCollider");
 	import_component_class<BoxCollider>(s, "BoxCollider");
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
+	import_component_class<LineMesh>(s, "LineMesh");
 	import_component_class<Animator>(s, "Animator");
 	import_component_class<Skeleton>(s, "Skeleton");
 	import_component_class<Model>(s, "Model");
