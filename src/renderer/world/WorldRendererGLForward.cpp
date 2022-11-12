@@ -192,6 +192,8 @@ void WorldRendererGLForward::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
+	draw_line_meshes(allow_material);
+	draw_point_meshes(allow_material);
 	if (allow_material)
 		draw_objects_transparent(allow_material, type);
 }

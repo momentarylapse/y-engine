@@ -213,6 +213,8 @@ void WorldRendererGLDeferred::draw_world(bool allow_material) {
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);
+	draw_line_meshes(allow_material);
+	draw_point_meshes(allow_material);
 }
 
 void WorldRendererGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {

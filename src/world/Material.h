@@ -35,7 +35,9 @@ enum class ReflectionMode {
 enum class ShaderVariant {
 	DEFAULT,
 	ANIMATED,
-	INSTANCED
+	INSTANCED,
+	LINES,
+	POINTS
 };
 
 enum class RenderPathType;
@@ -47,7 +49,7 @@ public:
 	Path name;
 
 	shared_array<Texture> textures;
-	shared<Shader> shader[6];
+	shared<Shader> shader[10];
 	Path shader_path;
 	void _prepare_shader(RenderPathType render_path_type, ShaderVariant v);
 	Shader *get_shader(RenderPathType render_path_type, ShaderVariant v);
