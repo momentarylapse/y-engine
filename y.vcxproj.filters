@@ -514,6 +514,9 @@
     <ClCompile Include="src\world\components\LineMesh.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\components\PointMesh.cpp">
+      <Filter>src\world\components</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\components\Skeleton.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
@@ -1084,6 +1087,9 @@
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\LineMesh.h">
+      <Filter>src\world\components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\components\PointMesh.h">
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Skeleton.h">

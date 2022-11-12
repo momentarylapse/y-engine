@@ -58,6 +58,7 @@
 #include "../world/components/Animator.h"
 #include "../world/components/Skeleton.h"
 #include "../world/components/LineMesh.h"
+#include "../world/components/PointMesh.h"
 #include "../meta.h"
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
@@ -276,6 +277,13 @@ void PluginManager::export_kaba() {
 	kaba::declare_class_element("LineMesh.width_in_screen_space", &LineMesh::width_in_screen_space);
 	kaba::declare_class_element("LineMesh.vertices", &LineMesh::vertices);
 	kaba::declare_class_element("LineMesh.material", &LineMesh::material);
+
+
+	kaba::declare_class_size("PointMesh", sizeof(PointMesh));
+	kaba::link_external_class_func("PointMesh.update", &PointMesh::update);
+	kaba::declare_class_element("PointMesh.width_in_screen_space", &PointMesh::width_in_screen_space);
+	kaba::declare_class_element("PointMesh.vertices", &PointMesh::vertices);
+	kaba::declare_class_element("PointMesh.material", &PointMesh::material);
 
 
 	kaba::declare_class_size("Animator", sizeof(Animator));
@@ -708,6 +716,7 @@ void PluginManager::import_kaba() {
 	import_component_class<BoxCollider>(s, "BoxCollider");
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
 	import_component_class<LineMesh>(s, "LineMesh");
+	import_component_class<PointMesh>(s, "PointMesh");
 	import_component_class<Animator>(s, "Animator");
 	import_component_class<Skeleton>(s, "Skeleton");
 	import_component_class<Model>(s, "Model");

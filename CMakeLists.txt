@@ -177,6 +177,7 @@ set(SOURCE
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
 	src/world/components/LineMesh.cpp
+	src/world/components/PointMesh.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/Camera.cpp
