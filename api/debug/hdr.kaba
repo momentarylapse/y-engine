@@ -1,0 +1,21 @@
+use y
+use y.ui
+use y.engine
+
+class X extends Controller
+	var pic: Picture*[]
+	
+	func override on_init()
+		if engine.hdr_renderer
+			pic.add(new Picture([0.8,1.0, 0.8, 1.0], engine.hdr_renderer.fb_main.color_attachments()[0]))
+			pic.add(new Picture([1.0,1.2, 0.8, 1.0], engine.hdr_renderer.fb_small1.color_attachments()[0]))
+			pic.add(new Picture([1.2,1.4, 0.8, 1.0], engine.hdr_renderer.fb_small1.color_attachments()[0]))
+		
+		for p in pic
+			toplevel.add(p)
+		
+			
+	func override on_draw_pre()
+		for p in pic
+			p.source = [0,engine.resolution_scale.x, 0,engine.resolution_scale.y]
+

@@ -1,0 +1,17 @@
+use y
+use y.ui
+use y.engine
+
+class X extends Controller
+	var pic: Picture*[]
+	func override on_init()
+		pic.add(new Picture([0.2,0.4, 0.0,0.2], engine.render_path.fb_shadow.depth_buffer(), [0,1, 0,1]))
+		pic.add(new Picture([0.2,0.4, 0.2,0.4], engine.render_path.fb_shadow2.depth_buffer(), [0,1, 0,1]))
+		
+		for p in pic
+			toplevel.add(p)
+			
+#	func override on_draw_pre()
+#		for p in pic
+#			p.source = [0,engine.renderer.resolution_scale.x, 1, 1-engine.renderer.resolution_scale.y]
+
