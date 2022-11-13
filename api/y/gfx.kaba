@@ -1,0 +1,36 @@
+use image
+
+
+class Vertex
+	var p, n: vec3
+	var u, v: float
+
+class VertexFx
+	pos: vec3
+	col: color
+	u, v: float
+
+class FrameBuffer
+	var width, height: int
+	func extern __init__(att: Texture*[])
+	func extern selfref depth_buffer() -> DepthBuffer*
+	func extern selfref color_attachments() -> Texture*[]
+
+class Shader
+	func extern set_float(name: string, f: float)
+	func extern set_floats(name: string, f: float*, num: int)
+
+class Texture as shared
+	var width, height: int
+	func extern __init__(w: int, h: int, format: string = "rgba:i8")
+	func extern __delete__()
+	func extern mut update(im: Image)
+
+class CubeMap extends Texture
+	func extern __init__(size: int, format: string)
+class DepthBuffer extends Texture
+	func extern override __init__(w: int, h: int, format: string)
+
+class VertexBuffer
+	func extern __init__(format: string = "3f,3f,2f")
+	func extern mut update(vertices: @DynamicArray)

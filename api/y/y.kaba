@@ -1,0 +1,267 @@
+use os
+use kaba
+use image
+use y.gfx
+use y.ecs
+use y.audio
+
+
+class Camera extends Component
+	var dest: rect
+	var m_view: mat4
+	var exposure: float
+	var bloom_radius: float
+	var bloom_factor: float
+	
+	var focus_enabled: bool
+	var focal_length: float
+	var focal_blur: float
+	
+	var fov: float
+	var min_depth, max_depth: float
+	
+	var show, enabled: bool
+
+	func extern project(p: vec3) -> vec3
+	func extern unproject(p: vec3) -> vec3
+	func extern mut update_matrices(aspect_ratio: float)
+
+class Material
+	var albedo: color
+	var roughness: float
+	var metal: float
+	var emission: color
+	var textures: Texture*[]
+	var shader: Shader*[6]
+	var cast_shadow: bool
+	func extern mut add_uniform(name: string, p: float*, size: int)
+	func extern static load(filename: Path) -> Material*
+
+class Model extends Component
+	class Mesh
+		class Sub
+			var num_triangles: int
+			var triangle_index: int[]
+			var skin_vertex: float[]
+			var normal: vec3[]
+		var bone_index: int[]
+		var vertex: vec3[]
+		var sub: Sub[]
+#	var matrix: matrix
+	var name: string
+	var radius: float
+	var min, max: vec3
+	
+	var materials: Material*[]
+	
+	var mesh: Mesh*[3]
+
+	func extern override __init__()
+	func extern override __delete__()
+	
+	func extern mut make_editable()
+	func extern mut begin_edit(detail: int)
+	func extern mut end_edit(detail: int)
+#	func extern update_matrix()
+	
+	func extern get_vertex(index: int) -> vec3
+
+class LineVertex
+	pos: vec3
+	r: float
+	col: color
+
+class LineMesh extends Component
+	vertices: LineVertex[]
+	contiguous: bool
+	width_in_screen_space: bool
+	material: Material*
+	func extern mut update()
+
+class PointVertex
+	pos: vec3
+	r: float
+	col: color
+
+class PointMesh extends Component
+	vertices: PointVertex[]
+	width_in_screen_space: bool
+	material: Material*
+	func extern mut update()
+
+
+class SolidBody extends Component
+	var vel: vec3
+	var rot: vec3
+	var mass: float
+	var theta: mat3
+	var physics_active: bool
+	var physics_passive: bool
+	var g_factor: float
+	
+	func extern mut add_force(f: vec3, rho: vec3 = vec3.0)
+	func extern mut add_impulse(p: vec3, rho: vec3 = vec3.0)
+	func extern mut add_torque(t: vec3)
+	func extern mut add_torque_impulse(l: vec3)
+	func extern mut update_mass()
+	func extern mut update_motion(mask: int)
+
+class Collider extends Component
+class MeshCollider extends Collider
+class BoxCollider extends Collider
+class SphereCollider extends Collider
+class TerrainCollider extends Collider
+	
+class Animator extends Component
+	enum Operation
+		SET           # overwrite
+		SET_NEW_KEYED # overwrite, if current doesn't equal 0
+		SET_OLD_KEYED # overwrite, if last equals 0
+		ADD_1_FACTOR  # w = w_old         + w_new * f
+		MIX_1_FACTOR  # w = w_old * (1-f) + w_new * f
+		MIX_2_FACTOR  # w = w_old * a     + w_new * b
+	func extern mut reset()
+	func extern mut add_x(op: Operation, p1: float, p2: float, move: int, out t: float, dt: float, vel_param: float = 1.0, loop: bool = true) -> bool
+	func extern mut add(op: Operation, move: int, out t: float, dt: float, loop: bool = true) -> bool
+	func extern mut is_done(op_no: int) -> bool
+
+class Skeleton extends Component
+	var bones: Entity[]
+	var pos0, dpos: vec3[]
+	var parents: int[]
+	func extern mut reset()
+
+class Terrain extends Component
+	var pattern: vec3
+	var num_x, num_z: int
+	var height: float[]
+	func extern get_height(p: vec3) -> float
+	func extern mut update(x1: int, x2: int, y1: int, y2: int, mask: int)
+	# ...
+
+class Light extends Component
+	var color: color
+	var radius: float
+	var theta: float
+	var harshness: float
+	var enabled: bool
+	var allow_shadow: bool
+	var user_shadow_control: bool
+	var user_shadow_theta: float
+	var shadow_dist_min: float
+	var shadow_dist_max: float
+	func extern mut set_direction(dir: vec3)
+
+#	class Spherical extends Light
+#		func extern __init__(pos: vec3, c: color, radius: float)
+#
+#	class Parallel extends Light
+#		func extern __init__(ang: quaternion, c: color)
+#
+#	class Cone extends Light
+#		func extern __init__(pos: vec3, ang: quaternion, c: color, radius: float, theta: float)
+
+class Particle extends BaseClass
+	var pos, vel: vec3
+	var radius: float
+	var time_to_live: float
+	var suicidal: bool
+	var texture: Texture*
+	var color: color
+	var source: rect
+	var enabled: bool
+	func extern __init__(p: vec3, r: float, t: Texture, ttl: float)
+	func extern override __delete__()
+
+class Beam extends Particle
+	var length: vec3
+	func extern __init__(p: vec3, l: vec3, r: float, t: Texture, ttl: float)
+
+class Fog
+	var color: color
+	var distance: float
+	var enabled: bool
+
+class Link extends BaseClass
+	var a, b: Model*
+	func extern mut set_motor(v: float, max: float)
+#	extern void mut set_axis(vector v)
+	func extern mut set_frame(n: int, q: quaternion)
+
+#	class Socket extends Link
+#		extern void __init__(Model* a, Model* b, vector pos)
+#	...
+
+class World
+	var ego: Entity*
+	
+	var lights: Light*[]
+	
+	var background: color
+	var skyboxes: Model*[]
+	
+	var fog: Fog
+	var gravity: vec3
+	
+	var links: Link*[]
+	
+	enum PhysicsMode
+		NONE
+		SIMPLE
+		FULL_INTERNAL
+		FULL_EXTERNAL
+	var physics_mode: PhysicsMode
+	
+	func extern mut load_soon(filename: Path)
+	
+	func extern mut add_light_parallel(ang: quaternion, c: color) -> Light*
+	func extern mut add_light_point(pos: vec3, c: color, radius: float) -> Light*
+	func extern mut add_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light*
+	func extern mut add_particle(p: Particle)
+	func extern mut add_sound(s: Sound)
+	func extern mut create_object(filename: Path, pos: vec3, ang: quaternion) -> Entity*
+	func extern mut create_object_no_reg(filename: Path, pos: vec3, ang: quaternion) -> Entity*
+	func extern mut create_object_multi(filename: Path, pos: vec3[], ang: quaternion[]) -> Entity*
+	func extern mut create_terrain(filename: Path, pos: vec3) -> Terrain*
+	func extern mut create_entity(pos: vec3, ang: quaternion) -> Entity*
+	func extern mut register_entity(e: Entity)
+	func extern mut set_active_physics(o: Model, active: bool)
+	func extern mut shift_all(dpos: vec3)
+	func extern get_g(pos: vec3) -> vec3
+	func extern trace(p1: vec3, p2: vec3, out d: CollisionData, simple_test: bool, ignore: Entity*) -> bool
+	
+	func selfref objects() -> Model*[]*
+		return get_component_list[Model]()
+	func selfref terrains() -> Terrain*[]*
+		return get_component_list[Terrain]()
+
+#	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
+#	func extern delete(o: void*)
+	
+	class MessageData
+		var e: Entity*
+		var v: vec3
+	var msg_data: MessageData
+	
+	func extern mut subscribe(msg: string, f: void->void)
+
+
+
+#func model(e: Entity) -> Model*
+#	var m: Model* = e.get_component[Model]()
+#	return m
+#func body(e: Entity) -> SolidBody*
+#	var b: SolidBody* = e.get_component(SolidBody)
+#	return b
+
+
+func extern load_model(filename: Path) -> Model*
+func extern load_shader(filename: Path) -> Shader*
+func extern create_shader(source: string) -> Shader*
+func extern load_texture(filename: Path) -> Texture*
+func extern add_camera(pos: vec3, ang: quaternion, r: rect) -> Camera*
+
+
+var extern tex_white: Texture*
+var extern world: World
+var extern cam: Camera*

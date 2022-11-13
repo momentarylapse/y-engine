@@ -1,0 +1,64 @@
+use kaba
+
+#class extern Model
+#class extern SolidBody
+
+class BaseClass
+#	extern void __init__()
+	func extern virtual __delete__()
+	func extern __del_override__()
+	func extern virtual mut on_init()
+	func extern virtual mut on_delete()
+	func extern virtual mut on_iterate(dt: float)
+
+class Entity extends BaseClass
+	var pos: vec3
+	var ang: quaternion
+	var parent: Entity*
+	func extern get_matrix() -> mat4
+	
+	func extern selfref mut __add_component(t: Class, vars: string) -> Component*
+	func extern selfref __get_component(t: Class) -> Component*
+	
+	func selfref mut add_component[T](vars: string) -> T*
+		var c: T* = __add_component(T, vars)
+		return c
+	func selfref get_component[T]() -> T*
+		var c: T* = __get_component(T)
+		return c
+	
+#	func selfref model() -> Model*
+#		var m: Model* = get_component(Model)
+#		return m
+#	func selfref body() -> SolidBody*
+#		var b: SolidBody* = get_component(SolidBody)
+#		return b
+
+
+
+class CollisionData
+	var entity: Entity*
+	#var body: SolidBody*
+	var pos, n: vec3
+
+# always let the engine create/delete!
+class Component
+	func extern __init__()
+	func extern virtual __delete__()
+	func extern virtual mut on_init()
+	func extern virtual mut on_delete()
+	func extern virtual mut on_iterate(dt: float)
+	func extern virtual mut on_collide(col: CollisionData)
+	func extern mut set_variables(vars: string)
+	var owner: Entity*
+	use owner
+
+##func extern get_component_list(t: Class) -> Component*[]*
+func extern __get_component_list(t: Class) -> Component*[]*
+func get_component_list[T]() -> T*[]*
+	var list: T*[]* = __get_component_list(T)
+	return list
+
+#func ffff()
+#	get_component_list[int]()
+

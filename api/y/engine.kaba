@@ -1,0 +1,81 @@
+use os
+use y
+use y.gfx
+
+class EngineData
+	var debug: bool
+	var show_timings: bool
+	var console_enabled: bool
+	#bool wire_mode
+	var resetting_game, game_running, first_frame: bool
+	var physical_aspect_ratio: float
+	
+	var physics_enabled, collisions_enabled: bool
+	var detail_level: float
+	
+	var elapsed: float
+	var elapsed_rt: float
+	var time_scale: float
+	
+	var fps_min, fps_max: float
+	var resolution_scale: vec2
+	
+	var initial_world_file, second_world_file: Path
+	#Font* default_font
+	var renderer: Renderer*
+	var render_path: RenderPath*
+	var hdr_renderer: HDRRenderer*
+	var post_processor: PostProcessor*
+
+	func extern exit()
+
+class Renderer
+
+class RenderPath
+	enum Type
+		NONE
+		FORWARD
+		DEFERRED
+	var type: Type
+	var depth_buffer: DepthBuffer*
+	var cube_map: CubeMap*
+	var fb_shadow, fb_shadow2: FrameBuffer*
+	var shader_fx: Shader*
+	var gbuffer: FrameBuffer*
+	var wireframe: bool
+
+	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
+	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
+	func extern mut add_fx_injector(f: void->void, transparent: bool)
+	func extern draw_user_mesh(vb: VertexBuffer, s: Shader, m: mat4, tex: Texture*[], data: any)
+
+class HDRRenderer
+	var fb_main: FrameBuffer*
+	var fb_small1, fb_small2: FrameBuffer*
+
+class PostProcessor
+	var fb1, fb2: FrameBuffer*
+	func extern next_fb(cur: FrameBuffer) -> FrameBuffer*
+	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
+	func extern mut add_stage(on_prepare: void->void, on_draw: void->void)
+
+class Scheduler
+	func static extern mut subscribe(dt: float, f: void->void)
+
+
+class PerformanceMonitor
+	class Channel
+		var name: string
+		var parent: int
+		var average: float
+	var extern static channels: Channel[]
+	var extern static avg_frame_time: float
+	var extern static frames: int
+	#class Average
+	#	var frame_time: float
+	#	var location: float[16]
+	#var frames: int
+	#var avg: Average
+#var extern perf_mon: PerformanceMonitor*
+
+var extern engine: EngineData

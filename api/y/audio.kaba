@@ -1,0 +1,21 @@
+use y.ecs
+use os
+
+# TODO
+class Sound extends Entity
+	func extern pause(pause: bool)
+	func extern play(loop: bool)
+	func extern set(pos: vec3, vel: vec3, r_min: float, r_max: float, speed: float = 1.0, volume: float = 1.0)
+	func extern stop()
+	func extern static emit(filename: Path, pos: vec3, r_min: float, r_max: float, speed: float = 1.0, volume: float = 1.0, loop: bool = false) -> Sound*
+	func extern static load(filename: Path) -> Sound*
+
+class Music extends Entity
+	func pause(pause: bool)
+	func play(loop: bool)
+	func set_rate(rate: float)
+	func stop()
+func load_music(filename: Path) -> Music*
+#void save_sound(Path filename, float[] buf_r, float[] buf_l, int freq, int channels, int bits)
+var volume_music: float
+var volume_sounds: float
