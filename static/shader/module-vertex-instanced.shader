@@ -9,8 +9,8 @@ layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_uv;
 layout(location = 0) out vec4 out_pos; // world space
-layout(location = 1) out vec2 out_uv;
-layout(location = 2) out vec3 out_normal;
+layout(location = 1) out vec3 out_normal;
+layout(location = 2) out vec2 out_uv;
 
 /*layout(binding = 5)*/ uniform Multi {
 	mat4 multi[1000];

@@ -21,8 +21,8 @@ layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_tex_coord;
 
 layout(location = 0) out vec4 out_pos;
-layout(location = 1) out vec2 out_tex_coord;
-layout(location = 2) out vec3 out_normal;
+layout(location = 1) out vec3 out_normal;
+layout(location = 2) out vec2 out_tex_coord;
 
 void main() {
 	gl_Position = mat.proj * mat.view * mat.model * vec4(in_position, 1.0);
@@ -78,8 +78,8 @@ layout(binding = 5) uniform sampler2D tex_glow;
 layout(binding = 6) uniform sampler2D sampler_shadow;
 
 layout(location = 0) in vec4 in_pos;
-layout(location = 1) in vec2 in_tex_coord;
-layout(location = 2) in vec3 in_normal;
+layout(location = 1) in vec3 in_normal;
+layout(location = 2) in vec2 in_tex_coord;
 
 layout(location = 0) out vec4 out_color;
 
