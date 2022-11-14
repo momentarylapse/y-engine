@@ -48,6 +48,9 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
+	ResourceManager::load_shader("module-vertex-lines.shader");
+	ResourceManager::load_shader("module-vertex-points.shader");
+	ResourceManager::load_shader("module-geometry-points.shader");
 
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 }

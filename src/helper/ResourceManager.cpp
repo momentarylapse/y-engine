@@ -90,8 +90,15 @@ string ResourceManager::expand_fragment_shader_source(const string &source, cons
 	return source;
 }
 
-Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant) {
-	msg_write("load_surface_shader: " + _filename.str() + "  " + render_path + "  " + variant);
+string ResourceManager::expand_geometry_shader_source(const string &source, const string &variant) {
+	if (source.find("<GeometryShader>") >= 0)
+		return source;
+	//msg_write("INJECTING " + variant);
+	return source + format("\n<GeometryShader>\n#import geometry-%s\n</GeometryShader>", variant);
+}
+
+Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant, const string &geo) {
+	msg_write("load_surface_shader: " + _filename.str() + "  " + render_path + "  " + variant + "  " + geo);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;
@@ -113,7 +120,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 		//fn = shader_dir << filename;
 	}
 
-	Path fnx = fn.with(":" + variant + ":" + render_path);
+	Path fnx = fn.with(":" + variant + ":" + render_path +  ":" + geo);
 	for (auto s: shader_map)
 		if (s.key == fnx) {
 #ifdef USING_VULKAN
@@ -127,6 +134,8 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	msg_write("loading shader: " + fnx.str());
 
 	string source = expand_vertex_shader_source(os::fs::read_text(fn), variant);
+	if (geo != "")
+		source = expand_geometry_shader_source(source, geo);
 	source = expand_fragment_shader_source(source, render_path);
 	auto shader = Shader::create(source);
 

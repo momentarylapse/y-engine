@@ -37,7 +37,8 @@ enum class ShaderVariant {
 	ANIMATED,
 	INSTANCED,
 	LINES,
-	POINTS
+	POINTS,
+	_NUM
 };
 
 enum class RenderPathType;
@@ -49,7 +50,7 @@ public:
 	Path name;
 
 	shared_array<Texture> textures;
-	shared<Shader> shader[10];
+	shared<Shader> shader[(int)ShaderVariant::_NUM * 2]; // * #(render paths)
 	Path shader_path;
 	void _prepare_shader(RenderPathType render_path_type, ShaderVariant v);
 	Shader *get_shader(RenderPathType render_path_type, ShaderVariant v);

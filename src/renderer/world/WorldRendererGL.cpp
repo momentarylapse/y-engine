@@ -337,10 +337,12 @@ void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathTy
 }
 
 void WorldRendererGL::draw_line_meshes(bool allow_material) {
+	if (!allow_material)
+		return;
 	auto meshes = ComponentManager::get_listx<LineMesh>();
 	for (auto *m: *meshes) {
 		auto o = m->owner;
-		nix::set_model_matrix(mat4::translation(o->pos));
+		nix::set_model_matrix(o->get_matrix());
 		if (allow_material) {
 			set_material(m->material, type, ShaderVariant::LINES);
 			/*auto s = l->material->get_shader(type, ShaderVariant::LINES);
@@ -354,10 +356,12 @@ void WorldRendererGL::draw_line_meshes(bool allow_material) {
 }
 
 void WorldRendererGL::draw_point_meshes(bool allow_material) {
+	if (!allow_material)
+		return;
 	auto meshes = ComponentManager::get_listx<PointMesh>();
 	for (auto *m: *meshes) {
 		auto o = m->owner;
-		nix::set_model_matrix(mat4::translation(o->pos));
+		nix::set_model_matrix(o->get_matrix());
 		if (allow_material) {
 			set_material(m->material, type, ShaderVariant::POINTS);
 			/*auto s = l->material->get_shader(type, ShaderVariant::LINES);
