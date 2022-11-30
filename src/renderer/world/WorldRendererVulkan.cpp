@@ -48,7 +48,11 @@ const int LOCATION_SHADOW0 = 2;
 const int LOCATION_SHADOW1 = 3;
 const int LOCATION_CUBE = 5;
 const int LOCATION_TEX0 = 4;
+const int LOCATION_INSTANCE_MATRICES = 7;
 const int LOCATION_FX_TEX0 = 1;
+
+const int MAX_LIGHTS = 1024;
+const int MAX_INSTANCES = 1<<10;
 
 
 WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
@@ -56,16 +60,16 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 
 	vb_2d = nullptr;
 
-	rvd_def.ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
+	rvd_def.ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 	for (int i=0; i<6; i++)
-		rvd_cube[i].ubo_light = new UniformBuffer(1024 * sizeof(UBOLight));
+		rvd_cube[i].ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 	rvd_shadow1.ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
 	rvd_shadow2.ubo_light = new UniformBuffer(3 * sizeof(UBOLight));
 
 
 
 
-	//ubo_multi_matrix = new nix::UniformBuffer();
+	ubo_multi_matrix = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
 
 
 	cube_map = new CubeMap(CUBE_SIZE, "rgba:i8");
@@ -105,6 +109,7 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	ResourceManager::load_shader("vulkan/module-surface-dummy.shader");
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
+	ResourceManager::load_shader("module-vertex-instanced.shader");
 
 
 
@@ -427,21 +432,40 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 	}
 }
 
-void WorldRendererVulkan::draw_objects_instanced(bool allow_material) {
-	/*for (auto &s: world.sorted_multi) {
+void WorldRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
+	auto &rda = rvd.rda_ob_multi;
+	int index = 0;
+	ubo.m = mat4::ID;
+
+	for (auto &s: world.sorted_multi) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
 		Model *m = s.model;
-		nix::set_model_matrix(s.matrices[0]);//m->_matrix);
+
+		if (index >= rda.num) {
+			rda.add({new UniformBuffer(sizeof(UBO)),
+				pool->create_set(s.material->get_shader(type, ShaderVariant::INSTANCED))});
+			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, ubo_multi_matrix);
+		}
+
+		m->update_matrix();
+		//ubo.m = m->_matrix;
+		ubo.albedo = s.material->albedo;
+		ubo.emission = s.material->emission;
+		ubo.metal = s.material->metal;
+		ubo.roughness = s.material->roughness;
+		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+
 		if (allow_material)
-			set_material(s.material, type, ShaderVariant::INSTANCED);
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::INSTANCED);
 		else
-			set_material(material_shadow, type, ShaderVariant::INSTANCED);
-		nix::bind_buffer(ubo_multi_matrix, 5);
-		//msg_write(s.matrices.num);
-		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
-		//s.material->shader = ss;
-	}*/
+			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::INSTANCED);
+
+		cb->draw_instanced(m->mesh[0]->sub[s.mat_index].vertex_buffer, min(s.matrices.num, MAX_INSTANCES));
+		index ++;
+	}
 }
 
 void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
@@ -534,11 +558,11 @@ void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass
 
 
 void WorldRendererVulkan::prepare_instanced_matrices() {
-	/*PerformanceMonitor::begin(ch_pre);
+	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
-		ubo_multi_matrix->update_array(s.matrices);
+		ubo_multi_matrix->update_part(&s.matrices[0], 0, min(s.matrices.num, MAX_INSTANCES) * sizeof(mat4));
 	}
-	PerformanceMonitor::end(ch_pre);*/
+	PerformanceMonitor::end(ch_pre);
 }
 
 void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {

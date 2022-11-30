@@ -85,6 +85,7 @@ public:
 		Array<RenderDataVK> rda_tr;
 		Array<RenderDataVK> rda_ob;
 		Array<RenderDataVK> rda_ob_trans;
+		Array<RenderDataVK> rda_ob_multi;
 		Array<RenderDataVK> rda_sky;
 		Array<RenderDataFxVK> rda_fx;
 	};
@@ -111,7 +112,7 @@ public:
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
 	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
 	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);
-	void draw_objects_instanced(bool allow_material);
+	void draw_objects_instanced(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);
 

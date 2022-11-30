@@ -161,7 +161,7 @@ void Terrain::update(int x1,int x2,int z1,int z2,int mode) {
 
 	pl.resize(num_x * num_z * 2);
 
-	// create (soft) normal vec3s and vertices
+	// create (soft) normal vectors and vertices
 	for (int i=x1;i<=x2;i++)
 		for (int j=z1;j<=z2;j++){
 			int n=Index(i,j);
@@ -513,7 +513,7 @@ void Terrain::build_vertex_buffer() {
 					vec3 vc=vertex[Index(x  ,z+e)];
 					vec3 vd=vertex[Index(x+e,z+e)];
 
-					// normal vec3s
+					// normal vectors
 					vec3 na=normal[Index(x  ,z  )];
 					vec3 nb=normal[Index(x+e,z  )];
 					vec3 nc=normal[Index(x  ,z+e)];

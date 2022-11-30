@@ -173,7 +173,7 @@ public:
 };
 
 
-// types of shading/normal vec3s
+// types of shading/normal vectors
 enum {
 	NORMAL_MODE_SMOOTH,
 	NORMAL_MODE_HARD,

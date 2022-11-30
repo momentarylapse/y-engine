@@ -11,12 +11,6 @@
 const kaba::Class *PointMesh::_class = nullptr;
 
 
-PointMesh::PointMesh() {
-
+PointMesh::PointMesh() : SimpleMesh<PointVertex>("4f,f,4f") {
 }
 
-void PointMesh::update() {
-	if (!vertex_buffer)
-		vertex_buffer = new VertexBuffer("3f,f,4f");
-	vertex_buffer->update(vertices);
-}

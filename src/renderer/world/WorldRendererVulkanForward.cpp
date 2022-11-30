@@ -69,6 +69,7 @@ void WorldRendererVulkanForward::prepare() {
 		_frame = 0;
 	}
 	prepare_lights(cam_main, rvd_def);
+	prepare_instanced_matrices();
 
 	/*if (!shadow_cam) {
 		shadow_entity = new Entity3D;
@@ -104,6 +105,7 @@ void WorldRendererVulkanForward::draw() {
 
 	draw_terrains(cb, rp, ubo, true, rvd);
 	draw_objects_opaque(cb, rp, ubo, true, rvd);
+	draw_objects_instanced(cb, rp, ubo, true, rvd);
 	draw_objects_transparent(cb, rp, ubo, rvd);
 
 	draw_particles(cb, rp, cam_main, rvd);
@@ -156,6 +158,7 @@ void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffe
 
 	draw_terrains(cb, render_pass_shadow, ubo, false, rvd);
 	draw_objects_opaque(cb, render_pass_shadow, ubo, false, rvd);
+	draw_objects_instanced(cb, render_pass_shadow, ubo, false, rvd);
 
 	cb->end_render_pass();
 }

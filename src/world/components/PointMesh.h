@@ -13,7 +13,31 @@
 #include "../../lib/base/pointer.h"
 #include "../../lib/math/vec3.h"
 #include "../../lib/image/color.h"
-#include "../../graphics-fwd.h"
+#include "../../graphics-impl.h"
+
+
+class Material;
+
+template<typename V>
+class SimpleMesh : public Component {
+public:
+	SimpleMesh(const string &fmt) {
+		vertex_buffer = new VertexBuffer(fmt);
+	}
+
+	using Vertex = V;
+
+	Array<Vertex> vertices;
+
+	Material *material = nullptr;
+
+	VertexBuffer *vertex_buffer = nullptr;
+
+	void update() {
+		vertex_buffer->update(vertices);
+	}
+};
+
 
 struct PointVertex {
 	vec3 pos;
@@ -23,20 +47,12 @@ struct PointVertex {
 
 class Material;
 
-class PointMesh : public Component {
+class PointMesh : public SimpleMesh<PointVertex> {
 public:
 	PointMesh();
 
 	bool width_in_screen_space = false;
-
-	Array<PointVertex> vertices;
-
-	Material *material = nullptr;
-
-	void update();
-
-	VertexBuffer *vertex_buffer = nullptr;
-
+	
 	static const kaba::Class *_class;
 };
 

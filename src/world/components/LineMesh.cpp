@@ -11,12 +11,6 @@
 const kaba::Class *LineMesh::_class = nullptr;
 
 
-LineMesh::LineMesh() {
-
+LineMesh::LineMesh() : SimpleMesh<LineVertex>("3f,f,4f") {
 }
 
-void LineMesh::update() {
-	if (!vertex_buffer)
-		vertex_buffer = new VertexBuffer("3f,f,4f");
-	vertex_buffer->update(vertices);
-}
