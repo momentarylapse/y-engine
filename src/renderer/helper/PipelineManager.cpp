@@ -27,12 +27,13 @@ GraphicsPipeline *get(Shader *s, RenderPass *rp) {
 	ob_pipelines.add({s, p});
 	return p;
 }
-GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst) {
+GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, Alpha src, Alpha dst, bool write_z) {
 	if (ob_pipelines_alpha.contains(s))
 		return ob_pipelines_alpha[s];
 	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
 	auto p = new GraphicsPipeline(s, rp, 0, "triangles", "3f,3f,2f");
-	p->set_z(true, false);
+	if (!write_z)
+		p->set_z(true, false);
 	p->set_blend(src, dst);
 	//p->set_culling(0);
 	p->rebuild();

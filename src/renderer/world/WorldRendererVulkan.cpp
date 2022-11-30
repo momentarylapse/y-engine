@@ -168,11 +168,10 @@ void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Descri
 	GraphicsPipeline *p;
 
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = PipelineManager::get_alpha(s, rp, m->alpha.source, m->alpha.destination);
+		p = PipelineManager::get_alpha(s, rp, m->alpha.source, m->alpha.destination, false);
 		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
-		msg_write("HARD");
-		p = PipelineManager::get_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		p = PipelineManager::get_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, true);
 	} else if (v == ShaderVariant::ANIMATED) {
 		p = PipelineManager::get_ani(s, rp);
 	} else {
