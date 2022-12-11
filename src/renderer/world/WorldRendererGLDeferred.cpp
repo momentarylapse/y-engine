@@ -10,7 +10,7 @@
 #include <GLFW/glfw3.h>
 
 #ifdef USING_OPENGL
-#include "pass/ShadowPassGL.h"
+#include "pass/ShadowRendererGL.h"
 #include "../base.h"
 #include "../../lib/nix/nix.h"
 #include "../../lib/os/msg.h"
@@ -39,11 +39,9 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
-	fb_shadow1 = new nix::FrameBuffer({
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
-	fb_shadow2 = new nix::FrameBuffer({
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
-	shadow_pass = new ShadowPassGL(this);
+	shadow_renderer = new ShadowRendererGL(this);
+	fb_shadow1 = shadow_renderer->fb[0];
+	fb_shadow2 = shadow_renderer->fb[1];
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
@@ -82,10 +80,8 @@ void WorldRendererGLDeferred::prepare() {
 	prepare_instanced_matrices();
 
 	prepare_lights();
-	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow1.get(), 4);
-		render_shadow_map(fb_shadow2.get(), 1);
-	}
+	if (shadow_index >= 0)
+		shadow_renderer->render(shadow_proj);
 
 	render_into_gbuffer(gbuffer.get(), cam_main);
 
@@ -222,12 +218,6 @@ void WorldRendererGLDeferred::draw_world(bool allow_material) {
 	draw_objects_opaque(allow_material);
 	draw_line_meshes(allow_material);
 	draw_point_meshes(allow_material);
-}
-
-void WorldRendererGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
-	nix::bind_frame_buffer(sfb);
-	shadow_pass->set(shadow_proj, scale);
-	shadow_pass->draw();
 }
 
 

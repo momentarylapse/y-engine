@@ -12,7 +12,7 @@
 
 class Camera;
 class PerformanceMonitor;
-class ShadowPassGL;
+class ShadowRendererGL;
 
 class WorldRendererGLForward : public WorldRendererGL {
 public:
@@ -23,9 +23,8 @@ public:
 
 	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
 	void draw_world(bool allow_material);
-	void render_shadow_map(FrameBuffer *sfb, float scale);
 
-	ShadowPassGL *shadow_pass = nullptr;
+	ShadowRendererGL *shadow_renderer = nullptr;
 };
 
 #endif

@@ -71,6 +71,59 @@ void BackgroundRendererGL::draw() {
 }
 
 
+ObjectsRendererGL::ObjectsRendererGL(Renderer *parent, WorldRendererGL *_context) : Renderer("ob", parent) {
+	context = _context;
+}
+
+void ObjectsRendererGL::draw() {
+	for (auto &s: world.sorted_opaque) {
+		if (!s.material->cast_shadow and !allow_material)
+			continue;
+		Model *m = s.model;
+		m->update_matrix();
+		nix::set_model_matrix(m->_matrix);
+
+		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+
+		if (ani) {
+			if (allow_material)
+				context->set_material(s.material, context->type, ShaderVariant::ANIMATED);
+			else
+				context->set_material(context->material_shadow, context->type, ShaderVariant::ANIMATED);
+			ani->buf->update_array(ani->dmatrix);
+			nix::bind_buffer(7, ani->buf);
+		} else {
+			if (allow_material)
+				context->set_material(s.material, context->type, ShaderVariant::DEFAULT);
+			else
+				context->set_material(context->material_shadow, context->type, ShaderVariant::DEFAULT);
+		}
+		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+	}
+}
+
+TerrainsRendererGL::TerrainsRendererGL(Renderer *parent, WorldRendererGL *_context) : Renderer("ter", parent) {
+	context = _context;
+}
+
+void TerrainsRendererGL::draw() {
+	auto terrains = ComponentManager::get_listx<Terrain>();
+	for (auto *t: *terrains) {
+		auto o = t->owner;
+		nix::set_model_matrix(mat4::translation(o->pos));
+		if (allow_material) {
+			context->set_material(t->material, context->type, ShaderVariant::DEFAULT);
+			auto s = t->material->get_shader(context->type, ShaderVariant::DEFAULT);
+			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
+			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
+		} else {
+			context->set_material(context->material_shadow, context->type, ShaderVariant::DEFAULT);
+		}
+		t->prepare_draw(cam_main->owner->pos);
+		nix::draw_triangles(t->vertex_buffer);
+	}
+}
+
 
 
 WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
@@ -92,6 +145,8 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 	ubo_multi_matrix = new nix::UniformBuffer();
 
 	background_renderer = new BackgroundRendererGL(this, this);
+	objects_renderer = new ObjectsRendererGL(this, this);
+	terrains_renderer = new TerrainsRendererGL(this, this);
 }
 
 void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
@@ -266,21 +321,8 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 }
 
 void WorldRendererGL::draw_terrains(bool allow_material) {
-	auto terrains = ComponentManager::get_listx<Terrain>();
-	for (auto *t: *terrains) {
-		auto o = t->owner;
-		nix::set_model_matrix(mat4::translation(o->pos));
-		if (allow_material) {
-			set_material(t->material, type, ShaderVariant::DEFAULT);
-			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
-			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
-		} else {
-			set_material(material_shadow, type, ShaderVariant::DEFAULT);
-		}
-		t->prepare_draw(cam_main->owner->pos);
-		nix::draw_triangles(t->vertex_buffer);
-	}
+	terrains_renderer->allow_material = allow_material;
+	terrains_renderer->draw();
 }
 
 void WorldRendererGL::draw_objects_instanced(bool allow_material) {
@@ -301,30 +343,8 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 }
 
 void WorldRendererGL::draw_objects_opaque(bool allow_material) {
-	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and !allow_material)
-			continue;
-		Model *m = s.model;
-		m->update_matrix();
-		nix::set_model_matrix(m->_matrix);
-
-		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-
-		if (ani) {
-			if (allow_material)
-				set_material(s.material, type, ShaderVariant::ANIMATED);
-			else
-				set_material(material_shadow, type, ShaderVariant::ANIMATED);
-			ani->buf->update_array(ani->dmatrix);
-			nix::bind_buffer(7, ani->buf);
-		} else {
-			if (allow_material)
-				set_material(s.material, type, ShaderVariant::DEFAULT);
-			else
-				set_material(material_shadow, type, ShaderVariant::DEFAULT);
-		}
-		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-	}
+	objects_renderer->allow_material = allow_material;
+	objects_renderer->draw();
 }
 
 void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathType t) {

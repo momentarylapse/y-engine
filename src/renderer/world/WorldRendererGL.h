@@ -30,16 +30,18 @@ public:
 
 class ObjectsRendererGL : public Renderer {
 public:
-	ObjectsRendererGL(Renderer *parent);
+	ObjectsRendererGL(Renderer *parent, WorldRendererGL *context);
 	void draw() override;
 	WorldRendererGL *context;
+	bool allow_material = true;
 };
 
 class TerrainsRendererGL : public Renderer {
 public:
-	TerrainsRendererGL(Renderer *parent);
+	TerrainsRendererGL(Renderer *parent, WorldRendererGL *context);
 	void draw() override;
 	WorldRendererGL *context;
+	bool allow_material = true;
 };
 
 class WorldRendererGL : public WorldRenderer {

@@ -1,5 +1,5 @@
 /*
- * ShadowPassGL.h
+ * ShadowRendererGL.h
  *
  *  Created on: Dec 11, 2022
  *      Author: michi
@@ -15,16 +15,19 @@
 class Camera;
 class PerformanceMonitor;
 
-class ShadowPassGL : public Renderer {
+class ShadowRendererGL : public Renderer {
 public:
-	ShadowPassGL(Renderer *parent);
+	ShadowRendererGL(Renderer *parent);
 
-    void set(const mat4 &shadow_proj, float scale);
+	shared<FrameBuffer> fb[2];
+
+    void render_shadow_map(FrameBuffer *sfb, float scale);
 
 	void prepare() override;
-	void draw() override;
+	void draw() override {}
 
-    float scale;
+    void render(const mat4 &m);
+
     mat4 shadow_proj;
 };
 

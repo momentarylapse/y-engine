@@ -10,7 +10,7 @@
 #include "WorldRendererGL.h"
 #ifdef USING_OPENGL
 
-class ShadowPassGL;
+class ShadowRendererGL;
 
 class WorldRendererGLDeferred : public WorldRendererGL {
 public:
@@ -31,12 +31,11 @@ public:
 	void render_into_gbuffer(FrameBuffer *fb, Camera *cam);
 	void draw_background(FrameBuffer *fb, Camera *cam);
 	void draw_world(bool allow_material);
-	void render_shadow_map(FrameBuffer *sfb, float scale);
 
 
 	void render_out_from_gbuffer(FrameBuffer *source);
 
-	ShadowPassGL *shadow_pass = nullptr;
+	ShadowRendererGL *shadow_renderer = nullptr;
 };
 
 #endif

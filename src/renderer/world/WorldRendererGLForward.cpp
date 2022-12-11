@@ -6,7 +6,7 @@
  */
 
 #include "WorldRendererGLForward.h"
-#include "pass/ShadowPassGL.h"
+#include "pass/ShadowRendererGL.h"
 
 #include <GLFW/glfw3.h>
 #ifdef USING_OPENGL
@@ -32,13 +32,9 @@
 
 WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world", parent, RenderPathType::FORWARD) {
 
-	fb_shadow1 = new nix::FrameBuffer({
-		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
-	fb_shadow2 = new nix::FrameBuffer({
-		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
-		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
-	shadow_pass = new ShadowPassGL(this);
+	shadow_renderer = new ShadowRendererGL(this);
+	fb_shadow1 = shadow_renderer->fb[0];
+	fb_shadow2 = shadow_renderer->fb[1];
 
 	ResourceManager::default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
@@ -75,10 +71,8 @@ void WorldRendererGLForward::prepare() {
 
 	prepare_lights();
 
-	if (shadow_index >= 0) {
-		render_shadow_map(fb_shadow2.get(), 1);
-		render_shadow_map(fb_shadow1.get(), 4);
-	}
+	if (shadow_index >= 0)
+		shadow_renderer->render(shadow_proj);
 
 	PerformanceMonitor::end(channel);
 }
@@ -208,12 +202,6 @@ void WorldRendererGLForward::draw_world(bool allow_material) {
 	draw_point_meshes(allow_material);
 	if (allow_material)
 		draw_objects_transparent(allow_material, type);
-}
-
-void WorldRendererGLForward::render_shadow_map(FrameBuffer *sfb, float scale) {
-	nix::bind_frame_buffer(sfb);
-	shadow_pass->set(shadow_proj, scale);
-	shadow_pass->draw();
 }
 
 
