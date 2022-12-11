@@ -110,20 +110,6 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
-
-
-
-
-	auto tex1 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-	auto tex2 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-	auto shadow_depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-	auto shadow_depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-	render_pass_shadow = new vulkan::RenderPass({tex1, shadow_depth1}, "clear");
-	fb_shadow1 = new vulkan::FrameBuffer(render_pass_shadow, {tex1, shadow_depth1});
-	fb_shadow2 = new vulkan::FrameBuffer(render_pass_shadow, {tex2, shadow_depth2});
-
-	material_shadow = new Material;
-	material_shadow->shader_path = "shadow.shader";
 }
 
 WorldRendererVulkan::~WorldRendererVulkan() {

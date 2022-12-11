@@ -66,11 +66,19 @@ struct RenderDataFxVK {
 	VertexBuffer *vb;
 };
 
+struct RenderViewDataVK {
+	UniformBuffer *ubo_light = nullptr;
+	Array<RenderDataVK> rda_tr;
+	Array<RenderDataVK> rda_ob;
+	Array<RenderDataVK> rda_ob_trans;
+	Array<RenderDataVK> rda_ob_multi;
+	Array<RenderDataVK> rda_sky;
+	Array<RenderDataFxVK> rda_fx;
+};
+
 
 class WorldRendererVulkan : public WorldRenderer {
 public:
-
-	RenderPass *render_pass_shadow = nullptr;
 	RenderPass *render_pass_cube = nullptr;
 
 
@@ -80,15 +88,6 @@ public:
 	shared<FrameBuffer> fb_cube;
 	shared<CubeMap> cube_map;
 
-	struct RenderViewDataVK {
-		UniformBuffer *ubo_light = nullptr;
-		Array<RenderDataVK> rda_tr;
-		Array<RenderDataVK> rda_ob;
-		Array<RenderDataVK> rda_ob_trans;
-		Array<RenderDataVK> rda_ob_multi;
-		Array<RenderDataVK> rda_sky;
-		Array<RenderDataFxVK> rda_fx;
-	};
 	RenderViewDataVK rvd_def;
 	RenderViewDataVK rvd_cube[6];
 	RenderViewDataVK rvd_shadow1, rvd_shadow2;

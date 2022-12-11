@@ -282,6 +282,7 @@
     <ClCompile Include="src\renderer\target\WindowRendererGL.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp" />
     <ClCompile Include="src\renderer\world\pass\ShadowPassGL.cpp" />
+    <ClCompile Include="src\renderer\world\pass\ShadowPassVulkan.cpp" />
     <ClCompile Include="src\renderer\world\WorldRenderer.cpp" />
     <ClCompile Include="src\renderer\world\WorldRendererGL.cpp" />
     <ClCompile Include="src\renderer\world\WorldRendererGLDeferred.cpp" />
@@ -482,6 +483,7 @@
     <ClInclude Include="src\renderer\target\WindowRendererGL.h" />
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h" />
     <ClInclude Include="src\renderer\world\pass\ShadowPassGL.h" />
+    <ClInclude Include="src\renderer\world\pass\ShadowPassVulkan.h" />
     <ClInclude Include="src\renderer\world\WorldRenderer.h" />
     <ClInclude Include="src\renderer\world\WorldRendererGL.h" />
     <ClInclude Include="src\renderer\world\WorldRendererGLDeferred.h" />

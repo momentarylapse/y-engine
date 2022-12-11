@@ -172,6 +172,7 @@ set(SOURCE
 	src/renderer/target/WindowRendererGL.cpp
 	src/renderer/target/WindowRendererVulkan.cpp
 	src/renderer/world/pass/ShadowPassGL.cpp
+	src/renderer/world/pass/ShadowPassVulkan.cpp
 	src/renderer/world/WorldRenderer.cpp
 	src/renderer/world/WorldRendererGL.cpp
 	src/renderer/world/WorldRendererGLDeferred.cpp

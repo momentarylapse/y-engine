@@ -7,6 +7,7 @@
 
 #include "WorldRendererVulkanForward.h"
 #ifdef USING_VULKAN
+#include "pass/ShadowPassVulkan.h"
 #include "../../graphics-impl.h"
 #include "../base.h"
 #include "../../lib/os/msg.h"
@@ -36,6 +37,21 @@
 
 WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
 	device = _device;
+
+
+	auto tex1 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
+	auto tex2 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
+	auto shadow_depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
+	auto shadow_depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
+	shadow_pass = new ShadowPassVulkan(this, tex1, shadow_depth1);
+	fb_shadow1 = new vulkan::FrameBuffer(shadow_pass->render_pass(), {tex1, shadow_depth1});
+	fb_shadow2 = new vulkan::FrameBuffer(shadow_pass->render_pass(), {tex2, shadow_depth2});
+
+	material_shadow = new Material;
+	material_shadow->shader_path = "shadow.shader";
+
+
+
 	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
 	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
@@ -143,22 +159,11 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 
 void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
 
-	cb->begin_render_pass(render_pass_shadow, sfb);
+	cb->begin_render_pass(shadow_pass->render_pass(), sfb);
 	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));
 
-	auto m = mat4::scale(scale, -scale, 1);
-	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
-
-	UBO ubo;
-	ubo.p = m * shadow_proj;
-	ubo.v = mat4::ID;
-	ubo.num_lights = 0;
-	ubo.shadow_index = -1;
-
-
-	draw_terrains(cb, render_pass_shadow, ubo, false, rvd);
-	draw_objects_opaque(cb, render_pass_shadow, ubo, false, rvd);
-	draw_objects_instanced(cb, render_pass_shadow, ubo, false, rvd);
+	shadow_pass->set(shadow_proj, scale, &rvd);
+	shadow_pass->draw();
 
 	cb->end_render_pass();
 }
