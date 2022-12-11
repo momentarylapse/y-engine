@@ -123,15 +123,22 @@ public:
 	gui::Text *fps_display;
 	int ch_iter = -1;
 
-	void print_render_chain() {
-		Renderer *r = renderer;
+	string render_graph_str(Renderer *r) {
 		string s = PerformanceMonitor::get_name(r->channel);
-		while (r->children.num) {
-			r = r->children[0];
-			s += " <<< " + PerformanceMonitor::get_name(r->channel);
+		if (r->children.num == 1)
+			s += " <<< " + render_graph_str(r->children[0]);
+		if (r->children.num >= 2) {
+			Array<string> ss;
+			for (auto c: r->children)
+				ss.add(render_graph_str(c));
+			s += " <<< (" + implode(ss, ", ");
 		}
+		return s;
+	}
+
+	void print_render_chain() {
 		msg_write("------------------------------------------");
-		msg_write("CHAIN:  " + s);
+		msg_write("CHAIN:  " + render_graph_str(renderer));
 		msg_write("------------------------------------------");
 	}
 

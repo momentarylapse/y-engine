@@ -463,6 +463,9 @@
     <ClCompile Include="src\renderer\helper\jitter.cpp">
       <Filter>src\renderer\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\helper\Pipeline.cpp">
+      <Filter>src\renderer\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\helper\PipelineManager.cpp">
       <Filter>src\renderer\helper</Filter>
     </ClCompile>
@@ -492,6 +495,9 @@
     </ClCompile>
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp">
       <Filter>src\renderer\target</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\world\pass\ShadowPassGL.cpp">
+      <Filter>src\renderer\world\pass</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\world\WorldRenderer.cpp">
       <Filter>src\renderer\world</Filter>
@@ -1053,6 +1059,9 @@
     <ClInclude Include="src\renderer\helper\jitter.h">
       <Filter>src\renderer\helper</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\helper\Pipeline.h">
+      <Filter>src\renderer\helper</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\helper\PipelineManager.h">
       <Filter>src\renderer\helper</Filter>
     </ClInclude>
@@ -1082,6 +1091,9 @@
     </ClInclude>
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h">
       <Filter>src\renderer\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\pass\ShadowPassGL.h">
+      <Filter>src\renderer\world\pass</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\world\WorldRenderer.h">
       <Filter>src\renderer\world</Filter>
@@ -1282,6 +1294,9 @@
     </Filter>
     <Filter Include="src\renderer\world">
       <UniqueIdentifier>{D4D42F7D-7B2C-AD64-9C61-0EA56ECD7EE5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\world\pass">
+      <UniqueIdentifier>{EDEFAEEA-AA55-96EB-D05B-06BB2FECB8BA}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\world">
       <UniqueIdentifier>{E9411D56-C9E9-1A0A-845C-CF6F8BB58006}</UniqueIdentifier>

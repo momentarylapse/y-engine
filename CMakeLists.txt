@@ -160,6 +160,7 @@ set(SOURCE
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
 	src/renderer/helper/jitter.cpp
+	src/renderer/helper/Pipeline.cpp
 	src/renderer/helper/PipelineManager.cpp
 	src/renderer/post/blur.cpp
 	src/renderer/post/HDRRendererGL.cpp
@@ -170,6 +171,7 @@ set(SOURCE
 	src/renderer/target/TargetRenderer.cpp
 	src/renderer/target/WindowRendererGL.cpp
 	src/renderer/target/WindowRendererVulkan.cpp
+	src/renderer/world/pass/ShadowPassGL.cpp
 	src/renderer/world/WorldRenderer.cpp
 	src/renderer/world/WorldRendererGL.cpp
 	src/renderer/world/WorldRendererGLDeferred.cpp

@@ -270,6 +270,7 @@
     <ClCompile Include="src\renderer\gui\GuiRendererGL.cpp" />
     <ClCompile Include="src\renderer\gui\GuiRendererVulkan.cpp" />
     <ClCompile Include="src\renderer\helper\jitter.cpp" />
+    <ClCompile Include="src\renderer\helper\Pipeline.cpp" />
     <ClCompile Include="src\renderer\helper\PipelineManager.cpp" />
     <ClCompile Include="src\renderer\post\blur.cpp" />
     <ClCompile Include="src\renderer\post\HDRRendererGL.cpp" />
@@ -280,6 +281,7 @@
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererGL.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp" />
+    <ClCompile Include="src\renderer\world\pass\ShadowPassGL.cpp" />
     <ClCompile Include="src\renderer\world\WorldRenderer.cpp" />
     <ClCompile Include="src\renderer\world\WorldRendererGL.cpp" />
     <ClCompile Include="src\renderer\world\WorldRendererGLDeferred.cpp" />
@@ -468,6 +470,7 @@
     <ClInclude Include="src\renderer\gui\GuiRendererGL.h" />
     <ClInclude Include="src\renderer\gui\GuiRendererVulkan.h" />
     <ClInclude Include="src\renderer\helper\jitter.h" />
+    <ClInclude Include="src\renderer\helper\Pipeline.h" />
     <ClInclude Include="src\renderer\helper\PipelineManager.h" />
     <ClInclude Include="src\renderer\post\blur.h" />
     <ClInclude Include="src\renderer\post\HDRRendererGL.h" />
@@ -478,6 +481,7 @@
     <ClInclude Include="src\renderer\target\TargetRenderer.h" />
     <ClInclude Include="src\renderer\target\WindowRendererGL.h" />
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h" />
+    <ClInclude Include="src\renderer\world\pass\ShadowPassGL.h" />
     <ClInclude Include="src\renderer\world\WorldRenderer.h" />
     <ClInclude Include="src\renderer\world\WorldRendererGL.h" />
     <ClInclude Include="src\renderer\world\WorldRendererGLDeferred.h" />

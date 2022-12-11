@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 
 #ifdef USING_OPENGL
+#include "pass/ShadowPassGL.h"
 #include "../base.h"
 #include "../../lib/nix/nix.h"
 #include "../../lib/os/msg.h"
@@ -42,6 +43,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
+	shadow_pass = new ShadowPassGL(this);
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
@@ -219,19 +221,8 @@ void WorldRendererGLDeferred::draw_world(bool allow_material) {
 
 void WorldRendererGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
-
-	auto m = mat4::scale(scale, scale, 1);
-	//auto m = mat4::translation(vec3(0,0,0.5f)) * mat4::scale(1,1,0.5f) * mat4::scale(scale, scale, 1);
-	nix::set_projection_matrix(m * shadow_proj);
-	nix::set_view_matrix(mat4::ID);
-
-	nix::clear_z();
-
-	nix::set_z(true, true);
-
-	draw_world(false);
-
-	break_point();
+	shadow_pass->set(shadow_proj, scale);
+	shadow_pass->draw();
 }
 
 

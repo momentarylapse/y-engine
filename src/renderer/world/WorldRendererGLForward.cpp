@@ -6,6 +6,7 @@
  */
 
 #include "WorldRendererGLForward.h"
+#include "pass/ShadowPassGL.h"
 
 #include <GLFW/glfw3.h>
 #ifdef USING_OPENGL
@@ -37,6 +38,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 	fb_shadow2 = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
+	shadow_pass = new ShadowPassGL(this);
 
 	ResourceManager::default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
@@ -203,21 +205,8 @@ void WorldRendererGLForward::draw_world(bool allow_material) {
 
 void WorldRendererGLForward::render_shadow_map(FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
-
-	auto m = mat4::scale(scale, scale, 1);
-	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
-	nix::set_projection_matrix(m * shadow_proj);
-	nix::set_view_matrix(mat4::ID);
-	nix::set_model_matrix(mat4::ID);
-
-	nix::clear_z();
-
-	nix::set_z(true, true);
-
-
-	draw_world(false);
-
-	break_point();
+	shadow_pass->set(shadow_proj, scale);
+	shadow_pass->draw();
 }
 
 

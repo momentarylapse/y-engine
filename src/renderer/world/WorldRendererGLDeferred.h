@@ -10,6 +10,8 @@
 #include "WorldRendererGL.h"
 #ifdef USING_OPENGL
 
+class ShadowPassGL;
+
 class WorldRendererGLDeferred : public WorldRendererGL {
 public:
 
@@ -33,6 +35,8 @@ public:
 
 
 	void render_out_from_gbuffer(FrameBuffer *source);
+
+	ShadowPassGL *shadow_pass = nullptr;
 };
 
 #endif
