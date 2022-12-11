@@ -139,9 +139,6 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
 
-	material_shadow = new Material;
-	material_shadow->shader_path = "shadow.shader";
-
 	ubo_multi_matrix = new nix::UniformBuffer();
 
 	background_renderer = new BackgroundRendererGL(this, this);

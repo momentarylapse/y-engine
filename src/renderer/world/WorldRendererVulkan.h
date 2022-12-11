@@ -90,7 +90,6 @@ public:
 
 	RenderViewDataVK rvd_def;
 	RenderViewDataVK rvd_cube[6];
-	RenderViewDataVK rvd_shadow1, rvd_shadow2;
 
 	GraphicsPipeline *pipeline_fx = nullptr;
 
@@ -98,7 +97,6 @@ public:
 	WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType type);
 	virtual ~WorldRendererVulkan();
 
-	virtual void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) = 0;
 	virtual void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) = 0;
 	void render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vec3 &pos);
 

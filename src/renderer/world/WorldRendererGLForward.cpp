@@ -35,6 +35,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 	shadow_renderer = new ShadowRendererGL(this);
 	fb_shadow1 = shadow_renderer->fb[0];
 	fb_shadow2 = shadow_renderer->fb[1];
+	material_shadow = shadow_renderer->material;
 
 	ResourceManager::default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {

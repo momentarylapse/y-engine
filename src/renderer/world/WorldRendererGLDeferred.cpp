@@ -42,6 +42,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 	shadow_renderer = new ShadowRendererGL(this);
 	fb_shadow1 = shadow_renderer->fb[0];
 	fb_shadow2 = shadow_renderer->fb[1];
+	material_shadow = shadow_renderer->material;
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");

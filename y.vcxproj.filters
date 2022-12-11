@@ -496,10 +496,10 @@
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\world\pass\ShadowPassVulkan.cpp">
+    <ClCompile Include="src\renderer\world\pass\ShadowRendererGL.cpp">
       <Filter>src\renderer\world\pass</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\world\pass\ShadowRendererGL.cpp">
+    <ClCompile Include="src\renderer\world\pass\ShadowRendererVulkan.cpp">
       <Filter>src\renderer\world\pass</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\world\WorldRenderer.cpp">
@@ -1095,10 +1095,10 @@
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h">
       <Filter>src\renderer\target</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\world\pass\ShadowPassVulkan.h">
+    <ClInclude Include="src\renderer\world\pass\ShadowRendererGL.h">
       <Filter>src\renderer\world\pass</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\world\pass\ShadowRendererGL.h">
+    <ClInclude Include="src\renderer\world\pass\ShadowRendererVulkan.h">
       <Filter>src\renderer\world\pass</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\world\WorldRenderer.h">

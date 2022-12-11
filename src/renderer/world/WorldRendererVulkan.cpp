@@ -63,8 +63,6 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	rvd_def.ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 	for (int i=0; i<6; i++)
 		rvd_cube[i].ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
-	rvd_shadow1.ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
-	rvd_shadow2.ubo_light = new UniformBuffer(3 * sizeof(UBOLight));
 
 
 
@@ -409,7 +407,6 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
 		} else {
 			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
-
 		}
 		t->prepare_draw(cam_main->owner->pos);
 		cb->draw(t->vertex_buffer);

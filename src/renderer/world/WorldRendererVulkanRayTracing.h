@@ -20,7 +20,6 @@ public:
 	void draw() override;
 
 	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
-	void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) override {}
 
 	enum class Mode {
 		NONE,

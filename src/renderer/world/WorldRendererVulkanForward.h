@@ -13,7 +13,7 @@
 class Camera;
 class PerformanceMonitor;
 struct UBO;
-class ShadowPassVulkan;
+class ShadowRendererVulkan;
 
 class WorldRendererVulkanForward : public WorldRendererVulkan {
 public:
@@ -23,11 +23,10 @@ public:
 	void draw() override;
 
 	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
-	void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) override;
 
 	vulkan::Device *device;
 
-	ShadowPassVulkan *shadow_pass = nullptr;
+	ShadowRendererVulkan *shadow_renderer = nullptr;
 };
 
 #endif

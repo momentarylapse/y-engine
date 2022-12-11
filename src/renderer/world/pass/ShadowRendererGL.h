@@ -14,6 +14,7 @@
 
 class Camera;
 class PerformanceMonitor;
+class Material;
 
 class ShadowRendererGL : public Renderer {
 public:
@@ -28,7 +29,8 @@ public:
 
     void render(const mat4 &m);
 
-    mat4 shadow_proj;
+    mat4 proj;
+    Material *material;
 };
 
 #endif

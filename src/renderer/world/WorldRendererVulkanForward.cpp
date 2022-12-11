@@ -7,7 +7,7 @@
 
 #include "WorldRendererVulkanForward.h"
 #ifdef USING_VULKAN
-#include "pass/ShadowPassVulkan.h"
+#include "pass/ShadowRendererVulkan.h"
 #include "../../graphics-impl.h"
 #include "../base.h"
 #include "../../lib/os/msg.h"
@@ -39,17 +39,10 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 	device = _device;
 
 
-	auto tex1 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-	auto tex2 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-	auto shadow_depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-	auto shadow_depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-	shadow_pass = new ShadowPassVulkan(this, tex1, shadow_depth1);
-	fb_shadow1 = new vulkan::FrameBuffer(shadow_pass->render_pass(), {tex1, shadow_depth1});
-	fb_shadow2 = new vulkan::FrameBuffer(shadow_pass->render_pass(), {tex2, shadow_depth2});
-
-	material_shadow = new Material;
-	material_shadow->shader_path = "shadow.shader";
-
+	shadow_renderer = new ShadowRendererVulkan(this);
+	fb_shadow1 = shadow_renderer->fb[0];
+	fb_shadow2 = shadow_renderer->fb[1];
+	material_shadow = shadow_renderer->material;
 
 
 	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
@@ -87,10 +80,9 @@ void WorldRendererVulkanForward::prepare() {
 	prepare_lights(cam_main, rvd_def);
 	prepare_instanced_matrices();
 
-	if (shadow_index >= 0) {
-		render_shadow_map(cb, fb_shadow1.get(), 4, rvd_shadow1);
-		render_shadow_map(cb, fb_shadow2.get(), 1, rvd_shadow2);
-	}
+	if (shadow_index >= 0)
+		shadow_renderer->render(cb, shadow_proj);
+
 	cb->timestamp(cur_query_offset + 1);
 }
 
@@ -145,17 +137,6 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 
 	cb->end_render_pass();
 
-}
-
-void WorldRendererVulkanForward::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
-
-	cb->begin_render_pass(shadow_pass->render_pass(), sfb);
-	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));
-
-	shadow_pass->set(shadow_proj, scale, &rvd);
-	shadow_pass->draw();
-
-	cb->end_render_pass();
 }
 
 #endif

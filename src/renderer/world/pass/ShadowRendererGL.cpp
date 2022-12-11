@@ -13,6 +13,7 @@
 #include "../../base.h"
 #include "../../../lib/nix/nix.h"
 #include "../../../helper/PerformanceMonitor.h"
+#include "../../../world/Material.h"
 #include "../../../Config.h"
 
 
@@ -26,6 +27,9 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 	fb[1] = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
+
+	material = new Material;
+	material->shader_path = "shadow.shader";
 }
 
 void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
@@ -33,7 +37,7 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 
 	auto m = mat4::scale(scale, scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
-	nix::set_projection_matrix(m * shadow_proj);
+	nix::set_projection_matrix(m * proj);
 	nix::set_view_matrix(mat4::ID);
 	nix::set_model_matrix(mat4::ID);
 
@@ -63,7 +67,7 @@ void ShadowRendererGL::prepare() {
 }
 
 void ShadowRendererGL::render(const mat4 &m) {
-	shadow_proj = m;
+	proj = m;
 	prepare();
 }
 
