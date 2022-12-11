@@ -77,9 +77,11 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 
 void WorldRendererGLDeferred::prepare() {
 	PerformanceMonitor::begin(channel);
+	cam = cam_main;
+
 	prepare_instanced_matrices();
 
-	prepare_lights(cam_main);
+	prepare_lights();
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow1.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
@@ -134,7 +136,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, Camera *cam)
 	//nix::clear_color(Green);
 	nix::clear_color(world.background);
 
-	draw_skyboxes(cam);
+	background_renderer->draw();
 	PerformanceMonitor::end(ch_bg);
 
 }
@@ -172,7 +174,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	PerformanceMonitor::end(ch_gbuf_out);
 }
 
-void WorldRendererGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
+//void WorldRendererGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 
 void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam) {
 	PerformanceMonitor::begin(ch_world);
@@ -209,6 +211,12 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *
 }
 
 void WorldRendererGLDeferred::draw_world(bool allow_material) {
+	if (allow_material) {
+		nix::bind_texture(3, fb_shadow1->depth_buffer.get());
+		nix::bind_texture(4, fb_shadow2->depth_buffer.get());
+		nix::bind_texture(5, cube_map.get());
+	}
+
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);

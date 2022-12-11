@@ -636,7 +636,7 @@ void PluginManager::export_kaba() {
 	//ext->declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
 #endif
 	ext->declare_class_element("RenderPath.wireframe", &RP::wireframe);
-	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
+//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 	ext->link_class_func("RenderPath.add_fx_injector", &RP::add_fx_injector);
 	ext->link_class_func("RenderPath.draw_user_mesh", &RP::draw_user_mesh);

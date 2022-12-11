@@ -49,6 +49,29 @@ nix::UniformBuffer *ubo_multi_matrix = nullptr;
 const int CUBE_SIZE = 128;
 
 
+BackgroundRendererGL::BackgroundRendererGL(Renderer *parent, WorldRendererGL *_context) : Renderer("bg", parent) {
+	context = _context;
+}
+
+void BackgroundRendererGL::draw() {
+	nix::set_z(false, false);
+	nix::set_cull(nix::CullMode::NONE);
+	nix::set_view_matrix(mat4::rotation(context->cam->owner->ang).transpose());
+	for (auto *sb: world.skybox) {
+		sb->_matrix = mat4::rotation(sb->owner->ang);
+		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
+		for (int i=0; i<sb->material.num; i++) {
+			context->set_material(sb->material[i], context->type, ShaderVariant::DEFAULT);
+			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
+		}
+	}
+	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::disable_alpha();
+	break_point();
+}
+
+
+
 
 WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
 	type = _type;
@@ -67,9 +90,12 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 	material_shadow->shader_path = "shadow.shader";
 
 	ubo_multi_matrix = new nix::UniformBuffer();
+
+	background_renderer = new BackgroundRendererGL(this, this);
 }
 
 void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
+	#if 0
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity o(pos, quaternion::ID);
@@ -99,6 +125,7 @@ void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, con
 		render_into_texture(fb_cube.get(), &cam);
 	}
 	cam.owner = nullptr;
+	#endif
 }
 
 
@@ -106,7 +133,7 @@ void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, con
 void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
 	nix::set_shader(s);
-	if (using_view_space)
+	if (WorldRenderer::using_view_space)
 		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH....
 	else
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
@@ -122,11 +149,12 @@ void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant 
 	else
 		nix::disable_alpha();
 
-	set_textures(weak(m->textures));
+	nix::set_textures(weak(m->textures));
 
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);
 }
 
+#if 0
 void WorldRendererGL::set_textures(const Array<Texture*> &tex) {
 	auto tt = tex;
 	if (tt.num == 0)
@@ -135,11 +163,12 @@ void WorldRendererGL::set_textures(const Array<Texture*> &tex) {
 		tt.add(tex_white);
 	if (tt.num == 2)
 		tt.add(tex_white);
-	tt.add(fb_shadow1->depth_buffer.get());
+	/*tt.add(fb_shadow1->depth_buffer.get());
 	tt.add(fb_shadow2->depth_buffer.get());
-	tt.add(cube_map.get());
+	tt.add(cube_map.get());*/
 	nix::set_textures(tt);
 }
+#endif
 
 void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const color &c) {
 	Array<VertexFx> v = {{{d.x1,d.y1,0}, c, s.x1,s.y1},
@@ -234,23 +263,6 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	nix::disable_alpha();
 	break_point();
 	PerformanceMonitor::end(ch_fx);
-}
-
-void WorldRendererGL::draw_skyboxes(Camera *cam) {
-	nix::set_z(false, false);
-	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(mat4::rotation(cam->owner->ang).transpose());
-	for (auto *sb: world.skybox) {
-		sb->_matrix = mat4::rotation(sb->owner->ang);
-		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
-		for (int i=0; i<sb->material.num; i++) {
-			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
-			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
-		}
-	}
-	nix::set_cull(nix::CullMode::DEFAULT);
-	nix::disable_alpha();
-	break_point();
 }
 
 void WorldRendererGL::draw_terrains(bool allow_material) {
@@ -383,7 +395,7 @@ void WorldRendererGL::prepare_instanced_matrices() {
 	PerformanceMonitor::end(ch_pre);
 }
 
-void WorldRendererGL::prepare_lights(Camera *cam) {
+void WorldRendererGL::prepare_lights() {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();

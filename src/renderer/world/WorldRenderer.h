@@ -60,21 +60,11 @@ struct RenderInjector {
 	bool shadow;
 };
 
-class WorldRenderer : public Renderer {
-public:
-	WorldRenderer(const string &name, Renderer *parent);
-	virtual ~WorldRenderer();
-
-	color background() const override;
-
-	int ch_post = -1, ch_post_focus = -1;
-	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;
-
-	RenderPathType type = RenderPathType::NONE;
-
+struct WorldRenderContext {
 	shared<FrameBuffer> fb_shadow1;
 	shared<FrameBuffer> fb_shadow2;
 	Material *material_shadow = nullptr;
+	Camera *cam;
 
 	shared<Shader> shader_fx;
 
@@ -87,6 +77,19 @@ public:
 	//Camera *shadow_cam;
 	mat4 shadow_proj;
 	int shadow_index;
+};
+
+class WorldRenderer : public Renderer, public WorldRenderContext {
+public:
+	WorldRenderer(const string &name, Renderer *parent);
+	virtual ~WorldRenderer();
+
+	color background() const override;
+
+	int ch_post = -1, ch_post_focus = -1;
+	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;
+
+	RenderPathType type = RenderPathType::NONE;
 
 	float shadow_box_size;
 	int shadow_resolution;
@@ -94,7 +97,7 @@ public:
 	bool wireframe = false;
 
 
-	bool using_view_space = false;
+	static bool using_view_space;
 
 
 	Array<RenderInjector> fx_injectors;

@@ -68,10 +68,12 @@ void WorldRendererGLForward::prepare() {
 		_frame = 0;
 	}
 
+	cam = cam_main;
+
 
 	prepare_instanced_matrices();
 
-	prepare_lights(cam_main);
+	prepare_lights();
 
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow2.get(), 1);
@@ -94,28 +96,29 @@ void WorldRendererGLForward::draw() {
 		 m *= jitter(fb->width, fb->height, 0);
 
 	// skyboxes
-	float max_depth = cam_main->max_depth;
-	cam_main->max_depth = 2000000;
-	cam_main->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(m * cam_main->m_projection);
+	float max_depth = cam->max_depth;
+	cam->max_depth = 2000000;
+	cam->update_matrices((float)fb->width / (float)fb->height);
+	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::clear_color(world.background);
 	nix::clear_z();
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 	nix::set_wire(wireframe);
 
-	draw_skyboxes(cam_main);
+
+	background_renderer->draw();
 	PerformanceMonitor::end(ch_bg);
 
 
 	// world
 	PerformanceMonitor::begin(ch_world);
-	cam_main->max_depth = max_depth;
-	cam_main->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(m * cam_main->m_projection);
+	cam->max_depth = max_depth;
+	cam->update_matrices((float)fb->width / (float)fb->height);
+	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::bind_buffer(1, ubo_light);
-	nix::set_view_matrix(cam_main->view_matrix());
+	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
@@ -133,6 +136,7 @@ void WorldRendererGLForward::draw() {
 	PerformanceMonitor::end(channel);
 }
 
+#if 0
 void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 	//draw();
 
@@ -188,8 +192,15 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 
 	nix::set_cull(nix::CullMode::DEFAULT);
 }
+#endif
 
 void WorldRendererGLForward::draw_world(bool allow_material) {
+	if (allow_material) {
+		nix::bind_texture(3, fb_shadow1->depth_buffer.get());
+		nix::bind_texture(4, fb_shadow2->depth_buffer.get());
+		nix::bind_texture(5, cube_map.get());
+	}
+
 	draw_terrains(allow_material);
 	draw_objects_instanced(allow_material);
 	draw_objects_opaque(allow_material);

@@ -19,6 +19,8 @@
 #include "../../Config.h"
 
 
+bool WorldRenderer::using_view_space = false;
+
 struct GeoPush {
 	alignas(16) mat4 model;
 	alignas(16) color emission;
