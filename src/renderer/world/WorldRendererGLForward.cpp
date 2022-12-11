@@ -30,7 +30,7 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world/fw", parent, RenderPathType::FORWARD) {
+WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world", parent, RenderPathType::FORWARD) {
 
 	fb_shadow1 = new nix::FrameBuffer({
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
@@ -73,12 +73,10 @@ void WorldRendererGLForward::prepare() {
 
 	prepare_lights(cam_main);
 
-	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow2.get(), 1);
 		render_shadow_map(fb_shadow1.get(), 4);
 	}
-	PerformanceMonitor::end(ch_shadow);
 
 	PerformanceMonitor::end(channel);
 }
@@ -141,12 +139,10 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 
 	prepare_lights(cam);
 
-	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow1.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
 	}
-	PerformanceMonitor::end(ch_shadow);
 
 	bool flip_y = false;
 	nix::bind_frame_buffer(fb);

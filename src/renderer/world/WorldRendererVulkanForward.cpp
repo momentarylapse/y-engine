@@ -87,20 +87,10 @@ void WorldRendererVulkanForward::prepare() {
 	prepare_lights(cam_main, rvd_def);
 	prepare_instanced_matrices();
 
-	/*if (!shadow_cam) {
-		shadow_entity = new Entity3D;
-		shadow_cam = new Camera(rect::ID);
-		shadow_entity->_add_component_external_(shadow_cam);
-		shadow_entity->pos = cam->get_owner<Entity3D>()->pos;
-		shadow_entity->ang = cam->get_owner<Entity3D>()->ang;
-	}*/
-
-	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(cb, fb_shadow1.get(), 4, rvd_shadow1);
 		render_shadow_map(cb, fb_shadow2.get(), 1, rvd_shadow2);
 	}
-	PerformanceMonitor::end(ch_shadow);
 	cb->timestamp(cur_query_offset + 1);
 }
 

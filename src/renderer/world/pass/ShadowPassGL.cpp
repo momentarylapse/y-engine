@@ -12,6 +12,7 @@
 #include "../WorldRendererGL.h"
 #include "../../base.h"
 #include "../../../lib/nix/nix.h"
+#include "../../../helper/PerformanceMonitor.h"
 
 
 ShadowPassGL::ShadowPassGL(Renderer *parent) : Renderer("shadow", parent) {
@@ -26,6 +27,8 @@ void ShadowPassGL::prepare() {
 }
 
 void ShadowPassGL::draw() {
+	PerformanceMonitor::begin(channel);
+
 	auto m = mat4::scale(scale, scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 	nix::set_projection_matrix(m * shadow_proj);
@@ -45,6 +48,7 @@ void ShadowPassGL::draw() {
 	w->draw_point_meshes(false);
 
 	break_point();
+	PerformanceMonitor::end(channel);
 }
 
 

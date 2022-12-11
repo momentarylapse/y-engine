@@ -17,7 +17,6 @@ class ShadowPassVulkan;
 
 class WorldRendererVulkanForward : public WorldRendererVulkan {
 public:
-
 	WorldRendererVulkanForward(Renderer *parent, vulkan::Device *device);
 
 	void prepare() override;

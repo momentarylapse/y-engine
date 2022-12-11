@@ -40,7 +40,6 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(na
 	ch_bg = PerformanceMonitor::create_channel("bg", channel);
 	ch_world = PerformanceMonitor::create_channel("world", channel);
 	ch_fx = PerformanceMonitor::create_channel("fx", channel);
-	ch_shadow = PerformanceMonitor::create_channel("shadow", channel);
 	ch_prepare_lights = PerformanceMonitor::create_channel("lights", channel);
 
 	using_view_space = true;

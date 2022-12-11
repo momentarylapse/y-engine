@@ -68,7 +68,7 @@ public:
 	color background() const override;
 
 	int ch_post = -1, ch_post_focus = -1;
-	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1, ch_shadow = -1;
+	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;
 
 	RenderPathType type = RenderPathType::NONE;
 

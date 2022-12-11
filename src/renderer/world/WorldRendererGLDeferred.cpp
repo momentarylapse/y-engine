@@ -80,13 +80,10 @@ void WorldRendererGLDeferred::prepare() {
 	prepare_instanced_matrices();
 
 	prepare_lights(cam_main);
-
-	PerformanceMonitor::begin(ch_shadow);
 	if (shadow_index >= 0) {
 		render_shadow_map(fb_shadow1.get(), 4);
 		render_shadow_map(fb_shadow2.get(), 1);
 	}
-	PerformanceMonitor::end(ch_shadow);
 
 	render_into_gbuffer(gbuffer.get(), cam_main);
 
