@@ -27,8 +27,8 @@ GuiRendererGL::~GuiRendererGL() {
 }
 
 void GuiRendererGL::draw() {
-	if (child)
-		child->draw();
+	for (auto c: children)
+		c->draw();
 	draw_gui(nullptr);
 }
 

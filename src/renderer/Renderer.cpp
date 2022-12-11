@@ -21,7 +21,7 @@ Renderer::Renderer(const string &name, Renderer *_parent) {
 	if (parent) {
 		width = parent->width;
 		height = parent->height;
-		parent->set_child(this);
+		parent->add_child(this);
 	}
 
 	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
@@ -37,13 +37,13 @@ rect Renderer::area() const {
 	return rect(0, width, 0, height);
 }
 
-void Renderer::set_child(Renderer *_child) {
-	child = _child;
+void Renderer::add_child(Renderer *child) {
+	children.add(child);
 }
 
 void Renderer::prepare() {
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 }
 
 color Renderer::background() const {

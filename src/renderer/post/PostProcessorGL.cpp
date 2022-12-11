@@ -99,8 +99,8 @@ FrameBuffer *PostProcessorGL::next_fb(FrameBuffer *cur) {
 }
 
 void PostProcessorGL::prepare() {
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 
 	if (stages.num == 0)
 		return;
@@ -122,8 +122,8 @@ void PostProcessorGL::prepare() {
 
 void PostProcessorGL::draw() {
 	if (stages.num == 0) {
-		if (child)
-			child->draw();
+		for (auto c: children)
+			c->draw();
 	} else {
 		stages.back()->draw();
 	}

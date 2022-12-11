@@ -220,7 +220,9 @@ void WorldRendererGLDeferred::draw_world(bool allow_material) {
 void WorldRendererGLDeferred::render_shadow_map(nix::FrameBuffer *sfb, float scale) {
 	nix::bind_frame_buffer(sfb);
 
-	nix::set_projection_matrix(mat4::translation(vec3(0,0,0.5f)) * mat4::scale(1,1,0.5f) * mat4::scale(scale, scale, 1) * shadow_proj);
+	auto m = mat4::scale(scale, scale, 1);
+	//auto m = mat4::translation(vec3(0,0,0.5f)) * mat4::scale(1,1,0.5f) * mat4::scale(scale, scale, 1);
+	nix::set_projection_matrix(m * shadow_proj);
 	nix::set_view_matrix(mat4::ID);
 
 	nix::clear_z();

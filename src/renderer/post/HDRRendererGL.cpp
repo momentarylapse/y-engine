@@ -77,8 +77,8 @@ void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, VertexBuffer *
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
 
-	if (r->child)
-		r->child->draw();
+	for (auto c: r->children)
+		c->draw();
 }
 
 void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shader *shader, const Any &data, VertexBuffer *vb_2d) {
@@ -109,8 +109,8 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 }
 
 void HDRRendererGL::prepare() {
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {

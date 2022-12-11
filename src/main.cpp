@@ -126,8 +126,8 @@ public:
 	void print_render_chain() {
 		Renderer *r = renderer;
 		string s = PerformanceMonitor::get_name(r->channel);
-		while (r->child) {
-			r = r->child;
+		while (r->children.num) {
+			r = r->children[0];
 			s += " <<< " + PerformanceMonitor::get_name(r->channel);
 		}
 		msg_write("------------------------------------------");

@@ -99,8 +99,8 @@ FrameBuffer *PostProcessorVulkan::next_fb(FrameBuffer *cur) {
 }
 
 void PostProcessorVulkan::prepare() {
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 
 	if (stages.num == 0)
 		return;
@@ -122,8 +122,8 @@ void PostProcessorVulkan::prepare() {
 
 void PostProcessorVulkan::draw() {
 	if (stages.num == 0) {
-		if (child)
-			child->draw();
+		for (auto c: children)
+			c->draw();
 	} else {
 		stages.back()->draw();
 	}

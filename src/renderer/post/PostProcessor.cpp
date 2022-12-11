@@ -53,13 +53,13 @@ void PostProcessor::rebuild() {
 	//	stages_eff.insert(hdr, 0);
 
 	if (stages_eff.num > 0) {
-		stages_eff[0]->set_child(child);
-		parent->set_child(stages_eff.back());
+		stages_eff[0]->children = children;
+		parent->children = {stages_eff.back()};
 	} else {
-		parent->set_child(child);
+		parent->children = children;
 	}
 	for (int i=1; i<stages_eff.num; i++)
-		stages_eff[i]->set_child(stages_eff[i-1]);
+		stages_eff[i]->children = {stages_eff[i-1]};
 	for (int i=0; i<stages_eff.num-1; i++)
 		stages_eff[i]->parent = stages_eff[i+1];
 }

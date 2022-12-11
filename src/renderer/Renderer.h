@@ -29,8 +29,8 @@ public:
 	rect area() const;
 
 	Renderer *parent = nullptr;
-	Renderer *child = nullptr;
-	void set_child(Renderer *child);
+	Array<Renderer*> children;
+	void add_child(Renderer *child);
 
 	// (vulkan: BEFORE/OUTSIDE a render pass)
 	// can render into separate targets

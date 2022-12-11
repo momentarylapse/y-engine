@@ -138,12 +138,12 @@ HDRRendererVulkan::~HDRRendererVulkan() {
 }
 
 void HDRRendererVulkan::prepare() {
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
-	into.render_into(child);
+	into.render_into(children[0]);
 
 	auto cb = command_buffer();
 

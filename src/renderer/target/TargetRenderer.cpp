@@ -18,9 +18,9 @@ TargetRenderer::~TargetRenderer() {
 }
 
 void TargetRenderer::draw() {
-	if (child) {
+	for (auto c: children) {
 		PerformanceMonitor::begin(channel);
-		child->draw();
+		c->draw();
 		PerformanceMonitor::end(channel);
 	}
 }

@@ -136,15 +136,15 @@ void WindowRendererVulkan::draw() {
 	auto fb = frame_buffer();
 
 	cb->begin();
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 
 	cb->set_viewport(area());
 	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
 
-	if (child)
-		child->draw();
+	for (auto c: children)
+		c->draw();
 
 	cb->end_render_pass();
 	cb->end();

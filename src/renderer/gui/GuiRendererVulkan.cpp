@@ -43,8 +43,8 @@ GuiRendererVulkan::~GuiRendererVulkan() {
 }
 
 void GuiRendererVulkan::draw() {
-	if (child)
-		child->draw();
+	for (auto c: children)
+		c->draw();
 	prepare_gui(parent->frame_buffer());
 	draw_gui(parent->command_buffer());
 }

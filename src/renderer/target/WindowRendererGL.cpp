@@ -51,15 +51,15 @@ void WindowRendererGL::prepare() {
 
 void WindowRendererGL::draw() {
 
-	if (child)
-		child->prepare();
+	for (auto c: children)
+		c->prepare();
 
 	bool prev_srgb = nix::get_srgb();
 	nix::set_srgb(true);
 	nix::bind_frame_buffer(_frame_buffer);
 
-	if (child)
-		child->draw();
+	for (auto c: children)
+		c->draw();
 
 	nix::set_srgb(prev_srgb);
 }
