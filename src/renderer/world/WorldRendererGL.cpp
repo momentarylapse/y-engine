@@ -49,83 +49,6 @@ nix::UniformBuffer *ubo_multi_matrix = nullptr;
 const int CUBE_SIZE = 128;
 
 
-BackgroundRendererGL::BackgroundRendererGL(Renderer *parent, WorldRendererGL *_context) : Renderer("bg", parent) {
-	context = _context;
-}
-
-void BackgroundRendererGL::draw() {
-	nix::set_z(false, false);
-	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(mat4::rotation(context->cam->owner->ang).transpose());
-	for (auto *sb: world.skybox) {
-		sb->_matrix = mat4::rotation(sb->owner->ang);
-		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
-		for (int i=0; i<sb->material.num; i++) {
-			context->set_material(sb->material[i], context->type, ShaderVariant::DEFAULT);
-			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
-		}
-	}
-	nix::set_cull(nix::CullMode::DEFAULT);
-	nix::disable_alpha();
-	break_point();
-}
-
-
-ObjectsRendererGL::ObjectsRendererGL(Renderer *parent, WorldRendererGL *_context) : Renderer("ob", parent) {
-	context = _context;
-}
-
-void ObjectsRendererGL::draw() {
-	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and !allow_material)
-			continue;
-		Model *m = s.model;
-		m->update_matrix();
-		nix::set_model_matrix(m->_matrix);
-
-		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-
-		if (ani) {
-			if (allow_material)
-				context->set_material(s.material, context->type, ShaderVariant::ANIMATED);
-			else
-				context->set_material(context->material_shadow, context->type, ShaderVariant::ANIMATED);
-			ani->buf->update_array(ani->dmatrix);
-			nix::bind_buffer(7, ani->buf);
-		} else {
-			if (allow_material)
-				context->set_material(s.material, context->type, ShaderVariant::DEFAULT);
-			else
-				context->set_material(context->material_shadow, context->type, ShaderVariant::DEFAULT);
-		}
-		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-	}
-}
-
-TerrainsRendererGL::TerrainsRendererGL(Renderer *parent, WorldRendererGL *_context) : Renderer("ter", parent) {
-	context = _context;
-}
-
-void TerrainsRendererGL::draw() {
-	auto terrains = ComponentManager::get_listx<Terrain>();
-	for (auto *t: *terrains) {
-		auto o = t->owner;
-		nix::set_model_matrix(mat4::translation(o->pos));
-		if (allow_material) {
-			context->set_material(t->material, context->type, ShaderVariant::DEFAULT);
-			auto s = t->material->get_shader(context->type, ShaderVariant::DEFAULT);
-			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
-		} else {
-			context->set_material(context->material_shadow, context->type, ShaderVariant::DEFAULT);
-		}
-		t->prepare_draw(cam_main->owner->pos);
-		nix::draw_triangles(t->vertex_buffer);
-	}
-}
-
-
-
 WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
 	type = _type;
 
@@ -140,10 +63,6 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
 
 	ubo_multi_matrix = new nix::UniformBuffer();
-
-	background_renderer = new BackgroundRendererGL(this, this);
-	objects_renderer = new ObjectsRendererGL(this, this);
-	terrains_renderer = new TerrainsRendererGL(this, this);
 }
 
 void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
@@ -233,7 +152,7 @@ void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const col
 }
 
 
-void WorldRendererGL::draw_particles(Camera *cam) {
+void WorldRendererGL::draw_particles() {
 	PerformanceMonitor::begin(ch_fx);
 
 	// script injectors
@@ -317,9 +236,39 @@ void WorldRendererGL::draw_particles(Camera *cam) {
 	PerformanceMonitor::end(ch_fx);
 }
 
+void WorldRendererGL::draw_skyboxes() {
+	nix::set_z(false, false);
+	nix::set_cull(nix::CullMode::NONE);
+	nix::set_view_matrix(mat4::rotation(cam->owner->ang).transpose());
+	for (auto *sb: world.skybox) {
+		sb->_matrix = mat4::rotation(sb->owner->ang);
+		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
+		for (int i=0; i<sb->material.num; i++) {
+			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
+			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
+		}
+	}
+	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::disable_alpha();
+	break_point();
+}
+
 void WorldRendererGL::draw_terrains(bool allow_material) {
-	terrains_renderer->allow_material = allow_material;
-	terrains_renderer->draw();
+	auto terrains = ComponentManager::get_listx<Terrain>();
+	for (auto *t: *terrains) {
+		auto o = t->owner;
+		nix::set_model_matrix(mat4::translation(o->pos));
+		if (allow_material) {
+			set_material(t->material, type, ShaderVariant::DEFAULT);
+			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
+			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
+			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
+		} else {
+			set_material(material_shadow, type, ShaderVariant::DEFAULT);
+		}
+		t->prepare_draw(cam_main->owner->pos);
+		nix::draw_triangles(t->vertex_buffer);
+	}
 }
 
 void WorldRendererGL::draw_objects_instanced(bool allow_material) {
@@ -340,8 +289,30 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 }
 
 void WorldRendererGL::draw_objects_opaque(bool allow_material) {
-	objects_renderer->allow_material = allow_material;
-	objects_renderer->draw();
+	for (auto &s: world.sorted_opaque) {
+		if (!s.material->cast_shadow and !allow_material)
+			continue;
+		Model *m = s.model;
+		m->update_matrix();
+		nix::set_model_matrix(m->_matrix);
+
+		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+
+		if (ani) {
+			if (allow_material)
+				set_material(s.material, type, ShaderVariant::ANIMATED);
+			else
+				set_material(material_shadow, type, ShaderVariant::ANIMATED);
+			ani->buf->update_array(ani->dmatrix);
+			nix::bind_buffer(7, ani->buf);
+		} else {
+			if (allow_material)
+				set_material(s.material, type, ShaderVariant::DEFAULT);
+			else
+				set_material(material_shadow, type, ShaderVariant::DEFAULT);
+		}
+		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+	}
 }
 
 void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathType t) {

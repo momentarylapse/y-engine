@@ -84,7 +84,7 @@ void WorldRendererGLDeferred::prepare() {
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
 
-	render_into_gbuffer(gbuffer.get(), cam_main);
+	render_into_gbuffer(gbuffer.get());
 
 	//auto source = do_post_processing(fb_main.get());
 
@@ -96,21 +96,21 @@ void WorldRendererGLDeferred::draw() {
 
 	auto target = parent->frame_buffer();
 
-	draw_background(target, cam_main);
+	draw_background(target);
 
 	render_out_from_gbuffer(gbuffer.get());
 
 	PerformanceMonitor::begin(ch_trans);
 	bool flip_y = rendering_into_window();
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-	cam_main->update_matrices((float)target->width / (float)target->height);
-	nix::set_projection_matrix(m * cam_main->m_projection);
+	cam->update_matrices((float)target->width / (float)target->height);
+	nix::set_projection_matrix(m * cam->m_projection);
 	nix::bind_buffer(1, ubo_light);
-	nix::set_view_matrix(cam_main->view_matrix());
+	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 
 	draw_objects_transparent(true, RenderPathType::FORWARD);
-	draw_particles(cam_main);
+	draw_particles();
 
 	nix::set_z(false, false);
 	nix::set_projection_matrix(mat4::ID);
@@ -120,7 +120,7 @@ void WorldRendererGLDeferred::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, Camera *cam) {
+void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb) {
 	PerformanceMonitor::begin(ch_bg);
 
 	float max_depth = cam->max_depth;
@@ -133,7 +133,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, Camera *cam)
 	//nix::clear_color(Green);
 	nix::clear_color(world.background);
 
-	background_renderer->draw();
+	draw_skyboxes();
 	PerformanceMonitor::end(ch_bg);
 
 }
@@ -144,7 +144,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	if (using_view_space)
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	else
-		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH
+		s->set_floats("eye_pos", &cam->owner->pos.x, 3); // NAH
 	s->set_int("num_lights", lights.num);
 	s->set_int("shadow_index", shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
@@ -173,7 +173,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 
 //void WorldRendererGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 
-void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *cam) {
+void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb) {
 	PerformanceMonitor::begin(ch_world);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
@@ -204,7 +204,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, Camera *
 	PerformanceMonitor::end(ch_world);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
-	draw_particles(cam);
+	draw_particles();
 }
 
 void WorldRendererGLDeferred::draw_world(bool allow_material) {

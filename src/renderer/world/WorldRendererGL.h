@@ -21,29 +21,6 @@ class RendererGL;
 class WorldRendererGL;
 
 
-class BackgroundRendererGL : public Renderer {
-public:
-	BackgroundRendererGL(Renderer *parent, WorldRendererGL *context);
-	void draw() override;
-	WorldRendererGL *context;
-};
-
-class ObjectsRendererGL : public Renderer {
-public:
-	ObjectsRendererGL(Renderer *parent, WorldRendererGL *context);
-	void draw() override;
-	WorldRendererGL *context;
-	bool allow_material = true;
-};
-
-class TerrainsRendererGL : public Renderer {
-public:
-	TerrainsRendererGL(Renderer *parent, WorldRendererGL *context);
-	void draw() override;
-	WorldRendererGL *context;
-	bool allow_material = true;
-};
-
 class WorldRendererGL : public WorldRenderer {
 public:
 	VertexBuffer *vb_fx = nullptr;
@@ -56,7 +33,8 @@ public:
 
 	void set_material(Material *m, RenderPathType type, ShaderVariant v);
 
-	void draw_particles(Camera *cam);
+	void draw_skyboxes();
+	void draw_particles();
 	void draw_terrains(bool allow_material);
 	void draw_objects_opaque(bool allow_material);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
@@ -67,10 +45,6 @@ public:
 	void prepare_lights();
 
 	void draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data);
-
-	BackgroundRendererGL *background_renderer;
-	ObjectsRendererGL *objects_renderer;
-	TerrainsRendererGL *terrains_renderer;
 };
 
 #endif
