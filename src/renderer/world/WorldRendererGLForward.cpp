@@ -116,7 +116,7 @@ void WorldRendererGLForward::draw() {
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
-	draw_world(true);
+	draw_world();
 	Scheduler::handle_render_inject();
 	break_point();
 	PerformanceMonitor::end(ch_world);
@@ -176,7 +176,7 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
-	draw_world(true);
+	draw_world();
 	Scheduler::handle_render_inject();
 	break_point();
 	PerformanceMonitor::end(ch_world);
@@ -188,20 +188,17 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 }
 #endif
 
-void WorldRendererGLForward::draw_world(bool allow_material) {
-	if (allow_material) {
-		nix::bind_texture(3, fb_shadow1->depth_buffer.get());
-		nix::bind_texture(4, fb_shadow2->depth_buffer.get());
-		nix::bind_texture(5, cube_map.get());
-	}
+void WorldRendererGLForward::draw_world() {
+	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
+	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
+	nix::bind_texture(5, cube_map.get());
 
-	draw_terrains(allow_material);
-	draw_objects_instanced(allow_material);
-	draw_objects_opaque(allow_material);
-	draw_line_meshes(allow_material);
-	draw_point_meshes(allow_material);
-	if (allow_material)
-		draw_objects_transparent(allow_material, type);
+	draw_terrains(true);
+	draw_objects_instanced(true);
+	draw_objects_opaque(true);
+	draw_line_meshes(true);
+	draw_point_meshes(true);
+	draw_objects_transparent(true, type);
 }
 
 
