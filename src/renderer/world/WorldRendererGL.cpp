@@ -262,6 +262,8 @@ void WorldRendererGL::draw_skyboxes() {
 void WorldRendererGL::draw_terrains(bool allow_material) {
 	auto terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: *terrains) {
+		if (!t->material->cast_shadow and !allow_material)
+			continue;
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
 		if (allow_material) {
@@ -270,8 +272,6 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		} else {
-			if (!t->material->cast_shadow)
-				continue;
 			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
 		t->prepare_draw(cam_main->owner->pos);
@@ -288,8 +288,6 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 		if (allow_material) {
 			set_material(s.material, type, ShaderVariant::INSTANCED);
 		} else {
-			if (!s.material->cast_shadow)
-				continue;
 			set_material(material_shadow, type, ShaderVariant::INSTANCED);
 		}
 		nix::bind_buffer(5, ubo_multi_matrix);
@@ -313,8 +311,6 @@ void WorldRendererGL::draw_objects_opaque(bool allow_material) {
 			if (allow_material) {
 				set_material(s.material, type, ShaderVariant::ANIMATED);
 			} else {
-				if (!s.material->cast_shadow)
-					continue;
 				set_material(material_shadow, type, ShaderVariant::ANIMATED);
 			}
 			ani->buf->update_array(ani->dmatrix);
@@ -323,8 +319,6 @@ void WorldRendererGL::draw_objects_opaque(bool allow_material) {
 			if (allow_material) {
 				set_material(s.material, type, ShaderVariant::DEFAULT);
 			} else {
-				if (!s.material->cast_shadow)
-					continue;
 				set_material(material_shadow, type, ShaderVariant::DEFAULT);
 			}
 		}
@@ -416,18 +410,23 @@ void WorldRendererGL::draw_user_meshes(bool allow_material, bool transparent, Re
 	for (auto *m: *meshes) {
 		if (m->material->is_transparent() != transparent)
 			continue;
+		if (!m->material->cast_shadow and !allow_material)
+			continue;
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
 		if (allow_material) {
-			auto shader = user_mesh_shader(m, t);
+			auto shader = user_mesh_shader(m, type);//t);
 			set_material_x(m->material, shader);
 		} else {
-			if (m->material->cast_shadow)
-				continue;
 			auto shader = user_mesh_shadow_shader(m, material_shadow, t);
 			set_material_x(material_shadow, shader);
 		}
-		nix::draw_points(m->vertex_buffer);
+		if (m->mode == DrawMode::TRIANGLES)
+			nix::draw_triangles(m->vertex_buffer);
+		else if (m->mode == DrawMode::POINTS)
+			nix::draw_points(m->vertex_buffer);
+		else if (m->mode == DrawMode::LINES)
+			nix::draw_points(m->vertex_buffer);
 	}
 }
 

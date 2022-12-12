@@ -100,3 +100,9 @@
 	using AlphaMode = nix::AlphaMode;
 
 #endif
+
+enum class DrawMode {
+	TRIANGLES,
+	LINES,
+	POINTS,
+};

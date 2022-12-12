@@ -1,6 +1,11 @@
 use image
 
 
+enum DrawMode
+	TRIANGLES
+	LINES
+	POINTS
+
 class Vertex
 	var p, n: vec3
 	var u, v: float

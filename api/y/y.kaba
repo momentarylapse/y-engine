@@ -92,6 +92,7 @@ class PointMesh extends Component
 
 class UserMesh extends Component
 	vertex_buffer: VertexBuffer*
+	mode: DrawMode
 	material: Material*
 	vertex_shader_module: string
 	geometry_shader_module: string
