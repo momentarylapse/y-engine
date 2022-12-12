@@ -60,26 +60,7 @@ struct RenderInjector {
 	bool shadow;
 };
 
-struct WorldRenderContext {
-	shared<FrameBuffer> fb_shadow1;
-	shared<FrameBuffer> fb_shadow2;
-	Material *material_shadow = nullptr;
-	Camera *cam;
-
-	shared<Shader> shader_fx;
-
-	Array<UBOLight> lights;
-
-	shared<DepthBuffer> depth_cube;
-	shared<FrameBuffer> fb_cube;
-	shared<CubeMap> cube_map;
-
-	//Camera *shadow_cam;
-	mat4 shadow_proj;
-	int shadow_index;
-};
-
-class WorldRenderer : public Renderer, public WorldRenderContext {
+class WorldRenderer : public Renderer {
 public:
 	WorldRenderer(const string &name, Renderer *parent);
 	virtual ~WorldRenderer();
@@ -98,6 +79,23 @@ public:
 
 
 	static bool using_view_space;
+
+	shared<FrameBuffer> fb_shadow1;
+	shared<FrameBuffer> fb_shadow2;
+	Material *material_shadow = nullptr;
+	Camera *cam;
+
+	shared<Shader> shader_fx;
+
+	Array<UBOLight> lights;
+
+	shared<DepthBuffer> depth_cube;
+	shared<FrameBuffer> fb_cube;
+	shared<CubeMap> cube_map;
+
+	//Camera *shadow_cam;
+	mat4 shadow_proj;
+	int shadow_index;
 
 
 	Array<RenderInjector> fx_injectors;
