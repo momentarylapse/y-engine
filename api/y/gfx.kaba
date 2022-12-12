@@ -15,6 +15,11 @@ class VertexFx
 	col: color
 	u, v: float
 
+class PointVertex
+	pos: vec3
+	radius: float
+	col: color
+
 class FrameBuffer
 	var width, height: int
 	func extern __init__(att: Texture*[])

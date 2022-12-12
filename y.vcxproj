@@ -294,8 +294,6 @@
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\world\components\Animator.cpp" />
     <ClCompile Include="src\world\components\Collider.cpp" />
-    <ClCompile Include="src\world\components\LineMesh.cpp" />
-    <ClCompile Include="src\world\components\PointMesh.cpp" />
     <ClCompile Include="src\world\components\Skeleton.cpp" />
     <ClCompile Include="src\world\components\SolidBody.cpp" />
     <ClCompile Include="src\world\components\UserMesh.cpp" />
@@ -496,8 +494,6 @@
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\world\components\Animator.h" />
     <ClInclude Include="src\world\components\Collider.h" />
-    <ClInclude Include="src\world\components\LineMesh.h" />
-    <ClInclude Include="src\world\components\PointMesh.h" />
     <ClInclude Include="src\world\components\Skeleton.h" />
     <ClInclude Include="src\world\components\SolidBody.h" />
     <ClInclude Include="src\world\components\UserMesh.h" />

@@ -33,8 +33,6 @@
 #include "../../world/World.h"
 #include "../../world/Light.h"
 #include "../../world/components/Animator.h"
-#include "../../world/components/LineMesh.h"
-#include "../../world/components/PointMesh.h"
 #include "../../world/components/UserMesh.h"
 #include "../../y/Entity.h"
 #include "../../y/ComponentManager.h"
@@ -345,46 +343,6 @@ void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathTy
 	}
 	nix::disable_alpha();
 	nix::set_z(true, true);
-}
-
-void WorldRendererGL::draw_line_meshes(bool allow_material) {
-	if (!allow_material)
-		return;
-	auto meshes = ComponentManager::get_list_family<LineMesh>();
-	for (auto *m: *meshes) {
-		auto o = m->owner;
-		nix::set_model_matrix(o->get_matrix());
-		if (allow_material) {
-			set_material(m->material, type, ShaderVariant::LINES);
-			/*auto s = l->material->get_shader(type, ShaderVariant::LINES);
-			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);*/
-		} else {
-			continue;
-			//set_material(material_shadow, type, ShaderVariant::LINES);
-		}
-		nix::draw_lines(m->vertex_buffer, m->contiguous);
-	}
-}
-
-void WorldRendererGL::draw_point_meshes(bool allow_material) {
-	if (!allow_material)
-		return;
-	auto meshes = ComponentManager::get_list_family<PointMesh>();
-	for (auto *m: *meshes) {
-		auto o = m->owner;
-		nix::set_model_matrix(o->get_matrix());
-		if (allow_material) {
-			set_material(m->material, type, ShaderVariant::POINTS);
-			/*auto s = l->material->get_shader(type, ShaderVariant::LINES);
-			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);*/
-		} else {
-			continue;
-			//set_material(material_shadow, type, ShaderVariant::LINES);
-		}
-		nix::draw_points(m->vertex_buffer);
-	}
 }
 
 Shader *user_mesh_shader(UserMesh *m, RenderPathType type) {

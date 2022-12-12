@@ -40,8 +40,6 @@ public:
 	void draw_objects_opaque(bool allow_material);
 	void draw_objects_transparent(bool allow_material, RenderPathType t);
 	void draw_objects_instanced(bool allow_material);
-	void draw_line_meshes(bool allow_material);
-	void draw_point_meshes(bool allow_material);
 	void draw_user_meshes(bool allow_material, bool transparent, RenderPathType t);
 	void prepare_instanced_matrices();
 	void prepare_lights();

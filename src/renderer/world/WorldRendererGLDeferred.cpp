@@ -219,8 +219,6 @@ void WorldRendererGLDeferred::draw_world() {
 	draw_terrains(true);
 	draw_objects_instanced(true);
 	draw_objects_opaque(true);
-	draw_line_meshes(true);
-	draw_point_meshes(true);
 	draw_user_meshes(true, false, type);
 }
 

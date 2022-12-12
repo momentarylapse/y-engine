@@ -57,8 +57,6 @@
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
 #include "../world/components/Skeleton.h"
-#include "../world/components/LineMesh.h"
-#include "../world/components/PointMesh.h"
 #include "../world/components/UserMesh.h"
 #include "../meta.h"
 #include "../graphics-impl.h"
@@ -271,21 +269,6 @@ void PluginManager::export_kaba() {
 	ext->link_virtual("Model.on_init", &Model::on_init, &model);
 	ext->link_virtual("Model.on_delete", &Model::on_delete, &model);
 	ext->link_virtual("Model.on_iterate", &Model::on_iterate, &model);
-
-
-	ext->declare_class_size("LineMesh", sizeof(LineMesh));
-	ext->link_class_func("LineMesh.update", &LineMesh::update);
-	ext->declare_class_element("LineMesh.contiguous", &LineMesh::contiguous);
-	ext->declare_class_element("LineMesh.width_in_screen_space", &LineMesh::width_in_screen_space);
-	ext->declare_class_element("LineMesh.vertices", &LineMesh::vertices);
-	ext->declare_class_element("LineMesh.material", &LineMesh::material);
-
-
-	ext->declare_class_size("PointMesh", sizeof(PointMesh));
-	ext->link_class_func("PointMesh.update", &PointMesh::update);
-	ext->declare_class_element("PointMesh.width_in_screen_space", &PointMesh::width_in_screen_space);
-	ext->declare_class_element("PointMesh.vertices", &PointMesh::vertices);
-	ext->declare_class_element("PointMesh.material", &PointMesh::material);
 
 
 	ext->declare_class_size("UserMesh", sizeof(UserMesh));
@@ -725,8 +708,6 @@ void PluginManager::import_kaba() {
 	import_component_class<SphereCollider>(s, "SphereCollider");
 	import_component_class<BoxCollider>(s, "BoxCollider");
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
-	import_component_class<LineMesh>(s, "LineMesh");
-	import_component_class<PointMesh>(s, "PointMesh");
 	import_component_class<UserMesh>(s, "UserMesh");
 	import_component_class<Animator>(s, "Animator");
 	import_component_class<Skeleton>(s, "Skeleton");

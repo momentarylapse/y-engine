@@ -66,29 +66,6 @@ class Model extends Component
 	
 	func extern get_vertex(index: int) -> vec3
 
-class LineVertex
-	pos: vec3
-	r: float
-	col: color
-
-class LineMesh extends Component
-	vertices: LineVertex[]
-	contiguous: bool
-	width_in_screen_space: bool
-	material: Material*
-	func extern mut update()
-
-class PointVertex
-	pos: vec3
-	r: float
-	col: color
-
-class PointMesh extends Component
-	vertices: PointVertex[]
-	width_in_screen_space: bool
-	material: Material*
-	func extern mut update()
-
 
 class UserMesh extends Component
 	vertex_buffer: VertexBuffer*
