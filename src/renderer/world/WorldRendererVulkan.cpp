@@ -383,7 +383,7 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 
 	ubo.m = mat4::ID;
 
-	auto terrains = ComponentManager::get_listx<Terrain>();
+	auto terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: *terrains) {
 		auto o = t->owner;
 		ubo.m = mat4::translation(o->pos);

@@ -121,7 +121,7 @@ void WorldRendererVulkanRayTracing::prepare() {
 		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
 		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
-	auto terrains = ComponentManager::get_listx<Terrain>();
+	auto terrains = ComponentManager::get_list_family<Terrain>();
 
 
 	Array<MeshDescription> meshes;
