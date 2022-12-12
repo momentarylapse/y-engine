@@ -49,6 +49,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 	ResourceManager::load_shader("module-vertex-instanced.shader");
 	ResourceManager::load_shader("module-vertex-lines.shader");
 	ResourceManager::load_shader("module-vertex-points.shader");
+	ResourceManager::load_shader("module-vertex-fx.shader");
 	ResourceManager::load_shader("module-geometry-points.shader");
 
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
@@ -193,12 +194,17 @@ void WorldRendererGLForward::draw_world() {
 	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
 	nix::bind_texture(5, cube_map.get());
 
+	// opaque
 	draw_terrains(true);
 	draw_objects_instanced(true);
 	draw_objects_opaque(true);
 	draw_line_meshes(true);
 	draw_point_meshes(true);
+	draw_user_meshes(true, false, type);
+
+	// transparent
 	draw_objects_transparent(true, type);
+	draw_user_meshes(true, true, type);
 }
 
 

@@ -702,19 +702,14 @@ void World::register_model(Model *m) {
 
 	for (int i=0;i<m->material.num;i++) {
 		Material *mat = m->material[i];
-		bool trans = false;//!mat->alpha.z_buffer; //false;
-		if (mat->alpha.mode == TransparencyMode::FUNCTIONS)
-			trans = true;
-		if (mat->alpha.mode == TransparencyMode::FACTOR)
-			trans = true;
 
 		PartialModel p;
 		p.model = m;
 		p.material = mat;
 		p.mat_index = i;
-		p.transparent = trans;
+		p.transparent = mat->is_transparent();
 		p.shadow = false;
-		if (trans)
+		if (p.transparent)
 			sorted_trans.add(p);
 		else
 			sorted_opaque.add(p);

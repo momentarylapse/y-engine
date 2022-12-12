@@ -137,6 +137,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	if (geo != "")
 		source = expand_geometry_shader_source(source, geo);
 	source = expand_fragment_shader_source(source, render_path);
+
 	auto shader = Shader::create(source);
 
 	//auto s = Shader::load(fn);
@@ -154,7 +155,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 
 
 	shaders.add(shader);
-	shader_map.add({filename, shader});
+	shader_map.add({fnx, shader});
 	return shader;
 }
 

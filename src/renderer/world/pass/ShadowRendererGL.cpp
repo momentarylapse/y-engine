@@ -52,6 +52,7 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 	w->draw_objects_opaque(false);
 	w->draw_line_meshes(false);
 	w->draw_point_meshes(false);
+	w->draw_user_meshes(false, false, RenderPathType::FORWARD);
 
 }
 

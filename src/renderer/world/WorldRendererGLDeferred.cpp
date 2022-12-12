@@ -55,6 +55,9 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
+	ResourceManager::load_shader("module-vertex-points.shader");
+	ResourceManager::load_shader("module-vertex-fx.shader");
+	ResourceManager::load_shader("module-geometry-points.shader");
 
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
@@ -110,6 +113,7 @@ void WorldRendererGLDeferred::draw() {
 	nix::set_z(true, true);
 
 	draw_objects_transparent(true, RenderPathType::FORWARD);
+	draw_user_meshes(true, true, RenderPathType::FORWARD);
 	draw_particles();
 
 	nix::set_z(false, false);
@@ -217,6 +221,7 @@ void WorldRendererGLDeferred::draw_world() {
 	draw_objects_opaque(true);
 	draw_line_meshes(true);
 	draw_point_meshes(true);
+	draw_user_meshes(true, false, type);
 }
 
 

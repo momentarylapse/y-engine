@@ -18,6 +18,7 @@
 #include "../../lib/math/rect.h"
 #include "../../lib/os/msg.h"
 #include "../../helper/PerformanceMonitor.h"
+#include "../../helper/ResourceManager.h"
 #include "../../plugins/PluginManager.h"
 #include "../../fx/Particle.h"
 #include "../../fx/Beam.h"
@@ -34,6 +35,7 @@
 #include "../../world/components/Animator.h"
 #include "../../world/components/LineMesh.h"
 #include "../../world/components/PointMesh.h"
+#include "../../world/components/UserMesh.h"
 #include "../../y/Entity.h"
 #include "../../y/ComponentManager.h"
 #include "../../meta.h"
@@ -103,6 +105,10 @@ void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, con
 
 void WorldRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
 	auto s = m->get_shader(t, v);
+	set_material_x(m, s);
+}
+
+void WorldRendererGL::set_material_x(Material *m, Shader *s) {
 	nix::set_shader(s);
 	if (WorldRenderer::using_view_space)
 		s->set_floats("eye_pos", &cam_main->owner->pos.x, 3); // NAH....
@@ -264,6 +270,8 @@ void WorldRendererGL::draw_terrains(bool allow_material) {
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		} else {
+			if (!t->material->cast_shadow)
+				continue;
 			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
 		t->prepare_draw(cam_main->owner->pos);
@@ -277,10 +285,13 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 			continue;
 		Model *m = s.model;
 		nix::set_model_matrix(s.matrices[0]);//m->_matrix);
-		if (allow_material)
+		if (allow_material) {
 			set_material(s.material, type, ShaderVariant::INSTANCED);
-		else
+		} else {
+			if (!s.material->cast_shadow)
+				continue;
 			set_material(material_shadow, type, ShaderVariant::INSTANCED);
+		}
 		nix::bind_buffer(5, ubo_multi_matrix);
 		//msg_write(s.matrices.num);
 		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
@@ -299,17 +310,23 @@ void WorldRendererGL::draw_objects_opaque(bool allow_material) {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (ani) {
-			if (allow_material)
+			if (allow_material) {
 				set_material(s.material, type, ShaderVariant::ANIMATED);
-			else
+			} else {
+				if (!s.material->cast_shadow)
+					continue;
 				set_material(material_shadow, type, ShaderVariant::ANIMATED);
+			}
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(7, ani->buf);
 		} else {
-			if (allow_material)
+			if (allow_material) {
 				set_material(s.material, type, ShaderVariant::DEFAULT);
-			else
+			} else {
+				if (!s.material->cast_shadow)
+					continue;
 				set_material(material_shadow, type, ShaderVariant::DEFAULT);
+			}
 		}
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 	}
@@ -349,6 +366,7 @@ void WorldRendererGL::draw_line_meshes(bool allow_material) {
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);*/
 		} else {
+			continue;
 			//set_material(material_shadow, type, ShaderVariant::LINES);
 		}
 		nix::draw_lines(m->vertex_buffer, m->contiguous);
@@ -368,7 +386,46 @@ void WorldRendererGL::draw_point_meshes(bool allow_material) {
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);*/
 		} else {
+			continue;
 			//set_material(material_shadow, type, ShaderVariant::LINES);
+		}
+		nix::draw_points(m->vertex_buffer);
+	}
+}
+
+Shader *user_mesh_shader(UserMesh *m, RenderPathType type) {
+	if (!m->shader_cache[(int)type - 1]) {
+		static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+		const string &rpt = RENDER_PATH_NAME[(int)type];
+		m->shader_cache[(int)type - 1] = ResourceManager::load_surface_shader(m->material->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
+	}
+	return m->shader_cache[(int)type - 1];
+}
+
+Shader *user_mesh_shadow_shader(UserMesh *m, Material *mat, RenderPathType type) {
+	if (!m->shader_cache_shadow[(int)type - 1]) {
+		static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+		const string &rpt = RENDER_PATH_NAME[(int)type];
+		m->shader_cache_shadow[(int)type - 1] = ResourceManager::load_surface_shader(mat->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
+	}
+	return m->shader_cache_shadow[(int)type - 1];
+}
+
+void WorldRendererGL::draw_user_meshes(bool allow_material, bool transparent, RenderPathType t) {
+	auto meshes = ComponentManager::get_list_family<UserMesh>();
+	for (auto *m: *meshes) {
+		if (m->material->is_transparent() != transparent)
+			continue;
+		auto o = m->owner;
+		nix::set_model_matrix(o->get_matrix());
+		if (allow_material) {
+			auto shader = user_mesh_shader(m, t);
+			set_material_x(m->material, shader);
+		} else {
+			if (m->material->cast_shadow)
+				continue;
+			auto shader = user_mesh_shadow_shader(m, material_shadow, t);
+			set_material_x(material_shadow, shader);
 		}
 		nix::draw_points(m->vertex_buffer);
 	}

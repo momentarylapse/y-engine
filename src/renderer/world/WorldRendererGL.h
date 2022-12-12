@@ -32,6 +32,7 @@ public:
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vec3 &pos);
 
 	void set_material(Material *m, RenderPathType type, ShaderVariant v);
+	void set_material_x(Material *m, Shader *shader);
 
 	void draw_skyboxes();
 	void draw_particles();
@@ -41,6 +42,7 @@ public:
 	void draw_objects_instanced(bool allow_material);
 	void draw_line_meshes(bool allow_material);
 	void draw_point_meshes(bool allow_material);
+	void draw_user_meshes(bool allow_material, bool transparent, RenderPathType t);
 	void prepare_instanced_matrices();
 	void prepare_lights();
 
