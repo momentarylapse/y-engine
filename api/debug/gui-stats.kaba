@@ -24,7 +24,7 @@ class StatDisplay extends Node
 #		label.set_text([for l in locations LOC_NAME[l]].join("\n"))
 
 	func mut add_pm_group(out l: string[], out s: string[], parent: int, indent: string)
-		for c,i in PerformanceMonitor.channels
+		for i=>c in PerformanceMonitor.channels
 			if c.parent == parent
 				l.add(c.name + indent)
 				s.add("{{c.average*1000|.2}}")

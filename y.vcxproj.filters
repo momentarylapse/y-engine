@@ -547,6 +547,9 @@
     <ClCompile Include="src\world\components\SolidBody.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\components\UserMesh.cpp">
+      <Filter>src\world\components</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\Camera.cpp">
       <Filter>src\world</Filter>
     </ClCompile>
@@ -1144,6 +1147,9 @@
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\SolidBody.h">
+      <Filter>src\world\components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\components\UserMesh.h">
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\Camera.h">

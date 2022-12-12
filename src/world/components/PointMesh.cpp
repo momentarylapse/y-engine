@@ -11,6 +11,6 @@
 const kaba::Class *PointMesh::_class = nullptr;
 
 
-PointMesh::PointMesh() : SimpleMesh<PointVertex>("4f,f,4f") {
+PointMesh::PointMesh() : TypedMesh<PointVertex>("4f,f,4f") {
 }
 

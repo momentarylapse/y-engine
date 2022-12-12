@@ -19,9 +19,9 @@
 class Material;
 
 template<typename V>
-class SimpleMesh : public Component {
+class TypedMesh : public Component {
 public:
-	SimpleMesh(const string &fmt) {
+	TypedMesh(const string &fmt) {
 		vertex_buffer = new VertexBuffer(fmt);
 	}
 
@@ -47,7 +47,7 @@ struct PointVertex {
 
 class Material;
 
-class PointMesh : public SimpleMesh<PointVertex> {
+class PointMesh : public TypedMesh<PointVertex> {
 public:
 	PointMesh();
 

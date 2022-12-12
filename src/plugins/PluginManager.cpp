@@ -59,6 +59,7 @@
 #include "../world/components/Skeleton.h"
 #include "../world/components/LineMesh.h"
 #include "../world/components/PointMesh.h"
+#include "../world/components/UserMesh.h"
 #include "../meta.h"
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
@@ -287,6 +288,13 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("PointMesh.material", &PointMesh::material);
 
 
+	ext->declare_class_size("UserMesh", sizeof(UserMesh));
+	ext->declare_class_element("UserMesh.vertex_buffer", &UserMesh::vertex_buffer);
+	ext->declare_class_element("UserMesh.material", &UserMesh::material);
+	ext->declare_class_element("UserMesh.vertex_shader_module", &UserMesh::vertex_shader_module);
+	ext->declare_class_element("UserMesh.geometry_shader_module", &UserMesh::geometry_shader_module);
+
+
 	ext->declare_class_size("Animator", sizeof(Animator));
 	ext->link_class_func("Animator.reset", &Animator::reset);
 	ext->link_class_func("Animator.add", &Animator::add);
@@ -441,7 +449,8 @@ void PluginManager::export_kaba() {
 	//ext->link_class_func("Link.set_axis", &Link::set_axis);
 
 
-	ext->link("__get_component_list", (void*)&ComponentManager::get_list);
+	ext->link("__get_component_list", (void*)&ComponentManager::_get_list);
+	ext->link("__get_component_family_list", (void*)&ComponentManager::_get_list_family);
 
 	Particle particle(vec3::ZERO, 0, nullptr, -1);
 	ext->declare_class_size("Particle", sizeof(Particle));
@@ -718,6 +727,7 @@ void PluginManager::import_kaba() {
 	import_component_class<TerrainCollider>(s, "TerrainCollider");
 	import_component_class<LineMesh>(s, "LineMesh");
 	import_component_class<PointMesh>(s, "PointMesh");
+	import_component_class<UserMesh>(s, "UserMesh");
 	import_component_class<Animator>(s, "Animator");
 	import_component_class<Skeleton>(s, "Skeleton");
 	import_component_class<Model>(s, "Model");

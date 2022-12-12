@@ -254,7 +254,7 @@ void WorldRendererGL::draw_skyboxes() {
 }
 
 void WorldRendererGL::draw_terrains(bool allow_material) {
-	auto terrains = ComponentManager::get_listx<Terrain>();
+	auto terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: *terrains) {
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
@@ -339,7 +339,7 @@ void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathTy
 void WorldRendererGL::draw_line_meshes(bool allow_material) {
 	if (!allow_material)
 		return;
-	auto meshes = ComponentManager::get_listx<LineMesh>();
+	auto meshes = ComponentManager::get_list_family<LineMesh>();
 	for (auto *m: *meshes) {
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
@@ -358,7 +358,7 @@ void WorldRendererGL::draw_line_meshes(bool allow_material) {
 void WorldRendererGL::draw_point_meshes(bool allow_material) {
 	if (!allow_material)
 		return;
-	auto meshes = ComponentManager::get_listx<PointMesh>();
+	auto meshes = ComponentManager::get_list_family<PointMesh>();
 	for (auto *m: *meshes) {
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());

@@ -11,6 +11,6 @@
 const kaba::Class *LineMesh::_class = nullptr;
 
 
-LineMesh::LineMesh() : SimpleMesh<LineVertex>("3f,f,4f") {
+LineMesh::LineMesh() : TypedMesh<LineVertex>("3f,f,4f") {
 }
 

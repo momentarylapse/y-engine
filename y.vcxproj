@@ -298,6 +298,7 @@
     <ClCompile Include="src\world\components\PointMesh.cpp" />
     <ClCompile Include="src\world\components\Skeleton.cpp" />
     <ClCompile Include="src\world\components\SolidBody.cpp" />
+    <ClCompile Include="src\world\components\UserMesh.cpp" />
     <ClCompile Include="src\world\Camera.cpp" />
     <ClCompile Include="src\world\LevelData.cpp" />
     <ClCompile Include="src\world\Light.cpp" />
@@ -499,6 +500,7 @@
     <ClInclude Include="src\world\components\PointMesh.h" />
     <ClInclude Include="src\world\components\Skeleton.h" />
     <ClInclude Include="src\world\components\SolidBody.h" />
+    <ClInclude Include="src\world\components\UserMesh.h" />
     <ClInclude Include="src\world\Camera.h" />
     <ClInclude Include="src\world\LevelData.h" />
     <ClInclude Include="src\world\Light.h" />

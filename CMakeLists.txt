@@ -188,6 +188,7 @@ set(SOURCE
 	src/world/components/PointMesh.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
+	src/world/components/UserMesh.cpp
 	src/world/Camera.cpp
 	src/world/LevelData.cpp
 	src/world/Light.cpp

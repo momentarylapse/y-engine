@@ -342,7 +342,7 @@ bool World::load(const LevelData &ld) {
 
 		add_components(cam_main->owner, c.components);
 	}
-	auto cameras = ComponentManager::get_listx<Camera>();
+	auto cameras = ComponentManager::get_list_family<Camera>();
 	if (cameras->num == 0) {
 		msg_error("no camera defined... creating one");
 		cam_main = add_camera(v_0, quaternion::ID, rect::ID);
@@ -781,7 +781,7 @@ void World::unregister_model(Model *m) {
 }
 
 void World::iterate_physics(float dt) {
-	auto list = ComponentManager::get_listx<SolidBody>();
+	auto list = ComponentManager::get_list_family<SolidBody>();
 
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
 #if HAS_LIB_BULLET
@@ -805,13 +805,13 @@ void World::iterate_physics(float dt) {
 void World::iterate_animations(float dt) {
 #ifdef _X_ALLOW_X_
 	PerformanceMonitor::begin(ch_animation);
-	auto list = ComponentManager::get_listx<Animator>();
+	auto list = ComponentManager::get_list_family<Animator>();
 	for (auto *o: *list)
 		o->do_animation(dt);
 
 
 	// TODO
-	auto list2 = ComponentManager::get_listx<Skeleton>();
+	auto list2 = ComponentManager::get_list_family<Skeleton>();
 	for (auto *o: *list2) {
 		for (auto &b: o->bones) {
 			if (auto *mm = b.get_component<Model>()) {
@@ -909,7 +909,7 @@ void World::shift_all(const vec3 &dpos) {
 		//if (auto m = e->get_component<Model>())
 		//	m->update_matrix();
 	}
-	auto list = ComponentManager::get_listx<Model>();
+	auto list = ComponentManager::get_list_family<Model>();
 	for (auto *m: *list)
 		m->update_matrix();
 #ifdef _X_ALLOW_X_

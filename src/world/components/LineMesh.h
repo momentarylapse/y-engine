@@ -16,7 +16,7 @@ struct LineVertex {
 	color col;
 };
 
-class LineMesh : public SimpleMesh<LineVertex> {
+class LineMesh : public TypedMesh<LineVertex> {
 public:
 	LineMesh();
 

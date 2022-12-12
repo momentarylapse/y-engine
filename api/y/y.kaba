@@ -90,6 +90,13 @@ class PointMesh extends Component
 	func extern mut update()
 
 
+class UserMesh extends Component
+	vertex_buffer: VertexBuffer*
+	material: Material*
+	vertex_shader_module: string
+	geometry_shader_module: string
+
+
 class SolidBody extends Component
 	var vel: vec3
 	var rot: vec3
@@ -231,9 +238,9 @@ class World
 	func extern trace(p1: vec3, p2: vec3, out d: CollisionData, simple_test: bool, ignore: Entity*) -> bool
 	
 	func selfref objects() -> Model*[]*
-		return get_component_list[Model]()
+		return get_component_family_list[Model]()
 	func selfref terrains() -> Terrain*[]*
-		return get_component_list[Terrain]()
+		return get_component_family_list[Terrain]()
 
 #	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
 #	func extern delete(o: void*)
