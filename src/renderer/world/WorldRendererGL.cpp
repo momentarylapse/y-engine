@@ -345,24 +345,6 @@ void WorldRendererGL::draw_objects_transparent(bool allow_material, RenderPathTy
 	nix::set_z(true, true);
 }
 
-Shader *user_mesh_shader(UserMesh *m, RenderPathType type) {
-	if (!m->shader_cache[(int)type - 1]) {
-		static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
-		const string &rpt = RENDER_PATH_NAME[(int)type];
-		m->shader_cache[(int)type - 1] = ResourceManager::load_surface_shader(m->material->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
-	}
-	return m->shader_cache[(int)type - 1];
-}
-
-Shader *user_mesh_shadow_shader(UserMesh *m, Material *mat, RenderPathType type) {
-	if (!m->shader_cache_shadow[(int)type - 1]) {
-		static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
-		const string &rpt = RENDER_PATH_NAME[(int)type];
-		m->shader_cache_shadow[(int)type - 1] = ResourceManager::load_surface_shader(mat->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
-	}
-	return m->shader_cache_shadow[(int)type - 1];
-}
-
 void WorldRendererGL::draw_user_meshes(bool allow_material, bool transparent, RenderPathType t) {
 	auto meshes = ComponentManager::get_list_family<UserMesh>();
 	for (auto *m: *meshes) {
@@ -379,11 +361,11 @@ void WorldRendererGL::draw_user_meshes(bool allow_material, bool transparent, Re
 			auto shader = user_mesh_shadow_shader(m, material_shadow, t);
 			set_material_x(material_shadow, shader);
 		}
-		if (m->mode == DrawMode::TRIANGLES)
+		if (m->topology == PrimitiveTopology::TRIANGLES)
 			nix::draw_triangles(m->vertex_buffer);
-		else if (m->mode == DrawMode::POINTS)
+		else if (m->topology == PrimitiveTopology::POINTS)
 			nix::draw_points(m->vertex_buffer);
-		else if (m->mode == DrawMode::LINES)
+		else if (m->topology == PrimitiveTopology::LINES)
 			nix::draw_points(m->vertex_buffer);
 	}
 }

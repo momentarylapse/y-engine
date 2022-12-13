@@ -104,9 +104,11 @@ void WorldRendererVulkanForward::draw() {
 	draw_terrains(cb, rp, ubo, true, rvd);
 	draw_objects_opaque(cb, rp, ubo, true, rvd);
 	draw_objects_instanced(cb, rp, ubo, true, rvd);
+	draw_user_meshes(cb, rp, ubo, true, false, rvd);
 	draw_objects_transparent(cb, rp, ubo, rvd);
 
 	draw_particles(cb, rp, cam_main, rvd);
+	draw_user_meshes(cb, rp, ubo, true, true, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
 }

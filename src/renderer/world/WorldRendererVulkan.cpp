@@ -31,6 +31,7 @@
 #include "../../world/World.h"
 #include "../../world/Light.h"
 #include "../../world/components/Animator.h"
+#include "../../world/components/UserMesh.h"
 #include "../../y/Entity.h"
 #include "../../y/ComponentManager.h"
 #include "../../Config.h"
@@ -108,6 +109,9 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	ResourceManager::load_shader("module-vertex-default.shader");
 	ResourceManager::load_shader("module-vertex-animated.shader");
 	ResourceManager::load_shader("module-vertex-instanced.shader");
+	ResourceManager::load_shader("module-vertex-fx.shader");
+	ResourceManager::load_shader("module-vertex-points.shader");
+	ResourceManager::load_shader("module-geometry-points.shader");
 }
 
 WorldRendererVulkan::~WorldRendererVulkan() {
@@ -146,25 +150,26 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 }
 
 
-
-void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v) {
-	auto s = m->get_shader(t, v);
-	GraphicsPipeline *p;
-
+GraphicsPipeline* WorldRendererVulkan::get_pipeline(Shader *s, RenderPass *rp, Material *m, PrimitiveTopology top, VertexBuffer *vb) {
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		p = PipelineManager::get_alpha(s, rp, m->alpha.source, m->alpha.destination, false);
-		//msg_write(format("a %d %d  %s  %s", (int)m->alpha.source, (int)m->alpha.destination, p2s(s), p2s(p)));
+		return PipelineManager::get_alpha(s, rp, top, vb, m->alpha.source, m->alpha.destination, false);
 	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
-		p = PipelineManager::get_alpha(s, rp, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, true);
-	} else if (v == ShaderVariant::ANIMATED) {
-		p = PipelineManager::get_ani(s, rp);
+		return PipelineManager::get_alpha(s, rp, top, vb, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, true);
 	} else {
-		p = PipelineManager::get(s, rp);
+		return PipelineManager::get(s, rp, top, vb);
 	}
+}
 
+void WorldRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v, PrimitiveTopology top, VertexBuffer *vb) {
+	auto s = m->get_shader(t, v);
+	auto p = get_pipeline(s, rp, m, top, vb);
+	set_material_x(cb, rp, dset, m, p);
+}
+
+void WorldRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, GraphicsPipeline *p) {
 	cb->bind_pipeline(p);
 
-	set_textures(dset, LOCATION_TEX0, m->textures.num, weak(m->textures));
+	set_textures(dset, LOCATION_TEX0, max(m->textures.num, 1), weak(m->textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
 
@@ -365,8 +370,9 @@ void WorldRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camer
 
 			rda[index].ubo->update(&ubo);
 
-			set_material(cb, rp, rda[index].dset, sb->material[i], type, ShaderVariant::DEFAULT);
-			cb->draw(sb->mesh[0]->sub[i].vertex_buffer);
+			auto vb = sb->mesh[0]->sub[i].vertex_buffer;
+			set_material(cb, rp, rda[index].dset, sb->material[i], type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
+			cb->draw(vb);
 
 			index ++;
 		}
@@ -402,11 +408,11 @@ void WorldRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &
 		rda[index].ubo->update(&ubo);
 
 		if (allow_material) {
-			set_material(cb, rp, rda[index].dset, t->material, type, ShaderVariant::DEFAULT);
+			set_material(cb, rp, rda[index].dset, t->material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, t->vertex_buffer);
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
 		} else {
-			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
+			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, t->vertex_buffer);
 		}
 		t->prepare_draw(cam_main->owner->pos);
 		cb->draw(t->vertex_buffer);
@@ -440,12 +446,13 @@ void WorldRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *
 		ubo.roughness = s.material->roughness;
 		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
+		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
 		if (allow_material)
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::INSTANCED);
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
 		else
-			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::INSTANCED);
+			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
 
-		cb->draw_instanced(m->mesh[0]->sub[s.mat_index].vertex_buffer, min(s.matrices.num, MAX_INSTANCES));
+		cb->draw_instanced(vb, min(s.matrices.num, MAX_INSTANCES));
 		index ++;
 	}
 }
@@ -480,19 +487,20 @@ void WorldRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp,
 		if (ani)
 			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
+		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
 		if (ani) {
 			if (allow_material)
-				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED);
+				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
 			else
-				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::ANIMATED);
+				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
 		} else {
 			if (allow_material)
-				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);
+				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
 			else
-				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT);
+				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
 		}
 
-		cb->draw(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		cb->draw(vb);
 		index ++;
 	}
 }
@@ -527,13 +535,63 @@ void WorldRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass
 		if (ani)
 			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
+		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
 		if (ani) {
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED);
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
 		} else {
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT);
+			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
 		}
 
-		cb->draw(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+		cb->draw(vb);
+		index ++;
+	}
+}
+
+void WorldRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, bool transparent, RenderViewDataVK &rvd) {
+	auto &rda = rvd.rda_user;
+	int index = 0;
+
+	ubo.m = mat4::ID;
+
+	auto meshes = ComponentManager::get_list_family<UserMesh>();
+
+	for (auto m: *meshes) {
+		if (!m->material->cast_shadow and !allow_material)
+			continue;
+		if (m->material->is_transparent() != transparent)
+			continue;
+
+		Shader *shader;
+		Material *material;
+		if (allow_material) {
+			material = m->material;
+			shader = user_mesh_shader(m, type);//t);
+		} else {
+			material = material_shadow;
+			shader = user_mesh_shadow_shader(m, material, type);
+		}
+		auto pipeline = get_pipeline(shader, render_pass(), material, m->topology, m->vertex_buffer);
+
+		if (index >= rda.num) {
+			rda.add({new UniformBuffer(sizeof(UBO)),
+				pool->create_set(shader)});
+			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+		}
+
+		ubo.m = m->owner->get_matrix();
+		ubo.albedo = m->material->albedo;
+		ubo.emission = m->material->emission;
+		ubo.metal = m->material->metal;
+		ubo.roughness = m->material->roughness;
+		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+
+		if (allow_material)
+			set_material_x(cb, rp, rda[index].dset, m->material, pipeline);
+		else
+			set_material_x(cb, rp, rda[index].dset, material_shadow, pipeline);
+
+		cb->draw(m->vertex_buffer);
 		index ++;
 	}
 }
@@ -591,7 +649,7 @@ void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4
 
 	rda->ubo->update_part(&ubo, 0, sizeof(UBO));
 
-	auto pipeline = PipelineManager::get_user(s, render_pass(), "3f,4f,2f");
+	auto pipeline = PipelineManager::get_user(s, render_pass(), PrimitiveTopology::TRIANGLES, vb);
 	cb->bind_pipeline(pipeline);
 	cb->bind_descriptor_set(0, rda->dset);
 	cb->draw(vb);

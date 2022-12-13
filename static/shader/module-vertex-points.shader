@@ -3,18 +3,17 @@
 </Layout>
 <Module>
 
-#ifdef vulkan
-struct Matrices {
+struct Matrix {
 	mat4 model;
 	mat4 view;
 	mat4 project;
 };
 
+#ifdef vulkan
 layout(binding = 0) uniform Parameters {
-	Matrices matrix;
+	Matrix matrix;
 };
 #else
-struct Matrix { mat4 model, view, project; };
 /*layout(binding = 0)*/ uniform Matrix matrix;
 #endif
 

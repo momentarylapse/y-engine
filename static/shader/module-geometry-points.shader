@@ -16,8 +16,11 @@ layout(location=1) out vec3 out_n;
 layout(location=2) out vec2 out_uv;
 layout(location=3) out vec4 out_color;
 
+#ifdef vulkan
+#else
 uniform float target_width = 1024, target_height = 768;
 uniform float line_width = 4;
+#endif
 
 void main() {
         /*float w0 = gl_in[0].gl_Position.w;

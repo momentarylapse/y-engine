@@ -72,6 +72,7 @@ struct RenderViewDataVK {
 	Array<RenderDataVK> rda_ob;
 	Array<RenderDataVK> rda_ob_trans;
 	Array<RenderDataVK> rda_ob_multi;
+	Array<RenderDataVK> rda_user;
 	Array<RenderDataVK> rda_sky;
 	Array<RenderDataFxVK> rda_fx;
 };
@@ -101,7 +102,9 @@ public:
 	void render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vec3 &pos);
 
 
-	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v);
+	GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, Material *m, PrimitiveTopology top, VertexBuffer *vb);
+	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType type, ShaderVariant v, PrimitiveTopology top, VertexBuffer *vb);
+	void set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, GraphicsPipeline *p);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
 	void draw_particles(CommandBuffer *cb, RenderPass *rp, Camera *cam, RenderViewDataVK &rvd);
@@ -110,6 +113,7 @@ public:
 	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
 	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);
 	void draw_objects_instanced(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd);
+	void draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, bool transparent, RenderViewDataVK &rvd);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);
 

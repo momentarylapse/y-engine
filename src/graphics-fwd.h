@@ -101,8 +101,8 @@
 
 #endif
 
-enum class DrawMode {
+enum class PrimitiveTopology {
 	TRIANGLES,
 	LINES,
-	POINTS,
+	POINTS
 };

@@ -69,7 +69,7 @@ class Model extends Component
 
 class UserMesh extends Component
 	vertex_buffer: VertexBuffer*
-	mode: DrawMode
+	topology: PrimitiveTopology
 	material: Material*
 	vertex_shader_module: string
 	geometry_shader_module: string

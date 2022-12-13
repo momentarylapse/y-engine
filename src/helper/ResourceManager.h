@@ -21,3 +21,11 @@ public:
 	static void clear();
 };
 
+
+class UserMesh;
+class Material;
+enum class RenderPathType;
+
+Shader *user_mesh_shader(UserMesh *m, RenderPathType type);
+Shader *user_mesh_shadow_shader(UserMesh *m, Material *mat, RenderPathType type);
+

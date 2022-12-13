@@ -30,7 +30,7 @@ public:
 	Shader *shader_cache_shadow[2] = {nullptr, nullptr};
 
 	VertexBuffer *vertex_buffer = nullptr;
-	DrawMode mode = DrawMode::TRIANGLES;
+	PrimitiveTopology topology = PrimitiveTopology::TRIANGLES;
 
 	static const kaba::Class *_class;
 };

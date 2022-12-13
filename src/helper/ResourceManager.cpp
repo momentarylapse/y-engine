@@ -12,6 +12,9 @@
 #include "../y/EngineData.h"
 #include "../graphics-impl.h"
 
+#include "../world/components/UserMesh.h"
+#include "../world/Material.h"
+
 
 Path ResourceManager::shader_dir;
 Path ResourceManager::texture_dir;
@@ -206,5 +209,25 @@ void ResourceManager::clear() {
 	shader_map.clear();
 	textures.clear();
 	texture_map.clear();
+}
+
+
+
+Shader *user_mesh_shader(UserMesh *m, RenderPathType type) {
+	if (!m->shader_cache[(int)type - 1]) {
+		static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+		const string &rpt = RENDER_PATH_NAME[(int)type];
+		m->shader_cache[(int)type - 1] = ResourceManager::load_surface_shader(m->material->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
+	}
+	return m->shader_cache[(int)type - 1];
+}
+
+Shader *user_mesh_shadow_shader(UserMesh *m, Material *mat, RenderPathType type) {
+	if (!m->shader_cache_shadow[(int)type - 1]) {
+		static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+		const string &rpt = RENDER_PATH_NAME[(int)type];
+		m->shader_cache_shadow[(int)type - 1] = ResourceManager::load_surface_shader(mat->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
+	}
+	return m->shader_cache_shadow[(int)type - 1];
 }
 

@@ -68,6 +68,7 @@ void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb
 	w->draw_terrains(cb, _render_pass, ubo, false, rvd);
 	w->draw_objects_opaque(cb, _render_pass, ubo, false, rvd);
 	w->draw_objects_instanced(cb, _render_pass, ubo, false, rvd);
+	w->draw_user_meshes(cb, _render_pass, ubo, false, false, rvd);
 
 
 	cb->end_render_pass();
