@@ -43,8 +43,6 @@ public:
 	void draw_user_meshes(bool allow_material, bool transparent, RenderPathType t);
 	void prepare_instanced_matrices();
 	void prepare_lights();
-
-	void draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data);
 };
 
 #endif

@@ -15,8 +15,6 @@ namespace PipelineManager {
 
 static base::map<Shader*,GraphicsPipeline*> ob_pipelines;
 static base::map<Shader*,GraphicsPipeline*> ob_pipelines_alpha;
-static base::map<Shader*,GraphicsPipeline*> ob_ani_pipelines;
-static base::map<Shader*,GraphicsPipeline*> ob_pipelines_user;
 static base::map<Shader*,GraphicsPipeline*> ob_pipelines_gui;
 
 string topology2vk(PrimitiveTopology top) {
@@ -51,15 +49,6 @@ GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, PrimitiveTopology top, Ve
 	return p;
 }
 
-GraphicsPipeline *get_user(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb) {
-	if (ob_pipelines_user.contains(s))
-		return ob_pipelines_user[s];
-	msg_write("NEW PIPELINE USER");
-	auto p = new GraphicsPipeline(s, rp, 0, topology2vk(top), vb);
-	ob_pipelines_user.add({s, p});
-	return p;
-}
-
 GraphicsPipeline *get_gui(Shader *s, RenderPass *rp, const string &format) {
 	if (ob_pipelines_gui.contains(s))
 		return ob_pipelines_gui[s];
@@ -75,8 +64,6 @@ GraphicsPipeline *get_gui(Shader *s, RenderPass *rp, const string &format) {
 void clear() {
 	ob_pipelines.clear();
 	ob_pipelines_alpha.clear();
-	ob_ani_pipelines.clear();
-	ob_pipelines_user.clear();
 	ob_pipelines_gui.clear();
 }
 

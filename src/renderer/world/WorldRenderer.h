@@ -53,13 +53,6 @@ enum class RenderPathType {
 	DEFERRED
 };
 
-struct RenderInjector {
-	using Callback = Callable<void()>;
-	const Callback *func;
-	bool transparent;
-	bool shadow;
-};
-
 class WorldRenderer : public Renderer {
 public:
 	WorldRenderer(const string &name, Renderer *parent);
@@ -96,10 +89,6 @@ public:
 	//Camera *shadow_cam;
 	mat4 shadow_proj;
 	int shadow_index;
-
-
-	Array<RenderInjector> fx_injectors;
-	void add_fx_injector(const RenderInjector::Callback *f, bool transparent);
 
 	void reset();
 };

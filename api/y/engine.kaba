@@ -46,8 +46,6 @@ class RenderPath
 
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
-	func extern mut add_fx_injector(f: void->void, transparent: bool)
-	func extern draw_user_mesh(vb: VertexBuffer, s: Shader, m: mat4, tex: Texture*[], data: any)
 
 class HDRRenderer
 	var fb_main: FrameBuffer*

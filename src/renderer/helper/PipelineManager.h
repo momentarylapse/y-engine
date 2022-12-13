@@ -15,7 +15,6 @@ namespace PipelineManager {
 
 GraphicsPipeline *get(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb);
 GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb, Alpha src, Alpha dst, bool write_z);
-GraphicsPipeline *get_user(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb);
 GraphicsPipeline *get_gui(Shader *s, RenderPass *rp, const string &format);
 
 void clear();

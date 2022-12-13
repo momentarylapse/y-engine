@@ -116,9 +116,6 @@ public:
 	void draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, bool transparent, RenderViewDataVK &rvd);
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);
-
-
-	void draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data);
 };
 
 #endif

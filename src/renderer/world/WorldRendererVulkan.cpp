@@ -227,11 +227,6 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 	PerformanceMonitor::begin(ch_fx);
 	auto &rda = rvd.rda_fx;
 
-	// script injectors
-	for (auto &i: fx_injectors)
-		if (!i.transparent)
-			(*i.func)();
-
 	cb->bind_pipeline(pipeline_fx);
 
 	UBOFx ubo;
@@ -326,11 +321,6 @@ void WorldRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Came
 
 		index ++;
 	}
-
-	// script injectors
-	for (auto &i: fx_injectors)
-		if (i.transparent)
-			(*i.func)();
 
 
 	PerformanceMonitor::end(ch_fx);
@@ -623,36 +613,6 @@ void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {
 	}
 	rvd.ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
 	PerformanceMonitor::end(ch_prepare_lights);
-}
-
-void WorldRendererVulkan::draw_user_mesh(VertexBuffer *vb, Shader *s, const mat4 &m, const Array<Texture*> &tex, const Any &data) {
-	auto cb = command_buffer();
-
-	static base::map<VertexBuffer*,RenderDataVK> rdas;
-	RenderDataVK *rda;
-	if (rdas.contains(vb)) {
-		rda = &rdas[vb];
-	} else {
-		rdas.set(vb, {new UniformBuffer(sizeof(UBO)),
-			pool->create_set(s)});
-		rda = &rdas[vb];
-		rda->dset->set_buffer(LOCATION_PARAMS, rda->ubo);
-		//rda->dset->set_buffer(LOCATION_LIGHT, ubo_light);
-		rda->dset->set_texture(1, tex[0]);
-		rda->dset->update();
-	}
-
-	UBO ubo;
-	ubo.p = cam_main->m_projection; // FIXME use current rendering cam...
-	ubo.v = cam_main->m_view;
-	ubo.m = m;
-
-	rda->ubo->update_part(&ubo, 0, sizeof(UBO));
-
-	auto pipeline = PipelineManager::get_user(s, render_pass(), PrimitiveTopology::TRIANGLES, vb);
-	cb->bind_pipeline(pipeline);
-	cb->bind_descriptor_set(0, rda->dset);
-	cb->draw(vb);
 }
 
 #endif
