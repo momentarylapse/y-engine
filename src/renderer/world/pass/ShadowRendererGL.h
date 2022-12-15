@@ -15,6 +15,7 @@
 class Camera;
 class PerformanceMonitor;
 class Material;
+class GeometryRendererGL;
 
 class ShadowRendererGL : public Renderer {
 public:
@@ -31,6 +32,8 @@ public:
 
     mat4 proj;
     Material *material;
+
+    GeometryRendererGL *geo_renderer;
 };
 
 #endif

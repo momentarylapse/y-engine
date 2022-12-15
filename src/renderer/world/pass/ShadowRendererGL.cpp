@@ -9,11 +9,13 @@
 
 #include <GLFW/glfw3.h>
 #ifdef USING_OPENGL
+#include "../geometry/GeometryRendererGL.h"
 #include "../WorldRendererGL.h"
 #include "../../base.h"
 #include "../../../lib/nix/nix.h"
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../world/Material.h"
+#include "../../../world/Camera.h"
 #include "../../../Config.h"
 
 
@@ -30,6 +32,11 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 
 	material = new Material;
 	material->shader_path = "shadow.shader";
+
+	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, this);
+	geo_renderer->material_shadow = material;
+	geo_renderer->ubo_light = new nix::UniformBuffer();
+	geo_renderer->num_lights = 0;
 }
 
 void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
@@ -46,16 +53,18 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 	nix::set_z(true, true);
 
     // all opaque meshes
-    auto w = static_cast<WorldRendererGL*>(parent);
-	w->draw_terrains(false);
-	w->draw_objects_instanced(false);
-	w->draw_objects_opaque(false);
-	w->draw_user_meshes(false, false, RenderPathType::FORWARD);
+	geo_renderer->draw_terrains(false);
+	geo_renderer->draw_objects_instanced(false);
+	geo_renderer->draw_objects_opaque(false);
+	geo_renderer->draw_user_meshes(false, false, RenderPathType::FORWARD);
 
 }
 
 void ShadowRendererGL::prepare() {
 	PerformanceMonitor::begin(channel);
+
+
+	geo_renderer->cam = cam_main;
 
 	render_shadow_map(fb[1].get(), 1);
 	render_shadow_map(fb[0].get(), 4);

@@ -12,7 +12,6 @@
 
 class Camera;
 class PerformanceMonitor;
-class ShadowRendererGL;
 
 class WorldRendererGLForward : public WorldRendererGL {
 public:
@@ -23,8 +22,6 @@ public:
 
 	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
 	void draw_world();
-
-	ShadowRendererGL *shadow_renderer = nullptr;
 };
 
 #endif

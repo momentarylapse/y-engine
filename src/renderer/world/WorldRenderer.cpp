@@ -19,8 +19,6 @@
 #include "../../Config.h"
 
 
-bool WorldRenderer::using_view_space = false;
-
 struct GeoPush {
 	alignas(16) mat4 model;
 	alignas(16) color emission;
@@ -43,8 +41,6 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(na
 	ch_world = PerformanceMonitor::create_channel("world", channel);
 	ch_fx = PerformanceMonitor::create_channel("fx", channel);
 	ch_prepare_lights = PerformanceMonitor::create_channel("lights", channel);
-
-	using_view_space = true;
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);

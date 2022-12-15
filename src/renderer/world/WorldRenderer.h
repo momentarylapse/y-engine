@@ -15,6 +15,8 @@
 #include "../../lib/base/callable.h"
 #include "../../lib/base/pointer.h"
 
+#include "geometry/GeometryRenderer.h"
+
 class ShadowMapRenderer;
 class PerformanceMonitor;
 class World;
@@ -24,27 +26,6 @@ class vec3;
 class quaternion;
 class Material;
 class UBOLight;
-
-mat4 mtr(const vec3 &t, const quaternion &a);
-
-
-
-struct UBOMatrices {
-	alignas(16) mat4 model;
-	alignas(16) mat4 view;
-	alignas(16) mat4 proj;
-};
-
-struct UBOFog {
-	alignas(16) color col;
-	alignas(16) float distance;
-};
-
-struct VertexFx {
-	vec3 pos;
-	color col;
-	float u, v;
-};
 
 
 enum class RenderPathType {
@@ -71,8 +52,6 @@ public:
 	bool wireframe = false;
 
 
-	static bool using_view_space;
-
 	shared<FrameBuffer> fb_shadow1;
 	shared<FrameBuffer> fb_shadow2;
 	Material *material_shadow = nullptr;
@@ -81,6 +60,7 @@ public:
 	shared<Shader> shader_fx;
 
 	Array<UBOLight> lights;
+	UniformBuffer *ubo_light = nullptr;
 
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;

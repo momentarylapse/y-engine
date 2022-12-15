@@ -7,6 +7,7 @@
 
 #include "WorldRendererGLForward.h"
 #include "pass/ShadowRendererGL.h"
+#include "geometry/GeometryRendererGL.h"
 
 #include <GLFW/glfw3.h>
 #ifdef USING_OPENGL
@@ -32,11 +33,6 @@
 
 WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world", parent, RenderPathType::FORWARD) {
 
-	shadow_renderer = new ShadowRendererGL(this);
-	fb_shadow1 = shadow_renderer->fb[0];
-	fb_shadow2 = shadow_renderer->fb[1];
-	material_shadow = shadow_renderer->material;
-
 	ResourceManager::default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
 		ResourceManager::load_shader("module-lighting-pbr.shader");
@@ -52,7 +48,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 	ResourceManager::load_shader("module-vertex-fx.shader");
 	ResourceManager::load_shader("module-geometry-points.shader");
 
-	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
+	create_more();
 }
 
 void WorldRendererGLForward::prepare() {
@@ -68,10 +64,8 @@ void WorldRendererGLForward::prepare() {
 
 	cam = cam_main;
 
-
-	prepare_instanced_matrices();
-
 	prepare_lights();
+	geo_renderer->prepare();
 
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
@@ -102,7 +96,7 @@ void WorldRendererGLForward::draw() {
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 	nix::set_wire(wireframe);
 
-	draw_skyboxes();
+	geo_renderer->draw_skyboxes();
 	PerformanceMonitor::end(ch_bg);
 
 
@@ -122,7 +116,7 @@ void WorldRendererGLForward::draw() {
 	break_point();
 	PerformanceMonitor::end(ch_world);
 
-	draw_particles();
+	geo_renderer->draw_particles();
 	//nix::set_scissor(rect::EMPTY);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
@@ -195,14 +189,14 @@ void WorldRendererGLForward::draw_world() {
 	nix::bind_texture(5, cube_map.get());
 
 	// opaque
-	draw_terrains(true);
-	draw_objects_instanced(true);
-	draw_objects_opaque(true);
-	draw_user_meshes(true, false, type);
+	geo_renderer->draw_terrains(true);
+	geo_renderer->draw_objects_instanced(true);
+	geo_renderer->draw_objects_opaque(true);
+	geo_renderer->draw_user_meshes(true, false, type);
 
 	// transparent
-	draw_objects_transparent(true, type);
-	draw_user_meshes(true, true, type);
+	geo_renderer->draw_objects_transparent(true, type);
+	geo_renderer->draw_user_meshes(true, true, type);
 }
 
 

@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 
 #ifdef USING_OPENGL
+#include "geometry/GeometryRendererGL.h"
 #include "pass/ShadowRendererGL.h"
 #include "../base.h"
 #include "../../lib/nix/nix.h"
@@ -39,11 +40,6 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
 		new nix::DepthBuffer(width, height, "d24s8")});
 
-	shadow_renderer = new ShadowRendererGL(this);
-	fb_shadow1 = shadow_renderer->fb[0];
-	fb_shadow2 = shadow_renderer->fb[1];
-	material_shadow = shadow_renderer->material;
-
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
@@ -62,7 +58,6 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
-	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
 
 	ssao_sample_buffer = new nix::UniformBuffer();
 	Array<vec4> ssao_samples;
@@ -75,15 +70,18 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 
 	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", channel);
 	ch_trans = PerformanceMonitor::create_channel("trans", channel);
+
+	create_more();
 }
 
 void WorldRendererGLDeferred::prepare() {
 	PerformanceMonitor::begin(channel);
 	cam = cam_main;
 
-	prepare_instanced_matrices();
-
 	prepare_lights();
+
+	geo_renderer->prepare();
+
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
 
@@ -112,9 +110,9 @@ void WorldRendererGLDeferred::draw() {
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 
-	draw_objects_transparent(true, RenderPathType::FORWARD);
-	draw_user_meshes(true, true, RenderPathType::FORWARD);
-	draw_particles();
+	geo_renderer->draw_objects_transparent(true, RenderPathType::FORWARD);
+	geo_renderer->draw_user_meshes(true, true, RenderPathType::FORWARD);
+	geo_renderer->draw_particles();
 
 	nix::set_z(false, false);
 	nix::set_projection_matrix(mat4::ID);
@@ -137,7 +135,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb) {
 	//nix::clear_color(Green);
 	nix::clear_color(world.background);
 
-	draw_skyboxes();
+	geo_renderer->draw_skyboxes();
 	PerformanceMonitor::end(ch_bg);
 
 }
@@ -145,7 +143,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb) {
 void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_gbuf_out);
 	auto s = shader_gbuffer_out.get();
-	if (using_view_space)
+	if (geo_renderer->using_view_space)
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	else
 		s->set_floats("eye_pos", &cam->owner->pos.x, 3); // NAH
@@ -208,7 +206,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb) {
 	PerformanceMonitor::end(ch_world);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
-	draw_particles();
+	geo_renderer->draw_particles();
 }
 
 void WorldRendererGLDeferred::draw_world() {
@@ -216,10 +214,10 @@ void WorldRendererGLDeferred::draw_world() {
 	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
 	nix::bind_texture(5, cube_map.get());
 
-	draw_terrains(true);
-	draw_objects_instanced(true);
-	draw_objects_opaque(true);
-	draw_user_meshes(true, false, type);
+	geo_renderer->draw_terrains(true);
+	geo_renderer->draw_objects_instanced(true);
+	geo_renderer->draw_objects_opaque(true);
+	geo_renderer->draw_user_meshes(true, false, type);
 }
 
 
