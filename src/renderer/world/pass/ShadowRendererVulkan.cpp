@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 #ifdef USING_VULKAN
 #include "../WorldRendererVulkan.h"
+#include "../geometry/GeometryRendererVulkan.h"
 #include "../../base.h"
 #include "../../../graphics-impl.h"
 #include "../../../world/Light.h"
@@ -36,6 +37,11 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 
 	material = new Material;
 	material->shader_path = "shadow.shader";
+
+	geo_renderer = new GeometryRendererVulkan(RenderPathType::FORWARD, this);
+	geo_renderer->material_shadow = material;
+	geo_renderer->ubo_light = new UniformBuffer(8); // dummy
+	geo_renderer->num_lights = 0;
 }
 
 void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, const mat4 &m) {
@@ -64,11 +70,10 @@ void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb
 	ubo.num_lights = 0;
 	ubo.shadow_index = -1;
 
-	auto w = static_cast<WorldRendererVulkan*>(parent);
-	w->draw_terrains(cb, _render_pass, ubo, false, rvd);
-	w->draw_objects_opaque(cb, _render_pass, ubo, false, rvd);
-	w->draw_objects_instanced(cb, _render_pass, ubo, false, rvd);
-	w->draw_user_meshes(cb, _render_pass, ubo, false, false, rvd);
+	geo_renderer->draw_terrains(cb, _render_pass, ubo, false, rvd);
+	geo_renderer->draw_objects_opaque(cb, _render_pass, ubo, false, rvd);
+	geo_renderer->draw_objects_instanced(cb, _render_pass, ubo, false, rvd);
+	geo_renderer->draw_user_meshes(cb, _render_pass, ubo, false, false, rvd);
 
 
 	cb->end_render_pass();

@@ -45,6 +45,8 @@ void WorldRendererGL::create_more() {
 	fb_shadow2 = shadow_renderer->fb[1];
 	material_shadow = shadow_renderer->material;
 	geo_renderer->material_shadow = shadow_renderer->material;
+	geo_renderer->fb_shadow1 = shadow_renderer->fb[0];
+	geo_renderer->fb_shadow2 = shadow_renderer->fb[1];
 }
 
 void WorldRendererGL::prepare_lights() {

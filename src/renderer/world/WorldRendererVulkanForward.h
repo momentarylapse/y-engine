@@ -25,8 +25,6 @@ public:
 	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
 
 	vulkan::Device *device;
-
-	ShadowRendererVulkan *shadow_renderer = nullptr;
 };
 
 #endif

@@ -17,6 +17,7 @@ class Camera;
 class Material;
 class PerformanceMonitor;
 struct RenderViewDataVK;
+class GeometryRendererVulkan;
 
 class ShadowRendererVulkan : public Renderer {
 public:
@@ -37,6 +38,8 @@ public:
     mat4 proj;
     Material *material;
 	RenderViewDataVK rvd[2];
+
+    GeometryRendererVulkan *geo_renderer;
 };
 
 #endif

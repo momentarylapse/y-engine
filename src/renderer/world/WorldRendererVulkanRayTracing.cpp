@@ -61,7 +61,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer,buffer");
 		rtx.dset->set_storage_image(1, offscreen_image);
 		rtx.dset->set_buffer(2, rtx.buffer_cam);
-		rtx.dset->set_buffer(4, rvd_def.ubo_light);
+		rtx.dset->set_buffer(4, geo_renderer->rvd_def.ubo_light);
 		rtx.dset->set_buffer(5, buffer_meshes);
 
 		auto shader_gen = ResourceManager::load_shader("vulkan/gen.shader");
@@ -80,7 +80,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
 		compute.dset->set_buffer(1, buffer_meshes);
-		compute.dset->set_buffer(2, rvd_def.ubo_light);
+		compute.dset->set_buffer(2, geo_renderer->rvd_def.ubo_light);
 		compute.dset->update();
 	}
 
@@ -109,7 +109,7 @@ static int cur_query_offset;
 
 void WorldRendererVulkanRayTracing::prepare() {
 	
-	prepare_lights(dummy_cam, rvd_def);
+	prepare_lights(dummy_cam, geo_renderer->rvd_def);
 
 	pc.iview = cam_main->view_matrix().inverse();
 	pc.background = background();

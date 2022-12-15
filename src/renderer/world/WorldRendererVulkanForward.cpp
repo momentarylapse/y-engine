@@ -38,19 +38,7 @@
 WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
 	device = _device;
 
-
-	shadow_renderer = new ShadowRendererVulkan(this);
-	fb_shadow1 = shadow_renderer->fb[0];
-	fb_shadow2 = shadow_renderer->fb[1];
-	material_shadow = shadow_renderer->material;
-
-
-	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
-	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
-	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
-	pipeline_fx->set_z(true, false);
-	pipeline_fx->set_culling(CullMode::NONE);
-	pipeline_fx->rebuild();
+	create_more();
 }
 
 static int cur_query_offset;
@@ -70,6 +58,7 @@ void WorldRendererVulkanForward::prepare() {
 
 
 
+#if 0
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
@@ -77,8 +66,11 @@ void WorldRendererVulkanForward::prepare() {
 			render_into_cubemap(cb, cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
-	prepare_lights(cam_main, rvd_def);
-	prepare_instanced_matrices();
+#endif
+
+	prepare_lights(cam_main, geo_renderer->rvd_def);
+	
+	geo_renderer->prepare();
 
 	if (shadow_index >= 0)
 		shadow_renderer->render(cb, shadow_proj);
@@ -91,9 +83,9 @@ void WorldRendererVulkanForward::draw() {
 	auto cb = command_buffer();
 	auto rp = render_pass();
 
-	auto &rvd = rvd_def;
+	auto &rvd = geo_renderer->rvd_def;
 
-	draw_skyboxes(cb, rp, cam_main, (float)width / (float)height, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, cam_main, (float)width / (float)height, rvd);
 
 	UBO ubo;
 	ubo.p = cam_main->m_projection;
@@ -101,14 +93,14 @@ void WorldRendererVulkanForward::draw() {
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	draw_terrains(cb, rp, ubo, true, rvd);
-	draw_objects_opaque(cb, rp, ubo, true, rvd);
-	draw_objects_instanced(cb, rp, ubo, true, rvd);
-	draw_user_meshes(cb, rp, ubo, true, false, rvd);
-	draw_objects_transparent(cb, rp, ubo, rvd);
+	geo_renderer->draw_terrains(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_objects_opaque(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_objects_instanced(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_user_meshes(cb, rp, ubo, true, false, rvd);
+	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
 
-	draw_particles(cb, rp, cam_main, rvd);
-	draw_user_meshes(cb, rp, ubo, true, true, rvd);
+	geo_renderer->draw_particles(cb, rp, cam_main, rvd);
+	geo_renderer->draw_user_meshes(cb, rp, ubo, true, true, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
 }
@@ -123,7 +115,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 
-	draw_skyboxes(cb, rp, cam, (float)fb->width / (float)fb->height, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, cam, (float)fb->width / (float)fb->height, rvd);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;
@@ -131,11 +123,11 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	draw_terrains(cb, rp, ubo, true, rvd);
-	draw_objects_opaque(cb, rp, ubo, true, rvd);
-	draw_objects_transparent(cb, rp, ubo, rvd);
+	geo_renderer->draw_terrains(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_objects_opaque(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
 
-	draw_particles(cb, rp, cam, rvd);
+	geo_renderer->draw_particles(cb, rp, cam, rvd);
 
 	cb->end_render_pass();
 

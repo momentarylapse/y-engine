@@ -59,8 +59,12 @@ public:
 	shared<Shader> shader_fx;
 	VertexBuffer *vb_fx = nullptr;
 
+	// FIXME  manually set from ShadowRenderer*
 	UniformBuffer *ubo_light = nullptr;
 	int num_lights = 0;
 	mat4 shadow_proj;
 	int shadow_index = -1;
+	shared<FrameBuffer> fb_shadow1;
+	shared<FrameBuffer> fb_shadow2;
+	shared<CubeMap> cube_map;
 };

@@ -35,7 +35,7 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 
 	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, this);
 	geo_renderer->material_shadow = material;
-	geo_renderer->ubo_light = new nix::UniformBuffer();
+	geo_renderer->ubo_light = new nix::UniformBuffer(); // dummy
 	geo_renderer->num_lights = 0;
 }
 
