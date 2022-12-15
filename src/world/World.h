@@ -22,6 +22,7 @@ class Object;
 class Material;
 class Terrain;
 class SolidBody;
+class MultiInstance;
 class Entity;
 class TemplateDataScriptVariable;
 class Light;
@@ -62,8 +63,8 @@ struct PartialModel {
 
 struct PartialModelMulti {
 	Model *model;
+	MultiInstance *instance;
 	Material *material;
-	Array<mat4> matrices;
 	int mat_index;
 	float d;
 	bool shadow, transparent;
@@ -107,7 +108,7 @@ public:
 	Terrain *create_terrain(const Path &filename, const vec3 &pos);
 	Terrain *create_terrain_no_reg(const Path &filename, const vec3 &pos);
 
-	Object* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
+	Entity* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 
 	int next_object_index = -1;
 	void request_next_object_index(int i);
@@ -121,7 +122,7 @@ public:
 	void register_model(Model *m);
 	void unregister_model(Model *m);
 
-	void register_model_multi(Model *m, const Array<mat4> &matrices);
+	void register_model_multi(MultiInstance *mi);
 
 	void add_link(Link *l);
 

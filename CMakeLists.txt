@@ -184,6 +184,7 @@ set(SOURCE
 	src/renderer/Renderer.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
+	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp

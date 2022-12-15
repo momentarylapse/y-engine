@@ -32,6 +32,7 @@
 #include "../../world/Light.h"
 #include "../../world/components/Animator.h"
 #include "../../world/components/UserMesh.h"
+#include "../../world/components/MultiInstance.h"
 #include "../../y/Entity.h"
 #include "../../y/ComponentManager.h"
 #include "../../Config.h"
@@ -53,7 +54,7 @@ const int LOCATION_INSTANCE_MATRICES = 7;
 const int LOCATION_FX_TEX0 = 1;
 
 const int MAX_LIGHTS = 1024;
-const int MAX_INSTANCES = 1<<10;
+const int MAX_INSTANCES = 1<<11;
 
 
 WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
@@ -442,7 +443,7 @@ void WorldRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *
 		else
 			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
 
-		cb->draw_instanced(vb, min(s.matrices.num, MAX_INSTANCES));
+		cb->draw_instanced(vb, min(s.instance->matrices.num, MAX_INSTANCES));
 		index ++;
 	}
 }
@@ -590,7 +591,7 @@ void WorldRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UB
 void WorldRendererVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
-		ubo_multi_matrix->update_part(&s.matrices[0], 0, min(s.matrices.num, MAX_INSTANCES) * sizeof(mat4));
+		ubo_multi_matrix->update_part(&s.instance->matrices[0], 0, min(s.instance->matrices.num, MAX_INSTANCES) * sizeof(mat4));
 	}
 	PerformanceMonitor::end(ch_pre);
 }

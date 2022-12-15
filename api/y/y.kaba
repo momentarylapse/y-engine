@@ -116,6 +116,10 @@ class Skeleton extends Component
 	var parents: int[]
 	func extern mut reset()
 
+class MultiInstance extends Component
+	var model: Model*
+	var matrices: mat4[]
+
 class Terrain extends Component
 	var pattern: vec3
 	var num_x, num_z: int

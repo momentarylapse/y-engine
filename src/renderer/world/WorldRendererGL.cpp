@@ -34,6 +34,7 @@
 #include "../../world/Light.h"
 #include "../../world/components/Animator.h"
 #include "../../world/components/UserMesh.h"
+#include "../../world/components/MultiInstance.h"
 #include "../../y/Entity.h"
 #include "../../y/ComponentManager.h"
 #include "../../meta.h"
@@ -272,7 +273,7 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 		if (!s.material->cast_shadow and !allow_material)
 			continue;
 		Model *m = s.model;
-		nix::set_model_matrix(s.matrices[0]);//m->_matrix);
+		nix::set_model_matrix(s.instance->matrices[0]);//m->_matrix);
 		if (allow_material) {
 			set_material(s.material, type, ShaderVariant::INSTANCED);
 		} else {
@@ -280,7 +281,7 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 		}
 		nix::bind_buffer(5, ubo_multi_matrix);
 		//msg_write(s.matrices.num);
-		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.matrices.num);
+		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.instance->matrices.num);
 		//s.material->shader = ss;
 	}
 }
@@ -364,7 +365,7 @@ void WorldRendererGL::draw_user_meshes(bool allow_material, bool transparent, Re
 void WorldRendererGL::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
-		ubo_multi_matrix->update_array(s.matrices);
+		ubo_multi_matrix->update_array(s.instance->matrices);
 	}
 	PerformanceMonitor::end(ch_pre);
 }

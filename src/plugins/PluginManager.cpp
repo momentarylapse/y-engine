@@ -58,6 +58,7 @@
 #include "../world/components/Animator.h"
 #include "../world/components/Skeleton.h"
 #include "../world/components/UserMesh.h"
+#include "../world/components/MultiInstance.h"
 #include "../meta.h"
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
@@ -94,7 +95,7 @@ Entity* _create_object_no_reg(World *w, const Path &filename, const vec3 &pos, c
 	return nullptr;
 }
 
-Model* _create_object_multi(World *w, const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
+Entity* _create_object_multi(World *w, const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_multi(filename, pos, ang); );
 	return nullptr;
 }
@@ -312,6 +313,10 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("SolidBody.update_mass", &SolidBody::update_mass);
 
 	ext->declare_class_size("Collider", sizeof(Collider));
+
+	ext->declare_class_size("MultiInstance", sizeof(MultiInstance));
+	ext->declare_class_element("MultiInstance.model", &MultiInstance::model);
+	ext->declare_class_element("MultiInstance.matrices", &MultiInstance::matrices);
 
 
 	ext->declare_class_size("Terrain", sizeof(Terrain));
@@ -710,6 +715,7 @@ void PluginManager::import_kaba() {
 	import_component_class<UserMesh>(s, "UserMesh");
 	import_component_class<Animator>(s, "Animator");
 	import_component_class<Skeleton>(s, "Skeleton");
+	import_component_class<MultiInstance>(s, "MultiInstance");
 	import_component_class<Model>(s, "Model");
 	import_component_class<Terrain>(s, "Terrain");
 	import_component_class<Light>(s, "Light");

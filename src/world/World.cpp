@@ -30,6 +30,7 @@
 #include "components/Collider.h"
 #include "components/Animator.h"
 #include "components/Skeleton.h"
+#include "components/MultiInstance.h"
 
 #ifdef _X_ALLOW_X_
 #include "Light.h"
@@ -478,65 +479,67 @@ Entity *World::create_object_no_reg_x(const Path &filename, const string &name, 
 	if (filename.is_empty())
 		throw Exception("create_object: empty filename");
 
-	auto o = create_entity(pos, ang);
+	auto e = create_entity(pos, ang);
 
 	//msg_write(on);
 	auto *m = ModelManager::load(filename);
 	m->script_data.name = name;
 
-	o->_add_component_external_(m);
+	e->_add_component_external_(m);
 	m->update_matrix();
 
 
 	// automatic components
 	if (m->_template->solid_body) {
-		auto col = (MeshCollider*)o->add_component(MeshCollider::_class, "");
-		auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
+		auto col = (MeshCollider*)e->add_component(MeshCollider::_class, "");
+		auto sb = (SolidBody*)e->add_component(SolidBody::_class, "");
 	}
 
 	if (m->_template->skeleton)
-		o->add_component(Skeleton::_class, "");
+		e->add_component(Skeleton::_class, "");
 
 	if (m->_template->animator)
-		o->add_component(Animator::_class, "");
+		e->add_component(Animator::_class, "");
 
-	return o;
+	return e;
 }
 
-Object* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
+Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 
+	auto e = create_entity(vec3::ZERO, quaternion::ID);
+	auto mi = (MultiInstance*)e->add_component(MultiInstance::_class, "");
 
-	//msg_write(on);
-	auto *o = static_cast<Object*>(ModelManager::load(filename));
+	auto *m = ModelManager::load(filename);
+	e->_add_component_external_(m);
+	mi->model = m;
 
-	Array<mat4> matrices;
-	for (int i=0; i<pos.num; i++) {
-		matrices.add(mat4::translation(pos[i]) * mat4::rotation(ang[i]));
-	}
-	register_model_multi(o, matrices);
+	for (int i=0; i<pos.num; i++)
+		mi->matrices.add(mat4::translation(pos[i]) * mat4::rotation(ang[i]));
 
-	return o;
+	register_model_multi(mi);
+
+	return e;
 }
 
-void World::register_model_multi(Model *m, const Array<mat4> &matrices) {
+void World::register_model_multi(MultiInstance *mi) {
 
-	if (m->registered)
+	if (mi->model->registered)
 		return;
 
-	for (int i=0;i<m->material.num;i++){
-		Material *mat = m->material[i];
+	for (int i=0; i<mi->model->material.num; i++){
+		Material *mat = mi->model->material[i];
 
 		PartialModelMulti p;
-		p.model = m;
+		p.instance = mi;
+		p.model = mi->model;
 		p.material = mat;
-		p.matrices = matrices;
 		p.mat_index = i;
 		p.transparent = false;
 		p.shadow = false;
 		sorted_multi.add(p);
 	}
 
-	m->registered = true;
+	mi->model->registered = true;
 }
 
 void World::request_next_object_index(int i) {

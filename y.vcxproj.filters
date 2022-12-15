@@ -535,6 +535,9 @@
     <ClCompile Include="src\world\components\Collider.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
+    <ClCompile Include="src\world\components\MultiInstance.cpp">
+      <Filter>src\world\components</Filter>
+    </ClCompile>
     <ClCompile Include="src\world\components\Skeleton.cpp">
       <Filter>src\world\components</Filter>
     </ClCompile>
@@ -1129,6 +1132,9 @@
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Collider.h">
+      <Filter>src\world\components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world\components\MultiInstance.h">
       <Filter>src\world\components</Filter>
     </ClInclude>
     <ClInclude Include="src\world\components\Skeleton.h">
