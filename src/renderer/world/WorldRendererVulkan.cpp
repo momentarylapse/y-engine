@@ -39,8 +39,6 @@
 #include "../../meta.h"
 
 
-UniformBuffer *ubo_multi_matrix = nullptr;
-
 const int CUBE_SIZE = 128;
 
 
@@ -66,10 +64,6 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 	for (int i=0; i<6; i++)
 		rvd_cube[i].ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 
-
-
-
-	ubo_multi_matrix = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
 
 
 	cube_map = new CubeMap(CUBE_SIZE, "rgba:i8");
@@ -426,7 +420,7 @@ void WorldRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *
 				pool->create_set(s.material->get_shader(type, ShaderVariant::INSTANCED))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
-			rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, ubo_multi_matrix);
+			rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, s.instance->ubo_matrices);
 		}
 
 		m->update_matrix();
@@ -591,7 +585,9 @@ void WorldRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UB
 void WorldRendererVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
-		ubo_multi_matrix->update_part(&s.instance->matrices[0], 0, min(s.instance->matrices.num, MAX_INSTANCES) * sizeof(mat4));
+		if (!s.instance->ubo_matrices)
+			s.instance->ubo_matrices = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
+		s.instance->ubo_matrices->update_part(&s.instance->matrices[0], 0, min(s.instance->matrices.num, MAX_INSTANCES) * sizeof(mat4));
 	}
 	PerformanceMonitor::end(ch_pre);
 }

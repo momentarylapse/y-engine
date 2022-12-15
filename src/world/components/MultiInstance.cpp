@@ -6,8 +6,14 @@
  */
 
 #include "MultiInstance.h"
+#include "../../graphics-impl.h"
 
 const kaba::Class *MultiInstance::_class = nullptr;
 
 MultiInstance::MultiInstance() {
+}
+
+MultiInstance::~MultiInstance() {
+    if (ubo_matrices)
+        delete ubo_matrices;
 }

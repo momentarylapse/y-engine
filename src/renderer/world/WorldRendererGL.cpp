@@ -45,8 +45,6 @@ namespace nix {
 }
 void apply_shader_data(Shader *s, const Any &shader_data);
 
-nix::UniformBuffer *ubo_multi_matrix = nullptr;
-
 const int CUBE_SIZE = 128;
 
 
@@ -62,8 +60,6 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPat
 	//shadow_cam = new Camera(v_0, quaternion::ID, rect::ID);
 
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
-
-	ubo_multi_matrix = new nix::UniformBuffer();
 }
 
 void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
@@ -279,7 +275,7 @@ void WorldRendererGL::draw_objects_instanced(bool allow_material) {
 		} else {
 			set_material(material_shadow, type, ShaderVariant::INSTANCED);
 		}
-		nix::bind_buffer(5, ubo_multi_matrix);
+		nix::bind_buffer(5, s.instance->ubo_matrices);
 		//msg_write(s.matrices.num);
 		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.instance->matrices.num);
 		//s.material->shader = ss;
@@ -365,7 +361,9 @@ void WorldRendererGL::draw_user_meshes(bool allow_material, bool transparent, Re
 void WorldRendererGL::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	for (auto &s: world.sorted_multi) {
-		ubo_multi_matrix->update_array(s.instance->matrices);
+		if (!s.instance->ubo_matrices)
+			s.instance->ubo_matrices = new nix::UniformBuffer();
+		s.instance->ubo_matrices->update_array(s.instance->matrices);
 	}
 	PerformanceMonitor::end(ch_pre);
 }
