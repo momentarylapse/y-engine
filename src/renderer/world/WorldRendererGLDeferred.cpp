@@ -72,6 +72,12 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 	ch_trans = PerformanceMonitor::create_channel("trans", channel);
 
 	create_more();
+
+	geo_renderer_trans = new GeometryRendererGL(RenderPathType::FORWARD, this);
+	geo_renderer_trans->cube_map = cube_map;
+	geo_renderer_trans->material_shadow = shadow_renderer->material;
+	geo_renderer_trans->fb_shadow1 = shadow_renderer->fb[0];
+	geo_renderer_trans->fb_shadow2 = shadow_renderer->fb[1];
 }
 
 void WorldRendererGLDeferred::prepare() {
@@ -81,6 +87,11 @@ void WorldRendererGLDeferred::prepare() {
 	prepare_lights();
 
 	geo_renderer->prepare();
+	geo_renderer_trans->prepare();
+	geo_renderer_trans->ubo_light = ubo_light;
+	geo_renderer_trans->num_lights = lights.num;
+	geo_renderer_trans->shadow_index = shadow_index;
+	geo_renderer_trans->shadow_proj = shadow_proj;
 
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
@@ -110,9 +121,7 @@ void WorldRendererGLDeferred::draw() {
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 
-	geo_renderer->draw_objects_transparent(true, RenderPathType::FORWARD);
-	geo_renderer->draw_user_meshes(true, true, RenderPathType::FORWARD);
-	geo_renderer->draw_particles();
+	geo_renderer_trans->draw_transparent();
 
 	nix::set_z(false, false);
 	nix::set_projection_matrix(mat4::ID);

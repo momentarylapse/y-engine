@@ -317,7 +317,7 @@ void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Ca
 	cam->update_matrices(aspect);
 }
 
-void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_tr;
 	int index = 0;
 
@@ -341,7 +341,7 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 
 		rda[index].ubo->update(&ubo);
 
-		if (allow_material) {
+		if (!is_shadow_pass()) {
 			set_material(cb, rp, rda[index].dset, t->material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, t->vertex_buffer);
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
@@ -354,13 +354,13 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 	}
 }
 
-void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_ob_multi;
 	int index = 0;
 	ubo.m = mat4::ID;
 
 	for (auto &s: world.sorted_multi) {
-		if (!s.material->cast_shadow and !allow_material)
+		if (!s.material->cast_shadow and is_shadow_pass())
 			continue;
 		Model *m = s.model;
 
@@ -381,7 +381,7 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
 		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		if (allow_material)
+		if (!is_shadow_pass())
 			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
 		else
 			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
@@ -391,14 +391,14 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 	}
 }
 
-void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_ob;
 	int index = 0;
 
 	ubo.m = mat4::ID;
 
 	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and !allow_material)
+		if (!s.material->cast_shadow and is_shadow_pass())
 			continue;
 		Model *m = s.model;
 
@@ -423,12 +423,12 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 
 		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
 		if (ani) {
-			if (allow_material)
+			if (!is_shadow_pass())
 				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
 			else
 				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
 		} else {
-			if (allow_material)
+			if (!is_shadow_pass())
 				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
 			else
 				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
@@ -481,7 +481,7 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 	}
 }
 
-void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool allow_material, bool transparent, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool transparent, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_user;
 	int index = 0;
 
@@ -490,14 +490,14 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 	auto meshes = ComponentManager::get_list_family<UserMesh>();
 
 	for (auto m: *meshes) {
-		if (!m->material->cast_shadow and !allow_material)
+		if (!m->material->cast_shadow and is_shadow_pass())
 			continue;
 		if (m->material->is_transparent() != transparent)
 			continue;
 
 		Shader *shader;
 		Material *material;
-		if (allow_material) {
+		if (!is_shadow_pass()) {
 			material = m->material;
 			shader = user_mesh_shader(m, type);//t);
 		} else {
@@ -520,7 +520,7 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		ubo.roughness = m->material->roughness;
 		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
-		if (allow_material)
+		if (!is_shadow_pass())
 			set_material_x(cb, rp, rda[index].dset, m->material, pipeline);
 		else
 			set_material_x(cb, rp, rda[index].dset, material_shadow, pipeline);

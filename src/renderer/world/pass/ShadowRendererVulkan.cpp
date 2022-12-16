@@ -39,6 +39,7 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 	material->shader_path = "shadow.shader";
 
 	geo_renderer = new GeometryRendererVulkan(RenderPathType::FORWARD, this);
+	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 	geo_renderer->material_shadow = material;
 	geo_renderer->ubo_light = new UniformBuffer(8); // dummy
 	geo_renderer->num_lights = 0;
@@ -46,11 +47,14 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 
 void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, const mat4 &m) {
 	proj = m;
-	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);
-	render_shadow_map(cb, fb[1].get(), 1, rvd[1]);
+	prepare();
 }
 
 void ShadowRendererVulkan::prepare() {
+	geo_renderer->prepare();
+	auto cb = command_buffer();
+	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);
+	render_shadow_map(cb, fb[1].get(), 1, rvd[1]);
 }
 
 void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
@@ -70,10 +74,10 @@ void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb
 	ubo.num_lights = 0;
 	ubo.shadow_index = -1;
 
-	geo_renderer->draw_terrains(cb, _render_pass, ubo, false, rvd);
-	geo_renderer->draw_objects_opaque(cb, _render_pass, ubo, false, rvd);
-	geo_renderer->draw_objects_instanced(cb, _render_pass, ubo, false, rvd);
-	geo_renderer->draw_user_meshes(cb, _render_pass, ubo, false, false, rvd);
+	geo_renderer->draw_terrains(cb, _render_pass, ubo, rvd);
+	geo_renderer->draw_objects_opaque(cb, _render_pass, ubo, rvd);
+	geo_renderer->draw_objects_instanced(cb, _render_pass, ubo, rvd);
+	geo_renderer->draw_user_meshes(cb, _render_pass, ubo, false, rvd);
 
 
 	cb->end_render_pass();

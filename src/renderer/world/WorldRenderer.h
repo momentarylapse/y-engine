@@ -60,14 +60,12 @@ public:
 
 	Array<UBOLight> lights;
 	UniformBuffer *ubo_light = nullptr;
+	int shadow_index = -1;
+	mat4 shadow_proj;
 
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;
 	shared<CubeMap> cube_map;
-
-	//Camera *shadow_cam;
-	mat4 shadow_proj;
-	int shadow_index;
 
 	void reset();
 };

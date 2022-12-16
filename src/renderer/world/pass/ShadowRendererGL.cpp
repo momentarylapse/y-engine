@@ -34,8 +34,8 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 	material->shader_path = "shadow.shader";
 
 	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, this);
+	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 	geo_renderer->material_shadow = material;
-	geo_renderer->ubo_light = new nix::UniformBuffer(); // dummy
 	geo_renderer->num_lights = 0;
 }
 
@@ -53,10 +53,7 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 	nix::set_z(true, true);
 
     // all opaque meshes
-	geo_renderer->draw_terrains(false);
-	geo_renderer->draw_objects_instanced(false);
-	geo_renderer->draw_objects_opaque(false);
-	geo_renderer->draw_user_meshes(false, false, RenderPathType::FORWARD);
+	geo_renderer->draw_opaque();
 
 }
 
@@ -65,6 +62,7 @@ void ShadowRendererGL::prepare() {
 
 
 	geo_renderer->cam = cam_main;
+	geo_renderer->prepare();
 
 	render_shadow_map(fb[1].get(), 1);
 	render_shadow_map(fb[0].get(), 4);

@@ -93,14 +93,14 @@ void WorldRendererVulkanForward::draw() {
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	geo_renderer->draw_terrains(cb, rp, ubo, true, rvd);
-	geo_renderer->draw_objects_opaque(cb, rp, ubo, true, rvd);
-	geo_renderer->draw_objects_instanced(cb, rp, ubo, true, rvd);
-	geo_renderer->draw_user_meshes(cb, rp, ubo, true, false, rvd);
+	geo_renderer->draw_terrains(cb, rp, ubo, rvd);
+	geo_renderer->draw_objects_opaque(cb, rp, ubo, rvd);
+	geo_renderer->draw_objects_instanced(cb, rp, ubo, rvd);
+	geo_renderer->draw_user_meshes(cb, rp, ubo, false, rvd);
 	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
 
 	geo_renderer->draw_particles(cb, rp, cam_main, rvd);
-	geo_renderer->draw_user_meshes(cb, rp, ubo, true, true, rvd);
+	geo_renderer->draw_user_meshes(cb, rp, ubo, true, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
 }
@@ -123,8 +123,8 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
-	geo_renderer->draw_terrains(cb, rp, ubo, true, rvd);
-	geo_renderer->draw_objects_opaque(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_terrains(cb, rp, ubo, rvd);
+	geo_renderer->draw_objects_opaque(cb, rp, ubo, rvd);
 	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
 
 	geo_renderer->draw_particles(cb, rp, cam, rvd);

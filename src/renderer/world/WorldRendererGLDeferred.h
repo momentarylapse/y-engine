@@ -19,6 +19,8 @@ public:
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
+	GeometryRendererGL *geo_renderer_trans = nullptr;
+
 	WorldRendererGLDeferred(Renderer *parent);
 	void prepare() override;
 	void draw() override;

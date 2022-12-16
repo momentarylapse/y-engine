@@ -44,13 +44,20 @@ struct VertexFx {
 
 class GeometryRenderer : public Renderer {
 public:
+	enum class Flags {
+		ALLOW_OPAQUE = 1,
+		ALLOW_TRANSPARENT = 2,
+		SHADOW_PASS = 4,
+	} flags;
+
 	GeometryRenderer(RenderPathType type, Renderer *parent);
+
+	bool is_shadow_pass() const;
 
 	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;
 
 	static bool using_view_space;
 	RenderPathType type;
-
 
 	Material *material_shadow = nullptr;
 
@@ -68,3 +75,11 @@ public:
 	shared<FrameBuffer> fb_shadow2;
 	shared<CubeMap> cube_map;
 };
+
+inline GeometryRenderer::Flags operator|(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {
+	return (GeometryRenderer::Flags)((int)a | (int)b);
+}
+
+inline GeometryRenderer::Flags operator&(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {
+	return (GeometryRenderer::Flags)((int)a & (int)b);
+}

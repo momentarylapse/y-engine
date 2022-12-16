@@ -53,6 +53,7 @@ void WorldRendererGL::prepare_lights() {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();
+	shadow_index = -1;
 	for (auto *l: world.lights) {
 		if (!l->enabled)
 			continue;

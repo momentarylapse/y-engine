@@ -208,14 +208,14 @@ void GeometryRendererGL::draw_skyboxes() {
 	break_point();
 }
 
-void GeometryRendererGL::draw_terrains(bool allow_material) {
+void GeometryRendererGL::draw_terrains() {
 	auto terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: *terrains) {
-		if (!t->material->cast_shadow and !allow_material)
+		if (!t->material->cast_shadow and is_shadow_pass())
 			continue;
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
-		if (allow_material) {
+		if (!is_shadow_pass()) {
 			set_material(t->material, type, ShaderVariant::DEFAULT);
 			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
@@ -228,13 +228,13 @@ void GeometryRendererGL::draw_terrains(bool allow_material) {
 	}
 }
 
-void GeometryRendererGL::draw_objects_instanced(bool allow_material) {
+void GeometryRendererGL::draw_objects_instanced() {
 	for (auto &s: world.sorted_multi) {
-		if (!s.material->cast_shadow and !allow_material)
+		if (!s.material->cast_shadow and is_shadow_pass())
 			continue;
 		Model *m = s.model;
 		nix::set_model_matrix(s.instance->matrices[0]);//m->_matrix);
-		if (allow_material) {
+		if (!is_shadow_pass()) {
 			set_material(s.material, type, ShaderVariant::INSTANCED);
 		} else {
 			set_material(material_shadow, type, ShaderVariant::INSTANCED);
@@ -246,9 +246,9 @@ void GeometryRendererGL::draw_objects_instanced(bool allow_material) {
 	}
 }
 
-void GeometryRendererGL::draw_objects_opaque(bool allow_material) {
+void GeometryRendererGL::draw_objects_opaque() {
 	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and !allow_material)
+		if (!s.material->cast_shadow and is_shadow_pass())
 			continue;
 		Model *m = s.model;
 		m->update_matrix();
@@ -257,7 +257,7 @@ void GeometryRendererGL::draw_objects_opaque(bool allow_material) {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (ani) {
-			if (allow_material) {
+			if (!is_shadow_pass()) {
 				set_material(s.material, type, ShaderVariant::ANIMATED);
 			} else {
 				set_material(material_shadow, type, ShaderVariant::ANIMATED);
@@ -265,7 +265,7 @@ void GeometryRendererGL::draw_objects_opaque(bool allow_material) {
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(7, ani->buf);
 		} else {
-			if (allow_material) {
+			if (!is_shadow_pass()) {
 				set_material(s.material, type, ShaderVariant::DEFAULT);
 			} else {
 				set_material(material_shadow, type, ShaderVariant::DEFAULT);
@@ -275,9 +275,10 @@ void GeometryRendererGL::draw_objects_opaque(bool allow_material) {
 	}
 }
 
-void GeometryRendererGL::draw_objects_transparent(bool allow_material, RenderPathType t) {
+void GeometryRendererGL::draw_objects_transparent() {
 	nix::set_z(false, true);
-	if (allow_material)
+	if (is_shadow_pass())
+		return;
 	for (auto &s: world.sorted_trans) {
 		Model *m = s.model;
 		m->update_matrix();
@@ -285,9 +286,9 @@ void GeometryRendererGL::draw_objects_transparent(bool allow_material, RenderPat
 		nix::set_cull(nix::CullMode::NONE);
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 		if (ani) {
-			set_material(s.material, t, ShaderVariant::ANIMATED);
+			set_material(s.material, type, ShaderVariant::ANIMATED);
 		} else {
-			set_material(s.material, t, ShaderVariant::DEFAULT);
+			set_material(s.material, type, ShaderVariant::DEFAULT);
 		}
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		nix::set_cull(nix::CullMode::DEFAULT);
@@ -296,20 +297,20 @@ void GeometryRendererGL::draw_objects_transparent(bool allow_material, RenderPat
 	nix::set_z(true, true);
 }
 
-void GeometryRendererGL::draw_user_meshes(bool allow_material, bool transparent, RenderPathType t) {
+void GeometryRendererGL::draw_user_meshes(bool transparent) {
 	auto meshes = ComponentManager::get_list_family<UserMesh>();
 	for (auto *m: *meshes) {
 		if (m->material->is_transparent() != transparent)
 			continue;
-		if (!m->material->cast_shadow and !allow_material)
+		if (!m->material->cast_shadow and is_shadow_pass())
 			continue;
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
-		if (allow_material) {
-			auto shader = user_mesh_shader(m, type);//t);
+		if (!is_shadow_pass()) {
+			auto shader = user_mesh_shader(m, type);
 			set_material_x(m->material, shader);
 		} else {
-			auto shader = user_mesh_shadow_shader(m, material_shadow, t);
+			auto shader = user_mesh_shadow_shader(m, material_shadow, type);
 			set_material_x(material_shadow, shader);
 		}
 		if (m->topology == PrimitiveTopology::TRIANGLES)
@@ -335,19 +336,20 @@ void GeometryRendererGL::prepare_instanced_matrices() {
 
 
 void GeometryRendererGL::draw_opaque() {
-	nix::set_view_matrix(cam->view_matrix());
-	nix::set_z(true, true);
-
-	nix::bind_buffer(1, ubo_light);
-	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
-	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
-	nix::bind_texture(5, cube_map.get());
+	if (!is_shadow_pass()) {
+		nix::set_z(true, true);
+		nix::set_view_matrix(cam->view_matrix());
+		nix::bind_buffer(1, ubo_light);
+		nix::bind_texture(3, fb_shadow1->depth_buffer.get());
+		nix::bind_texture(4, fb_shadow2->depth_buffer.get());
+		nix::bind_texture(5, cube_map.get());
+	}
 
 	// opaque
-	draw_terrains(true);
-	draw_objects_instanced(true);
-	draw_objects_opaque(true);
-	draw_user_meshes(true, false, type);
+	draw_terrains();
+	draw_objects_instanced();
+	draw_objects_opaque();
+	draw_user_meshes(false);
 }
 
 void GeometryRendererGL::draw_transparent() {
@@ -359,8 +361,8 @@ void GeometryRendererGL::draw_transparent() {
 	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
 	nix::bind_texture(5, cube_map.get());
 
-	draw_objects_transparent(true, type);
-	draw_user_meshes(true, true, type);
+	draw_objects_transparent();
+	draw_user_meshes(true);
 	draw_particles();
 }
 

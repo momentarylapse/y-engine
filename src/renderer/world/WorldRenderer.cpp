@@ -44,7 +44,6 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(na
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
-	shadow_index = -1;
 }
 
 WorldRenderer::~WorldRenderer() {
