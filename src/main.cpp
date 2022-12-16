@@ -131,7 +131,7 @@ public:
 			Array<string> ss;
 			for (auto c: r->children)
 				ss.add(render_graph_str(c));
-			s += " <<< (" + implode(ss, ", ");
+			s += " <<< (" + implode(ss, ", ") + ")";
 		}
 		return s;
 	}

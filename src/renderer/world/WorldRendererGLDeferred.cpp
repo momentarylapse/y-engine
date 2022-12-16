@@ -168,6 +168,9 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	nix::vb_temp->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 	nix::draw_triangles(nix::vb_temp);
 
+	// ...
+	//geo_renderer->draw_transparent();
+
 
 	break_point();
 	PerformanceMonitor::end(ch_gbuf_out);
@@ -180,44 +183,24 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb) {
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
 
-	float max_depth = cam->max_depth;
-	cam->max_depth = 2000000;
-	cam->update_matrices((float)fb->width / (float)fb->height);
-	nix::set_projection_matrix(mat4::scale(1,-1,1) * cam->m_projection);
-
 	//nix::clear_color(Green);//world.background);
 	nix::clear_z();
 	//fb->clear_color(2, color(0, 0,0,max_depth * 0.99f));
 	fb->clear_color(0, color(-1, 0,1,0));
 
 
-	cam->max_depth = max_depth;
 	cam->update_matrices((float)fb->width / (float)fb->height);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
 
-	nix::bind_buffer(1, ubo_light);
-	nix::set_view_matrix(cam->view_matrix());
-	nix::set_z(true, true);
 	nix::set_cull(nix::CullMode::CW);
 
-	draw_world();
+	geo_renderer->draw_opaque();
 	Scheduler::handle_render_inject();
 	break_point();
 	PerformanceMonitor::end(ch_world);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
 	geo_renderer->draw_particles();
-}
-
-void WorldRendererGLDeferred::draw_world() {
-	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
-	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
-	nix::bind_texture(5, cube_map.get());
-
-	geo_renderer->draw_terrains(true);
-	geo_renderer->draw_objects_instanced(true);
-	geo_renderer->draw_objects_opaque(true);
-	geo_renderer->draw_user_meshes(true, false, type);
 }
 
 

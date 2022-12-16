@@ -94,12 +94,12 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 }
 
 void WorldRendererVulkan::create_more() {
-	geo_renderer = new GeometryRendererVulkan(type, this);
-
 	shadow_renderer = new ShadowRendererVulkan(this);
 	fb_shadow1 = shadow_renderer->fb[0];
 	fb_shadow2 = shadow_renderer->fb[1];
-	material_shadow = shadow_renderer->material;
+
+	geo_renderer = new GeometryRendererVulkan(type, this);
+	geo_renderer->cube_map = cube_map;
 	geo_renderer->material_shadow = shadow_renderer->material;
 	geo_renderer->fb_shadow1 = shadow_renderer->fb[0];
 	geo_renderer->fb_shadow2 = shadow_renderer->fb[1];

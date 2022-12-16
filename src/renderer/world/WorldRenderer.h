@@ -54,7 +54,6 @@ public:
 
 	shared<FrameBuffer> fb_shadow1;
 	shared<FrameBuffer> fb_shadow2;
-	Material *material_shadow = nullptr;
 	Camera *cam;
 
 	shared<Shader> shader_fx;

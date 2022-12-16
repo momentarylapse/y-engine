@@ -28,7 +28,6 @@ public:
 	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
 	void render_into_gbuffer(FrameBuffer *fb);
 	void draw_background(FrameBuffer *fb);
-	void draw_world();
 
 
 	void render_out_from_gbuffer(FrameBuffer *source);

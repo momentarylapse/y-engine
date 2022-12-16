@@ -111,12 +111,11 @@ void WorldRendererGLForward::draw() {
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
-	draw_world();
-	Scheduler::handle_render_inject();
+	geo_renderer->draw_opaque();
+	geo_renderer->draw_transparent();
 	break_point();
 	PerformanceMonitor::end(ch_world);
 
-	geo_renderer->draw_particles();
 	//nix::set_scissor(rect::EMPTY);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
@@ -182,22 +181,5 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 	nix::set_cull(nix::CullMode::DEFAULT);
 }
 #endif
-
-void WorldRendererGLForward::draw_world() {
-	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
-	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
-	nix::bind_texture(5, cube_map.get());
-
-	// opaque
-	geo_renderer->draw_terrains(true);
-	geo_renderer->draw_objects_instanced(true);
-	geo_renderer->draw_objects_opaque(true);
-	geo_renderer->draw_user_meshes(true, false, type);
-
-	// transparent
-	geo_renderer->draw_objects_transparent(true, type);
-	geo_renderer->draw_user_meshes(true, true, type);
-}
-
 
 #endif

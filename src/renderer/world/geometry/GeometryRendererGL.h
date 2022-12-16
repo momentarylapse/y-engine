@@ -36,6 +36,9 @@ public:
 	void draw_objects_instanced(bool allow_material);
 	void draw_user_meshes(bool allow_material, bool transparent, RenderPathType t);
 	void prepare_instanced_matrices();
+
+	void draw_opaque();
+	void draw_transparent();
 };
 
 #endif

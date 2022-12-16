@@ -21,7 +21,6 @@ public:
 	void draw() override;
 
 	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
-	void draw_world();
 };
 
 #endif

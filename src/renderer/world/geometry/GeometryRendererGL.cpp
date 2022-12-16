@@ -333,4 +333,36 @@ void GeometryRendererGL::prepare_instanced_matrices() {
 }
 
 
+
+void GeometryRendererGL::draw_opaque() {
+	nix::set_view_matrix(cam->view_matrix());
+	nix::set_z(true, true);
+
+	nix::bind_buffer(1, ubo_light);
+	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
+	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
+	nix::bind_texture(5, cube_map.get());
+
+	// opaque
+	draw_terrains(true);
+	draw_objects_instanced(true);
+	draw_objects_opaque(true);
+	draw_user_meshes(true, false, type);
+}
+
+void GeometryRendererGL::draw_transparent() {
+	nix::set_view_matrix(cam->view_matrix());
+	//nix::set_z(true, true);
+
+	nix::bind_buffer(1, ubo_light);
+	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
+	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
+	nix::bind_texture(5, cube_map.get());
+
+	draw_objects_transparent(true, type);
+	draw_user_meshes(true, true, type);
+	draw_particles();
+}
+
+
 #endif
