@@ -46,7 +46,7 @@ void Path::operator =(const Path &p) {
 	s = p.s;
 }
 
-void Path::operator <<=(const Path &p) {
+void Path::operator |=(const Path &p) {
 	if (is_empty())
 		s = p.s;
 	else if (has_dir_ending())
@@ -55,9 +55,9 @@ void Path::operator <<=(const Path &p) {
 		s += SEPARATOR + p.s;
 }
 
-Path Path::operator <<(const Path &p) const {
+Path Path::operator |(const Path &p) const {
 	Path temp = *this;
-	temp <<= p;
+	temp |= p;
 	return temp;
 }
 
@@ -183,7 +183,7 @@ string Path::dirname() const {
 
 Path Path::absolute() const {
 	if (is_relative())
-		return os::fs::current_directory() << *this;
+		return os::fs::current_directory() | *this;
 	return *this;
 }
 

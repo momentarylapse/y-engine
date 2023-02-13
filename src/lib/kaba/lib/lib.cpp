@@ -89,6 +89,7 @@ const Class *TypeImage;
 
 const Class *TypeException;
 const Class *TypeExceptionP;
+const Class *TypeNoValueError;
 
 const Class *TypeClass;
 const Class *TypeClassP;
@@ -99,13 +100,15 @@ const Class *TypeFunctionCodeP;
 const Class *TypeSpecialFunction;
 const Class *TypeSpecialFunctionP;
 
-extern const Class *TypePath;
-
 Module *cur_package = nullptr;
 
 
 static Function *cur_func = nullptr;
 static Class *cur_class;
+
+Flags operator|(Flags a, Flags b) {
+	return (Flags)((int)a | (int)b);
+}
 
 bool flags_has(Flags flags, Flags t) {
 	return ((int(flags) & int(t)) == int(t));
@@ -263,16 +266,16 @@ const Class *add_type_f(const Class *ret_type, const Array<const Class*> &params
 	add_class(ff);
 	if (ret_type == TypeVoid) {
 		if (params.num == 0) {
-			class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, &KabaCallable<void()>::__init__);
+			class_add_func(Identifier::Func::INIT, TypeVoid, &KabaCallable<void()>::__init__);
 				func_add_param("fp", TypePointer);
 			class_add_func_virtual("call", TypeVoid, &KabaCallable<void()>::operator());
 		} else if (params.num == 1 and ptr_param(params[0])) {
-			class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, &KabaCallable<void(void*)>::__init__);
+			class_add_func(Identifier::Func::INIT, TypeVoid, &KabaCallable<void(void*)>::__init__);
 				func_add_param("fp", TypePointer);
 			class_add_func_virtual("call", TypeVoid, &KabaCallable<void(void*)>::operator());
 				func_add_param("a", params[0]);
 		} else if (params.num == 2 and ptr_param(params[0]) and ptr_param(params[1])) {
-			class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, &KabaCallable<void(void*,void*)>::__init__);
+			class_add_func(Identifier::Func::INIT, TypeVoid, &KabaCallable<void(void*,void*)>::__init__);
 				func_add_param("fp", TypePointer);
 			class_add_func_virtual("call", TypeVoid, &KabaCallable<void(void*,void*)>::operator());
 				func_add_param("a", params[0]);
@@ -283,7 +286,7 @@ const Class *add_type_f(const Class *ret_type, const Array<const Class*> &params
 
 	/*auto c = cur_package->syntax->make_class_callable_fp(params, ret_type);
 	add_class(c);
-		class_add_func(IDENTIFIER_FUNC_INIT, TypeVoid, &kaba_callable_fp_init);
+		class_add_func(Identifier::Func::INIT, TypeVoid, &kaba_callable_fp_init);
 			func_add_param("fp", TypePointer);
 	return c;*/
 }

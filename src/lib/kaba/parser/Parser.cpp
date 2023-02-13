@@ -333,11 +333,11 @@ shared<Node> Parser::parse_abstract_operand_extension(shared<Node> operand, Bloc
 	} else if (Exp.cur == "?") {
 		// optional?
 		return parse_abstract_operand_extension(parse_abstract_operand_extension_optional(operand), block, true);
-	} else if (Exp.cur == IDENTIFIER_SHARED or Exp.cur == IDENTIFIER_OWNED) {
+	} else if (Exp.cur == Identifier::SHARED or Exp.cur == Identifier::OWNED) {
 		auto sub = operand;
-		if (Exp.cur == IDENTIFIER_SHARED) {
+		if (Exp.cur == Identifier::SHARED) {
 			operand = new Node(NodeKind::ABSTRACT_TYPE_SHARED, 0, TypeUnknown);
-		} else { //if (pre == IDENTIFIER_OWNED)
+		} else { //if (pre == Identifier::OWNED)
 			operand = new Node(NodeKind::ABSTRACT_TYPE_OWNED, 0, TypeUnknown);
 		}
 		operand->token_id = Exp.consume_token();
@@ -417,7 +417,7 @@ shared<Node> Parser::parse_abstract_set_builder(Block *block) {
 	auto n_exp = parse_abstract_operand_greedy(block);
 	
 	shared<Node> n_cmp;
-	if (try_consume(IDENTIFIER_IF))
+	if (try_consume(Identifier::IF))
 		n_cmp = parse_abstract_operand_greedy(block);
 
 	expect_identifier("]", "] expected");
@@ -433,9 +433,9 @@ shared<Node> Parser::parse_abstract_set_builder(Block *block) {
 
 
 shared<Node> Parser::apply_format(shared<Node> n, const string &fmt) {
-	auto f = n->type->get_member_func(IDENTIFIER_FUNC_FORMAT, TypeString, {TypeString});
+	auto f = n->type->get_member_func(Identifier::Func::FORMAT, TypeString, {TypeString});
 	if (!f)
-		do_error(format("format string: no '%s.%s(string)' function found", n->type->long_name(), IDENTIFIER_FUNC_FORMAT), n);
+		do_error(format("format string: no '%s.%s(string)' function found", n->type->long_name(), Identifier::Func::FORMAT), n);
 	auto *c = tree->add_constant(TypeString);
 	c->as_string() = fmt;
 	auto nf = add_node_call(f, n->token_id);
@@ -719,21 +719,20 @@ shared<Node> digest_operator_list_to_tree(shared_array<Node> &operands, shared_a
 }
 
 // greedily parse AxBxC...(operand, operator)
-shared<Node> Parser::parse_operand_greedy(Block *block, bool allow_tuples, shared<Node> first_operand) {
-	auto tree = parse_abstract_operand_greedy(block, allow_tuples, first_operand);
+shared<Node> Parser::parse_operand_greedy(Block *block, bool allow_tuples) {
+	auto tree = parse_abstract_operand_greedy(block, allow_tuples);
 	if (config.verbose)
 		tree->show();
 	return con.concretify_node(tree, block, block->name_space());
 }
 
 // greedily parse AxBxC...(operand, operator)
-shared<Node> Parser::parse_abstract_operand_greedy(Block *block, bool allow_tuples, shared<Node> first_operand) {
+shared<Node> Parser::parse_abstract_operand_greedy(Block *block, bool allow_tuples) {
 	shared_array<Node> operands;
 	shared_array<Node> operators;
 
 	// find the first operand
-	if (!first_operand)
-		first_operand = parse_abstract_operand(block);
+	auto first_operand = parse_abstract_operand(block);
 	if (config.verbose) {
 		msg_write("---first:");
 		first_operand->show();
@@ -784,7 +783,7 @@ shared<Node> Parser::parse_abstract_for_header(Block *block) {
 	}
 
 
-	expect_identifier(IDENTIFIER_IN, "'in' expected after variable in 'for ...'");
+	expect_identifier(Identifier::IN, "'in' expected after variable in 'for ...'");
 
 	// first value/array
 	auto val0 = parse_abstract_operand_greedy(block);
@@ -929,14 +928,14 @@ shared<Node> Parser::parse_abstract_statement_raise(Block *block) {
 	Exp.next();
 	auto cmd = add_node_statement(StatementID::RAISE);
 
-	auto cmd_ex = check_param_link(parse_operand_greedy(block), TypeExceptionP, IDENTIFIER_RAISE, 0);
+	auto cmd_ex = check_param_link(parse_operand_greedy(block), TypeExceptionP, Identifier::RAISE, 0);
 	cmd->set_num_params(1);
 	cmd->set_param(0, cmd_ex);
 
 	/*if (block->function->return_type == TypeVoid) {
 		cmd->set_num_params(0);
 	} else {
-		auto cmd_value = CheckParamLink(GetCommand(block), block->function->return_type, IDENTIFIER_RETURN, 0);
+		auto cmd_value = CheckParamLink(GetCommand(block), block->function->return_type, Identifier::RETURN, 0);
 		cmd->set_num_params(1);
 		cmd->set_param(0, cmd_value);
 	}*/
@@ -966,7 +965,7 @@ shared<Node> Parser::parse_abstract_statement_try(Block *block) {
 	int num_excepts = 0;
 
 	// except?
-	while (!Exp.end_of_file() and (Exp.cur == IDENTIFIER_EXCEPT) and (Exp.cur_line->indent == ind)) {
+	while (!Exp.end_of_file() and (Exp.cur == Identifier::EXCEPT) and (Exp.cur_line->indent == ind)) {
 		int token1 = Exp.consume_token(); // "except"
 
 		auto cmd_ex = add_node_statement(StatementID::EXCEPT, token1, TypeUnknown);
@@ -979,7 +978,7 @@ shared<Node> Parser::parse_abstract_statement_try(Block *block) {
 				do_error_exp("Exception class expected");
 			cmd_ex->params.add(ex_type);
 			if (!Exp.end_of_line()) {
-				expect_identifier(IDENTIFIER_AS, "'as' expected");
+				expect_identifier(Identifier::AS, "'as' expected");
 				cmd_ex->params.add(parse_abstract_token()); // var name
 			}
 		}
@@ -1052,12 +1051,12 @@ shared<Node> Parser::parse_abstract_statement_if(Block *block) {
 	Exp.next_line();
 
 	// else?
-	if (!Exp.end_of_file() and (Exp.cur == IDENTIFIER_ELSE) and (Exp.cur_line->indent >= ind)) {
+	if (!Exp.end_of_file() and (Exp.cur == Identifier::ELSE) and (Exp.cur_line->indent >= ind)) {
 		cmd_if->link_no = (int64)statement_from_id(StatementID::IF_ELSE);
 		cmd_if->set_num_params(3);
 		Exp.next();
 		// iterative if
-		if (Exp.cur == IDENTIFIER_IF) {
+		if (Exp.cur == Identifier::IF) {
 			// sub-if's in a new block
 			auto cmd_block = new Block(block->function, block, TypeUnknown);
 			cmd_if->set_param(2, cmd_block);
@@ -1139,7 +1138,7 @@ shared_array<Node> parse_comma_sep_token_list(Parser *p) {
 
 // local (variable) definitions...
 shared<Node> Parser::parse_abstract_statement_var(Block *block) {
-	bool is_let = (Exp.cur == IDENTIFIER_LET);
+	bool is_let = (Exp.cur == Identifier::LET);
 	Exp.next(); // "var"/"let"
 
 	// tuple "var (x,y) = ..."
@@ -1247,33 +1246,33 @@ shared<Node> Parser::parse_abstract_statement_raw_function_pointer(Block *block)
 }
 
 shared<Node> Parser::parse_abstract_statement(Block *block) {
-	if (Exp.cur == IDENTIFIER_FOR) {
+	if (Exp.cur == Identifier::FOR) {
 		return parse_abstract_statement_for(block);
-	} else if (Exp.cur == IDENTIFIER_WHILE) {
+	} else if (Exp.cur == Identifier::WHILE) {
 		return parse_abstract_statement_while(block);
- 	} else if (Exp.cur == IDENTIFIER_BREAK) {
+ 	} else if (Exp.cur == Identifier::BREAK) {
  		return parse_abstract_statement_break();
-	} else if (Exp.cur == IDENTIFIER_CONTINUE) {
+	} else if (Exp.cur == Identifier::CONTINUE) {
 		return parse_abstract_statement_continue();
-	} else if (Exp.cur == IDENTIFIER_RETURN) {
+	} else if (Exp.cur == Identifier::RETURN) {
 		return parse_abstract_statement_return(block);
-	//} else if (Exp.cur == IDENTIFIER_RAISE) {
+	//} else if (Exp.cur == Identifier::RAISE) {
 	//	ParseStatementRaise(block);
-	} else if (Exp.cur == IDENTIFIER_TRY) {
+	} else if (Exp.cur == Identifier::TRY) {
 		return parse_abstract_statement_try(block);
-	} else if (Exp.cur == IDENTIFIER_IF) {
+	} else if (Exp.cur == Identifier::IF) {
 		return parse_abstract_statement_if(block);
-	} else if (Exp.cur == IDENTIFIER_PASS) {
+	} else if (Exp.cur == Identifier::PASS) {
 		return parse_abstract_statement_pass(block);
-	} else if (Exp.cur == IDENTIFIER_NEW) {
+	} else if (Exp.cur == Identifier::NEW) {
 		return parse_abstract_statement_new(block);
-	} else if (Exp.cur == IDENTIFIER_DELETE) {
+	} else if (Exp.cur == Identifier::DELETE) {
 		return parse_abstract_statement_delete(block);
-	} else if (Exp.cur == IDENTIFIER_LET or Exp.cur == IDENTIFIER_VAR) {
+	} else if (Exp.cur == Identifier::LET or Exp.cur == Identifier::VAR) {
 		return parse_abstract_statement_var(block);
-	} else if (Exp.cur == IDENTIFIER_LAMBDA or Exp.cur == IDENTIFIER_FUNC) {
+	} else if (Exp.cur == Identifier::LAMBDA or Exp.cur == Identifier::FUNC) {
 		return parse_abstract_statement_lambda(block);
-	} else if (Exp.cur == IDENTIFIER_RAW_FUNCTION_POINTER) {
+	} else if (Exp.cur == Identifier::RAW_FUNCTION_POINTER) {
 		return parse_abstract_statement_raw_function_pointer(block);
 	}
 	do_error_exp("unhandled statement: " + Exp.cur);
@@ -1340,10 +1339,8 @@ void Parser::parse_abstract_complete_command(Block *block) {
 
 	} else {
 
-		auto first = parse_abstract_operand(block);
-
 		// commands (the actual code!)
-		block->add(parse_abstract_operand_greedy(block, true, first));
+		block->add(parse_abstract_operand_greedy(block, true));
 	}
 
 	expect_new_line();
@@ -1351,7 +1348,7 @@ void Parser::parse_abstract_complete_command(Block *block) {
 
 void Parser::parse_import() {
 	string command = Exp.cur; // 'use' / 'import'
-	bool indirect = (command == IDENTIFIER_IMPORT);
+	bool indirect = (command == Identifier::IMPORT);
 	Exp.next();
 
 	// parse import name
@@ -1360,7 +1357,7 @@ void Parser::parse_import() {
 
 	string as_name;
 	while (!Exp.end_of_line()) {
-		if (try_consume(IDENTIFIER_AS)) {
+		if (try_consume(Identifier::AS)) {
 			expect_no_new_line("name expected after 'as'");
 			as_name = Exp.cur;
 			break;
@@ -1393,6 +1390,12 @@ void Parser::parse_enum(Class *_namespace) {
 	int token0 = Exp.cur_token();
 	auto _class = tree->create_new_class(Exp.consume(), Class::Type::ENUM, sizeof(int), -1, nullptr, {}, _namespace, token0);
 
+	// as shared|@noauto
+	if (try_consume(Identifier::AS))
+		_class->flags = parse_flags(_class->flags);
+
+	auto_implementer.add_missing_function_headers_for_class(_class);
+
 	expect_new_line_with_indent();
 	Exp.next_line();
 	int indent0 = Exp.cur_line->indent;
@@ -1413,7 +1416,7 @@ void Parser::parse_enum(Class *_namespace) {
 			}
 			c->as_int() = (next_value ++);
 
-			if (try_consume(IDENTIFIER_AS)) {
+			if (try_consume(Identifier::AS)) {
 				expect_no_new_line();
 
 				auto cn = parse_and_eval_const(tree->root_of_all_evil->block.get(), TypeString);
@@ -1449,7 +1452,7 @@ void parser_class_add_element(Parser *p, Class *_class, const string &name, cons
 	if (override and ! orig)
 		p->do_error(format("can not override element '%s', no previous definition", name), token_id);
 	if (!override and orig)
-		p->do_error(format("element '%s' is already defined, use '%s' to override", name, IDENTIFIER_OVERRIDE), token_id);
+		p->do_error(format("element '%s' is already defined, use '%s' to override", name, Identifier::OVERRIDE), token_id);
 	if (override) {
 		if (orig->type->is_pointer() and type->is_pointer())
 			orig->type = type;
@@ -1480,7 +1483,7 @@ void parser_class_add_element(Parser *p, Class *_class, const string &name, cons
 
 Class *Parser::parse_class_header(Class *_namespace, int &offset0) {
 	offset0 = 0;
-	bool as_interface = (Exp.consume() == IDENTIFIER_INTERFACE); // 'class'/'interface'
+	bool as_interface = (Exp.consume() == Identifier::INTERFACE); // class/struct/interface
 	string name = Exp.cur;
 	int token_id = Exp.consume_token();
 
@@ -1493,37 +1496,38 @@ Class *Parser::parse_class_header(Class *_namespace, int &offset0) {
 	if (as_interface)
 		_class->type = Class::Type::INTERFACE;
 
-	if (try_consume(IDENTIFIER_AS)) {
-		if (try_consume(IDENTIFIER_SHARED))
-			flags_set(_class->flags, Flags::SHARED);
-		else
-			do_error_exp("'shared' extected after 'as'");
-	}
-
 	// parent class
-	if (try_consume(IDENTIFIER_EXTENDS)) {
+	if (try_consume(Identifier::EXTENDS)) {
 		auto parent = parse_type(_namespace); // force
 		if (!parent->fully_parsed())
 			return nullptr;
 			//do_error(format("parent class '%s' not fully parsed yet", parent->long_name()));
 		_class->derive_from(parent, true);
+		_class->flags = parent->flags;
 		offset0 = parent->size;
 	}
 
-	if (try_consume(IDENTIFIER_IMPLEMENTS)) {
+	if (try_consume(Identifier::IMPLEMENTS)) {
 		auto parent = parse_type(_namespace); // force
 		if (!parent->fully_parsed())
 			return nullptr;
 		_class->derive_from(parent, true);
 		offset0 = parent->size;
 	}
-	expect_new_line();
 
-	if (flags_has(_class->flags, Flags::SHARED)) {
-		parser_class_add_element(this, _class, IDENTIFIER_SHARED_COUNT, TypeInt, Flags::NONE, offset0, _class->token_id);
+	// as shared|@noauto
+	Flags explicit_flags = Flags::NONE;
+	if (try_consume(Identifier::AS)) {
+		explicit_flags = parse_flags(explicit_flags);
+		flags_set(_class->flags, explicit_flags);
 	}
 
-	//msg_write("parse " + _class->long_name());
+	expect_new_line();
+
+	if (flags_has(explicit_flags, Flags::SHARED)) {
+		parser_class_add_element(this, _class, Identifier::SHARED_COUNT, TypeInt, Flags::NONE, offset0, _class->token_id);
+	}
+
 	return _class;
 }
 
@@ -1545,32 +1549,29 @@ bool Parser::parse_class(Class *_namespace) {
 		if (Exp.end_of_file())
 			break;
 
-		if (Exp.cur == IDENTIFIER_ENUM) {
+		if (Exp.cur == Identifier::ENUM) {
 			parse_enum(_class);
-		} else if ((Exp.cur == IDENTIFIER_CLASS) or (Exp.cur == IDENTIFIER_INTERFACE)) {
-			//msg_write("sub....");
+		} else if ((Exp.cur == Identifier::CLASS) or (Exp.cur == Identifier::INTERFACE)) {
 			int cur_token = Exp.cur_token();
 			if (!parse_class(_class)) {
 				sub_class_token_ids.add(cur_token);
 				skip_parse_class();
 			}
-			//msg_write(">>");
-		} else if (Exp.cur == IDENTIFIER_FUNC) {
+		} else if (Exp.cur == Identifier::FUNC) {
 			auto flags = Flags::CONST;
 			if (_class->is_interface())
 				flags_set(flags, Flags::VIRTUAL);
 			auto f = parse_function_header(TypeVoid, _class, flags);
 			expect_new_line("newline expected after parameter list");
 			skip_parsing_function_body(f);
-		} else if ((Exp.cur == IDENTIFIER_CONST) or (Exp.cur == IDENTIFIER_LET)) {
+		} else if ((Exp.cur == Identifier::CONST) or (Exp.cur == Identifier::LET)) {
 			parse_named_const(_class, tree->root_of_all_evil->block.get());
-		} else if (try_consume(IDENTIFIER_VAR)) {
+		} else if (try_consume(Identifier::VAR)) {
 			parse_class_variable_declaration(_class, tree->root_of_all_evil->block.get(), _offset);
-		} else if (Exp.cur == IDENTIFIER_USE) {
+		} else if (Exp.cur == Identifier::USE) {
 			parse_class_use_statement(_class);
 		} else {
 			parse_class_variable_declaration(_class, tree->root_of_all_evil->block.get(), _offset);
-			//do_error("unknown definition inside a class");
 		}
 	}
 
@@ -1579,14 +1580,10 @@ bool Parser::parse_class(Class *_namespace) {
 
 	int cur_token = Exp.cur_token();
 
-	//msg_write(ia2s(sub_class_line_offsets));
 	for (int id: sub_class_token_ids) {
-		//msg_write("SUB...");
 		Exp.jump(id);
-		//.add(Exp.get_line_no());
 		if (!parse_class(_class))
 			do_error(format("parent class not fully parsed yet"), id);
-			//do_error(format("parent class '%s' not fully parsed yet", parent->long_name()));
 	}
 
 	Exp.jump(cur_token-1);
@@ -1609,7 +1606,7 @@ void Parser::post_process_newly_parsed_class(Class *_class, int size) {
 			for (ClassElement &e: _class->elements)
 				e.offset = external->process_class_offset(_class->cname(tree->base_class), e.name, e.offset + config.pointer_size);
 
-			auto el = ClassElement(IDENTIFIER_VTABLE_VAR, TypePointer, 0);
+			auto el = ClassElement(Identifier::VTABLE_VAR, TypePointer, 0);
 			_class->elements.insert(el, 0);
 			size += config.pointer_size;
 
@@ -1624,7 +1621,7 @@ void Parser::post_process_newly_parsed_class(Class *_class, int size) {
 	_class->size = external->process_class_size(_class->cname(tree->base_class), size);
 
 
-	tree->add_missing_function_headers_for_class(_class);
+	auto_implementer.add_missing_function_headers_for_class(_class);
 
 	flags_set(_class->flags, Flags::FULLY_PARSED);
 }
@@ -1798,7 +1795,7 @@ bool peek_commands_super(ExpressionBuffer &Exp) {
 	ExpressionBuffer::Line *l = Exp.cur_line + 1;
 	if (l->tokens.num < 3)
 		return false;
-	if ((l->tokens[0].name == IDENTIFIER_SUPER) and (l->tokens[1].name == ".") and (l->tokens[2].name == IDENTIFIER_FUNC_INIT))
+	if ((l->tokens[0].name == Identifier::SUPER) and (l->tokens[1].name == ".") and (l->tokens[2].name == Identifier::Func::INIT))
 		return true;
 	return false;
 }
@@ -1871,7 +1868,7 @@ Function *Parser::parse_function_header(const Class *default_type, Class *name_s
 		name = format(":lambda-%d:", lambda_count ++);
 	} else {
 		name = Exp.consume();
-		if ((name == IDENTIFIER_FUNC_INIT) or (name == IDENTIFIER_FUNC_DELETE) or (name == IDENTIFIER_FUNC_ASSIGN))
+		if ((name == Identifier::Func::INIT) or (name == Identifier::Func::DELETE) or (name == Identifier::Func::ASSIGN))
 			flags_clear(flags, Flags::CONST);
 	}
 
@@ -1964,13 +1961,13 @@ void Parser::parse_abstract_function_body(Function *f) {
 	bool more_to_parse = true;
 
 	// auto implement constructor?
-	if (f->name == IDENTIFIER_FUNC_INIT) {
+	if (f->name == Identifier::Func::INIT) {
 		if (peek_commands_super(Exp)) {
 			more_to_parse = parse_abstract_function_command(f, indent0);
 
-			auto_implementer.auto_implement_regular_constructor(f, f->name_space, false);
+			auto_implementer.implement_regular_constructor(f, f->name_space, false);
 		} else {
-			auto_implementer.auto_implement_regular_constructor(f, f->name_space, true);
+			auto_implementer.implement_regular_constructor(f, f->name_space, true);
 		}
 	}
 
@@ -1995,7 +1992,7 @@ void Parser::parse_abstract_function_body(Function *f) {
 void Parser::parse_all_class_names_in_block(Class *ns, int indent0) {
 	while (!Exp.end_of_file()) {
 		if ((Exp.cur_line->indent == indent0) and (Exp.cur_line->tokens.num >= 2)) {
-			if ((Exp.cur == IDENTIFIER_CLASS) or (Exp.cur == IDENTIFIER_INTERFACE)) {
+			if ((Exp.cur == Identifier::CLASS) or (Exp.cur == Identifier::STRUCT) or (Exp.cur == Identifier::INTERFACE)) {
 				Exp.next();
 //				if (Exp.cur.num == 1)
 //					do_error("class names must be at least 2 characters long", Exp.cur_token());
@@ -2028,32 +2025,36 @@ Flags Parser::parse_flags(Flags initial) {
 	Flags flags = initial;
 
 	while (true) {
-		if (Exp.cur == IDENTIFIER_STATIC) {
+		if (Exp.cur == Identifier::STATIC) {
 			flags_set(flags, Flags::STATIC);
-		} else if (Exp.cur == IDENTIFIER_EXTERN) {
+		} else if (Exp.cur == Identifier::EXTERN) {
 			flags_set(flags, Flags::EXTERN);
-		} else if (Exp.cur == IDENTIFIER_CONST) {
+		} else if (Exp.cur == Identifier::CONST) {
 			flags_set(flags, Flags::CONST);
-		} else if (Exp.cur == IDENTIFIER_MUTABLE) {
+		} else if (Exp.cur == Identifier::MUTABLE) {
 			flags_clear(flags, Flags::CONST);
-		} else if (Exp.cur == IDENTIFIER_CONST) {
+		} else if (Exp.cur == Identifier::CONST) {
 			flags_set(flags, Flags::CONST);
-		} else if (Exp.cur == IDENTIFIER_VIRTUAL) {
+		} else if (Exp.cur == Identifier::VIRTUAL) {
 			flags_set(flags, Flags::VIRTUAL);
-		} else if (Exp.cur == IDENTIFIER_OVERRIDE) {
+		} else if (Exp.cur == Identifier::OVERRIDE) {
 			flags_set(flags, Flags::OVERRIDE);
-		} else if (Exp.cur == IDENTIFIER_SELFREF or Exp.cur == IDENTIFIER_REF) {
+		} else if (Exp.cur == Identifier::SELFREF or Exp.cur == Identifier::REF) {
 			flags_set(flags, Flags::REF);
-		//} else if (Exp.cur == IDENTIFIER_SHARED) {
-		//	flags = flags_mix({flags, Flags::SHARED});
-		//} else if (Exp.cur == IDENTIFIER_OWNED) {
-		//	flags = flags_mix({flags, Flags::OWNED});
-		} else if (Exp.cur == IDENTIFIER_OUT) {
+		} else if (Exp.cur == Identifier::SHARED) {
+			flags_set(flags, Flags::SHARED);
+		} else if (Exp.cur == Identifier::OWNED) {
+			flags_set(flags, Flags::OWNED);
+		} else if (Exp.cur == Identifier::OUT) {
 			flags_set(flags, Flags::OUT);
-		} else if (Exp.cur == IDENTIFIER_THROWS) {
+		} else if (Exp.cur == Identifier::THROWS) {
 			flags_set(flags, Flags::RAISES_EXCEPTIONS);
-		} else if (Exp.cur == IDENTIFIER_PURE) {
+		} else if (Exp.cur == Identifier::PURE) {
 			flags_set(flags, Flags::PURE);
+		} else if (Exp.cur == Identifier::NOAUTO) {
+			flags_set(flags, Flags::NOAUTO);
+		} else if (Exp.cur == Identifier::NOFRAME) {
+			flags_set(flags, Flags::NOFRAME);
 		} else {
 			break;
 		}
@@ -2075,27 +2076,33 @@ void Parser::parse_top_level() {
 	// global definitions (enum, class, variables and functions)
 	while (!Exp.end_of_file()) {
 
-		if ((Exp.cur == IDENTIFIER_IMPORT) or (Exp.cur == IDENTIFIER_USE)) {
+		if ((Exp.cur == Identifier::IMPORT) or (Exp.cur == Identifier::USE)) {
 			parse_import();
 
 		// enum
-		} else if (Exp.cur == IDENTIFIER_ENUM) {
+		} else if (Exp.cur == Identifier::ENUM) {
 			parse_enum(tree->base_class);
 
 		// class
-		} else if ((Exp.cur == IDENTIFIER_CLASS) or (Exp.cur == IDENTIFIER_INTERFACE)) {
+		} else if ((Exp.cur == Identifier::CLASS) or (Exp.cur == Identifier::STRUCT) or (Exp.cur == Identifier::INTERFACE)) {
 			parse_class(tree->base_class);
 
 		// func
-		} else if (Exp.cur == IDENTIFIER_FUNC) {
+		} else if (Exp.cur == Identifier::FUNC) {
 			auto f = parse_function_header(TypeVoid, tree->base_class, Flags::STATIC);
 			expect_new_line("newline expected after parameter list");
 			skip_parsing_function_body(f);
 
-		} else if ((Exp.cur == IDENTIFIER_CONST) or (Exp.cur == IDENTIFIER_LET)) {
+		// macro
+		} else if (Exp.cur == Identifier::MACRO) {
+			auto f = parse_function_header(TypeVoid, tree->base_class, Flags::STATIC | Flags::MACRO);
+			expect_new_line("newline expected after parameter list");
+			skip_parsing_function_body(f);
+
+		} else if ((Exp.cur == Identifier::CONST) or (Exp.cur == Identifier::LET)) {
 			parse_named_const(tree->base_class, tree->root_of_all_evil->block.get());
 
-		} else if (try_consume(IDENTIFIER_VAR)) {
+		} else if (try_consume(Identifier::VAR)) {
 			int offset = 0;
 			parse_class_variable_declaration(tree->base_class, tree->root_of_all_evil->block.get(), offset, Flags::STATIC);
 
@@ -2124,7 +2131,7 @@ void Parser::parse() {
 		test_node_recursion(f->block.get(), tree->base_class, "a " + f->long_name());
 
 	for (int i=0; i<tree->owned_classes.num; i++) // array might change...
-		auto_implementer.auto_implement_functions(tree->owned_classes[i]);
+		auto_implementer.implement_functions(tree->owned_classes[i]);
 
 	for (auto *f: tree->functions)
 		test_node_recursion(f->block.get(), tree->base_class, "b " + f->long_name());

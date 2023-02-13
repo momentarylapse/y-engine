@@ -219,19 +219,6 @@ void Module::allocate_memory() {
 	memory_size = 0;
 }
 
-void _update_const_locations(const Class *ns) {
-	for (auto *c: weak(ns->constants)) {
-		c->address = c->p();
-	}
-	for (auto *c: weak(ns->classes))
-		_update_const_locations(c);
-}
-
-// DEPRECATED???
-void Module::update_constant_locations() {
-	_update_const_locations(syntax->base_class);
-}
-
 void Module::_map_global_variables_to_memory(char *mem, int &offset, char *address, const Class *name_space) {
 	auto external = context->external.get();
 	for (auto *v: weak(name_space->static_variables)) {
@@ -298,9 +285,8 @@ void remap_virtual_tables(Module *s, char *mem, int &offset, char *address, cons
 		t->_vtable_location_target_ = &address[offset];
 		offset += config.pointer_size * t->vtable.num;
 		for (Constant *c: weak(s->syntax->base_class->constants))
-			if ((c->type == TypePointer) and (c->as_int64() == (int_p)t->vtable.data)) {
+			if ((c->type == TypePointer) and (c->as_int64() == (int_p)t->vtable.data))
 				c->as_int64() = (int_p)t->_vtable_location_target_;
-			}
 	}
 
 	for (auto *c: weak(ct->classes))
@@ -313,9 +299,9 @@ void _map_constants_to_memory(char *mem, int &offset, char *address, const Class
 	// also allow named constants... might be imported by other modules!
 	for (Constant *c: weak(ns->constants))
 		if (c->used or ((c->name[0] != '-') and !config.compile_os)) {
-			c->address = (void*)(address + offset);//ns->owner->asm_meta_info->code_origin + offset);
-		//	c->address = &mem[offset];
-			c->map_into(&mem[offset], (char*)c->address);
+			c->address_runtime = (void*)(address + offset);//ns->owner->asm_meta_info->code_origin + offset);
+			c->address_compiler = &mem[offset];
+			c->map_into(&mem[offset], (char*)c->address_runtime);
 			offset += mem_align(c->mapping_size(), 4);
 		}
 
@@ -365,6 +351,8 @@ void Module::map_constants_to_memory(char *mem, int &offset, char *address) {
 }
 
 void Module::map_constants_to_opcode() {
+    //remap_virtual_tables(this, opcode, opcode_size, (char*)(int_p)syntax->asm_meta_info->code_origin, syntax->base_class);
+
 	map_constants_to_memory(opcode, opcode_size, (char*)(int_p)syntax->asm_meta_info->code_origin);
 	align_opcode();
 }
@@ -440,6 +428,17 @@ void import_includes(Module *s) {
 		import_deep(s->syntax, i->syntax);
 }
 
+void link_raw_function_pointers(Module *m) {
+	for (auto &c: m->constants())
+		if (c->type == TypeFunctionCodeP) {
+			auto f = (Function*)(int_p)c->as_int64();
+			c->as_int64() = f->address;
+
+			// remap
+			memcpy(c->address_compiler, &c->as_int64(), config.pointer_size);
+		}
+}
+
 void Module::link_functions() {
 	for (Asm::WantedLabel &l: functions_to_link) {
 		string name = l.name.sub(10);
@@ -453,6 +452,10 @@ void Module::link_functions() {
 		if (!found)
 			do_error_link("could not link function: " + name);
 	}
+
+	link_raw_function_pointers(this);
+
+	// unused?
 	for (int n: function_vars_to_link) {
 		int64 p = (n + 0xefef0000);
 		int64 q = syntax->functions[n]->address;
@@ -465,14 +468,10 @@ void Module::link_functions() {
 
 void Module::link_virtual_functions_into_vtable(const Class *c) {
 	Class *t = const_cast<Class*>(c);
-	if (t->owner == syntax)
-		t->link_virtual_table();
+	t->link_virtual_table();
 
-	/*if (config.compile_os)*/{
-		for (int i=0; i<t->vtable.num; i++) {
-			memcpy((char*)t->_vtable_location_compiler_ + i*config.pointer_size, &t->vtable[i], config.pointer_size);
-		}
-	}
+	for (int i=0; i<t->vtable.num; i++)
+		memcpy((char*)t->_vtable_location_compiler_ + i*config.pointer_size, &t->vtable[i], config.pointer_size);
 
 	for (auto *cc: weak(c->classes))
 		link_virtual_functions_into_vtable(cc);

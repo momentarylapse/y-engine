@@ -227,13 +227,13 @@ public:
 
 		msg_write("on init...");
 
-		engine.set_dirs(config.game_dir << "Textures",
-			config.game_dir << "Maps",
-			config.game_dir << "Objects",
-			config.game_dir << "Sounds",
-			config.game_dir << "Scripts",
-			config.game_dir << "Materials",
-			config.game_dir << "Fonts");
+		engine.set_dirs(config.game_dir | "Textures",
+			config.game_dir | "Maps",
+			config.game_dir | "Objects",
+			config.game_dir | "Sounds",
+			config.game_dir | "Scripts",
+			config.game_dir | "Materials",
+			config.game_dir | "Fonts");
 
 		api_init(window);
 		create_full_renderer();

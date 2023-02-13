@@ -157,20 +157,20 @@ Path find_system_font_file(const string &name) {
 	auto list = os::fs::search(base, "*.ttf", "fr");
 	for (auto &f: list)
 		if ((f.basename_no_ext().lower() == name.lower()) or (f.basename_no_ext().lower() == name.lower() + "-regular"))
-			return base << f;
+			return base | f;
 #ifdef OS_WINDOWS
 	return "c:\\Windows\\Fonts\\arial.ttf";
 #else
-	if (os::fs::exists(base << "truetype/noto/NotoSans-Regular.ttf"))
-		return base << "truetype/noto/NotoSans-Regular.ttf";
+	if (os::fs::exists(base | "truetype/noto/NotoSans-Regular.ttf"))
+		return base | "truetype/noto/NotoSans-Regular.ttf";
 	//return "/usr/share/fonts/TTF/DejaVuSansMono.ttf";
-	if (os::fs::exists(base << "noto/NotoSans-Regular.ttf"))
-		return base << "noto/NotoSans-Regular.ttf";
-	if (os::fs::exists(base << "truetype/freefont/FreeSans.ttf"))
-		return base << "truetype/freefont/FreeSans.ttf";
+	if (os::fs::exists(base | "noto/NotoSans-Regular.ttf"))
+		return base | "noto/NotoSans-Regular.ttf";
+	if (os::fs::exists(base | "truetype/freefont/FreeSans.ttf"))
+		return base | "truetype/freefont/FreeSans.ttf";
 	list = os::fs::search(base, "*Sans*.ttf", "rf");
 	if (list.num > 0)
-		return base << list[0];
+		return base | list[0];
 	return "?";
 #endif
 }

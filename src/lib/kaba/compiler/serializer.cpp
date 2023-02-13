@@ -328,7 +328,7 @@ void Serializer::insert_constructors_block(Block *b) {
 	for (auto *v: b->vars) {
 		if (!v->explicitly_constructed) {
 			SerialNodeParam param = param_local(v->type, v->_offset);
-			add_cmd_constructor(param, (v->name == IDENTIFIER_RETURN_VAR) ? NodeKind::NONE : NodeKind::VAR_LOCAL);
+			add_cmd_constructor(param, (v->name == Identifier::RETURN_VAR) ? NodeKind::NONE : NodeKind::VAR_LOCAL);
 		}
 	}
 }
@@ -972,7 +972,7 @@ int check_needed(SyntaxTree *tree, Function *f) {
 	if (f->virtual_index >= 0)
 		ref_count ++;
 	// well, for now, only allow these functions:
-	if (f->name != IDENTIFIER_FUNC_ASSIGN and f->name != IDENTIFIER_FUNC_DELETE and f->name != IDENTIFIER_FUNC_INIT)
+	if (f->name != Identifier::Func::ASSIGN and f->name != Identifier::Func::DELETE and f->name != Identifier::Func::INIT)
 		ref_count ++;
 
 	return ref_count;
@@ -1055,7 +1055,7 @@ void Module::compile_functions(char *oc, int &ocs) {
 	// link external functions
 	int func_no = 0;
 	for (Function *f: syntax->functions) {
-		if (f->is_template()) {
+		if (f->is_template() or  f->is_macro()) {
 			//msg_write("SKIP COMPILE " + f->signature());
 		} else if (f->is_extern()) {
 			string name = function_link_name(f);
@@ -1072,7 +1072,7 @@ void Module::compile_functions(char *oc, int &ocs) {
 	// create assembler
 	for (auto&& [i,f]: enumerate(syntax->functions)) {
 		func_offset.add(list->num);
-		if (!f->is_extern() and !f->is_template()) {
+		if (!f->is_extern() and !f->is_template() and !f->is_macro()) {
 			assemble_function(i, f, list);
 		}
 	}
@@ -1101,7 +1101,7 @@ void Module::compile_functions(char *oc, int &ocs) {
 
 	// get function addresses
 	for (auto *f: syntax->functions)
-		if (!f->is_extern() and !f->is_template())
+		if (!f->is_extern() and !f->is_template() and !f->is_macro())
 			function_update_address(f, list);
 
 	if (!config.interpreted)

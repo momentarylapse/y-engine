@@ -50,8 +50,8 @@ Application::Application(const string &app_name, const string &def_lang, int fla
 
 	SetDefaultErrorHandler(nullptr);
 
-	if (os::fs::exists(directory << "config.txt"))
-		config.load(directory << "config.txt");
+	if (os::fs::exists(directory | "config.txt"))
+		config.load(directory | "config.txt");
 
 }
 
@@ -59,7 +59,7 @@ Application::~Application() {
 	//foreachb(Window *w, _all_windows_)
 	//	delete(w);
 	if (config.changed)
-		config.save(directory << "config.txt");
+		config.save(directory | "config.txt");
 	if ((msg_inited) /*&& (HuiMainLevel == 0)*/)
 		msg_end();
 }
@@ -106,20 +106,20 @@ void Application::guess_directories(const Array<string> &arg, const string &app_
 
 	// first, assume a local/non-installed version
 	directory = strip_dev_dirs(filename.parent());
-	directory_static = directory << "static";
+	directory_static = directory | "static";
 
 
 	#if defined(OS_LINUX) || defined(OS_MINGW) //defined(__GNUC__) || defined(OS_LINUX)
 		// installed version?
 		if (filename.is_in("/usr/local") or (filename.str().find("/") < 0)) {
 			installed = true;
-			directory_static = Path("/usr/local/share") << app_name;
+			directory_static = Path("/usr/local/share") | app_name;
 		} else if (filename.is_in("/usr")) {
 			installed = true;
-			directory_static = Path("/usr/share") << app_name;
+			directory_static = Path("/usr/share") | app_name;
 		} else if (filename.is_in("/opt")) {
 			installed = true;
-			directory_static = Path("/opt") << app_name;
+			directory_static = Path("/opt") | app_name;
 		//} else if (f) {
 		}
 

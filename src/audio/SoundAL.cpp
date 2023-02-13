@@ -101,7 +101,7 @@ Sound *Sound::load(const Path &filename) {
 	// no -> load from file
 	AudioFile af = {0,0,0,0, nullptr};
 	if (cached < 0)
-		af = load_sound_file(engine.sound_dir << filename);
+		af = load_sound_file(engine.sound_dir | filename);
 
 	Sound *s = new Sound;
 	
@@ -258,7 +258,7 @@ bool AudioStream::stream(int buf) {
 Music *Music::load(const Path &filename) {
 	msg_write("loading sound " + filename.str());
 	int id = -1;
-	auto as = load_sound_start(engine.sound_dir << filename);
+	auto as = load_sound_start(engine.sound_dir | filename);
 
 	Music *m = new Music();
 
