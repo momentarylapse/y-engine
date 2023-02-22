@@ -60,7 +60,7 @@ Array<const char*> get_required_instance_extensions(bool glfw, bool validation) 
 		uint32_t glfw_extension_count = 0;
 		const char** glfw_extensions;
 		glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
-		for (int i=0; i<glfw_extension_count; i++)
+		for (uint32_t i=0; i<glfw_extension_count; i++)
 			extensions.add(glfw_extensions[i]);
 	}
 
@@ -112,9 +112,7 @@ int parse_version(const string &v) {
 	return VK_MAKE_VERSION(vv[0]._int(), 0, 0);
 }
 
-Instance *Instance::create(const Array<string> &op) {
-
-
+xfer<Instance> Instance::create(const Array<string> &op) {
 	string name = "no name";
 	int api = VK_API_VERSION_1_0;
 	for (auto &o: op) {

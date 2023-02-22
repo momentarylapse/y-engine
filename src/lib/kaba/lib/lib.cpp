@@ -37,6 +37,7 @@ const Class *TypeReg16;
 const Class *TypeReg8;
 const Class *TypeVoid;
 const Class *TypePointer;
+const Class *TypeNone; // nil
 const Class *TypeObject;
 const Class *TypeObjectP;
 const Class *TypeBool;
@@ -88,7 +89,7 @@ const Class *TypeDate;
 const Class *TypeImage;
 
 const Class *TypeException;
-const Class *TypeExceptionP;
+const Class *TypeExceptionXfer;
 const Class *TypeNoValueError;
 
 const Class *TypeClass;
@@ -129,6 +130,7 @@ Flags flags_mix(const Array<Flags> &f) {
 	return r;
 }
 
+
 void add_package(Context *c, const string &name, Flags flags) {
 	for (auto &p: c->packages)
 		if (p->filename.str() == name) {
@@ -152,23 +154,51 @@ void __add_class__(Class *t, const Class *name_space) {
 	}
 }
 
-const Class *add_type(const string &name, int size, Flags flag, const Class *name_space) {
+const Class *add_type(const string &name, int size, Flags flags, const Class *name_space) {
 	Class *t = new Class(Class::Type::REGULAR, name, size, cur_package->syntax);
-	if (flags_has(flag, Flags::CALL_BY_VALUE))
-		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+	flags_set(t->flags, flags);
 	__add_class__(t, name_space);
 	return t;
 }
 
-const Class *add_type_p(const Class *sub_type, Flags flag) {
-	string name;
-	if (flags_has(flag, Flags::SHARED))
-		name = sub_type->name + " shared";
-	else
-		name = sub_type->name + "*";
-	Class *t = new Class(Class::Type::POINTER, name, config.pointer_size, cur_package->syntax, nullptr, {sub_type});
-	if (flags_has(flag, Flags::SHARED))
-		t->type = Class::Type::POINTER_SHARED;
+const Class *add_type_p(const Class *sub_type) {
+	string name = sub_type->name + "*";
+	Class *t = new Class(Class::Type::POINTER, name, config.target.pointer_size, cur_package->syntax, nullptr, {sub_type});
+	flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+	__add_class__(t, sub_type->name_space);
+	cur_package->context->implicit_class_registry->add(t);
+	return t;
+}
+
+const Class *add_type_ref(const Class *sub_type) {
+	string name = sub_type->name + "&";
+	Class *t = new Class(Class::Type::REFERENCE, name, config.target.pointer_size, cur_package->syntax, nullptr, {sub_type});
+	flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+	__add_class__(t, sub_type->name_space);
+	cur_package->context->implicit_class_registry->add(t);
+	return t;
+}
+
+const Class *add_type_p_owned(const Class *sub_type) {
+	string name = format("%s[%s]", Identifier::OWNED, sub_type->name);
+	Class *t = new Class(Class::Type::POINTER_OWNED, name, config.target.pointer_size, cur_package->syntax, nullptr, {sub_type});
+	__add_class__(t, sub_type->name_space);
+	cur_package->context->implicit_class_registry->add(t);
+	return t;
+}
+
+const Class *add_type_p_shared(const Class *sub_type) {
+	string name = format("%s[%s]", Identifier::SHARED, sub_type->name);
+	Class *t = new Class(Class::Type::POINTER_SHARED, name, config.target.pointer_size, cur_package->syntax, nullptr, {sub_type});
+	__add_class__(t, sub_type->name_space);
+	cur_package->context->implicit_class_registry->add(t);
+	return t;
+}
+
+const Class *add_type_p_xfer(const Class *sub_type) {
+	string name = format("%s[%s]", Identifier::XFER, sub_type->name);
+	Class *t = new Class(Class::Type::POINTER_XFER, name, config.target.pointer_size, cur_package->syntax, nullptr, {sub_type});
+	flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
 	__add_class__(t, sub_type->name_space);
 	cur_package->context->implicit_class_registry->add(t);
 	return t;
@@ -187,7 +217,7 @@ const Class *add_type_a(const Class *sub_type, int array_length) {
 // super array
 const Class *add_type_l(const Class *sub_type) {
 	string name = sub_type->name + "[]";
-	Class *t = new Class(Class::Type::SUPER_ARRAY, name, config.super_array_size, cur_package->syntax, nullptr, {sub_type});
+	Class *t = new Class(Class::Type::SUPER_ARRAY, name, config.target.super_array_size, cur_package->syntax, nullptr, {sub_type});
 	kaba_make_super_array(t);
 	__add_class__(t, sub_type->name_space);
 	cur_package->context->implicit_class_registry->add(t);
@@ -197,7 +227,7 @@ const Class *add_type_l(const Class *sub_type) {
 // dict
 const Class *add_type_d(const Class *sub_type) {
 	string name = sub_type->name + "{}";
-	Class *t = new Class(Class::Type::DICT, name, config.super_array_size, cur_package->syntax, nullptr, {sub_type});
+	Class *t = new Class(Class::Type::DICT, name, config.target.super_array_size, cur_package->syntax, nullptr, {sub_type});
 	kaba_make_dict(t);
 	__add_class__(t, sub_type->name_space);
 	cur_package->context->implicit_class_registry->add(t);
@@ -282,7 +312,7 @@ const Class *add_type_f(const Class *ret_type, const Array<const Class*> &params
 				func_add_param("b", params[1]);
 		}
 	}
-	return cur_package->syntax->request_implicit_class(name, Class::Type::POINTER, config.pointer_size, 0, nullptr, {ff}, -1);
+	return cur_package->syntax->request_implicit_class(name, Class::Type::POINTER, config.target.pointer_size, 0, nullptr, {ff}, -1);
 
 	/*auto c = cur_package->syntax->make_class_callable_fp(params, ret_type);
 	add_class(c);
@@ -319,11 +349,11 @@ void add_operator_x(OperatorID primitive_op, const Class *return_type, const Cla
 	}
 
 	Flags flags = Flags::NONE;
-	if (!o->abstract->left_modifiable)
+	if (!(o->abstract->flags & OperatorFlags::LEFT_IS_MODIFIABLE))
 		flags = Flags::PURE;
 
 	//if (!c->uses_call_by_reference())
-	if (o->abstract->left_modifiable and !c->uses_call_by_reference())
+	if ((o->abstract->flags & OperatorFlags::LEFT_IS_MODIFIABLE) and !c->uses_call_by_reference())
 		flags_set(flags, Flags::STATIC);
 
 	if (!flags_has(flags, Flags::STATIC)) {
@@ -366,10 +396,8 @@ void class_add_element_x(const string &name, const Class *type, int offset, Flag
 	cur_class->elements.add(ClassElement(name, type, offset));
 }
 
-void class_derive_from(const Class *parent, bool increase_size, bool copy_vtable) {
-	cur_class->derive_from(parent, increase_size);
-	if (copy_vtable)
-		cur_class->vtable = parent->vtable;
+void class_derive_from(const Class *parent, DeriveFlags flags) {
+	cur_class->derive_from(parent, flags);
 }
 
 void _class_add_member_func(const Class *ccc, Function *f, Flags flag) {
@@ -419,7 +447,7 @@ Function* class_add_func(const string &name, const Class *return_type, std::null
 }
 
 int get_virtual_index(void *func, const string &tname, const string &name) {
-	if ((config.native_abi == Abi::X86_WINDOWS) or (config.native_abi == Abi::AMD64_WINDOWS)) {
+	if ((config.native_target.abi == Abi::X86_WINDOWS) or (config.native_target.abi == Abi::AMD64_WINDOWS)) {
 		if (!func)
 			return 0;
 		unsigned char* pp = (unsigned char*)func;
@@ -463,7 +491,7 @@ int get_virtual_index(void *func, const string &tname, const string &name) {
 			msg_write(p2s(pp));
 			msg_write(Asm::disassemble(func, 16));
 		}
-	} else if (config.native_abi == Abi::AMD64_WINDOWS) {
+	} else if (config.native_target.abi == Abi::AMD64_WINDOWS) {
 		msg_error("class_add_func_virtual(" + tname + "." + name + "):  can't read virtual index");
 		msg_write(Asm::disassemble(func, 16));
 	} else {
@@ -651,22 +679,14 @@ void init_lib(Context *c) {
 Context *_secret_lib_context_ = nullptr;
 
 void init(Abi abi, bool allow_std_lib) {
+	config.native_target = CompilerConfiguration::Target::get_native();
 	if (abi == Abi::NATIVE) {
-		config.abi = config.native_abi;
+		config.target = config.native_target;
 	} else {
-		config.abi = abi;
+		config.target = CompilerConfiguration::Target::get_for_abi(abi);
 	}
-	config.instruction_set = extract_instruction_set(config.abi);
-	Asm::init(config.instruction_set);
+	Asm::init(config.target.instruction_set);
 	config.allow_std_lib = allow_std_lib;
-	config.pointer_size = Asm::instruction_set.pointer_size;
-	if (abi == Abi::NATIVE)
-		config.super_array_size = sizeof(DynamicArray);
-	else
-		config.super_array_size = mem_align(config.pointer_size + 3 * sizeof(int), config.pointer_size);
-
-	config.function_align = 2 * config.pointer_size;
-	config.stack_frame_align = 2 * config.pointer_size;
 
 	SIAddStatements();
 

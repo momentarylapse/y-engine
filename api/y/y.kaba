@@ -38,8 +38,8 @@ class Material
 	func extern static load(filename: Path) -> Material*
 
 class Model extends Component
-	class Mesh
-		class Sub
+	struct Mesh
+		struct Sub
 			var num_triangles: int
 			var triangle_index: int[]
 			var skin_vertex: float[]

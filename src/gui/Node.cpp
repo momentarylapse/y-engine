@@ -40,7 +40,7 @@ void Node::__delete__() {
 	this->Node::~Node();
 }
 
-void Node::add(Node *n) {
+void Node::add(shared<Node> n) {
 	children.add(n);
 	n->parent = this;
 	update_tree();

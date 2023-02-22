@@ -30,6 +30,12 @@ shared<Node> AutoImplementer::node_true() {
 	return add_node_const(c);
 }
 
+shared<Node> AutoImplementer::node_nil() {
+	auto c = tree->add_constant(TypePointer);
+	c->as_int64() = 0;
+	return add_node_const(c);
+}
+
 shared<Node> AutoImplementer::const_int(int i) {
 	return add_node_const(tree->add_constant_int(i));
 }
@@ -137,7 +143,7 @@ void AutoImplementer::add_full_constructor(Class *t) {
 	flags_set(f->flags, Flags::__INIT_FILL_ALL_PARAMS);
 }
 
-bool AutoImplementer::can_fully_construct(const Class *t) {
+bool AutoImplementer::class_can_fully_construct(const Class *t) {
 	if (t->vtable.num > 0)
 		return false;
 	if (t->elements.num > FULL_CONSTRUCTOR_MAX_PARAMS)
@@ -155,10 +161,55 @@ bool AutoImplementer::can_fully_construct(const Class *t) {
 	return num_el > 0;
 }
 
+bool AutoImplementer::class_can_default_construct(const Class *t) {
+	if (!t->needs_constructor())
+		return true;
+	if (t->get_default_constructor())
+		return true;
+	if (t->is_struct() and !flags_has(t->flags, Flags::NOAUTO))
+		return true;
+	if (t->is_array())
+		return class_can_default_construct(t->param[0]);
+	return false;
+}
+
+bool AutoImplementer::class_can_destruct(const Class *t) {
+	if (!t->needs_destructor())
+		return true;
+	if (t->get_destructor())
+		return true;
+	if (t->is_struct() and !flags_has(t->flags, Flags::NOAUTO))
+		return true;
+	if (t->is_array())
+		return class_can_destruct(t->param[0]);
+	return false;
+}
+
 bool AutoImplementer::class_can_assign(const Class *t) {
-	if (t->is_pointer())
+	if (t->is_pointer() or t->is_reference())
 		return true;
 	if (t->get_assign())
+		return true;
+	if (t->is_struct() and !flags_has(t->flags, Flags::NOAUTO))
+		return true;
+	if (t->is_array())
+		return class_can_assign(t->param[0]);
+	return false;
+}
+
+// _should_ we make it possible to assign?
+bool AutoImplementer::class_can_elements_assign(const Class *t) {
+	for (auto &e: t->elements)
+		if (!e.hidden())
+			if (!class_can_assign(e.type))
+				return false;
+	return true;
+}
+
+bool AutoImplementer::class_can_equal(const Class *t) {
+	if (t->is_pointer() or t->is_reference())
+		return true;
+	if (t->get_member_func(Identifier::Func::EQUAL, TypeBool, {t}))
 		return true;
 	return false;
 }
@@ -166,7 +217,7 @@ bool AutoImplementer::class_can_assign(const Class *t) {
 void AutoImplementer::add_missing_function_headers_for_class(Class *t) {
 	if (t->owner != tree)
 		return;
-	if (t->is_pointer())
+	if (t->is_pointer() or t->is_reference())
 		return;
 
 	if (t->is_super_array()) {
@@ -179,6 +230,8 @@ void AutoImplementer::add_missing_function_headers_for_class(Class *t) {
 		_add_missing_function_headers_for_shared(t);
 	} else if (t->is_pointer_owned()) {
 		_add_missing_function_headers_for_owned(t);
+	} else if (t->is_pointer_xfer()) {
+		_add_missing_function_headers_for_xfer(t);
 	} else if (t->is_product()) {
 		_add_missing_function_headers_for_product(t);
 	} else if (t->is_callable_fp()) {
@@ -197,12 +250,9 @@ void AutoImplementer::add_missing_function_headers_for_class(Class *t) {
 Function* AutoImplementer::prepare_auto_impl(const Class *t, Function *f) {
 	if (!f)
 		return nullptr;
-	if (f->auto_declared) {
-		flags_clear(f->flags, Flags::NEEDS_OVERRIDE); // we're about to implement....
-		return f;
-	}
-	return nullptr;
-	t->owner->module->do_error_internal("prepare class func..." + f->signature());
+	if (!f->auto_declared)
+		return nullptr;
+	flags_clear(f->flags, Flags::NEEDS_OVERRIDE); // we're about to implement....
 	return f;
 }
 
@@ -210,7 +260,7 @@ Function* AutoImplementer::prepare_auto_impl(const Class *t, Function *f) {
 void AutoImplementer::implement_functions(const Class *t) {
 	if (t->owner != tree)
 		return;
-	if (t->is_pointer())
+	if (t->is_pointer() or t->is_reference())
 		return;
 
 	auto sub_classes = t->classes; // might change
@@ -225,6 +275,8 @@ void AutoImplementer::implement_functions(const Class *t) {
 		_implement_functions_for_shared(t);
 	} else if (t->is_pointer_owned()) {
 		_implement_functions_for_owned(t);
+	} else if (t->is_pointer_xfer()) {
+		_implement_functions_for_xfer(t);
 	} else if (t->is_enum()) {
 		_implement_functions_for_enum(t);
 	} else if (t->is_callable_fp()) {
@@ -243,6 +295,68 @@ void AutoImplementer::implement_functions(const Class *t) {
 	// recursion
 	//for (auto *c: sub_classes)
 	//	implement_functions(c);
+}
+
+extern const Class* TypeDynamicArray;
+extern const Class* TypeCallableBase;
+
+void AutoImplementer::complete_type(Class *t, int array_size, int token_id) {
+
+	auto params = t->param;
+	// ->derive_from() will overwrite params!!!
+
+	t->array_length = max(array_size, 0);
+	if (t->is_super_array() or t->is_dict()) {
+		t->derive_from(TypeDynamicArray); // we already set its size!
+		if (!class_can_default_construct(params[0]))
+			tree->do_error(format("can not create a dynamic array from type '%s', missing default constructor", params[0]->long_name()), token_id);
+		t->param = params;
+		add_missing_function_headers_for_class(t);
+	} else if (t->is_array()) {
+		if (!class_can_default_construct(params[0]))
+			tree->do_error(format("can not create an array from type '%s', missing default constructor", params[0]->long_name()), token_id);
+		t->param = params;
+		add_missing_function_headers_for_class(t);
+	} else if (t->is_pointer()) {
+		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+	} else if (t->is_reference()) {
+		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+	} else if (t->is_pointer_xfer()) {
+		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+	} else if (t->is_pointer_shared() or t->is_pointer_owned()) {
+		//t->derive_from(TypeSharedPointer);
+		//flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+		t->param = params;
+		add_missing_function_headers_for_class(t);
+	} else if (t->is_optional()) {
+		if (!class_can_default_construct(params[0]))
+			tree->do_error(format("can not create an optional from type '%s', missing default constructor", params[0]->long_name()), token_id);
+		add_missing_function_headers_for_class(t);
+	} else if (t->type == Class::Type::FUNCTION) {
+		t->derive_from(TypeFunction);
+		t->param = params;
+	} else if (t->is_callable_fp()) {
+		t->derive_from(TypeCallableBase);
+		t->functions.clear(); // don't inherit call() with specific types!
+		t->param = params;
+		add_missing_function_headers_for_class(t);
+	} else if (t->is_callable_bind()) {
+		t->derive_from(TypeCallableBase);
+		t->functions.clear(); // don't inherit call() with specific types!
+		t->param = params;
+		//add_missing_function_headers_for_class(t); // later... depending on the bind variables
+	} else if (t->is_product()) {
+		int offset = 0;
+		for (auto&& [i,cc]: enumerate(params)) {
+			t->elements.add(ClassElement(format("e%d", i), cc, offset));
+			offset += cc->size;
+		}
+		add_missing_function_headers_for_class(t);
+	} else if (t->is_enum()) {
+		t->flags = Flags::FORCE_CALL_BY_VALUE; // FORCE_CALL_BY_VALUE
+		kaba::add_class(t);
+		//add_missing_function_headers_for_class(t); // later... might need to parse @noauto first
+	}
 }
 
 

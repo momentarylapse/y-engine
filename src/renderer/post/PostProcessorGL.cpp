@@ -18,8 +18,8 @@
 #include "../../Config.h"
 #include "../../world/Camera.h"
 
-static float resolution_scale_x = 1.0f;
-static float resolution_scale_y = 1.0f;
+//static float resolution_scale_x = 1.0f;
+//static float resolution_scale_y = 1.0f;
 
 
 PostProcessorGL::PostProcessorGL(Renderer *parent) : PostProcessor(parent) {
@@ -127,7 +127,7 @@ void PostProcessorGL::draw() {
 	} else {
 		stages.back()->draw();
 	}
-	bool flip_y = rendering_into_window();
+	[[maybe_unused]] bool flip_y = rendering_into_window();
 	//render_out(fb_main.get(), fb_small2->color_attachments[0].get(), flip_y);
 }
 

@@ -776,7 +776,7 @@ int BackendARM::add_global_ref(void *p) {
 void BackendARM::do_mapping() {
 
 	map_remaining_temp_vars_to_stack();
-	stack_max_size = mem_align(stack_max_size, config.stack_frame_align);
+	stack_max_size = mem_align(stack_max_size, config.target.stack_frame_align);
 
 	serializer->cmd_list_out("map:e", "post var reg");
 }
@@ -829,11 +829,7 @@ Asm::InstructionParam BackendARM::prepare_param(Asm::InstID inst, SerialNodePara
 			do_error("prepare_param: evil global of type " + p.type->name);
 		return Asm::param_deref_imm(p.p + p.shift, size);
 	} else if (p.kind == NodeKind::LOCAL_MEMORY) {
-		if (config.instruction_set == Asm::InstructionSet::ARM) {
-			return Asm::param_deref_reg_shift(Asm::RegID::R13, p.p + p.shift, p.type->size);
-		} else {
-			return Asm::param_deref_reg_shift(Asm::RegID::EBP, p.p + p.shift, p.type->size);
-		}
+		return Asm::param_deref_reg_shift(Asm::RegID::R13, p.p + p.shift, p.type->size);
 		//if ((param_size != 1) and (param_size != 2) and (param_size != 4) and (param_size != 8))
 		//	param_size = -1; // lea doesn't need size...
 			//s->DoErrorInternal("get_param: evil local of type " + p.type->name);

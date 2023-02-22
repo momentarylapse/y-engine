@@ -3,7 +3,7 @@ use y.ui
 use y.engine
 
 class X extends Controller
-	var pic: Picture*[]
+	var pic: shared[Picture][]
 	
 	func override on_init()
 		if engine.render_path.type == RenderPath.Type.DEFERRED

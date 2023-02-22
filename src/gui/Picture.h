@@ -15,11 +15,11 @@ namespace gui {
 
 class Picture : public Node {
 public:
-	Picture(const rect &r, Texture *tex, const rect &source, Shader *shader);
-	Picture(const rect &r, Texture *tex, const rect &source = rect::ID);
+	Picture(const rect &r, shared<Texture> tex, const rect &source, shared<Shader> shader);
+	Picture(const rect &r, shared<Texture> tex, const rect &source = rect::ID);
 	virtual ~Picture();
 
-	void __init__(const rect &r, Texture *tex, const rect &source);
+	void __init__(const rect &r, shared<Texture> tex, const rect &source);
 	virtual void __delete__();
 
 	rect source;

@@ -141,8 +141,8 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	height = ny;
 	depth = nz;
 	image.format = parse_format(_format);
-	int ps = format_size(image.format);
-	VkDeviceSize image_size = width * height * depth * ps;
+	//int ps = format_size(image.format);
+	//VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = 1;
 
 	VkExtent3D extent = {(unsigned)nx, (unsigned)ny, (unsigned)nz};
@@ -203,7 +203,7 @@ void Texture::_destroy() {
 	mip_levels = 1;
 }
 
-Texture* Texture::load(const Path &filename) {
+xfer<Texture> Texture::load(const Path &filename) {
 	if (verbosity >= 1)
 		msg_write(" load texture " + filename.str());
 	if (!filename)
@@ -215,12 +215,10 @@ Texture* Texture::load(const Path &filename) {
 
 
 void Texture::_load(const Path &filename) {
-	Image *im = Image::load(filename);
-	if (!im) {
+	auto im = ownify(Image::load(filename));
+	if (!im)
 		throw Exception("failed to load texture image!");
-	}
 	write(*im);
-	delete im;
 }
 
 void Texture::write(const Image &im) {
@@ -241,7 +239,7 @@ void Texture::writex(const void *data, int nx, int ny, int nz, const string &for
 void Texture::_create_image(const void *image_data, VkImageType type, VkFormat format, bool allow_mip, bool allow_storage, bool cube) {
 	int num_layers = cube ? 6 : 1;
 	int layer_size = width * height * depth * format_size(format);
-	VkDeviceSize image_size = layer_size * num_layers;
+	//VkDeviceSize image_size = layer_size * num_layers;
 	mip_levels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 	if (!allow_mip)
 		mip_levels = 1;

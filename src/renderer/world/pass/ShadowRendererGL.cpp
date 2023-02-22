@@ -20,7 +20,7 @@
 
 
 ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent) {
-	int shadow_box_size = config.get_float("shadow.boxsize", 2000);
+	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 
 	fb[0] = new nix::FrameBuffer({

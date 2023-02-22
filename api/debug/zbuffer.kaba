@@ -3,7 +3,7 @@ use y.ui
 use y.engine
 
 class X extends Controller
-	var pic: Picture*[]
+	var pic: shared[Picture][]
 	func override on_init()
 		pic.add(new Picture([0.2,0.4, 0.0,0.2], engine.render_path.fb_shadow.depth_buffer(), [0,1, 0,1]))
 		pic.add(new Picture([0.2,0.4, 0.2,0.4], engine.render_path.fb_shadow2.depth_buffer(), [0,1, 0,1]))

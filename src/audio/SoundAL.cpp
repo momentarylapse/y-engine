@@ -87,8 +87,6 @@ void exit() {
 }
 
 Sound *Sound::load(const Path &filename) {
-	int id = -1;
-
 	// cached?
 	int cached = -1;
 	for (int i=0;i<small_audio_cache.num;i++)
@@ -256,8 +254,7 @@ bool AudioStream::stream(int buf) {
 }
 
 Music *Music::load(const Path &filename) {
-	msg_write("loading sound " + filename.str());
-	int id = -1;
+	msg_write("loading sound " + str(filename));
 	auto as = load_sound_start(engine.sound_dir | filename);
 
 	Music *m = new Music();

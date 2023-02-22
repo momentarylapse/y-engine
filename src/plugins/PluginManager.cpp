@@ -606,17 +606,17 @@ void PluginManager::export_kaba() {
 	ext->declare_class_size("Renderer", sizeof(Renderer));
 
 #ifdef USING_VULKAN
-	using WR = WindowRendererVulkan;
+//	using WR = WindowRendererVulkan;
 	using HR = HDRRendererVulkan;
-	using GR = GuiRendererVulkan;
+//	using GR = GuiRendererVulkan;
 	using RP = WorldRendererVulkan;
 	using RPF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
-	using WR = WindowRendererGL;
+//	using WR = WindowRendererGL;
 	using HR = HDRRendererGL;
-	using GR = GuiRendererGL;
+//	using GR = GuiRendererGL;
 	using RP = WorldRendererGL;
 	using RPF = WorldRendererGLForward;
 	using RPD = WorldRendererGLDeferred;

@@ -64,9 +64,9 @@ void update() {
 				sorted_nodes.swap(i, j);
 
 
-	for (auto *p: all_nodes) {
-		//p->rebuild();
-	}
+	//for (auto *p: all_nodes) {
+	//	p->rebuild();
+	//}
 }
 
 // input: [0:1]x[0:1]
@@ -95,7 +95,7 @@ void iterate(float dt) {
 	// tree might change...
 	for (auto n: nodes) {
 		if (n->visible) {
-			auto prev = std::chrono::high_resolution_clock::now();
+			[[maybe_unused]] auto prev = std::chrono::high_resolution_clock::now();
 			n->on_iterate(dt);
 #if 0
 			auto now = std::chrono::high_resolution_clock::now();

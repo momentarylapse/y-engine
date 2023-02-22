@@ -299,8 +299,8 @@ void ft_render_text(Font *font, FT_Face face, const string &text, gui::Node::Ali
 			if (error)
 				continue;
 
-			for (int i=0; i<face->glyph->bitmap.width; i++)
-				for (int j=0; j<face->glyph->bitmap.rows; j++) {
+			for (unsigned int i=0; i<face->glyph->bitmap.width; i++)
+				for (unsigned int j=0; j<face->glyph->bitmap.rows; j++) {
 					float f = (float)face->glyph->bitmap.buffer[i + j*face->glyph->bitmap.width] / 255.0f;
 					im.set_pixel(x+face->glyph->bitmap_left+i,y-face->glyph->bitmap_top+j, color(f, 1,1,1));
 				}

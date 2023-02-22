@@ -134,7 +134,7 @@ void WorldRendererGLDeferred::draw() {
 void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb) {
 	PerformanceMonitor::begin(ch_bg);
 
-	float max_depth = cam->max_depth;
+//	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	bool flip_y = rendering_into_window();
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;

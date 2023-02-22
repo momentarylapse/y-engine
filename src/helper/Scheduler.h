@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#pragma
+#pragma once
 
 #include "../lib/base/callable.h"
 

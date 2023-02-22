@@ -29,7 +29,7 @@ struct UBOMatrices {
 
 namespace gui {
 
-Picture::Picture(const rect &r, Texture *tex, const rect &s, Shader *_shader) :
+Picture::Picture(const rect &r, shared<Texture> tex, const rect &s, shared<Shader> _shader) :
 	Node(r)
 {
 	type = Type::PICTURE;
@@ -41,7 +41,7 @@ Picture::Picture(const rect &r, Texture *tex, const rect &s, Shader *_shader) :
 	shader = nullptr;
 }
 
-Picture::Picture(const rect &r, Texture *tex, const rect &s) : Picture(r, tex, s, nullptr) {
+Picture::Picture(const rect &r, shared<Texture> tex, const rect &s) : Picture(r, tex, s, nullptr) {
 }
 
 Picture::~Picture() {
@@ -58,7 +58,7 @@ Picture::~Picture() {
 	//dset->set({ubo}, {texture});
 //}
 
-void Picture::__init__(const rect &r, Texture *tex, const rect &s) {
+void Picture::__init__(const rect &r, shared<Texture> tex, const rect &s) {
 	new(this) Picture(r, tex, s);
 	source = s;
 }

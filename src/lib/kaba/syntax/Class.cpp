@@ -6,6 +6,8 @@
 
 namespace kaba {
 
+extern Class *TypeNone;
+
 void remove_enum_labels(const Class *type);
 
 ClassElement::ClassElement() {
@@ -57,27 +59,39 @@ bool func_pointer_match(const Class *given, const Class *wanted) {
 	return true;
 }
 
+bool is_same_kind_of_pointer(const Class *a, const Class *b) {
+	return (a->is_some_pointer() and (a->type == b->type));
+}
+
 bool type_match(const Class *given, const Class *wanted) {
 	// exact match?
 	if (given == wanted)
 		return true;
 
 	// allow any pointer?
-	if (given->is_pointer() and (wanted == TypePointer))
+	// FIXME don't use raw pointer parameters...
+	if ((given->is_pointer() or given->is_reference() or given->is_pointer_xfer()) and (wanted == TypePointer))
 		return true;
 
-	// FIXME... quick'n'dirty hack to allow nil as parameter
-	if ((given == TypePointer) and wanted->is_pointer())
+	// allow nil as parameter
+	if ((given == TypeNone) and wanted->is_pointer())
 		return true;
+
+	// allow any pointer
+	if (given->is_pointer() and wanted == TypePointer)
+		return true;
+
+	/*if (given->is_() and wanted->is_pointer_xfer())
+		if (given->param[0] == wanted->param[0])
+			return true;*/
+
+	/*if (given->is_pointer_xfer() and wanted->is_pointer_owned())
+		if (given->param[0] == wanted->param[0])
+			return true;*/
 
 	// compatible pointers (of same or derived class)
-	if (given->is_pointer() and wanted->is_pointer()) {
-		if (given->param[0]->is_derived_from(wanted->param[0]))
-			return true;
-	}
-
-	// compatible shared pointers (of same or derived class)
-	if (given->is_pointer_shared() and wanted->is_pointer_shared()) {
+	if (is_same_kind_of_pointer(given, wanted)) {
+		// MAYBE: return type_match(given->param[0], wanted->param[0]);
 		if (given->param[0]->is_derived_from(wanted->param[0]))
 			return true;
 	}
@@ -173,6 +187,10 @@ bool Class::is_regular() const {
 	return type == Type::REGULAR;
 }
 
+bool Class::is_struct() const {
+	return type == Type::STRUCT;
+}
+
 bool Class::is_array() const {
 	return type == Type::ARRAY;
 }
@@ -186,7 +204,7 @@ bool Class::is_pointer() const {
 }
 
 bool Class::is_some_pointer() const {
-	return type == Type::POINTER  or type == Type::POINTER_SHARED or type == Type::POINTER_OWNED;
+	return type == Type::POINTER  or type == Type::POINTER_SHARED or type == Type::POINTER_OWNED or type == Type::REFERENCE or type == Type::POINTER_XFER;
 }
 
 bool Class::is_pointer_shared() const {
@@ -195,6 +213,14 @@ bool Class::is_pointer_shared() const {
 
 bool Class::is_pointer_owned() const {
 	return type == Type::POINTER_OWNED;
+}
+
+bool Class::is_pointer_xfer() const {
+	return type == Type::POINTER_XFER;
+}
+
+bool Class::is_reference() const {
+	return type == Type::REFERENCE;
 }
 
 bool Class::is_enum() const {
@@ -232,13 +258,13 @@ bool Class::is_callable_bind() const {
 }
 
 bool Class::uses_call_by_reference() const {
-	return (!force_call_by_value() and !is_pointer()) or is_array() or is_optional();
+	return (!force_call_by_value() and !is_pointer() and !is_reference()) or is_array() or is_optional();
 }
 
 bool Class::uses_return_by_memory() const {
 	if (_amd64_allow_pass_in_xmm())
 		return false;
-	return (!force_call_by_value() and !is_pointer()) or is_array() or is_optional();
+	return (!force_call_by_value() and !is_pointer() and !is_reference()) or is_array() or is_optional();
 }
 
 
@@ -334,7 +360,7 @@ bool Class::needs_destructor() const {
 	if (is_super_array() or is_dict() or is_optional())
 		return true;
 	if (is_array())
-		return param[0]->get_destructor();
+		return param[0]->needs_destructor();
 	if (parent) {
 		if (parent->get_destructor())
 			return true;
@@ -468,7 +494,7 @@ void Class::link_virtual_table() {
 	if (parent)
 		for (int i=0; i<parent->vtable.num; i++)
 			vtable[i] = parent->vtable[i];
-	if ((config.abi == Abi::X86_WINDOWS) or (config.abi == Abi::AMD64_WINDOWS))
+	if ((config.target.abi == Abi::X86_WINDOWS) or (config.target.abi == Abi::AMD64_WINDOWS))
 		vtable[0] = mf(&VirtualBase::__delete_external__);
 	else
 		vtable[1] = mf(&VirtualBase::__delete_external__);
@@ -509,7 +535,7 @@ void Class::link_external_virtual_table(void *p) {
 	for (int i=0; i<vtable.num; i++)
 		vtable[i] = t[i];
 	// this should also link the "real" c++ destructor
-	if ((config.abi == Abi::X86_WINDOWS) or (config.abi == Abi::AMD64_WINDOWS))
+	if ((config.target.abi == Abi::X86_WINDOWS) or (config.target.abi == Abi::AMD64_WINDOWS))
 		vtable[0] = mf(&VirtualBase::__delete_external__);
 	else
 		vtable[1] = mf(&VirtualBase::__delete_external__);
@@ -572,7 +598,7 @@ void Class::add_function(SyntaxTree *s, Function *f, bool as_virtual, bool overr
 			if (config.verbose)
 				msg_write("VVVVV +");
 			f->virtual_index = s->module->context->external->process_class_offset(cname(owner->base_class), f->name, max(vtable.num, 2));
-			if ((f->name == Identifier::Func::DELETE) and (config.abi == Abi::AMD64_WINDOWS or config.abi == Abi::X86_WINDOWS))
+			if ((f->name == Identifier::Func::DELETE) and (config.target.abi == Abi::AMD64_WINDOWS or config.target.abi == Abi::X86_WINDOWS))
 				f->virtual_index = 1;
 		}
 
@@ -629,7 +655,15 @@ void Class::add_function(SyntaxTree *s, Function *f, bool as_virtual, bool overr
 	}
 }
 
-void Class::derive_from(const Class* root, bool increase_size) {
+DeriveFlags operator|(DeriveFlags a, DeriveFlags b) {
+	return (DeriveFlags)((int)a | (int)b);
+}
+
+int operator&(DeriveFlags a, DeriveFlags b) {
+	return ((int)a & (int)b);
+}
+
+void Class::derive_from(const Class* root, DeriveFlags derive_flags) {
 	if (config.verbose)
 		msg_write("DERIVE  " + long_name() + " from " + root->long_name());
 	parent = const_cast<Class*>(root);
@@ -643,7 +677,11 @@ void Class::derive_from(const Class* root, bool increase_size) {
 		if (f->name == Identifier::Func::ASSIGN)
 			continue;
 		Function *ff = f;
-		if ((f->name == Identifier::Func::INIT) or (f->name == Identifier::Func::DELETE)) {
+		if (f->name == Identifier::Func::INIT) {
+			if (!(derive_flags & DeriveFlags::KEEP_CONSTRUCTORS))
+				continue;
+			ff = f->create_dummy_clone(this);
+		} else if (f->name == Identifier::Func::DELETE) {
 			ff = f->create_dummy_clone(this);
 		} else if (f->name == Identifier::Func::SUBARRAY) {
 			ff = f->create_dummy_clone(this);
@@ -661,8 +699,10 @@ void Class::derive_from(const Class* root, bool increase_size) {
 		functions.add(ff);
 	}
 
-	if (increase_size)
-		size += parent->size;
+	if (derive_flags & DeriveFlags::SET_SIZE)
+		size = parent->size;
+
+	//if (derive_flags & DeriveFlags::COPY_VTABLE)
 	vtable = parent->vtable;
 	_vtable_location_compiler_ = vtable.data;
 	_vtable_location_target_ = vtable.data;

@@ -125,7 +125,7 @@ AudioFile load_wave_file(const Path &filename) {
 	}
 	r.channels = *(short*)&header[22];
 	r.freq = *(int*)&header[24];
-	int block_align = *(short*)&header[32];
+	[[maybe_unused]] int block_align = *(short*)&header[32];
 	r.bits = *(short*)&header[34];
 	int byte_per_sample = (r.bits / 8) * r.channels;
 	if ((header[36] != 'd') or (header[37] != 'a') or (header[38] != 't') or (header[39] != 'a')){

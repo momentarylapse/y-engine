@@ -293,7 +293,7 @@ void add_components(Entity *ent, const Array<LevelData::ScriptData> &components)
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		auto comp = ent->add_component(type, cc.var);
+		[[maybe_unused]] auto comp = ent->add_component(type, cc.var);
 #endif
 	}
 }
@@ -410,7 +410,7 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vec3 &pos) {
 	auto t = (Terrain*)o->add_component(Terrain::_class, "");
 	t->load(filename);
 
-	auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
+	[[maybe_unused]] auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
 
 	auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
 	sb->mass = 10000.0f;
@@ -438,7 +438,7 @@ Entity *World::create_entity(const vec3 &pos, const quaternion &ang) {
 }
 
 void World::register_entity(Entity *e) {
-	if (auto m = e->get_component<Model>())
+	if ([[maybe_unused]] auto m = e->get_component<Model>())
 		register_object(e);
 
 #ifdef _X_ALLOW_X_
@@ -491,8 +491,8 @@ Entity *World::create_object_no_reg_x(const Path &filename, const string &name, 
 
 	// automatic components
 	if (m->_template->solid_body) {
-		auto col = (MeshCollider*)e->add_component(MeshCollider::_class, "");
-		auto sb = (SolidBody*)e->add_component(SolidBody::_class, "");
+		[[maybe_unused]] auto col = (MeshCollider*)e->add_component(MeshCollider::_class, "");
+		[[maybe_unused]] auto sb = (SolidBody*)e->add_component(SolidBody::_class, "");
 	}
 
 	if (m->_template->skeleton)
@@ -812,7 +812,7 @@ void World::iterate_animations(float dt) {
 	auto list2 = ComponentManager::get_list_family<Skeleton>();
 	for (auto *o: *list2) {
 		for (auto &b: o->bones) {
-			if (auto *mm = b.get_component<Model>()) {
+			if ([[maybe_unused]] auto *mm = b.get_component<Model>()) {
 //				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
 //				mm->_matrix = o->get_owner<Entity3D>()->get_matrix() * b.dmatrix;
 			}

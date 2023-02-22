@@ -3,7 +3,7 @@ use kaba
 #class extern Model
 #class extern SolidBody
 
-class BaseClass
+struct BaseClass
 #	extern void __init__()
 	func extern virtual __delete__()
 	func extern __del_override__()
@@ -11,7 +11,7 @@ class BaseClass
 	func extern virtual mut on_delete()
 	func extern virtual mut on_iterate(dt: float)
 
-class Entity extends BaseClass
+struct Entity extends BaseClass
 	var pos: vec3
 	var ang: quaternion
 	var parent: Entity*

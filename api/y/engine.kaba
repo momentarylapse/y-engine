@@ -62,7 +62,7 @@ class Scheduler
 
 
 class PerformanceMonitor
-	class Channel
+	struct Channel
 		var name: string
 		var parent: int
 		var average: float
