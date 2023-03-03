@@ -22,8 +22,8 @@ class EngineData
 	
 	var initial_world_file, second_world_file: Path
 	#Font* default_font
-	var renderer: Renderer*
-	var render_path: RenderPath*
+	var renderer: ptr![Renderer]
+	var render_path: ptr![RenderPath]
 	var hdr_renderer: HDRRenderer*
 	var post_processor: PostProcessor*
 
@@ -37,9 +37,9 @@ class RenderPath
 		FORWARD
 		DEFERRED
 	var type: Type
-	var depth_buffer: DepthBuffer*
+	var depth_buffer: ptr![DepthBuffer]
 	var cube_map: CubeMap*
-	var fb_shadow, fb_shadow2: FrameBuffer*
+	var fb_shadow, fb_shadow2: ptr![FrameBuffer]
 	var shader_fx: Shader*
 	var gbuffer: FrameBuffer*
 	var wireframe: bool
@@ -48,12 +48,12 @@ class RenderPath
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
 class HDRRenderer
-	var fb_main: FrameBuffer*
-	var fb_small1, fb_small2: FrameBuffer*
+	var fb_main: ptr![FrameBuffer]
+	var fb_small1, fb_small2: ptr![FrameBuffer]
 
 class PostProcessor
-	var fb1, fb2: FrameBuffer*
-	func extern next_fb(cur: FrameBuffer) -> FrameBuffer*
+	var fb1, fb2: ptr![FrameBuffer]
+	func extern next_fb(cur: FrameBuffer) -> FrameBuffer&
 	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
 	func extern mut add_stage(on_prepare: void->void, on_draw: void->void)
 

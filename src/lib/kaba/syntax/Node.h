@@ -57,7 +57,7 @@ enum class NodeKind {
 	POINTER_AS_ARRAY,   // = []
 	DYNAMIC_ARRAY,      // = []
 	REFERENCE_NEW,      // = &!
-	REFERENCE_LEGACY,   // = &  ->  pointer
+	REFERENCE_RAW,      // = &  ->  pointer
 	DEREFERENCE,        // = *
 	DEREF_ADDRESS_SHIFT,// = ->
 	CONSTANT_BY_ADDRESS,
@@ -80,10 +80,14 @@ enum class NodeKind {
 	ABSTRACT_ELEMENT,
 	ABSTRACT_CALL,
 	ABSTRACT_TYPE_SHARED,  // shared[X]
+	ABSTRACT_TYPE_SHARED_NOT_NULL,// shared![X]
 	ABSTRACT_TYPE_OWNED,   // owned[X]
-	ABSTRACT_TYPE_POINTER, // X*
+	ABSTRACT_TYPE_OWNED_NOT_NULL,// owned![X]
+	ABSTRACT_TYPE_POINTER, // ptr[X]
+	ABSTRACT_TYPE_POINTER_NOT_NULL, // ptr![X]
 	ABSTRACT_TYPE_XFER,    // xfer[X]
 	ABSTRACT_TYPE_REFERENCE,// X&
+	ABSTRACT_TYPE_STAR,    // X*
 	ABSTRACT_TYPE_LIST,    // X[]
 	ABSTRACT_TYPE_DICT,    // X{}
 	ABSTRACT_TYPE_OPTIONAL,// X?
@@ -149,10 +153,11 @@ public:
 	shared<Node> shallow_copy() const;
 	shared<Node> ref_new(const Class *t) const;
 	shared<Node> ref_new(SyntaxTree *tree) const;
-	shared<Node> ref_legacy(const Class *t) const;
-	shared<Node> ref_legacy(SyntaxTree *tree) const;
+	shared<Node> ref_raw(const Class *t) const;
+	shared<Node> ref_raw(SyntaxTree *tree) const;
 	shared<Node> deref(const Class *override_type = nullptr) const;
 	shared<Node> shift(int64 shift, const Class *type, int token_id = -1) const;
+	shared<Node> change_type(const Class *type, int token_id = -1) const;
 	shared<Node> deref_shift(int64 shift, const Class *type, int token_id) const;
 };
 

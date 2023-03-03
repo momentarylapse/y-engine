@@ -7,6 +7,7 @@
 
 #include "ParticleEmitter.h"
 #include "Particle.h"
+#include "../graphics-impl.h"
 #include "../lib/math/math.h"
 #include "../lib/math/random.h"
 

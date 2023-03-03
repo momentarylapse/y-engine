@@ -3,7 +3,7 @@ use y.ui
 use y.engine
 
 class StatDisplay extends Node
-	var label, stat: Text*
+	var label, stat: shared![Text]
 	
 	func __init__()
 		super.__init__(rect.ID)
@@ -39,7 +39,7 @@ class StatDisplay extends Node
 
 class Test extends Controller
 	var t: float
-	var stat_display: StatDisplay*
+	var stat_display: shared![StatDisplay]
 	
 	func override on_init()
 		stat_display = new StatDisplay()

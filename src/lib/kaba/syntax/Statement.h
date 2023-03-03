@@ -21,9 +21,9 @@ namespace kaba {
 enum class StatementID {
 	RETURN,
 	IF,
-	IF_ELSE,
+	IF_UNWRAP,
 	WHILE,
-	FOR_ARRAY,
+	FOR_CONTAINER,
 	FOR_RANGE,
 	FOR_DIGEST,
 	BREAK,

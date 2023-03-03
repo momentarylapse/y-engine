@@ -124,7 +124,7 @@ void BackendX86::correct_parameters_variables_to_memory(CommandList &cmd) {
 				p.kind = NodeKind::MEMORY;
 			} else if (p.kind == NodeKind::CONSTANT) {
 				auto cc = (Constant*)p.p;
-				if (module->syntax->flag_function_pointer_as_code and (p.type == TypeFunctionP)) {
+				if (module->tree->flag_function_pointer_as_code and (p.type == TypeFunctionP)) {
 					auto *fp = (Function*)(int_p)cc->as_int64();
 					p.kind = NodeKind::LABEL;
 					p.p = fp->_label;
@@ -576,7 +576,7 @@ void BackendX86::extend_reg_usage_to_call(int index) {
 SerialNodeParam BackendX86::insert_reference(const SerialNodeParam &param, const Class *type) {
 	SerialNodeParam ret;
 	if (!type)
-		type = module->syntax->get_pointer(param.type, -1);
+		type = module->tree->get_pointer(param.type, -1);
 	ret.type = type;
 	ret.shift = 0;
 	if (param.kind == NodeKind::CONSTANT_BY_ADDRESS) {
@@ -1045,7 +1045,7 @@ Asm::InstructionParam BackendX86::prepare_param(Asm::InstID inst, SerialNodePara
 			//s->DoErrorInternal("get_param: evil local of type " + p.type->name);
 	} else if (p.kind == NodeKind::CONSTANT_BY_ADDRESS) {
 		bool imm_allowed = Asm::get_instruction_allow_const(inst);
-		if (imm_allowed and p.type->is_pointer()) {
+		if (imm_allowed and p.type->is_pointer_raw()) {
 			return Asm::param_imm(*(int_p*)(p.p + p.shift), p.type->size);
 		} else if (imm_allowed and (p.type->size <= 4)) {
 			return Asm::param_imm(*(int*)(p.p + p.shift), p.type->size);

@@ -17,15 +17,13 @@ struct Entity extends BaseClass
 	var parent: Entity*
 	func extern get_matrix() -> mat4
 	
-	func extern selfref mut __add_component(t: Class, vars: string) -> Component*
-	func extern selfref __get_component(t: Class) -> Component*
+	func extern selfref mut __add_component(t: Class*, vars: string) -> ptr![Component]
+	func extern selfref __get_component(t: Class*) -> Component*
 	
-	func selfref mut add_component[T](vars: string) -> T*
-		var c: T* = __add_component(T, vars)
-		return c
+	func selfref mut add_component[T](vars: string) -> ptr![T]
+		return __add_component(T, vars) as ptr![T]
 	func selfref get_component[T]() -> T*
-		var c: T* = __get_component(T)
-		return c
+		return __get_component(T) as T*
 	
 #	func selfref model() -> Model*
 #		var m: Model* = get_component(Model)
@@ -37,7 +35,7 @@ struct Entity extends BaseClass
 
 
 class CollisionData
-	var entity: Entity*
+	var entity: ptr![Entity]
 	#var body: SolidBody*
 	var pos, n: vec3
 
@@ -50,18 +48,16 @@ class Component
 	func extern virtual mut on_iterate(dt: float)
 	func extern virtual mut on_collide(col: CollisionData)
 	func extern mut set_variables(vars: string)
-	var owner: Entity*
+	var owner: ptr![Entity]
 	use owner
 
-func extern __get_component_list(t: Class) -> Component*[]*
-func get_component_list[T]() -> T*[]*
-	var list: T*[]* = __get_component_list(T)
-	return list
+func extern __get_component_list(t: Class*) -> ptr![Component][]&
+func get_component_list[T]() -> ptr![T][]&
+	return __get_component_list(T) as ptr![T][]&
 
-func extern __get_component_family_list(t: Class) -> Component*[]*
-func get_component_family_list[T]() -> T*[]*
-	var list: T*[]* = __get_component_family_list(T)
-	return list
+func extern __get_component_family_list(t: Class*) -> ptr![Component][]&
+func get_component_family_list[T]() -> ptr![T][]&
+	return __get_component_family_list(T) as ptr![T][]&
 
 #func ffff()
 #	get_component_list[int]()

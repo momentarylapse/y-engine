@@ -10,6 +10,7 @@
 
 #include "../graphics-fwd.h"
 #include "../lib/base/base.h"
+#include "../lib/base/pointer.h"
 #include "../lib/math/vec3.h"
 #include "../lib/image/color.h"
 #include "../y/BaseClass.h"
@@ -29,7 +30,7 @@ public:
 	float phase = 0;
 	float spawn_dt;
 	int next_index = 0;
-	Texture *texture;
+	shared<Texture> texture;
 	vec3 pos;
 	vec3 spawn_vel;
 	float spawn_dvel;

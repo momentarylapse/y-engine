@@ -200,7 +200,7 @@ Material *LoadMaterial(const Path &filename) {
 	if (mode == "static") {
 		m->reflection.mode = ReflectionMode::CUBE_MAP_STATIC;
 		texture_files = c.get_str_array("reflection.cubemap");
-		Array<Texture*> cmt;
+		shared_array<Texture> cmt;
 		for (auto &f: texture_files)
 			cmt.add(ResourceManager::load_texture(f));
 		m->reflection.density = c.get_float("reflection.density", 1);

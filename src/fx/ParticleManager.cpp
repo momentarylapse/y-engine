@@ -65,7 +65,7 @@ void ParticleManager::add(Particle *p) {
 			g->add(p);
 			return;
 		}
-	auto *gg = new ParticleGroup(p->texture);
+	auto *gg = new ParticleGroup(p->texture.get());
 	gg->add(p);
 	groups.add(gg);
 }

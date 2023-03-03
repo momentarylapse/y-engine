@@ -503,7 +503,7 @@ void BackendARM::correct_implement_commands() {
 
 int BackendARM::_reference_to_register_32(const SerialNodeParam &p, const Class *type) {
 	if (!type)
-		type = module->syntax->get_pointer(p.type, -1);
+		type = module->tree->get_pointer(p.type, -1);
 
 	int reg = find_unused_reg(cmd.next_cmd_index, cmd.next_cmd_index, 4);
 
@@ -661,7 +661,7 @@ void BackendARM::add_function_call(Function *f, const Array<SerialNodeParam> &pa
 	serializer->call_used = true;
 	int push_size = fc_begin(params, ret, f->is_static());
 
-	if ((f->owner() == module->syntax) and (!f->is_extern())) {
+	if ((f->owner() == module->tree) and (!f->is_extern())) {
 		insert_cmd(Asm::InstID::CALL, param_label(TypePointer, f->_label));
 	} else {
 		if (f->address == 0)
@@ -835,7 +835,7 @@ Asm::InstructionParam BackendARM::prepare_param(Asm::InstID inst, SerialNodePara
 			//s->DoErrorInternal("get_param: evil local of type " + p.type->name);
 	} else if (p.kind == NodeKind::CONSTANT_BY_ADDRESS) {
 		bool imm_allowed = Asm::get_instruction_allow_const(inst);
-		if ((imm_allowed) and (p.type->is_pointer())) {
+		if ((imm_allowed) and (p.type->is_pointer_raw())) {
 			return Asm::param_imm(*(int_p*)(p.p + p.shift), p.type->size);
 		} else if ((p.type->size <= 4) and (imm_allowed)) {
 			return Asm::param_imm(*(int*)(p.p + p.shift), p.type->size);

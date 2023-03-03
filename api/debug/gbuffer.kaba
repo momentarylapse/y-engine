@@ -3,14 +3,14 @@ use y.ui
 use y.engine
 
 class X extends Controller
-	var pic: shared[Picture][]
+	var pic: shared![Picture][]
 	
 	func override on_init()
 		if engine.render_path.type == RenderPath.Type.DEFERRED
-			var gbuf = engine.render_path.gbuffer
-			for i in 0:4
-				pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], gbuf.color_attachments()[i]))
-			pic.add(new Picture([0.0,0.2, 0.8, 1.0], gbuf.depth_buffer()))
+			for gbuf in engine.render_path.gbuffer
+				for i in 0:4
+					pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], gbuf.color_attachments()[i]))
+				pic.add(new Picture([0.0,0.2, 0.8, 1.0], gbuf.depth_buffer()))
 		
 		for p in pic
 			toplevel.add(p)

@@ -6,8 +6,6 @@
 
 namespace kaba {
 
-extern Class *TypeNone;
-
 void remove_enum_labels(const Class *type);
 
 ClassElement::ClassElement() {
@@ -33,84 +31,8 @@ bool ClassElement::hidden() const {
 	return (name[0] == '_') or (name[0] == '-');
 }
 
-bool type_match(const Class *given, const Class *wanted);
+bool type_match_up(const Class *given, const Class *wanted);
 
-bool func_pointer_match(const Class *given, const Class *wanted) {
-	auto g = given->param[0];
-	auto w = wanted->param[0];
-	//msg_write(format("%s   vs   %s", g->name, w->name));
-	if (g->param.num != w->param.num) {
-		//msg_error(format("%s   vs   %s     ###", g->name, w->name));
-		return false;
-	}
-	// hmmm, let's be pedantic for return values
-	if (g->param.back() != w->param.back()) {
-		//msg_error(format("%s   vs   %s     return", g->name, w->name));
-		return false;
-	}
-	// allow down-cast for parameters
-	// ACTUALLY, this is the wrong way!!!!
-	//    but we can't know user types when creating the standard library...
-	for (int i=0; i<g->param.num-1; i++)
-		if (!type_match(g->param[i], w->param[i])) {
-			//msg_error(format("%s   vs   %s     param", g->name, w->name, i));
-			return false;
-		}
-	return true;
-}
-
-bool is_same_kind_of_pointer(const Class *a, const Class *b) {
-	return (a->is_some_pointer() and (a->type == b->type));
-}
-
-bool type_match(const Class *given, const Class *wanted) {
-	// exact match?
-	if (given == wanted)
-		return true;
-
-	// allow any pointer?
-	// FIXME don't use raw pointer parameters...
-	if ((given->is_pointer() or given->is_reference() or given->is_pointer_xfer()) and (wanted == TypePointer))
-		return true;
-
-	// allow nil as parameter
-	if ((given == TypeNone) and wanted->is_pointer())
-		return true;
-
-	// allow any pointer
-	if (given->is_pointer() and wanted == TypePointer)
-		return true;
-
-	/*if (given->is_() and wanted->is_pointer_xfer())
-		if (given->param[0] == wanted->param[0])
-			return true;*/
-
-	/*if (given->is_pointer_xfer() and wanted->is_pointer_owned())
-		if (given->param[0] == wanted->param[0])
-			return true;*/
-
-	// compatible pointers (of same or derived class)
-	if (is_same_kind_of_pointer(given, wanted)) {
-		// MAYBE: return type_match(given->param[0], wanted->param[0]);
-		if (given->param[0]->is_derived_from(wanted->param[0]))
-			return true;
-	}
-
-	if (given->is_callable() and wanted->is_callable())
-		return func_pointer_match(given, wanted);
-
-	if (wanted->is_super_array()) {
-		if (given->is_super_array()) {
-			if (type_match(given->param[0], wanted->param[0]) and (given->param[0]->size == wanted->param[0]->size))
-				return true;
-		}
-	}
-
-	if (wanted == TypeDynamic)
-		return true;
-
-	return given->is_derived_from(wanted);
-}
 
 
 Class::Class(Type _type, const string &_name, int64 _size, SyntaxTree *_owner, const Class *_parent, const Array<const Class*> &_param) {
@@ -195,24 +117,50 @@ bool Class::is_array() const {
 	return type == Type::ARRAY;
 }
 
-bool Class::is_super_array() const {
-	return type == Type::SUPER_ARRAY;
-}
-
-bool Class::is_pointer() const {
-	return type == Type::POINTER /* or type == Type::POINTER_SHARED or type == Type::POINTER_UNIQUE */;
+bool Class::is_list() const {
+	return type == Type::LIST;
 }
 
 bool Class::is_some_pointer() const {
-	return type == Type::POINTER  or type == Type::POINTER_SHARED or type == Type::POINTER_OWNED or type == Type::REFERENCE or type == Type::POINTER_XFER;
+	return type == Type::POINTER_RAW
+			or type == Type::POINTER_RAW_NOT_NULL
+			or type == Type::POINTER_SHARED
+			or type == Type::POINTER_SHARED_NOT_NULL
+			or type == Type::POINTER_OWNED
+			or type == Type::POINTER_OWNED_NOT_NULL
+			or type == Type::REFERENCE
+			or type == Type::POINTER_XFER;
+}
+
+bool Class::is_some_pointer_not_null() const {
+	return type == Type::POINTER_RAW_NOT_NULL
+			or type == Type::POINTER_SHARED_NOT_NULL
+			or type == Type::POINTER_OWNED_NOT_NULL
+			or type == Type::REFERENCE;
+}
+
+bool Class::is_pointer_raw() const {
+	return type == Type::POINTER_RAW;
+}
+
+bool Class::is_pointer_raw_not_null() const {
+	return type == Type::POINTER_RAW_NOT_NULL;
 }
 
 bool Class::is_pointer_shared() const {
 	return type == Type::POINTER_SHARED;
 }
 
+bool Class::is_pointer_shared_not_null() const {
+	return type == Type::POINTER_SHARED_NOT_NULL;
+}
+
 bool Class::is_pointer_owned() const {
 	return type == Type::POINTER_OWNED;
+}
+
+bool Class::is_pointer_owned_not_null() const {
+	return type == Type::POINTER_OWNED_NOT_NULL;
 }
 
 bool Class::is_pointer_xfer() const {
@@ -244,7 +192,7 @@ bool Class::is_optional() const {
 }
 
 bool Class::is_callable() const {
-	if (is_pointer())
+	if (is_pointer_raw())
 		return param[0]->is_callable_fp() or param[0]->is_callable_bind();
 	return false;
 }
@@ -258,13 +206,13 @@ bool Class::is_callable_bind() const {
 }
 
 bool Class::uses_call_by_reference() const {
-	return (!force_call_by_value() and !is_pointer() and !is_reference()) or is_array() or is_optional();
+	return (!force_call_by_value() and !is_pointer_raw() and !is_reference()) or is_array() or is_optional();
 }
 
 bool Class::uses_return_by_memory() const {
 	if (_amd64_allow_pass_in_xmm())
 		return false;
-	return (!force_call_by_value() and !is_pointer() and !is_reference()) or is_array() or is_optional();
+	return (!force_call_by_value() and !is_pointer_raw() and !is_reference()) or is_array() or is_optional();
 }
 
 
@@ -275,7 +223,7 @@ bool Class::can_memcpy() const {
 		return true;
 	if (is_array() or is_optional())
 		return param[0]->can_memcpy();
-	if (is_super_array())
+	if (is_list())
 		return false;
 	if (is_dict())
 		return false;
@@ -296,20 +244,20 @@ bool Class::can_memcpy() const {
 	return true;
 }
 
-bool Class::usable_as_super_array() const {
-	if (is_super_array())
+bool Class::usable_as_list() const {
+	if (is_list())
 		return true;
-	if (is_array() or is_dict() or is_pointer())
+	if (is_array() or is_dict() or is_pointer_raw())
 		return false;
 	if (parent)
-		return parent->usable_as_super_array();
+		return parent->usable_as_list();
 	return false;
 }
 
 const Class *Class::get_array_element() const {
-	if (is_array() or is_super_array() or is_dict())
+	if (is_array() or is_list() or is_dict())
 		return param[0];
-	if (is_pointer())
+	if (is_pointer_raw())
 		return nullptr;
 	if (parent)
 		return parent->get_array_element();
@@ -320,7 +268,7 @@ const Class *Class::get_array_element() const {
 bool Class::needs_constructor() const {
 	if (!uses_call_by_reference()) // int/float/pointer etc
 		return false;
-	if (is_super_array() or is_dict() or is_optional())
+	if (is_list() or is_dict() or is_optional())
 		return true;
 	if (initializers.num > 0)
 		return true;
@@ -342,7 +290,7 @@ bool Class::needs_constructor() const {
 }
 
 bool Class::is_size_known() const {
-	if (is_super_array() or is_dict() or is_some_pointer() or is_enum())
+	if (is_list() or is_dict() or is_some_pointer() or is_enum())
 		return true;
 	if (!fully_parsed())
 		return false;
@@ -357,7 +305,7 @@ bool Class::is_size_known() const {
 bool Class::needs_destructor() const {
 	if (!uses_call_by_reference())
 		return false;
-	if (is_super_array() or is_dict() or is_optional())
+	if (is_list() or is_dict() or is_optional())
 		return true;
 	if (is_array())
 		return param[0]->needs_destructor();
@@ -550,7 +498,7 @@ bool member_func_override_match(Function *a, Function *b) {
 	if (a->num_params != b->num_params)
 		return false;
 	for (int i=1; i<a->num_params; i++)
-		if (!type_match(b->literal_param_type[i], a->literal_param_type[i]))
+		if (!type_match_up(b->literal_param_type[i], a->literal_param_type[i]))
 			return false;
 	return true;
 }

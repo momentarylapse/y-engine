@@ -13,7 +13,7 @@ extern const Class *TypeFloatList;
 extern const Class *TypeBoolList;
 extern const Class *TypeAny;
 extern const Class *TypePath;
-
+extern const Class *TypeSpecialFunction;
 
 	
 	
@@ -29,7 +29,7 @@ void var_assign(void *pa, const void *pb, const Class *type) {
 		*(int*)pa = *(int*)pb;
 	} else if ((type == TypeBool) or (type == TypeChar)) {
 		*(char*)pa = *(char*)pb;
-	} else if (type->is_pointer()) {
+	} else if (type->is_pointer_raw()) {
 		*(void**)pa = *(void**)pb;
 	} else {
 		auto *f = type->get_assign();
@@ -182,8 +182,8 @@ string _cdecl var_repr_str(const void *p, const Class *type, bool as_repr) {
 	} else if (type == TypeFunction or type->type == Class::Type::FUNCTION) {
 		// probably not...
 		return func_repr((Function*)p);
-	} else if (type == TypeSpecialFunctionP) {
-		return format("<special function %s>", (*(SpecialFunction**)p)->name);
+	} else if (type == TypeSpecialFunction) {
+		return format("<special function %s>", ((SpecialFunction*)p)->name);
 	} else if (type == TypeAny) {
 		if (as_repr)
 			return ((Any*)p)->repr();
@@ -216,7 +216,7 @@ string _cdecl var_repr_str(const void *p, const Class *type, bool as_repr) {
 		if (*(bool*)((int_p)p + type->size - 1))
 			return var_repr_str(p, type->param[0], as_repr);
 		return "nil";
-	} else if (type->is_super_array()) {
+	} else if (type->is_list()) {
 		string s;
 		auto *da = reinterpret_cast<const DynamicArray*>(p);
 		for (int i=0; i<da->num; i++) {
@@ -305,7 +305,7 @@ Any _cdecl dynify(const void *var, const Class *type) {
 			a.add(dynify((char*)var + t_el->size * i, t_el));
 		return a;
 	}
-	if (type->is_super_array()) {
+	if (type->is_list()) {
 		Any a = Any::EmptyArray;
 		auto *ar = reinterpret_cast<const DynamicArray*>(var);
 		auto *t_el = type->get_array_element();

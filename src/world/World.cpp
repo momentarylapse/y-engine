@@ -890,10 +890,11 @@ Light *World::add_light_cone(const vec3 &pos, const quaternion &ang, const color
 #endif
 }
 
-void World::add_particle(Particle *p) {
+Particle* World::add_particle(xfer<Particle> p) {
 #ifdef _X_ALLOW_X_
 	particle_manager->add(p);
 #endif
+	return p;
 }
 
 void World::add_sound(audio::Sound *s) {

@@ -275,7 +275,7 @@ public:
 void SIAddPackageOSPath(Context *c) {
 	add_package(c, "os");
 
-	TypePath = add_type("Path", config.target.super_array_size);
+	TypePath = add_type("Path", config.target.dynamic_array_size);
 
 	add_class(TypePath);
 		class_add_element_x("_s", TypeString, 0);
@@ -314,7 +314,7 @@ void SIAddPackageOSPath(Context *c) {
 
 
 	// AFTER TypePath!
-	TypePathList = add_type_l(TypePath);
+	TypePathList = add_type_list(TypePath);
 
 	add_class(TypePath);
 		class_add_func("all_parents", TypePathList, &Path::all_parents, Flags::PURE);
@@ -412,7 +412,7 @@ void SIAddPackageOS(Context *c) {
 	TypeStreamShared = add_type_p_shared(TypeStream);
 	auto TypeFileStream = add_type("FileStream", sizeof(os::fs::FileStream));
 	auto TypeFileStreamXfer = add_type_p_xfer(TypeFileStream);
-	auto TypeFileStreamShared = add_type_p_shared(TypeFileStream);
+	auto TypeFileStreamSharedNN = add_type_p_shared_not_null(TypeFileStream);
 	auto TypeBinaryFormatter = add_type("BinaryFormatter", sizeof(BinaryFormatter));
 	auto TypeTextLinesFormatter = add_type("TextLinesFormatter", sizeof(TextLinesFormatter));
 	auto TypeFilesystem = add_type("fs", 0);
@@ -423,14 +423,14 @@ void SIAddPackageOS(Context *c) {
 	TypeOsConfiguration = add_type("Configuration", sizeof(Configuration));
 	auto TypeTerminal = add_type("terminal", 0);
 
-	TypeCallback = add_type_f(TypeVoid, {});
-	TypeCallbackString = add_type_f(TypeVoid, {TypeString});
-	auto TypeCallbackStringList = add_type_f(TypeVoid, {TypeStringList});
+	TypeCallback = add_type_func(TypeVoid, {});
+	TypeCallbackString = add_type_func(TypeVoid, {TypeString});
+	auto TypeCallbackStringList = add_type_func(TypeVoid, {TypeStringList});
 
-	kaba_create_pointer_xfer(TypeStreamXfer);
-	kaba_create_pointer_xfer(TypeFileStreamXfer);
-	kaba_create_pointer_shared<Stream>(TypeStreamShared, TypeStreamXfer);
-	kaba_create_pointer_shared<os::fs::FileStream>(TypeFileStreamShared, TypeFileStreamXfer);
+	lib_create_pointer_xfer(TypeStreamXfer);
+	lib_create_pointer_xfer(TypeFileStreamXfer);
+	lib_create_pointer_shared<Stream>(TypeStreamShared, TypeStreamXfer);
+	lib_create_pointer_shared<os::fs::FileStream>(TypeFileStreamSharedNN, TypeFileStreamXfer);
 
 	add_class(TypeStream);
 		class_add_element(Identifier::SHARED_COUNT, TypeInt, evil_member_offset(os::fs::FileStream, _pointer_ref_counter));
@@ -591,7 +591,7 @@ void SIAddPackageOS(Context *c) {
 		
 		if (!_kaba_stdin)
 			_kaba_stdin = new os::fs::FileStream(0);
-		add_ext_var("stdin", TypeFileStreamShared, &_kaba_stdin);
+		add_ext_var("stdin", TypeFileStreamSharedNN, &_kaba_stdin);
 	
 	add_class(TypeTerminal);
 		class_add_const("RED", TypeString, &os::terminal::RED);

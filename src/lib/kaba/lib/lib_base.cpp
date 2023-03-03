@@ -12,7 +12,6 @@
 #include <math.h>
 #include <cstdio>
 
-
 namespace kaba {
 
 extern const Class *TypeDynamicArray;
@@ -245,17 +244,6 @@ void SIAddXCommands(Context *c) {
 		func_add_param("class", TypeClassP);
 }
 
-int& kaba_x_array_ref(Array<int>& a) {
-	msg_write("_x_array_ref... ");
-	msg_write(p2s(a.data));
-	return a[0];
-};
-void kaba_x_ref_set(int& r, int i) {
-	msg_write(r);
-	r = i;
-	msg_write(r);
-};
-
 void SIAddPackageBase(Context *c) {
 	add_package(c, "base", Flags::AUTO_IMPORT);
 
@@ -267,7 +255,7 @@ void SIAddPackageBase(Context *c) {
 	TypeReg16			= add_type  ("@reg16", 2, Flags::FORCE_CALL_BY_VALUE);
 	TypeReg8			= add_type  ("@reg8", 1, Flags::FORCE_CALL_BY_VALUE);
 	TypeObject			= add_type  ("Object", sizeof(VirtualBase)); // base for most virtual classes
-	TypeObjectP			= add_type_p(TypeObject);
+	TypeObjectP			= add_type_p_raw(TypeObject);
 	TypeDynamic			= add_type  ("@dynamic", 0);
 
 	// "real"
@@ -278,8 +266,8 @@ void SIAddPackageBase(Context *c) {
 	TypeFloat32			= add_type  ("float32", sizeof(float), Flags::FORCE_CALL_BY_VALUE);
 	TypeFloat64			= add_type  ("float64", sizeof(double), Flags::FORCE_CALL_BY_VALUE);
 	TypeChar			= add_type  ("char", sizeof(char), Flags::FORCE_CALL_BY_VALUE);
-	TypeDynamicArray	= add_type  ("@DynamicArray", config.target.super_array_size);
-	TypeDictBase		= add_type  ("@DictBase",   config.target.super_array_size);
+	TypeDynamicArray	= add_type  ("@DynamicArray", config.target.dynamic_array_size);
+	TypeDictBase		= add_type  ("@DictBase",   config.target.dynamic_array_size);
 	TypeSharedPointer	= add_type  ("@SharedPointer", config.target.pointer_size);
 	TypeCallableBase	= add_type  ("@CallableBase", sizeof(Callable<void()>));
 
@@ -333,26 +321,28 @@ void SIAddPackageBase(Context *c) {
 			func_set_inline(InlineID::SHARED_POINTER_INIT);
 
 	// derived   (must be defined after the primitive types and the bases!)
-	TypePointer     = add_type_p(TypeVoid); // substitute for all pointer types
-	TypeNone        = add_type_p(TypeVoid); // type of <nil>
+	TypePointer     = add_type_p_raw(TypeVoid); // substitute for all raw pointer types
+	TypePointerNN   = add_type_p_raw_not_null(TypeVoid); // substitute for all raw-not-null pointer types
+	TypeReference   = add_type_ref(TypeVoid); // substitute for all reference types
+	TypeNone        = add_type_p_raw(TypeVoid); // type of <nil>
 	const_cast<Class*>(TypeNone)->name = "None";
-	TypePointerList = add_type_l(TypePointer);
-	TypeBoolList    = add_type_l(TypeBool);
-	TypeIntP        = add_type_p(TypeInt);
-	TypeIntList     = add_type_l(TypeInt);
-	TypeFloatP      = add_type_p(TypeFloat);
-	TypeFloatList   = add_type_l(TypeFloat);
-	TypeFloat64List = add_type_l(TypeFloat64);
-	TypeCString     = add_type_a(TypeChar, 256);
+	TypePointerList = add_type_list(TypePointer);
+	TypeBoolList    = add_type_list(TypeBool);
+	TypeIntP        = add_type_p_raw(TypeInt);
+	TypeIntList     = add_type_list(TypeInt);
+	TypeFloatP      = add_type_p_raw(TypeFloat);
+	TypeFloatList   = add_type_list(TypeFloat);
+	TypeFloat64List = add_type_list(TypeFloat64);
+	TypeCString     = add_type_array(TypeChar, 256);
 	capture_implicit_type(TypeCString, "cstring"); // cstring := char[256]
-	TypeString      = add_type_l(TypeChar);
+	TypeString      = add_type_list(TypeChar);
 	capture_implicit_type(TypeString, "string"); // string := char[]
-	TypeStringAutoCast = add_type("<string-auto-cast>", config.target.super_array_size);	// string := char[]
-	TypeStringList  = add_type_l(TypeString);
+	TypeStringAutoCast = add_type("<string-auto-cast>", config.target.dynamic_array_size);	// string := char[]
+	TypeStringList  = add_type_list(TypeString);
 
-	TypeIntDict     = add_type_d(TypeInt);
-	TypeFloatDict   = add_type_d(TypeFloat);
-	TypeStringDict  = add_type_d(TypeString);
+	TypeIntDict     = add_type_dict(TypeInt);
+	TypeFloatDict   = add_type_dict(TypeFloat);
+	TypeStringDict  = add_type_dict(TypeString);
 
 
 	add_class(TypeCallableBase);
@@ -370,13 +360,21 @@ void SIAddPackageBase(Context *c) {
 		func_add_param("p", TypePointer);
 	
 
-
 	add_class(TypePointer);
 		class_add_func(Identifier::Func::STR, TypeString, &p2s, Flags::PURE);
 		add_operator(OperatorID::ASSIGN, TypeVoid, TypePointer, TypePointer, InlineID::POINTER_ASSIGN);
 		add_operator(OperatorID::EQUAL, TypeBool, TypePointer, TypePointer, InlineID::POINTER_EQUAL);
 		add_operator(OperatorID::NOT_EQUAL, TypeBool, TypePointer, TypePointer, InlineID::POINTER_NOT_EQUAL);
 
+
+	add_class(TypePointerNN);
+			class_add_func(Identifier::Func::STR, TypeString, &p2s, Flags::PURE);
+			add_operator(OperatorID::ASSIGN, TypeVoid, TypePointerNN, TypePointerNN, InlineID::POINTER_ASSIGN);
+			add_operator(OperatorID::EQUAL, TypeBool, TypePointerNN, TypePointerNN, InlineID::POINTER_EQUAL);
+			add_operator(OperatorID::NOT_EQUAL, TypeBool, TypePointerNN, TypePointerNN, InlineID::POINTER_NOT_EQUAL);
+
+	add_class(TypeReference);
+		add_operator(OperatorID::REF_ASSIGN, TypeVoid, TypeReference, TypeReference, InlineID::POINTER_ASSIGN);
 
 	add_class(TypeInt);
 		class_add_func(Identifier::Func::STR, TypeString, &i2s, Flags::PURE);
@@ -756,7 +754,7 @@ void SIAddPackageBase(Context *c) {
 		func_add_param("str", TypeStringAutoCast);//, (Flags)((int)Flags::CONST | (int)Flags::AUTO_CAST));
 	add_ext_var("_print_postfix", TypeString, &os::terminal::_print_postfix_);
 	add_func("as_binary", TypeString, &kaba_binary, Flags::STATIC);
-		func_add_param("p", TypePointer, Flags::REF);
+		func_add_param("p", TypePointerNN, Flags::REF);
 		func_add_param("length", TypeInt);
 	// memory
 	add_func("@malloc", TypePointer, &kaba_malloc, Flags::STATIC);
@@ -796,21 +794,6 @@ void SIAddPackageBase(Context *c) {
 	//add_type_cast(30, TypeBoolList, TypeBool, "bool[].__bool__");
 	add_type_cast(50, TypePointer, TypeBool, "p2b");
 	//add_type_cast(50, TypePointer, TypeString, "p2s");
-
-
-
-	//---------------------------------------------
-	// experiments
-	auto TypeIntRef = add_type_ref(TypeInt);
-
-	add_class(TypeIntRef);
-		add_operator(OperatorID::ASSIGN, TypeVoid, TypeIntRef,  TypeIntRef, InlineID::POINTER_ASSIGN);
-
-	add_func("_x_array_ref", TypeIntRef, &kaba_x_array_ref, Flags::STATIC);
-		func_add_param("a", TypeIntList);
-	add_func("_x_ref_set", TypeVoid, &kaba_x_ref_set, Flags::STATIC);
-		func_add_param("r", TypeIntRef);
-		func_add_param("i", TypeInt);
 }
 
 

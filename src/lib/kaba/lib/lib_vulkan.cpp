@@ -1,7 +1,9 @@
 #include "../kaba.h"
 #include "../../math/mat4.h"
+#include "../../base/optional.h"
 #include "lib.h"
 #include "shared.h"
+#include "optional.h"
 #include "../dynamic/exception.h"
 
 #if __has_include("../../vulkan/vulkan.h") && HAS_LIB_VULKAN
@@ -95,7 +97,7 @@ public:
 
 class VulkanFrameBuffer : public vulkan::FrameBuffer {
 public:
-	void __init__(vulkan::RenderPass *rp, const Array<vulkan::Texture*> &attachments) {
+	void __init__(vulkan::RenderPass *rp, const shared_array<vulkan::Texture> &attachments) {
 		new(this) vulkan::FrameBuffer(rp, attachments);
 	}
 	void __delete__() {
@@ -199,6 +201,12 @@ public:
 	void __delete__() {
 		this->~SwapChain();
 	}
+	base::optional<int> acquire_image_x(vulkan::Semaphore *sem) {
+		int index;
+		if (vulkan::SwapChain::acquire_image(&index, sem))
+			return index;
+		return base::None;
+	}
 };
 
 class VulkanFence : public vulkan::Fence {
@@ -258,7 +266,6 @@ public:
 		typedef int Device;
 		typedef int Queue;
 		typedef int VertexBuffer;
-		typedef int Texture;
 		typedef int Shader;
 		typedef int BasePipeline;
 		typedef int GraphicsPipeline;
@@ -281,6 +288,7 @@ public:
 		typedef int CubeMap;
 		typedef int StorageTexture;
 		typedef int AccelerationStructure;
+		struct Texture : public Sharable<base::Empty> {};
 	};
 	#define vul_p(p)		nullptr
 #endif
@@ -300,68 +308,84 @@ extern const Class *TypeDynamicArray;
 void SIAddPackageVulkan(Context *c) {
 	add_package(c, "vulkan");
 
-	auto TypeInstance		= add_type  ("Instance", sizeof(vulkan::Instance));
-	auto TypeInstanceP		= add_type_p(TypeInstance);
-	auto TypeInstanceXfer	= add_type_p_xfer(TypeInstance);
-	auto TypeDevice			= add_type  ("Device", sizeof(vulkan::Device));
-	auto TypeDeviceP		= add_type_p(TypeDevice);
-	auto TypeDeviceXfer		= add_type_p_xfer(TypeDevice);
-	auto TypeQueue			= add_type  ("Queue", sizeof(vulkan::Queue));
-	auto TypeVertexBuffer	= add_type  ("VertexBuffer", sizeof(vulkan::VertexBuffer));
-	//auto TypeVertexBufferP	= add_type_p(TypeVertexBuffer);
-	auto TypeTexture		= add_type  ("Texture", sizeof(vulkan::Texture));
-	auto TypeTextureXfer	= add_type_p_xfer(TypeTexture);
-	auto TypeTextureP		= add_type_p(TypeTexture);
-	auto TypeTexturePList	= add_type_l(TypeTextureP);
-	auto TypeVolumeTexture	= add_type  ("VolumeTexture", sizeof(vulkan::VolumeTexture));
-	auto TypeCubeMap		= add_type  ("CubeMap", sizeof(vulkan::CubeMap));
-	auto TypeStorageTexture	= add_type  ("StorageTexture", sizeof(vulkan::StorageTexture));
-	auto TypeDepthBuffer	= add_type  ("DepthBuffer", sizeof(vulkan::DepthBuffer));
-	auto TypeDepthBufferP	= add_type_p(TypeDepthBuffer);
-	auto TypeDepthBufferXfer= add_type_p_xfer(TypeDepthBuffer);
-	auto TypeFrameBuffer	= add_type  ("FrameBuffer", sizeof(vulkan::FrameBuffer));
-	auto TypeFrameBufferP	= add_type_p(TypeFrameBuffer);
-	auto TypeFrameBufferPList= add_type_l(TypeFrameBufferP);
-	auto TypeShader			= add_type  ("Shader", sizeof(vulkan::Shader));
-	auto TypeShaderXfer		= add_type_p_xfer(TypeShader);
-	auto TypeShaderP		= add_type_p(TypeShader);
-	auto TypeShaderPList	= add_type_l(TypeShaderP);
-	auto TypeCommandBuffer	= add_type  ("CommandBuffer", sizeof(vulkan::CommandBuffer));
-	auto TypeCommandBufferXfer= add_type_p_xfer(TypeCommandBuffer);
-	auto TypeCommandPool	= add_type  ("CommandPool", sizeof(vulkan::CommandPool));
-	auto TypeCommandPoolP	= add_type_p(TypeCommandPool);
-	auto TypePipeline       = add_type  ("Pipeline", sizeof(vulkan::BasePipeline));
-	auto TypeGraphicsPipeline = add_type  ("GraphicsPipeline", sizeof(vulkan::GraphicsPipeline));
-	auto TypeComputePipeline = add_type  ("ComputePipeline", sizeof(vulkan::ComputePipeline));
-	auto TypeRayPipeline	= add_type  ("RayPipeline", sizeof(vulkan::RayPipeline));
-	auto TypeRenderPass		= add_type  ("RenderPass", sizeof(vulkan::RenderPass));
-	auto TypeRenderPassP	= add_type_p(TypeRenderPass);
-	auto TypeRenderPassXfer	= add_type_p_xfer(TypeRenderPass);
-	auto TypeBuffer			= add_type  ("Buffer", sizeof(vulkan::Buffer));
-	auto TypeUniformBuffer	= add_type  ("UniformBuffer", sizeof(vulkan::UniformBuffer));
-	auto TypeDescriptorPool	= add_type  ("DescriptorPool", sizeof(vulkan::DescriptorPool));
-	auto TypeDescriptorSet	= add_type  ("DescriptorSet", sizeof(vulkan::DescriptorSet));
-	auto TypeDescriptorSetXfer= add_type_p_xfer(TypeDescriptorSet);
-	auto TypeSwapChain		= add_type  ("SwapChain", sizeof(vulkan::SwapChain));
-	auto TypeFence			= add_type  ("Fence", sizeof(vulkan::Fence));
-	auto TypeSemaphore		= add_type  ("Semaphore", sizeof(vulkan::Semaphore));
-	auto TypeSemaphoreP		= add_type_p(TypeSemaphore);
-	auto TypeSemaphorePList	= add_type_l(TypeSemaphoreP);
-	auto TypeAccelerationStructure = add_type  ("AccelerationStructure", sizeof(vulkan::AccelerationStructure));
-	auto TypeAccelerationStructureXfer= add_type_p_xfer(TypeAccelerationStructure);
-	auto TypeImageLayout    = add_type_e("ImageLayout");
-	auto TypeAccessFlags    = add_type_e("AccessFlags");
-	auto TypePipelineBindPoint = add_type_e("BindPoint", TypePipeline);
+	auto TypeInstance = add_type("Instance", sizeof(vulkan::Instance));
+	auto TypeInstanceP = add_type_p_raw(TypeInstance);
+	auto TypeInstanceXfer = add_type_p_xfer(TypeInstance);
+	auto TypeDevice = add_type("Device", sizeof(vulkan::Device));
+	auto TypeDeviceP = add_type_p_raw(TypeDevice);
+	auto TypeDeviceXfer = add_type_p_xfer(TypeDevice);
+	auto TypeQueue = add_type("Queue", sizeof(vulkan::Queue));
+	auto TypeVertexBuffer = add_type("VertexBuffer", sizeof(vulkan::VertexBuffer));
+	auto TypeVertexBufferP = add_type_p_raw(TypeVertexBuffer);
+	auto TypeTexture = add_type("Texture", sizeof(vulkan::Texture));
+	auto TypeTextureXfer = add_type_p_xfer(TypeTexture);
+	auto TypeTextureP = add_type_p_raw(TypeTexture);
+	auto TypeTexturePList = add_type_list(TypeTextureP);
+	auto TypeTextureSharedNN = add_type_p_shared_not_null(TypeTexture);
+	auto TypeTextureSharedNNList = add_type_list(TypeTextureSharedNN);
+	auto TypeTextureXferList = add_type_list(TypeTextureXfer);
+	auto TypeVolumeTexture = add_type("VolumeTexture", sizeof(vulkan::VolumeTexture));
+	auto TypeCubeMap = add_type("CubeMap", sizeof(vulkan::CubeMap));
+	auto TypeStorageTexture = add_type("StorageTexture", sizeof(vulkan::StorageTexture));
+	auto TypeDepthBuffer = add_type("DepthBuffer", sizeof(vulkan::DepthBuffer));
+	auto TypeDepthBufferP = add_type_p_raw(TypeDepthBuffer);
+	auto TypeDepthBufferXfer = add_type_p_xfer(TypeDepthBuffer);
+	auto TypeFrameBuffer = add_type("FrameBuffer", sizeof(vulkan::FrameBuffer));
+	auto TypeFrameBufferP = add_type_p_raw(TypeFrameBuffer);
+	auto TypeFrameBufferXfer = add_type_p_xfer(TypeFrameBuffer);
+	auto TypeFrameBufferXferList = add_type_list(TypeFrameBufferXfer);
+	auto TypeShader = add_type("Shader", sizeof(vulkan::Shader));
+	auto TypeShaderXfer = add_type_p_xfer(TypeShader);
+	auto TypeShaderP = add_type_p_raw(TypeShader);
+	auto TypeShaderPList = add_type_list(TypeShaderP);
+	auto TypeCommandBuffer = add_type("CommandBuffer", sizeof(vulkan::CommandBuffer));
+	auto TypeCommandBufferXfer = add_type_p_xfer(TypeCommandBuffer);
+	auto TypeCommandBufferP = add_type_p_raw(TypeCommandBuffer);
+	auto TypeCommandPool = add_type("CommandPool", sizeof(vulkan::CommandPool));
+	auto TypeCommandPoolP = add_type_p_raw(TypeCommandPool);
+	auto TypePipeline = add_type("Pipeline", sizeof(vulkan::BasePipeline));
+	auto TypePipelineP = add_type_p_raw(TypePipeline);
+	auto TypeGraphicsPipeline = add_type("GraphicsPipeline", sizeof(vulkan::GraphicsPipeline));
+	auto TypeComputePipeline = add_type("ComputePipeline", sizeof(vulkan::ComputePipeline));
+	auto TypeRayPipeline = add_type("RayPipeline", sizeof(vulkan::RayPipeline));
+	auto TypeRenderPass = add_type("RenderPass", sizeof(vulkan::RenderPass));
+	auto TypeRenderPassP = add_type_p_raw(TypeRenderPass);
+	auto TypeRenderPassXfer = add_type_p_xfer(TypeRenderPass);
+	auto TypeBuffer = add_type("Buffer", sizeof(vulkan::Buffer));
+	auto TypeBufferP = add_type_p_raw(TypeBuffer);
+	auto TypeUniformBuffer = add_type("UniformBuffer", sizeof(vulkan::UniformBuffer));
+	auto TypeDescriptorPool = add_type("DescriptorPool", sizeof(vulkan::DescriptorPool));
+	auto TypeDescriptorSet = add_type("DescriptorSet", sizeof(vulkan::DescriptorSet));
+	auto TypeDescriptorSetXfer = add_type_p_xfer(TypeDescriptorSet);
+	auto TypeDescriptorSetP = add_type_p_raw(TypeDescriptorSet);
+	auto TypeSwapChain = add_type("SwapChain", sizeof(vulkan::SwapChain));
+	auto TypeFence = add_type("Fence", sizeof(vulkan::Fence));
+	auto TypeFenceP = add_type_p_raw(TypeFence);
+	auto TypeSemaphore = add_type("Semaphore", sizeof(vulkan::Semaphore));
+	auto TypeSemaphoreP = add_type_p_raw(TypeSemaphore);
+	auto TypeSemaphorePList = add_type_list(TypeSemaphoreP);
+	auto TypeAccelerationStructure = add_type("AccelerationStructure", sizeof(vulkan::AccelerationStructure));
+	auto TypeAccelerationStructureXfer = add_type_p_xfer(TypeAccelerationStructure);
+	auto TypeAccelerationStructureP = add_type_p_raw(TypeAccelerationStructure);
+	auto TypeImageLayout = add_type_enum("ImageLayout");
+	auto TypeAccessFlags = add_type_enum("AccessFlags");
+	auto TypePipelineBindPoint = add_type_enum("BindPoint", TypePipeline);
 
-	kaba_create_pointer_xfer(TypeDeviceXfer);
-	kaba_create_pointer_xfer(TypeInstanceXfer);
-	kaba_create_pointer_xfer(TypeTextureXfer);
-	kaba_create_pointer_xfer(TypeShaderXfer);
-	kaba_create_pointer_xfer(TypeDepthBufferXfer);
-	kaba_create_pointer_xfer(TypeDescriptorSetXfer);
-	kaba_create_pointer_xfer(TypeCommandBufferXfer);
-	kaba_create_pointer_xfer(TypeRenderPassXfer);
-	kaba_create_pointer_xfer(TypeAccelerationStructureXfer);
+	auto TypeIntOptional = add_type_optional(TypeInt);
+
+	lib_create_pointer_xfer(TypeDeviceXfer);
+	lib_create_pointer_xfer(TypeInstanceXfer);
+	lib_create_pointer_xfer(TypeTextureXfer);
+	lib_create_pointer_xfer(TypeShaderXfer);
+	lib_create_pointer_xfer(TypeDepthBufferXfer);
+	lib_create_pointer_xfer(TypeFrameBufferXfer);
+	lib_create_pointer_xfer(TypeDescriptorSetXfer);
+	lib_create_pointer_xfer(TypeCommandBufferXfer);
+	lib_create_pointer_xfer(TypeRenderPassXfer);
+	lib_create_pointer_xfer(TypeAccelerationStructureXfer);
+	lib_create_pointer_shared<vulkan::Texture>(TypeTextureSharedNN, TypeTextureXfer);
+
+	lib_create_optional<int>(TypeIntOptional);
 
 
 	add_class(TypeInstance);
@@ -411,7 +435,7 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_func("write", TypeVoid, vul_p(&vulkan::Texture::write));
 			func_add_param("image", TypeImage);
 		class_add_func("write", TypeVoid, vul_p(&vulkan::Texture::writex));
-			func_add_param("data", TypePointer);
+			func_add_param("data", TypePointerNN);
 			func_add_param("nx", TypeInt);
 			func_add_param("ny", TypeInt);
 			func_add_param("nz", TypeInt);
@@ -460,8 +484,8 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_element("width", TypeInt, vul_p(&vulkan::FrameBuffer::width));
 		class_add_element("height", TypeInt, vul_p(&vulkan::FrameBuffer::height));
 		class_add_func(Identifier::Func::INIT, TypeVoid, vul_p(&VulkanFrameBuffer::__init__));
-			func_add_param("rp", TypeRenderPass);
-			func_add_param("attachments", TypePointerList);
+			func_add_param("rp", TypeRenderPassP);
+			func_add_param("attachments", TypeTextureSharedNNList);
 		class_add_func(Identifier::Func::DELETE, TypeVoid, vul_p(&VulkanFrameBuffer::__delete__));
 
 
@@ -480,7 +504,7 @@ void SIAddPackageVulkan(Context *c) {
 			func_add_param("size", TypeInt);
 		class_add_func(Identifier::Func::DELETE, TypeVoid, vul_p(&VulkanUniformBuffer::__delete__));
 		class_add_func("update", TypeVoid, vul_p(&vulkan::UniformBuffer::update));
-			func_add_param("source", TypePointer);
+			func_add_param("source", TypePointerNN);
 
 
 	add_class(TypeDescriptorPool);
@@ -497,23 +521,23 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_func("update", TypeVoid, vul_p(&vulkan::DescriptorSet::update));
 		class_add_func("set_texture", TypeVoid, vul_p(&vulkan::DescriptorSet::set_texture));
 			func_add_param("binding", TypeInt);
-			func_add_param("tex", TypeTexture);
+			func_add_param("tex", TypeTextureP);
 		class_add_func("set_storage_image", TypeVoid, vul_p(&vulkan::DescriptorSet::set_storage_image));
 			func_add_param("binding", TypeInt);
-			func_add_param("tex", TypeTexture);
+			func_add_param("tex", TypeTextureP);
 		class_add_func("set_buffer", TypeVoid, vul_p(&vulkan::DescriptorSet::set_buffer));
 			func_add_param("binding", TypeInt);
-			func_add_param("buf", TypeBuffer);
+			func_add_param("buf", TypeBufferP);
 		class_add_func("set_acceleration_structure", TypeVoid, vul_p(&vulkan::DescriptorSet::set_acceleration_structure));
 			func_add_param("binding", TypeInt);
-			func_add_param("as", TypeAccelerationStructure);
+			func_add_param("as", TypeAccelerationStructureP);
 
 
 	add_class(TypeGraphicsPipeline);
 		class_derive_from(TypePipeline);
 		class_add_func(Identifier::Func::INIT, TypeVoid, vul_p(&VulkanGraphicsPipeline::__init__));
-			func_add_param("shader", TypeShader);
-			func_add_param("pass", TypeRenderPass);
+			func_add_param("shader", TypeShaderP);
+			func_add_param("pass", TypeRenderPassP);
 			func_add_param("subpass", TypeInt);
 			func_add_param("topology", TypeString);
 			func_add_param("format", TypeString);
@@ -549,7 +573,7 @@ void SIAddPackageVulkan(Context *c) {
 		class_derive_from(TypePipeline);
 		class_add_func(Identifier::Func::INIT, TypeVoid, vul_p(&VulkanComputePipeline::__init__));
 			func_add_param("layout", TypeString);
-			func_add_param("shader", TypeShader);
+			func_add_param("shader", TypeShaderP);
 
 
 	add_class(TypeRayPipeline);
@@ -590,22 +614,21 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_func("create_depth_buffer", TypeDepthBufferXfer, vul_p(&vulkan::SwapChain::create_depth_buffer));
 		class_add_func("create_render_pass", TypeRenderPassXfer, vul_p(&vulkan::SwapChain::create_render_pass));
 			func_add_param("depth_buffer", TypeDepthBufferP);
-		class_add_func("create_frame_buffers", TypeFrameBufferPList, vul_p(&vulkan::SwapChain::create_frame_buffers));
+		class_add_func("create_frame_buffers", TypeFrameBufferXferList, vul_p(&vulkan::SwapChain::create_frame_buffers));
 			func_add_param("render_pass", TypeRenderPassP);
 			func_add_param("depth_buffer", TypeDepthBufferP);
-		class_add_func("create_textures", TypeTexturePList, vul_p(&vulkan::SwapChain::create_textures));
+		class_add_func("create_textures", TypeTextureXferList, vul_p(&vulkan::SwapChain::create_textures));
 		class_add_func("rebuild", TypeVoid, vul_p(&vulkan::SwapChain::rebuild));
 		class_add_func("present", TypeBool, vul_p(&vulkan::SwapChain::present));
 			func_add_param("image_index", TypeInt);
 			func_add_param("wait_sem", TypeSemaphorePList);
-		class_add_func("acquire_image", TypeBool, vul_p(&vulkan::SwapChain::acquire_image));
-			func_add_param("image_index", TypeIntP);
-			func_add_param("signal_sem", TypeSemaphore);
+		class_add_func("acquire_image", TypeIntOptional, vul_p(&VulkanSwapChain::acquire_image_x));
+			func_add_param("signal_sem", TypeSemaphoreP);
 
 
 	add_class(TypeFence);
 		class_add_func(Identifier::Func::INIT, TypeVoid, vul_p(&VulkanFence::__init__));
-			func_add_param("device", TypeDevice);
+			func_add_param("device", TypeDeviceP);
 		class_add_func(Identifier::Func::DELETE, TypeVoid, vul_p(&VulkanFence::__delete__));
 		class_add_func("wait", TypeVoid, vul_p(&vulkan::Fence::wait));
 		class_add_func("reset", TypeVoid, vul_p(&vulkan::Fence::reset));
@@ -613,7 +636,7 @@ void SIAddPackageVulkan(Context *c) {
 
 	add_class(TypeSemaphore);
 		class_add_func(Identifier::Func::INIT, TypeVoid, vul_p(&VulkanSemaphore::__init__));
-			func_add_param("device", TypeDevice);
+			func_add_param("device", TypeDeviceP);
 		class_add_func(Identifier::Func::DELETE, TypeVoid, vul_p(&VulkanSemaphore::__delete__));
 
 
@@ -629,21 +652,21 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_func("set_bind_point", TypeVoid, vul_p(&vulkan::CommandBuffer::set_bind_point));
 			func_add_param("bp", TypePipelineBindPoint);
 		class_add_func("bind_pipeline", TypeVoid, vul_p(&vulkan::CommandBuffer::bind_pipeline));
-			func_add_param("p", TypePipeline);
+			func_add_param("p", TypePipelineP);
 		class_add_func("draw", TypeVoid, vul_p(&vulkan::CommandBuffer::draw));
-			func_add_param("vb", TypeVertexBuffer);
+			func_add_param("vb", TypeVertexBufferP);
 		class_add_func("begin_render_pass", TypeVoid, vul_p(&vulkan::CommandBuffer::begin_render_pass));
-			func_add_param("rp", TypeRenderPass);
-			func_add_param("fb", TypeFrameBuffer);
+			func_add_param("rp", TypeRenderPassP);
+			func_add_param("fb", TypeFrameBufferP);
 		class_add_func("next_subpass", TypeVoid, vul_p(&vulkan::CommandBuffer::next_subpass));
 		class_add_func("end_render_pass", TypeVoid, vul_p(&vulkan::CommandBuffer::end_render_pass));
 		class_add_func("push_constant", TypeVoid, vul_p(&vulkan::CommandBuffer::push_constant));
 			func_add_param("offset", TypeInt);
 			func_add_param("size", TypeInt);
-			func_add_param("data", TypePointer);
+			func_add_param("data", TypePointerNN);
 		class_add_func("bind_descriptor_set", TypeVoid, vul_p(&vulkan::CommandBuffer::bind_descriptor_set));
 			func_add_param("index", TypeInt);
-			func_add_param("set", TypeDescriptorSet);
+			func_add_param("set", TypeDescriptorSetP);
 		class_add_func("set_scissor", TypeVoid, vul_p(&vulkan::CommandBuffer::set_scissor));
 			func_add_param("r", TypeRect);
 		class_add_func("set_viewport", TypeVoid, vul_p(&vulkan::CommandBuffer::set_viewport));
@@ -656,14 +679,14 @@ void SIAddPackageVulkan(Context *c) {
 			func_add_param("t", TypeTexturePList);
 			func_add_param("mode", TypeInt);
 		class_add_func("image_barrier", TypeVoid, vul_p(&vulkan::CommandBuffer::image_barrier));
-			func_add_param("t", TypeTexture);
+			func_add_param("t", TypeTextureP);
 			func_add_param("src_access", TypeAccessFlags);
 			func_add_param("dst_access", TypeAccessFlags);
 			func_add_param("old_layout", TypeImageLayout);
 			func_add_param("new_layout", TypeImageLayout);
 		class_add_func("copy_image", TypeVoid, vul_p(&vulkan::CommandBuffer::copy_image));
-			func_add_param("src", TypeTexture);
-			func_add_param("dst", TypeTexture);
+			func_add_param("src", TypeTextureP);
+			func_add_param("dst", TypeTextureP);
 			func_add_param("extend", TypeIntList);
 		class_add_func("trace_rays", TypeVoid, vul_p(&vulkan::CommandBuffer::trace_rays));
 			func_add_param("nx", TypeInt);
@@ -673,7 +696,7 @@ void SIAddPackageVulkan(Context *c) {
 
 	add_class(TypeAccelerationStructure);
 		class_add_func("create_top", TypeAccelerationStructureXfer, vul_p(&vulkan::AccelerationStructure::create_top), Flags::STATIC);
-			func_add_param("device", TypeDevice);
+			func_add_param("device", TypeDeviceP);
 			func_add_param("instances", TypeDynamicArray);
 			func_add_param("matrices", TypeDynamicArray);
 		class_add_func("create_bottom", TypeAccelerationStructureXfer, vul_p(&vulkan::AccelerationStructure::create_bottom), Flags::STATIC);
@@ -683,10 +706,10 @@ void SIAddPackageVulkan(Context *c) {
 
 	add_class(TypeQueue);
 		class_add_func("submit", TypeVoid, vul_p(&vulkan::Queue::submit));
-			func_add_param("cb", TypeCommandBuffer);
+			func_add_param("cb", TypeCommandBufferP);
 			func_add_param("wait_sem", TypeSemaphorePList);
 			func_add_param("signal_sem", TypeSemaphorePList);
-			func_add_param("fence", TypeFence);
+			func_add_param("fence", TypeFenceP);
 
 
 	add_class(TypeAccessFlags);
@@ -708,7 +731,7 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_enum("COMPUTE", TypePipelineBindPoint, vul_p(vulkan::PipelineBindPoint::COMPUTE));
 
 
-	add_func("create_window", TypePointer, vul_p(&vulkan::create_window), Flags::STATIC);
+	add_func("create_window", TypePointerNN, vul_p(&vulkan::create_window), Flags::STATIC);
 		func_add_param("title", TypeString);
 		func_add_param("w", TypeInt);
 		func_add_param("h", TypeInt);

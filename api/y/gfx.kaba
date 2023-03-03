@@ -22,13 +22,13 @@ struct PointVertex
 
 class FrameBuffer
 	var width, height: int
-	func extern __init__(att: Texture*[])
-	func extern selfref depth_buffer() -> DepthBuffer*
-	func extern selfref color_attachments() -> Texture*[]
+	func extern __init__(att: ptr![Texture][])
+	func extern selfref depth_buffer() -> shared[DepthBuffer]
+	func extern selfref color_attachments() -> shared![Texture][]
 
 class Shader as shared
 	func extern set_float(name: string, f: float)
-	func extern set_floats(name: string, f: float*, num: int)
+	func extern set_floats(name: string, f: float&, num: int)
 
 class Texture as shared
 	var width, height: int

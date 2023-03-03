@@ -47,6 +47,17 @@ void AutoImplementer::db_add_print_node(shared<Block> block, shared<Node> node) 
 	block->add(cmd);
 }
 
+void AutoImplementer::db_add_print_p2s_node(shared<Block> block, shared<Node> node) {
+	auto f_p2s = tree->required_func_global("p2s");
+	auto n_p2s = add_node_call(f_p2s);
+	n_p2s->set_param(0, node);
+
+	auto f_print = tree->required_func_global("print");
+	auto n_print = add_node_call(f_print);
+	n_print->set_param(0, n_p2s);
+	block->add(n_print);
+}
+
 void AutoImplementer::db_add_print_label(shared<Block> block, const string &s) {
 	auto c = tree->add_constant(TypeString);
 	c->as_string() = s;
@@ -89,6 +100,7 @@ Function *AutoImplementer::add_func_header(Class *t, const string &name, const C
 	f->update_parameters_after_parsing();
 	if (config.verbose)
 		msg_write("ADD HEADER " + f->signature(TypeVoid));
+
 	bool override = cf;
 	t->add_function(tree, f, false, override);
 	return f;
@@ -186,7 +198,7 @@ bool AutoImplementer::class_can_destruct(const Class *t) {
 }
 
 bool AutoImplementer::class_can_assign(const Class *t) {
-	if (t->is_pointer() or t->is_reference())
+	if (t->is_pointer_raw() or t->is_reference())
 		return true;
 	if (t->get_assign())
 		return true;
@@ -207,7 +219,7 @@ bool AutoImplementer::class_can_elements_assign(const Class *t) {
 }
 
 bool AutoImplementer::class_can_equal(const Class *t) {
-	if (t->is_pointer() or t->is_reference())
+	if (t->is_pointer_raw() or t->is_reference())
 		return true;
 	if (t->get_member_func(Identifier::Func::EQUAL, TypeBool, {t}))
 		return true;
@@ -217,18 +229,18 @@ bool AutoImplementer::class_can_equal(const Class *t) {
 void AutoImplementer::add_missing_function_headers_for_class(Class *t) {
 	if (t->owner != tree)
 		return;
-	if (t->is_pointer() or t->is_reference())
+	if (t->is_pointer_raw() or t->is_reference())
 		return;
 
-	if (t->is_super_array()) {
-		_add_missing_function_headers_for_super_array(t);
+	if (t->is_list()) {
+		_add_missing_function_headers_for_list(t);
 	} else if (t->is_array()) {
 		_add_missing_function_headers_for_array(t);
 	} else if (t->is_dict()) {
 		_add_missing_function_headers_for_dict(t);
-	} else if (t->is_pointer_shared()) {
+	} else if (t->is_pointer_shared() or t->is_pointer_shared_not_null()) {
 		_add_missing_function_headers_for_shared(t);
-	} else if (t->is_pointer_owned()) {
+	} else if (t->is_pointer_owned() or t->is_pointer_owned_not_null()) {
 		_add_missing_function_headers_for_owned(t);
 	} else if (t->is_pointer_xfer()) {
 		_add_missing_function_headers_for_xfer(t);
@@ -260,20 +272,20 @@ Function* AutoImplementer::prepare_auto_impl(const Class *t, Function *f) {
 void AutoImplementer::implement_functions(const Class *t) {
 	if (t->owner != tree)
 		return;
-	if (t->is_pointer() or t->is_reference())
+	if (t->is_pointer_raw() or t->is_reference())
 		return;
 
 	auto sub_classes = t->classes; // might change
 
-	if (t->is_super_array()) {
-		_implement_functions_for_super_array(t);
+	if (t->is_list()) {
+		_implement_functions_for_list(t);
 	} else if (t->is_array()) {
 		_implement_functions_for_array(t);
 	} else if (t->is_dict()) {
 		_implement_functions_for_dict(t);
-	} else if (t->is_pointer_shared()) {
+	} else if (t->is_pointer_shared() or t->is_pointer_shared_not_null()) {
 		_implement_functions_for_shared(t);
-	} else if (t->is_pointer_owned()) {
+	} else if (t->is_pointer_owned() or t->is_pointer_owned_not_null()) {
 		_implement_functions_for_owned(t);
 	} else if (t->is_pointer_xfer()) {
 		_implement_functions_for_xfer(t);
@@ -306,7 +318,7 @@ void AutoImplementer::complete_type(Class *t, int array_size, int token_id) {
 	// ->derive_from() will overwrite params!!!
 
 	t->array_length = max(array_size, 0);
-	if (t->is_super_array() or t->is_dict()) {
+	if (t->is_list() or t->is_dict()) {
 		t->derive_from(TypeDynamicArray); // we already set its size!
 		if (!class_can_default_construct(params[0]))
 			tree->do_error(format("can not create a dynamic array from type '%s', missing default constructor", params[0]->long_name()), token_id);
@@ -317,15 +329,19 @@ void AutoImplementer::complete_type(Class *t, int array_size, int token_id) {
 			tree->do_error(format("can not create an array from type '%s', missing default constructor", params[0]->long_name()), token_id);
 		t->param = params;
 		add_missing_function_headers_for_class(t);
-	} else if (t->is_pointer()) {
+	} else if (t->is_pointer_raw() or t->is_pointer_raw_not_null()) {
 		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
 	} else if (t->is_reference()) {
 		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
 	} else if (t->is_pointer_xfer()) {
 		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
-	} else if (t->is_pointer_shared() or t->is_pointer_owned()) {
+	} else if (t->is_pointer_shared() or t->is_pointer_shared_not_null()) {
 		//t->derive_from(TypeSharedPointer);
-		//flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
+		//flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE); // FIXME why not?!?
+		t->param = params;
+		add_missing_function_headers_for_class(t);
+	} else if (t->is_pointer_owned() or t->is_pointer_owned_not_null()) {
+		flags_set(t->flags, Flags::FORCE_CALL_BY_VALUE);
 		t->param = params;
 		add_missing_function_headers_for_class(t);
 	} else if (t->is_optional()) {

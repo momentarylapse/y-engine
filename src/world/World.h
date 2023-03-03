@@ -11,6 +11,7 @@
 
 
 #include "../lib/base/base.h"
+#include "../lib/base/pointer.h"
 #include "../lib/base/callable.h"
 #include "../lib/os/path.h"
 #include "../lib/image/color.h"
@@ -137,7 +138,7 @@ public:
 	Light *add_light_cone(const vec3 &p, const quaternion &ang, const color &c, float r, float t);
 
 	ParticleManager *particle_manager;
-	void add_particle(Particle *p);
+	Particle *add_particle(xfer<Particle> p);
 
 	void iterate(float dt);
 	void iterate_physics(float dt);

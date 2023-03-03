@@ -6,12 +6,13 @@
  */
 
 #include "Particle.h"
+#include "../graphics-impl.h"
 
 Shader *shader_fx;
 
 //DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
 
-Particle::Particle(const vec3 &p, float r, Texture *t, float ttl) : BaseClass(Type::PARTICLE) {
+Particle::Particle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseClass(Type::PARTICLE) {
 	pos = p;
 	vel = vec3::ZERO;
 	col = White;
@@ -27,7 +28,7 @@ Particle::Particle(const vec3 &p, float r, Texture *t, float ttl) : BaseClass(Ty
 Particle::~Particle() {
 }
 
-void Particle::__init__(const vec3 &p, float r, Texture *t, float ttl) {
+void Particle::__init__(const vec3 &p, float r, shared<Texture> t, float ttl) {
 	new(this) Particle(p, r, t, ttl);
 }
 

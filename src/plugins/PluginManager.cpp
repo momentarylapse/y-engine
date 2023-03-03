@@ -100,7 +100,7 @@ Entity* _create_object_multi(World *w, const Path &filename, const Array<vec3> &
 	return nullptr;
 }
 
-void framebuffer_init(FrameBuffer *fb, const Array<Texture*> &tex) {
+void framebuffer_init(FrameBuffer *fb, const shared_array<Texture> &tex) {
 #ifdef USING_VULKAN
 	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__() for vulkan"));
 #else
@@ -108,7 +108,7 @@ void framebuffer_init(FrameBuffer *fb, const Array<Texture*> &tex) {
 #endif
 }
 
-void *framebuffer_depthbuffer(FrameBuffer *fb) {
+shared<Texture> framebuffer_depthbuffer(FrameBuffer *fb) {
 #ifdef USING_VULKAN
 	return fb->attachments.back().get();
 #else
@@ -116,11 +116,11 @@ void *framebuffer_depthbuffer(FrameBuffer *fb) {
 #endif
 }
 
-Array<Texture*> framebuffer_color_attachments(FrameBuffer *fb) {
+shared_array<Texture> framebuffer_color_attachments(FrameBuffer *fb) {
 #ifdef USING_VULKAN
-	return weak(fb->attachments);//.sub_ref(0, -1));
+	return fb->attachments;//.sub_ref(0, -1));
 #else
-	return weak(fb->color_attachments);
+	return fb->color_attachments;
 #endif
 }
 

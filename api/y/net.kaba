@@ -3,14 +3,14 @@ use y
 use ecs
 
 class Connection
-	var s: Socket*
-	var buffer: BinaryBuffer*
+	var s: owned![Socket]
+	var buffer: owned![BinaryBuffer]
 	func extern mut start_block(id: string)
 	func extern mut end_block()
 	func extern mut send()
 
 class NetworkManager
-	var cur_con: Connection*
+	var cur_con: ptr![Connection]
 	func extern mut connect_to_host(host: string) -> Connection*
 	func extern mut event(id: string, e: BaseClass, f: void->void)
 

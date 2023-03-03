@@ -3,13 +3,13 @@ use y.ui
 use y.engine
 
 class X extends Controller
-	var pic: shared[Picture][]
+	var pic: shared![Picture][]
 	
 	func override on_init()
-		if engine.hdr_renderer
-			pic.add(new Picture([0.8,1.0, 0.8, 1.0], engine.hdr_renderer.fb_main.color_attachments()[0]))
-			pic.add(new Picture([1.0,1.2, 0.8, 1.0], engine.hdr_renderer.fb_small1.color_attachments()[0]))
-			pic.add(new Picture([1.2,1.4, 0.8, 1.0], engine.hdr_renderer.fb_small1.color_attachments()[0]))
+		for hdr in engine.hdr_renderer
+			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.fb_main.color_attachments()[0]))
+			pic.add(new Picture([1.0,1.2, 0.8, 1.0], hdr.fb_small1.color_attachments()[0]))
+			pic.add(new Picture([1.2,1.4, 0.8, 1.0], hdr.fb_small1.color_attachments()[0]))
 		
 		for p in pic
 			toplevel.add(p)

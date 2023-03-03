@@ -1,5 +1,5 @@
 /*
- * implicit_shared.cpp
+ * implicit_pointer.cpp
  *
  *  Created on: 12 Feb 2023
  *      Author: michi
@@ -9,14 +9,16 @@
 #include "implicit.h"
 #include "../parser/Parser.h"
 
+#include "../../os/msg.h"
+
 namespace kaba {
 
 extern Class* TypeNone;
 
 /*static shared<Node> shared_p(shared<Node> n) {
-	return n->shift(0, tree->get_pointer(t->param[0]));
+	return n->change_type(tree->get_pointer(t->param[0]));
 }*/
-#define SHARED_P(N)       (N->shift(0, tree->get_pointer(t->param[0])))
+#define SHARED_P(N)       (N->change_type(tree->get_pointer(t->param[0])))
 //#define SHARED_COUNTER(N) (SHARED_P(self)->deref()->shift(e.offset, e.type))
 
 void AutoImplementer::_add_missing_function_headers_for_shared(Class *t) {
@@ -31,12 +33,33 @@ void AutoImplementer::_add_missing_function_headers_for_shared(Class *t) {
 	add_func_header(t, Identifier::Func::SHARED_CREATE, t, {t_xfer}, {"p"}, nullptr, Flags::STATIC);
 }
 
+
+struct XX {
+	void __init__() {
+		msg_write("XX.init");
+		msg_write(p2s(this));
+		p = nullptr;
+		msg_write(p2s(p));
+	}
+	void __del__() {
+		msg_write("XX.del");
+		msg_write(p2s(this));
+		msg_write(p2s(p));
+	}
+	int *p;
+};
+
+
 void AutoImplementer::_add_missing_function_headers_for_owned(Class *t) {
 	[[maybe_unused]] auto t_p = tree->get_pointer(t->param[0]);
 	auto t_xfer = tree->request_implicit_class_xfer(t->param[0], -1);
 	add_func_header(t, Identifier::Func::INIT, TypeVoid, {}, {});
 	add_func_header(t, Identifier::Func::DELETE, TypeVoid, {}, {});
+//	f->address_preprocess = mf(&XX::__del__);
+//	f->address = (int_p)f->address_preprocess;
 	add_func_header(t, Identifier::Func::SHARED_CLEAR, TypeVoid, {}, {});
+	//f->address_preprocess = mf(&XX::__del__);
+	//f->address = (int_p)f->address_preprocess;
 	add_func_header(t, Identifier::Func::OWNED_GIVE, t_xfer, {}, {});
 	add_func_header(t, Identifier::Func::ASSIGN, TypeVoid, {t_xfer}, {"other"});
 	add_func_header(t, Identifier::Func::ASSIGN, TypeVoid, {TypeNone}, {"other"});
