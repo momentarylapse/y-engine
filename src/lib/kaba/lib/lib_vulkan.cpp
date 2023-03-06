@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "shared.h"
 #include "optional.h"
+#include "list.h"
 #include "../dynamic/exception.h"
 
 #if __has_include("../../vulkan/vulkan.h") && HAS_LIB_VULKAN
@@ -435,7 +436,7 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_func("write", TypeVoid, vul_p(&vulkan::Texture::write));
 			func_add_param("image", TypeImage);
 		class_add_func("write", TypeVoid, vul_p(&vulkan::Texture::writex));
-			func_add_param("data", TypePointerNN);
+			func_add_param("data", TypeReference);
 			func_add_param("nx", TypeInt);
 			func_add_param("ny", TypeInt);
 			func_add_param("nz", TypeInt);
@@ -504,7 +505,7 @@ void SIAddPackageVulkan(Context *c) {
 			func_add_param("size", TypeInt);
 		class_add_func(Identifier::Func::DELETE, TypeVoid, vul_p(&VulkanUniformBuffer::__delete__));
 		class_add_func("update", TypeVoid, vul_p(&vulkan::UniformBuffer::update));
-			func_add_param("source", TypePointerNN);
+			func_add_param("source", TypeReference);
 
 
 	add_class(TypeDescriptorPool);
@@ -663,7 +664,7 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_func("push_constant", TypeVoid, vul_p(&vulkan::CommandBuffer::push_constant));
 			func_add_param("offset", TypeInt);
 			func_add_param("size", TypeInt);
-			func_add_param("data", TypePointerNN);
+			func_add_param("data", TypeReference);
 		class_add_func("bind_descriptor_set", TypeVoid, vul_p(&vulkan::CommandBuffer::bind_descriptor_set));
 			func_add_param("index", TypeInt);
 			func_add_param("set", TypeDescriptorSetP);
@@ -731,7 +732,11 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_enum("COMPUTE", TypePipelineBindPoint, vul_p(vulkan::PipelineBindPoint::COMPUTE));
 
 
-	add_func("create_window", TypePointerNN, vul_p(&vulkan::create_window), Flags::STATIC);
+
+	lib_create_list<shared<vulkan::Texture>>(TypeTextureSharedNNList);
+
+
+	add_func("create_window", TypeReference, vul_p(&vulkan::create_window), Flags::STATIC);
 		func_add_param("title", TypeString);
 		func_add_param("w", TypeInt);
 		func_add_param("h", TypeInt);

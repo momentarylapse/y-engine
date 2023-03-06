@@ -10,7 +10,8 @@ class X extends Controller
 			for gbuf in engine.render_path.gbuffer
 				for i in 0:4
 					pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], gbuf.color_attachments()[i]))
-				pic.add(new Picture([0.0,0.2, 0.8, 1.0], gbuf.depth_buffer()))
+				for d in gbuf.depth_buffer()
+					pic.add(new Picture([0.0,0.2, 0.8, 1.0], d))
 		
 		for p in pic
 			toplevel.add(p)

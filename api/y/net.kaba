@@ -10,7 +10,7 @@ class Connection
 	func extern mut send()
 
 class NetworkManager
-	var cur_con: ptr![Connection]
+	var cur_con: Connection&
 	func extern mut connect_to_host(host: string) -> Connection*
 	func extern mut event(id: string, e: BaseClass, f: void->void)
 

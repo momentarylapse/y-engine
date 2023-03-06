@@ -61,21 +61,30 @@ bool is_same_kind_of_pointer(const Class *a, const Class *b) {
 }
 
 // can be re-interpreted as...?
+bool type_match_generic_pointer(const Class *given, const Class *wanted) {
+	// allow any non-owning pointer?
+	if ((wanted == TypePointer) and (given->is_pointer_raw() or given->is_reference()))
+		return true;
+
+	// any reference
+	if ((wanted == TypeReference) and given->is_reference())
+		return true;
+
+	// any xfer[..]?
+	if ((wanted->is_pointer_xfer() and wanted->param[0] == TypeVoid) and given->is_pointer_xfer())
+		return true;
+
+	return false;
+}
+
+// can be re-interpreted as...?
 bool type_match_up(const Class *given, const Class *wanted) {
 	// exact match?
 	if (given == wanted)
 		return true;
 
-	// allow any non-owning pointer?
-	if ((wanted == TypePointer) and (given->is_pointer_raw() or given->is_pointer_raw_not_null() or given->is_reference()))
-		return true;
 
-	// allow any not-null non-owning pointer?
-	if ((wanted == TypePointerNN) and (given->is_pointer_raw_not_null() or given->is_reference()))
-		return true;
-
-	// reference
-	if ((wanted == TypeReference) and given->is_reference())
+	if (type_match_generic_pointer(given, wanted))
 		return true;
 
 	// nil  ->  any raw pointer
@@ -97,12 +106,12 @@ bool type_match_up(const Class *given, const Class *wanted) {
 	//msg_write(given->long_name() + "  ->  " + wanted->long_name());
 
 	// ...  ->  raw
-	if (wanted->is_pointer_raw() and (given->is_reference() or given->is_pointer_raw_not_null() or given->is_pointer_owned() or given->is_pointer_owned_not_null()))
+	if (wanted->is_pointer_raw() and (given->is_reference() or given->is_pointer_owned() or given->is_pointer_owned_not_null()))
 		if (type_match_up(given->param[0], wanted->param[0]))
 			return true;
 
-	// ...  ->  raw
-	if (wanted->is_pointer_raw_not_null() and (given->is_reference() or given->is_pointer_owned_not_null()))
+	// ...  ->  ref
+	if (wanted->is_reference() and (given->is_reference() or given->is_pointer_owned_not_null()))
 		if (type_match_up(given->param[0], wanted->param[0]))
 			return true;
 
@@ -184,12 +193,13 @@ bool Concretifier::type_match_with_cast(shared<Node> node, bool is_modifiable, c
 
 	if (given->is_some_pointer_not_null()) {
 		CastingData cd_sub;
-		if (type_match_with_cast(node->deref(), is_modifiable, wanted, cd_sub)) {
-			cd = cd_sub;
-			cd.pre_deref = true;
-			cd.penalty += 10;
-			return true;
-		}
+		if (type_match_with_cast(node->deref(), is_modifiable, wanted, cd_sub))
+			if (!cd.pre_deref) {
+				cd = cd_sub;
+				cd.pre_deref = true;
+				cd.penalty += 10;
+				return true;
+			}
 	}
 
 	if (is_modifiable) {
@@ -198,13 +208,22 @@ bool Concretifier::type_match_with_cast(shared<Node> node, bool is_modifiable, c
 			return true;
 
 		// allow any raw pointer
-		if (given->is_pointer_raw() and wanted == TypePointer)
+		if (given->is_pointer_raw() and wanted == TypePointer) {
+			cd.penalty = 10;
 			return true;
+		}
 
 		return false;
 	}
 	if (type_match_up(given, wanted))
 		return true;
+
+	/*if (type_match_generic_pointer(given, wanted)) {
+		msg_error(" -> GENERIC");
+		cd.penalty = 10;
+		return true;
+	}*/
+
 	/*if (given->is_some_pointer()) {
 		if (type_match_up(given->param[0], wanted)) {
 			cd.penalty = 10;

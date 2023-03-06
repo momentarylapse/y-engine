@@ -35,7 +35,7 @@ class Material
 	var shader: shared![Shader][6]
 	var cast_shadow: bool
 	func extern mut add_uniform(name: string, p: float*, size: int)
-	func extern static load(filename: Path) -> ptr![Material]
+	func extern static load(filename: Path) -> Material&
 
 class Model extends Component
 	struct Mesh
@@ -52,9 +52,9 @@ class Model extends Component
 	var radius: float
 	var min, max: vec3
 	
-	var materials: ptr![Material][]
+	var materials: Material&[]
 	
-	var mesh: ptr![Mesh][3]
+	var mesh: Mesh&[3]
 
 	func extern override __init__()
 	func extern override __delete__()
@@ -184,15 +184,15 @@ class Link extends BaseClass
 class World
 	var ego: Entity*
 	
-	var lights: ptr![Light][]
+	var lights: Light&[]
 	
 	var background: color
-	var skyboxes: ptr![Model][]
+	var skyboxes: Model&[]
 	
 	var fog: Fog
 	var gravity: vec3
 	
-	var links: ptr![Link][]
+	var links: Link&[]
 	
 	enum PhysicsMode
 		NONE
@@ -203,25 +203,25 @@ class World
 	
 	func extern mut load_soon(filename: Path)
 	
-	func extern mut add_light_parallel(ang: quaternion, c: color) -> ptr![Light]
-	func extern mut add_light_point(pos: vec3, c: color, radius: float) -> ptr![Light]
-	func extern mut add_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> ptr![Light]
-	func extern mut add_particle(p: xfer[Particle]) -> ptr![Particle]
+	func extern mut add_light_parallel(ang: quaternion, c: color) -> Light&
+	func extern mut add_light_point(pos: vec3, c: color, radius: float) -> Light&
+	func extern mut add_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
+	func extern mut add_particle(p: xfer[Particle]) -> Particle&
 	func extern mut add_sound(s: xfer[Sound])
-	func extern mut create_object(filename: Path, pos: vec3, ang: quaternion) -> ptr![Entity]
-	func extern mut create_object_no_reg(filename: Path, pos: vec3, ang: quaternion) -> ptr![Entity]
-	func extern mut create_object_multi(filename: Path, pos: vec3[], ang: quaternion[]) -> ptr![Entity]
-	func extern mut create_terrain(filename: Path, pos: vec3) -> ptr![Terrain]
-	func extern mut create_entity(pos: vec3, ang: quaternion) -> ptr![Entity]
+	func extern mut create_object(filename: Path, pos: vec3, ang: quaternion) -> Entity&
+	func extern mut create_object_no_reg(filename: Path, pos: vec3, ang: quaternion) -> Entity&
+	func extern mut create_object_multi(filename: Path, pos: vec3[], ang: quaternion[]) -> Entity&
+	func extern mut create_terrain(filename: Path, pos: vec3) -> Terrain&
+	func extern mut create_entity(pos: vec3, ang: quaternion) -> Entity&
 	func extern mut register_entity(e: Entity*)
 	func extern mut set_active_physics(o: Model, active: bool)
 	func extern mut shift_all(dpos: vec3)
 	func extern get_g(pos: vec3) -> vec3
 	func extern trace(p1: vec3, p2: vec3, out d: CollisionData, simple_test: bool, ignore: Entity*) -> bool
 	
-	func selfref objects() -> ptr![Model][]&
+	func selfref objects() -> Model&[]&
 		return get_component_family_list[Model]()
-	func selfref terrains() -> ptr![Terrain][]&
+	func selfref terrains() -> Terrain&[]&
 		return get_component_family_list[Terrain]()
 
 #	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
@@ -244,13 +244,13 @@ class World
 #	return b
 
 
-func extern load_model(filename: Path) -> ptr![Model]
-func extern load_shader(filename: Path) -> ptr![Shader]
-func extern create_shader(source: string) -> ptr![Shader]
+func extern load_model(filename: Path) -> Model&
+func extern load_shader(filename: Path) -> Shader&
+func extern create_shader(source: string) -> Shader&
 func extern load_texture(filename: Path) -> shared![Texture]
-func extern add_camera(pos: vec3, ang: quaternion, r: rect) -> ptr![Camera]
+func extern add_camera(pos: vec3, ang: quaternion, r: rect) -> Camera&
 
 
 var extern tex_white: shared![Texture]
 var extern world: World
-var extern cam: ptr![Camera]
+var extern cam: Camera&

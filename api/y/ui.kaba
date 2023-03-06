@@ -126,7 +126,7 @@ class Picture3d extends Node
 		model = m
 		self.matrix = mat
 
-var extern static toplevel: ptr![Node]
+var extern static toplevel: Node&
 func extern static key_state(k: Key) -> bool
 func extern static key_down(k: Key) -> bool
 func extern static key_up(k: Key) -> bool
