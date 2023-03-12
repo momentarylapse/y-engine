@@ -2,6 +2,7 @@
 
 #include "../lib/config.h"
 #include "../lib/math/vec3.h"
+#include "../lib/base/pointer.h"
 #include "../y/BaseClass.h"
 
 class Path;
@@ -28,8 +29,8 @@ public:
 	void _cdecl set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume);
 
 
-	static Sound *_cdecl load(const Path &filename);
-	static Sound *_cdecl emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
+	static xfer<Sound> _cdecl load(const Path &filename);
+	static xfer<Sound> _cdecl emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
 };
 
 class AudioFile {

@@ -127,6 +127,7 @@
     <ClCompile Include="src\gui\Node.cpp" />
     <ClCompile Include="src\gui\Picture.cpp" />
     <ClCompile Include="src\gui\Text.cpp" />
+    <ClCompile Include="src\helper\DeletionQueue.cpp" />
     <ClCompile Include="src\helper\ErrorHandler.cpp" />
     <ClCompile Include="src\helper\PerformanceMonitor.cpp" />
     <ClCompile Include="src\helper\ResourceManager.cpp" />
@@ -341,6 +342,7 @@
     <ClInclude Include="src\gui\Node.h" />
     <ClInclude Include="src\gui\Picture.h" />
     <ClInclude Include="src\gui\Text.h" />
+    <ClInclude Include="src\helper\DeletionQueue.h" />
     <ClInclude Include="src\helper\ErrorHandler.h" />
     <ClInclude Include="src\helper\PerformanceMonitor.h" />
     <ClInclude Include="src\helper\ResourceManager.h" />

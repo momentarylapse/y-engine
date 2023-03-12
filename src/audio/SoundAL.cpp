@@ -86,7 +86,7 @@ void exit() {
 //	alutExit();
 }
 
-Sound *Sound::load(const Path &filename) {
+xfer<Sound> Sound::load(const Path &filename) {
 	// cached?
 	int cached = -1;
 	for (int i=0;i<small_audio_cache.num;i++)
@@ -139,7 +139,7 @@ Sound *Sound::load(const Path &filename) {
 }
 
 
-Sound *Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
+xfer<Sound> Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
 	Sound *s = Sound::load(filename);
 	s->suicidal = true;
 	s->set_data(pos, v_0, min_dist, max_dist, speed, volume);
@@ -355,8 +355,8 @@ namespace audio {
 
 void init(){}
 void exit(){}
-Sound* Sound::load(const Path &filename){ return nullptr; }
-Sound* Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
+xfer<Sound> Sound::load(const Path &filename){ return nullptr; }
+xfer<Sound> Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
 Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {}
 Sound::~Sound(){}
 void Sound::__delete__(){}

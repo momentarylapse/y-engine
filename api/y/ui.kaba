@@ -177,6 +177,6 @@ class Controller extends BaseClass
 	func extern virtual mut on_render_inject()
 
 
-func extern __get_controller(type: Class) -> Controller*
+func extern __get_controller(type: Class*) -> Controller*
 func get_controller[T]() -> T*
 	return __get_controller(T) as T*

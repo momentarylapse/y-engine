@@ -15,6 +15,7 @@
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
+#include "../helper/DeletionQueue.h"
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
@@ -69,7 +70,7 @@ Array<Controller*> PluginManager::controllers;
 int ch_controller = -1;
 
 
-void global_delete(BaseClass *e) {
+/*void global_delete(BaseClass *e) {
 	//msg_error("global delete... " + p2s(e));
 	world.unregister(e);
 	if (e->type == BaseClass::Type::ENTITY)
@@ -77,7 +78,7 @@ void global_delete(BaseClass *e) {
 	else
 		e->on_delete();
 	delete e;
-}
+}*/
 
 
 #pragma GCC push_options
@@ -197,7 +198,6 @@ void PluginManager::export_kaba() {
 	ext->link_virtual("BaseClass.on_init", &BaseClass::on_init, &entity);
 	ext->link_virtual("BaseClass.on_delete", &BaseClass::on_delete, &entity);
 	ext->link_virtual("BaseClass.on_iterate", &BaseClass::on_iterate, &entity);
-	ext->link_class_func("BaseClass.__del_override__", &global_delete);
 
 	ext->declare_class_size("Entity", sizeof(Entity));
 	ext->declare_class_element("Entity.pos", &Entity::pos);
@@ -206,6 +206,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Entity.get_matrix", &Entity::get_matrix);
 	ext->link_class_func("Entity.__get_component", &Entity::_get_component_untyped_);
 	ext->link_class_func("Entity.__add_component", &Entity::add_component);
+	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add);
 
 	Component component;
 	ext->declare_class_size("Component", sizeof(Component));
@@ -378,6 +379,10 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.get_g", &World::get_g);
 	ext->link_class_func("World.trace", &World::trace);
 	ext->link_class_func("World.unregister", &World::unregister);
+	ext->link_class_func("World.delete_entity", &World::delete_entity);
+	ext->link_class_func("World.delete_particle", &World::delete_particle);
+	ext->link_class_func("World.delete_sound", &World::delete_sound);
+	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
 
 
@@ -409,6 +414,7 @@ void PluginManager::export_kaba() {
 	ext->link_virtual("Controller.on_right_button_down", &Controller::on_right_button_down, &con);
 	ext->link_virtual("Controller.on_right_button_up", &Controller::on_right_button_up, &con);
 	ext->link_virtual("Controller.on_render_inject", &Controller::on_render_inject, &con);
+	ext->link_class_func("Controller.__del_override__", &DeletionQueue::add);
 
 #define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
 
@@ -436,6 +442,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Link.set_motor", &Link::set_motor);
 	ext->link_class_func("Link.set_frame", &Link::set_frame);
 	//ext->link_class_func("Link.set_axis", &Link::set_axis);
+	ext->link_class_func("Link.__del_override__", &DeletionQueue::add);
 
 
 	ext->link("__get_component_list", (void*)&ComponentManager::_get_list);
@@ -456,6 +463,7 @@ void PluginManager::export_kaba() {
 	ext->link_virtual("Particle.__delete__", &Particle::__delete__, &particle);
 	//ext->link_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);
 	//ext->link_class_func("Particle.__del_override__", &global_delete);
+	ext->link_class_func("Particle.__del_override__", &DeletionQueue::add);
 
 	ext->declare_class_size("Beam", sizeof(Beam));
 	ext->declare_class_element("Beam.length", &Beam::length);
@@ -463,6 +471,8 @@ void PluginManager::export_kaba() {
 
 
 	ext->declare_class_size("Sound", sizeof(audio::Sound));
+	ext->declare_class_element("Sound.pos", &audio::Sound::pos);
+	ext->declare_class_element("Sound.vel", &audio::Sound::vel);
 	ext->link_class_func("Sound.play", &audio::Sound::play);
 	ext->link_class_func("Sound.stop", &audio::Sound::stop);
 	ext->link_class_func("Sound.pause", &audio::Sound::pause);
@@ -470,7 +480,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Sound.set", &audio::Sound::set_data);
 	ext->link_class_func("Sound.load", &audio::Sound::load);
 	ext->link_class_func("Sound.emit", &audio::Sound::emit);
-	ext->link_class_func("Sound.__del_override__", &global_delete);
+	ext->link_class_func("Sound.__del_override__", &DeletionQueue::add);
 
 	gui::Node node(rect::ID);
 	ext->declare_class_size("Node", sizeof(gui::Node));
@@ -489,7 +499,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Node.parent", &gui::Node::parent);
 	ext->link_class_func("Node.__init__", &gui::Node::__init_base__);
 	ext->link_virtual("Node.__delete__", &gui::Node::__delete__, &node);
-	ext->link_class_func("Node.__del_override__", &gui::delete_node);
+	ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
 	ext->link_class_func("Node.add", &gui::Node::add);
 	ext->link_class_func("Node.set_area", &gui::Node::set_area);
 	ext->link_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);

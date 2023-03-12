@@ -17,6 +17,7 @@
 
 #include "lib/hui_minimal/hui.h"
 
+#include "helper/DeletionQueue.h"
 #include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
 #include "helper/Scheduler.h"
@@ -390,6 +391,7 @@ public:
 		network_manager.iterate();
 
 		world.iterate(engine.elapsed);
+		DeletionQueue::delete_all();
 
 		Scheduler::handle_iterate(engine.elapsed);
 

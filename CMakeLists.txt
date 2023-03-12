@@ -17,6 +17,7 @@ set(SOURCE
 	src/gui/Node.cpp
 	src/gui/Picture.cpp
 	src/gui/Text.cpp
+	src/helper/DeletionQueue.cpp
 	src/helper/ErrorHandler.cpp
 	src/helper/PerformanceMonitor.cpp
 	src/helper/ResourceManager.cpp

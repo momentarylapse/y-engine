@@ -34,6 +34,9 @@
     <ClCompile Include="src\gui\Text.cpp">
       <Filter>src\gui</Filter>
     </ClCompile>
+    <ClCompile Include="src\helper\DeletionQueue.cpp">
+      <Filter>src\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\helper\ErrorHandler.cpp">
       <Filter>src\helper</Filter>
     </ClCompile>
@@ -671,6 +674,9 @@
     </ClInclude>
     <ClInclude Include="src\gui\Text.h">
       <Filter>src\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\DeletionQueue.h">
+      <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\helper\ErrorHandler.h">
       <Filter>src\helper</Filter>

@@ -653,6 +653,26 @@ void World::unregister_entity(Entity *e) {
 		}
 }
 
+void World::delete_entity(Entity *e) {
+	unregister_entity(e);
+	e->on_delete_rec();
+	delete e;
+}
+
+void World::delete_particle(Particle *p) {
+	particle_manager->_delete(p);
+}
+
+void World::delete_sound(audio::Sound *s) {
+	if (unregister(s))
+		delete s;
+}
+
+void World::delete_link(Link *l) {
+	if (unregister(l))
+		delete l;
+}
+
 bool World::unregister(BaseClass* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
 	if (x->type == BaseClass::Type::ENTITY) {

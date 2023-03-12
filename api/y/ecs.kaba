@@ -6,7 +6,6 @@ use kaba
 struct BaseClass
 #	extern void __init__()
 	func extern virtual __delete__()
-	func extern __del_override__()
 	func extern virtual mut on_init()
 	func extern virtual mut on_delete()
 	func extern virtual mut on_iterate(dt: float)
@@ -16,6 +15,7 @@ struct Entity extends BaseClass
 	var ang: quaternion
 	var parent: Entity*
 	func extern get_matrix() -> mat4
+	func extern __del_override__()
 	
 	func extern selfref mut __add_component(t: Class*, vars: string) -> Component&
 	func extern selfref __get_component(t: Class*) -> Component*

@@ -31,7 +31,7 @@ class ParticleManager {
 public:
 	Array<ParticleGroup*> groups;
 	void add(Particle *p);
-	bool try_delete(Particle *p);
+	void _delete(Particle *p);
 	bool unregister(Particle *p);
 	void clear();
 	void iterate(float dt);

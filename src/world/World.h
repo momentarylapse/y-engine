@@ -119,6 +119,10 @@ public:
 	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 
 	bool unregister(BaseClass *o);
+	void delete_entity(Entity *e);
+	void delete_particle(Particle *p);
+	void delete_sound(audio::Sound *s);
+	void delete_link(Link *l);
 
 	void register_model(Model *m);
 	void unregister_model(Model *m);

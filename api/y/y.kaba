@@ -226,6 +226,10 @@ class World
 
 #	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
 #	func extern delete(o: void*)
+	func extern delete_entity(e: Entity*)
+	func extern delete_particle(e: Particle*)
+	func extern delete_sound(e: Sound*)
+	func extern delete_link(e: Link*)
 	
 	class MessageData
 		var e: Entity*

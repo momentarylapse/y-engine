@@ -77,6 +77,11 @@ bool ParticleManager::unregister(Particle *p) {
 	return false;
 }
 
+void ParticleManager::_delete(Particle *p) {
+	if (unregister(p))
+		delete(p);
+}
+
 void ParticleManager::clear() {
 	for (auto *g: groups)
 		delete g;
