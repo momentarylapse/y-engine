@@ -698,18 +698,22 @@ bool World::unregister(BaseClass* x) {
 				links.erase(i);
 				return true;
 			}
-	} else if (x->type == BaseClass::Type::SOUND) {
 #ifdef _X_ALLOW_X_
+	} else if (x->type == BaseClass::Type::SOUND) {
 		foreachi(auto *s, sounds, i)
 			if (s == x) {
 				//msg_write(" -> SOUND");
 				sounds.erase(i);
 				return true;
 			}
-#endif
-	} else if (x->type == BaseClass::Type::PARTICLE or x->type == BaseClass::Type::BEAM) {
-#ifdef _X_ALLOW_X_
+	} else if (x->type == BaseClass::Type::LEGACY_PARTICLE or x->type == BaseClass::Type::LEGACY_BEAM) {
 		if (particle_manager->unregister_legacy((LegacyParticle*)x))
+			return true;
+	} else if (x->type == BaseClass::Type::PARTICLE_GROUP) {
+		if (particle_manager->unregister_particle_group((ParticleGroup*)x))
+			return true;
+	} else if (x->type == BaseClass::Type::BEAM_GROUP) {
+		if (particle_manager->unregister_beam_group((BeamGroup*)x))
 			return true;
 #endif
 	}

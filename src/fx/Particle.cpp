@@ -10,9 +10,20 @@
 
 Shader *shader_fx;
 
-//DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
+Particle::Particle(const vec3 &p, const color& _col, float r, float ttl) {
+	pos = p;
+	vel = vec3::ZERO;
+	col = _col;
+	radius = r;
+	time_to_live = -1;
+	source = rect::ID;
+	time_to_live = ttl;
+	suicidal = ttl > 0;
+	enabled = true;
+}
 
-LegacyParticle::LegacyParticle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseClass(Type::PARTICLE) {
+
+LegacyParticle::LegacyParticle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseClass(Type::LEGACY_PARTICLE) {
 	pos = p;
 	vel = vec3::ZERO;
 	col = White;

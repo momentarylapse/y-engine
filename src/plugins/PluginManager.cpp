@@ -11,6 +11,7 @@
 #include "../audio/Sound.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
+#include "../fx/ParticleEmitter.h"
 #include "../gui/gui.h"
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
@@ -469,6 +470,20 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Beam.length", &LegacyBeam::length);
 	ext->link_class_func("Beam.__init__", &LegacyBeam::__init_beam__);
 
+	{
+	ParticleEmitter emitter;
+	ext->declare_class_size("ParticleEmitter", sizeof(ParticleEmitter));
+	ext->declare_class_element("ParticleEmitter.pos", &ParticleEmitter::pos);
+	ext->declare_class_element("ParticleEmitter.spawn_dt", &ParticleEmitter::spawn_dt);
+	ext->declare_class_element("ParticleEmitter.spawn_time_to_live", &ParticleEmitter::spawn_time_to_live);
+	ext->link_class_func("ParticleEmitter.__init__", &ParticleEmitter::__init__);
+	ext->link_class_func("ParticleEmitter.emit_particle", &ParticleEmitter::emit_particle);
+	ext->link_virtual("ParticleEmitter.__delete__", &LegacyParticle::__delete__, &emitter);
+	ext->link_virtual("ParticleEmitter.on_iterate", &ParticleEmitter::on_iterate, &emitter);
+	ext->link_virtual("ParticleEmitter.on_init_particle", &ParticleEmitter::on_init_particle, &emitter);
+	ext->link_virtual("ParticleEmitter.on_iterate_particle", &ParticleEmitter::on_iterate_particle, &emitter);
+	//ext->link_class_func("ParticleEmitter.__del_override__", &DeletionQueue::add);
+	}
 
 	ext->declare_class_size("Sound", sizeof(audio::Sound));
 	ext->declare_class_element("Sound.pos", &audio::Sound::pos);

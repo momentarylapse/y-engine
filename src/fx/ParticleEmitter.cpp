@@ -11,55 +11,81 @@
 #include "../lib/math/math.h"
 #include "../lib/math/random.h"
 
+#if !NEW_PARTICLES
+#include "../world/World.h"
+#include "../lib/os/msg.h"
+#endif
+
 extern Texture *tex_white;
 
 static Random pe_random;
 
-ParticleEmitter::ParticleEmitter() : BaseClass(BaseClass::Type::PARTICLE_EMITTER) {
-	time_to_live = 1;
-	spawn_dt = 0.1f;
-	texture = tex_white;
 
+ParticleGroup::ParticleGroup() : BaseClass(BaseClass::Type::PARTICLE_GROUP) {
+	texture = tex_white;
 	pos = vec3::ZERO;
+}
+
+
+#if NEW_PARTICLES
+Particle* ParticleGroup::emit_particle(const vec3& pos, const color& col, float r) {
+	particles.add(Particle(pos, col, r, -1));
+	return &particles.back();
+}
+
+void ParticleGroup::on_iterate(float dt) {
+	for (auto &p: particles) {
+		on_iterate_particle(&p, dt);
+		p.pos += p.vel * dt;
+	}
+}
+#else
+LegacyParticle* ParticleGroup::emit_particle(const vec3& pos, const color& col, float r) {
+	auto p = world.add_legacy_particle(new LegacyParticle(pos, r, texture, -1));
+	p->col = col;
+	particles.add(p);
+	return p;
+}
+
+void ParticleGroup::on_iterate(float dt) {
+	for (auto p: particles) {
+		on_iterate_particle(p, dt);
+		//p->pos += p->vel * dt;
+		p->time_to_live -= dt;
+		if (p->time_to_live < 0 /*and p->suicidal*/) {
+			particles.erase(particles.find(p));
+			world.delete_legacy_particle(p);
+		}
+	}
+}
+#endif
+
+
+ParticleEmitter::ParticleEmitter() {
+	spawn_time_to_live = 1;
+	spawn_dt = 0.1f;
+
 	spawn_vel = vec3(0,0,100);
 	spawn_dvel = 20;
 	spawn_radius = 10;
 	spawn_dradius = 5;
 }
 
-ParticleEmitter::~ParticleEmitter() {
-}
-
-void ParticleEmitter::on_iterate_particle(Particle *p, float dt) {
-	p->pos += p->vel * dt;
+void ParticleEmitter::__init__() {
+	new(this) ParticleEmitter;
 }
 
 void ParticleEmitter::on_iterate(float dt) {
-	/*int N = time_to_live * spawn_dt;
-
-	phase += dt;
-	while (phase > spawn_dt) {
-		auto p = &particles[next_index];
-		if (particles.num < N) {
-			particles.resize(next_index + 1);
-			p = &particles[next_index];
-		}
-
-		// new
-		p->texture = texture;
-		p->pos = pos;
-		p->vel = spawn_vel + pe_random.in_ball(spawn_dvel);
-		p->radius = spawn_radius + randf(spawn_dradius);
-		p->col = White;
-		on_create_particle(p);
-
-		phase -= spawn_dt;
-		next_index ++;
-		if (next_index >= N)
-			next_index = 0;
+	tt += dt;
+	while (tt >= spawn_dt) {
+		tt -= spawn_dt;
+		auto p = emit_particle(pos, White, spawn_radius);
+		p->time_to_live = spawn_time_to_live;
+		p->suicidal = false;//(p->time_to_live > 0);
+		on_init_particle(p);
+		p->pos += p->vel * tt;
 	}
 
-	for (auto &p: particles)
-		on_iterate_particle(&p, dt);*/
+	ParticleGroup::on_iterate(dt);
 }
 

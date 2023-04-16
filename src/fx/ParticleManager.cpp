@@ -9,6 +9,7 @@
 #include "ParticleManager.h"
 #include "Particle.h"
 #include "Beam.h"
+#include "ParticleEmitter.h"
 #include "../lib/os/msg.h"
 
 
@@ -33,21 +34,21 @@ LegacyParticleGroup::~LegacyParticleGroup() {
 }
 
 void LegacyParticleGroup::add(LegacyParticle *p) {
-	if (p->type == BaseClass::Type::PARTICLE)
+	if (p->type == BaseClass::Type::LEGACY_PARTICLE)
 		particles.add(p);
-	else if (p->type == BaseClass::Type::BEAM)
+	else if (p->type == BaseClass::Type::LEGACY_BEAM)
 		beams.add((LegacyBeam*)p);
 }
 
 bool LegacyParticleGroup::unregister(LegacyParticle *p) {
-	if (p->type == BaseClass::Type::PARTICLE) {
+	if (p->type == BaseClass::Type::LEGACY_PARTICLE) {
 		foreachi (auto *pp, particles, i)
 			if (pp == p) {
 				//msg_write("  -> PARTICLE");
 				particles.erase(i);
 				return true;
 			}
-	} else if (p->type == BaseClass::Type::BEAM) {
+	} else if (p->type == BaseClass::Type::LEGACY_BEAM) {
 		foreachi (auto *pp, beams, i)
 			if (pp == p) {
 				//msg_write("  -> BEAM");
@@ -82,6 +83,31 @@ void ParticleManager::_delete_legacy(LegacyParticle *p) {
 		delete(p);
 }
 
+
+void ParticleManager::register_particle_group(ParticleGroup *g) {
+	particle_groups.add(g);
+}
+
+bool ParticleManager::unregister_particle_group(ParticleGroup *g) {
+	if (int i = particle_groups.find(g)) {
+		particle_groups.erase(i);
+		return true;
+	}
+	return false;
+}
+
+void ParticleManager::register_beam_group(BeamGroup *g) {
+	beam_groups.add(g);
+}
+
+bool ParticleManager::unregister_beam_group(BeamGroup *g) {
+	if (int i = beam_groups.find(g)) {
+		beam_groups.erase(i);
+		return true;
+	}
+	return false;
+}
+
 void ParticleManager::clear() {
 	for (auto *g: legacy_groups)
 		delete g;
@@ -110,6 +136,10 @@ void ParticleManager::iterate(float dt) {
 		iterate_particles(&g->particles, dt);
 		iterate_particles((Array<LegacyParticle*>*)&g->beams, dt);
 	}
+	for (auto g: particle_groups)
+		g->on_iterate(dt);
+	for (auto g: beam_groups)
+		g->on_iterate(dt);
 }
 
 void ParticleManager::shift_all(const vec3 &dpos) {

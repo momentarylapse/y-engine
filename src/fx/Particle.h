@@ -16,17 +16,10 @@
 #include "../y/BaseClass.h"
 
 
-/*struct ParticlePushData {
-	alignas(16) matrix m;
-	color fog_color;
-	float fog_distance;
-};*/
-
-class NewParticle {
+class Particle {
 public:
-	NewParticle(const vec3 &pos, float r, float ttl);
-
-	void __init__(const vec3 &pos, float r, float ttl);
+	Particle() {}
+	Particle(const vec3 &pos, const color& col, float r, float ttl);
 
 	vec3 pos;
 	vec3 vel;
