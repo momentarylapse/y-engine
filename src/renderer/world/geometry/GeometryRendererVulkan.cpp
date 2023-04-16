@@ -25,6 +25,7 @@
 #include "../../../plugins/PluginManager.h"
 #include "../../../fx/Particle.h"
 #include "../../../fx/Beam.h"
+#include "../../../fx/ParticleEmitter.h"
 #include "../../../fx/ParticleManager.h"
 #include "../../../gui/gui.h"
 #include "../../../gui/Picture.h"
@@ -215,8 +216,46 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 		index ++;
 	}
 
+
+	// new particles
+	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
+	for (auto g: *particle_groups) {
+		if (index >= rda.num) {
+			rda.add({new UniformBuffer(sizeof(UBOFx)),
+				pool->create_set(shader_fx.get()),
+				new VertexBuffer("3f,4f,2f")});
+			//rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
+			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+			rda[index].dset->set_texture(LOCATION_FX_TEX0, g->texture);
+			rda[index].dset->update();
+		}
+
+		Array<VertexFx> v;
+		for (auto& p: g->particles)
+			if (p.enabled) {
+				auto m = mat4::translation(p.pos) * r * mat4::scale(p.radius, p.radius, p.radius);
+
+				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
+				v.add({m * vec3( 1, 1,0), p.col, p.source.x2, p.source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
+				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
+				v.add({m * vec3(-1,-1,0), p.col, p.source.x1, p.source.y2});
+			}
+		rda[index].vb->update(v);
+
+		rda[index].ubo->update(&ubo);
+
+		cb->bind_descriptor_set(0, rda[index].dset);
+		cb->draw(rda[index].vb);
+
+		index ++;
+	}
+
 	// beams
-	for (auto g: world.particle_manager->legacy_groups) {
+	for (auto g: *particle_groups) {
+		if (g->beams.num == 0)
+			continue;
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
@@ -230,30 +269,30 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 
 		Array<VertexFx> v;
 
-		for (auto p: g->beams) {
-			if (!p->enabled)
+		for (auto& p: g->beams) {
+			if (!p.enabled)
 				continue;
 			// TODO geometry shader!
-			auto pa = cam->project(p->pos);
-			auto pb = cam->project(p->pos + p->length);
+			auto pa = cam->project(p.pos);
+			auto pb = cam->project(p.pos + p.length);
 			auto pe = vec3::cross(pb - pa, vec3::EZ).normalized();
 			auto uae = cam->unproject(pa + pe * 0.1f);
 			auto ube = cam->unproject(pb + pe * 0.1f);
-			auto _e1 = (p->pos - uae).normalized() * p->radius;
-			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
-			//vec3 e1 = -vec3::cross(cam->ang * vec3::EZ, p->length).normalized() * p->radius/2;
+			auto _e1 = (p.pos - uae).normalized() * p.radius;
+			auto _e2 = (p.pos + p.length - ube).normalized() * p.radius;
+			//vec3 e1 = -vec3::cross(cam->ang * vec3::EZ, p.length).normalized() * p.radius/2;
 
-			vec3 p00 = p->pos - _e1;
-			vec3 p01 = p->pos - _e2 + p->length;
-			vec3 p10 = p->pos + _e1;
-			vec3 p11 = p->pos + _e2 + p->length;
+			vec3 p00 = p.pos - _e1;
+			vec3 p01 = p.pos - _e2 + p.length;
+			vec3 p10 = p.pos + _e1;
+			vec3 p11 = p.pos + _e2 + p.length;
 
-			v.add({p00, p->col, p->source.x1, p->source.y1});
-			v.add({p01, p->col, p->source.x2, p->source.y1});
-			v.add({p11, p->col, p->source.x2, p->source.y2});
-			v.add({p00, p->col, p->source.x1, p->source.y1});
-			v.add({p11, p->col, p->source.x2, p->source.y2});
-			v.add({p10, p->col, p->source.x1, p->source.y2});
+			v.add({p00, p.col, p.source.x1, p.source.y1});
+			v.add({p01, p.col, p.source.x2, p.source.y1});
+			v.add({p11, p.col, p.source.x2, p.source.y2});
+			v.add({p00, p.col, p.source.x1, p.source.y1});
+			v.add({p11, p.col, p.source.x2, p.source.y2});
+			v.add({p10, p.col, p.source.x1, p.source.y2});
 		}
 
 		rda[index].vb->update(v);
