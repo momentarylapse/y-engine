@@ -386,6 +386,8 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
 
+	ext->link_class_func("World.register_fx", &World::__register_fx);
+
 
 	ext->declare_class_element("World.MessageData.e", &World::MessageData::e);
 	ext->declare_class_element("World.MessageData.v", &World::MessageData::v);

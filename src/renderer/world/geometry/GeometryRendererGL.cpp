@@ -26,6 +26,7 @@
 #include "../../../fx/Particle.h"
 #include "../../../fx/Beam.h"
 #include "../../../fx/ParticleManager.h"
+#include "../../../fx/ParticleEmitter.h"
 #include "../../../gui/gui.h"
 #include "../../../gui/Picture.h"
 #include "../../../world/Camera.h"
@@ -140,6 +141,25 @@ void GeometryRendererGL::draw_particles() {
 				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
 				v.add({m * vec3( 1,-1,0), p->col, p->source.x2, p->source.y2});
 				v.add({m * vec3(-1,-1,0), p->col, p->source.x1, p->source.y2});
+			}
+		vb_fx->update(v);
+		nix::set_model_matrix(mat4::ID);
+		nix::draw_triangles(vb_fx);
+	}
+
+	for (auto g: world.particle_manager->particle_groups) {
+		nix::set_texture(g->texture);
+		Array<VertexFx> v;
+		for (auto& p: g->particles)
+			if (p.enabled) {
+				auto m = mat4::translation(p.pos) * r * mat4::scale(p.radius, p.radius, p.radius);
+
+				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
+				v.add({m * vec3( 1, 1,0), p.col, p.source.x2, p.source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
+				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
+				v.add({m * vec3(-1,-1,0), p.col, p.source.x1, p.source.y2});
 			}
 		vb_fx->update(v);
 		nix::set_model_matrix(mat4::ID);

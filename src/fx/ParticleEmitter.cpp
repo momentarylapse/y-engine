@@ -38,6 +38,15 @@ void ParticleGroup::on_iterate(float dt) {
 		on_iterate_particle(&p, dt);
 		p.pos += p.vel * dt;
 	}
+	for (int i=0; i<particles.num; i++) {
+		auto& p = particles[i];
+		//p->pos += p->vel * dt;
+		p.time_to_live -= dt;
+		if (p.time_to_live < 0 /*and p->suicidal*/) {
+			particles.erase(i);
+			i --;
+		}
+	}
 }
 #else
 LegacyParticle* ParticleGroup::emit_particle(const vec3& pos, const color& col, float r) {
@@ -58,6 +67,7 @@ void ParticleGroup::on_iterate(float dt) {
 		if (p->time_to_live < 0 /*and p->suicidal*/) {
 			particles.erase(i);
 			world.delete_legacy_particle(p);
+			i --;
 		}
 	}
 }

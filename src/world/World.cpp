@@ -36,6 +36,7 @@
 #include "Light.h"
 #include "../fx/Particle.h"
 #include "../fx/ParticleManager.h"
+#include "../fx/ParticleEmitter.h"
 #include "../plugins/PluginManager.h"
 #include "../helper/PerformanceMonitor.h"
 #endif
@@ -675,6 +676,10 @@ void World::delete_sound(audio::Sound *s) {
 void World::delete_link(Link *l) {
 	if (unregister(l))
 		delete l;
+}
+
+void World::__register_fx(BaseClass *e) {
+	particle_manager->register_particle_group(static_cast<ParticleGroup*>(e));
 }
 
 bool World::unregister(BaseClass* x) {

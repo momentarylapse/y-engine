@@ -18,7 +18,7 @@
 #include "Particle.h"
 #include "Beam.h"
 
-#define NEW_PARTICLES 0
+#define NEW_PARTICLES 1
 
 class ParticleGroup : public BaseClass /*Component*/ {
 public:
