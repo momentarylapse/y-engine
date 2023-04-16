@@ -89,8 +89,9 @@ void ParticleManager::register_particle_group(ParticleGroup *g) {
 }
 
 bool ParticleManager::unregister_particle_group(ParticleGroup *g) {
-	if (int i = particle_groups.find(g)) {
-		particle_groups.erase(i);
+	int index = particle_groups.find(g);
+	if (index >= 0) {
+		particle_groups.erase(index);
 		return true;
 	}
 	return false;
@@ -101,8 +102,9 @@ void ParticleManager::register_beam_group(BeamGroup *g) {
 }
 
 bool ParticleManager::unregister_beam_group(BeamGroup *g) {
-	if (int i = beam_groups.find(g)) {
-		beam_groups.erase(i);
+	int index = beam_groups.find(g);
+	if (index >= 0) {
+		beam_groups.erase(index);
 		return true;
 	}
 	return false;
