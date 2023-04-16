@@ -20,27 +20,20 @@
 
 #define NEW_PARTICLES 1
 
-class ParticleGroup : public BaseClass /*Component*/ {
+class ParticleGroup : public Component {
 public:
 	ParticleGroup();
 
-#if NEW_PARTICLES
 	Particle* emit_particle(const vec3& pos, const color& col, float r);
 	virtual void on_iterate_particle(Particle *p, float dt) {}
-#else
-	LegacyParticle* emit_particle(const vec3& pos, const color& col, float r);
-	virtual void on_iterate_particle(LegacyParticle *p, float dt) {}
-#endif
 	void on_iterate(float dt) override;
 
 	Texture* texture;
-	vec3 pos;
+	//vec3 pos;
 
-#if NEW_PARTICLES
 	Array<Particle> particles;
-#else
-	Array<LegacyParticle*> particles;
-#endif
+
+	static const kaba::Class *_class;
 };
 
 class BeamGroup : public Component {
@@ -62,11 +55,7 @@ public:
 	ParticleEmitter();
 	void __init__();
 
-#if NEW_PARTICLES
 	virtual void on_init_particle(Particle *p) {}
-#else
-	virtual void on_init_particle(LegacyParticle *p) {}
-#endif
 	void on_iterate(float dt) override;
 
 	float spawn_time_to_live;
@@ -77,6 +66,8 @@ public:
 	float spawn_dvel;
 	float spawn_radius;
 	float spawn_dradius;
+
+	static const kaba::Class *_class;
 };
 
 #endif /* SRC_FX_PARTICLEEMITTER_H_ */

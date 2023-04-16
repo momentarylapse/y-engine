@@ -180,18 +180,25 @@ class Beam extends Particle
 	var length: vec3
 
 
-class ParticleEmitter
+class ParticleGroup extends Component
+#	var update_dt = 0.1
+#	var texture: shared![Texture]
+	
+	func extern override __init__()
+	func extern emit(pos: vec3, col: color, radius: float, ttl: float) -> Particle&
+	func extern override mut on_iterate(dt: float)
+	func extern virtual mut on_iterate_particle(out p: Particle, dt: float)
+
+class ParticleEmitter extends ParticleGroup
 	var spawn_dt: float
 	var spawn_time_to_live: float
 #	var update_dt = 0.1
 #	var texture: shared![Texture]
 #	var radius = 10.0
-	var pos: vec3
 	
-	func extern __init__()
-	func extern virtual mut on_iterate(dt: float)
+	func extern override __init__()
+	func extern override mut on_iterate(dt: float)
 	func extern virtual mut on_init_particle(out p: Particle)
-	func extern virtual mut on_iterate_particle(out p: Particle, dt: float)
 
 
 class Fog

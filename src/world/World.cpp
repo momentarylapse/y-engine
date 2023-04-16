@@ -679,7 +679,7 @@ void World::delete_link(Link *l) {
 }
 
 void World::__register_fx(BaseClass *e) {
-	particle_manager->register_particle_group(static_cast<ParticleGroup*>(e));
+	//particle_manager->register_particle_group(static_cast<ParticleGroup*>(e));
 }
 
 bool World::unregister(BaseClass* x) {

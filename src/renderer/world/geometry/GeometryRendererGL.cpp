@@ -147,7 +147,9 @@ void GeometryRendererGL::draw_particles() {
 		nix::draw_triangles(vb_fx);
 	}
 
-	for (auto g: world.particle_manager->particle_groups) {
+
+	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
+	for (auto g: *particle_groups) {
 		nix::set_texture(g->texture);
 		Array<VertexFx> v;
 		for (auto& p: g->particles)

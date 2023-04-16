@@ -487,9 +487,20 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("LegacyBeam.__init__", &LegacyBeam::__init_beam__);
 
 	{
+	ParticleGroup group;
+	ext->declare_class_size("ParticleGroup", sizeof(ParticleGroup));
+	ext->link_class_func("ParticleGroup.__init__", &ParticleGroup::__init__);
+	ext->link_class_func("ParticleGroup.emit", &ParticleGroup::emit_particle);
+	ext->link_virtual("ParticleGroup.__delete__", &LegacyParticle::__delete__, &group);
+	ext->link_virtual("ParticleGroup.on_iterate", &ParticleGroup::on_iterate, &group);
+	ext->link_virtual("ParticleGroup.on_iterate_particle", &ParticleGroup::on_iterate_particle, &group);
+	//ext->link_class_func("ParticleGroup.__del_override__", &DeletionQueue::add);
+	}
+
+	{
 	ParticleEmitter emitter;
 	ext->declare_class_size("ParticleEmitter", sizeof(ParticleEmitter));
-	ext->declare_class_element("ParticleEmitter.pos", &ParticleEmitter::pos);
+	//ext->declare_class_element("ParticleEmitter.pos", &ParticleEmitter::pos);
 	ext->declare_class_element("ParticleEmitter.spawn_dt", &ParticleEmitter::spawn_dt);
 	ext->declare_class_element("ParticleEmitter.spawn_time_to_live", &ParticleEmitter::spawn_time_to_live);
 	ext->link_class_func("ParticleEmitter.__init__", &ParticleEmitter::__init__);
@@ -761,6 +772,8 @@ void PluginManager::import_kaba() {
 	import_component_class<Terrain>(s, "Terrain");
 	import_component_class<Light>(s, "Light");
 	import_component_class<Camera>(s, "Camera");
+	import_component_class<ParticleGroup>(s, "ParticleGroup");
+	import_component_class<ParticleEmitter>(s, "ParticleEmitter");
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
 	//msg_write(MeshCollider::_class->parent->parent->name);
