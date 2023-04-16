@@ -456,7 +456,6 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Particle.time_to_live", &Particle::time_to_live);
 	ext->declare_class_element("Particle.suicidal", &Particle::suicidal);
 	ext->declare_class_element("Particle.color", &Particle::col);
-	ext->declare_class_element("Particle.source", &Particle::source);
 	ext->declare_class_element("Particle.enabled", &Particle::enabled);
 
 	ext->declare_class_size("Beam", sizeof(Beam));
@@ -487,6 +486,7 @@ void PluginManager::export_kaba() {
 	{
 	ParticleGroup group;
 	ext->declare_class_size("ParticleGroup", sizeof(ParticleGroup));
+	ext->declare_class_element("ParticleGroup.source", &ParticleGroup::source);
 	ext->link_class_func("ParticleGroup.__init__", &ParticleGroup::__init__);
 	ext->link_class_func("ParticleGroup.emit", &ParticleGroup::emit_particle);
 	ext->link_class_func("ParticleGroup.emit_beam", &ParticleGroup::emit_beam);

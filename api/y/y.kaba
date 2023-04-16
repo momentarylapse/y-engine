@@ -173,7 +173,6 @@ class Particle
 	var time_to_live: float
 	var suicidal: bool
 	var color: color
-	var source: rect
 	var enabled: bool
 
 class Beam extends Particle
@@ -184,6 +183,7 @@ class ParticleGroup extends Component
 #	var update_dt = 0.1
 	#var texture: shared![Texture]
 	var texture: Texture&
+	var source: rect
 	
 	func extern override __init__()
 	func extern mut emit(pos: vec3, col: color, radius: float, ttl: float) -> Particle&

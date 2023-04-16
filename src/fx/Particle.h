@@ -24,7 +24,6 @@ public:
 	vec3 pos;
 	vec3 vel;
 	color col;
-	rect source;
 	float radius;
 	float time_to_live;
 	bool suicidal;

@@ -230,17 +230,17 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 			rda[index].dset->update();
 		}
 
+		auto source = g->source;
 		Array<VertexFx> v;
 		for (auto& p: g->particles)
 			if (p.enabled) {
 				auto m = mat4::translation(p.pos) * r * mat4::scale(p.radius, p.radius, p.radius);
-
-				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
-				v.add({m * vec3( 1, 1,0), p.col, p.source.x2, p.source.y1});
-				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
-				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
-				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
-				v.add({m * vec3(-1,-1,0), p.col, p.source.x1, p.source.y2});
+				v.add({m * vec3(-1, 1,0), p.col, source.x1, source.y1});
+				v.add({m * vec3( 1, 1,0), p.col, source.x2, source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
+				v.add({m * vec3(-1, 1,0), p.col, source.x1, source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
+				v.add({m * vec3(-1,-1,0), p.col, source.x1, source.y2});
 			}
 		rda[index].vb->update(v);
 
@@ -267,8 +267,8 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 			rda[index].dset->update();
 		}
 
+		auto source = g->source;
 		Array<VertexFx> v;
-
 		for (auto& p: g->beams) {
 			if (!p.enabled)
 				continue;
@@ -287,12 +287,12 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 			vec3 p10 = p.pos + _e1;
 			vec3 p11 = p.pos + _e2 + p.length;
 
-			v.add({p00, p.col, p.source.x1, p.source.y1});
-			v.add({p01, p.col, p.source.x2, p.source.y1});
-			v.add({p11, p.col, p.source.x2, p.source.y2});
-			v.add({p00, p.col, p.source.x1, p.source.y1});
-			v.add({p11, p.col, p.source.x2, p.source.y2});
-			v.add({p10, p.col, p.source.x1, p.source.y2});
+			v.add({p00, p.col, source.x1, source.y1});
+			v.add({p01, p.col, source.x2, source.y1});
+			v.add({p11, p.col, source.x2, source.y2});
+			v.add({p00, p.col, source.x1, source.y1});
+			v.add({p11, p.col, source.x2, source.y2});
+			v.add({p10, p.col, source.x1, source.y2});
 		}
 
 		rda[index].vb->update(v);

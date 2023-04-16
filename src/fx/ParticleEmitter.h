@@ -32,6 +32,7 @@ public:
 
 	//shared<Texture> texture;
 	Texture* texture;
+	rect source;
 
 	Array<Particle> particles;
 	Array<Beam> beams;

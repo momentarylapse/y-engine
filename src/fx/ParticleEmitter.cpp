@@ -22,6 +22,7 @@ const kaba::Class *ParticleEmitter::_class = nullptr;
 ParticleGroup::ParticleGroup() {
 	if (tex_white)
 		texture = tex_white;
+	source = rect::ID;
 	//pos = vec3::ZERO;
 }
 
@@ -31,6 +32,11 @@ void ParticleGroup::__init__() {
 
 
 Particle* ParticleGroup::emit_particle(const vec3& pos, const color& col, float r, float ttl) {
+	for (auto& p: particles)
+		if (!p.enabled) {
+			p = Particle(pos, col, r, ttl);
+			return &p;
+		}
 	particles.add(Particle(pos, col, r, ttl));
 	return &particles.back();
 }
@@ -59,8 +65,9 @@ void ParticleGroup::iterate_particles(float dt) {
 		//p->pos += p->vel * dt;
 		p.time_to_live -= dt;
 		if (p.time_to_live < 0 and p.suicidal) {
-			particles.erase(i);
-			i --;
+			p.enabled = false;
+			//particles.erase(i);
+			//i --;
 		}
 	}
 	for (int i=0; i<beams.num; i++) {

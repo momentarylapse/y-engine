@@ -151,17 +151,22 @@ void GeometryRendererGL::draw_particles() {
 	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
 	for (auto g: *particle_groups) {
 		nix::set_texture(g->texture);
+		auto source = g->source;
 		Array<VertexFx> v;
+		int count = 0;
+		for (auto& p: g->particles)
+			count += int(p.enabled);
+		v.__reserve(count * 6);
 		for (auto& p: g->particles)
 			if (p.enabled) {
 				auto m = mat4::translation(p.pos) * r * mat4::scale(p.radius, p.radius, p.radius);
 
-				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
-				v.add({m * vec3( 1, 1,0), p.col, p.source.x2, p.source.y1});
-				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
-				v.add({m * vec3(-1, 1,0), p.col, p.source.x1, p.source.y1});
-				v.add({m * vec3( 1,-1,0), p.col, p.source.x2, p.source.y2});
-				v.add({m * vec3(-1,-1,0), p.col, p.source.x1, p.source.y2});
+				v.add({m * vec3(-1, 1,0), p.col, source.x1, source.y1});
+				v.add({m * vec3( 1, 1,0), p.col, source.x2, source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
+				v.add({m * vec3(-1, 1,0), p.col, source.x1, source.y1});
+				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
+				v.add({m * vec3(-1,-1,0), p.col, source.x1, source.y2});
 			}
 		vb_fx->update(v);
 		nix::set_model_matrix(mat4::ID);
@@ -173,6 +178,7 @@ void GeometryRendererGL::draw_particles() {
 	nix::set_model_matrix(mat4::ID);
 	for (auto g: *particle_groups) {
 		nix::set_texture(g->texture);
+		auto source = g->source;
 
 		Array<VertexFx> v;
 
@@ -194,12 +200,12 @@ void GeometryRendererGL::draw_particles() {
 			vec3 p10 = p.pos + _e1;
 			vec3 p11 = p.pos + _e2 + p.length;
 
-			v.add({p00, p.col, p.source.x1, p.source.y1});
-			v.add({p01, p.col, p.source.x2, p.source.y1});
-			v.add({p11, p.col, p.source.x2, p.source.y2});
-			v.add({p00, p.col, p.source.x1, p.source.y1});
-			v.add({p11, p.col, p.source.x2, p.source.y2});
-			v.add({p10, p.col, p.source.x1, p.source.y2});
+			v.add({p00, p.col, source.x1, source.y1});
+			v.add({p01, p.col, source.x2, source.y1});
+			v.add({p11, p.col, source.x2, source.y2});
+			v.add({p00, p.col, source.x1, source.y1});
+			v.add({p11, p.col, source.x2, source.y2});
+			v.add({p10, p.col, source.x1, source.y2});
 		}
 
 		vb_fx->update(v);
