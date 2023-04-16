@@ -150,7 +150,7 @@ class Light extends Component
 #	class Cone extends Light
 #		func extern __init__(pos: vec3, ang: quaternion, c: color, radius: float, theta: float)
 
-class Particle extends BaseClass
+class LegacyParticle extends BaseClass
 	var pos, vel: vec3
 	var radius: float
 	var time_to_live: float
@@ -162,62 +162,36 @@ class Particle extends BaseClass
 	func extern __init__(p: vec3, r: float, t: shared![Texture], ttl: float)
 	func extern override __delete__()
 
-class Beam extends Particle
+class LegacyBeam extends LegacyParticle
 	var length: vec3
 	func extern __init__(p: vec3, l: vec3, r: float, t: shared![Texture], ttl: float)
 
 
-#class ParticleEmitterX
-#	var rate = 60.0
-#	var time_to_live = 2.0
-#	var update_dt = 0.1
-#	var texture: shared![Texture]
-#	var radius = 10.0
-#	
-#	var pos = vec3.0
-#	var tt = 0.0
-#	var particles: Particle&[]
-#	
-#	func __init__()
-#		texture = tex_white
-#	
-#	func mut on_iterate(_pos: vec3, dt: float)
-#		pos = _pos
-#		tt += dt
-#		let pdt = 1.0 / rate
-#		while tt >= pdt
-#			tt -= pdt
-#			var p = new Particle(pos, radius, texture, time_to_live)
-#			p.suicidal = false # hack
-#			on_init_particle(p)
-#			p.pos += p.vel * tt
-#			particles.add(p)
-#			world.add_particle(give(p))
-#			
-#		for i=>p in particles
-#			on_iterate_particle(p, dt)
-#			p.time_to_live -= dt
-#			if p.time_to_live < 0
-#				p.suicidal = true
-#				particles.remove(i)
-#	
-#	func virtual mut on_init_particle(out p: Particle)
-#	func virtual mut on_iterate_particle(out p: Particle, dt: float)
+class Particle
+	var pos, vel: vec3
+	var radius: float
+	var time_to_live: float
+	var suicidal: bool
+	var color: color
+	var source: rect
+	var enabled: bool
+
+class Beam extends Particle
+	var length: vec3
+
 
 class ParticleEmitter
 	var spawn_dt: float
 	var spawn_time_to_live: float
-#	var time_to_live = 2.0
 #	var update_dt = 0.1
 #	var texture: shared![Texture]
 #	var radius = 10.0
-	
 	var pos: vec3
 	
 	func extern __init__()
 	func extern virtual mut on_iterate(dt: float)
-	func extern virtual mut on_init_particle(out p: Particle)
-	func extern virtual mut on_iterate_particle(out p: Particle, dt: float)
+	func extern virtual mut on_init_particle(out p: LegacyParticle)
+	func extern virtual mut on_iterate_particle(out p: LegacyParticle, dt: float)
 
 
 class Fog
@@ -260,7 +234,7 @@ class World
 	func extern mut add_light_parallel(ang: quaternion, c: color) -> Light&
 	func extern mut add_light_point(pos: vec3, c: color, radius: float) -> Light&
 	func extern mut add_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
-	func extern mut add_particle(p: xfer[Particle]) -> Particle&
+	func extern mut add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
 	func extern mut add_sound(s: xfer[Sound])
 	func extern mut create_object(filename: Path, pos: vec3, ang: quaternion) -> Entity&
 	func extern mut create_object_no_reg(filename: Path, pos: vec3, ang: quaternion) -> Entity&
@@ -281,7 +255,7 @@ class World
 #	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)
-	func extern delete_particle(e: Particle*)
+	func extern delete_particle(e: LegacyParticle*)
 	func extern delete_sound(e: Sound*)
 	func extern delete_link(e: Link*)
 	
