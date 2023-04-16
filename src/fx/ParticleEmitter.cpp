@@ -20,13 +20,18 @@ const kaba::Class *ParticleGroup::_class = nullptr;
 const kaba::Class *ParticleEmitter::_class = nullptr;
 
 ParticleGroup::ParticleGroup() {
-	texture = tex_white;
+	if (tex_white)
+		texture = tex_white;
 	//pos = vec3::ZERO;
 }
 
+void ParticleGroup::__init__() {
+	new(this) ParticleGroup;
+}
 
-Particle* ParticleGroup::emit_particle(const vec3& pos, const color& col, float r) {
-	particles.add(Particle(pos, col, r, -1));
+
+Particle* ParticleGroup::emit_particle(const vec3& pos, const color& col, float r, float ttl) {
+	particles.add(Particle(pos, col, r, ttl));
 	return &particles.back();
 }
 
@@ -39,7 +44,7 @@ void ParticleGroup::on_iterate(float dt) {
 		auto& p = particles[i];
 		//p->pos += p->vel * dt;
 		p.time_to_live -= dt;
-		if (p.time_to_live < 0 /*and p->suicidal*/) {
+		if (p.time_to_live < 0 and p.suicidal) {
 			particles.erase(i);
 			i --;
 		}
@@ -65,8 +70,7 @@ void ParticleEmitter::on_iterate(float dt) {
 	tt += dt;
 	while (tt >= spawn_dt) {
 		tt -= spawn_dt;
-		auto p = emit_particle(owner->pos, White, spawn_radius);
-		p->time_to_live = spawn_time_to_live;
+		auto p = emit_particle(owner->pos, White, spawn_radius, spawn_time_to_live);
 		p->suicidal = false;//(p->time_to_live > 0);
 		on_init_particle(p);
 		p->pos += p->vel * tt;

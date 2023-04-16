@@ -15,7 +15,6 @@ Particle::Particle(const vec3 &p, const color& _col, float r, float ttl) {
 	vel = vec3::ZERO;
 	col = _col;
 	radius = r;
-	time_to_live = -1;
 	source = rect::ID;
 	time_to_live = ttl;
 	suicidal = ttl > 0;

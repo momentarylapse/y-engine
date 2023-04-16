@@ -23,13 +23,14 @@
 class ParticleGroup : public Component {
 public:
 	ParticleGroup();
+	void __init__();
 
-	Particle* emit_particle(const vec3& pos, const color& col, float r);
+	Particle* emit_particle(const vec3& pos, const color& col, float r, float ttl);
 	virtual void on_iterate_particle(Particle *p, float dt) {}
 	void on_iterate(float dt) override;
 
+	//shared<Texture> texture;
 	Texture* texture;
-	//vec3 pos;
 
 	Array<Particle> particles;
 
