@@ -182,14 +182,19 @@ class Beam extends Particle
 
 class ParticleGroup extends Component
 #	var update_dt = 0.1
-#	var texture: shared![Texture]
+	#var texture: shared![Texture]
+	var texture: Texture&
 	
 	func extern override __init__()
-	func extern emit(pos: vec3, col: color, radius: float, ttl: float) -> Particle&
+	func extern mut emit(pos: vec3, col: color, radius: float, ttl: float) -> Particle&
+	func extern mut emit_beam(pos: vec3, length: vec3, col: color, radius: float, ttl: float) -> Beam&
+	func extern mut iterate_particles(dt: float)
 	func extern override mut on_iterate(dt: float)
 	func extern virtual mut on_iterate_particle(out p: Particle, dt: float)
+	func extern virtual mut on_iterate_beam(out p: Beam, dt: float)
 
 class ParticleEmitter extends ParticleGroup
+	var spawn_beams: bool
 	var spawn_dt: float
 	var spawn_time_to_live: float
 #	var update_dt = 0.1
@@ -197,8 +202,10 @@ class ParticleEmitter extends ParticleGroup
 #	var radius = 10.0
 	
 	func extern override __init__()
+	func extern mut iterate_emitter(dt: float)
 	func extern override mut on_iterate(dt: float)
 	func extern virtual mut on_init_particle(out p: Particle)
+	func extern virtual mut on_init_beam(out p: Beam)
 
 
 class Fog
@@ -249,7 +256,6 @@ class World
 	func extern mut create_terrain(filename: Path, pos: vec3) -> Terrain&
 	func extern mut create_entity(pos: vec3, ang: quaternion) -> Entity&
 	func extern mut register_entity(e: Entity*)
-	func extern mut register_fx(e: ParticleEmitter*)
 	func extern mut set_active_physics(o: Model, active: bool)
 	func extern mut shift_all(dpos: vec3)
 	func extern get_g(pos: vec3) -> vec3

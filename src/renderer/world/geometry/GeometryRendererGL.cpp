@@ -171,35 +171,35 @@ void GeometryRendererGL::draw_particles() {
 	// beams
 	//Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_model_matrix(mat4::ID);
-	for (auto g: world.particle_manager->legacy_groups) {
+	for (auto g: *particle_groups) {
 		nix::set_texture(g->texture);
 
 		Array<VertexFx> v;
 
-		for (auto p: g->beams) {
-			if (!p->enabled)
+		for (auto& p: g->beams) {
+			if (!p.enabled)
 				continue;
 			// TODO geometry shader!
-			auto pa = cam->project(p->pos);
-			auto pb = cam->project(p->pos + p->length);
+			auto pa = cam->project(p.pos);
+			auto pb = cam->project(p.pos + p.length);
 			auto pe = vec3::cross(pb - pa, vec3::EZ).normalized();
 			auto uae = cam->unproject(pa + pe * 0.1f);
 			auto ube = cam->unproject(pb + pe * 0.1f);
-			auto _e1 = (p->pos - uae).normalized() * p->radius;
-			auto _e2 = (p->pos + p->length - ube).normalized() * p->radius;
-			//vec3 e1 = -vec3::cross(cam->ang * vec3::EZ, p->length).normalized() * p->radius/2;
+			auto _e1 = (p.pos - uae).normalized() * p.radius;
+			auto _e2 = (p.pos + p.length - ube).normalized() * p.radius;
+			//vec3 e1 = -vec3::cross(cam->ang * vec3::EZ, p.length).normalized() * p.radius/2;
 
-			vec3 p00 = p->pos - _e1;
-			vec3 p01 = p->pos - _e2 + p->length;
-			vec3 p10 = p->pos + _e1;
-			vec3 p11 = p->pos + _e2 + p->length;
+			vec3 p00 = p.pos - _e1;
+			vec3 p01 = p.pos - _e2 + p.length;
+			vec3 p10 = p.pos + _e1;
+			vec3 p11 = p.pos + _e2 + p.length;
 
-			v.add({p00, p->col, p->source.x1, p->source.y1});
-			v.add({p01, p->col, p->source.x2, p->source.y1});
-			v.add({p11, p->col, p->source.x2, p->source.y2});
-			v.add({p00, p->col, p->source.x1, p->source.y1});
-			v.add({p11, p->col, p->source.x2, p->source.y2});
-			v.add({p10, p->col, p->source.x1, p->source.y2});
+			v.add({p00, p.col, p.source.x1, p.source.y1});
+			v.add({p01, p.col, p.source.x2, p.source.y1});
+			v.add({p11, p.col, p.source.x2, p.source.y2});
+			v.add({p00, p.col, p.source.x1, p.source.y1});
+			v.add({p11, p.col, p.source.x2, p.source.y2});
+			v.add({p10, p.col, p.source.x1, p.source.y2});
 		}
 
 		vb_fx->update(v);

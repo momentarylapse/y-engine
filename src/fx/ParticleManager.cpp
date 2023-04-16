@@ -97,19 +97,6 @@ bool ParticleManager::unregister_particle_group(ParticleGroup *g) {
 	return false;
 }
 
-void ParticleManager::register_beam_group(BeamGroup *g) {
-	beam_groups.add(g);
-}
-
-bool ParticleManager::unregister_beam_group(BeamGroup *g) {
-	int index = beam_groups.find(g);
-	if (index >= 0) {
-		beam_groups.erase(index);
-		return true;
-	}
-	return false;
-}
-
 void ParticleManager::clear() {
 	for (auto *g: legacy_groups)
 		delete g;
@@ -139,8 +126,6 @@ void ParticleManager::iterate(float dt) {
 		iterate_particles((Array<LegacyParticle*>*)&g->beams, dt);
 	}
 	for (auto g: particle_groups)
-		g->on_iterate(dt);
-	for (auto g: beam_groups)
 		g->on_iterate(dt);
 }
 

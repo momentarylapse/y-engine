@@ -11,6 +11,7 @@
 
 class Beam : public Particle {
 public:
+	Beam() {}
 	Beam(const vec3 &pos, const vec3 &length, const color& col, float r, float ttl);
 
 	vec3 length;

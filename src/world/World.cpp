@@ -678,10 +678,6 @@ void World::delete_link(Link *l) {
 		delete l;
 }
 
-void World::__register_fx(BaseClass *e) {
-	//particle_manager->register_particle_group(static_cast<ParticleGroup*>(e));
-}
-
 bool World::unregister(BaseClass* x) {
 	//msg_error("World.unregister  " + i2s((int)x->type));
 	if (x->type == BaseClass::Type::ENTITY) {
@@ -713,12 +709,6 @@ bool World::unregister(BaseClass* x) {
 			}
 	} else if (x->type == BaseClass::Type::LEGACY_PARTICLE or x->type == BaseClass::Type::LEGACY_BEAM) {
 		if (particle_manager->unregister_legacy((LegacyParticle*)x))
-			return true;
-	} else if (x->type == BaseClass::Type::PARTICLE_GROUP) {
-		if (particle_manager->unregister_particle_group((ParticleGroup*)x))
-			return true;
-	} else if (x->type == BaseClass::Type::BEAM_GROUP) {
-		if (particle_manager->unregister_beam_group((BeamGroup*)x))
 			return true;
 #endif
 	}

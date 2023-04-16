@@ -386,8 +386,6 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
 
-	ext->link_class_func("World.register_fx", &World::__register_fx);
-
 
 	ext->declare_class_element("World.MessageData.e", &World::MessageData::e);
 	ext->declare_class_element("World.MessageData.v", &World::MessageData::v);
@@ -491,24 +489,28 @@ void PluginManager::export_kaba() {
 	ext->declare_class_size("ParticleGroup", sizeof(ParticleGroup));
 	ext->link_class_func("ParticleGroup.__init__", &ParticleGroup::__init__);
 	ext->link_class_func("ParticleGroup.emit", &ParticleGroup::emit_particle);
-	ext->link_virtual("ParticleGroup.__delete__", &LegacyParticle::__delete__, &group);
+	ext->link_class_func("ParticleGroup.emit_beam", &ParticleGroup::emit_beam);
+	ext->link_class_func("ParticleGroup.iterate_particles", &ParticleGroup::iterate_particles);
+	ext->link_virtual("ParticleGroup.__delete__", &ParticleGroup::__delete__, &group);
 	ext->link_virtual("ParticleGroup.on_iterate", &ParticleGroup::on_iterate, &group);
 	ext->link_virtual("ParticleGroup.on_iterate_particle", &ParticleGroup::on_iterate_particle, &group);
+	ext->link_virtual("ParticleGroup.on_iterate_beam", &ParticleGroup::on_iterate_beam, &group);
 	//ext->link_class_func("ParticleGroup.__del_override__", &DeletionQueue::add);
 	}
 
 	{
 	ParticleEmitter emitter;
 	ext->declare_class_size("ParticleEmitter", sizeof(ParticleEmitter));
-	//ext->declare_class_element("ParticleEmitter.pos", &ParticleEmitter::pos);
+	ext->declare_class_element("ParticleEmitter.spawn_beams", &ParticleEmitter::spawn_beams);
 	ext->declare_class_element("ParticleEmitter.spawn_dt", &ParticleEmitter::spawn_dt);
 	ext->declare_class_element("ParticleEmitter.spawn_time_to_live", &ParticleEmitter::spawn_time_to_live);
 	ext->link_class_func("ParticleEmitter.__init__", &ParticleEmitter::__init__);
 	ext->link_class_func("ParticleEmitter.emit_particle", &ParticleEmitter::emit_particle);
-	ext->link_virtual("ParticleEmitter.__delete__", &LegacyParticle::__delete__, &emitter);
+	ext->link_class_func("ParticleEmitter.iterate_emitter", &ParticleEmitter::iterate_emitter);
+	ext->link_virtual("ParticleEmitter.__delete__", &ParticleEmitter::__delete__, &emitter);
 	ext->link_virtual("ParticleEmitter.on_iterate", &ParticleEmitter::on_iterate, &emitter);
 	ext->link_virtual("ParticleEmitter.on_init_particle", &ParticleEmitter::on_init_particle, &emitter);
-	ext->link_virtual("ParticleEmitter.on_iterate_particle", &ParticleEmitter::on_iterate_particle, &emitter);
+	ext->link_virtual("ParticleEmitter.on_init_beam", &ParticleEmitter::on_init_beam, &emitter);
 	//ext->link_class_func("ParticleEmitter.__del_override__", &DeletionQueue::add);
 	}
 

@@ -118,8 +118,6 @@ public:
 	void unregister_object(Entity *o);
 	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 
-	void __register_fx(BaseClass *e);
-
 	bool unregister(BaseClass *o);
 	void delete_entity(Entity *e);
 	void delete_legacy_particle(LegacyParticle *p);
