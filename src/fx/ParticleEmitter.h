@@ -14,15 +14,17 @@
 #include "../lib/math/vec3.h"
 #include "../lib/image/color.h"
 #include "../y/BaseClass.h"
+#include "Particle.h"
 
-class Particle;
 
 class ParticleEmitter : public BaseClass {
 public:
 	ParticleEmitter();
 	virtual ~ParticleEmitter();
 
-	virtual void on_create_particle(Particle *p) {}
+	using Particle = NewParticle;
+
+	virtual void on_init_particle(Particle *p) {}
 	virtual void on_iterate_particle(Particle *p, float dt);
 	void on_iterate(float dt) override;
 
@@ -37,7 +39,7 @@ public:
 	float spawn_radius;
 	float spawn_dradius;
 
-	//Array<Particle> particles;
+	Array<Particle> particles;
 };
 
 #endif /* SRC_FX_PARTICLEEMITTER_H_ */

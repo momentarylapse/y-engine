@@ -659,9 +659,9 @@ void World::delete_entity(Entity *e) {
 	delete e;
 }
 
-void World::delete_particle(Particle *p) {
+void World::delete_legacy_particle(LegacyParticle *p) {
 #ifdef _X_ALLOW_X_
-	particle_manager->_delete(p);
+	particle_manager->_delete_legacy(p);
 #endif
 }
 
@@ -709,7 +709,7 @@ bool World::unregister(BaseClass* x) {
 #endif
 	} else if (x->type == BaseClass::Type::PARTICLE or x->type == BaseClass::Type::BEAM) {
 #ifdef _X_ALLOW_X_
-		if (particle_manager->unregister((Particle*)x))
+		if (particle_manager->unregister_legacy((LegacyParticle*)x))
 			return true;
 #endif
 	}
@@ -914,9 +914,9 @@ Light *World::add_light_cone(const vec3 &pos, const quaternion &ang, const color
 #endif
 }
 
-Particle* World::add_particle(xfer<Particle> p) {
+LegacyParticle* World::add_legacy_particle(xfer<LegacyParticle> p) {
 #ifdef _X_ALLOW_X_
-	particle_manager->add(p);
+	particle_manager->add_legacy(p);
 #endif
 	return p;
 }

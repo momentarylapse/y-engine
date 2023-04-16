@@ -126,7 +126,7 @@ void GeometryRendererGL::draw_particles() {
 
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
-	for (auto g: world.particle_manager->groups) {
+	for (auto g: world.particle_manager->legacy_groups) {
 		nix::set_texture(g->texture);
 
 		Array<VertexFx> v;
@@ -149,7 +149,7 @@ void GeometryRendererGL::draw_particles() {
 	// beams
 	//Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_model_matrix(mat4::ID);
-	for (auto g: world.particle_manager->groups) {
+	for (auto g: world.particle_manager->legacy_groups) {
 		nix::set_texture(g->texture);
 
 		Array<VertexFx> v;

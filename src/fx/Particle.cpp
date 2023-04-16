@@ -12,7 +12,7 @@ Shader *shader_fx;
 
 //DescriptorSet *rp_create_dset_fx(Texture *tex, UniformBuffer *ubo);
 
-Particle::Particle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseClass(Type::PARTICLE) {
+LegacyParticle::LegacyParticle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseClass(Type::PARTICLE) {
 	pos = p;
 	vel = vec3::ZERO;
 	col = White;
@@ -25,14 +25,14 @@ Particle::Particle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseC
 	enabled = true;
 }
 
-Particle::~Particle() {
+LegacyParticle::~LegacyParticle() {
 }
 
-void Particle::__init__(const vec3 &p, float r, shared<Texture> t, float ttl) {
-	new(this) Particle(p, r, t, ttl);
+void LegacyParticle::__init__(const vec3 &p, float r, shared<Texture> t, float ttl) {
+	new(this) LegacyParticle(p, r, t, ttl);
 }
 
-void Particle::__delete__() {
-	this->Particle::~Particle();
+void LegacyParticle::__delete__() {
+	this->LegacyParticle::~LegacyParticle();
 }
 

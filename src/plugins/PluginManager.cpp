@@ -373,14 +373,14 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.add_light_point", &World::add_light_point);
 	ext->link_class_func("World.add_light_cone", &World::add_light_cone);
 	ext->link_class_func("World.add_link", &World::add_link);
-	ext->link_class_func("World.add_particle", &World::add_particle);
+	ext->link_class_func("World.add_particle", &World::add_legacy_particle);
 	ext->link_class_func("World.add_sound", &World::add_sound);
 	ext->link_class_func("World.shift_all", &World::shift_all);
 	ext->link_class_func("World.get_g", &World::get_g);
 	ext->link_class_func("World.trace", &World::trace);
 	ext->link_class_func("World.unregister", &World::unregister);
 	ext->link_class_func("World.delete_entity", &World::delete_entity);
-	ext->link_class_func("World.delete_particle", &World::delete_particle);
+	ext->link_class_func("World.delete_particle", &World::delete_legacy_particle);
 	ext->link_class_func("World.delete_sound", &World::delete_sound);
 	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
@@ -448,26 +448,26 @@ void PluginManager::export_kaba() {
 	ext->link("__get_component_list", (void*)&ComponentManager::_get_list);
 	ext->link("__get_component_family_list", (void*)&ComponentManager::_get_list_family);
 
-	Particle particle(vec3::ZERO, 0, nullptr, -1);
-	ext->declare_class_size("Particle", sizeof(Particle));
-	ext->declare_class_element("Particle.pos", &Particle::pos);
-	ext->declare_class_element("Particle.vel", &Particle::vel);
-	ext->declare_class_element("Particle.radius", &Particle::radius);
-	ext->declare_class_element("Particle.time_to_live", &Particle::time_to_live);
-	ext->declare_class_element("Particle.suicidal", &Particle::suicidal);
-	ext->declare_class_element("Particle.texture", &Particle::texture);
-	ext->declare_class_element("Particle.color", &Particle::col);
-	ext->declare_class_element("Particle.source", &Particle::source);
-	ext->declare_class_element("Particle.enabled", &Particle::enabled);
-	ext->link_class_func("Particle.__init__", &Particle::__init__);
-	ext->link_virtual("Particle.__delete__", &Particle::__delete__, &particle);
+	LegacyParticle particle(vec3::ZERO, 0, nullptr, -1);
+	ext->declare_class_size("Particle", sizeof(LegacyParticle));
+	ext->declare_class_element("Particle.pos", &LegacyParticle::pos);
+	ext->declare_class_element("Particle.vel", &LegacyParticle::vel);
+	ext->declare_class_element("Particle.radius", &LegacyParticle::radius);
+	ext->declare_class_element("Particle.time_to_live", &LegacyParticle::time_to_live);
+	ext->declare_class_element("Particle.suicidal", &LegacyParticle::suicidal);
+	ext->declare_class_element("Particle.texture", &LegacyParticle::texture);
+	ext->declare_class_element("Particle.color", &LegacyParticle::col);
+	ext->declare_class_element("Particle.source", &LegacyParticle::source);
+	ext->declare_class_element("Particle.enabled", &LegacyParticle::enabled);
+	ext->link_class_func("Particle.__init__", &LegacyParticle::__init__);
+	ext->link_virtual("Particle.__delete__", &LegacyParticle::__delete__, &particle);
 	//ext->link_virtual("Particle.on_iterate", &Particle::on_iterate, &particle);
 	//ext->link_class_func("Particle.__del_override__", &global_delete);
 	ext->link_class_func("Particle.__del_override__", &DeletionQueue::add);
 
-	ext->declare_class_size("Beam", sizeof(Beam));
-	ext->declare_class_element("Beam.length", &Beam::length);
-	ext->link_class_func("Beam.__init__", &Beam::__init_beam__);
+	ext->declare_class_size("Beam", sizeof(LegacyBeam));
+	ext->declare_class_element("Beam.length", &LegacyBeam::length);
+	ext->link_class_func("Beam.__init__", &LegacyBeam::__init_beam__);
 
 
 	ext->declare_class_size("Sound", sizeof(audio::Sound));

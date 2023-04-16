@@ -166,6 +166,44 @@ class Beam extends Particle
 	var length: vec3
 	func extern __init__(p: vec3, l: vec3, r: float, t: shared![Texture], ttl: float)
 
+
+class ParticleEmitter
+	var rate = 60.0
+	var time_to_live = 2.0
+	var update_dt = 0.1
+	var texture: shared![Texture]
+	var radius = 10.0
+	
+	var pos = vec3.0
+	var tt = 0.0
+	var particles: Particle&[]
+	
+	func __init__()
+		texture = tex_white
+	
+	func mut on_iterate(_pos: vec3, dt: float)
+		pos = _pos
+		tt += dt
+		let pdt = 1.0 / rate
+		while tt >= pdt
+			tt -= pdt
+			var p = new Particle(pos, radius, texture, -1)
+			on_init_particle(p)
+			p.pos += p.vel * tt
+			particles.add(p)
+			world.add_particle(give(p))
+			
+		for i=>p in particles
+			on_iterate_particle(p, dt)
+			p.time_to_live -= dt
+			if p.time_to_live < 0
+				p.suicidal = true
+				particles.remove(i)
+	
+	func virtual mut on_init_particle(out p: Particle)
+	func virtual mut on_iterate_particle(out p: Particle, dt: float)
+
+
 class Fog
 	var color: color
 	var distance: float

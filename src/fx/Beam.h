@@ -9,9 +9,9 @@
 
 #include "Particle.h"
 
-class Beam : public Particle{
+class LegacyBeam : public LegacyParticle {
 public:
-	Beam(const vec3 &pos, const vec3 &length, float r, shared<Texture> tex, float ttl);
+	LegacyBeam(const vec3 &pos, const vec3 &length, float r, shared<Texture> tex, float ttl);
 
 	void __init_beam__(const vec3 &pos, const vec3 &length, float r, shared<Texture> tex, float ttl);
 

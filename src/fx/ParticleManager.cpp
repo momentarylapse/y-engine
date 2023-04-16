@@ -12,7 +12,7 @@
 #include "../lib/os/msg.h"
 
 
-ParticleGroup::ParticleGroup(Texture *t) {
+LegacyParticleGroup::LegacyParticleGroup(Texture *t) {
 	texture = t;
 	ubo = nullptr;
 #if USE_API_VULKAN
@@ -21,7 +21,7 @@ ParticleGroup::ParticleGroup(Texture *t) {
 #endif
 }
 
-ParticleGroup::~ParticleGroup() {
+LegacyParticleGroup::~LegacyParticleGroup() {
 	for (auto *p: particles)
 		delete p;
 	for (auto *b: beams)
@@ -32,14 +32,14 @@ ParticleGroup::~ParticleGroup() {
 #endif
 }
 
-void ParticleGroup::add(Particle *p) {
-	if (p->type == Particle::Type::PARTICLE)
+void LegacyParticleGroup::add(LegacyParticle *p) {
+	if (p->type == BaseClass::Type::PARTICLE)
 		particles.add(p);
-	else if (p->type == Particle::Type::BEAM)
-		beams.add((Beam*)p);
+	else if (p->type == BaseClass::Type::BEAM)
+		beams.add((LegacyBeam*)p);
 }
 
-bool ParticleGroup::unregister(Particle *p) {
+bool LegacyParticleGroup::unregister(LegacyParticle *p) {
 	if (p->type == BaseClass::Type::PARTICLE) {
 		foreachi (auto *pp, particles, i)
 			if (pp == p) {
@@ -59,36 +59,36 @@ bool ParticleGroup::unregister(Particle *p) {
 }
 
 
-void ParticleManager::add(Particle *p) {
-	for (auto *g: groups)
+void ParticleManager::add_legacy(LegacyParticle *p) {
+	for (auto *g: legacy_groups)
 		if (g->texture == p->texture) {
 			g->add(p);
 			return;
 		}
-	auto *gg = new ParticleGroup(p->texture.get());
+	auto *gg = new LegacyParticleGroup(p->texture.get());
 	gg->add(p);
-	groups.add(gg);
+	legacy_groups.add(gg);
 }
 
-bool ParticleManager::unregister(Particle *p) {
-	for (auto *g: groups)
+bool ParticleManager::unregister_legacy(LegacyParticle *p) {
+	for (auto *g: legacy_groups)
 		if (g->unregister(p))
 			return true;
 	return false;
 }
 
-void ParticleManager::_delete(Particle *p) {
-	if (unregister(p))
+void ParticleManager::_delete_legacy(LegacyParticle *p) {
+	if (unregister_legacy(p))
 		delete(p);
 }
 
 void ParticleManager::clear() {
-	for (auto *g: groups)
+	for (auto *g: legacy_groups)
 		delete g;
-	groups.clear();
+	legacy_groups.clear();
 }
 
-static void iterate_particles(Array<Particle*> *particles, float dt) {
+static void iterate_particles(Array<LegacyParticle*> *particles, float dt) {
 	foreachi (auto p, *particles, i) {
 		p->pos += p->vel * dt;
 		if (p->suicidal) {
@@ -106,14 +106,14 @@ static void iterate_particles(Array<Particle*> *particles, float dt) {
 }
 
 void ParticleManager::iterate(float dt) {
-	for (auto g: groups) {
+	for (auto g: legacy_groups) {
 		iterate_particles(&g->particles, dt);
-		iterate_particles((Array<Particle*>*)&g->beams, dt);
+		iterate_particles((Array<LegacyParticle*>*)&g->beams, dt);
 	}
 }
 
 void ParticleManager::shift_all(const vec3 &dpos) {
-	for (auto g: groups) {
+	for (auto g: legacy_groups) {
 		for (auto *p: g->particles)
 			p->pos += dpos;
 		for (auto *p: g->beams)

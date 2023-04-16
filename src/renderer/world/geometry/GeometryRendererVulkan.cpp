@@ -181,7 +181,7 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
 	int index = 0;
-	for (auto g: world.particle_manager->groups) {
+	for (auto g: world.particle_manager->legacy_groups) {
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
@@ -216,7 +216,7 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 	}
 
 	// beams
-	for (auto g: world.particle_manager->groups) {
+	for (auto g: world.particle_manager->legacy_groups) {
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBOFx)),

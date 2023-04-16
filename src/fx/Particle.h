@@ -22,11 +22,26 @@
 	float fog_distance;
 };*/
 
-class Particle : public BaseClass {
+class NewParticle {
 public:
+	NewParticle(const vec3 &pos, float r, float ttl);
 
-	Particle(const vec3 &pos, float r, shared<Texture> tex, float ttl);
-	virtual ~Particle();
+	void __init__(const vec3 &pos, float r, float ttl);
+
+	vec3 pos;
+	vec3 vel;
+	color col;
+	rect source;
+	float radius;
+	float time_to_live;
+	bool suicidal;
+	bool enabled;
+};
+
+class LegacyParticle : public BaseClass {
+public:
+	LegacyParticle(const vec3 &pos, float r, shared<Texture> tex, float ttl);
+	virtual ~LegacyParticle();
 
 	void __init__(const vec3 &pos, float r, shared<Texture> tex, float ttl);
 	void __delete__() override;

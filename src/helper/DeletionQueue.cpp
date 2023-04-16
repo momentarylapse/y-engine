@@ -30,7 +30,7 @@ void delete_all() {
 		if (c->type == BaseClass::Type::ENTITY)
 			world.delete_entity(static_cast<Entity*>(c));
 		else if (c->type == BaseClass::Type::PARTICLE or c->type == BaseClass::Type::BEAM)
-			world.delete_particle(static_cast<Particle*>(c));
+			world.delete_legacy_particle(static_cast<LegacyParticle*>(c));
 		else if (c->type == BaseClass::Type::SOUND)
 			world.delete_sound(static_cast<audio::Sound*>(c));
 		else

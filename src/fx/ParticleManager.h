@@ -10,29 +10,28 @@
 #include "../graphics-fwd.h"
 #include "../lib/base/base.h"
 
-class Particle;
-class Beam;
+class LegacyParticle;
+class LegacyBeam;
 class vec3;
 
-class ParticleGroup {
+class LegacyParticleGroup {
 public:
-	ParticleGroup(Texture *t);
-	~ParticleGroup();
-	Array<Particle*> particles;
-	Array<Beam*> beams;
-	void add(Particle *p);
-	bool unregister(Particle *p);
+	LegacyParticleGroup(Texture *t);
+	~LegacyParticleGroup();
+	Array<LegacyParticle*> particles;
+	Array<LegacyBeam*> beams;
+	void add(LegacyParticle *p);
+	bool unregister(LegacyParticle *p);
 	Texture *texture;
 	UniformBuffer *ubo;
-	//DescriptorSet *dset;
 };
 
 class ParticleManager {
 public:
-	Array<ParticleGroup*> groups;
-	void add(Particle *p);
-	void _delete(Particle *p);
-	bool unregister(Particle *p);
+	Array<LegacyParticleGroup*> legacy_groups;
+	void add_legacy(LegacyParticle *p);
+	void _delete_legacy(LegacyParticle *p);
+	bool unregister_legacy(LegacyParticle *p);
 	void clear();
 	void iterate(float dt);
 	void shift_all(const vec3 &dpos);
