@@ -12,8 +12,13 @@
 #include "../y/EngineData.h"
 #include "../graphics-impl.h"
 
-#include "../world/components/UserMesh.h"
-#include "../world/Material.h"
+#if __has_include("../world/Material.h")
+	#include "../world/components/UserMesh.h"
+	#include "../world/Material.h"
+#else
+	#include "components/UserMesh.h"
+	#include "Material.h"
+#endif
 
 
 Path ResourceManager::shader_dir;

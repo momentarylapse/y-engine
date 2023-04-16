@@ -660,12 +660,16 @@ void World::delete_entity(Entity *e) {
 }
 
 void World::delete_particle(Particle *p) {
+#ifdef _X_ALLOW_X_
 	particle_manager->_delete(p);
+#endif
 }
 
 void World::delete_sound(audio::Sound *s) {
+#ifdef _X_ALLOW_X_
 	if (unregister(s))
 		delete s;
+#endif
 }
 
 void World::delete_link(Link *l) {
