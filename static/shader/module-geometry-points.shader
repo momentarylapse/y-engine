@@ -17,9 +17,11 @@ layout(location=2) out vec2 out_uv;
 layout(location=3) out vec4 out_color;
 
 #ifdef vulkan
+const vec4 source_uv = vec4(0,1,0,1);
 #else
 uniform float target_width = 1024, target_height = 768;
 uniform float line_width = 4;
+uniform vec4 source_uv = vec4(0,1,0,1);
 #endif
 
 void main() {
@@ -35,25 +37,25 @@ void main() {
 
         gl_Position = gl_in[0].gl_Position + vec4(-dx,-dy,0,0);
 	out_n = vec3(0,0,-1);
-        out_uv = vec2(0,0);
+        out_uv = vec2(source_uv[0], source_uv[2]);
         out_color = in_color[0];
         EmitVertex();
 
         gl_Position = gl_in[0].gl_Position + vec4(dx,-dy,0,0);
 	out_n = vec3(0,0,-1);
-        out_uv = vec2(0,0);
+        out_uv = vec2(source_uv[1], source_uv[2]);
         out_color = in_color[0];
         EmitVertex();
     
         gl_Position = gl_in[0].gl_Position + vec4(-dx,dy,0,0);
 	out_n = vec3(0,0,-1);
-        out_uv = vec2(0,0);
+        out_uv = vec2(source_uv[0], source_uv[3]);
         out_color = in_color[0];
         EmitVertex();
 
         gl_Position = gl_in[0].gl_Position + vec4(dx,dy,0,0);
 	out_n = vec3(0,0,-1);
-        out_uv = vec2(0,0);
+        out_uv = vec2(source_uv[1], source_uv[3]);
         out_color = in_color[0];
         EmitVertex();
     
