@@ -47,8 +47,13 @@
 GeometryRendererGL::GeometryRendererGL(RenderPathType type, Renderer *parent) : GeometryRenderer(type, parent) {
 
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
+	vb_fx_points = new nix::VertexBuffer("3f,f,4f");
 
 	shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
+
+	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+	const string &rpt = RENDER_PATH_NAME[(int)type];
+	shader_fx_points = ResourceManager::load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
 
 	cam = cam_main;
 }
@@ -151,26 +156,24 @@ void GeometryRendererGL::draw_particles() {
 	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
 	for (auto g: *particle_groups) {
 		nix::set_texture(g->texture);
-		auto source = g->source;
-		Array<VertexFx> v;
 		int count = 0;
 		for (auto& p: g->particles)
 			count += int(p.enabled);
-		v.__reserve(count * 6);
-		for (auto& p: g->particles)
-			if (p.enabled) {
-				auto m = mat4::translation(p.pos) * r * mat4::scale(p.radius, p.radius, p.radius);
 
-				v.add({m * vec3(-1, 1,0), p.col, source.x1, source.y1});
-				v.add({m * vec3( 1, 1,0), p.col, source.x2, source.y1});
-				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
-				v.add({m * vec3(-1, 1,0), p.col, source.x1, source.y1});
-				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
-				v.add({m * vec3(-1,-1,0), p.col, source.x1, source.y2});
-			}
-		vb_fx->update(v);
+		nix::set_shader(shader_fx_points.get());
+		struct VertexPoint {
+			vec3 pos;
+			float radius;
+			color col;
+		};
+		Array<VertexPoint> v;
+		v.__reserve(count);
+		for (auto& p: g->particles)
+			if (p.enabled)
+				v.add({p.pos, p.radius*2, p.col});
+		vb_fx_points->update(v);
 		nix::set_model_matrix(mat4::ID);
-		nix::draw_triangles(vb_fx);
+		nix::draw_points(vb_fx_points);
 	}
 
 	// beams

@@ -64,7 +64,9 @@ public:
 	Camera *cam;
 
 	shared<Shader> shader_fx;
+	shared<Shader> shader_fx_points;
 	VertexBuffer *vb_fx = nullptr;
+	VertexBuffer *vb_fx_points = nullptr;
 
 	// FIXME  manually set from ShadowRenderer*
 	UniformBuffer *ubo_light = nullptr;
