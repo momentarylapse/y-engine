@@ -130,6 +130,7 @@ void GeometryRendererGL::draw_particles() {
 	nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	nix::set_z(false, true);
+	nix::set_cull(nix::CullMode::NONE);
 
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
@@ -163,11 +164,6 @@ void GeometryRendererGL::draw_particles() {
 
 		nix::set_shader(shader_fx_points.get());
 		shader_fx_points->set_floats("source_uv", &g->source.x1, 4);
-		struct VertexPoint {
-			vec3 pos;
-			float radius;
-			color col;
-		};
 		Array<VertexPoint> v;
 		v.__reserve(count);
 		for (auto& p: g->particles)

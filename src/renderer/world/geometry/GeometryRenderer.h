@@ -42,6 +42,12 @@ struct VertexFx {
 	float u, v;
 };
 
+struct VertexPoint {
+	vec3 pos;
+	float radius;
+	color col;
+};
+
 class GeometryRenderer : public Renderer {
 public:
 	enum class Flags {
