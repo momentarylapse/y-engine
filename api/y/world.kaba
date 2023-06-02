@@ -1,0 +1,147 @@
+use os
+use y.gfx
+use y.fx
+use y.ecs
+use y.model
+use y.audio
+
+class SolidBody extends Component
+	var vel: vec3
+	var rot: vec3
+	var mass: float
+	var theta: mat3
+	var physics_active: bool
+	var physics_passive: bool
+	var g_factor: float
+	
+	func extern mut add_force(f: vec3, rho: vec3 = vec3.0)
+	func extern mut add_impulse(p: vec3, rho: vec3 = vec3.0)
+	func extern mut add_torque(t: vec3)
+	func extern mut add_torque_impulse(l: vec3)
+	func extern mut update_mass()
+	func extern mut update_motion(mask: int)
+
+class Collider extends Component
+class MeshCollider extends Collider
+class BoxCollider extends Collider
+class SphereCollider extends Collider
+class TerrainCollider extends Collider
+
+
+class MultiInstance extends Component
+	var model: Model*
+	var matrices: mat4[]
+
+class Terrain extends Component
+	var pattern: vec3
+	var num_x, num_z: int
+	var height: float[]
+	func extern get_height(p: vec3) -> float
+	func extern mut update(x1: int, x2: int, y1: int, y2: int, mask: int)
+	# ...
+
+class Light extends Component
+	var color: color
+	var radius: float
+	var theta: float
+	var harshness: float
+	var enabled: bool
+	var allow_shadow: bool
+	var user_shadow_control: bool
+	var user_shadow_theta: float
+	var shadow_dist_min: float
+	var shadow_dist_max: float
+	func extern mut set_direction(dir: vec3)
+
+#	class Spherical extends Light
+#		func extern __init__(pos: vec3, c: color, radius: float)
+#
+#	class Parallel extends Light
+#		func extern __init__(ang: quaternion, c: color)
+#
+#	class Cone extends Light
+#		func extern __init__(pos: vec3, ang: quaternion, c: color, radius: float, theta: float)
+
+
+class Fog
+	var color: color
+	var distance: float
+	var enabled: bool
+
+class Link extends BaseClass
+	var a, b: Model*
+	func extern mut set_motor(v: float, max: float)
+#	extern void mut set_axis(vector v)
+	func extern mut set_frame(n: int, q: quaternion)
+
+#	class Socket extends Link
+#		extern void __init__(Model* a, Model* b, vector pos)
+#	...
+
+
+class World
+	var ego: Entity*
+	
+	var lights: Light&[]
+	
+	var background: color
+	var skyboxes: Model&[]
+	
+	var fog: Fog
+	var gravity: vec3
+	
+	var links: Link&[]
+	
+	enum PhysicsMode
+		NONE
+		SIMPLE
+		FULL_INTERNAL
+		FULL_EXTERNAL
+	var physics_mode: PhysicsMode
+	
+	func extern mut load_soon(filename: Path)
+	
+	func extern mut add_light_parallel(ang: quaternion, c: color) -> Light&
+	func extern mut add_light_point(pos: vec3, c: color, radius: float) -> Light&
+	func extern mut add_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
+	func extern mut add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
+	func extern mut add_sound(s: xfer[Sound])
+	func extern mut create_object(filename: Path, pos: vec3, ang: quaternion) -> Entity&
+	func extern mut create_object_no_reg(filename: Path, pos: vec3, ang: quaternion) -> Entity&
+	func extern mut create_object_multi(filename: Path, pos: vec3[], ang: quaternion[]) -> Entity&
+	func extern mut create_terrain(filename: Path, pos: vec3) -> Terrain&
+	func extern mut create_entity(pos: vec3, ang: quaternion) -> Entity&
+	func extern mut register_entity(e: Entity*)
+	func extern mut set_active_physics(o: Model, active: bool)
+	func extern mut shift_all(dpos: vec3)
+	func extern get_g(pos: vec3) -> vec3
+	func extern trace(p1: vec3, p2: vec3, out d: CollisionData, simple_test: bool, ignore: Entity*) -> bool
+	
+	func selfref objects() -> Model&[]&
+		return get_component_family_list[Model]()
+	func selfref terrains() -> Terrain&[]&
+		return get_component_family_list[Terrain]()
+
+#	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
+#	func extern delete(o: void*)
+	func extern delete_entity(e: Entity*)
+	func extern delete_particle(e: LegacyParticle*)
+	func extern delete_sound(e: Sound*)
+	func extern delete_link(e: Link*)
+	
+	class MessageData
+		var e: Entity*
+		var v: vec3
+	var msg_data: MessageData
+	
+	func extern mut subscribe(msg: string, f: void->void)
+
+
+#func model(e: Entity) -> Model*
+#	var m: Model* = e.get_component[Model]()
+#	return m
+#func body(e: Entity) -> SolidBody*
+#	var b: SolidBody* = e.get_component(SolidBody)
+#	return b
+
+var extern world: World

@@ -759,23 +759,30 @@ void import_component_class(shared<kaba::Module> m, const string &name) {
 }
 
 void PluginManager::import_kaba() {
-	auto s = kaba::default_context->load_module("y/y.kaba");
-	import_component_class<SolidBody>(s, "SolidBody");
-	import_component_class<Collider>(s, "Collider");
-	import_component_class<MeshCollider>(s, "MeshCollider");
-	import_component_class<SphereCollider>(s, "SphereCollider");
-	import_component_class<BoxCollider>(s, "BoxCollider");
-	import_component_class<TerrainCollider>(s, "TerrainCollider");
-	import_component_class<UserMesh>(s, "UserMesh");
-	import_component_class<Animator>(s, "Animator");
-	import_component_class<Skeleton>(s, "Skeleton");
-	import_component_class<MultiInstance>(s, "MultiInstance");
-	import_component_class<Model>(s, "Model");
-	import_component_class<Terrain>(s, "Terrain");
-	import_component_class<Light>(s, "Light");
-	import_component_class<Camera>(s, "Camera");
-	import_component_class<ParticleGroup>(s, "ParticleGroup");
-	import_component_class<ParticleEmitter>(s, "ParticleEmitter");
+	auto m_model = kaba::default_context->load_module("y/model.kaba");
+	import_component_class<Animator>(m_model, "Animator");
+	import_component_class<Skeleton>(m_model, "Skeleton");
+	import_component_class<Model>(m_model, "Model");
+
+	auto m_world = kaba::default_context->load_module("y/world.kaba");
+	import_component_class<SolidBody>(m_world, "SolidBody");
+	import_component_class<Collider>(m_world, "Collider");
+	import_component_class<MeshCollider>(m_world, "MeshCollider");
+	import_component_class<SphereCollider>(m_world, "SphereCollider");
+	import_component_class<BoxCollider>(m_world, "BoxCollider");
+	import_component_class<TerrainCollider>(m_world, "TerrainCollider");
+	import_component_class<MultiInstance>(m_world, "MultiInstance");
+	import_component_class<Terrain>(m_world, "Terrain");
+	import_component_class<Light>(m_world, "Light");
+
+	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
+	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
+	import_component_class<ParticleEmitter>(m_fx, "ParticleEmitter");
+
+	auto m_y = kaba::default_context->load_module("y/y.kaba");
+	import_component_class<UserMesh>(m_y, "UserMesh");
+	import_component_class<Camera>(m_y, "Camera");
+
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
 	//msg_write(MeshCollider::_class->parent->parent->name);

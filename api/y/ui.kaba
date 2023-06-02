@@ -1,6 +1,6 @@
-use y
 use y.gfx
 use y.ecs
+use y.model
 use kaba
 
 enum Key

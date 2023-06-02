@@ -1,6 +1,4 @@
 use y
-use y.ui
-use y.engine
 
 class StatDisplay extends Node
 	var label, stat: shared![Text]

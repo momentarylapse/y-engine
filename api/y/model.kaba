@@ -1,0 +1,64 @@
+use os
+use y.gfx
+use y.ecs
+
+class Material
+	var albedo: color
+	var roughness: float
+	var metal: float
+	var emission: color
+	var textures: shared![Texture][]
+	var shader: shared![Shader][6]
+	var cast_shadow: bool
+	func extern mut add_uniform(name: string, p: float*, size: int)
+	func extern static load(filename: Path) -> Material&
+
+class Model extends Component
+	class Mesh
+		struct Sub
+			var num_triangles: int
+			var triangle_index: int[]
+			var skin_vertex: float[]
+			var normal: vec3[]
+		var bone_index: int[]
+		var vertex: vec3[]
+		var sub: Sub[]
+#	var matrix: matrix
+	var name: string
+	var radius: float
+	var min, max: vec3
+	
+	var materials: Material&[]
+	
+	var mesh: Mesh&[3]
+
+	func extern override __init__()
+	func extern override __delete__()
+	
+	func extern mut make_editable()
+	func extern mut begin_edit(detail: int)
+	func extern mut end_edit(detail: int)
+#	func extern update_matrix()
+	
+	func extern get_vertex(index: int) -> vec3
+
+class Animator extends Component
+	enum Operation
+		SET           # overwrite
+		SET_NEW_KEYED # overwrite, if current doesn't equal 0
+		SET_OLD_KEYED # overwrite, if last equals 0
+		ADD_1_FACTOR  # w = w_old         + w_new * f
+		MIX_1_FACTOR  # w = w_old * (1-f) + w_new * f
+		MIX_2_FACTOR  # w = w_old * a     + w_new * b
+	func extern mut reset()
+	func extern mut add_x(op: Operation, p1: float, p2: float, move: int, out t: float, dt: float, vel_param: float = 1.0, loop: bool = true) -> bool
+	func extern mut add(op: Operation, move: int, out t: float, dt: float, loop: bool = true) -> bool
+	func extern mut is_done(op_no: int) -> bool
+
+class Skeleton extends Component
+	var bones: Entity[]
+	var pos0, dpos: vec3[]
+	var parents: int[]
+	func extern mut reset()
+
+func extern load_model(filename: Path) -> Model&

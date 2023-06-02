@@ -1,6 +1,4 @@
 use y
-use y.ui
-use y.engine
 
 class X extends Controller
 	var pic: shared![Picture][]

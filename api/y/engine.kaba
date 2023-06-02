@@ -1,5 +1,4 @@
 use os
-use y
 use y.gfx
 
 class EngineData

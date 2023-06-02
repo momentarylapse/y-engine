@@ -1,4 +1,5 @@
 use image
+use os
 
 
 enum PrimitiveTopology
@@ -44,3 +45,9 @@ class DepthBuffer extends Texture
 class VertexBuffer
 	func extern __init__(format: string = "3f,3f,2f")
 	func extern mut update(vertices: @DynamicArray)
+
+var extern tex_white: shared![Texture]
+
+func extern load_shader(filename: Path) -> Shader&
+func extern create_shader(source: string) -> Shader&
+func extern load_texture(filename: Path) -> shared![Texture]

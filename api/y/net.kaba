@@ -1,6 +1,5 @@
 use net
-use y
-use ecs
+use y.ecs
 
 class Connection
 	var s: owned![Socket]
