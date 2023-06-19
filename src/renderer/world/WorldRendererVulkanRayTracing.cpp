@@ -40,6 +40,9 @@ static const int MAX_RT_MESHES = 1024;
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("rt", parent, RenderPathType::FORWARD) {
 	device = _device;
 
+	//create_more();
+	geo_renderer = new GeometryRendererVulkan(type, this);
+
 	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;
 	else if (device->has_compute())
