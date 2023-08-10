@@ -12,6 +12,7 @@
 #include "../../base/base.h"
 #include "../../base/pointer.h"
 //#include "../lib/common.h"
+#include "Flags.h"
 
 namespace kaba {
 
@@ -56,8 +57,7 @@ enum class NodeKind {
 	ARRAY,              // = []
 	POINTER_AS_ARRAY,   // = []
 	DYNAMIC_ARRAY,      // = []
-	REFERENCE_NEW,      // = &!
-	REFERENCE_RAW,      // = &  ->  pointer
+	REFERENCE,          // = &
 	DEREFERENCE,        // = *
 	DEREF_ADDRESS_SHIFT,// = ->
 	CONSTANT_BY_ADDRESS,
@@ -116,15 +116,15 @@ public:
 	// linking of class function instances
 	// return value
 	const Class *type;
-	bool is_const;
+	Flags flags;
+	bool is_mutable() const;
 
-	Node(NodeKind kind, int64 link_no, const Class *type, bool is_const = false, int token_id = -1);
+	Node(NodeKind kind, int64 link_no, const Class *type, Flags flags = Flags::MUTABLE, int token_id = -1);
 	/*Node(const Class *c);
 	Node(const Block *b);
 	Node(const Constant *c);*/
 	~Node();
-	Node *modifiable();
-	Node *make_const();
+	void set_mutable(bool _mutable);
 	bool is_call() const;
 	bool is_function() const;
 	Block *as_block() const;
@@ -150,10 +150,8 @@ public:
 	void show(const Class *ns = nullptr) const;
 
 	shared<Node> shallow_copy() const;
-	shared<Node> ref_new(const Class *t) const;
-	shared<Node> ref_new(SyntaxTree *tree) const;
-	shared<Node> ref_raw(const Class *t) const;
-	shared<Node> ref_raw(SyntaxTree *tree) const;
+	shared<Node> ref(const Class *t) const;
+	shared<Node> ref(SyntaxTree *tree) const;
 	shared<Node> deref(const Class *override_type = nullptr) const;
 	shared<Node> shift(int64 shift, const Class *type, int token_id = -1) const;
 	shared<Node> change_type(const Class *type, int token_id = -1) const;

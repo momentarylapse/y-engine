@@ -8,7 +8,8 @@
 #pragma once
 
 #include "../kaba.h"
-#include "serializer.h"
+#include "CommandList.h"
+#include "SerialNode.h"
 
 namespace Asm {
 	enum class RegID;
@@ -82,7 +83,7 @@ public:
 	void do_error(const string &e);
 
 
-	void add_asm_block();
+	void add_asm_block(int uuid);
 };
 
 

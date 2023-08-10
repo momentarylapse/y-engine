@@ -114,7 +114,7 @@ const Class *Parser::get_constant_type(const string &str) {
 	}
 	if (type == TypeInt) {
 		if (hex) {
-			if ((s2i2(str) >= 0x100000000) or (-s2i2(str) > 0x00000000))
+			if (str.num > 10)
 				type = TypeInt64;
 		} else {
 			if ((s2i2(str) >= 0x80000000) or (-s2i2(str) > 0x80000000))
@@ -153,6 +153,9 @@ void Parser::do_error(const string &str, int token_id) {
 }
 
 void Parser::do_error_exp(const string &str, int override_token_id) {
+	if (Exp.lines.num == 0)
+		throw Exception(str, "", 0, 0, tree->module);
+
 	// what data do we have?
 	int token_id = Exp.cur_token();
 
@@ -236,7 +239,7 @@ shared<Node> Parser::parse_abstract_operand_extension_array(shared<Node> operand
 
 
 	if (try_consume("]")) {
-		auto node = new Node(NodeKind::ABSTRACT_TYPE_LIST, 0, TypeUnknown, false, token0);
+		auto node = new Node(NodeKind::ABSTRACT_TYPE_LIST, 0, TypeUnknown, Flags::CONST, token0);
 		node->set_num_params(1);
 		node->set_param(0, operand);
 		return node;
@@ -272,7 +275,7 @@ shared<Node> Parser::parse_abstract_operand_extension_call(shared<Node> link, Bl
 	// parse all parameters
 	auto params = parse_abstract_call_parameters(block);
 
-	auto node = new Node(NodeKind::ABSTRACT_CALL, 0, TypeUnknown, false, link->token_id);
+	auto node = new Node(NodeKind::ABSTRACT_CALL, 0, TypeUnknown, Flags::CONST, link->token_id);
 	node->set_num_params(params.num + 1);
 	node->set_param(0, link);
 	for (auto&& [i,p]: enumerate(params))
@@ -399,7 +402,7 @@ shared_array<Node> Parser::parse_abstract_call_parameters(Block *block) {
 
 
 shared<Node> build_abstract_list(const Array<shared<Node>> &el) {
-	auto c = new Node(NodeKind::ARRAY_BUILDER, 0, TypeUnknown, true);
+	auto c = new Node(NodeKind::ARRAY_BUILDER, 0, TypeUnknown, Flags::CONST);
 	c->set_num_params(el.num);
 	for (int i=0; i<el.num; i++)
 		c->set_param(i, el[i]);
@@ -407,7 +410,7 @@ shared<Node> build_abstract_list(const Array<shared<Node>> &el) {
 }
 
 shared<Node> build_abstract_dict(const Array<shared<Node>> &el) {
-	auto c = new Node(NodeKind::DICT_BUILDER, 0, TypeUnknown, true);
+	auto c = new Node(NodeKind::DICT_BUILDER, 0, TypeUnknown, Flags::CONST);
 	c->set_num_params(el.num);
 	for (int i=0; i<el.num; i++)
 		c->set_param(i, el[i]);
@@ -415,7 +418,7 @@ shared<Node> build_abstract_dict(const Array<shared<Node>> &el) {
 }
 
 shared<Node> build_abstract_tuple(const Array<shared<Node>> &el) {
-	auto c = new Node(NodeKind::TUPLE, 0, TypeUnknown, true);
+	auto c = new Node(NodeKind::TUPLE, 0, TypeUnknown, Flags::CONST);
 	c->set_num_params(el.num);
 	for (int i=0; i<el.num; i++)
 		c->set_param(i, el[i]);
@@ -591,7 +594,7 @@ const Class *merge_type_tuple_into_product(SyntaxTree *tree, const Array<const C
 }
 
 shared<Node> Parser::parse_abstract_token() {
-	return new Node(NodeKind::ABSTRACT_TOKEN, (int_p)tree, TypeUnknown, false, Exp.consume_token());
+	return new Node(NodeKind::ABSTRACT_TOKEN, (int_p)tree, TypeUnknown, Flags::NONE, Exp.consume_token());
 }
 
 // minimal operand
@@ -603,13 +606,9 @@ shared<Node> Parser::parse_abstract_operand(Block *block, bool prefer_class) {
 	if (try_consume("(")) {
 		operand = parse_abstract_operand_greedy(block, true);
 		expect_identifier(")", "')' expected");
-	/*} else if (try_consume("&!")) { // &! -> new address operator
+	} else if (try_consume("&")) { // & -> address operator
 		int token = Exp.cur_token();
-		operand = parse_abstract_operand(block)->ref_new(TypeUnknown);
-		operand->token_id = token;*/
-	} else if (try_consume("&")) { // & -> legacy address operator
-		int token = Exp.cur_token();
-		operand = parse_abstract_operand(block)->ref_raw(TypeUnknown);
+		operand = parse_abstract_operand(block)->ref(TypeUnknown);
 		operand->token_id = token;
 	} else if (try_consume("*")) { // * -> dereference
 		int token = Exp.cur_token();
@@ -628,24 +627,24 @@ shared<Node> Parser::parse_abstract_operand(Block *block, bool prefer_class) {
 	//} else if (auto s = which_special_function(Exp.cur)) {
 	//	operand = parse_abstract_special_function(block, s);
 	} else if (auto w = which_abstract_operator(Exp.cur, OperatorFlags::UNARY_RIGHT)) { // negate/not...
-		operand = new Node(NodeKind::ABSTRACT_OPERATOR, (int_p)w, TypeUnknown, false, Exp.cur_token());
+		operand = new Node(NodeKind::ABSTRACT_OPERATOR, (int_p)w, TypeUnknown, Flags::NONE, Exp.cur_token());
 		Exp.next();
 		operand->set_num_params(1);
 		operand->set_param(0, parse_abstract_operand(block));
 	} else if (try_consume(Identifier::RAW_POINTER)) {
-		operand = new Node(NodeKind::ABSTRACT_TYPE_POINTER, 0, TypeUnknown, false, Exp.cur_token());
+		operand = new Node(NodeKind::ABSTRACT_TYPE_POINTER, 0, TypeUnknown, Flags::NONE, Exp.cur_token());
 	} else if (try_consume(Identifier::SHARED)) {
 		if (try_consume("!"))
-			operand = new Node(NodeKind::ABSTRACT_TYPE_SHARED_NOT_NULL, 0, TypeUnknown, false, Exp.cur_token()-1);
+			operand = new Node(NodeKind::ABSTRACT_TYPE_SHARED_NOT_NULL, 0, TypeUnknown, Flags::NONE, Exp.cur_token()-1);
 		else
-			operand = new Node(NodeKind::ABSTRACT_TYPE_SHARED, 0, TypeUnknown, false, Exp.cur_token());
+			operand = new Node(NodeKind::ABSTRACT_TYPE_SHARED, 0, TypeUnknown, Flags::NONE, Exp.cur_token());
 	} else if (try_consume(Identifier::OWNED)) {
 		if (try_consume("!"))
-			operand = new Node(NodeKind::ABSTRACT_TYPE_OWNED_NOT_NULL, 0, TypeUnknown, false, Exp.cur_token()-1);
+			operand = new Node(NodeKind::ABSTRACT_TYPE_OWNED_NOT_NULL, 0, TypeUnknown, Flags::NONE, Exp.cur_token()-1);
 		else
-			operand = new Node(NodeKind::ABSTRACT_TYPE_OWNED, 0, TypeUnknown, false, Exp.cur_token());
+			operand = new Node(NodeKind::ABSTRACT_TYPE_OWNED, 0, TypeUnknown, Flags::NONE, Exp.cur_token());
 	} else if (try_consume(Identifier::XFER)) {
-		operand = new Node(NodeKind::ABSTRACT_TYPE_XFER, 0, TypeUnknown, false, Exp.cur_token());
+		operand = new Node(NodeKind::ABSTRACT_TYPE_XFER, 0, TypeUnknown, Flags::NONE, Exp.cur_token());
 	} else {
 		operand = parse_abstract_token();
 	}
@@ -1328,6 +1327,23 @@ shared<Node> Parser::parse_abstract_statement_raw_function_pointer(Block *block)
 	return node;
 }
 
+shared<Node> Parser::parse_abstract_statement_trust_me(Block *block) {
+	[[maybe_unused]] int token0 = Exp.consume_token(); // "trust_me"
+	/*auto node = add_node_statement(StatementID::TRUST_ME, token0, TypeUnknown);
+	// ...block
+	expect_new_line_with_indent();
+	Exp.next_line();
+	node->set_param(0, parse_abstract_block(block));
+	flags_set(node->flags, Flags::TRUST_ME);
+	return node;*/
+
+	expect_new_line_with_indent();
+	Exp.next_line();
+	auto b = parse_abstract_block(block);
+	flags_set(b->flags, Flags::TRUST_ME);
+	return b;
+}
+
 shared<Node> Parser::parse_abstract_statement(Block *block) {
 	if (Exp.cur == Identifier::FOR) {
 		return parse_abstract_statement_for(block);
@@ -1360,6 +1376,8 @@ shared<Node> Parser::parse_abstract_statement(Block *block) {
 		return parse_abstract_statement_lambda(block);
 	} else if (Exp.cur == Identifier::RAW_FUNCTION_POINTER) {
 		return parse_abstract_statement_raw_function_pointer(block);
+	} else if (Exp.cur == Identifier::TRUST_ME) {
+		return parse_abstract_statement_trust_me(block);
 	}
 	do_error_exp("unhandled statement: " + Exp.cur);
 	return nullptr;
@@ -1422,7 +1440,9 @@ void Parser::parse_abstract_complete_command(Block *block) {
 
 	// assembler block
 	if (try_consume("-asm-")) {
-		block->add(add_node_statement(StatementID::ASM));
+		auto a = add_node_statement(StatementID::ASM);
+		a->params.add(add_node_const(tree->add_constant_int(tree->asm_blocks[next_asm_block ++].uuid), -1));
+		block->add(a);
 
 	} else {
 
