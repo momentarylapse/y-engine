@@ -46,6 +46,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 	ResourceManager::load_shader("module-vertex-lines.shader");
 	ResourceManager::load_shader("module-vertex-points.shader");
 	ResourceManager::load_shader("module-vertex-fx.shader");
+	ResourceManager::load_shader("module-geometry-lines.shader");
 	ResourceManager::load_shader("module-geometry-points.shader");
 
 	create_more();

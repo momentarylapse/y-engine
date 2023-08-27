@@ -348,7 +348,9 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 		else if (m->topology == PrimitiveTopology::POINTS)
 			nix::draw_points(m->vertex_buffer);
 		else if (m->topology == PrimitiveTopology::LINES)
-			nix::draw_points(m->vertex_buffer);
+			nix::draw_lines(m->vertex_buffer, false);
+		else if (m->topology == PrimitiveTopology::LINESTRIP)
+			nix::draw_lines(m->vertex_buffer, true);
 	}
 }
 

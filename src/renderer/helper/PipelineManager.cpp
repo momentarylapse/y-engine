@@ -22,6 +22,8 @@ string topology2vk(PrimitiveTopology top) {
 		return "points";
 	if (top == PrimitiveTopology::LINES)
 		return "lines";
+	if (top == PrimitiveTopology::LINESTRIP)
+		return "line-strip";
 	if (top == PrimitiveTopology::TRIANGLES)
 		return "triangles";
 	return "triangles";

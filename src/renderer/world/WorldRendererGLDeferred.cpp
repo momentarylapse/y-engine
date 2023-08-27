@@ -54,6 +54,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 	ResourceManager::load_shader("module-vertex-points.shader");
 	ResourceManager::load_shader("module-vertex-fx.shader");
 	ResourceManager::load_shader("module-geometry-points.shader");
+	ResourceManager::load_shader("module-geometry-lines.shader");
 
 	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))

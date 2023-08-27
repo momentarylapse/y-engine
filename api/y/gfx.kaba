@@ -5,6 +5,7 @@ use os
 enum PrimitiveTopology
 	TRIANGLES
 	LINES
+	LINESTRIP
 	POINTS
 
 struct Vertex
