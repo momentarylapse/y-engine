@@ -85,6 +85,9 @@
     <ClCompile Include="src\lib\doc\xml.cpp">
       <Filter>src\lib\doc</Filter>
     </ClCompile>
+    <ClCompile Include="src\lib\fft\fft.cpp">
+      <Filter>src\lib\fft</Filter>
+    </ClCompile>
     <ClCompile Include="src\lib\hui_minimal\Application.cpp">
       <Filter>src\lib\hui_minimal</Filter>
     </ClCompile>
@@ -753,6 +756,9 @@
     <ClInclude Include="src\lib\doc\xml.h">
       <Filter>src\lib\doc</Filter>
     </ClInclude>
+    <ClInclude Include="src\lib\fft\fft.h">
+      <Filter>src\lib\fft</Filter>
+    </ClInclude>
     <ClInclude Include="src\lib\hui_minimal\Application.h">
       <Filter>src\lib\hui_minimal</Filter>
     </ClInclude>
@@ -1300,6 +1306,9 @@
     </Filter>
     <Filter Include="src\lib\doc">
       <UniqueIdentifier>{71410E6E-87C0-EE20-BAEF-9044CC4AD485}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\lib\fft">
+      <UniqueIdentifier>{E7559A58-BF41-808F-3F10-62C8B9F73A51}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\lib\hui_minimal">
       <UniqueIdentifier>{26A0171C-9ACA-4892-FFB9-D80DAE15A8DC}</UniqueIdentifier>

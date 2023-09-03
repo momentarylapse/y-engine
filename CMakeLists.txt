@@ -5,7 +5,7 @@ project(y)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
-set(SOURCE 
+set(SOURCE
 	src/audio/Sound.cpp
 	src/audio/SoundAL.cpp
 	src/fx/Beam.cpp
@@ -34,6 +34,7 @@ set(SOURCE
 	src/lib/doc/pdf.cpp
 	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
+	src/lib/fft/fft.cpp
 	src/lib/hui_minimal/Application.cpp
 	src/lib/hui_minimal/Callback.cpp
 	src/lib/hui_minimal/error.cpp
@@ -221,10 +222,12 @@ set(SOURCE
 	src/main.cpp
 )
 
+add_executable(y ${SOURCE})
+
 find_package(PkgConfig REQUIRED)
 
 
-# zlib mandatory
+# lib: zlib mandatory
 pkg_check_modules(ZLIB REQUIRED zlib)
 include_directories(${ZLIB_INCLUDE_DIRS})
 link_directories(${ZLIB_LIBRARY_DIRS})
@@ -232,14 +235,15 @@ list(APPEND DEPS ${ZLIB_LIBRARIES})
 add_definitions(${ZLIB_CFLAGS_OTHER})
 add_compile_definitions(HAS_LIB_ZLIB=1)
 
-# glfw mandatory
+# lib: glfw mandatory
 pkg_check_modules(GLFW REQUIRED glfw3)
 include_directories(${GLFW_INCLUDE_DIRS})
 link_directories(${GLFW_LIBRARY_DIRS})
 list(APPEND DEPS ${GLFW_LIBRARIES})
 add_definitions(${GLFW_CFLAGS_OTHER})
 add_compile_definitions(HAS_LIB_GLFW=1)
-# gl or vulkan mandatory
+
+# lib: gl or vulkan (mandatory)
 set(GL_OR_VULKAN "gl" CACHE STRING "Use gl or vulkan?")
 pkg_check_modules(GL gl)
 if(GL_FOUND)
@@ -274,7 +278,7 @@ if(GL_OR_VULKAN STREQUAL "vulkan")
 	add_compile_definitions(HAS_LIB_VULKAN=1)
 endif()
 
-# freetype2 mandatory
+# lib: freetype2 mandatory
 pkg_check_modules(FREETYPE2 REQUIRED freetype2)
 include_directories(${FREETYPE2_INCLUDE_DIRS})
 link_directories(${FREETYPE2_LIBRARY_DIRS})
@@ -282,7 +286,7 @@ list(APPEND DEPS ${FREETYPE2_LIBRARIES})
 add_definitions(${FREETYPE2_CFLAGS_OTHER})
 add_compile_definitions(HAS_LIB_FREETYPE2=1)
 
-# unwind (optional)
+# lib: unwind (optional)
 pkg_check_modules(LIBUNWIND libunwind)
 if(LIBUNWIND_FOUND)
 	include_directories(${LIBUNWIND_INCLUDE_DIRS})
@@ -294,11 +298,11 @@ else()
 	add_compile_definitions(HAS_LIB_UNWIND=0)
 endif()
 
-# dl...
+# lib: dl...
 list(APPEND DEPS ${CMAKE_DL_LIBS})
 add_compile_definitions(HAS_LIB_DL=1)
 
-# bullet (optional)
+# lib: bullet (optional)
 pkg_check_modules(BULLET bullet)
 if(BULLET_FOUND)
 	include_directories(${BULLET_INCLUDE_DIRS})
@@ -310,7 +314,7 @@ else()
 	add_compile_definitions(HAS_LIB_BULLET=0)
 endif()
 
-# openal (optional)
+# lib: openal (optional)
 pkg_check_modules(OPENAL openal)
 if(OPENAL_FOUND)
 	include_directories(${OPENAL_INCLUDE_DIRS})
@@ -322,7 +326,7 @@ else()
 	add_compile_definitions(HAS_LIB_OPENAL=0)
 endif()
 
-# ogg (optional)
+# lib: ogg (optional)
 pkg_check_modules(OGG ogg)
 pkg_check_modules(VORBIS vorbis)
 pkg_check_modules(VORBISFILE vorbisfile)
@@ -349,7 +353,7 @@ else()
 	add_compile_definitions(HAS_LIB_OGG=0)
 endif()
 
-# shaderc (optional)
+# lib: shaderc (optional)
 pkg_check_modules(SHADERC shaderc)
 if(SHADERC_FOUND)
 	include_directories(${SHADERC_INCLUDE_DIRS})
@@ -361,7 +365,17 @@ else()
 	add_compile_definitions(HAS_LIB_SHADERC=0)
 endif()
 
-add_executable(y ${SOURCE})
+# lib: fftw3 (optional)
+pkg_check_modules(FFTW3F fftw3f)
+if(FFTW3F_FOUND)
+	include_directories(${FFTW3F_INCLUDE_DIRS})
+	link_directories(${FFTW3F_LIBRARY_DIRS})
+	list(APPEND DEPS ${FFTW3F_LIBRARIES})
+	add_definitions(${FFTW3F_CFLAGS_OTHER})
+	add_compile_definitions(HAS_LIB_FFTW3=1)
+else()
+	add_compile_definitions(HAS_LIB_FFTW3=0)
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
