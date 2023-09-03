@@ -1,19 +1,23 @@
 use y
 
-class StatDisplay extends Node
+class StatDisplay extends Picture
 	var label, stat: shared![Text]
 	
 	func __init__()
-		super.__init__(rect.ID)
+		super.__init__([0,0.2, 0,1], tex_white)
 		align = Node.Align.RIGHT | Node.Align.TOP
-		margin = [0,0.01, 0.017,0]
+		#margin = [0,0.01, 0.01,0]
+		self.color = [0,0,0, 0.5]
 		
 		label = new Text("AA", 0.015)
 		label.align = Node.Align.RIGHT | Node.Align.TOP
 		label.margin.x2 = 0.05
+		label.margin.y1 = 0.01
 		add(label)
 		stat = new Text("AA", 0.015)
 		stat.align = Node.Align.RIGHT | Node.Align.TOP
+		stat.margin.x2 = 0.01
+		stat.margin.y1 = 0.01
 		add(stat)
 		
 		visible = false
