@@ -116,7 +116,7 @@ void WindowRendererVulkan::end_frame() {
 
 	static int frame = 0;
 	frame ++;
-	if ((frame%100 == 0) and (config.debug >= 2)) {
+	if ((frame%100 == 0) and (config.debug_level >= 2)) {
 		auto tt = device->get_timestamps(0, 3);
 		//msg_write(ia2s(tt));
 		//msg_write(f2s(device->device_properties.limits.timestampPeriod, 9));

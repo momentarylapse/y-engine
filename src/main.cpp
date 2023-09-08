@@ -276,14 +276,8 @@ public:
 
 		for (auto &s: world.scripts)
 			PluginManager::add_controller(s.filename, s.variables);
-		for (auto &s: config.get_str_array("default.additional-scripts"))
+		for (auto &s: config.additional_scripts)
 			PluginManager::add_controller(s, {});
-		if (config.debug >= 1)
-			for (auto &s: config.get_str_array("debug.scripts1"))
-				PluginManager::add_controller(s, {});
-		if (config.debug >= 2)
-			for (auto &s: config.get_str_array("debug.scripts2"))
-				PluginManager::add_controller(s, {});
 
 		msg_left();
 		msg_write("|                                                      |");
@@ -291,7 +285,6 @@ public:
 	}
 	
 	GLFWwindow* create_window() {
-		GLFWwindow* window;
 		glfwInit();
 #ifdef USING_VULKAN
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -326,7 +319,7 @@ public:
 			w = vidmode->width;
 			h = vidmode->height;
 		}
-		window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
+		GLFWwindow* window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
 
 		glfwSetWindowUserPointer(window, this);
 		glfwMakeContextCurrent(window);

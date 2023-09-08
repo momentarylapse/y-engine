@@ -21,7 +21,7 @@ enum class AntialiasingMethod {
 
 class Config : public Configuration {
 public:
-	int debug = 0;
+	int debug_level = 0;
 	string main_script;
 	string default_world;
 	string second_world;
@@ -30,6 +30,7 @@ public:
 	Path game_dir;
 	AntialiasingMethod antialiasing_method = AntialiasingMethod::NONE;
 	bool allow_rtx = true;
+	Array<string> additional_scripts;
 
 	float resolution_scale_min = 0;
 	float resolution_scale_max = 0;

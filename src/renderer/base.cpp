@@ -99,7 +99,7 @@ void api_end() {
 }
 
 void break_point() {
-	if (config.debug) {
+	if (config.debug_level) {
 		nix::flush();
 	}
 }

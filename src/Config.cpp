@@ -20,8 +20,8 @@ void Config::load(const Array<string> &arg) {
 	// local config override
 	Configuration local;
 	local.load("game-local.ini");
-	for (auto &k: local.keys())
-		set_str(k, local.get_str(k, ""));
+	for (auto&& [k, v]: local.map)
+		set(k, v);
 
 	// cli arguments override
 	for (auto &a: arg.sub_ref(1)) {
@@ -54,6 +54,8 @@ void Config::load(const Array<string> &arg) {
 			set_int("screen.width", xx[0]._int());
 			set_int("screen.height", xx[1]._int());
 			set_str("screen.mode", "windowed");
+		} else if (a.head(9) == "--script=") {
+			additional_scripts.add(a.sub_ref(9));
 		} else if (a.head(1) != "-") {
 			set_str("default.world", a);
 		}
@@ -76,7 +78,7 @@ void Config::load(const Array<string> &arg) {
 	main_script = get_str("default.main-script", "");
 	default_font = get_str("default.font", "");
 	default_material = get_str("default.material", "");
-	debug = get_int("debug.levelS", 1);
+	debug_level = get_int("debug.level", 1);
 
 	string aa = get_str("renderer.antialiasing", "");
 	if (aa == "") {
@@ -95,4 +97,10 @@ void Config::load(const Array<string> &arg) {
 	ambient_occlusion_radius = get_float("renderer.ssao.radius", 10);
 	if (!get_bool("renderer.ssao.enabled", true))
 		ambient_occlusion_radius = -1;
+
+	additional_scripts.append(get_str_array("default.additional-scripts"));
+	if (debug_level >= 1)
+		additional_scripts.append(get_str_array("debug.scripts1"));
+	if (debug_level >= 2)
+		additional_scripts.append(get_str_array("debug.scripts2"));
 }
