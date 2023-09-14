@@ -13,10 +13,6 @@ TargetRenderer::TargetRenderer(const string &name) : Renderer(name, nullptr) {
 	ch_end = PerformanceMonitor::create_channel("end", channel);
 }
 
-
-TargetRenderer::~TargetRenderer() {
-}
-
 void TargetRenderer::draw() {
 	for (auto c: children) {
 		PerformanceMonitor::begin(channel);

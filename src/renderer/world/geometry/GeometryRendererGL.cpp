@@ -53,8 +53,8 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, Renderer *parent) : 
 
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)type];
-	shader_fx = ResourceManager::load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
-	shader_fx_points = ResourceManager::load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
+	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
+	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
 
 	cam = cam_main;
 }
@@ -135,7 +135,7 @@ void GeometryRendererGL::draw_particles() {
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
 	for (auto g: world.particle_manager->legacy_groups) {
-		nix::set_texture(g->texture);
+		nix::bind_texture(0, g->texture);
 
 		Array<VertexFx> v;
 		for (auto p: g->particles)
@@ -157,7 +157,7 @@ void GeometryRendererGL::draw_particles() {
 
 	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
 	for (auto g: *particle_groups) {
-		nix::set_texture(g->texture);
+		nix::bind_texture(0, g->texture);
 		int count = 0;
 		for (auto& p: g->particles)
 			count += int(p.enabled);
@@ -179,7 +179,7 @@ void GeometryRendererGL::draw_particles() {
 	nix::set_shader(shader_fx.get());
 	nix::set_model_matrix(mat4::ID);
 	for (auto g: *particle_groups) {
-		nix::set_texture(g->texture);
+		nix::bind_texture(0, g->texture);
 		auto source = g->source;
 
 		Array<VertexFx> v;
@@ -337,10 +337,10 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
 		if (!is_shadow_pass()) {
-			auto shader = user_mesh_shader(m, type);
+			auto shader = user_mesh_shader(resource_manager, m, type);
 			set_material_x(m->material, shader);
 		} else {
-			auto shader = user_mesh_shadow_shader(m, material_shadow, type);
+			auto shader = user_mesh_shadow_shader(resource_manager, m, material_shadow, type);
 			set_material_x(material_shadow, shader);
 		}
 		if (m->topology == PrimitiveTopology::TRIANGLES)

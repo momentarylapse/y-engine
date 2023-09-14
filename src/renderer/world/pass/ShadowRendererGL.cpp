@@ -30,7 +30,7 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 		new nix::Texture(shadow_resolution, shadow_resolution, "rgba:i8"),
 		new nix::DepthBuffer(shadow_resolution, shadow_resolution, "d24s8")});
 
-	material = new Material;
+	material = new Material(resource_manager);
 	material->shader_path = "shadow.shader";
 
 	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, this);

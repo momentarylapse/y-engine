@@ -15,6 +15,7 @@ class rect;
 
 class rect;
 class color;
+class ResourceManager;
 
 rect dynamicly_scaled_area(FrameBuffer *fb);
 rect dynamicly_scaled_source();
@@ -58,4 +59,6 @@ public:
 	//int ch_render= -1;
 	//int ch_end = -1;
 	int channel;
+	Context *context;
+	ResourceManager *resource_manager;
 };

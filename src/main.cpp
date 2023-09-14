@@ -21,6 +21,7 @@
 #include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
 #include "helper/Scheduler.h"
+#include "helper/ResourceManager.h"
 
 #include "audio/Sound.h"
 
@@ -236,7 +237,10 @@ public:
 			config.game_dir | "Materials",
 			config.game_dir | "Fonts");
 
-		api_init(window);
+		auto context = api_init(window);
+		auto resource_manager = new ResourceManager(context);
+		engine.set_context(context, resource_manager);
+
 		create_full_renderer();
 
 		audio::init();
@@ -250,9 +254,6 @@ public:
 
 
 		input::init(window);
-
-
-		MaterialInit();
 	}
 
 	void load_first_world() {

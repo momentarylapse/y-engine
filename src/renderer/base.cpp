@@ -76,23 +76,22 @@ void break_point() {}
 
 namespace nix {
 	extern bool allow_separate_vertex_arrays;
-	int total_mem();
-	int available_mem();
 }
 
 
-void api_init(GLFWwindow* window) {
+Context* api_init(GLFWwindow* window) {
 	nix::allow_separate_vertex_arrays = true;
-	nix::init();
+	auto gl = nix::init();
 
-	if (nix::total_mem() > 0) {
-		msg_write(format("VRAM: %d mb  of  %d mb available", nix::available_mem() / 1024, nix::total_mem() / 1024));
+	if (gl->total_mem() > 0) {
+		msg_write(format("VRAM: %d mb  of  %d mb available", gl->available_mem() / 1024, gl->total_mem() / 1024));
 	}
 
 	tex_white = new nix::Texture(16, 16, "rgba:i8");
 	tex_black = new nix::Texture(16, 16, "rgba:i8");
 	tex_white->write(Image(16, 16, White));
 	tex_black->write(Image(16, 16, Black));
+	return gl;
 }
 
 void api_end() {

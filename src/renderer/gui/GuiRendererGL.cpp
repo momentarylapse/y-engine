@@ -17,7 +17,7 @@
 
 GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
 	ch_gui = PerformanceMonitor::create_channel("gui", channel);
-	shader = ResourceManager::load_shader("forward/2d.shader");
+	shader = resource_manager->load_shader("forward/2d.shader");
 
 	vb = new VertexBuffer("3f,3f,2f");
 	vb->create_quad(rect::ID);

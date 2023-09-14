@@ -13,7 +13,6 @@
 class TargetRenderer : public Renderer {
 public:
 	TargetRenderer(const string &name);
-	virtual ~TargetRenderer();
 
 	void draw() override;
 

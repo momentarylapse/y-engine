@@ -13,7 +13,7 @@
 
 struct GLFWwindow;
 
-void api_init(GLFWwindow* window);
+Context* api_init(GLFWwindow* window);
 void api_end();
 
 void break_point();

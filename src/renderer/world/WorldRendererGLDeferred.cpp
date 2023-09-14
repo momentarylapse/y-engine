@@ -44,19 +44,19 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent) : WorldRender
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
 
-	ResourceManager::default_shader = "default.shader";
-	ResourceManager::load_shader("module-lighting-pbr.shader");
-	ResourceManager::load_shader("deferred/module-surface.shader");
-	ResourceManager::load_shader("forward/module-surface-pbr.shader");
-	ResourceManager::load_shader("module-vertex-default.shader");
-	ResourceManager::load_shader("module-vertex-animated.shader");
-	ResourceManager::load_shader("module-vertex-instanced.shader");
-	ResourceManager::load_shader("module-vertex-points.shader");
-	ResourceManager::load_shader("module-vertex-fx.shader");
-	ResourceManager::load_shader("module-geometry-points.shader");
-	ResourceManager::load_shader("module-geometry-lines.shader");
+	resource_manager->default_shader = "default.shader";
+	resource_manager->load_shader("module-lighting-pbr.shader");
+	resource_manager->load_shader("deferred/module-surface.shader");
+	resource_manager->load_shader("forward/module-surface-pbr.shader");
+	resource_manager->load_shader("module-vertex-default.shader");
+	resource_manager->load_shader("module-vertex-animated.shader");
+	resource_manager->load_shader("module-vertex-instanced.shader");
+	resource_manager->load_shader("module-vertex-points.shader");
+	resource_manager->load_shader("module-vertex-fx.shader");
+	resource_manager->load_shader("module-geometry-points.shader");
+	resource_manager->load_shader("module-geometry-lines.shader");
 
-	shader_gbuffer_out = ResourceManager::load_shader("deferred/out.shader");
+	shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
 
@@ -175,8 +175,8 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 	s->set_floats("resolution_scale", &resolution_scale_x, 2);
 	nix::set_shader(s);
 
-	nix::vb_temp->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-	nix::draw_triangles(nix::vb_temp);
+	context->vb_temp->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+	nix::draw_triangles(context->vb_temp);
 
 	// ...
 	//geo_renderer->draw_transparent();

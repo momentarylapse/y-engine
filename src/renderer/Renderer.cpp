@@ -11,7 +11,7 @@
 #include "../helper/PerformanceMonitor.h"
 #include "world/WorldRenderer.h"
 
-
+#include "../lib/os/msg.h"
 
 
 Renderer::Renderer(const string &name, Renderer *_parent) {
@@ -27,6 +27,11 @@ Renderer::Renderer(const string &name, Renderer *_parent) {
 	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
 	//ch_render = PerformanceMonitor::create_channel("render");
 	//ch_end = PerformanceMonitor::create_channel("end", ch_render);
+	msg_write("NEW: " + name);
+	msg_write(p2s(engine.context));
+	msg_write(p2s(engine.resource_manager));
+	context = engine.context;
+	resource_manager = engine.resource_manager;
 }
 
 

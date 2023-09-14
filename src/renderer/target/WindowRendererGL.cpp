@@ -19,7 +19,7 @@ WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) : TargetRender
 	width = w;
 	height = h;
 
-	_frame_buffer = nix::FrameBuffer::DEFAULT;
+	_frame_buffer = context->default_framebuffer;
 }
 
 
@@ -33,14 +33,14 @@ DepthBuffer *WindowRendererGL::depth_buffer() const {
 
 
 bool WindowRendererGL::start_frame() {
-	nix::start_frame_glfw(window);
+	nix::start_frame_glfw(context, window);
 	//jitter_iterate();
 	return true;
 }
 
 void WindowRendererGL::end_frame() {
 	PerformanceMonitor::begin(ch_end);
-	nix::end_frame_glfw(window);
+	nix::end_frame_glfw();
 	break_point();
 	PerformanceMonitor::end(ch_end);
 }

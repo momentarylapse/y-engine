@@ -183,6 +183,27 @@ void global_exit(EngineData& engine) {
 	exit(0);
 }
 
+
+Model* __load_model(const Path& filename) {
+	return engine.resource_manager->load_model(filename);
+}
+
+Shader* __load_shader(const Path& filename) {
+	return engine.resource_manager->load_shader(filename);
+}
+
+Shader* __create_shader(const string& source) {
+	return engine.resource_manager->create_shader(source);
+}
+
+shared<Texture> __load_texture(const Path& filename) {
+	return engine.resource_manager->load_texture(filename);
+}
+
+Material* __load_material(const Path& filename) {
+	return engine.resource_manager->load_material(filename);
+}
+
 void PluginManager::init(int ch_iter) {
 	ch_controller = PerformanceMonitor::create_channel("controller", ch_iter);
 	export_kaba();
@@ -348,9 +369,6 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Material.emission", &Material::emission);
 	ext->declare_class_element("Material.cast_shadow", &Material::cast_shadow);
 	ext->link_class_func("Material.add_uniform", &Material::add_uniform);
-
-
-	ext->link("Material.load", (void*)&LoadMaterial);
 
 
 	ext->declare_class_element("World.background", &World::background);
@@ -624,6 +642,16 @@ void PluginManager::export_kaba() {
 	ext->link("PerformanceMonitor.channels", &PerformanceMonitor::channels);
 	//ext->link("perf_mon", &global_perf_mon);
 
+
+	// unused
+	ext->declare_class_size("ResourceManager", sizeof(ResourceManager));
+	ext->link_class_func("ResourceManager.load_shader", &ResourceManager::load_shader);
+	ext->link_class_func("ResourceManager.create_shader", &ResourceManager::create_shader);
+	ext->link_class_func("ResourceManager.load_texture", &ResourceManager::load_texture);
+	ext->link_class_func("ResourceManager.load_material", &ResourceManager::load_material);
+	ext->link_class_func("ResourceManager.load_model", &ResourceManager::load_model);
+
+
 	ext->declare_class_size("EngineData", sizeof(EngineData));
 	ext->declare_class_element("EngineData.app_name", &EngineData::app_name);
 	ext->declare_class_element("EngineData.version", &EngineData::version);
@@ -737,13 +765,15 @@ void PluginManager::export_kaba() {
 	ext->link("world", &world);
 	ext->link("cam", &cam_main);
 	ext->link("engine", &engine);
-	ext->link("load_model", (void*)&ModelManager::load);
-	ext->link("load_shader", (void*)&ResourceManager::load_shader);
-	ext->link("create_shader", (void*)&ResourceManager::create_shader);
-	ext->link("load_texture", (void*)&ResourceManager::load_texture);
 	ext->link("__get_controller", (void*)&PluginManager::get_controller);
 	ext->link("add_camera", (void*)&add_camera);
 	ext->link("Scheduler.subscribe", (void*)&Scheduler::subscribe);
+
+	ext->link("load_model", (void*)&__load_model);
+	ext->link("load_shader", (void*)&__load_shader);
+	ext->link("create_shader", (void*)&__create_shader);
+	ext->link("load_texture", (void*)&__load_texture);
+	ext->link("load_material", (void*)&__load_material);
 }
 
 template<class C>

@@ -42,7 +42,7 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", paren
 			new nix::RenderBuffer(width, height, 4, "d24s8")});
 
 
-		shader_resolve_multisample = ResourceManager::load_shader("forward/resolve-multisample.shader");
+		shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
 	} else {
 		msg_error("no msaa");
 	}
@@ -60,8 +60,8 @@ HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", paren
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 
-	shader_blur = ResourceManager::load_shader("forward/blur.shader");
-	shader_out = ResourceManager::load_shader("forward/hdr.shader");
+	shader_blur = resource_manager->load_shader("forward/blur.shader");
+	shader_out = resource_manager->load_shader("forward/hdr.shader");
 
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
