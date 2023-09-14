@@ -13,19 +13,17 @@
 #include "components/Skeleton.h"
 #include "../y/Entity.h"
 #include "../y/EngineData.h"
-#include "../lib/math/complex.h"
-#include "../lib/kaba/kaba.h"
-#include "../lib/config.h"
-#if __has_include("../helper/ResourceManager.h")
+#include <lib/math/complex.h>
+#include <lib/kaba/kaba.h>
+#include <lib/config.h>
 #include "../helper/ResourceManager.h"
+#if __has_include("../plugins/PluginManager.h")
 #include "../plugins/PluginManager.h"
-#else
-#include "ResourceManager.h"
 #endif
-#include "../lib/os/file.h"
-#include "../lib/os/msg.h"
-#include "../lib/os/formatter.h"
-#include "../lib/doc/chunked.h"
+#include <lib/os/file.h>
+#include <lib/os/msg.h>
+#include <lib/os/formatter.h>
+#include <lib/doc/chunked.h>
 #include "../graphics-impl.h"
 #include "../meta.h"
 #include "Material.h"

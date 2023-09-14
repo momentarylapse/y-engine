@@ -6,7 +6,7 @@
  */
 
 #include "Config.h"
-#include "lib/os/msg.h"
+#include <lib/os/msg.h>
 
 Config config;
 

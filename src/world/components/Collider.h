@@ -8,8 +8,8 @@
 #pragma once
 
 #include "../../y/Component.h"
-#include "../../lib/math/plane.h"
-#include "../../lib/math/vec3.h"
+#include <lib/math/plane.h>
+#include <lib/math/vec3.h>
 
 class Model;
 class Terrain;

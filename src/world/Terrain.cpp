@@ -12,18 +12,14 @@
 #include "World.h"
 #include "../y/Entity.h"
 #include "../y/EngineData.h"
-#include "../lib/config.h"
-#include "../lib/math/vec3.h"
-#include "../lib/math/plane.h"
-#ifdef _X_ALLOW_X_
+#include <lib/config.h>
+#include <lib/math/vec3.h>
+#include <lib/math/plane.h>
 #include "../helper/ResourceManager.h"
-#else
-#include "ResourceManager.h"
-#endif
 #include "../graphics-impl.h"
-#include "../lib/os/file.h"
-#include "../lib/os/formatter.h"
-#include "../lib/os/msg.h"
+#include <lib/os/file.h>
+#include <lib/os/formatter.h>
+#include <lib/os/msg.h>
 
 const kaba::Class *Terrain::_class = nullptr;
 

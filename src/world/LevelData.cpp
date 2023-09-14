@@ -8,8 +8,8 @@
 #include "LevelData.h"
 #include "Link.h"
 #include "World.h"
-#include "../lib/os/file.h"
-#include "../lib/doc/xml.h"
+#include <lib/os/file.h>
+#include <lib/doc/xml.h>
 #include "../y/EngineData.h"
 #include "../meta.h"
 
@@ -227,7 +227,7 @@ string phys_mode_name(PhysicsMode m) {
 #include "../plugins/PluginManager.h"
 #include "../plugins/Controller.h"
 #endif
-#include "../lib/kaba/kaba.h"
+#include <lib/kaba/kaba.h>
 
 void LevelData::save(const Path &filename) {
 #ifdef _X_ALLOW_X_

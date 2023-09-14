@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "../lib/math/vec3.h"
-#include "../lib/math/quaternion.h"
+#include <lib/math/vec3.h>
+#include <lib/math/quaternion.h>
 #include "BaseClass.h"
 
 class mat4;

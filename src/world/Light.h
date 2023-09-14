@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "../lib/base/base.h"
-#include "../lib/math/vec3.h"
-#include "../lib/math/mat4.h"
-#include "../lib/image/color.h"
+#include <lib/base/base.h>
+#include <lib/math/vec3.h>
+#include <lib/math/mat4.h>
+#include <lib/image/color.h>
 #include "../y/Component.h"
 
 class Camera;

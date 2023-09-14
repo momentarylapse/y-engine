@@ -8,9 +8,9 @@
 \*----------------------------------------------------------------------------*/
 #pragma once
 
-#include "../lib/base/base.h"
-#include "../lib/os/path.h"
-#include "../lib/math/vec3.h"
+#include <lib/base/base.h>
+#include <lib/os/path.h>
+#include <lib/math/vec3.h>
 #include "../y/Component.h"
 #include "Material.h"
 #include "../graphics-fwd.h"

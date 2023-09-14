@@ -26,14 +26,14 @@
 
 #include "../graphics-fwd.h"
 #include "../y/Component.h"
-#include "../lib/base/base.h"
-#include "../lib/base/pointer.h"
-#include "../lib/os/path.h"
-#include "../lib/math/mat4.h"
-#include "../lib/math/mat3.h"
-#include "../lib/math/plane.h"
-#include "../lib/math/vec4.h"
-#include "../lib/image/color.h"
+#include <lib/base/base.h>
+#include <lib/base/pointer.h>
+#include <lib/os/path.h>
+#include <lib/math/mat4.h>
+#include <lib/math/mat3.h>
+#include <lib/math/plane.h>
+#include <lib/math/vec4.h>
+#include <lib/image/color.h>
 
 
 class Model;

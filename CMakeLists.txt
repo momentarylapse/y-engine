@@ -223,6 +223,7 @@ set(SOURCE
 )
 
 add_executable(y ${SOURCE})
+target_include_directories(y PRIVATE src)
 
 find_package(PkgConfig REQUIRED)
 

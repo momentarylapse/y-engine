@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../lib/base/base.h"
+#include <lib/base/base.h>
 
 class Component;
 namespace kaba {

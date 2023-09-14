@@ -9,10 +9,10 @@
 #define WORLD_COMPONENTS_USERMESH_H
 
 #include "../../y/Component.h"
-#include "../../lib/base/base.h"
-#include "../../lib/base/pointer.h"
-#include "../../lib/math/vec3.h"
-#include "../../lib/image/color.h"
+#include <lib/base/base.h>
+#include <lib/base/pointer.h>
+#include <lib/math/vec3.h>
+#include <lib/image/color.h>
 #include "../../graphics-impl.h"
 
 

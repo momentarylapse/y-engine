@@ -8,13 +8,8 @@
 #include "Skeleton.h"
 #include "Animator.h"
 #include "../Model.h"
-#if __has_include("../../helper/ResourceManager.h")
 #include "../../helper/ResourceManager.h"
 #include "../../y/EngineData.h"
-#else
-#include "../ResourceManager.h"
-#include "../EngineData.h"
-#endif
 #include "../ModelManager.h"
 #include "../../y/Entity.h"
 

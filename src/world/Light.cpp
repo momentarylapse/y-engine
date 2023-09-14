@@ -8,7 +8,7 @@
 #include "Light.h"
 #include "Camera.h"
 #include "../y/Entity.h"
-#include "../lib/os/msg.h"
+//#include <lib/os/msg.h>
 
 const kaba::Class *Light::_class = nullptr;
 

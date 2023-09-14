@@ -9,21 +9,17 @@
 \*----------------------------------------------------------------------------*/
 
 #include <algorithm>
-#include "../lib/config.h"
-#include "../lib/os/msg.h"
-#include "../lib/nix/nix.h"
-#include "../lib/kaba/kaba.h"
+#include <lib/config.h>
+#include <lib/os/msg.h>
+#include <lib/nix/nix.h>
+#include <lib/kaba/kaba.h>
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
 #include "../y/Entity.h"
 #include "../meta.h"
 #include "ModelManager.h"
-#if __has_include("../helper/ResourceManager.h")
 #include "../helper/ResourceManager.h"
-#else
-#include "ResourceManager.h"
-#endif
 #include "Link.h"
 #include "Material.h"
 #include "Model.h"

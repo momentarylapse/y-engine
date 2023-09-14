@@ -9,9 +9,9 @@
 #define SRC_CONFIG_H_
 
 
-#include "lib/base/base.h"
-#include "lib/os/config.h"
-#include "lib/os/path.h"
+#include <lib/base/base.h>
+#include <lib/os/config.h>
+#include <lib/os/path.h>
 
 enum class AntialiasingMethod {
 	NONE,

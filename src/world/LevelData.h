@@ -9,11 +9,11 @@
 #define SRC_WORLD_LEVELDATA_H_
 
 
-#include "../lib/base/base.h"
-#include "../lib/os/path.h"
-#include "../lib/math/vec3.h"
-#include "../lib/image/color.h"
-#include "../y/Entity.h"
+#include <lib/base/base.h>
+#include <lib/os/path.h>
+#include <lib/math/vec3.h>
+#include <lib/image/color.h>
+#include <y/Entity.h>
 
 class LevelData;
 

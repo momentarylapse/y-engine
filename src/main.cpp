@@ -8,14 +8,14 @@
 #include <chrono>
 
 
-#include "lib/os/msg.h"
-#include "lib/os/time.h"
-#include "lib/math/math.h"
-#include "lib/image/color.h"
-#include "lib/image/image.h"
-#include "lib/kaba/kaba.h"
+#include <lib/os/msg.h>
+#include <lib/os/time.h>
+#include <lib/math/math.h>
+#include <lib/image/color.h>
+#include <lib/image/image.h>
+#include <lib/kaba/kaba.h>
 
-#include "lib/hui_minimal/hui.h"
+#include <lib/hui_minimal/hui.h>
 
 #include "helper/DeletionQueue.h"
 #include "helper/PerformanceMonitor.h"

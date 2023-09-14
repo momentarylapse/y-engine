@@ -7,9 +7,9 @@
 #pragma once
 
 #include "../../y/Component.h"
-#include "../../lib/base/base.h"
-#include "../../lib/base/pointer.h"
 #include "../../graphics-fwd.h"
+#include <lib/base/base.h>
+#include <lib/base/pointer.h>
 
 class Model;
 class vec3;

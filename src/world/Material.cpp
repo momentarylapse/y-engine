@@ -1,17 +1,12 @@
 #include "Material.h"
 #include "Model.h"
-#include "../lib/config.h"
-#include "../lib/os/msg.h"
-#include "../lib/os/config.h"
-#include "../lib/any/any.h"
+#include <lib/config.h>
+#include <lib/os/msg.h>
+#include <lib/os/config.h>
+#include <lib/any/any.h>
 #include "../graphics-impl.h"
-#if __has_include("ResourceManager.h")
-	#include "ResourceManager.h"
-	#include "EngineData.h"
-#else
-	#include "../helper/ResourceManager.h"
-	#include "../y/EngineData.h"
-#endif
+#include "../helper/ResourceManager.h"
+#include "../y/EngineData.h"
 
 
 

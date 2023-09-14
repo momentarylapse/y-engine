@@ -7,17 +7,17 @@
 
 #include "ComponentManager.h"
 #include "Component.h"
-#include "../lib/base/map.h"
-#include "../lib/config.h"
+#include <lib/base/map.h>
+#include <lib/config.h>
 #ifdef _X_ALLOW_X_
 #include "../meta.h"
 #include "../plugins/PluginManager.h"
 #include "../helper/PerformanceMonitor.h"
 #endif
-#include "../lib/kaba/syntax/Class.h"
-#include "../lib/kaba/syntax/Function.h"
+#include <lib/kaba/syntax/Class.h>
+#include <lib/kaba/syntax/Function.h>
 
-#include "../lib/os/msg.h"
+#include <lib/os/msg.h>
 
 static int ch_component = -1;
 

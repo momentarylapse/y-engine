@@ -6,8 +6,8 @@
  */
 
 #include "Component.h"
-#include "../lib/base/base.h"
-#include "../lib/config.h"
+#include <lib/base/base.h>
+#include <lib/config.h>
 #ifdef _X_ALLOW_X_
 #include "../plugins/PluginManager.h"
 #endif

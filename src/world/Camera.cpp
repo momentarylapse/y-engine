@@ -13,8 +13,8 @@
 #include "../y/Entity.h"
 #include "../y/ComponentManager.h"
 #include "../y/EngineData.h"
-#include "../lib/math/vec3.h"
-#include "../lib/math/mat4.h"
+#include <lib/math/vec3.h>
+#include <lib/math/mat4.h>
 
 
 const kaba::Class *Camera::_class = nullptr;

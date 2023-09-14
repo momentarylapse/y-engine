@@ -1,27 +1,21 @@
 #include "ResourceManager.h"
-#include "../lib/os/filesystem.h"
-#include "../lib/os/file.h"
-#include "../lib/os/msg.h"
-#include "../lib/nix/nix.h"
-#include "../lib/image/image.h"
-#ifdef _X_USE_HUI_
-	#include "../lib/hui/hui.h"
+#include <lib/os/filesystem.h>
+#include <lib/os/file.h>
+#include <lib/os/msg.h>
+#include <lib/nix/nix.h>
+#include <lib/image/image.h>
+#if __has_include(<lib/hui/hui.h>)
+	#include <lib/hui/hui.h>
 #else
-	#include "../lib/hui_minimal/Application.h"
-	#include "../lib/hui_minimal/error.h"
+	#include <lib/hui_minimal/Application.h>
+	#include <lib/hui_minimal/error.h>
 #endif
-#include "../y/EngineData.h"
-#include "../graphics-impl.h"
+#include <y/EngineData.h>
+#include <graphics-impl.h>
 
-#if __has_include("../world/Material.h")
-	#include "../world/components/UserMesh.h"
-	#include "../world/Material.h"
-	#include "../world/ModelManager.h"
-#else
-	#include "components/UserMesh.h"
-	#include "Material.h"
-	#include "ModelManager.h"
-#endif
+#include <world/components/UserMesh.h>
+#include <world/Material.h>
+#include <world/ModelManager.h>
 
 ResourceManager::ResourceManager(Context *_ctx) {
 	ctx = _ctx;

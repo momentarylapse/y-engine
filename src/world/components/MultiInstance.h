@@ -9,8 +9,8 @@
 
 #include "../../y/Component.h"
 #include "../../y/Entity.h"
-#include "../../lib/base/pointer.h"
-#include "../../lib/math/mat4.h"
+#include <lib/base/pointer.h>
+#include <lib/math/mat4.h>
 #include "../../graphics-fwd.h"
 
 class Model;

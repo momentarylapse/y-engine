@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../graphics-fwd.h"
-#include "../lib/base/pointer.h"
-#include "../lib/base/map.h"
-#include "../lib/os/path.h"
+#include <lib/base/pointer.h>
+#include <lib/base/map.h>
+#include <lib/os/path.h>
 
 
 class string;
