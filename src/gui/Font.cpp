@@ -13,7 +13,9 @@
 #include "../lib/os/filesystem.h"
 
 //#define USE_CAIRO 1
+#if HAS_LIB_FREETYPE2
 #define USE_FREETYPE 1
+#endif
 
 
 #ifdef USE_CAIRO
@@ -147,6 +149,7 @@ void Font::init_fonts() {}
 #else
 
 
+#ifdef USE_FREETYPE
 Path find_system_font_file(const string &name) {
 #ifdef OS_WINDOWS
 	// TODO use FOLDERID_Fonts
@@ -193,6 +196,7 @@ void *ft_load_font(const string &name, float font_size) {
 
 	return face;
 }
+#endif
 
 void Font::init_fonts() {
 #ifdef USE_FREETYPE
@@ -208,6 +212,7 @@ void Font::init_fonts() {
 #endif
 }
 
+#ifdef USE_FREETYPE
 int ft_get_text_width_single_line(FT_Face face, const string &text) {
 	auto utf32 = text.utf8_to_utf32();
 
@@ -309,7 +314,7 @@ void ft_render_text(Font *font, FT_Face face, const string &text, gui::Node::Ali
 		y += font->line_height;
 	}
 }
-
+#endif
 #endif
 
 void Font::render_text(const string &str, Node::Align align, Image &im) {
@@ -317,7 +322,9 @@ void Font::render_text(const string &str, Node::Align align, Image &im) {
 	string font_name = "CAC Champagne";
 	cairo_render_text(font_name, FONT_SIZE, str, align, im);
 #else
+#ifdef USE_FREETYPE
 	ft_render_text(this, (FT_Face)face, str, align, im);
+#endif
 #endif
 }
 

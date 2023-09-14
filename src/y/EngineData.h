@@ -13,7 +13,7 @@
 #include "../graphics-fwd.h"
 
 
-namespace Gui {
+namespace gui {
 	class Font;
 }
 
@@ -43,7 +43,7 @@ public:
 	int multisampling;
 	bool CullingEnabled, SortingEnabled, ZBufferEnabled;
 	bool resetting_game;
-	Gui::Font *default_font;
+	gui::Font *default_font;
 	Path initial_world_file, second_world_file;
 	bool physics_enabled, collisions_enabled;
 	int mirror_level_max;

@@ -13,7 +13,9 @@
 #include "../lib/math/vec3.h"
 #include "../lib/math/mat4.h"
 #include "../lib/kaba/kaba.h"
+#ifdef _X_ALLOW_X_
 #include "../helper/PerformanceMonitor.h"
+#endif
 #include <stdio.h>
 
 namespace gui {
@@ -21,11 +23,13 @@ namespace gui {
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;
 shared<Node> toplevel;
-static int ch_gui_iter = -1;
+//static int ch_gui_iter = -1;
 
 
 void init(int ch_iter) {
+#ifdef _X_ALLOW_X_
 	ch_gui_iter = PerformanceMonitor::create_channel("gui", ch_iter);
+#endif
 
 	Font::init_fonts();
 
@@ -90,12 +94,16 @@ void handle_mouse_move(const vec2 &m_prev, const vec2 &m) {
 }
 
 void iterate(float dt) {
+#ifdef _X_ALLOW_X_
 	PerformanceMonitor::begin(ch_gui_iter);
+#endif
 	auto nodes = all_nodes;
 	// tree might change...
 	for (auto n: nodes) {
 		if (n->visible) {
+#if 0
 			[[maybe_unused]] auto prev = std::chrono::high_resolution_clock::now();
+#endif
 			n->on_iterate(dt);
 #if 0
 			auto now = std::chrono::high_resolution_clock::now();
@@ -108,7 +116,9 @@ void iterate(float dt) {
 #endif
 		}
 	}
+#ifdef _X_ALLOW_X_
 	PerformanceMonitor::end(ch_gui_iter);
+#endif
 }
 
 void delete_node(Node *n) {
