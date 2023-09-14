@@ -53,15 +53,33 @@ Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 	return filename;*/
 }
 
+
+
+Shader *ResourceManager::__load_shader(const Path& path) {
+#ifdef USING_VULKAN
+	return Shader::load(path);
+#else
+	return ctx->load_shader(path);
+#endif
+}
+
+Shader *ResourceManager::__create_shader(const string& source) {
+#ifdef USING_VULKAN
+	return Shader::create(source);
+#else
+	return ctx->create_shader(source);
+#endif
+}
+
 Shader* ResourceManager::load_shader(const Path& filename) {
 	if (!filename)
-		return ctx->load_shader("");
+		return __load_shader("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
 	if (!fn) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + filename.str());
-			return ctx->load_shader("");
+			return __load_shader("");
 		}
 		throw Exception("missing shader: " + filename.str());
 		//fn = shader_dir | filename;
@@ -79,7 +97,7 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 #ifdef USING_VULKAN
 	msg_write("loading shader: " + fn.str());
 #endif
-	auto s = ctx->load_shader(fn);
+	auto s = __load_shader(fn);
 	if (!s)
 		return nullptr;
 #ifdef USING_VULKAN
@@ -123,13 +141,13 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 
 
 	if (!filename)
-		return ctx->load_shader("");
+		return __load_shader("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
 	if (fn.is_empty()) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + filename.str());
-			return ctx->load_shader("");
+			return __load_shader("");
 		}
 		throw Exception("missing shader: " + filename.str());
 		//fn = shader_dir | filename;
@@ -153,7 +171,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 		source = expand_geometry_shader_source(source, geo);
 	source = expand_fragment_shader_source(source, render_path);
 
-	auto shader = ctx->create_shader(source);
+	auto shader = __create_shader(source);
 
 	//auto s = Shader::load(fn);
 #ifdef USING_VULKAN
@@ -175,7 +193,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 }
 
 Shader* ResourceManager::create_shader(const string &source) {
-	return ctx->create_shader(source);
+	return __create_shader(source);
 }
 
 shared<Texture> ResourceManager::load_texture(const Path& filename) {

@@ -74,25 +74,25 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, R
 
 
 
-	ResourceManager::default_shader = "default.shader";
+	resource_manager->default_shader = "default.shader";
 	/*if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
-		ResourceManager::load_shader("module-lighting-pbr.shader");
-		ResourceManager::load_shader("forward/module-surface-pbr.shader");
+		resource_manager->load_shader("module-lighting-pbr.shader");
+		resource_manager->load_shader("forward/module-surface-pbr.shader");
 	} else {
-		ResourceManager::load_shader("forward/module-surface.shader");
+		resource_manager->load_shader("forward/module-surface.shader");
 	}
-	ResourceManager::load_shader("module-vertex-default.shader");
-	ResourceManager::load_shader("module-vertex-animated.shader");
-	ResourceManager::load_shader("module-vertex-instanced.shader");*/
-	ResourceManager::load_shader("vulkan/module-surface-dummy.shader");
-	ResourceManager::load_shader("module-vertex-default.shader");
-	ResourceManager::load_shader("module-vertex-animated.shader");
-	ResourceManager::load_shader("module-vertex-instanced.shader");
-	ResourceManager::load_shader("module-vertex-fx.shader");
-	ResourceManager::load_shader("module-vertex-points.shader");
-	ResourceManager::load_shader("module-vertex-lines.shader");
-	ResourceManager::load_shader("module-geometry-points.shader");
-	ResourceManager::load_shader("module-geometry-lines.shader");
+	resource_manager->load_shader("module-vertex-default.shader");
+	resource_manager->load_shader("module-vertex-animated.shader");
+	resource_manager->load_shader("module-vertex-instanced.shader");*/
+	resource_manager->load_shader("vulkan/module-surface-dummy.shader");
+	resource_manager->load_shader("module-vertex-default.shader");
+	resource_manager->load_shader("module-vertex-animated.shader");
+	resource_manager->load_shader("module-vertex-instanced.shader");
+	resource_manager->load_shader("module-vertex-fx.shader");
+	resource_manager->load_shader("module-vertex-points.shader");
+	resource_manager->load_shader("module-vertex-lines.shader");
+	resource_manager->load_shader("module-geometry-points.shader");
+	resource_manager->load_shader("module-geometry-lines.shader");
 }
 
 void WorldRendererVulkan::create_more() {

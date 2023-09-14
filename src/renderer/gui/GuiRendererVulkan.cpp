@@ -31,7 +31,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 	ch_gui = PerformanceMonitor::create_channel("gui", channel);
 
 
-	shader = ResourceManager::load_shader("vulkan/2d.shader");
+	shader = resource_manager->load_shader("vulkan/2d.shader");
 	pipeline = PipelineManager::get_gui(shader, parent->render_pass(), "3f,3f,2f");
 
 

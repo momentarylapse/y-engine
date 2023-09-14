@@ -9,6 +9,7 @@
 #include "helper/PipelineManager.h"
 #include "../helper/ResourceManager.h"
 #include "../graphics-impl.h"
+#include "../y/EngineData.h"
 #include "../lib/image/image.h"
 #include "../lib/os/msg.h"
 #include "../Config.h"
@@ -23,7 +24,7 @@ vulkan::Instance *instance = nullptr;
 vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
 
-void api_init(GLFWwindow* window) {
+Context* api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.2", "rtx?", "verbosity=2"});
 	try {
 		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx", "compute"});
@@ -56,11 +57,13 @@ void api_init(GLFWwindow* window) {
 	tex_black = new Texture();
 	tex_white->write(Image(16, 16, White));
 	tex_black->write(Image(16, 16, Black));
+
+	return new Context;
 }
 
 void api_end() {
 	PipelineManager::clear();
-	ResourceManager::clear();
+	engine.resource_manager->clear();
 	delete pool;
 	if (device)
 		delete device;

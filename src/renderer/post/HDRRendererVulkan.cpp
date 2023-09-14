@@ -114,7 +114,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 
 	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
 	// without clear, we get artifacts from dynamic resolution scaling
-	shader_blur = ResourceManager::load_shader("forward/blur.shader");
+	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	blur_pipeline = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass, 0, "triangles", "3f,3f,2f");
 	blur_pipeline->set_z(false, false);
 	blur_pipeline->rebuild();
@@ -125,7 +125,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, blur_depth});
 	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
-	out = RenderOutData(ResourceManager::load_shader("forward/hdr.shader"), this, {into.fb_main->attachments[0].get(), fb_small2->attachments[0].get()});
+	out = RenderOutData(resource_manager->load_shader("forward/hdr.shader"), this, {into.fb_main->attachments[0].get(), fb_small2->attachments[0].get()});
 
 
 

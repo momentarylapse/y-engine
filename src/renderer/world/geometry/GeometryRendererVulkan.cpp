@@ -71,7 +71,7 @@ GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, Renderer *pa
 	//	rvd_cube[i].ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 
 
-	shader_fx = ResourceManager::load_shader("vulkan/3d-fx.shader");
+	shader_fx = resource_manager->load_shader("vulkan/3d-fx.shader");
 	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_fx->set_z(true, false);
@@ -538,10 +538,10 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		Material *material;
 		if (!is_shadow_pass()) {
 			material = m->material;
-			shader = user_mesh_shader(m, type);//t);
+			shader = user_mesh_shader(resource_manager, m, type);//t);
 		} else {
 			material = material_shadow;
-			shader = user_mesh_shadow_shader(m, material, type);
+			shader = user_mesh_shadow_shader(resource_manager, m, material, type);
 		}
 		auto pipeline = get_pipeline(shader, render_pass(), material, m->topology, m->vertex_buffer);
 

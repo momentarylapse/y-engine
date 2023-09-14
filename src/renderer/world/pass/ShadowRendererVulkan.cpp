@@ -35,7 +35,7 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 	rvd[0].ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
 	rvd[1].ubo_light = new UniformBuffer(3 * sizeof(UBOLight));
 
-	material = new Material;
+	material = new Material(resource_manager);
 	material->shader_path = "shadow.shader";
 
 	geo_renderer = new GeometryRendererVulkan(RenderPathType::FORWARD, this);

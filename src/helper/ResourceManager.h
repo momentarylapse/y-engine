@@ -29,6 +29,9 @@ public:
 	Material *load_material(const Path &filename);
 	Model *load_model(const Path &filename);
 
+	Shader *__load_shader(const Path& path);
+	Shader *__create_shader(const string& source);
+
 	Path texture_dir;
 	Path shader_dir;
 	Path default_shader;

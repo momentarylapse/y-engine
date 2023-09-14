@@ -47,6 +47,7 @@
 		class AccelerationStructure;
 	}
 
+	class Context{};
 	using Texture = vulkan::Texture;
 	using Shader = vulkan::Shader;
 	using VertexBuffer = vulkan::VertexBuffer;

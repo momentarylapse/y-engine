@@ -67,9 +67,9 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		rtx.dset->set_buffer(4, geo_renderer->rvd_def.ubo_light);
 		rtx.dset->set_buffer(5, buffer_meshes);
 
-		auto shader_gen = ResourceManager::load_shader("vulkan/gen.shader");
-		auto shader1 = ResourceManager::load_shader("vulkan/group1.shader");
-		auto shader2 = ResourceManager::load_shader("vulkan/group2.shader");
+		auto shader_gen = resource_manager->load_shader("vulkan/gen.shader");
+		auto shader1 = resource_manager->load_shader("vulkan/group1.shader");
+		auto shader2 = resource_manager->load_shader("vulkan/group2.shader");
 		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer,buffer]]", {shader_gen, shader1, shader2}, 2);
 		rtx.pipeline->create_sbt();
 
@@ -78,7 +78,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
-		auto shader = ResourceManager::load_shader("vulkan/compute.shader");
+		auto shader = resource_manager->load_shader("vulkan/compute.shader");
 		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader);
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
@@ -89,7 +89,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 
 
-	shader_out = ResourceManager::load_shader("vulkan/passthrough.shader");
+	shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
 	pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), parent->render_pass(), 0, "triangles", "3f,3f,2f");
 	pipeline_out->set_culling(CullMode::NONE);
 	pipeline_out->rebuild();
