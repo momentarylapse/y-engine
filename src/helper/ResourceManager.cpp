@@ -3,6 +3,7 @@
 #include "../lib/os/file.h"
 #include "../lib/os/msg.h"
 #include "../lib/nix/nix.h"
+#include "../lib/image/image.h"
 #ifdef _X_USE_HUI_
 	#include "../lib/hui/hui.h"
 #else
@@ -26,6 +27,16 @@ ResourceManager::ResourceManager(Context *_ctx) {
 	ctx = _ctx;
 	material_manager = new MaterialManager(this);
 	model_manager = new ModelManager(this, material_manager);
+
+
+#ifdef USING_VULKAN
+	Image im;
+	im.create(8, 8, White);
+	tex_white = new Texture();
+	tex_white->write(im);
+#else
+	tex_white = ctx->tex_white;
+#endif
 }
 
 Material *ResourceManager::load_material(const Path &filename) {
@@ -78,10 +89,10 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
 	if (!fn) {
 		if (engine.ignore_missing_files) {
-			msg_error("missing shader: " + filename.str());
+			msg_error("missing shader: " + str(filename));
 			return __load_shader("");
 		}
-		throw Exception("missing shader: " + filename.str());
+		throw Exception("missing shader: " + str(filename));
 		//fn = shader_dir | filename;
 	}
 
@@ -95,7 +106,7 @@ Shader* ResourceManager::load_shader(const Path& filename) {
 		}
 
 #ifdef USING_VULKAN
-	msg_write("loading shader: " + fn.str());
+	msg_write("loading shader: " + str(fn));
 #endif
 	auto s = __load_shader(fn);
 	if (!s)
@@ -131,7 +142,7 @@ string ResourceManager::expand_geometry_shader_source(const string &source, cons
 }
 
 Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &variant, const string &geo) {
-	msg_write("load_surface_shader: " + _filename.str() + "  " + render_path + "  " + variant + "  " + geo);
+	msg_write("load_surface_shader: " + str(_filename) + "  " + render_path + "  " + variant + "  " + geo);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;
@@ -146,10 +157,10 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
 	if (fn.is_empty()) {
 		if (engine.ignore_missing_files) {
-			msg_error("missing shader: " + filename.str());
+			msg_error("missing shader: " + str(filename));
 			return __load_shader("");
 		}
-		throw Exception("missing shader: " + filename.str());
+		throw Exception("missing shader: " + str(filename));
 		//fn = shader_dir | filename;
 	}
 
@@ -164,7 +175,7 @@ Shader* ResourceManager::load_surface_shader(const Path& _filename, const string
 		}
 
 
-	msg_write("loading shader: " + fnx.str());
+	msg_write("loading shader: " + str(fnx));
 
 	string source = expand_vertex_shader_source(os::fs::read_text(fn), variant);
 	if (geo != "")
@@ -198,15 +209,15 @@ Shader* ResourceManager::create_shader(const string &source) {
 
 shared<Texture> ResourceManager::load_texture(const Path& filename) {
 	if (filename.is_empty())
-		return nullptr;
+		return tex_white;
 
 	Path fn = guess_absolute_path(filename, {texture_dir});
 	if (fn.is_empty()) {
 		if (engine.ignore_missing_files) {
-			msg_error("missing texture: " + filename.str());
-			return nullptr;
+			msg_error("missing texture: " + str(filename));
+			return tex_white;
 		}
-		throw Exception("missing texture: " + filename.str());
+		throw Exception("missing texture: " + str(filename));
 	}
 
 	for (auto&& [key, t]: texture_map)
@@ -214,13 +225,13 @@ shared<Texture> ResourceManager::load_texture(const Path& filename) {
 #ifdef USING_VULKAN
 			return t;
 #else
-			return t->valid ? t : nullptr;
+			return t->valid ? t : tex_white;
 #endif
 		}
 
 	try {
 #ifdef USING_VULKAN
-		msg_write("loading texture: " + fn.str());
+		msg_write("loading texture: " + str(fn));
 #endif
 		auto t = Texture::load(fn);
 		textures.add(t);
@@ -230,7 +241,7 @@ shared<Texture> ResourceManager::load_texture(const Path& filename) {
 		if (!engine.ignore_missing_files)
 			throw;
 		msg_error(e.message());
-		return nullptr;
+		return tex_white;
 	}
 }
 

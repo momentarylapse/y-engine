@@ -42,6 +42,8 @@ public:
 	shared_array<Texture> textures;
 	base::map<Path,Shader*> shader_map;
 	base::map<Path,Texture*> texture_map;
+
+	shared<Texture> tex_white;
 };
 
 
