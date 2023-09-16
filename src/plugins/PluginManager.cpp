@@ -351,6 +351,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Terrain.pattern", &Terrain::pattern);
 	ext->declare_class_element("Terrain.num_x", &Terrain::num_x);
 	ext->declare_class_element("Terrain.num_z", &Terrain::num_z);
+	ext->declare_class_element("Terrain.vertex_shader_module", &Terrain::vertex_shader_module);
 	ext->link_class_func("Terrain.update", &Terrain::update);
 	ext->link_class_func("Terrain.get_height", &Terrain::gimme_height);
 
@@ -362,7 +363,7 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_size("Material", sizeof(Material));
 	ext->declare_class_element("Material.textures", &Material::textures);
-	ext->declare_class_element("Material.shader", &Material::shader);
+	ext->declare_class_element("Material.shader_path", &Material::shader_path);
 	ext->declare_class_element("Material.albedo", &Material::albedo);
 	ext->declare_class_element("Material.roughness", &Material::roughness);
 	ext->declare_class_element("Material.metal", &Material::metal);

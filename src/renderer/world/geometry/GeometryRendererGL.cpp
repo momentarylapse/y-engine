@@ -36,6 +36,7 @@
 #include "../../../world/Terrain.h"
 #include "../../../world/World.h"
 #include "../../../world/Light.h"
+#include "../../../world/ModelManager.h"
 #include "../../../world/components/Animator.h"
 #include "../../../world/components/UserMesh.h"
 #include "../../../world/components/MultiInstance.h"
@@ -69,9 +70,9 @@ void GeometryRendererGL::prepare() {
 	PerformanceMonitor::end(channel);
 }
 
-void GeometryRendererGL::set_material(Material *m, RenderPathType t, ShaderVariant v) {
-	auto s = m->get_shader(t, v);
-	set_material_x(m, s);
+void GeometryRendererGL::set_material(ShaderCache &cache, Material *m, RenderPathType t, const string &vertex_module, const string &geometry_module) {
+	cache._prepare_shader(t, m, vertex_module, geometry_module);
+	set_material_x(m, cache.get_shader(t));
 }
 
 void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
@@ -229,7 +230,7 @@ void GeometryRendererGL::draw_skyboxes() {
 		sb->_matrix = mat4::rotation(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
-			set_material(sb->material[i], type, ShaderVariant::DEFAULT);
+			set_material(sb->shader_cache[i], sb->material[i], type, "default", "");
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
@@ -245,13 +246,13 @@ void GeometryRendererGL::draw_terrains() {
 			continue;
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
-		if (!is_shadow_pass()) {
-			set_material(t->material, type, ShaderVariant::DEFAULT);
-			auto s = t->material->get_shader(type, ShaderVariant::DEFAULT);
+		if (is_shadow_pass()) {
+			set_material(t->shader_cache_shadow, material_shadow, type, t->vertex_shader_module, "");
+		} else {
+			set_material(t->shader_cache, t->material, type, t->vertex_shader_module, "");
+			auto s = t->shader_cache.get_shader(type);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
-		} else {
-			set_material(material_shadow, type, ShaderVariant::DEFAULT);
 		}
 		t->prepare_draw(cam_main->owner->pos);
 		nix::draw_triangles(t->vertex_buffer);
@@ -264,10 +265,10 @@ void GeometryRendererGL::draw_objects_instanced() {
 			continue;
 		Model *m = s.model;
 		nix::set_model_matrix(s.instance->matrices[0]);//m->_matrix);
-		if (!is_shadow_pass()) {
-			set_material(s.material, type, ShaderVariant::INSTANCED);
+		if (is_shadow_pass()) {
+			set_material(m->shader_cache_shadow[s.mat_index], material_shadow, type, "instanced", "");
 		} else {
-			set_material(material_shadow, type, ShaderVariant::INSTANCED);
+			set_material(m->shader_cache[s.mat_index], s.material, type, "instanced", "");
 		}
 		nix::bind_buffer(5, s.instance->ubo_matrices);
 		//msg_write(s.matrices.num);
@@ -287,18 +288,18 @@ void GeometryRendererGL::draw_objects_opaque() {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (ani) {
-			if (!is_shadow_pass()) {
-				set_material(s.material, type, ShaderVariant::ANIMATED);
+			if (is_shadow_pass()) {
+				set_material(m->shader_cache_shadow[s.mat_index], material_shadow, type, "animated", "");
 			} else {
-				set_material(material_shadow, type, ShaderVariant::ANIMATED);
+				set_material(m->shader_cache[s.mat_index], s.material, type, "animated", "");
 			}
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(7, ani->buf);
 		} else {
-			if (!is_shadow_pass()) {
-				set_material(s.material, type, ShaderVariant::DEFAULT);
+			if (is_shadow_pass()) {
+				set_material(m->shader_cache_shadow[s.mat_index], material_shadow, type, m->_template->vertex_shader_module, "");
 			} else {
-				set_material(material_shadow, type, ShaderVariant::DEFAULT);
+				set_material(m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "");
 			}
 		}
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
@@ -314,12 +315,8 @@ void GeometryRendererGL::draw_objects_transparent() {
 		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
 		nix::set_cull(nix::CullMode::NONE);
-		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-		if (ani) {
-			set_material(s.material, type, ShaderVariant::ANIMATED);
-		} else {
-			set_material(s.material, type, ShaderVariant::DEFAULT);
-		}
+		//auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+		set_material(m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "");
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 		nix::set_cull(nix::CullMode::DEFAULT);
 	}

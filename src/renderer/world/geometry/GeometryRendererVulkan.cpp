@@ -36,6 +36,7 @@
 #include "../../../world/Terrain.h"
 #include "../../../world/World.h"
 #include "../../../world/Light.h"
+#include "../../../world/ModelManager.h"
 #include "../../../world/components/Animator.h"
 #include "../../../world/components/UserMesh.h"
 #include "../../../world/components/MultiInstance.h"
@@ -102,8 +103,9 @@ GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp
 	}
 }
 
-void GeometryRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, RenderPathType t, ShaderVariant v, PrimitiveTopology top, VertexBuffer *vb) {
-	auto s = m->get_shader(t, v);
+void GeometryRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, ShaderCache &cache, Material *m, RenderPathType t, const string &vertex_module, const string &geometry_module, PrimitiveTopology top, VertexBuffer *vb) {
+	cache._prepare_shader(t, m, vertex_module, geometry_module);
+	auto s = cache.get_shader(t);
 	auto p = get_pipeline(s, rp, m, top, vb);
 	set_material_x(cb, rp, dset, m, p);
 }
@@ -331,8 +333,9 @@ void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Ca
 
 		for (int i=0; i<sb->material.num; i++) {
 			if (index >= rda.num) {
+				sb->shader_cache[i]._prepare_shader(type, sb->material[i], "default", "");
 				rda.add({new UniformBuffer(sizeof(UBO)),
-					pool->create_set(sb->material[i]->get_shader(type, ShaderVariant::DEFAULT))});
+					pool->create_set(sb->shader_cache[i].get_shader(type))});
 				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 			}
@@ -344,7 +347,7 @@ void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Ca
 			rda[index].ubo->update(&ubo);
 
 			auto vb = sb->mesh[0]->sub[i].vertex_buffer;
-			set_material(cb, rp, rda[index].dset, sb->material[i], type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
+			set_material(cb, rp, rda[index].dset, sb->shader_cache[i], sb->material[i], type, "default", "", PrimitiveTopology::TRIANGLES, vb);
 			cb->draw(vb);
 
 			index ++;
@@ -372,20 +375,21 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 		ubo.roughness = t->material->roughness;
 
 		if (index >= rda.num) {
+			t->shader_cache._prepare_shader(type, t->material, t->vertex_shader_module, "");
 			rda.add({new UniformBuffer(sizeof(UBO)),
-				pool->create_set(t->material->get_shader(type, ShaderVariant::DEFAULT))});
+				pool->create_set(t->shader_cache.get_shader(type))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 		}
 
 		rda[index].ubo->update(&ubo);
 
-		if (!is_shadow_pass()) {
-			set_material(cb, rp, rda[index].dset, t->material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, t->vertex_buffer);
+		if (is_shadow_pass()) {
+			set_material(cb, rp, rda[index].dset, t->shader_cache_shadow, material_shadow, type, t->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, t->vertex_buffer);
+		} else {
+			set_material(cb, rp, rda[index].dset, t->shader_cache, t->material, type, t->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, t->vertex_buffer);
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
-		} else {
-			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, t->vertex_buffer);
 		}
 		t->prepare_draw(cam_main->owner->pos);
 		cb->draw(t->vertex_buffer);
@@ -404,8 +408,9 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 		Model *m = s.model;
 
 		if (index >= rda.num) {
+			m->shader_cache[s.mat_index]._prepare_shader(type, s.material, "instanced", "");
 			rda.add({new UniformBuffer(sizeof(UBO)),
-				pool->create_set(s.material->get_shader(type, ShaderVariant::INSTANCED))});
+				pool->create_set(m->shader_cache[s.mat_index].get_shader(type))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 			rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, s.instance->ubo_matrices);
@@ -420,10 +425,10 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
 		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		if (!is_shadow_pass())
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
+		if (is_shadow_pass())
+			set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[s.mat_index], material_shadow, type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
 		else
-			set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::INSTANCED, PrimitiveTopology::TRIANGLES, vb);
+			set_material(cb, rp, rda[index].dset, m->shader_cache[s.mat_index], s.material, type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
 
 		cb->draw_instanced(vb, min(s.instance->matrices.num, MAX_INSTANCES));
 		index ++;
@@ -444,8 +449,9 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (index >= rda.num) {
+			m->shader_cache[s.mat_index]._prepare_shader(type, s.material, m->_template->vertex_shader_module, "");
 			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
-				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
+				pool->create_set(m->shader_cache[s.mat_index].get_shader(type))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 		}
@@ -461,17 +467,10 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
 		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		if (ani) {
-			if (!is_shadow_pass())
-				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
-			else
-				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
-		} else {
-			if (!is_shadow_pass())
-				set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
-			else
-				set_material(cb, rp, rda[index].dset, material_shadow, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
-		}
+		if (is_shadow_pass())
+			set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[s.mat_index], material_shadow, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+		else
+			set_material(cb, rp, rda[index].dset, m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
 
 		cb->draw(vb);
 		index ++;
@@ -492,8 +491,9 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
 		if (index >= rda.num) {
+			m->shader_cache[s.mat_index]._prepare_shader(type, s.material, m->_template->vertex_shader_module, "");
 			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
-				pool->create_set(s.material->get_shader(type, ShaderVariant::DEFAULT))});
+				pool->create_set(m->shader_cache[s.mat_index].get_shader(type))});
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
 		}
@@ -509,11 +509,7 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
 		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		if (ani) {
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::ANIMATED, PrimitiveTopology::TRIANGLES, vb);
-		} else {
-			set_material(cb, rp, rda[index].dset, s.material, type, ShaderVariant::DEFAULT, PrimitiveTopology::TRIANGLES, vb);
-		}
+		set_material(cb, rp, rda[index].dset, m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
 
 		cb->draw(vb);
 		index ++;
@@ -536,12 +532,12 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 
 		Shader *shader;
 		Material *material;
-		if (!is_shadow_pass()) {
-			material = m->material;
-			shader = user_mesh_shader(resource_manager, m, type);//t);
-		} else {
+		if (is_shadow_pass()) {
 			material = material_shadow;
 			shader = user_mesh_shadow_shader(resource_manager, m, material, type);
+		} else {
+			material = m->material;
+			shader = user_mesh_shader(resource_manager, m, type);//t);
 		}
 		auto pipeline = get_pipeline(shader, render_pass(), material, m->topology, m->vertex_buffer);
 
@@ -559,10 +555,10 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		ubo.roughness = m->material->roughness;
 		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
-		if (!is_shadow_pass())
-			set_material_x(cb, rp, rda[index].dset, m->material, pipeline);
-		else
+		if (is_shadow_pass())
 			set_material_x(cb, rp, rda[index].dset, material_shadow, pipeline);
+		else
+			set_material_x(cb, rp, rda[index].dset, m->material, pipeline);
 
 		cb->draw(m->vertex_buffer);
 		index ++;

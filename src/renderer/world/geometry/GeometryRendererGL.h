@@ -14,6 +14,7 @@
 class Camera;
 class PerformanceMonitor;
 class Material;
+struct ShaderCache;
 
 enum class RenderPathType;
 enum class ShaderVariant;
@@ -25,7 +26,7 @@ public:
 	void prepare() override;
 	void draw() override {}
 
-	void set_material(Material *m, RenderPathType type, ShaderVariant v);
+	void set_material(ShaderCache &cache, Material *m, RenderPathType type, const string &vertex_module, const string &geometry_module);
 	void set_material_x(Material *m, Shader *shader);
 
 	void draw_skyboxes();

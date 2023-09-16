@@ -650,11 +650,14 @@ Model* ModelManager::load(const Path &_filename) {
 	m->_template->mesh_collider = new MeshCollider;
 	m->_template->animator = new Animator;
 	m->_template->skeleton = new Skeleton;
+	m->_template->vertex_shader_module = "default";
 
 	modelmanager::ModelParser p(this);
 	p.read(filename, m);
 
 
+	m->shader_cache.resize(m->material.num);
+	m->shader_cache_shadow.resize(m->material.num);
 
 	// remove unneeded components
 	/*if (m->_template->mesh_collider->phys->balls.num + ... == 0) {
@@ -683,6 +686,8 @@ Model* ModelManager::load(const Path &_filename) {
 
 	PostProcessPhys(m, m->_template->mesh_collider->phys);
 
+	if (m->_template->animator)
+		m->_template->vertex_shader_module = "animated";
 
 
 

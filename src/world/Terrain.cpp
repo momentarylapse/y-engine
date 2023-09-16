@@ -34,7 +34,8 @@ void Terrain::reset() {
 	error = false;
 	num_x = num_z = 0;
 	changed = false;
-	vertex_buffer = NULL;
+	vertex_buffer = nullptr;
+	vertex_shader_module = "default";
 }
 
 Terrain::Terrain() {

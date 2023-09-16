@@ -97,8 +97,6 @@ Material* Material::copy() {
 		cube_map = FxCubeMapNew(m2->cube_map_size);
 		FxCubeMapCreate(cube_map, model);
 	}*/
-	for (int i=0; i<3; i++)
-		m->shader[i] = shader[i];
 	m->shader_path = shader_path;
 	m->friction = friction;
 	return m;
@@ -218,27 +216,24 @@ Material *MaterialManager::load(const Path &filename) {
 	return m->copy();
 }
 
-inline int shader_index(RenderPathType render_path_type, ShaderVariant v) {
-	return (int)v + (int)ShaderVariant::_NUM * ((int)render_path_type - 1);
+inline int shader_index(RenderPathType render_path_type) {
+	return (int)render_path_type - 1;
 }
 
-void Material::_prepare_shader(RenderPathType render_path_type, ShaderVariant v) {
-	int i = shader_index(render_path_type, v);
+
+void ShaderCache::_prepare_shader(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module) {
+	int i = shader_index(render_path_type);
 	if (shader[i])
 		return;
-	static const string VARIANT_NAME[5] = {"default", "animated", "instanced", "lines", "points"};
-	const string &vv = VARIANT_NAME[(int)v];
-	static const string GEOMETRY_NAME[5] = {"", "", "", "lines", "points"};
-	const string &gg = GEOMETRY_NAME[(int)v];
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = resource_manager->load_surface_shader(shader_path, rpt, vv, gg);
+	shader[i] = material->resource_manager->load_surface_shader(material->shader_path, rpt, vertex_module, geometry_module);
 }
 
-Shader *Material::get_shader(RenderPathType render_path_type, ShaderVariant v) {
-	int i = shader_index(render_path_type, v);
-	_prepare_shader(render_path_type, v);
-	return shader[i].get();
+Shader *ShaderCache::get_shader(RenderPathType render_path_type) {
+	int i = shader_index(render_path_type);
+	//_prepare_shader(render_path_type, v);
+	return shader[i];
 }
 
 bool Material::is_transparent() const {

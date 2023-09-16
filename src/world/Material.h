@@ -32,14 +32,14 @@ enum class ReflectionMode {
 	CUBE_MAP_DYNAMIC
 };
 
-enum class ShaderVariant {
+/*enum class ShaderVariant {
 	DEFAULT,
 	ANIMATED,
 	INSTANCED,
 	LINES,
 	POINTS,
 	_NUM
-};
+};*/
 
 enum class RenderPathType;
 
@@ -51,10 +51,7 @@ public:
 	ResourceManager *resource_manager;
 
 	shared_array<Texture> textures;
-	shared<Shader> shader[(int)ShaderVariant::_NUM * 2]; // * #(render paths)
 	Path shader_path;
-	void _prepare_shader(RenderPathType render_path_type, ShaderVariant v);
-	Shader *get_shader(RenderPathType render_path_type, ShaderVariant v);
 
 	struct ShaderUniform {
 		string name;
@@ -94,6 +91,12 @@ public:
 	Material *copy();
 
 	bool is_transparent() const;
+};
+
+struct ShaderCache {
+	Shader *shader[2] = {nullptr, nullptr}; // * #(render paths)
+	void _prepare_shader(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module);
+	Shader *get_shader(RenderPathType render_path_type);
 };
 
 

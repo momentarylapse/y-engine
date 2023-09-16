@@ -30,6 +30,7 @@ public:
 	MeshCollider *mesh_collider;
 	Animator *animator;
 	Skeleton *skeleton;
+	string vertex_shader_module;
 
 
 	ModelTemplate(Model *m);

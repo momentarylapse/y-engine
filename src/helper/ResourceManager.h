@@ -22,7 +22,7 @@ public:
 	shared<Texture> load_texture(const Path& path);
 	Shader *load_shader(const Path& path);
 	Shader *create_shader(const string &source);
-	Shader *load_surface_shader(const Path& path, const string &render_path, const string &variant, const string &geo);
+	Shader *load_surface_shader(const Path& path, const string &render_path, const string &vertex_module, const string &geometry_module);
 	string expand_vertex_shader_source(const string &source, const string &variant);
 	string expand_fragment_shader_source(const string &source, const string &render_path);
 	string expand_geometry_shader_source(const string &source, const string &variant);

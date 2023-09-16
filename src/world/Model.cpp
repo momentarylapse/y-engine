@@ -266,6 +266,9 @@ Model *Model::copy(Model *pre_allocated) {
 
 	for (Material* mat: material)
 		m->material.add(mat->copy());
+
+	m->shader_cache.resize(m->material.num);
+	m->shader_cache_shadow.resize(m->material.num);
 	
 
 	// "copy" presettings (just using references)
