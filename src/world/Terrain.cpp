@@ -34,7 +34,6 @@ void Terrain::reset() {
 	error = false;
 	num_x = num_z = 0;
 	changed = false;
-	vertex_buffer = nullptr;
 	vertex_shader_module = "default";
 }
 
@@ -134,8 +133,6 @@ bool Terrain::load(ResourceManager *resource_manager, const Path &_filename_, bo
 }
 
 Terrain::~Terrain() {
-	delete vertex_buffer;
-	delete material;
 }
 
 // die Normalen-Vektoren in einem bestimmten Abschnitt der Karte neu berechnen

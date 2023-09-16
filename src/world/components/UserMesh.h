@@ -24,15 +24,13 @@ public:
 	UserMesh() {
 	}
 
-	Material *material = nullptr;
+	owned<Material> material;
 	string vertex_shader_module;
 	string geometry_shader_module;
 	ShaderCache shader_cache;
 	ShaderCache shader_cache_shadow;
-	//Shader *shader_cache[2] = {nullptr, nullptr};
-	//Shader *shader_cache_shadow[2] = {nullptr, nullptr};
 
-	VertexBuffer *vertex_buffer = nullptr;
+	owned<VertexBuffer> vertex_buffer;
 	PrimitiveTopology topology = PrimitiveTopology::TRIANGLES;
 
 	static const kaba::Class *_class;

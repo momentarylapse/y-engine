@@ -184,15 +184,15 @@ void global_exit(EngineData& engine) {
 }
 
 
-Model* __load_model(const Path& filename) {
+xfer<Model> __load_model(const Path& filename) {
 	return engine.resource_manager->load_model(filename);
 }
 
-Shader* __load_shader(const Path& filename) {
+shared<Shader> __load_shader(const Path& filename) {
 	return engine.resource_manager->load_shader(filename);
 }
 
-Shader* __create_shader(const string& source) {
+xfer<Shader> __create_shader(const string& source) {
 	return engine.resource_manager->create_shader(source);
 }
 
@@ -200,7 +200,7 @@ shared<Texture> __load_texture(const Path& filename) {
 	return engine.resource_manager->load_texture(filename);
 }
 
-Material* __load_material(const Path& filename) {
+xfer<Material> __load_material(const Path& filename) {
 	return engine.resource_manager->load_material(filename);
 }
 

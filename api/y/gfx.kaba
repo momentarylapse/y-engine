@@ -49,6 +49,6 @@ class VertexBuffer
 
 var extern tex_white: shared![Texture]
 
-func extern load_shader(filename: Path) -> Shader&
-func extern create_shader(source: string) -> Shader&
+func extern load_shader(filename: Path) -> shared![Shader]
+func extern create_shader(source: string) -> xfer[Shader]
 func extern load_texture(filename: Path) -> shared![Texture]

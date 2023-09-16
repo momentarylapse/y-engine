@@ -13,6 +13,7 @@
 #include "../../../lib/image/color.h"
 #include "../../../lib/math/mat4.h"
 #include "../../../world/Light.h"
+#include "../../../world/Material.h"
 
 class Camera;
 class PerformanceMonitor;
@@ -65,17 +66,17 @@ public:
 	static bool using_view_space;
 	RenderPathType type;
 
-	Material *material_shadow = nullptr;
+	owned<Material> material_shadow;
 
 	Camera *cam;
 
 	shared<Shader> shader_fx;
 	shared<Shader> shader_fx_points;
-	VertexBuffer *vb_fx = nullptr;
-	VertexBuffer *vb_fx_points = nullptr;
+	owned<VertexBuffer> vb_fx;
+	owned<VertexBuffer> vb_fx_points;
 
 	// FIXME  manually set from ShadowRenderer*
-	UniformBuffer *ubo_light = nullptr;
+	owned<UniformBuffer> ubo_light;
 	int num_lights = 0;
 	mat4 shadow_proj;
 	int shadow_index = -1;

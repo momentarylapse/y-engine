@@ -32,7 +32,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 
 
 	shader = resource_manager->load_shader("vulkan/2d.shader");
-	pipeline = PipelineManager::get_gui(shader, parent->render_pass(), "3f,3f,2f");
+	pipeline = PipelineManager::get_gui(shader.get(), parent->render_pass(), "3f,3f,2f");
 
 
 	vb = new VertexBuffer("3f,3f,2f");
@@ -111,7 +111,7 @@ void GuiRendererVulkan::draw_gui(CommandBuffer *cb) {
 			}
 
 			cb->bind_descriptor_set(0, dset[index]);
-			cb->draw(vb);
+			cb->draw(vb.get());
 
 			if (p->shader)
 				cb->bind_pipeline(pipeline);

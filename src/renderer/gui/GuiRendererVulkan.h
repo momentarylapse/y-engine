@@ -19,11 +19,11 @@ public:
 
 	int ch_gui = -1;
 
-	Shader *shader;
+	shared<Shader> shader;
 	GraphicsPipeline* pipeline;
 	Array<DescriptorSet*> dset;
 	Array<UniformBuffer*> ubo;
-	VertexBuffer* vb;
+	owned<VertexBuffer> vb;
 	void prepare_gui(FrameBuffer *source);
 	void draw_gui(CommandBuffer *cb);
 };

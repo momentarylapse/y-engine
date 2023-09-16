@@ -25,8 +25,6 @@ MaterialManager::~MaterialManager() {
 }
 
 void MaterialManager::reset() {
-	for (auto *m: materials)
-		delete m;
 	materials.clear();
 
 	set_default(trivial_material);
@@ -79,7 +77,7 @@ void Material::add_uniform(const string &name, float *p, int size) {
 	uniforms.add({name, p, size});
 }
 
-Material* Material::copy() {
+xfer<Material> Material::copy() {
 	auto m = new Material(resource_manager);
 	m->name = name;
 	m->albedo = albedo;
@@ -128,7 +126,7 @@ color any2color(const Any &a) {
 }
 
 
-Material *MaterialManager::load(const Path &filename) {
+xfer<Material> MaterialManager::load(const Path &filename) {
 	// an empty name loads the default material
 	if (filename.is_empty())
 		return default_material->copy();
@@ -233,7 +231,7 @@ void ShaderCache::_prepare_shader(RenderPathType render_path_type, Material *mat
 Shader *ShaderCache::get_shader(RenderPathType render_path_type) {
 	int i = shader_index(render_path_type);
 	//_prepare_shader(render_path_type, v);
-	return shader[i];
+	return shader[i].get();
 }
 
 bool Material::is_transparent() const {

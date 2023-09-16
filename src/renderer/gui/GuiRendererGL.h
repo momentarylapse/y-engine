@@ -19,8 +19,8 @@ public:
 
 	void draw_gui(FrameBuffer *source);
 
-	Shader *shader;
-	VertexBuffer* vb;
+	shared<Shader> shader;
+	owned<VertexBuffer> vb;
 	int ch_gui = -1;
 };
 

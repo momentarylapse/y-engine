@@ -37,6 +37,7 @@ class Terrain extends Component
 	var num_x, num_z: int
 	var height: float[]
 	var vertex_shader_module: string
+	var material: owned![Material]
 	func extern get_height(p: vec3) -> float
 	func extern mut update(x1: int, x2: int, y1: int, y2: int, mask: int)
 	# ...

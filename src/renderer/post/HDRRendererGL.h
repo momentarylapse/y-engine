@@ -38,7 +38,7 @@ public:
 	shared<Shader> shader_out;
 	shared<Shader> shader_resolve_multisample;
 
-	VertexBuffer *vb_2d;
+	owned<VertexBuffer> vb_2d;
 
 	int ch_post_blur = -1, ch_out = -1;
 };

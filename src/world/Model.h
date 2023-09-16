@@ -68,7 +68,6 @@ public:
 	// normals
 	Array<vec3> normal;
 
-	// owned<>...
 	VertexBuffer *vertex_buffer;
 
 	// refill the vertex buffer etc...
@@ -113,7 +112,7 @@ public:
 	void _cdecl __init__();
 	void _cdecl __delete__() override;
 
-	Model *copy(Model *pre_allocated = NULL);
+	Model *copy(Model *pre_allocated = nullptr);
 	void reset_data();
 	void _cdecl make_editable();
 	//void Update();
@@ -135,11 +134,11 @@ public:
 	// drawing
 	//void update_vertex_buffer(int mat_no, int detail);
 
-	// visible skins (shared<>)
-	Mesh *mesh[MODEL_NUM_MESHES];
+	// visible skins
+	shared<Mesh> mesh[MODEL_NUM_MESHES];
 
-	// material (owned<>)
-	Array<Material*> material;
+	// material
+	owned_array<Material> material;
 	Array<int> num_uvs;
 	Array<ShaderCache> shader_cache;
 	Array<ShaderCache> shader_cache_shadow;

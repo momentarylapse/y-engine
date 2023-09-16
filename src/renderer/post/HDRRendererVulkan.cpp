@@ -125,7 +125,8 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, blur_depth});
 	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
 
-	out = RenderOutData(resource_manager->load_shader("forward/hdr.shader"), this, {into.fb_main->attachments[0].get(), fb_small2->attachments[0].get()});
+	shader_out = resource_manager->load_shader("forward/hdr.shader");
+	out = RenderOutData(shader_out.get(), this, {into.fb_main->attachments[0].get(), fb_small2->attachments[0].get()});
 
 
 
@@ -184,7 +185,7 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	cb->bind_pipeline(blur_pipeline);
 	cb->bind_descriptor_set(0, blur_dset[iaxis]);
 
-	cb->draw(vb_2d);
+	cb->draw(vb_2d.get());
 
 	cb->end_render_pass();
 

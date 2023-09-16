@@ -46,9 +46,9 @@ bool Model::AllowDeleteRecursive = true;
 
 
 SubMesh::SubMesh() {
-	vertex_buffer = nullptr;
 	force_update = true;
 	num_triangles = 0;
+	vertex_buffer = nullptr;
 }
 
 // make a copy of all the data
@@ -301,7 +301,7 @@ Model::~Model() {
 	ExternalModelCleanup(this);
 
 	// skin
-	for (int i=0;i<MODEL_NUM_MESHES;i++)
+	/*for (int i=0;i<MODEL_NUM_MESHES;i++)
 		if (mesh[i]) {
 			Mesh *s = mesh[i];
 			if (s->owner != this)
@@ -317,7 +317,7 @@ Model::~Model() {
 		}
 
 	for (Material* m: material)
-		delete m;
+		delete m;*/
 }
 
 void Model::__delete__() {

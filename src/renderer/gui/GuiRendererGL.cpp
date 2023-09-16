@@ -73,7 +73,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 			continue;
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
-			auto s = shader;
+			auto s = shader.get();
 			if (p->shader) {
 				s = p->shader.get();
 				apply_shader_data(s, p->shader_data);
@@ -90,7 +90,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 				nix::set_model_matrix(mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(1/r, 1, 0) * mat4::rotation_z(p->angle) * mat4::scale(p->eff_area.width() * r, p->eff_area.height(), 0));
 			}
 			vb->create_quad(rect::ID, p->source);
-			nix::draw_triangles(vb);
+			nix::draw_triangles(vb.get());
 		}
 	}
 	nix::set_z(true, true);

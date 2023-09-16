@@ -88,13 +88,13 @@ public:
 
 	Material(ResourceManager *resource_manager);
 	~Material();
-	Material *copy();
+	xfer<Material> copy();
 
 	bool is_transparent() const;
 };
 
 struct ShaderCache {
-	Shader *shader[2] = {nullptr, nullptr}; // * #(render paths)
+	shared<Shader> shader[2]; // * #(render paths)
 	void _prepare_shader(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module);
 	Shader *get_shader(RenderPathType render_path_type);
 };
@@ -109,13 +109,13 @@ public:
 
 	void set_default(Material *m);
 	void set_default_shader(Shader *s);
-	Material *load(const Path &filename);
+	xfer<Material> load(const Path &filename);
 
 private:
 	ResourceManager *resource_manager;
 	Material *default_material;
 	Material *trivial_material;
-	Array<Material*> materials; // "originals"
+	owned_array<Material> materials; // "originals"
 };
 
 

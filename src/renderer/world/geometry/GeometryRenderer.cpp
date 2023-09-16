@@ -23,6 +23,7 @@ GeometryRenderer::GeometryRenderer(RenderPathType _type, Renderer *parent) : Ren
 	ch_prepare_lights = PerformanceMonitor::create_channel("lights", channel);
 
 	using_view_space = true;
+	cam = nullptr;
 }
 
 bool GeometryRenderer::is_shadow_pass() const {

@@ -54,8 +54,9 @@ public:
 	bool forwarding_into_window() const override { return false; };
 
 	shared<Shader> shader_blur;
+	shared<Shader> shader_out;
 
-	VertexBuffer *vb_2d;
+	owned<VertexBuffer> vb_2d;
 
 	int ch_post_blur = -1, ch_out = -1;
 };

@@ -318,7 +318,7 @@ public:
 				sub->normal[i] = get_normal_by_index(f->read_word());
 
 			sub->force_update = true;
-			sub->vertex_buffer = NULL;
+			sub->vertex_buffer = nullptr;
 		}
 	}
 	void write(BinaryFormatter *f) override {}
@@ -621,7 +621,7 @@ public:
 
 }
 
-Model* fancy_copy(Model *orig) {
+xfer<Model> fancy_copy(Model *orig) {
 	Model *clone = new Model();
 	//clone->owner = new Entity3D(Entity::Type::ENTITY3D);
 	return orig->copy(clone);
@@ -633,7 +633,7 @@ ModelManager::ModelManager(ResourceManager *_resource_manager, MaterialManager *
 	material_manager = _material_manager;
 }
 
-Model* ModelManager::load(const Path &_filename) {
+xfer<Model> ModelManager::load(const Path &_filename) {
 	if (_filename == "")
 		return nullptr;
 	auto filename = engine.object_dir | _filename.with(".model");

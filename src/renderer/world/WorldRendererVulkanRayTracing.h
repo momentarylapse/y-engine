@@ -72,7 +72,7 @@ public:
 	shared<Shader> shader_out;
 	GraphicsPipeline* pipeline_out;
 	DescriptorSet *dset_out;
-	VertexBuffer *vb_2d;
+	owned<VertexBuffer> vb_2d;
 
 	Entity *dummy_cam_entity;
 	Camera *dummy_cam;

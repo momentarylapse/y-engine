@@ -33,11 +33,11 @@ ResourceManager::ResourceManager(Context *_ctx) {
 #endif
 }
 
-Material *ResourceManager::load_material(const Path &filename) {
+xfer<Material> ResourceManager::load_material(const Path &filename) {
 	return material_manager->load(filename);
 }
 
-Model *ResourceManager::load_model(const Path &filename) {
+xfer<Model> ResourceManager::load_model(const Path &filename) {
 	return model_manager->load(filename);
 }
 
@@ -60,7 +60,7 @@ Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 
 
 
-Shader *ResourceManager::__load_shader(const Path& path) {
+xfer<Shader> ResourceManager::__load_shader(const Path& path) {
 #ifdef USING_VULKAN
 	return Shader::load(path);
 #else
@@ -68,7 +68,7 @@ Shader *ResourceManager::__load_shader(const Path& path) {
 #endif
 }
 
-Shader *ResourceManager::__create_shader(const string& source) {
+xfer<Shader> ResourceManager::__create_shader(const string& source) {
 #ifdef USING_VULKAN
 	return Shader::create(source);
 #else
@@ -76,9 +76,10 @@ Shader *ResourceManager::__create_shader(const string& source) {
 #endif
 }
 
-Shader* ResourceManager::load_shader(const Path& filename) {
-	if (!filename)
-		return __load_shader("");
+shared<Shader> ResourceManager::load_shader(const Path& filename) {
+	//if (!filename)
+	//	TODO default shader?
+	//	return __load_shader("");
 
 	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
 	if (!fn) {
@@ -135,7 +136,7 @@ string ResourceManager::expand_geometry_shader_source(const string &source, cons
 	return source + format("\n<GeometryShader>\n#import geometry-%s\n</GeometryShader>", variant);
 }
 
-Shader* ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &vertex_module, const string &geometry_module) {
+shared<Shader> ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &vertex_module, const string &geometry_module) {
 	msg_write("load_surface_shader: " + str(_filename) + "  " + render_path + "  " + vertex_module + "  " + geometry_module);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
@@ -255,7 +256,7 @@ Shader *user_mesh_shader(ResourceManager *rm, UserMesh *m, RenderPathType type) 
 		const string &rpt = RENDER_PATH_NAME[(int)type];
 		m->shader_cache.shader[(int)type - 1] = rm->load_surface_shader(m->material->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
 	}
-	return m->shader_cache.shader[(int)type - 1];
+	return m->shader_cache.shader[(int)type - 1].get();
 }
 
 Shader *user_mesh_shadow_shader(ResourceManager *rm, UserMesh *m, Material *mat, RenderPathType type) {
@@ -264,6 +265,6 @@ Shader *user_mesh_shadow_shader(ResourceManager *rm, UserMesh *m, Material *mat,
 		const string &rpt = RENDER_PATH_NAME[(int)type];
 		m->shader_cache_shadow.shader[(int)type - 1] = rm->load_surface_shader(mat->shader_path, rpt, m->vertex_shader_module, m->geometry_shader_module);
 	}
-	return m->shader_cache_shadow.shader[(int)type - 1];
+	return m->shader_cache_shadow.shader[(int)type - 1].get();
 }
 

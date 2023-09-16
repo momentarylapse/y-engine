@@ -51,7 +51,7 @@ Context* api_init(GLFWwindow* window) {
 	}
 
 	device->create_query_pool(16384);
-	pool = new vulkan::DescriptorPool("buffer:4096,sampler:4096", 4096);
+	pool = new vulkan::DescriptorPool("buffer:4096,sampler:4096", 65536);
 
 	tex_white = new Texture();
 	tex_black = new Texture();

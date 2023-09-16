@@ -70,7 +70,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		auto shader_gen = resource_manager->load_shader("vulkan/gen.shader");
 		auto shader1 = resource_manager->load_shader("vulkan/group1.shader");
 		auto shader2 = resource_manager->load_shader("vulkan/group2.shader");
-		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer,buffer]]", {shader_gen, shader1, shader2}, 2);
+		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer,buffer]]", {shader_gen.get(), shader1.get(), shader2.get()}, 2);
 		rtx.pipeline->create_sbt();
 
 
@@ -79,7 +79,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
 		auto shader = resource_manager->load_shader("vulkan/compute.shader");
-		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader);
+		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader.get());
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
 		compute.dset->set_buffer(1, buffer_meshes);
@@ -197,8 +197,8 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 			for (auto *t: *terrains) {
 				auto o = t->owner;
-				make_indexed(t->vertex_buffer);
-				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, t->vertex_buffer));
+				make_indexed(t->vertex_buffer.get());
+				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, t->vertex_buffer.get()));
 				matrices.add(mat4::translation(o->pos).transpose());
 			}
 
@@ -259,7 +259,7 @@ void WorldRendererVulkanRayTracing::draw() {
     pco.x[3] = 1; // scale_x
     pco.x[4] = 1;
 	cb->push_constant(0, sizeof(mat4) * 3 + 5 * sizeof(float), &pco);
-	cb->draw(vb_2d);
+	cb->draw(vb_2d.get());
 }
 
 void WorldRendererVulkanRayTracing::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) {

@@ -152,7 +152,7 @@ void GeometryRendererGL::draw_particles() {
 			}
 		vb_fx->update(v);
 		nix::set_model_matrix(mat4::ID);
-		nix::draw_triangles(vb_fx);
+		nix::draw_triangles(vb_fx.get());
 	}
 
 
@@ -172,7 +172,7 @@ void GeometryRendererGL::draw_particles() {
 				v.add({p.pos, p.radius*2, p.col});
 		vb_fx_points->update(v);
 		nix::set_model_matrix(mat4::ID);
-		nix::draw_points(vb_fx_points);
+		nix::draw_points(vb_fx_points.get());
 	}
 
 	// beams
@@ -212,7 +212,7 @@ void GeometryRendererGL::draw_particles() {
 		}
 
 		vb_fx->update(v);
-		nix::draw_triangles(vb_fx);
+		nix::draw_triangles(vb_fx.get());
 	}
 
 
@@ -247,15 +247,15 @@ void GeometryRendererGL::draw_terrains() {
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
 		if (is_shadow_pass()) {
-			set_material(t->shader_cache_shadow, material_shadow, type, t->vertex_shader_module, "");
+			set_material(t->shader_cache_shadow, material_shadow.get(), type, t->vertex_shader_module, "");
 		} else {
-			set_material(t->shader_cache, t->material, type, t->vertex_shader_module, "");
+			set_material(t->shader_cache, t->material.get(), type, t->vertex_shader_module, "");
 			auto s = t->shader_cache.get_shader(type);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
 		t->prepare_draw(cam_main->owner->pos);
-		nix::draw_triangles(t->vertex_buffer);
+		nix::draw_triangles(t->vertex_buffer.get());
 	}
 }
 
@@ -266,7 +266,7 @@ void GeometryRendererGL::draw_objects_instanced() {
 		Model *m = s.model;
 		nix::set_model_matrix(s.instance->matrices[0]);//m->_matrix);
 		if (is_shadow_pass()) {
-			set_material(m->shader_cache_shadow[s.mat_index], material_shadow, type, "instanced", "");
+			set_material(m->shader_cache_shadow[s.mat_index], material_shadow.get(), type, "instanced", "");
 		} else {
 			set_material(m->shader_cache[s.mat_index], s.material, type, "instanced", "");
 		}
@@ -287,20 +287,14 @@ void GeometryRendererGL::draw_objects_opaque() {
 
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
+		if (is_shadow_pass()) {
+			set_material(m->shader_cache_shadow[s.mat_index], material_shadow.get(), type, m->_template->vertex_shader_module, "");
+		} else {
+			set_material(m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "");
+		}
 		if (ani) {
-			if (is_shadow_pass()) {
-				set_material(m->shader_cache_shadow[s.mat_index], material_shadow, type, "animated", "");
-			} else {
-				set_material(m->shader_cache[s.mat_index], s.material, type, "animated", "");
-			}
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(7, ani->buf);
-		} else {
-			if (is_shadow_pass()) {
-				set_material(m->shader_cache_shadow[s.mat_index], material_shadow, type, m->_template->vertex_shader_module, "");
-			} else {
-				set_material(m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "");
-			}
 		}
 		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
 	}
@@ -333,21 +327,21 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 			continue;
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
-		if (!is_shadow_pass()) {
-			auto shader = user_mesh_shader(resource_manager, m, type);
-			set_material_x(m->material, shader);
+		if (is_shadow_pass()) {
+			auto shader = user_mesh_shadow_shader(resource_manager, m, material_shadow.get(), type);
+			set_material_x(material_shadow.get(), shader);
 		} else {
-			auto shader = user_mesh_shadow_shader(resource_manager, m, material_shadow, type);
-			set_material_x(material_shadow, shader);
+			auto shader = user_mesh_shader(resource_manager, m, type);
+			set_material_x(m->material.get(), shader);
 		}
 		if (m->topology == PrimitiveTopology::TRIANGLES)
-			nix::draw_triangles(m->vertex_buffer);
+			nix::draw_triangles(m->vertex_buffer.get());
 		else if (m->topology == PrimitiveTopology::POINTS)
-			nix::draw_points(m->vertex_buffer);
+			nix::draw_points(m->vertex_buffer.get());
 		else if (m->topology == PrimitiveTopology::LINES)
-			nix::draw_lines(m->vertex_buffer, false);
+			nix::draw_lines(m->vertex_buffer.get(), false);
 		else if (m->topology == PrimitiveTopology::LINESTRIP)
-			nix::draw_lines(m->vertex_buffer, true);
+			nix::draw_lines(m->vertex_buffer.get(), true);
 	}
 }
 
@@ -368,7 +362,7 @@ void GeometryRendererGL::draw_opaque() {
 	if (!is_shadow_pass()) {
 		nix::set_z(true, true);
 		nix::set_view_matrix(cam->view_matrix());
-		nix::bind_buffer(1, ubo_light);
+		nix::bind_buffer(1, ubo_light.get());
 		nix::bind_texture(3, fb_shadow1->depth_buffer.get());
 		nix::bind_texture(4, fb_shadow2->depth_buffer.get());
 		nix::bind_texture(5, cube_map.get());
@@ -385,7 +379,7 @@ void GeometryRendererGL::draw_transparent() {
 	nix::set_view_matrix(cam->view_matrix());
 	//nix::set_z(true, true);
 
-	nix::bind_buffer(1, ubo_light);
+	nix::bind_buffer(1, ubo_light.get());
 	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
 	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
 	nix::bind_texture(5, cube_map.get());

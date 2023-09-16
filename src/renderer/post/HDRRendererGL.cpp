@@ -114,7 +114,7 @@ void HDRRendererGL::prepare() {
 
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		render_source_into_framebuffer(this, fb_main_ms.get(), vb_2d);
+		render_source_into_framebuffer(this, fb_main_ms.get(), vb_2d.get());
 
 		// resolve
 		if (true) {
@@ -127,7 +127,7 @@ void HDRRendererGL::prepare() {
 		}
 
 	} else {
-		render_source_into_framebuffer(this, fb_main.get(), vb_2d);
+		render_source_into_framebuffer(this, fb_main.get(), vb_2d.get());
 	}
 
 	PerformanceMonitor::begin(ch_post_blur);
@@ -145,7 +145,7 @@ void HDRRendererGL::draw() {
 	data.map_set("scale_y", resolution_scale_y);
 
 
-	render_out_through_shader(this, {fb_main->color_attachments[0].get(), fb_small2->color_attachments[0].get()}, shader_out.get(), data, vb_2d);
+	render_out_through_shader(this, {fb_main->color_attachments[0].get(), fb_small2->color_attachments[0].get()}, shader_out.get(), data, vb_2d.get());
 	//render_out(fb_main.get(), fb_small2->color_attachments[0].get());
 }
 
@@ -169,7 +169,7 @@ void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, 
 	nix::set_shader(shader);
 
 	nix::set_textures(source);
-	nix::draw_triangles(vb_2d);
+	nix::draw_triangles(vb_2d.get());
 	//nix::set_scissor(rect::EMPTY);
 }
 
@@ -192,7 +192,7 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {
 
 	nix::set_z(false, false);
 
-	nix::draw_triangles(vb_2d);
+	nix::draw_triangles(vb_2d.get());
 
 	nix::set_cull(nix::CullMode::DEFAULT);
 	break_point();

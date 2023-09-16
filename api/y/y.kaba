@@ -37,9 +37,9 @@ class Camera extends Component
 
 
 class UserMesh extends Component
-	vertex_buffer: owned![VertexBuffer]
+	vertex_buffer: owned[VertexBuffer]
 	topology: PrimitiveTopology
-	material: Material*
+	material: owned[Material]
 	vertex_shader_module: string
 	geometry_shader_module: string
 
