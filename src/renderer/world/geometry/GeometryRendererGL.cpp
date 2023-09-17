@@ -260,62 +260,77 @@ void GeometryRendererGL::draw_terrains() {
 }
 
 void GeometryRendererGL::draw_objects_instanced() {
-	for (auto &s: world.sorted_multi) {
-		if (!s.material->cast_shadow and is_shadow_pass())
-			continue;
-		Model *m = s.model;
-		nix::set_model_matrix(s.instance->matrices[0]);//m->_matrix);
-		if (is_shadow_pass()) {
-			set_material(m->shader_cache_shadow[s.mat_index], material_shadow.get(), type, "instanced", "");
-		} else {
-			set_material(m->shader_cache[s.mat_index], s.material, type, "instanced", "");
+	auto list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: *list) {
+		auto m = mi->model;
+		for (int i=0; i<m->material.num; i++) {
+			if (!m->material[i]->cast_shadow and is_shadow_pass())
+				continue;
+			nix::set_model_matrix(mi->matrices[0]);//m->_matrix);
+			if (is_shadow_pass()) {
+				set_material(m->shader_cache_shadow[i], material_shadow.get(), type, "instanced", "");
+			} else {
+				set_material(m->shader_cache[i], m->material[i], type, "instanced", "");
+			}
+			nix::bind_buffer(5, mi->ubo_matrices);
+			//msg_write(s.matrices.num);
+			nix::draw_instanced_triangles(m->mesh[0]->sub[i].vertex_buffer, mi->matrices.num);
 		}
-		nix::bind_buffer(5, s.instance->ubo_matrices);
-		//msg_write(s.matrices.num);
-		nix::draw_instanced_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer, s.instance->matrices.num);
-		//s.material->shader = ss;
 	}
 }
 
 void GeometryRendererGL::draw_objects_opaque() {
-	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and is_shadow_pass())
-			continue;
-		Model *m = s.model;
+	auto list = ComponentManager::get_list_family<Model>();
+	for (auto *m: *list) {
 		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
 
-		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-
-		if (is_shadow_pass()) {
-			set_material(m->shader_cache_shadow[s.mat_index], material_shadow.get(), type, m->_template->vertex_shader_module, "");
-		} else {
-			set_material(m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "");
-		}
-		if (ani) {
+		if (auto ani = m->owner->get_component<Animator>()) {
 			ani->buf->update_array(ani->dmatrix);
 			nix::bind_buffer(7, ani->buf);
 		}
-		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
+
+		for (int i=0; i<m->material.num; i++) {
+			if (m->material[i]->is_transparent())
+				continue;
+			if (!m->material[i]->cast_shadow and is_shadow_pass())
+				continue;
+
+			if (is_shadow_pass()) {
+				set_material(m->shader_cache_shadow[i], material_shadow.get(), type, m->_template->vertex_shader_module, "");
+			} else {
+				set_material(m->shader_cache[i], weak(m->material)[i], type, m->_template->vertex_shader_module, "");
+			}
+			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
+		}
 	}
 }
 
 void GeometryRendererGL::draw_objects_transparent() {
-	nix::set_z(false, true);
 	if (is_shadow_pass())
 		return;
-	for (auto &s: world.sorted_trans) {
-		Model *m = s.model;
+	nix::set_z(false, true);
+	nix::set_cull(nix::CullMode::NONE);
+	auto list = ComponentManager::get_list_family<Model>();
+	for (auto *m: *list) {
 		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
-		nix::set_cull(nix::CullMode::NONE);
-		//auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
-		set_material(m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "");
-		nix::draw_triangles(m->mesh[0]->sub[s.mat_index].vertex_buffer);
-		nix::set_cull(nix::CullMode::DEFAULT);
+
+		/*if (auto ani = m->owner->get_component<Animator>()) {
+			ani->buf->update_array(ani->dmatrix);
+			nix::bind_buffer(7, ani->buf);
+		}*/
+
+		for (int i=0; i<m->material.num; i++) {
+			if (!m->material[i]->is_transparent())
+				continue;
+			set_material(m->shader_cache[i], weak(m->material)[i], type, m->_template->vertex_shader_module, "");
+			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
+		}
 	}
 	nix::disable_alpha();
 	nix::set_z(true, true);
+	nix::set_cull(nix::CullMode::DEFAULT);
 }
 
 void GeometryRendererGL::draw_user_meshes(bool transparent) {
@@ -348,10 +363,11 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 
 void GeometryRendererGL::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
-	for (auto &s: world.sorted_multi) {
-		if (!s.instance->ubo_matrices)
-			s.instance->ubo_matrices = new nix::UniformBuffer();
-		s.instance->ubo_matrices->update_array(s.instance->matrices);
+	auto list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: *list) {
+		if (!mi->ubo_matrices)
+			mi->ubo_matrices = new nix::UniformBuffer();
+		mi->ubo_matrices->update_array(mi->matrices);
 	}
 	PerformanceMonitor::end(ch_pre);
 }

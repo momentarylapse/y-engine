@@ -124,23 +124,26 @@ void WorldRendererVulkanRayTracing::prepare() {
 		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
 		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
+	auto models = ComponentManager::get_list_family<Model>();
 	auto terrains = ComponentManager::get_list_family<Terrain>();
 
 
 	Array<MeshDescription> meshes;
 
-	for (auto &s: world.sorted_opaque) {
-		Model *m = s.model;
+	for (auto m: *models) {
 		m->update_matrix();
+		for (int i=0; i<m->material.num; i++) {
+			auto material = m->material[i];
 
-		MeshDescription md;
-		md.matrix = m->_matrix;
-		md.num_triangles = m->mesh[0]->sub[s.mat_index].triangle_index.num / 3;
-		md.albedo = s.material->albedo.with_alpha(s.material->roughness);
-		md.emission = s.material->emission.with_alpha(s.material->metal);
-		md.address_vertices = m->mesh[0]->sub[s.mat_index].vertex_buffer->vertex_buffer.get_device_address();
-		//md.address_indices = m->mesh[0]->sub[s.mat_index].vertex_buffer->index_buffer.get_device_address();
-		meshes.add(md);
+			MeshDescription md;
+			md.matrix = m->_matrix;
+			md.num_triangles = m->mesh[0]->sub[i].triangle_index.num / 3;
+			md.albedo = material->albedo.with_alpha(material->roughness);
+			md.emission = material->emission.with_alpha(material->metal);
+			md.address_vertices = m->mesh[0]->sub[i].vertex_buffer->vertex_buffer.get_device_address();
+			//md.address_indices = m->mesh[0]->sub[i].vertex_buffer->index_buffer.get_device_address();
+			meshes.add(md);
+		}
 	}
 	for (auto *t: *terrains) {
 		auto o = t->owner;
@@ -164,10 +167,10 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 		if (rtx.tlas) {
 			// update
-			for (auto &s: world.sorted_opaque) {
-				Model *m = s.model;
+			for (auto m: *models) {
 				m->update_matrix();
-				matrices.add(m->owner->get_matrix().transpose());
+				for (int i=0; i<m->material.num; i++)
+					matrices.add(m->owner->get_matrix().transpose());
 			}
 			for (auto *t: *terrains) {
 				auto o = t->owner;
@@ -186,13 +189,15 @@ void WorldRendererVulkanRayTracing::prepare() {
 				}
 			};
 
-			for (auto &s: world.sorted_opaque) {
-				Model *m = s.model;
+			for (auto m: *models) {
 				m->update_matrix();
-				auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-				make_indexed(vb);
-				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
-				matrices.add(m->owner->get_matrix().transpose());
+				for (int i=0; i<m->material.num; i++) {
+					m->update_matrix();
+					auto vb = m->mesh[0]->sub[i].vertex_buffer;
+					make_indexed(vb);
+					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
+					matrices.add(m->owner->get_matrix().transpose());
+				}
 			}
 
 			for (auto *t: *terrains) {

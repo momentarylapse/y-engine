@@ -402,36 +402,43 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 	int index = 0;
 	ubo.m = mat4::ID;
 
-	for (auto &s: world.sorted_multi) {
-		if (!s.material->cast_shadow and is_shadow_pass())
-			continue;
-		Model *m = s.model;
+	auto list = ComponentManager::get_list_family<MultiInstance>();
 
-		if (index >= rda.num) {
-			m->shader_cache[s.mat_index]._prepare_shader(type, s.material, "instanced", "");
-			rda.add({new UniformBuffer(sizeof(UBO)),
-				pool->create_set(m->shader_cache[s.mat_index].get_shader(type))});
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
-			rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, s.instance->ubo_matrices);
+	for (auto mi: *list) {
+		auto m = mi->model;
+		for (int i=0; i<m->material.num; i++) {
+			auto material = m->material[i];
+			if (material->is_transparent())
+				continue;
+			if (!material->cast_shadow and is_shadow_pass())
+				continue;
+
+			if (index >= rda.num) {
+				m->shader_cache[i]._prepare_shader(type, material, "instanced", "");
+				rda.add({new UniformBuffer(sizeof(UBO)),
+					pool->create_set(m->shader_cache[i].get_shader(type))});
+				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+				rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, mi->ubo_matrices);
+			}
+
+			m->update_matrix();
+			//ubo.m = m->_matrix;
+			ubo.albedo = material->albedo;
+			ubo.emission = material->emission;
+			ubo.metal = material->metal;
+			ubo.roughness = material->roughness;
+			rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+
+			auto vb = m->mesh[0]->sub[i].vertex_buffer;
+			if (is_shadow_pass())
+				set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[i], material_shadow.get(), type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
+			else
+				set_material(cb, rp, rda[index].dset, m->shader_cache[i], material, type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
+
+			cb->draw_instanced(vb, min(mi->matrices.num, MAX_INSTANCES));
+			index ++;
 		}
-
-		m->update_matrix();
-		//ubo.m = m->_matrix;
-		ubo.albedo = s.material->albedo;
-		ubo.emission = s.material->emission;
-		ubo.metal = s.material->metal;
-		ubo.roughness = s.material->roughness;
-		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
-
-		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		if (is_shadow_pass())
-			set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[s.mat_index], material_shadow.get(), type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
-		else
-			set_material(cb, rp, rda[index].dset, m->shader_cache[s.mat_index], s.material, type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
-
-		cb->draw_instanced(vb, min(s.instance->matrices.num, MAX_INSTANCES));
-		index ++;
 	}
 }
 
@@ -441,39 +448,44 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 
 	ubo.m = mat4::ID;
 
-	for (auto &s: world.sorted_opaque) {
-		if (!s.material->cast_shadow and is_shadow_pass())
-			continue;
-		Model *m = s.model;
+	auto list = ComponentManager::get_list_family<Model>();
 
+	for (auto m: *list) {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+		for (int i=0; i<m->material.num; i++) {
+			auto material = m->material[i];
+			if (material->is_transparent())
+				continue;
+			if (!material->cast_shadow and is_shadow_pass())
+				continue;
 
-		if (index >= rda.num) {
-			m->shader_cache[s.mat_index]._prepare_shader(type, s.material, m->_template->vertex_shader_module, "");
-			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
-				pool->create_set(m->shader_cache[s.mat_index].get_shader(type))});
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			if (index >= rda.num) {
+				m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
+				rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
+					pool->create_set(m->shader_cache[i].get_shader(type))});
+				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			}
+
+			m->update_matrix();
+			ubo.m = m->_matrix;
+			ubo.albedo = material->albedo;
+			ubo.emission = material->emission;
+			ubo.metal = material->metal;
+			ubo.roughness = material->roughness;
+			rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+			if (ani)
+				rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
+
+			auto vb = m->mesh[0]->sub[i].vertex_buffer;
+			if (is_shadow_pass())
+				set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[i], material_shadow.get(), type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+			else
+				set_material(cb, rp, rda[index].dset, m->shader_cache[i], material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+
+			cb->draw(vb);
+			index ++;
 		}
-
-		m->update_matrix();
-		ubo.m = m->_matrix;
-		ubo.albedo = s.material->albedo;
-		ubo.emission = s.material->emission;
-		ubo.metal = s.material->metal;
-		ubo.roughness = s.material->roughness;
-		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
-		if (ani)
-			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
-
-		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		if (is_shadow_pass())
-			set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[s.mat_index], material_shadow.get(), type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
-		else
-			set_material(cb, rp, rda[index].dset, m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
-
-		cb->draw(vb);
-		index ++;
 	}
 }
 
@@ -483,36 +495,39 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 
 	ubo.m = mat4::ID;
 
-	for (auto &s: world.sorted_trans) {
-		//if (!s.material->cast_shadow)
-		//	continue;
-		Model *m = s.model;
+	auto list = ComponentManager::get_list_family<Model>();
 
+	for (auto m: *list) {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+		for (int i=0; i<m->material.num; i++) {
+			auto material = m->material[i];
+			if (!material->is_transparent())
+				continue;
 
-		if (index >= rda.num) {
-			m->shader_cache[s.mat_index]._prepare_shader(type, s.material, m->_template->vertex_shader_module, "");
-			rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
-				pool->create_set(m->shader_cache[s.mat_index].get_shader(type))});
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			if (index >= rda.num) {
+				m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
+				rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
+					pool->create_set(m->shader_cache[i].get_shader(type))});
+				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
+				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			}
+
+			m->update_matrix();
+			ubo.m = m->_matrix;
+			ubo.albedo = material->albedo;
+			ubo.emission = material->emission;
+			ubo.metal = material->metal;
+			ubo.roughness = material->roughness;
+			rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+			if (ani)
+				rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
+
+			auto vb = m->mesh[0]->sub[i].vertex_buffer;
+			set_material(cb, rp, rda[index].dset, m->shader_cache[i], material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+
+			cb->draw(vb);
+			index ++;
 		}
-
-		m->update_matrix();
-		ubo.m = m->_matrix;
-		ubo.albedo = s.material->albedo;
-		ubo.emission = s.material->emission;
-		ubo.metal = s.material->metal;
-		ubo.roughness = s.material->roughness;
-		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
-		if (ani)
-			rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
-
-		auto vb = m->mesh[0]->sub[s.mat_index].vertex_buffer;
-		set_material(cb, rp, rda[index].dset, m->shader_cache[s.mat_index], s.material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
-
-		cb->draw(vb);
-		index ++;
 	}
 }
 
@@ -568,10 +583,11 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 
 void GeometryRendererVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
-	for (auto &s: world.sorted_multi) {
-		if (!s.instance->ubo_matrices)
-			s.instance->ubo_matrices = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
-		s.instance->ubo_matrices->update_part(&s.instance->matrices[0], 0, min(s.instance->matrices.num, MAX_INSTANCES) * sizeof(mat4));
+	auto list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: *list) {
+		if (!mi->ubo_matrices)
+			mi->ubo_matrices = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
+		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, MAX_INSTANCES) * sizeof(mat4));
 	}
 	PerformanceMonitor::end(ch_pre);
 }
