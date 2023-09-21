@@ -143,8 +143,16 @@ void texture_delete(Texture *t) {
 	t->~Texture();
 }
 
-void texture_update(Texture *t, const Image &im) {
+void texture_write(Texture *t, const Image &im) {
 	t->write(im);
+}
+
+void texture_write_float(Texture *t, const DynamicArray& data) {
+#ifdef USING_VULKAN
+	msg_error("unimplemented:  Texture.write_float()");
+#else
+	t->write_float(data);
+#endif
 }
 
 void cubemap_init(CubeMap *t, int size, const string &format) {
@@ -752,7 +760,8 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Texture.height", &Texture::height);
 	ext->link_class_func("Texture.__init__", &texture_init);
 	ext->link_class_func("Texture.__delete__", &texture_delete);
-	ext->link_class_func("Texture.update", &texture_update);
+	ext->link_class_func("Texture.write", &texture_write);
+	ext->link_class_func("Texture.write_float", &texture_write_float);
 
 	ext->link_class_func("CubeMap.__init__", &cubemap_init);
 

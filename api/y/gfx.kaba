@@ -36,7 +36,8 @@ class Texture as shared
 	var width, height: int
 	func extern __init__(w: int, h: int, format: string = "rgba:i8")
 	func extern __delete__()
-	func extern mut update(im: Image)
+	func extern mut write(im: Image)
+	func extern mut write_float(data: @DynamicArray)
 
 class CubeMap extends Texture
 	func extern __init__(size: int, format: string)
