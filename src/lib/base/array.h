@@ -5,7 +5,7 @@
 #include <string.h>
 #include <initializer_list>
 #include <stdlib.h>
-#include <type_traits>
+//#include <type_traits>
 #include <utility>
 //#include <functional>
 //#include <ciso646>
