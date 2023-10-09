@@ -664,6 +664,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_size("EngineData", sizeof(EngineData));
 	ext->declare_class_element("EngineData.app_name", &EngineData::app_name);
 	ext->declare_class_element("EngineData.version", &EngineData::version);
+	ext->declare_class_element("EngineData.context", &EngineData::context);
 	ext->declare_class_element("EngineData.physics_enabled", &EngineData::physics_enabled);
 	ext->declare_class_element("EngineData.collisions_enabled", &EngineData::collisions_enabled);
 	ext->declare_class_element("EngineData.elapsed", &EngineData::elapsed);
