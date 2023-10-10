@@ -335,7 +335,7 @@ public:
 		while (!glfwWindowShouldClose(window)) {
 			PerformanceMonitor::next_frame();
 			engine.elapsed_rt = PerformanceMonitor::frame_dt;
-			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 0.1f);
+			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
 			input::iterate();
 			Scheduler::handle_input();

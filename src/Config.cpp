@@ -14,6 +14,13 @@ Config config;
 Config::Config() {
 }
 
+Array<float> parse_range(const string& a) {
+	auto xx = a.explode(":");
+	if (xx.num >= 2)
+		return {xx[0]._float(), xx[1]._float()};
+	return {xx[0]._float(), xx[0]._float()};
+}
+
 void Config::load(const Array<string> &arg) {
 	// fixed config
 	Configuration::load("game.ini");
@@ -61,15 +68,21 @@ void Config::load(const Array<string> &arg) {
 	p.option("--msaa", "use multi sampling anti aliasing", [this] {
 		set_str("renderer.antialiasing", "MSAA");
 	});
-	p.option("--scale", "SCALE", "use fixed resolutions scale", [this] (const string& a) {
-		set_float("renderer.resolution-scale-min", a._float());
-		set_float("renderer.resolution-scale-max", a._float());
+	p.option("--scale", "RANGE", "use resolutions scale MIN[:MAX]", [this] (const string& a) {
+		auto r = parse_range(a);
+		set_float("renderer.resolution-scale-min", r[0]);
+		set_float("renderer.resolution-scale-max", r[1]);
 	});
 	p.option("--size", "SIZE", "set resolution WxH", [this] (const string& a) {
 		auto xx = a.explode("x");
 		set_int("screen.width", xx[0]._int());
 		set_int("screen.height", xx[1]._int());
 		set_str("screen.mode", "windowed");
+	});
+	p.option("--fps", "RANGE", "limit framerate in MIN[:MAX]", [this] (const string& a) {
+		auto r = parse_range(a);
+		set_float("renderer.min-framerate", r[0]);
+		set_float("renderer.target-framerate", r[1]);
 	});
 	p.option("--script", "SCRIPT", "execute additional script", [this] (const string& a) {
 		additional_scripts.add(a);
@@ -116,6 +129,7 @@ void Config::load(const Array<string> &arg) {
 	resolution_scale_min = get_float("renderer.resolution-scale-min", 0.5f);
 	resolution_scale_max = get_float("renderer.resolution-scale-max", 1.0f);
 	target_framerate = get_float("renderer.target-framerate", 60.0f);
+	min_framerate = get_float("renderer.min-framerate", 10.0f);
 
 	ambient_occlusion_radius = get_float("renderer.ssao.radius", 10);
 	if (!get_bool("renderer.ssao.enabled", true))
