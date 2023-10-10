@@ -523,6 +523,9 @@
     <ClCompile Include="src\renderer\post\PostProcessorVulkan.cpp">
       <Filter>src\renderer\post</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\regions\RegionRendererGL.cpp">
+      <Filter>src\renderer\regions</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
@@ -1152,6 +1155,9 @@
     <ClInclude Include="src\renderer\post\PostProcessorVulkan.h">
       <Filter>src\renderer\post</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\regions\RegionRendererGL.h">
+      <Filter>src\renderer\regions</Filter>
+    </ClInclude>
     <ClInclude Include="src\renderer\target\TargetRenderer.h">
       <Filter>src\renderer\target</Filter>
     </ClInclude>
@@ -1375,6 +1381,9 @@
     </Filter>
     <Filter Include="src\renderer\post">
       <UniqueIdentifier>{83B3818A-1816-CB3C-65E2-E27DB0A569DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\renderer\regions">
+      <UniqueIdentifier>{B7F8BEFA-4D89-1A43-4387-EBA197C8F74B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\renderer\target">
       <UniqueIdentifier>{1D768818-A3B8-48CD-8B64-75ECD466B30D}</UniqueIdentifier>

@@ -61,7 +61,9 @@
 	#include "renderer/gui/GuiRendererGL.h"
 	#include "renderer/post/HDRRendererGL.h"
 	#include "renderer/post/PostProcessorGL.h"
+	#include "renderer/regions/RegionRendererGL.h"
 	#include "renderer/target/WindowRendererGL.h"
+using RegionRenderer = RegionRendererGL;
 #endif
 
 #include "Config.h"
@@ -118,6 +120,7 @@ public:
 
 	WorldRenderer *world_renderer = nullptr;
 	Renderer *gui_renderer = nullptr;
+	RegionRenderer *region_renderer = nullptr;
 	PostProcessorStage *hdr_renderer = nullptr;
 	PostProcessor *post_processor = nullptr;
 	TargetRenderer *renderer = nullptr;
@@ -160,6 +163,14 @@ public:
 #endif
 	}
 
+	RegionRenderer *create_region_renderer(Renderer *parent) {
+#ifdef USING_VULKAN
+		return new RegionRendererVulkan(parent);
+#else
+		return new RegionRendererGL(parent);
+#endif
+	}
+
 	PostProcessorStage *create_hdr_renderer(PostProcessor *parent) {
 #ifdef USING_VULKAN
 		return new HDRRendererVulkan(parent);
@@ -194,10 +205,11 @@ public:
 		try {
 			engine.window_renderer = renderer = create_window_renderer();
 			engine.gui_renderer = gui_renderer = create_gui_renderer(renderer);
+			engine.region_renderer = region_renderer = create_region_renderer(gui_renderer);
 			if (config.get_str("renderer.path", "forward") == "direct") {
-				engine.world_renderer = world_renderer = create_world_renderer(gui_renderer);
+				engine.world_renderer = world_renderer = create_world_renderer(region_renderer->add_region(rect::ID));
 			} else {
-				engine.post_processor = post_processor = create_post_processor(gui_renderer);
+				engine.post_processor = post_processor = create_post_processor(region_renderer->add_region(rect::ID));
 				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(post_processor);
 				engine.world_renderer = world_renderer = create_world_renderer(hdr_renderer);
 				//post_processor->set_hdr(hdr_renderer);

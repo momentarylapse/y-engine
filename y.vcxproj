@@ -290,6 +290,7 @@
     <ClCompile Include="src\renderer\post\PostProcessor.cpp" />
     <ClCompile Include="src\renderer\post\PostProcessorGL.cpp" />
     <ClCompile Include="src\renderer\post\PostProcessorVulkan.cpp" />
+    <ClCompile Include="src\renderer\regions\RegionRendererGL.cpp" />
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererGL.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp" />
@@ -501,6 +502,7 @@
     <ClInclude Include="src\renderer\post\PostProcessor.h" />
     <ClInclude Include="src\renderer\post\PostProcessorGL.h" />
     <ClInclude Include="src\renderer\post\PostProcessorVulkan.h" />
+    <ClInclude Include="src\renderer\regions\RegionRendererGL.h" />
     <ClInclude Include="src\renderer\target\TargetRenderer.h" />
     <ClInclude Include="src\renderer\target\WindowRendererGL.h" />
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h" />

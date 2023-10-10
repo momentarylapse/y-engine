@@ -79,6 +79,7 @@ public:
 
 	TargetRenderer *window_renderer;
 	Renderer *gui_renderer;
+	Renderer *region_renderer;
 	Renderer *hdr_renderer;
 	PostProcessor *post_processor;
 	WorldRenderer *world_renderer;
