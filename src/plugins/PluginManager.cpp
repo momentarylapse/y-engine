@@ -185,6 +185,14 @@ void shader_set_floats(Shader *s, const string &name, float *f, int num) {
 
 #pragma GCC pop_options
 
+void screenshot(Image& im) {
+#ifdef USING_VULKAN
+	msg_error("unimplemented:  screenshot()");
+#else
+	engine.context->default_framebuffer->read(im);
+#endif
+}
+
 
 void global_exit(EngineData& engine) {
 	msg_error("exit by script...");
@@ -785,6 +793,7 @@ void PluginManager::export_kaba() {
 	ext->link("create_shader", (void*)&__create_shader);
 	ext->link("load_texture", (void*)&__load_texture);
 	ext->link("load_material", (void*)&__load_material);
+	ext->link("screenshot", (void*)&screenshot);
 }
 
 template<class C>

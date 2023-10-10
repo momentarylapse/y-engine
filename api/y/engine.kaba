@@ -1,5 +1,6 @@
 use os
 use y.gfx
+use image
 
 class EngineData
 	var context: void&
@@ -77,3 +78,5 @@ class PerformanceMonitor
 #var extern perf_mon: PerformanceMonitor*
 
 var extern engine: EngineData
+
+func extern screenshot(out im: Image)
