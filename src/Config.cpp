@@ -37,6 +37,9 @@ void Config::load(const Array<string> &arg) {
 	p.option("-D/--debug", "enable debug mode (level 2)", [this] {
 		set_int("debug.level", 2);
 	});
+	p.option("-D0/--no-debug", "disable debug mode (level 0)", [this] {
+		set_int("debug.level", 0);
+	});
 	p.option("--game-dir", "DIR", "set game directory", [this] (const string& a) {
 		game_dir = a;
 	});

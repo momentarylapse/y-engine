@@ -407,6 +407,7 @@ public:
 		device->wait_idle();
 #endif
 		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
+		fps_display->visible = (config.debug_level >= 1);
 	}
 
 	static Array<float> render_times;
