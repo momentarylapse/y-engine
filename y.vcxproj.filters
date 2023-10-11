@@ -529,6 +529,9 @@
     <ClCompile Include="src\renderer\regions\RegionRendererGL.cpp">
       <Filter>src\renderer\regions</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\regions\RegionRendererVulkan.cpp">
+      <Filter>src\renderer\regions</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
@@ -1162,6 +1165,9 @@
       <Filter>src\renderer\post</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\regions\RegionRendererGL.h">
+      <Filter>src\renderer\regions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\regions\RegionRendererVulkan.h">
       <Filter>src\renderer\regions</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\target\TargetRenderer.h">

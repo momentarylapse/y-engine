@@ -44,7 +44,7 @@ const int CUBE_SIZE = 128;
 
 
 
-WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
+WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, Camera *cam, RenderPathType _type) : WorldRenderer(name, parent, cam) {
 	type = _type;
 
 	vb_2d = nullptr;

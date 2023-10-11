@@ -42,6 +42,7 @@
 #include "../renderer/world/WorldRendererVulkan.h"
 #include "../renderer/world/WorldRendererVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
+#include "../renderer/regions/RegionRendererVulkan.h"
 #include "../renderer/post/HDRRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
@@ -712,6 +713,7 @@ void PluginManager::export_kaba() {
 //	using WR = WindowRendererVulkan;
 	using HR = HDRRendererVulkan;
 //	using GR = GuiRendererVulkan;
+	using RR = RegionRendererVulkan;
 	using RP = WorldRendererVulkan;
 	using RPF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;

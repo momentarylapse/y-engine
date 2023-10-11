@@ -7,6 +7,7 @@
 
 #include "RendererFactory.h"
 #include "../base.h"
+#include <graphics-impl.h>
 #include "../world/WorldRenderer.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkan.h"
@@ -15,7 +16,9 @@
 	#include "../gui/GuiRendererVulkan.h"
 	#include "../post/HDRRendererVulkan.h"
 	#include "../post/PostProcessorVulkan.h"
+	#include "../regions/RegionRendererVulkan.h"
 	#include "../target/WindowRendererVulkan.h"
+	using RegionRenderer = RegionRendererVulkan;
 #else
 	#include "../world/WorldRendererGL.h"
 	#include "../world/WorldRendererGLForward.h"
@@ -25,7 +28,7 @@
 	#include "../post/PostProcessorGL.h"
 	#include "../regions/RegionRendererGL.h"
 	#include "../target/WindowRendererGL.h"
-using RegionRenderer = RegionRendererGL;
+	using RegionRenderer = RegionRendererGL;
 #endif
 #include <y/EngineData.h>
 #include <world/Camera.h>

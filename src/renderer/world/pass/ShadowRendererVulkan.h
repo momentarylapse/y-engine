@@ -38,6 +38,7 @@ public:
     mat4 proj;
     Material *material;
 	RenderViewDataVK rvd[2];
+	Camera *cam = nullptr;
 
     GeometryRendererVulkan *geo_renderer;
 };

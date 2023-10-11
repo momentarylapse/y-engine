@@ -14,7 +14,7 @@ class Camera;
 
 class WorldRendererVulkanRayTracing : public WorldRendererVulkan {
 public:
-	WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *device);
+	WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *device, Camera *cam);
 
 	void prepare() override;
 	void draw() override;

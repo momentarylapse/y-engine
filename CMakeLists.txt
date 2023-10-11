@@ -182,6 +182,7 @@ set(SOURCE
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
 	src/renderer/regions/RegionRendererGL.cpp
+	src/renderer/regions/RegionRendererVulkan.cpp
 	src/renderer/target/TargetRenderer.cpp
 	src/renderer/target/WindowRendererGL.cpp
 	src/renderer/target/WindowRendererVulkan.cpp

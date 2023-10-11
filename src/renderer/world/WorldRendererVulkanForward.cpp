@@ -35,7 +35,7 @@
 #include "../../meta.h"
 
 
-WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("fw", parent, RenderPathType::FORWARD) {
+WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("fw", parent, cam, RenderPathType::FORWARD) {
 	device = _device;
 
 	create_more();
@@ -44,6 +44,10 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 static int cur_query_offset;
 
 void WorldRendererVulkanForward::prepare() {
+	if (!cam)
+		cam = cam_main;
+	geo_renderer->cam = cam;
+	shadow_renderer->cam = cam;
 
 
 	static int pool_no = 0;
@@ -85,7 +89,7 @@ void WorldRendererVulkanForward::draw() {
 
 	auto &rvd = geo_renderer->rvd_def;
 
-	geo_renderer->draw_skyboxes(cb, rp, cam_main, (float)width / (float)height, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, cam, (float)width / (float)height, rvd);
 
 	UBO ubo;
 	ubo.p = cam_main->m_projection;

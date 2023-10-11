@@ -51,6 +51,7 @@ void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, const mat4 &m) {
 }
 
 void ShadowRendererVulkan::prepare() {
+	geo_renderer->cam = cam;
 	geo_renderer->prepare();
 	auto cb = command_buffer();
 	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);

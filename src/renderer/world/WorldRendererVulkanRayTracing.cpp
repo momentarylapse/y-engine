@@ -37,7 +37,7 @@
 static const int MAX_RT_TRIAS = 65536;
 static const int MAX_RT_MESHES = 1024;
 
-WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device) : WorldRendererVulkan("rt", parent, RenderPathType::FORWARD) {
+WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("rt", parent, cam, RenderPathType::FORWARD) {
 	device = _device;
 
 	//create_more();
@@ -111,6 +111,8 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 static int cur_query_offset;
 
 void WorldRendererVulkanRayTracing::prepare() {
+	if (!cam)
+		cam = cam_main;
 	
 	prepare_lights(dummy_cam, geo_renderer->rvd_def);
 
@@ -152,7 +154,7 @@ void WorldRendererVulkanRayTracing::prepare() {
 		md.matrix = mat4::translation(o->pos);
 		md.albedo = t->material->albedo.with_alpha(t->material->roughness);
 		md.emission = t->material->emission.with_alpha(t->material->metal);
-		t->prepare_draw(cam_main->owner->pos);
+		t->prepare_draw(cam->owner->pos);
 		md.num_triangles = t->vertex_buffer->output_count / 3;
 		md.address_vertices = t->vertex_buffer->vertex_buffer.get_device_address();
 		meshes.add(md);
@@ -260,7 +262,7 @@ void WorldRendererVulkanRayTracing::draw() {
 		mat4 p, m, v;
 		float x[32];
 	};
-	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, cam_main->exposure};
+	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, cam->exposure};
     pco.x[3] = 1; // scale_x
     pco.x[4] = 1;
 	cb->push_constant(0, sizeof(mat4) * 3 + 5 * sizeof(float), &pco);
