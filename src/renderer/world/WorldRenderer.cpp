@@ -33,7 +33,7 @@ mat4 mtr(const vec3 &t, const quaternion &a) {
 	return mt * mr;
 }
 
-WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(name, parent) {
+WorldRenderer::WorldRenderer(const string &name, Renderer *parent, Camera *_cam) : Renderer(name, parent) {
 	ch_pre = PerformanceMonitor::create_channel("pre", channel);
 	ch_post = PerformanceMonitor::create_channel("post", channel);
 	ch_post_focus = PerformanceMonitor::create_channel("focus", ch_post);
@@ -44,6 +44,8 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent) : Renderer(na
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
+
+	cam = _cam;
 }
 
 WorldRenderer::~WorldRenderer() {

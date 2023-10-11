@@ -31,7 +31,7 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRendererGL("world", parent, RenderPathType::FORWARD) {
+WorldRendererGLForward::WorldRendererGLForward(Renderer *parent, Camera *cam) : WorldRendererGL("world", parent, cam, RenderPathType::FORWARD) {
 
 	resource_manager->default_shader = "default.shader";
 	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
@@ -55,6 +55,11 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent) : WorldRenderer
 void WorldRendererGLForward::prepare() {
 	PerformanceMonitor::begin(channel);
 
+	if (!cam)
+		cam = cam_main;
+	geo_renderer->cam = cam;
+	shadow_renderer->cam = cam;
+
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
@@ -62,8 +67,6 @@ void WorldRendererGLForward::prepare() {
 			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
-
-	cam = cam_main;
 
 	prepare_lights();
 	geo_renderer->prepare();

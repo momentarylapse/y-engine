@@ -21,7 +21,7 @@ public:
 
 	GeometryRendererGL *geo_renderer_trans = nullptr;
 
-	WorldRendererGLDeferred(Renderer *parent);
+	WorldRendererGLDeferred(Renderer *parent, Camera *cam);
 	void prepare() override;
 	void draw() override;
 

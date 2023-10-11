@@ -24,6 +24,7 @@ class EngineData
 	var initial_world_file, second_world_file: Path
 	#Font* default_font
 	var renderer: Renderer&
+	var region_renderer: RegionRenderer&
 	var render_path: RenderPath&
 	var hdr_renderer: HDRRenderer*
 	var post_processor: PostProcessor*
@@ -31,6 +32,13 @@ class EngineData
 	func extern exit()
 
 class Renderer
+
+class RegionRenderer
+	struct Region
+		var dest: rect
+		var renderer: Renderer*
+	var regions: Region[]
+	func extern add_region(dest: rect) -> Renderer&
 
 class RenderPath
 	enum Type

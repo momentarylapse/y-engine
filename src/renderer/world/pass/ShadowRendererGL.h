@@ -32,6 +32,7 @@ public:
 
     mat4 proj;
     Material *material;
+    Camera *cam = nullptr;
 
     GeometryRendererGL *geo_renderer;
 };

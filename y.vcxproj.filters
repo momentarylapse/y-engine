@@ -505,6 +505,9 @@
     <ClCompile Include="src\renderer\helper\PipelineManager.cpp">
       <Filter>src\renderer\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\helper\RendererFactory.cpp">
+      <Filter>src\renderer\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\post\blur.cpp">
       <Filter>src\renderer\post</Filter>
     </ClCompile>
@@ -1135,6 +1138,9 @@
       <Filter>src\renderer\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\helper\PipelineManager.h">
+      <Filter>src\renderer\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\helper\RendererFactory.h">
       <Filter>src\renderer\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\post\blur.h">

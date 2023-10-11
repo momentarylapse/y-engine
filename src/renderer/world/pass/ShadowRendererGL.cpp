@@ -61,7 +61,7 @@ void ShadowRendererGL::prepare() {
 	PerformanceMonitor::begin(channel);
 
 
-	geo_renderer->cam = cam_main;
+	geo_renderer->cam = cam;
 	geo_renderer->prepare();
 
 	render_shadow_map(fb[1].get(), 1);

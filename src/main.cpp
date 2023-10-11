@@ -45,25 +45,12 @@
 #include "plugins/Controller.h"
 
 #include "renderer/base.h"
+#include "renderer/helper/RendererFactory.h"
 #include "renderer/world/WorldRenderer.h"
 #ifdef USING_VULKAN
-	#include "renderer/world/WorldRendererVulkan.h"
-	#include "renderer/world/WorldRendererVulkanForward.h"
-	#include "renderer/world/WorldRendererVulkanRayTracing.h"
-	#include "renderer/gui/GuiRendererVulkan.h"
-	#include "renderer/post/HDRRendererVulkan.h"
-	#include "renderer/post/PostProcessorVulkan.h"
 	#include "renderer/target/WindowRendererVulkan.h"
 #else
-	#include "renderer/world/WorldRendererGL.h"
-	#include "renderer/world/WorldRendererGLForward.h"
-	#include "renderer/world/WorldRendererGLDeferred.h"
-	#include "renderer/gui/GuiRendererGL.h"
-	#include "renderer/post/HDRRendererGL.h"
-	#include "renderer/post/PostProcessorGL.h"
-	#include "renderer/regions/RegionRendererGL.h"
 	#include "renderer/target/WindowRendererGL.h"
-using RegionRenderer = RegionRendererGL;
 #endif
 
 #include "Config.h"
@@ -118,108 +105,8 @@ public:
 //private:
 	GLFWwindow* window;
 
-	WorldRenderer *world_renderer = nullptr;
-	Renderer *gui_renderer = nullptr;
-	RegionRenderer *region_renderer = nullptr;
-	PostProcessorStage *hdr_renderer = nullptr;
-	PostProcessor *post_processor = nullptr;
-	TargetRenderer *renderer = nullptr;
-
 	gui::Text *fps_display;
 	int ch_iter = -1;
-
-	string render_graph_str(Renderer *r) {
-		string s = PerformanceMonitor::get_name(r->channel);
-		if (r->children.num == 1)
-			s += " <<< " + render_graph_str(r->children[0]);
-		if (r->children.num >= 2) {
-			Array<string> ss;
-			for (auto c: r->children)
-				ss.add(render_graph_str(c));
-			s += " <<< (" + implode(ss, ", ") + ")";
-		}
-		return s;
-	}
-
-	void print_render_chain() {
-		msg_write("------------------------------------------");
-		msg_write("CHAIN:  " + render_graph_str(renderer));
-		msg_write("------------------------------------------");
-	}
-
-	TargetRenderer *create_window_renderer() {
-#ifdef USING_VULKAN
-		return new WindowRendererVulkan(window, engine.width, engine.height, device);
-#else
-		return new WindowRendererGL(window, engine.width, engine.height);
-#endif
-	}
-
-	Renderer *create_gui_renderer(Renderer *parent) {
-#ifdef USING_VULKAN
-		return new GuiRendererVulkan(parent);
-#else
-		return new GuiRendererGL(parent);
-#endif
-	}
-
-	RegionRenderer *create_region_renderer(Renderer *parent) {
-#ifdef USING_VULKAN
-		return new RegionRendererVulkan(parent);
-#else
-		return new RegionRendererGL(parent);
-#endif
-	}
-
-	PostProcessorStage *create_hdr_renderer(PostProcessor *parent) {
-#ifdef USING_VULKAN
-		return new HDRRendererVulkan(parent);
-#else
-		return new HDRRendererGL(parent);
-#endif
-	}
-
-	PostProcessor *create_post_processor(Renderer *parent) {
-#ifdef USING_VULKAN
-		return new PostProcessorVulkan(parent);
-#else
-		return new PostProcessorGL(parent);
-#endif
-	}
-
-	WorldRenderer *create_world_renderer(Renderer *parent) {
-#ifdef USING_VULKAN
-		if (config.get_str("renderer.path", "forward") == "raytracing")
-			return new WorldRendererVulkanRayTracing(parent, device);
-		else
-			return new WorldRendererVulkanForward(parent, device);
-#else
-		if (config.get_str("renderer.path", "forward") == "deferred")
-			return new WorldRendererGLDeferred(parent);
-		else
-			return new WorldRendererGLForward(parent);
-#endif
-	}
-
-	void create_full_renderer() {
-		try {
-			engine.window_renderer = renderer = create_window_renderer();
-			engine.gui_renderer = gui_renderer = create_gui_renderer(renderer);
-			engine.region_renderer = region_renderer = create_region_renderer(gui_renderer);
-			if (config.get_str("renderer.path", "forward") == "direct") {
-				engine.world_renderer = world_renderer = create_world_renderer(region_renderer->add_region(rect::ID));
-			} else {
-				engine.post_processor = post_processor = create_post_processor(region_renderer->add_region(rect::ID));
-				engine.hdr_renderer = hdr_renderer = create_hdr_renderer(post_processor);
-				engine.world_renderer = world_renderer = create_world_renderer(hdr_renderer);
-				//post_processor->set_hdr(hdr_renderer);
-			}
-		} catch(Exception &e) {
-			hui::ShowError(e.message());
-			throw e;
-		}
-		print_render_chain();
-	}
 
 	void init(const Array<string> &arg) {
 		config.load(arg);
@@ -253,7 +140,7 @@ public:
 		auto resource_manager = new ResourceManager(context);
 		engine.set_context(context, resource_manager);
 
-		create_full_renderer();
+		create_full_renderer(window, nullptr); // cam_main does not exist yet
 
 		audio::init();
 
@@ -370,7 +257,7 @@ public:
 	}
 
 	void reset_game() {
-		world_renderer->reset();
+		engine.world_renderer->reset();
 		PluginManager::reset();
 		CameraReset();
 		world.reset();
@@ -381,8 +268,8 @@ public:
 		reset_game();
 		GodEnd();
 
-		delete world_renderer;
-		delete renderer;
+		delete engine.world_renderer;
+		delete engine.window_renderer;
 		api_end();
 
 		glfwDestroyWindow(window);
@@ -461,13 +348,13 @@ public:
 
 		update_dynamic_resolution();
 
-		if (!renderer->start_frame())
+		if (!engine.window_renderer->start_frame())
 			return;
 		Scheduler::handle_draw_pre();
 		timer_render.peek();
-		renderer->draw();
+		engine.window_renderer->draw();
 		render_times.add(timer_render.get());
-		renderer->end_frame();
+		engine.window_renderer->end_frame();
 	}
 
 

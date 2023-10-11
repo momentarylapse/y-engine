@@ -36,7 +36,7 @@ enum class RenderPathType {
 
 class WorldRenderer : public Renderer {
 public:
-	WorldRenderer(const string &name, Renderer *parent);
+	WorldRenderer(const string &name, Renderer *parent, Camera *cam);
 	virtual ~WorldRenderer();
 
 	color background() const override;

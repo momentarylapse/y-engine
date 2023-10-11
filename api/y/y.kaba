@@ -49,3 +49,5 @@ func extern add_camera(pos: vec3, ang: quaternion, r: rect) -> Camera&
 
 
 var extern cam: Camera&
+
+func extern create_render_path(parent: Renderer&, cam: Camera&) -> xfer[Renderer]

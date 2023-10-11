@@ -27,11 +27,13 @@
 #include "../net/NetworkManager.h"
 #include "../renderer/base.h"
 #include "../renderer/Renderer.h"
+#include "../renderer/helper/RendererFactory.h"
 #ifdef USING_OPENGL
 #include "../renderer/world/WorldRendererGL.h"
 #include "../renderer/world/WorldRendererGLForward.h"
 #include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
+#include "../renderer/regions/RegionRendererGL.h"
 #include "../renderer/post/HDRRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
@@ -697,6 +699,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("EngineData.physical_aspect_ratio", &EngineData::physical_aspect_ratio);
 	ext->declare_class_element("EngineData.window_renderer", &EngineData::window_renderer);
 	ext->declare_class_element("EngineData.gui_renderer", &EngineData::gui_renderer);
+	ext->declare_class_element("EngineData.region_renderer", &EngineData::region_renderer);
 	ext->declare_class_element("EngineData.hdr_renderer", &EngineData::hdr_renderer);
 	ext->declare_class_element("EngineData.post_processor", &EngineData::post_processor);
 	ext->declare_class_element("EngineData.render_path", &EngineData::world_renderer);
@@ -717,6 +720,7 @@ void PluginManager::export_kaba() {
 //	using WR = WindowRendererGL;
 	using HR = HDRRendererGL;
 //	using GR = GuiRendererGL;
+	using RR = RegionRendererGL;
 	using RP = WorldRendererGL;
 	using RPF = WorldRendererGLForward;
 	using RPD = WorldRendererGLDeferred;
@@ -736,6 +740,11 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("RenderPath.wireframe", &RP::wireframe);
 //	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
+
+
+	ext->declare_class_size("RegionsRenderer", sizeof(RR));
+	ext->declare_class_element("RegionRenderer.regions", &RR::regions);
+	ext->link_class_func("RegionRenderer.add_region", &RR::add_region);
 
 	ext->declare_class_size("PostProcessor", sizeof(PP));
 	ext->declare_class_element("PostProcessor.fb1", &PP::fb1);
@@ -794,6 +803,7 @@ void PluginManager::export_kaba() {
 	ext->link("load_texture", (void*)&__load_texture);
 	ext->link("load_material", (void*)&__load_material);
 	ext->link("screenshot", (void*)&screenshot);
+	ext->link("create_render_path", (void*)&create_render_path);
 }
 
 template<class C>

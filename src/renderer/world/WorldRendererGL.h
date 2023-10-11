@@ -23,7 +23,7 @@ class GeometryRendererGL;
 
 class WorldRendererGL : public WorldRenderer {
 public:
-	WorldRendererGL(const string &name, Renderer *parent, RenderPathType type);
+	WorldRendererGL(const string &name, Renderer *parent, Camera *cam, RenderPathType type);
 	void create_more();
 
 	//virtual void render_into_texture(FrameBuffer *fb, Camera *cam) = 0;

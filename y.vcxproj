@@ -284,6 +284,7 @@
     <ClCompile Include="src\renderer\helper\jitter.cpp" />
     <ClCompile Include="src\renderer\helper\Pipeline.cpp" />
     <ClCompile Include="src\renderer\helper\PipelineManager.cpp" />
+    <ClCompile Include="src\renderer\helper\RendererFactory.cpp" />
     <ClCompile Include="src\renderer\post\blur.cpp" />
     <ClCompile Include="src\renderer\post\HDRRendererGL.cpp" />
     <ClCompile Include="src\renderer\post\HDRRendererVulkan.cpp" />
@@ -496,6 +497,7 @@
     <ClInclude Include="src\renderer\helper\jitter.h" />
     <ClInclude Include="src\renderer\helper\Pipeline.h" />
     <ClInclude Include="src\renderer\helper\PipelineManager.h" />
+    <ClInclude Include="src\renderer\helper\RendererFactory.h" />
     <ClInclude Include="src\renderer\post\blur.h" />
     <ClInclude Include="src\renderer\post\HDRRendererGL.h" />
     <ClInclude Include="src\renderer\post\HDRRendererVulkan.h" />

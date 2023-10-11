@@ -27,7 +27,8 @@ void apply_shader_data(Shader *s, const Any &shader_data);
 const int CUBE_SIZE = 128;
 
 
-WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, RenderPathType _type) : WorldRenderer(name, parent) {
+WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, Camera *cam, RenderPathType _type) :
+		WorldRenderer(name, parent, cam) {
 	type = _type;
 
 	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
