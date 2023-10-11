@@ -49,6 +49,9 @@
     <ClCompile Include="src\helper\Scheduler.cpp">
       <Filter>src\helper</Filter>
     </ClCompile>
+    <ClCompile Include="src\helper\TimeTable.cpp">
+      <Filter>src\helper</Filter>
+    </ClCompile>
     <ClCompile Include="src\input\Gamepad.cpp">
       <Filter>src\input</Filter>
     </ClCompile>
@@ -697,6 +700,9 @@
       <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\helper\Scheduler.h">
+      <Filter>src\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helper\TimeTable.h">
       <Filter>src\helper</Filter>
     </ClInclude>
     <ClInclude Include="src\input\Gamepad.h">

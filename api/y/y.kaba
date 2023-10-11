@@ -44,6 +44,11 @@ class UserMesh extends Component
 	geometry_shader_module: string
 
 
+class TimeTable
+	func extern __init__()
+	func extern at(t: float, f: void->void)
+	func extern iterate(dt: float)
+
 
 func extern add_camera(pos: vec3, ang: quaternion, r: rect) -> Camera&
 

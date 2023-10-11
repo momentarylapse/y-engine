@@ -20,6 +20,7 @@
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
+#include "../helper/TimeTable.h"
 #include "../input/InputManager.h"
 #include "../input/Gamepad.h"
 #include "../input/Keyboard.h"
@@ -221,6 +222,15 @@ shared<Texture> __load_texture(const Path& filename) {
 
 xfer<Material> __load_material(const Path& filename) {
 	return engine.resource_manager->load_material(filename);
+}
+
+
+void timetable_init(TimeTable *tt) {
+	new(tt) TimeTable();
+}
+
+void timetable_at(TimeTable *tt, float t, Callable<void()> *f) {
+	tt->at(t, [f] { (*f)(); });
 }
 
 void PluginManager::init(int ch_iter) {
@@ -789,6 +799,12 @@ void PluginManager::export_kaba() {
 
 	ext->link_class_func("Shader.set_float", &shader_set_float);
 	ext->link_class_func("Shader.set_floats", &shader_set_floats);
+
+
+	ext->declare_class_size("TimeTable", sizeof(TimeTable));
+	ext->link_class_func("TimeTable.__init__", &timetable_init);
+	ext->link_class_func("TimeTable.iterate", &TimeTable::iterate);
+	ext->link_class_func("TimeTable.at", &timetable_at);
 
 
 	ext->link("tex_white", &tex_white);

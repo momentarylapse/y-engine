@@ -22,6 +22,7 @@ set(SOURCE
 	src/helper/PerformanceMonitor.cpp
 	src/helper/ResourceManager.cpp
 	src/helper/Scheduler.cpp
+	src/helper/TimeTable.cpp
 	src/input/Gamepad.cpp
 	src/input/InputManager.cpp
 	src/input/Keyboard.cpp

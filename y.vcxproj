@@ -132,6 +132,7 @@
     <ClCompile Include="src\helper\PerformanceMonitor.cpp" />
     <ClCompile Include="src\helper\ResourceManager.cpp" />
     <ClCompile Include="src\helper\Scheduler.cpp" />
+    <ClCompile Include="src\helper\TimeTable.cpp" />
     <ClCompile Include="src\input\Gamepad.cpp" />
     <ClCompile Include="src\input\InputManager.cpp" />
     <ClCompile Include="src\input\Keyboard.cpp" />
@@ -350,6 +351,7 @@
     <ClInclude Include="src\helper\PerformanceMonitor.h" />
     <ClInclude Include="src\helper\ResourceManager.h" />
     <ClInclude Include="src\helper\Scheduler.h" />
+    <ClInclude Include="src\helper\TimeTable.h" />
     <ClInclude Include="src\input\Gamepad.h" />
     <ClInclude Include="src\input\InputManager.h" />
     <ClInclude Include="src\input\Keyboard.h" />
