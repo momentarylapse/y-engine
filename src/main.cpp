@@ -231,7 +231,7 @@ public:
 	}
 
 	void main_loop() {
-		while (!glfwWindowShouldClose(window)) {
+		while (!glfwWindowShouldClose(window) and !engine.end_requested) {
 			PerformanceMonitor::next_frame();
 			engine.elapsed_rt = PerformanceMonitor::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);

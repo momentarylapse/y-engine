@@ -116,7 +116,7 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 	if (!fb_cube)
 		fb_cube = new FrameBuffer(render_pass_cube, {depth_cube.get()});
 	Entity o(pos, quaternion::ID);
-	Camera cam(rect::ID);
+	Camera cam;
 	cam.owner = &o;
 	cam.fov = pi/2;
 	for (int i=0; i<6; i++) {

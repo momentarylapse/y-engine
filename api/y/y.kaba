@@ -16,7 +16,6 @@ let EXPORT_IMPORTS = true
 
 
 class Camera extends Component
-	var dest: rect
 	var m_view: mat4
 	var exposure: float
 	var bloom_radius: float
@@ -50,9 +49,10 @@ class TimeTable
 	func extern iterate(dt: float)
 
 
-func extern add_camera(pos: vec3, ang: quaternion, r: rect) -> Camera&
+func extern add_camera(pos: vec3, ang: quaternion) -> Camera&
+
+
+func extern create_render_path(parent: Renderer&, cam: Camera&) -> xfer[Renderer]
 
 
 var extern cam: Camera&
-
-func extern create_render_path(parent: Renderer&, cam: Camera&) -> xfer[Renderer]

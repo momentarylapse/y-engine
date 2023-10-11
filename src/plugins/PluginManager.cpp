@@ -198,12 +198,6 @@ void screenshot(Image& im) {
 }
 
 
-void global_exit(EngineData& engine) {
-	msg_error("exit by script...");
-	exit(0);
-}
-
-
 xfer<Model> __load_model(const Path& filename) {
 	return engine.resource_manager->load_model(filename);
 }
@@ -270,9 +264,8 @@ void PluginManager::export_kaba() {
 	ext->link_virtual("Component.on_collide", &Component::on_collide, &component);
 	ext->link_class_func("Component.set_variables", &Component::set_variables);
 
-	Camera _cam(rect::ID);
+	Camera _cam;
 	ext->declare_class_size("Camera", sizeof(Camera));
-	ext->declare_class_element("Camera.dest", &Camera::dest);
 	ext->declare_class_element("Camera.fov", &Camera::fov);
 	ext->declare_class_element("Camera.exposure", &Camera::exposure);
 	ext->declare_class_element("Camera.bloom_radius", &Camera::bloom_radius);
@@ -714,7 +707,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("EngineData.hdr_renderer", &EngineData::hdr_renderer);
 	ext->declare_class_element("EngineData.post_processor", &EngineData::post_processor);
 	ext->declare_class_element("EngineData.render_path", &EngineData::world_renderer);
-	ext->link_class_func("EngineData.exit", &global_exit);
+	ext->link_class_func("EngineData.exit", &EngineData::exit);
 
 
 	ext->declare_class_size("Renderer", sizeof(Renderer));
@@ -967,7 +960,7 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 	if (c == Light::_class)
 		return new Light(White, -1, -1);
 	if (c == Camera::_class)
-		return new Camera(rect::ID);
+		return new Camera;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

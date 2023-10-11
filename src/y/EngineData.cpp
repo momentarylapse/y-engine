@@ -89,4 +89,8 @@ void EngineData::set_dirs(const Path &_texture_dir, const Path &_map_dir, const 
 	kaba::config.directory = _script_dir;
 }
 
+void EngineData::exit() {
+	end_requested = true;
+}
+
 

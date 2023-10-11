@@ -329,7 +329,7 @@ bool World::load(const LevelData &ld) {
 	background = ld.background_color;
 
 	for (auto &c: ld.cameras) {
-		auto cc = add_camera(c.pos, quaternion::rotation(c.ang), rect::ID);
+		auto cc = add_camera(c.pos, quaternion::rotation(c.ang));
 		cam_main = cc;
 		cc->min_depth = c.min_depth;
 		cc->max_depth = c.max_depth;
@@ -341,7 +341,7 @@ bool World::load(const LevelData &ld) {
 	auto cameras = ComponentManager::get_list_family<Camera>();
 	if (cameras->num == 0) {
 		msg_error("no camera defined... creating one");
-		cam_main = add_camera(v_0, quaternion::ID, rect::ID);
+		cam_main = add_camera(v_0, quaternion::ID);
 	}
 
 	// objects

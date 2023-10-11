@@ -103,7 +103,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 
 	dummy_cam_entity = new Entity;
-	dummy_cam = new Camera(rect::ID);
+	dummy_cam = new Camera;
 	dummy_cam_entity->components.add(dummy_cam);
 	dummy_cam->owner = dummy_cam_entity;
 }
