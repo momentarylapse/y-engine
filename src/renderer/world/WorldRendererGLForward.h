@@ -17,8 +17,8 @@ class WorldRendererGLForward : public WorldRendererGL {
 public:
 	WorldRendererGLForward(Renderer *parent, Camera *cam);
 
-	void prepare() override;
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
 	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
 };

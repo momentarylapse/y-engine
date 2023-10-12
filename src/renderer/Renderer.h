@@ -20,6 +20,13 @@ class ResourceManager;
 rect dynamicly_scaled_area(FrameBuffer *fb);
 rect dynamicly_scaled_source();
 
+struct RenderParams {
+	float desired_aspect_ratio;
+	bool target_is_window;
+	RenderParams with_no_window() const;
+	static const RenderParams WHATEVER;
+	static const RenderParams INTO_TEXTURE;
+};
 
 class Renderer {
 public:
@@ -35,12 +42,12 @@ public:
 
 	// (vulkan: BEFORE/OUTSIDE a render pass)
 	// can render into separate targets
-	virtual void prepare();
+	virtual void prepare(const RenderParams& params);
 
 	// assume, parent has already bound the frame buffer
 	// (vulkan: INSIDE an already started render pass)
 	// just draw into that
-	virtual void draw() = 0;
+	virtual void draw(const RenderParams& params) = 0;
 
 	virtual color background() const;
 
@@ -52,8 +59,8 @@ public:
 	virtual CommandBuffer *command_buffer() const;
 #endif
 
-	virtual bool forwarding_into_window() const;
-	bool rendering_into_window() const;
+//	virtual bool forwarding_into_window() const;
+//	bool rendering_into_window() const;
 
 
 	//int ch_render= -1;

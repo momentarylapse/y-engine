@@ -25,8 +25,8 @@ public:
 
     void render_shadow_map(FrameBuffer *sfb, float scale);
 
-	void prepare() override;
-	void draw() override {}
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override {}
 
     void render(const mat4 &m);
 

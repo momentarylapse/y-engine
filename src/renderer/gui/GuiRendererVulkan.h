@@ -13,9 +13,8 @@
 class GuiRendererVulkan : public Renderer {
 public:
 	GuiRendererVulkan(Renderer *parent);
-	virtual ~GuiRendererVulkan();
 
-	void draw() override;
+	void draw(const RenderParams& params) override;
 
 	int ch_gui = -1;
 

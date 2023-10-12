@@ -20,13 +20,13 @@ PostProcessorStageUser::PostProcessorStageUser(const PostProcessorStageUser::Cal
 	func_draw = d;
 }
 
-void PostProcessorStageUser::prepare() {
+void PostProcessorStageUser::prepare(const RenderParams& params) {
 	if (func_prepare)
-		(*func_prepare)();
+		(*func_prepare)(params);
 }
-void PostProcessorStageUser::draw() {
+void PostProcessorStageUser::draw(const RenderParams& params) {
 	if (func_draw)
-		(*func_draw)();
+		(*func_draw)(params);
 }
 
 PostProcessor::PostProcessor(Renderer *parent) : Renderer("post", parent) {

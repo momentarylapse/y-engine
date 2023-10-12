@@ -16,10 +16,10 @@ class WorldRendererVulkanRayTracing : public WorldRendererVulkan {
 public:
 	WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *device, Camera *cam);
 
-	void prepare() override;
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
-	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) override;
+	void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) override;
 
 	enum class Mode {
 		NONE,

@@ -20,8 +20,8 @@ public:
 	PostProcessorGL(Renderer *parent);
 	virtual ~PostProcessorGL();
 
-	void prepare() override;
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader, const Any &data);
 	FrameBuffer* do_post_processing(FrameBuffer *source);
@@ -40,7 +40,6 @@ public:
 
 	FrameBuffer *frame_buffer() const override;
 	DepthBuffer *depth_buffer() const override;
-	bool forwarding_into_window() const override;
 
 	DepthBuffer *_depth_buffer = nullptr;
 	shared<Shader> shader_blur;

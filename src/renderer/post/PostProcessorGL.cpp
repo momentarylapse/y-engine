@@ -87,20 +87,18 @@ DepthBuffer *PostProcessorGL::depth_buffer() const {
 	return _depth_buffer;
 }
 
-bool PostProcessorGL::forwarding_into_window() const {
-	if (stages.num == 0)
-		if (parent)
-			return parent->forwarding_into_window();
-	return true;
-}
-
 FrameBuffer *PostProcessorGL::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }
 
-void PostProcessorGL::prepare() {
-	for (auto c: children)
-		c->prepare();
+void PostProcessorGL::prepare(const RenderParams& params) {
+	if (stages.num == 0) {
+		for (auto c: children)
+			c->prepare(params);
+	} else {
+		for (auto c: children)
+			c->prepare(params);
+	}
 
 	if (stages.num == 0)
 		return;
@@ -120,14 +118,15 @@ void PostProcessorGL::prepare() {
 	//PerformanceMonitor::end(ch_post_blur);
 }
 
-void PostProcessorGL::draw() {
+void PostProcessorGL::draw(const RenderParams& params) {
 	if (stages.num == 0) {
 		for (auto c: children)
-			c->draw();
+			c->draw(params);
 	} else {
-		stages.back()->draw();
+		// FIXME params
+		stages.back()->draw(params);
 	}
-	[[maybe_unused]] bool flip_y = rendering_into_window();
+	[[maybe_unused]] bool flip_y = params.target_is_window;
 	//render_out(fb_main.get(), fb_small2->color_attachments[0].get(), flip_y);
 }
 

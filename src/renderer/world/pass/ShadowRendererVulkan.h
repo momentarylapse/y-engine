@@ -23,8 +23,8 @@ class ShadowRendererVulkan : public Renderer {
 public:
 	ShadowRendererVulkan(Renderer *parent);
 
-	void prepare() override;
-	void draw() override {}
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override {}
 
     void render(vulkan::CommandBuffer *cb, const mat4 &m);
 

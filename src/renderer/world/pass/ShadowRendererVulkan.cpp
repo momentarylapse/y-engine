@@ -47,12 +47,12 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 
 void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, const mat4 &m) {
 	proj = m;
-	prepare();
+	prepare(RenderParams::WHATEVER);
 }
 
-void ShadowRendererVulkan::prepare() {
+void ShadowRendererVulkan::prepare(const RenderParams& params) {
 	geo_renderer->cam = cam;
-	geo_renderer->prepare();
+	geo_renderer->prepare(RenderParams::INTO_TEXTURE);
 	auto cb = command_buffer();
 	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);
 	render_shadow_map(cb, fb[1].get(), 1, rvd[1]);

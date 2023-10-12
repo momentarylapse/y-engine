@@ -71,19 +71,19 @@ HDRRendererGL::~HDRRendererGL() {
 }
 
 
-void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, VertexBuffer *vb_2d) {
+void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, VertexBuffer *vb_2d, const RenderParams& params) {
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
 
 	for (auto c: r->children)
-		c->draw();
+		c->draw(params);
 }
 
-void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shader *shader, const Any &data, VertexBuffer *vb_2d) {
+void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shader *shader, const Any &data, VertexBuffer *vb_2d, const RenderParams& params) {
 
-	bool flip_y = r->rendering_into_window();
+	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(r->channel);
 
@@ -108,13 +108,15 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 	PerformanceMonitor::end(r->channel);
 }
 
-void HDRRendererGL::prepare() {
+void HDRRendererGL::prepare(const RenderParams& params) {
+	auto sub_params = params.with_no_window();
+
 	for (auto c: children)
-		c->prepare();
+		c->prepare(sub_params);
 
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		render_source_into_framebuffer(this, fb_main_ms.get(), vb_2d.get());
+		render_source_into_framebuffer(this, fb_main_ms.get(), vb_2d.get(), sub_params);
 
 		// resolve
 		if (true) {
@@ -127,7 +129,7 @@ void HDRRendererGL::prepare() {
 		}
 
 	} else {
-		render_source_into_framebuffer(this, fb_main.get(), vb_2d.get());
+		render_source_into_framebuffer(this, fb_main.get(), vb_2d.get(), sub_params);
 	}
 
 	PerformanceMonitor::begin(ch_post_blur);
@@ -137,7 +139,7 @@ void HDRRendererGL::prepare() {
 	PerformanceMonitor::end(ch_post_blur);
 }
 
-void HDRRendererGL::draw() {
+void HDRRendererGL::draw(const RenderParams& params) {
 	Any data;
 	data.map_set("exposure", cam_main->exposure);
 	data.map_set("bloom_factor", cam_main->bloom_factor);
@@ -145,7 +147,7 @@ void HDRRendererGL::draw() {
 	data.map_set("scale_y", resolution_scale_y);
 
 
-	render_out_through_shader(this, {fb_main->color_attachments[0].get(), fb_small2->color_attachments[0].get()}, shader_out.get(), data, vb_2d.get());
+	render_out_through_shader(this, {fb_main->color_attachments[0].get(), fb_small2->color_attachments[0].get()}, shader_out.get(), data, vb_2d.get(), params);
 	//render_out(fb_main.get(), fb_small2->color_attachments[0].get());
 }
 
@@ -173,9 +175,9 @@ void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, 
 	//nix::set_scissor(rect::EMPTY);
 }
 
-void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom) {
+void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const RenderParams& params) {
 
-	bool flip_y = rendering_into_window();
+	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(ch_out);
 

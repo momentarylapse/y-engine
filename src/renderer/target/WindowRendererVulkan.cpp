@@ -126,25 +126,25 @@ void WindowRendererVulkan::end_frame() {
 	}
 }
 
-void WindowRendererVulkan::prepare() {
+void WindowRendererVulkan::prepare(const RenderParams& params) {
 
 }
 
-void WindowRendererVulkan::draw() {
+void WindowRendererVulkan::draw(const RenderParams& params) {
 	auto cb = command_buffer();
 	auto rp = render_pass();
 	auto fb = frame_buffer();
 
 	cb->begin();
 	for (auto c: children)
-		c->prepare();
+		c->prepare(params);
 
 	cb->set_viewport(area());
 	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
 
 	for (auto c: children)
-		c->draw();
+		c->draw(params);
 
 	cb->end_render_pass();
 	cb->end();

@@ -110,7 +110,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 static int cur_query_offset;
 
-void WorldRendererVulkanRayTracing::prepare() {
+void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	if (!cam)
 		cam = cam_main;
 	
@@ -250,7 +250,7 @@ void WorldRendererVulkanRayTracing::prepare() {
 
 }
 
-void WorldRendererVulkanRayTracing::draw() {
+void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 
 	auto cb = command_buffer();
 
@@ -269,7 +269,7 @@ void WorldRendererVulkanRayTracing::draw() {
 	cb->draw(vb_2d.get());
 }
 
-void WorldRendererVulkanRayTracing::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) {
+void WorldRendererVulkanRayTracing::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
 }
 
 #endif

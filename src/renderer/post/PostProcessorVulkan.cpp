@@ -87,20 +87,13 @@ DepthBuffer *PostProcessorVulkan::depth_buffer() const {
 	return _depth_buffer;
 }
 
-bool PostProcessorVulkan::forwarding_into_window() const {
-	if (stages.num == 0)
-		if (parent)
-			return parent->forwarding_into_window();
-	return true;
-}
-
 FrameBuffer *PostProcessorVulkan::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }
 
-void PostProcessorVulkan::prepare() {
+void PostProcessorVulkan::prepare(const RenderParams& params) {
 	for (auto c: children)
-		c->prepare();
+		c->prepare(params);
 
 	if (stages.num == 0)
 		return;
@@ -120,14 +113,14 @@ void PostProcessorVulkan::prepare() {
 	//PerformanceMonitor::end(ch_post_blur);
 }
 
-void PostProcessorVulkan::draw() {
+void PostProcessorVulkan::draw(const RenderParams& params) {
 	if (stages.num == 0) {
 		for (auto c: children)
-			c->draw();
+			c->draw(params);
 	} else {
-		stages.back()->draw();
+		stages.back()->draw(params);
 	}
-	bool flip_y = rendering_into_window();
+	bool flip_y = params.target_is_window;
 	//render_out(fb_main.get(), fb_small2->color_attachments[0].get(), flip_y);
 }
 

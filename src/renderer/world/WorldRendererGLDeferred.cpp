@@ -81,7 +81,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam) 
 	geo_renderer_trans->fb_shadow2 = shadow_renderer->fb[1];
 }
 
-void WorldRendererGLDeferred::prepare() {
+void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	if (!cam)
@@ -92,8 +92,8 @@ void WorldRendererGLDeferred::prepare() {
 
 	prepare_lights();
 
-	geo_renderer->prepare();
-	geo_renderer_trans->prepare();
+	geo_renderer->prepare(params.with_no_window());
+	geo_renderer_trans->prepare(params);
 	geo_renderer_trans->ubo_light = ubo_light;
 	geo_renderer_trans->num_lights = lights.num;
 	geo_renderer_trans->shadow_index = shadow_index;
@@ -102,26 +102,26 @@ void WorldRendererGLDeferred::prepare() {
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
 
-	render_into_gbuffer(gbuffer.get());
+	render_into_gbuffer(gbuffer.get(), params.with_no_window());
 
 	//auto source = do_post_processing(fb_main.get());
 
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLDeferred::draw() {
+void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	auto target = parent->frame_buffer();
 
-	draw_background(target);
+	draw_background(target, params);
 
-	render_out_from_gbuffer(gbuffer.get());
+	render_out_from_gbuffer(gbuffer.get(), params);
 
 	PerformanceMonitor::begin(ch_trans);
-	bool flip_y = rendering_into_window();
+	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-	cam->update_matrices((float)target->width / (float)target->height);
+	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
 	nix::bind_buffer(1, ubo_light);
 	nix::set_view_matrix(cam->view_matrix());
@@ -137,14 +137,14 @@ void WorldRendererGLDeferred::draw() {
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb) {
+void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_bg);
 
 //	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	bool flip_y = rendering_into_window();
+	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
 
 	//nix::clear_color(Green);
@@ -155,7 +155,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb) {
 
 }
 
-void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) {
+void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_gbuf_out);
 	auto s = shader_gbuffer_out.get();
 	if (geo_renderer->using_view_space)
@@ -193,7 +193,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source) 
 
 //void WorldRendererGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 
-void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb) {
+void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_world);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
@@ -204,7 +204,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb) {
 	fb->clear_color(0, color(-1, 0,1,0));
 
 
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
 
 	nix::set_cull(nix::CullMode::CW);

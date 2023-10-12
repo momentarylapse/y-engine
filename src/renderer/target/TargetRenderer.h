@@ -14,7 +14,7 @@ class TargetRenderer : public Renderer {
 public:
 	TargetRenderer(const string &name);
 
-	void draw() override;
+	void draw(const RenderParams& params) override;
 
 	virtual bool start_frame() = 0;
 	virtual void end_frame() = 0;

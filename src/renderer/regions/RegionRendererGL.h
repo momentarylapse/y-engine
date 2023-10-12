@@ -17,7 +17,8 @@ class RegionRendererGL : public Renderer {
 public:
 	RegionRendererGL(Renderer *parent);
 
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
 	Renderer *add_region(const rect &dest);
 

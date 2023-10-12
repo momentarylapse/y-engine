@@ -24,14 +24,14 @@ struct PostProcessorStage : public Renderer {
 };
 
 struct PostProcessorStageUser : public PostProcessorStage {
-	using Callback = Callable<void()>;
+	using Callback = Callable<void(const RenderParams&)>;
 	const Callback *func_prepare = nullptr;
 	const Callback *func_draw = nullptr;
 
 	PostProcessorStageUser(const Callback *p, const Callback *d);
 
-	void prepare() override;
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 };
 
 class PostProcessor : public Renderer {

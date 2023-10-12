@@ -13,13 +13,13 @@
 RegionRendererVulkan::RegionRendererVulkan(Renderer *parent) : Renderer("region", parent) {
 }
 
-void RegionRendererVulkan::draw() {
+void RegionRendererVulkan::draw(const RenderParams& params) {
 	for (int i=0; i<children.num; i++)
 		regions[i].renderer = children[i];
 
 	for (auto& r: regions) {
 		if (r.renderer) {
-			r.renderer->draw();
+			r.renderer->draw(params);
 		}
 	}
 }

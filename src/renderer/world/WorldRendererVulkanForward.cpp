@@ -43,7 +43,7 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 
 static int cur_query_offset;
 
-void WorldRendererVulkanForward::prepare() {
+void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	if (!cam)
 		cam = cam_main;
 	geo_renderer->cam = cam;
@@ -74,7 +74,7 @@ void WorldRendererVulkanForward::prepare() {
 
 	prepare_lights(cam_main, geo_renderer->rvd_def);
 	
-	geo_renderer->prepare();
+	geo_renderer->prepare(params);
 
 	if (shadow_index >= 0)
 		shadow_renderer->render(cb, shadow_proj);
@@ -82,14 +82,14 @@ void WorldRendererVulkanForward::prepare() {
 	cb->timestamp(cur_query_offset + 1);
 }
 
-void WorldRendererVulkanForward::draw() {
+void WorldRendererVulkanForward::draw(const RenderParams& params) {
 
 	auto cb = command_buffer();
 	auto rp = render_pass();
 
 	auto &rvd = geo_renderer->rvd_def;
 
-	geo_renderer->draw_skyboxes(cb, rp, cam, (float)width / (float)height, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, cam, params.desired_aspect_ratio, rvd);
 
 	UBO ubo;
 	ubo.p = cam_main->m_projection;
@@ -109,7 +109,7 @@ void WorldRendererVulkanForward::draw() {
 	cb->timestamp(cur_query_offset + 2);
 }
 
-void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) {
+void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
 
 	prepare_lights(cam, rvd);
 
@@ -119,7 +119,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 
-	geo_renderer->draw_skyboxes(cb, rp, cam, (float)fb->width / (float)fb->height, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, cam, params.desired_aspect_ratio, rvd);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;

@@ -61,8 +61,8 @@ class GeometryRendererVulkan : public GeometryRenderer {
 public:
 	GeometryRendererVulkan(RenderPathType type, Renderer *parent);
 
-	void prepare() override;
-	void draw() override {}
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override {}
 
 	GraphicsPipeline *pipeline_fx = nullptr;
 	RenderViewDataVK rvd_def;

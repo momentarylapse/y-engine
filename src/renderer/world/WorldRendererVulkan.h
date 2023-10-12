@@ -65,7 +65,7 @@ public:
 	WorldRendererVulkan(const string &name, Renderer *parent, Camera *cam, RenderPathType type);
 	virtual ~WorldRendererVulkan();
 
-	virtual void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd) = 0;
+	virtual void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) = 0;
 	void render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vec3 &pos);
 
 	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);

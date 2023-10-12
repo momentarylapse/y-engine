@@ -45,21 +45,20 @@ void WindowRendererGL::end_frame() {
 	PerformanceMonitor::end(ch_end);
 }
 
-void WindowRendererGL::prepare() {
+void WindowRendererGL::prepare(const RenderParams& params) {
 
 }
 
-void WindowRendererGL::draw() {
-
+void WindowRendererGL::draw(const RenderParams& params) {
 	for (auto c: children)
-		c->prepare();
+		c->prepare(params);
 
 	bool prev_srgb = nix::get_srgb();
 	nix::set_srgb(true);
 	nix::bind_frame_buffer(_frame_buffer);
 
 	for (auto c: children)
-		c->draw();
+		c->draw(params);
 
 	nix::set_srgb(prev_srgb);
 }

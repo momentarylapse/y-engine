@@ -23,12 +23,9 @@ GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
 	vb->create_quad(rect::ID);
 }
 
-GuiRendererGL::~GuiRendererGL() {
-}
-
-void GuiRendererGL::draw() {
+void GuiRendererGL::draw(const RenderParams& params) {
 	for (auto c: children)
-		c->draw();
+		c->draw(params);
 	draw_gui(nullptr);
 }
 

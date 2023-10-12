@@ -60,7 +60,7 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, Renderer *parent) : 
 	cam = cam_main;
 }
 
-void GeometryRendererGL::prepare() {
+void GeometryRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	prepare_instanced_matrices();

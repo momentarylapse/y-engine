@@ -22,8 +22,8 @@ public:
 	bool start_frame() override;
 	void end_frame() override;
 
-	void prepare() override;
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
 	GLFWwindow* window;
 
@@ -33,9 +33,6 @@ public:
 
 	FrameBuffer *frame_buffer() const override;
 	DepthBuffer *depth_buffer() const override;
-
-
-	bool forwarding_into_window() const override { return true; }
 };
 
 #endif

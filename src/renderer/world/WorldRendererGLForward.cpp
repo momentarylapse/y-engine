@@ -52,7 +52,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent, Camera *cam) : 
 	create_more();
 }
 
-void WorldRendererGLForward::prepare() {
+void WorldRendererGLForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	if (!cam)
@@ -69,7 +69,7 @@ void WorldRendererGLForward::prepare() {
 	}
 
 	prepare_lights();
-	geo_renderer->prepare();
+	geo_renderer->prepare(params);
 
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
@@ -77,11 +77,11 @@ void WorldRendererGLForward::prepare() {
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLForward::draw() {
+void WorldRendererGLForward::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	auto fb = frame_buffer();
-	bool flip_y = rendering_into_window();
+	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(ch_bg);
 
@@ -92,7 +92,7 @@ void WorldRendererGLForward::draw() {
 	// skyboxes
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::clear_color(world.background);
@@ -107,7 +107,7 @@ void WorldRendererGLForward::draw() {
 	// world
 	PerformanceMonitor::begin(ch_world);
 	cam->max_depth = max_depth;
-	cam->update_matrices((float)fb->width / (float)fb->height);
+	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
 
 	nix::bind_buffer(1, ubo_light);

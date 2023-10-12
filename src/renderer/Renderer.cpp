@@ -14,6 +14,16 @@
 #include "../lib/os/msg.h"
 
 
+RenderParams RenderParams::with_no_window() const {
+	RenderParams r = *this;
+	r.target_is_window = false;
+	return r;
+}
+
+const RenderParams RenderParams::WHATEVER = {};
+const RenderParams RenderParams::INTO_TEXTURE = {1.0f, false};
+
+
 Renderer::Renderer(const string &name, Renderer *_parent) {
 	width = engine.width;
 	height = engine.height;
@@ -46,9 +56,9 @@ void Renderer::add_child(Renderer *child) {
 	children.add(child);
 }
 
-void Renderer::prepare() {
+void Renderer::prepare(const RenderParams& params) {
 	for (auto c: children)
-		c->prepare();
+		c->prepare(params);
 }
 
 color Renderer::background() const {
@@ -82,7 +92,7 @@ CommandBuffer *Renderer::command_buffer() const {
 #endif
 
 
-bool Renderer::rendering_into_window() const {
+/*bool Renderer::rendering_into_window() const {
 	if (!parent)
 		return false;
 	return parent->forwarding_into_window();
@@ -92,4 +102,4 @@ bool Renderer::forwarding_into_window() const {
 	if (!parent)
 		return false;
 	return parent->forwarding_into_window();
-}
+}*/

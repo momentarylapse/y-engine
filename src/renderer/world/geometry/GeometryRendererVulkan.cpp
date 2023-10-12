@@ -81,7 +81,7 @@ GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, Renderer *pa
 
 }
 
-void GeometryRendererVulkan::prepare() {
+void GeometryRendererVulkan::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	cam = cam_main;

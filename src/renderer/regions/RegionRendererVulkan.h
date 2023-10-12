@@ -17,7 +17,7 @@ class RegionRendererVulkan : public Renderer {
 public:
 	RegionRendererVulkan(Renderer *parent);
 
-	void draw() override;
+	void draw(const RenderParams& params) override;
 
 	Renderer *add_region(const rect &dest);
 

@@ -13,9 +13,8 @@
 class GuiRendererGL : public Renderer {
 public:
 	GuiRendererGL(Renderer *parent);
-	virtual ~GuiRendererGL();
 
-	void draw() override;
+	void draw(const RenderParams& params) override;
 
 	void draw_gui(FrameBuffer *source);
 

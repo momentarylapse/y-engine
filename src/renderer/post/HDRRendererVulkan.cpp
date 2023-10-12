@@ -51,7 +51,7 @@ HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, Renderer *r, const Ar
 }
 
 
-void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data) {
+void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data, const RenderParams& params) {
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 
@@ -79,7 +79,7 @@ HDRRendererVulkan::RenderIntoData::RenderIntoData(Renderer *r) {
 	fb_main->attachments[0]->set_options("wrap=clamp");
 }
 
-void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r) {
+void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderParams& params) {
 	if (!r)
 		return;
 
@@ -92,7 +92,7 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r) {
 	_render_pass->clear_color = {r->background()};
 	cb->begin_render_pass(_render_pass, fb_main.get());
 
-	r->draw();
+	r->draw(params);
 
 	cb->end_render_pass();
 }
@@ -138,13 +138,13 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr
 HDRRendererVulkan::~HDRRendererVulkan() {
 }
 
-void HDRRendererVulkan::prepare() {
+void HDRRendererVulkan::prepare(const RenderParams& params) {
 	for (auto c: children)
-		c->prepare();
+		c->prepare(params.with_no_window());
 
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
-	into.render_into(children[0]);
+	into.render_into(children[0], params.with_no_window());
 
 	auto cb = command_buffer();
 
@@ -156,12 +156,12 @@ void HDRRendererVulkan::prepare() {
 
 }
 
-void HDRRendererVulkan::draw() {
+void HDRRendererVulkan::draw(const RenderParams& params) {
 	auto cb = command_buffer();
 
 
 	PerformanceMonitor::begin(ch_out);
-	out.render_out(cb, {cam_main->exposure, cam_main->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y});
+	out.render_out(cb, {cam_main->exposure, cam_main->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y}, params);
 	PerformanceMonitor::end(ch_out);
 }
 

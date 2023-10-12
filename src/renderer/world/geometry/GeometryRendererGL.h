@@ -23,8 +23,8 @@ class GeometryRendererGL : public GeometryRenderer {
 public:
 	GeometryRendererGL(RenderPathType type, Renderer *parent);
 
-	void prepare() override;
-	void draw() override {}
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override {}
 
 	void set_material(ShaderCache &cache, Material *m, RenderPathType type, const string &vertex_module, const string &geometry_module);
 	void set_material_x(Material *m, Shader *shader);

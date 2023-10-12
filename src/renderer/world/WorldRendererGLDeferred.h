@@ -22,17 +22,15 @@ public:
 	GeometryRendererGL *geo_renderer_trans = nullptr;
 
 	WorldRendererGLDeferred(Renderer *parent, Camera *cam);
-	void prepare() override;
-	void draw() override;
-
-	bool forwarding_into_window() const override { return false; };
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
 	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
-	void render_into_gbuffer(FrameBuffer *fb);
-	void draw_background(FrameBuffer *fb);
+	void render_into_gbuffer(FrameBuffer *fb, const RenderParams& params);
+	void draw_background(FrameBuffer *fb, const RenderParams& params);
 
 
-	void render_out_from_gbuffer(FrameBuffer *source);
+	void render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params);
 };
 
 #endif

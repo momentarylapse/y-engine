@@ -16,15 +16,15 @@ public:
 	HDRRendererVulkan(Renderer *parent);
 	virtual ~HDRRendererVulkan();
 
-	void prepare() override;
-	void draw() override;
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
 
 	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
 
 	struct RenderIntoData {
 		RenderIntoData() {}
 		RenderIntoData(Renderer *r);
-		void render_into(Renderer *r);
+		void render_into(Renderer *r, const RenderParams& params);
 
 		shared<FrameBuffer> fb_main;
 		DepthBuffer *_depth_buffer = nullptr;
@@ -37,7 +37,7 @@ public:
 	struct RenderOutData {
 		RenderOutData(){}
 		RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex);
-		void render_out(CommandBuffer *cb, const Array<float> &data);
+		void render_out(CommandBuffer *cb, const Array<float> &data, const RenderParams& params);
 		shared<Shader> shader_out;
 		GraphicsPipeline* pipeline_out;
 		DescriptorSet *dset_out;
@@ -51,7 +51,6 @@ public:
 
 	FrameBuffer *frame_buffer() const override { return into.fb_main.get(); };
 	DepthBuffer *depth_buffer() const override { return into._depth_buffer; };
-	bool forwarding_into_window() const override { return false; };
 
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;

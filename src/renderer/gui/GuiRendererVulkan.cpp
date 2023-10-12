@@ -39,12 +39,9 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 	vb->create_quad(rect::ID);
 }
 
-GuiRendererVulkan::~GuiRendererVulkan() {
-}
-
-void GuiRendererVulkan::draw() {
+void GuiRendererVulkan::draw(const RenderParams& params) {
 	for (auto c: children)
-		c->draw();
+		c->draw(params);
 	prepare_gui(parent->frame_buffer());
 	draw_gui(parent->command_buffer());
 }
