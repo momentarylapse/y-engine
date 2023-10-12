@@ -62,6 +62,7 @@ Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 
 xfer<Shader> ResourceManager::__load_shader(const Path& path) {
 #ifdef USING_VULKAN
+	//msg_write("loading shader: " + str(path));
 	return Shader::load(path);
 #else
 	return ctx->load_shader(path);
@@ -100,9 +101,6 @@ shared<Shader> ResourceManager::load_shader(const Path& filename) {
 #endif
 		}
 
-#ifdef USING_VULKAN
-	msg_write("loading shader: " + str(fn));
-#endif
 	auto s = __load_shader(fn);
 	if (!s)
 		return nullptr;
@@ -200,6 +198,16 @@ shared<Shader> ResourceManager::load_surface_shader(const Path& _filename, const
 
 Shader* ResourceManager::create_shader(const string &source) {
 	return __create_shader(source);
+}
+
+void ResourceManager::load_shader_module(const Path& path) {
+	Path fn = guess_absolute_path(path, {shader_dir, hui::Application::directory_static | "shader"});
+	if (fn) {
+		if (shader_modules.find(fn) >= 0)
+			return;
+		shader_modules.add(fn);
+	}
+	load_shader(path);
 }
 
 shared<Texture> ResourceManager::load_texture(const Path& filename) {

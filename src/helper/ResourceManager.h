@@ -26,6 +26,7 @@ public:
 	string expand_vertex_shader_source(const string &source, const string &variant);
 	string expand_fragment_shader_source(const string &source, const string &render_path);
 	string expand_geometry_shader_source(const string &source, const string &variant);
+	void load_shader_module(const Path& path);
 	xfer<Material> load_material(const Path &filename);
 	xfer<Model> load_model(const Path &filename);
 
@@ -39,6 +40,7 @@ public:
 
 
 	shared_array<Shader> shaders;
+	Array<Path> shader_modules;
 	shared_array<Texture> textures;
 	base::map<Path,Shader*> shader_map;
 	base::map<Path,Texture*> texture_map;

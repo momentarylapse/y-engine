@@ -45,16 +45,16 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam) 
 
 
 	resource_manager->default_shader = "default.shader";
-	resource_manager->load_shader("module-lighting-pbr.shader");
-	resource_manager->load_shader("deferred/module-surface.shader");
-	resource_manager->load_shader("forward/module-surface-pbr.shader");
-	resource_manager->load_shader("module-vertex-default.shader");
-	resource_manager->load_shader("module-vertex-animated.shader");
-	resource_manager->load_shader("module-vertex-instanced.shader");
-	resource_manager->load_shader("module-vertex-points.shader");
-	resource_manager->load_shader("module-vertex-fx.shader");
-	resource_manager->load_shader("module-geometry-points.shader");
-	resource_manager->load_shader("module-geometry-lines.shader");
+	resource_manager->load_shader_module("module-lighting-pbr.shader");
+	resource_manager->load_shader_module("deferred/module-surface.shader");
+	resource_manager->load_shader_module("forward/module-surface-pbr.shader");
+	resource_manager->load_shader_module("module-vertex-default.shader");
+	resource_manager->load_shader_module("module-vertex-animated.shader");
+	resource_manager->load_shader_module("module-vertex-instanced.shader");
+	resource_manager->load_shader_module("module-vertex-points.shader");
+	resource_manager->load_shader_module("module-vertex-fx.shader");
+	resource_manager->load_shader_module("module-geometry-points.shader");
+	resource_manager->load_shader_module("module-geometry-lines.shader");
 
 	shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
