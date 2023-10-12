@@ -42,11 +42,11 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 void GuiRendererVulkan::draw(const RenderParams& params) {
 	for (auto c: children)
 		c->draw(params);
-	prepare_gui(parent->frame_buffer());
-	draw_gui(parent->command_buffer());
+	prepare_gui(frame_buffer(), params);
+	draw_gui(command_buffer());
 }
 
-void GuiRendererVulkan::prepare_gui(FrameBuffer *source) {
+void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_gui);
 	gui::update();
 
@@ -73,7 +73,7 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source) {
 				u.m = mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(p->eff_area.width(), p->eff_area.height(), 0);
 			} else {
 				// TODO this should use the physical ratio
-				float r = (float)width / (float)height;
+				float r = params.desired_aspect_ratio;
 				u.m = mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(1/r, 1, 0) * mat4::rotation_z(p->angle) * mat4::scale(p->eff_area.width() * r, p->eff_area.height(), 0);
 			}
 			u.blur = p->bg_blur;

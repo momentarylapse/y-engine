@@ -38,7 +38,7 @@ void RegionRendererGL::draw(const RenderParams& params) {
 			auto sub_params = params;
 			sub_params.desired_aspect_ratio *= r.dest.width() / r.dest.height();
 			auto rr = rect(area.x2 * r.dest.x1, area.x2 * r.dest.x2, area.y2 * r.dest.y1, area.y2 * r.dest.y2);
-			nix::set_viewport(rect(area.x2 * r.dest.x1, area.x2 * r.dest.x2, area.y2 * r.dest.y1, area.y2 * r.dest.y2));
+			nix::set_viewport(rect(rr));
 			nix::set_scissor(rr);
 			r.renderer->draw(sub_params);
 		}

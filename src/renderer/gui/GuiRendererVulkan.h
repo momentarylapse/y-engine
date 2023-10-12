@@ -23,7 +23,7 @@ public:
 	Array<DescriptorSet*> dset;
 	Array<UniformBuffer*> ubo;
 	owned<VertexBuffer> vb;
-	void prepare_gui(FrameBuffer *source);
+	void prepare_gui(FrameBuffer *source, const RenderParams& params);
 	void draw_gui(CommandBuffer *cb);
 };
 
