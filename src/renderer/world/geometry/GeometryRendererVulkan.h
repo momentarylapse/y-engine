@@ -73,8 +73,8 @@ public:
 	void set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, GraphicsPipeline *p);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);
 
-	void draw_particles(CommandBuffer *cb, RenderPass *rp, Camera *cam, RenderViewDataVK &rvd);
-	void draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camera *cam, float aspect, RenderViewDataVK &rvd);
+	void draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd);
+	void draw_skyboxes(CommandBuffer *cb, RenderPass *rp, float aspect, RenderViewDataVK &rvd);
 	void draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);
 	void draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);
 	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);

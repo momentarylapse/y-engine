@@ -72,7 +72,9 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	}
 #endif
 
-	prepare_lights(cam_main, geo_renderer->rvd_def);
+	cam->update_matrices(params.desired_aspect_ratio);
+
+	prepare_lights(cam, geo_renderer->rvd_def);
 	
 	geo_renderer->prepare(params);
 
@@ -89,11 +91,11 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 
 	auto &rvd = geo_renderer->rvd_def;
 
-	geo_renderer->draw_skyboxes(cb, rp, cam, params.desired_aspect_ratio, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, params.desired_aspect_ratio, rvd);
 
 	UBO ubo;
-	ubo.p = cam_main->m_projection;
-	ubo.v = cam_main->m_view;
+	ubo.p = cam->m_projection;
+	ubo.v = cam->m_view;
 	ubo.num_lights = lights.num;
 	ubo.shadow_index = shadow_index;
 
@@ -103,13 +105,17 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	geo_renderer->draw_user_meshes(cb, rp, ubo, false, rvd);
 	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
 
-	geo_renderer->draw_particles(cb, rp, cam_main, rvd);
+	geo_renderer->draw_particles(cb, rp, rvd);
 	geo_renderer->draw_user_meshes(cb, rp, ubo, true, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
 }
 
 void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
+	auto cam0 = this->cam;
+	this->cam = cam;
+
+	geo_renderer->cam = cam;
 
 	prepare_lights(cam, rvd);
 
@@ -119,7 +125,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 
-	geo_renderer->draw_skyboxes(cb, rp, cam, params.desired_aspect_ratio, rvd);
+	geo_renderer->draw_skyboxes(cb, rp, params.desired_aspect_ratio, rvd);
 
 	UBO ubo;
 	ubo.p = cam->m_projection;
@@ -131,10 +137,11 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	geo_renderer->draw_objects_opaque(cb, rp, ubo, rvd);
 	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
 
-	geo_renderer->draw_particles(cb, rp, cam, rvd);
+	geo_renderer->draw_particles(cb, rp, rvd);
 
 	cb->end_render_pass();
 
+	this->cam = cam0;
 }
 
 #endif

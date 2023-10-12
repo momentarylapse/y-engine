@@ -84,8 +84,6 @@ GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, Renderer *pa
 void GeometryRendererVulkan::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
-	cam = cam_main;
-
 	prepare_instanced_matrices();
 
 	PerformanceMonitor::end(channel);
@@ -170,7 +168,7 @@ void GeometryRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, co
 
 
 
-void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, Camera *cam, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_fx);
 	auto &rda = rvd.rda_fx;
 
@@ -311,7 +309,7 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, C
 	PerformanceMonitor::end(ch_fx);
 }
 
-void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, Camera *cam, float aspect, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, float aspect, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_sky;
 
 	int index = 0;

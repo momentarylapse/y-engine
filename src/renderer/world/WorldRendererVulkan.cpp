@@ -116,9 +116,9 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 	if (!fb_cube)
 		fb_cube = new FrameBuffer(render_pass_cube, {depth_cube.get()});
 	Entity o(pos, quaternion::ID);
-	Camera cam;
-	cam.owner = &o;
-	cam.fov = pi/2;
+	Camera cube_cam;
+	cube_cam.owner = &o;
+	cube_cam.fov = pi/2;
 	for (int i=0; i<6; i++) {
 		try {
 			fb_cube->update_x(render_pass_cube, {cube, depth_cube.get()}, i);
@@ -138,9 +138,9 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vec3(0,pi,0));
-		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cam, rvd_cube[i], RenderParams::INTO_TEXTURE);
+		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cube_cam, rvd_cube[i], RenderParams::INTO_TEXTURE);
 	}
-	cam.owner = nullptr;
+	cube_cam.owner = nullptr;
 }
 
 
