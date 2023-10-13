@@ -28,10 +28,11 @@ namespace nix {
 }
 
 
-HDRRendererGL::HDRRendererGL(Renderer *parent) : PostProcessorStage("hdr", parent) {
+HDRRendererGL::HDRRendererGL(Renderer *parent, Camera *_cam) : PostProcessorStage("hdr", parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
+	cam = _cam;
 
 	_depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
@@ -90,8 +91,8 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 	nix::set_textures(source);
 	nix::set_shader(shader);
 	apply_shader_data(shader, data);
-	/*shader->set_float("exposure", cam_main->exposure);
-	shader->set_float("bloom_factor", cam_main->bloom_factor);
+	/*shader->set_float("exposure", cam->exposure);
+	shader->set_float("bloom_factor", cam->bloom_factor);
 	shader->set_float("scale_x", resolution_scale_x);
 	shader->set_float("scale_y", resolution_scale_y);*/
 	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);
@@ -110,6 +111,9 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 
 void HDRRendererGL::prepare(const RenderParams& params) {
 	auto sub_params = params.with_no_window();
+
+	if (!cam)
+		cam = cam_main;
 
 	for (auto c: children)
 		c->prepare(sub_params);
@@ -141,8 +145,8 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 
 void HDRRendererGL::draw(const RenderParams& params) {
 	Any data;
-	data.map_set("exposure", cam_main->exposure);
-	data.map_set("bloom_factor", cam_main->bloom_factor);
+	data.map_set("exposure", cam->exposure);
+	data.map_set("bloom_factor", cam->bloom_factor);
 	data.map_set("scale_x", resolution_scale_x);
 	data.map_set("scale_y", resolution_scale_y);
 
@@ -152,9 +156,9 @@ void HDRRendererGL::draw(const RenderParams& params) {
 }
 
 void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis) {
-	float r = cam_main->bloom_radius * resolution_scale_x;
+	float r = cam->bloom_radius * resolution_scale_x;
 	shader_blur->set_float("radius", r);
-	shader_blur->set_float("threshold", threshold / cam_main->exposure);
+	shader_blur->set_float("threshold", threshold / cam->exposure);
 	shader_blur->set_floats("axis", &axis.x, 2);
 	process(weak(source->color_attachments), target, shader_blur.get());
 }
@@ -183,8 +187,8 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const Render
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
 	nix::set_shader(shader_out.get());
-	shader_out->set_float("exposure", cam_main->exposure);
-	shader_out->set_float("bloom_factor", cam_main->bloom_factor);
+	shader_out->set_float("exposure", cam->exposure);
+	shader_out->set_float("bloom_factor", cam->bloom_factor);
 	shader_out->set_float("scale_x", resolution_scale_x);
 	shader_out->set_float("scale_y", resolution_scale_y);
 	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);

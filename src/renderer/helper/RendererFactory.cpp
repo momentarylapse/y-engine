@@ -83,11 +83,11 @@ RegionRenderer *create_region_renderer(Renderer *parent) {
 #endif
 }
 
-PostProcessorStage *create_hdr_renderer(PostProcessor *parent) {
+PostProcessorStage *create_hdr_renderer(PostProcessor *parent, Camera *cam) {
 #ifdef USING_VULKAN
-	return new HDRRendererVulkan(parent);
+	return new HDRRendererVulkan(parent, cam);
 #else
-	return new HDRRendererGL(parent);
+	return new HDRRendererGL(parent, cam);
 #endif
 }
 
@@ -119,7 +119,7 @@ Renderer *create_render_path(Renderer *parent, Camera *cam) {
 		return engine.world_renderer;
 	} else {
 		engine.post_processor = create_post_processor(parent);
-		engine.hdr_renderer = create_hdr_renderer(engine.post_processor);
+		engine.hdr_renderer = create_hdr_renderer(engine.post_processor, cam);
 		engine.world_renderer = create_world_renderer(engine.hdr_renderer, cam);
 		//post_processor->set_hdr(hdr_renderer);
 		return engine.post_processor;

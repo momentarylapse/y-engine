@@ -51,7 +51,7 @@ HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, Renderer *r, const Ar
 }
 
 
-void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data, const RenderParams& params) {
+void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params) {
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 
@@ -61,7 +61,7 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 		mat4 p, m, v;
 		float x[32];
 	};
-	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, cam_main->exposure};
+	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, exposure};
 	memcpy(&pco.x, &data[0], sizeof(float) * data.num);
 	cb->push_constant(0, sizeof(mat4) * 3 + sizeof(float) * data.num, &pco);
 	cb->draw(vb_2d);
@@ -98,7 +98,8 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 }
 
 
-HDRRendererVulkan::HDRRendererVulkan(Renderer *parent) : PostProcessorStage("hdr", parent) {
+HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam) : PostProcessorStage("hdr", parent) {
+	cam = _cam;
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
@@ -139,6 +140,9 @@ HDRRendererVulkan::~HDRRendererVulkan() {
 }
 
 void HDRRendererVulkan::prepare(const RenderParams& params) {
+	if (!cam)
+		cam = cam_main;
+
 	for (auto c: children)
 		c->prepare(params.with_no_window());
 
@@ -161,7 +165,7 @@ void HDRRendererVulkan::draw(const RenderParams& params) {
 
 
 	PerformanceMonitor::begin(ch_out);
-	out.render_out(cb, {cam_main->exposure, cam_main->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y}, params);
+	out.render_out(cb, {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y}, cam->exposure, params);
 	PerformanceMonitor::end(ch_out);
 }
 
@@ -169,8 +173,8 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	const vec2 AXIS[2] = {{(float)BLUR_SCALE,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
 	UBOBlur u;
-	u.radius = cam_main->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
-	u.threshold = threshold / cam_main->exposure;
+	u.radius = cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
+	u.threshold = threshold / cam->exposure;
 	u.axis = AXIS[iaxis];
 	blur_ubo[iaxis]->update(&u);
 	blur_dset[iaxis]->set_buffer(0, blur_ubo[iaxis]);

@@ -11,10 +11,11 @@
 #ifdef USING_OPENGL
 
 class vec2;
+class Camera;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
-	HDRRendererGL(Renderer *parent);
+	HDRRendererGL(Renderer *parent, Camera *cam);
 	virtual ~HDRRendererGL();
 
 	void prepare(const RenderParams& params) override;
@@ -23,6 +24,8 @@ public:
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis);
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
 	void render_out(FrameBuffer *source, Texture *bloom, const RenderParams& params);
+
+	Camera *cam;
 
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_main_ms;

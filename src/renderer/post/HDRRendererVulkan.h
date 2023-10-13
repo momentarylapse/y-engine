@@ -11,9 +11,11 @@
 #include "PostProcessor.h"
 #ifdef USING_VULKAN
 
+class Camera;
+
 class HDRRendererVulkan : public PostProcessorStage {
 public:
-	HDRRendererVulkan(Renderer *parent);
+	HDRRendererVulkan(Renderer *parent, Camera* cam);
 	virtual ~HDRRendererVulkan();
 
 	void prepare(const RenderParams& params) override;
@@ -37,12 +39,14 @@ public:
 	struct RenderOutData {
 		RenderOutData(){}
 		RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex);
-		void render_out(CommandBuffer *cb, const Array<float> &data, const RenderParams& params);
+		void render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params);
 		shared<Shader> shader_out;
 		GraphicsPipeline* pipeline_out;
 		DescriptorSet *dset_out;
 		VertexBuffer *vb_2d;
 	} out;
+
+	Camera *cam;
 
 
 	FrameBuffer *fb_main;
