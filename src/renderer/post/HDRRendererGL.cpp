@@ -58,6 +58,7 @@ HDRRendererGL::HDRRendererGL(Renderer *parent, Camera *_cam) : PostProcessorStag
 		new nix::Texture(width/2, height/2, "rgba:f16")});
 
 	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
+	fb_main->color_attachments[0]->set_options("magfilter=" + config.resolution_scale_filter);
 	fb_small1->color_attachments[0]->set_options("wrap=clamp");
 	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 

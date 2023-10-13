@@ -128,6 +128,7 @@ void Config::load(const Array<string> &arg) {
 
 	resolution_scale_min = get_float("renderer.resolution-scale-min", 0.5f);
 	resolution_scale_max = get_float("renderer.resolution-scale-max", 1.0f);
+	resolution_scale_filter = get_str("renderer.resolution-scale-filter", "linear");
 	target_framerate = get_float("renderer.target-framerate", 60.0f);
 	min_framerate = get_float("renderer.min-framerate", 10.0f);
 

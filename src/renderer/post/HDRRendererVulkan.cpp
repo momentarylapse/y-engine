@@ -8,13 +8,14 @@
 #include "HDRRendererVulkan.h"
 #ifdef USING_VULKAN
 #include "../base.h"
-#include "../../graphics-impl.h"
-#include "../../helper/PerformanceMonitor.h"
-#include "../../helper/ResourceManager.h"
-#include "../../lib/math/rect.h"
-#include "../../lib/math/vec2.h"
-#include "../../world/Camera.h"
-#include "../../world/World.h"
+#include <graphics-impl.h>
+#include <Config.h>
+#include <helper/PerformanceMonitor.h>
+#include <helper/ResourceManager.h>
+#include <lib/math/rect.h>
+#include <lib/math/vec2.h>
+#include <world/Camera.h>
+#include <world/World.h>
 
 struct UBOBlur{
 	vec2 axis;
@@ -70,13 +71,13 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 
 HDRRendererVulkan::RenderIntoData::RenderIntoData(Renderer *r) {
 	auto tex = new vulkan::Texture(r->width, r->height, "rgba:f16");
+	tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
 	_depth_buffer = new DepthBuffer(r->width, r->height, "d:f32", true);
 	_render_pass = new vulkan::RenderPass({tex, _depth_buffer}, "clear");
 
 	fb_main = new vulkan::FrameBuffer(_render_pass, {
 		tex,
 		_depth_buffer});
-	fb_main->attachments[0]->set_options("wrap=clamp");
 }
 
 void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderParams& params) {
