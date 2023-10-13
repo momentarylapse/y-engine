@@ -40,6 +40,9 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 }
 
 void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
+	geo_renderer->cam = cam;
+	geo_renderer->prepare(RenderParams::into_texture(sfb, 1.0f));
+
 	nix::bind_frame_buffer(sfb);
 
 	auto m = mat4::scale(scale, scale, 1);
@@ -59,9 +62,6 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 
 void ShadowRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
-
-	geo_renderer->cam = cam;
-	geo_renderer->prepare(RenderParams::INTO_TEXTURE);
 
 	render_shadow_map(fb[1].get(), 1);
 	render_shadow_map(fb[0].get(), 4);

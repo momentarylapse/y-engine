@@ -23,9 +23,11 @@ rect dynamicly_scaled_source();
 struct RenderParams {
 	float desired_aspect_ratio;
 	bool target_is_window;
-	RenderParams with_no_window() const;
+	FrameBuffer *frame_buffer;
+	RenderParams with_target(FrameBuffer *fb) const;
 	static const RenderParams WHATEVER;
-	static const RenderParams INTO_TEXTURE;
+	static RenderParams into_window(FrameBuffer *frame_buffer, float aspect_ratio);
+	static RenderParams into_texture(FrameBuffer *frame_buffer, float aspect_ratio);
 };
 
 class Renderer {

@@ -138,7 +138,7 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vec3(0,pi,0));
-		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cube_cam, rvd_cube[i], RenderParams::INTO_TEXTURE);
+		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cube_cam, rvd_cube[i], RenderParams::into_texture(fb_cube.get(), 1.0f));
 	}
 	cube_cam.owner = nullptr;
 }

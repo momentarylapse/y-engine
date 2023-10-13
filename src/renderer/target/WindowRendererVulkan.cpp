@@ -134,17 +134,18 @@ void WindowRendererVulkan::draw(const RenderParams& params) {
 	auto cb = command_buffer();
 	auto rp = render_pass();
 	auto fb = frame_buffer();
+	auto sub_params = RenderParams::into_window(fb, params.desired_aspect_ratio);
 
 	cb->begin();
 	for (auto c: children)
-		c->prepare(params);
+		c->prepare(sub_params);
 
 	cb->set_viewport(area());
 	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
 
 	for (auto c: children)
-		c->draw(params);
+		c->draw(sub_params);
 
 	cb->end_render_pass();
 	cb->end();

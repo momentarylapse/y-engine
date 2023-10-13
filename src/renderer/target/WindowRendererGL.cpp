@@ -50,15 +50,16 @@ void WindowRendererGL::prepare(const RenderParams& params) {
 }
 
 void WindowRendererGL::draw(const RenderParams& params) {
+	auto sub_params = RenderParams::into_window(_frame_buffer, params.desired_aspect_ratio);
 	for (auto c: children)
-		c->prepare(params);
+		c->prepare(sub_params);
 
 	bool prev_srgb = nix::get_srgb();
 	nix::set_srgb(true);
 	nix::bind_frame_buffer(_frame_buffer);
 
 	for (auto c: children)
-		c->draw(params);
+		c->draw(sub_params);
 
 	nix::set_srgb(prev_srgb);
 }

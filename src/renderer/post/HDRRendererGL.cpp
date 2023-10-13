@@ -110,7 +110,7 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 }
 
 void HDRRendererGL::prepare(const RenderParams& params) {
-	auto sub_params = params.with_no_window();
+	auto sub_params = params.with_target((config.antialiasing_method == AntialiasingMethod::MSAA) ? fb_main_ms.get() : fb_main.get());
 
 	if (!cam)
 		cam = cam_main;

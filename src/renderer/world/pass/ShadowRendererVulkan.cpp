@@ -51,14 +51,14 @@ void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, const mat4 &m) {
 }
 
 void ShadowRendererVulkan::prepare(const RenderParams& params) {
-	geo_renderer->cam = cam;
-	geo_renderer->prepare(RenderParams::INTO_TEXTURE);
 	auto cb = command_buffer();
 	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);
 	render_shadow_map(cb, fb[1].get(), 1, rvd[1]);
 }
 
 void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
+	geo_renderer->cam = cam;
+	geo_renderer->prepare(RenderParams::into_texture(sfb, 1.0f));
 
 	cb->begin_render_pass(render_pass(), sfb);
 	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));

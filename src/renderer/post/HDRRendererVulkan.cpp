@@ -143,12 +143,14 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 	if (!cam)
 		cam = cam_main;
 
+	auto sub_params = params.with_target(into.fb_main.get());
+
 	for (auto c: children)
-		c->prepare(params.with_no_window());
+		c->prepare(sub_params);
 
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
-	into.render_into(children[0], params.with_no_window());
+	into.render_into(children[0], sub_params);
 
 	auto cb = command_buffer();
 

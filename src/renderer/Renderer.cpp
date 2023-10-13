@@ -14,14 +14,22 @@
 #include "../lib/os/msg.h"
 
 
-RenderParams RenderParams::with_no_window() const {
+const RenderParams RenderParams::WHATEVER = {};
+
+RenderParams RenderParams::with_target(FrameBuffer *fb) const {
 	RenderParams r = *this;
+	r.frame_buffer = fb;
 	r.target_is_window = false;
 	return r;
 }
 
-const RenderParams RenderParams::WHATEVER = {};
-const RenderParams RenderParams::INTO_TEXTURE = {1.0f, false};
+RenderParams RenderParams::into_window(FrameBuffer *frame_buffer, float aspect_ratio) {
+	return {aspect_ratio, true, frame_buffer};
+
+}
+RenderParams RenderParams::into_texture(FrameBuffer *frame_buffer, float aspect_ratio) {
+	return {aspect_ratio, false, frame_buffer};
+}
 
 
 Renderer::Renderer(const string &name, Renderer *_parent) {

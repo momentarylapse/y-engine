@@ -90,10 +90,12 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	geo_renderer_trans->cam = cam;
 	shadow_renderer->cam = cam;
 
+	auto sub_params = params.with_target(gbuffer.get());
+
 	prepare_lights();
 
-	geo_renderer->prepare(params.with_no_window());
-	geo_renderer_trans->prepare(params);
+	geo_renderer->prepare(sub_params);
+	geo_renderer_trans->prepare(params); // keep drawing into direct target
 	geo_renderer_trans->ubo_light = ubo_light;
 	geo_renderer_trans->num_lights = lights.num;
 	geo_renderer_trans->shadow_index = shadow_index;
@@ -102,7 +104,7 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	if (shadow_index >= 0)
 		shadow_renderer->render(shadow_proj);
 
-	render_into_gbuffer(gbuffer.get(), params.with_no_window());
+	render_into_gbuffer(gbuffer.get(), sub_params);
 
 	//auto source = do_post_processing(fb_main.get());
 
