@@ -209,10 +209,6 @@ static shaderc_compiler_t shaderc = nullptr;
 		string source = expand_shader_source(_source, meta);
 		if (source.num == 0)
 			return nullptr;
-
-		//msg_error(source);
-
-
 		static shaderc_compile_options_t options;
 		if (!shaderc) {
 			shaderc = shaderc_compiler_initialize();
