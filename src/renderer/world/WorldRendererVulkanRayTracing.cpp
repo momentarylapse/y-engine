@@ -126,13 +126,13 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
 		vulkan::ImageLayout::UNDEFINED, vulkan::ImageLayout::GENERAL);
 
-	auto models = ComponentManager::get_list_family<Model>();
-	auto terrains = ComponentManager::get_list_family<Terrain>();
+	auto& models = ComponentManager::get_list_family<Model>();
+	auto& terrains = ComponentManager::get_list_family<Terrain>();
 
 
 	Array<MeshDescription> meshes;
 
-	for (auto m: *models) {
+	for (auto m: models) {
 		m->update_matrix();
 		for (int i=0; i<m->material.num; i++) {
 			auto material = m->material[i];
@@ -147,7 +147,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 			meshes.add(md);
 		}
 	}
-	for (auto *t: *terrains) {
+	for (auto *t: terrains) {
 		auto o = t->owner;
 
 		MeshDescription md;
@@ -169,12 +169,12 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 
 		if (rtx.tlas) {
 			// update
-			for (auto m: *models) {
+			for (auto m: models) {
 				m->update_matrix();
 				for (int i=0; i<m->material.num; i++)
 					matrices.add(m->owner->get_matrix().transpose());
 			}
-			for (auto *t: *terrains) {
+			for (auto *t: terrains) {
 				auto o = t->owner;
 				matrices.add(mat4::translation(o->pos).transpose());
 			}
@@ -191,7 +191,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 				}
 			};
 
-			for (auto m: *models) {
+			for (auto m: models) {
 				m->update_matrix();
 				for (int i=0; i<m->material.num; i++) {
 					m->update_matrix();
@@ -202,7 +202,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 				}
 			}
 
-			for (auto *t: *terrains) {
+			for (auto *t: terrains) {
 				auto o = t->owner;
 				make_indexed(t->vertex_buffer.get());
 				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, t->vertex_buffer.get()));

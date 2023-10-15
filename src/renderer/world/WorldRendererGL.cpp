@@ -13,10 +13,11 @@
 #include "geometry/GeometryRendererGL.h"
 #include "pass/ShadowRendererGL.h"
 #include "../base.h"
-#include "../../graphics-impl.h"
-#include "../../world/World.h"
-#include "../../world/Light.h"
-#include "../../helper/PerformanceMonitor.h"
+#include <graphics-impl.h>
+#include <world/World.h>
+#include <world/Light.h>
+#include <helper/PerformanceMonitor.h>
+#include <y/ComponentManager.h>
 
 
 namespace nix {
@@ -55,7 +56,8 @@ void WorldRendererGL::prepare_lights() {
 
 	lights.clear();
 	shadow_index = -1;
-	for (auto *l: world.lights) {
+	auto& all_lights = ComponentManager::get_list_family<Light>();
+	for (auto l: all_lights) {
 		if (!l->enabled)
 			continue;
 

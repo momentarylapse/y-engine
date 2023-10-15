@@ -396,7 +396,6 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_element("World.background", &World::background);
 	ext->declare_class_element("World.skyboxes", &World::skybox);
-	ext->declare_class_element("World.lights", &World::lights);
 	ext->declare_class_element("World.links", &World::links);
 	ext->declare_class_element("World.ego", &World::ego);
 	ext->declare_class_element("World.fog", &World::fog);
@@ -411,9 +410,10 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.create_entity", &World::create_entity);
 	ext->link_class_func("World.register_entity", &World::register_entity);
 	ext->link_class_func("World.set_active_physics", &World::set_active_physics);
-	ext->link_class_func("World.add_light_parallel", &World::add_light_parallel);
-	ext->link_class_func("World.add_light_point", &World::add_light_point);
-	ext->link_class_func("World.add_light_cone", &World::add_light_cone);
+	ext->link_class_func("World.create_light_parallel", &World::create_light_parallel);
+	ext->link_class_func("World.create_light_point", &World::create_light_point);
+	ext->link_class_func("World.create_light_cone", &World::create_light_cone);
+	ext->link_class_func("World.create_camera", &World::create_camera);
 	ext->link_class_func("World.add_link", &World::add_link);
 	ext->link_class_func("World.add_particle", &World::add_legacy_particle);
 	ext->link_class_func("World.add_sound", &World::add_sound);
@@ -805,7 +805,6 @@ void PluginManager::export_kaba() {
 	ext->link("cam", &cam_main);
 	ext->link("engine", &engine);
 	ext->link("__get_controller", (void*)&PluginManager::get_controller);
-	ext->link("add_camera", (void*)&add_camera);
 	ext->link("Scheduler.subscribe", (void*)&Scheduler::subscribe);
 
 	ext->link("load_model", (void*)&__load_model);
@@ -845,6 +844,7 @@ void PluginManager::import_kaba() {
 	import_component_class<MultiInstance>(m_world, "MultiInstance");
 	import_component_class<Terrain>(m_world, "Terrain");
 	import_component_class<Light>(m_world, "Light");
+	import_component_class<Camera>(m_world, "Camera");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
@@ -852,7 +852,6 @@ void PluginManager::import_kaba() {
 
 	auto m_y = kaba::default_context->load_module("y/y.kaba");
 	import_component_class<UserMesh>(m_y, "UserMesh");
-	import_component_class<Camera>(m_y, "Camera");
 
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);

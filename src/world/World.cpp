@@ -229,10 +229,6 @@ void World::reset() {
 	num_reserved_objects = 0;
 
 #ifdef _X_ALLOW_X_
-	//for (auto *l: lights)
-	//	delete l->owner;
-	lights.clear();
-
 	particle_manager->clear();
 #endif
 
@@ -329,7 +325,7 @@ bool World::load(const LevelData &ld) {
 	background = ld.background_color;
 
 	for (auto &c: ld.cameras) {
-		auto cc = add_camera(c.pos, quaternion::rotation(c.ang));
+		auto cc = create_camera(c.pos, quaternion::rotation(c.ang));
 		cam_main = cc;
 		cc->min_depth = c.min_depth;
 		cc->max_depth = c.max_depth;
@@ -338,10 +334,10 @@ bool World::load(const LevelData &ld) {
 
 		add_components(cam_main->owner, c.components);
 	}
-	auto cameras = ComponentManager::get_list_family<Camera>();
-	if (cameras->num == 0) {
+	auto& cameras = ComponentManager::get_list_family<Camera>();
+	if (cameras.num == 0) {
 		msg_error("no camera defined... creating one");
-		cam_main = add_camera(v_0, quaternion::ID);
+		cam_main = create_camera(v_0, quaternion::ID);
 	}
 
 	// objects
@@ -435,11 +431,6 @@ Entity *World::create_entity(const vec3 &pos, const quaternion &ang) {
 void World::register_entity(Entity *e) {
 	if ([[maybe_unused]] auto m = e->get_component<Model>())
 		register_object(e);
-
-#ifdef _X_ALLOW_X_
-	if (auto l = e->get_component<Light>())
-		lights.add(l);
-#endif
 
 	entities.add(e);
 	e->on_init_rec();
@@ -662,15 +653,6 @@ bool World::unregister(BaseClass* x) {
 	if (x->type == BaseClass::Type::ENTITY) {
 		auto e = (Entity*)x;
 		unregister_entity(e);
-/*	} else if (x->type == Entity::Type::LIGHT) {
-#ifdef _X_ALLOW_X_
-		foreachi(auto *l, lights, i)
-			if (l == x) {
-				//msg_write(" -> LIGHT");
-				lights.erase(i);
-				return true;
-			}
-#endif*/
 	} else if (x->type == BaseClass::Type::LINK) {
 		foreachi(auto *l, links, i)
 			if (l == x) {
@@ -749,22 +731,22 @@ void World::unregister_model(Model *m) {
 }
 
 void World::iterate_physics(float dt) {
-	auto list = ComponentManager::get_list_family<SolidBody>();
+	auto& list = ComponentManager::get_list_family<SolidBody>();
 
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
 #if HAS_LIB_BULLET
 		dynamicsWorld->setGravity(bt_set_v(gravity));
 		dynamicsWorld->stepSimulation(dt, 10);
 
-		for (auto *o: *list)
+		for (auto *o: list)
 			o->get_state_from_bullet();
 #endif
 	} else if (physics_mode == PhysicsMode::SIMPLE) {
-		for (auto *o: *list)
+		for (auto *o: list)
 			o->do_simple_physics(dt);
 	}
 
-	for (auto *sb: *list) {
+	for (auto *sb: list) {
 		if (auto m = sb->owner->get_component<Model>())
 			m->update_matrix();
 	}
@@ -773,14 +755,14 @@ void World::iterate_physics(float dt) {
 void World::iterate_animations(float dt) {
 #ifdef _X_ALLOW_X_
 	PerformanceMonitor::begin(ch_animation);
-	auto list = ComponentManager::get_list_family<Animator>();
-	for (auto *o: *list)
+	auto& list = ComponentManager::get_list_family<Animator>();
+	for (auto *o: list)
 		o->do_animation(dt);
 
 
 	// TODO
-	auto list2 = ComponentManager::get_list_family<Skeleton>();
-	for (auto *o: *list2) {
+	auto& list2 = ComponentManager::get_list_family<Skeleton>();
+	for (auto *o: list2) {
 		for (auto &b: o->bones) {
 			if ([[maybe_unused]] auto *mm = b.get_component<Model>()) {
 //				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
@@ -821,7 +803,7 @@ void World::iterate(float dt) {
 #endif
 }
 
-Light *World::add_light_parallel(const quaternion &ang, const color &c) {
+Light *World::create_light_parallel(const quaternion &ang, const color &c) {
 #ifdef _X_ALLOW_X_
 	auto o = create_entity(v_0, ang);
 
@@ -834,7 +816,7 @@ Light *World::add_light_parallel(const quaternion &ang, const color &c) {
 #endif
 }
 
-Light *World::add_light_point(const vec3 &pos, const color &c, float r) {
+Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
 #ifdef _X_ALLOW_X_
 	auto o = create_entity(pos, quaternion::ID);
 
@@ -847,7 +829,7 @@ Light *World::add_light_point(const vec3 &pos, const color &c, float r) {
 #endif
 }
 
-Light *World::add_light_cone(const vec3 &pos, const quaternion &ang, const color &c, float r, float t) {
+Light *World::create_light_cone(const vec3 &pos, const quaternion &ang, const color &c, float r, float t) {
 #ifdef _X_ALLOW_X_
 	auto o = create_entity(pos, ang);
 
@@ -858,6 +840,15 @@ Light *World::add_light_cone(const vec3 &pos, const quaternion &ang, const color
 #else
 	return nullptr;
 #endif
+}
+
+Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
+	auto o = create_entity(pos, ang);
+
+	auto c = new Camera();
+	o->_add_component_external_(c);
+	register_entity(o);
+	return c;
 }
 
 LegacyParticle* World::add_legacy_particle(xfer<LegacyParticle> p) {
@@ -878,8 +869,8 @@ void World::shift_all(const vec3 &dpos) {
 		//if (auto m = e->get_component<Model>())
 		//	m->update_matrix();
 	}
-	auto list = ComponentManager::get_list_family<Model>();
-	for (auto *m: *list)
+	auto& list = ComponentManager::get_list_family<Model>();
+	for (auto *m: list)
 		m->update_matrix();
 #ifdef _X_ALLOW_X_
 	for (auto *s: sounds)

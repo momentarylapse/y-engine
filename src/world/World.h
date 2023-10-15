@@ -27,6 +27,7 @@ class MultiInstance;
 class Entity;
 class TemplateDataScriptVariable;
 class Light;
+class Camera;
 class ParticleManager;
 class LegacyParticle;
 class Link;
@@ -117,10 +118,11 @@ public:
 	Array<Model*> skybox;
 	Fog fog;
 
-	Array<Light*> lights;
-	Light *add_light_parallel(const quaternion &ang, const color &c);
-	Light *add_light_point(const vec3 &p, const color &c, float r);
-	Light *add_light_cone(const vec3 &p, const quaternion &ang, const color &c, float r, float t);
+	Light *create_light_parallel(const quaternion &ang, const color &c);
+	Light *create_light_point(const vec3 &p, const color &c, float r);
+	Light *create_light_cone(const vec3 &p, const quaternion &ang, const color &c, float r, float t);
+
+	Camera *create_camera(const vec3 &pos, const quaternion &ang);
 
 	ParticleManager *particle_manager;
 	LegacyParticle *add_legacy_particle(xfer<LegacyParticle> p);

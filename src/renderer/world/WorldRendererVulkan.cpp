@@ -148,7 +148,8 @@ void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
 	lights.clear();
-	for (auto *l: world.lights) {
+	auto& all_lights = ComponentManager::get_list_family<Light>();
+	for (auto *l: all_lights) {
 		if (!l->enabled)
 			continue;
 

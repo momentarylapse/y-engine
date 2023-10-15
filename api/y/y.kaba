@@ -15,26 +15,6 @@ use y.net
 let EXPORT_IMPORTS = true
 
 
-class Camera extends Component
-	var m_view: mat4
-	var exposure: float
-	var bloom_radius: float
-	var bloom_factor: float
-	
-	var focus_enabled: bool
-	var focal_length: float
-	var focal_blur: float
-	
-	var fov: float
-	var min_depth, max_depth: float
-	
-	var show, enabled: bool
-
-	func extern project(p: vec3) -> vec3
-	func extern unproject(p: vec3) -> vec3
-	func extern mut update_matrices(aspect_ratio: float)
-
-
 class UserMesh extends Component
 	vertex_buffer: owned[VertexBuffer]
 	topology: PrimitiveTopology
@@ -45,11 +25,8 @@ class UserMesh extends Component
 
 class TimeTable
 	func extern __init__()
-	func extern at(t: float, f: void->void)
+	func extern mut at(t: float, f: void->void)
 	func extern iterate(dt: float)
-
-
-func extern add_camera(pos: vec3, ang: quaternion) -> Camera&
 
 
 func extern create_render_path(parent: Renderer&, cam: Camera&) -> xfer[Renderer]

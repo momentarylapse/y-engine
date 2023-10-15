@@ -218,8 +218,8 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 
 
 	// new particles
-	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
-	for (auto g: *particle_groups) {
+	auto& particle_groups = ComponentManager::get_list_family<ParticleGroup>();
+	for (auto g: particle_groups) {
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
 				pool->create_set(shader_fx.get()),
@@ -253,7 +253,7 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 	}
 
 	// beams
-	for (auto g: *particle_groups) {
+	for (auto g: particle_groups) {
 		if (g->beams.num == 0)
 			continue;
 
@@ -319,10 +319,12 @@ void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, fl
 	cam->max_depth = 2000000;
 	cam->update_matrices(aspect);
 
+	auto& light_list = ComponentManager::get_list_family<MultiInstance>();
+
 	ubo.p = cam->m_projection;
 	ubo.v = mat4::rotation(cam->owner->ang).transpose();
 	ubo.m = mat4::ID;
-	ubo.num_lights = world.lights.num;
+	ubo.num_lights = light_list.num;
 
 	for (auto *sb: world.skybox) {
 		sb->_matrix = mat4::rotation(sb->owner->ang);
@@ -363,8 +365,8 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 
 	ubo.m = mat4::ID;
 
-	auto terrains = ComponentManager::get_list_family<Terrain>();
-	for (auto *t: *terrains) {
+	auto& terrains = ComponentManager::get_list_family<Terrain>();
+	for (auto *t: terrains) {
 		auto o = t->owner;
 		ubo.m = mat4::translation(o->pos);
 		ubo.albedo = t->material->albedo;
@@ -400,9 +402,9 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 	int index = 0;
 	ubo.m = mat4::ID;
 
-	auto list = ComponentManager::get_list_family<MultiInstance>();
+	auto& list = ComponentManager::get_list_family<MultiInstance>();
 
-	for (auto mi: *list) {
+	for (auto mi: list) {
 		auto m = mi->model;
 		for (int i=0; i<m->material.num; i++) {
 			auto material = m->material[i];
@@ -446,9 +448,9 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 
 	ubo.m = mat4::ID;
 
-	auto list = ComponentManager::get_list_family<Model>();
+	auto& list = ComponentManager::get_list_family<Model>();
 
-	for (auto m: *list) {
+	for (auto m: list) {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 		for (int i=0; i<m->material.num; i++) {
 			auto material = m->material[i];
@@ -493,9 +495,9 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 
 	ubo.m = mat4::ID;
 
-	auto list = ComponentManager::get_list_family<Model>();
+	auto& list = ComponentManager::get_list_family<Model>();
 
-	for (auto m: *list) {
+	for (auto m: list) {
 		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 		for (int i=0; i<m->material.num; i++) {
 			auto material = m->material[i];
@@ -535,9 +537,9 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 
 	ubo.m = mat4::ID;
 
-	auto meshes = ComponentManager::get_list_family<UserMesh>();
+	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 
-	for (auto m: *meshes) {
+	for (auto m: meshes) {
 		if (!m->material->cast_shadow and is_shadow_pass())
 			continue;
 		if (m->material->is_transparent() != transparent)
@@ -581,8 +583,8 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 
 void GeometryRendererVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
-	auto list = ComponentManager::get_list_family<MultiInstance>();
-	for (auto *mi: *list) {
+	auto& list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: list) {
 		if (!mi->ubo_matrices)
 			mi->ubo_matrices = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
 		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, MAX_INSTANCES) * sizeof(mat4));

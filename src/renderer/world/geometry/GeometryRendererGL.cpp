@@ -154,8 +154,8 @@ void GeometryRendererGL::draw_particles() {
 	}
 
 
-	auto particle_groups = ComponentManager::get_list_family<ParticleGroup>();
-	for (auto g: *particle_groups) {
+	auto& particle_groups = ComponentManager::get_list_family<ParticleGroup>();
+	for (auto g: particle_groups) {
 		nix::bind_texture(0, g->texture);
 		int count = 0;
 		for (auto& p: g->particles)
@@ -177,7 +177,7 @@ void GeometryRendererGL::draw_particles() {
 	//Array<Vertex1> v = {{v_0, v_0, 0,0}, {v_0, v_0, 0,1}, {v_0, v_0, 1,1}, {v_0, v_0, 0,0}, {v_0, v_0, 1,1}, {v_0, v_0, 1,0}};
 	nix::set_shader(shader_fx.get());
 	nix::set_model_matrix(mat4::ID);
-	for (auto g: *particle_groups) {
+	for (auto g: particle_groups) {
 		nix::bind_texture(0, g->texture);
 		auto source = g->source;
 
@@ -238,8 +238,8 @@ void GeometryRendererGL::draw_skyboxes() {
 }
 
 void GeometryRendererGL::draw_terrains() {
-	auto terrains = ComponentManager::get_list_family<Terrain>();
-	for (auto *t: *terrains) {
+	auto& terrains = ComponentManager::get_list_family<Terrain>();
+	for (auto *t: terrains) {
 		if (!t->material->cast_shadow and is_shadow_pass())
 			continue;
 		auto o = t->owner;
@@ -258,8 +258,8 @@ void GeometryRendererGL::draw_terrains() {
 }
 
 void GeometryRendererGL::draw_objects_instanced() {
-	auto list = ComponentManager::get_list_family<MultiInstance>();
-	for (auto *mi: *list) {
+	auto& list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: list) {
 		auto m = mi->model;
 		for (int i=0; i<m->material.num; i++) {
 			if (!m->material[i]->cast_shadow and is_shadow_pass())
@@ -278,8 +278,8 @@ void GeometryRendererGL::draw_objects_instanced() {
 }
 
 void GeometryRendererGL::draw_objects_opaque() {
-	auto list = ComponentManager::get_list_family<Model>();
-	for (auto *m: *list) {
+	auto& list = ComponentManager::get_list_family<Model>();
+	for (auto *m: list) {
 		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
 
@@ -309,8 +309,8 @@ void GeometryRendererGL::draw_objects_transparent() {
 		return;
 	nix::set_z(false, true);
 	nix::set_cull(nix::CullMode::NONE);
-	auto list = ComponentManager::get_list_family<Model>();
-	for (auto *m: *list) {
+	auto& list = ComponentManager::get_list_family<Model>();
+	for (auto *m: list) {
 		m->update_matrix();
 		nix::set_model_matrix(m->_matrix);
 
@@ -332,8 +332,8 @@ void GeometryRendererGL::draw_objects_transparent() {
 }
 
 void GeometryRendererGL::draw_user_meshes(bool transparent) {
-	auto meshes = ComponentManager::get_list_family<UserMesh>();
-	for (auto *m: *meshes) {
+	auto& meshes = ComponentManager::get_list_family<UserMesh>();
+	for (auto *m: meshes) {
 		if (m->material->is_transparent() != transparent)
 			continue;
 		if (!m->material->cast_shadow and is_shadow_pass())
@@ -361,8 +361,8 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 
 void GeometryRendererGL::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
-	auto list = ComponentManager::get_list_family<MultiInstance>();
-	for (auto *mi: *list) {
+	auto& list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: list) {
 		if (!mi->ubo_matrices)
 			mi->ubo_matrices = new nix::UniformBuffer();
 		mi->ubo_matrices->update_array(mi->matrices);
