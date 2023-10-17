@@ -171,6 +171,14 @@ void depthbuffer_init(DepthBuffer *t, int w, int h, const string &format) {
 #endif
 }
 
+void volumetexture_init(VolumeTexture *t, int nx, int ny, int nz, const string &format) {
+#ifdef USING_VULKAN
+	//new(t) DepthBuffer(w, h, format, true);
+#else
+	new(t) VolumeTexture(nx, ny, nz, format);
+#endif
+}
+
 void shader_set_float(Shader *s, const string &name, float f) {
 #ifdef USING_VULKAN
 	msg_error("unimplemented:  Shader.set_float()");
@@ -789,6 +797,8 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("CubeMap.__init__", &cubemap_init);
 
 	ext->link_class_func("DepthBuffer.__init__", &depthbuffer_init);
+
+	ext->link_class_func("VolumeTexture.__init__", &volumetexture_init);
 
 	ext->link_class_func("Shader.set_float", &shader_set_float);
 	ext->link_class_func("Shader.set_floats", &shader_set_floats);

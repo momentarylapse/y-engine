@@ -3,9 +3,9 @@ use y
 class X extends Controller
 	var pic: shared![Picture][]
 	func override on_init()
-		for db in engine.render_path.fb_shadow.depth_buffer()
+		for shared db in engine.render_path.fb_shadow.depth_buffer()
 			pic.add(new Picture([0.2,0.4, 0.0,0.2], db, [0,1, 0,1]))
-		for db in engine.render_path.fb_shadow2.depth_buffer()
+		for shared db in engine.render_path.fb_shadow2.depth_buffer()
 			pic.add(new Picture([0.2,0.4, 0.2,0.4], db, [0,1, 0,1]))
 		
 		for p in pic

@@ -43,6 +43,8 @@ class CubeMap extends Texture
 	func extern __init__(size: int, format: string)
 class DepthBuffer extends Texture
 	func extern override __init__(w: int, h: int, format: string)
+class VolumeTexture extends Texture
+	func extern __init__(nx: int, ny: int, nz: int, format: string)
 
 class VertexBuffer
 	func extern __init__(format: string = "3f,3f,2f")
