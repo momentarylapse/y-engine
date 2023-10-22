@@ -43,7 +43,7 @@ void RegionRendererGL::draw(const RenderParams& params) {
 			r.renderer->draw(sub_params);
 		}
 	}
-	nix::set_scissor(area);
+	nix::set_scissor(rect::EMPTY);
 	nix::set_viewport(area);
 }
 
