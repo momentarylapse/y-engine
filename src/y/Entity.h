@@ -34,7 +34,7 @@ public:
 		return (C*)_get_component_untyped_(C::_class);
 	}
 
-	void _add_component_external_(Component *c);
+	void _add_component_external_no_init_(Component *c);
 
 
 	vec3 pos;

@@ -279,12 +279,12 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-void add_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
+void add_components_no_init(Entity *ent, const Array<LevelData::ScriptData> &components) {
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		[[maybe_unused]] auto comp = ent->add_component(type, cc.var);
+		[[maybe_unused]] auto comp = ent->add_component_no_init(type, cc.var);
 #endif
 	}
 }
@@ -309,8 +309,8 @@ bool World::load(const LevelData &ld) {
 		ll->enabled = l.enabled;
 		if (ll->light.radius < 0)
 			ll->allow_shadow = true;
-		o->_add_component_external_(ll);
-		add_components(o, l.components);
+		o->_add_component_external_no_init_(ll);
+		add_components_no_init(o, l.components);
 		register_entity(o);
 	}
 #endif
@@ -332,7 +332,7 @@ bool World::load(const LevelData &ld) {
 		cc->exposure = c.exposure;
 		cc->fov = c.fov;
 
-		add_components(cam_main->owner, c.components);
+		add_components_no_init(cam_main->owner, c.components);
 	}
 	auto& cameras = ComponentManager::get_list_family<Camera>();
 	if (cameras.num == 0) {
@@ -350,7 +350,7 @@ bool World::load(const LevelData &ld) {
 			//try {
 				auto q = quaternion::rotation(o.ang);
 				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q);
-				add_components(oo, o.components);
+				add_components_no_init(oo, o.components);
 				request_next_object_index(i);
 				register_entity(oo);
 				if (ld.ego_index == i)
@@ -369,7 +369,7 @@ bool World::load(const LevelData &ld) {
 		auto tt = create_terrain_no_reg(t.filename, t.pos);
 		register_entity(tt->owner);
 
-		add_components(tt->owner, t.components);
+		add_components_no_init(tt->owner, t.components);
 		ok &= !tt->error;
 	}
 
@@ -471,21 +471,21 @@ Entity *World::create_object_no_reg_x(const Path &filename, const string &name, 
 	auto *m = engine.resource_manager->load_model(filename);
 	m->script_data.name = name;
 
-	e->_add_component_external_(m);
+	e->_add_component_external_no_init_(m);
 	m->update_matrix();
 
 
 	// automatic components
 	if (m->_template->solid_body) {
-		[[maybe_unused]] auto col = (MeshCollider*)e->add_component(MeshCollider::_class, "");
-		[[maybe_unused]] auto sb = (SolidBody*)e->add_component(SolidBody::_class, "");
+		[[maybe_unused]] auto col = (MeshCollider*)e->add_component_no_init(MeshCollider::_class, "");
+		[[maybe_unused]] auto sb = (SolidBody*)e->add_component_no_init(SolidBody::_class, "");
 	}
 
 	if (m->_template->skeleton)
-		e->add_component(Skeleton::_class, "");
+		e->add_component_no_init(Skeleton::_class, "");
 
 	if (m->_template->animator)
-		e->add_component(Animator::_class, "");
+		e->add_component_no_init(Animator::_class, "");
 
 	return e;
 }
@@ -493,7 +493,7 @@ Entity *World::create_object_no_reg_x(const Path &filename, const string &name, 
 Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 
 	auto e = create_entity(vec3::ZERO, quaternion::ID);
-	auto mi = (MultiInstance*)e->add_component(MultiInstance::_class, "");
+	auto mi = (MultiInstance*)e->add_component_no_init(MultiInstance::_class, "");
 
 	mi->model = engine.resource_manager->load_model(filename);
 
@@ -808,7 +808,7 @@ Light *World::create_light_parallel(const quaternion &ang, const color &c) {
 	auto o = create_entity(v_0, ang);
 
 	auto l = new Light(c, -1, -1);
-	o->_add_component_external_(l);
+	o->_add_component_external_no_init_(l);
 	register_entity(o);
 	return l;
 #else
@@ -821,7 +821,7 @@ Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
 	auto o = create_entity(pos, quaternion::ID);
 
 	auto l = new Light(c, r, -1);
-	o->_add_component_external_(l);
+	o->_add_component_external_no_init_(l);
 	register_entity(o);
 	return l;
 #else
@@ -834,7 +834,7 @@ Light *World::create_light_cone(const vec3 &pos, const quaternion &ang, const co
 	auto o = create_entity(pos, ang);
 
 	auto l = new Light(c, r, t);
-	o->_add_component_external_(l);
+	o->_add_component_external_no_init_(l);
 	register_entity(o);
 	return l;
 #else
@@ -846,7 +846,7 @@ Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 	auto o = create_entity(pos, ang);
 
 	auto c = new Camera();
-	o->_add_component_external_(c);
+	o->_add_component_external_no_init_(c);
 	register_entity(o);
 	return c;
 }
