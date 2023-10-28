@@ -106,6 +106,11 @@ Entity* _create_object_multi(World *w, const Path &filename, const Array<vec3> &
 	return nullptr;
 }
 
+Model* _attach_model(World *w, Entity& e, const Path &filename) {
+	KABA_EXCEPTION_WRAPPER( return &w->attach_model(e, filename); );
+	return nullptr;
+}
+
 void framebuffer_init(FrameBuffer *fb, const shared_array<Texture> &tex) {
 #ifdef USING_VULKAN
 	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__() for vulkan"));
@@ -422,6 +427,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.create_light_point", &World::create_light_point);
 	ext->link_class_func("World.create_light_cone", &World::create_light_cone);
 	ext->link_class_func("World.create_camera", &World::create_camera);
+	ext->link_class_func("World.attach_model", &_attach_model);
 	ext->link_class_func("World.add_link", &World::add_link);
 	ext->link_class_func("World.add_particle", &World::add_legacy_particle);
 	ext->link_class_func("World.add_sound", &World::add_sound);

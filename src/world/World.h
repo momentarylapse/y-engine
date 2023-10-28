@@ -91,13 +91,11 @@ public:
 	Terrain *create_terrain(const Path &filename, const vec3 &pos);
 	Terrain *create_terrain_no_reg(const Path &filename, const vec3 &pos);
 
+	Model& attach_model_no_reg(Entity &e, const Path &filename);
+	Model& attach_model(Entity &e, const Path &filename);
+
 	Entity* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 
-	int next_object_index = -1;
-	void request_next_object_index(int i);
-
-	void register_object(Entity *o);
-	void unregister_object(Entity *o);
 	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 
 	bool unregister(BaseClass *o);
@@ -145,10 +143,7 @@ public:
 	bool net_msg_enabled;
 	Array<GodNetMessage> net_messages;
 
-	// content of the world
-	Array<Entity*> _objects;
 	Entity *ego;
-	int num_reserved_objects;
 
 
 	Array<LevelData::ScriptData> scripts;

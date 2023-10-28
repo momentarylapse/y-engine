@@ -225,9 +225,6 @@ void World::reset() {
 		delete o;
 	entities.clear();
 
-	_objects.clear();
-	num_reserved_objects = 0;
-
 #ifdef _X_ALLOW_X_
 	particle_manager->clear();
 #endif
@@ -342,16 +339,12 @@ bool World::load(const LevelData &ld) {
 
 	// objects
 	ego = nullptr;
-	_objects.clear(); // make sure the "missing" objects are NULL
-	_objects.resize(ld.objects.num);
-	num_reserved_objects = ld.objects.num;
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()) {
 			//try {
 				auto q = quaternion::rotation(o.ang);
 				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q);
 				add_components_no_init(oo, o.components);
-				request_next_object_index(i);
 				register_entity(oo);
 				if (ld.ego_index == i)
 					ego = oo;
@@ -373,11 +366,13 @@ bool World::load(const LevelData &ld) {
 		ok &= !tt->error;
 	}
 
+	auto& model_list = ComponentManager::get_list_family<Model>();
 	for (auto &l: ld.links) {
+		Entity *a = model_list[l.object[0]]->owner;
 		Entity *b = nullptr;
 		if (l.object[1] >= 0)
-			b = _objects[l.object[1]];
-		add_link(Link::create(l.type, _objects[l.object[0]], b, l.pos, quaternion::rotation(l.ang)));
+			b = model_list[l.object[1]]->owner;
+		add_link(Link::create(l.type, a, b, l.pos, quaternion::rotation(l.ang)));
 	}
 
 	scripts = ld.scripts;
@@ -425,16 +420,13 @@ bool GodLoadWorld(const Path &filename) {
 }
 
 Entity *World::create_entity(const vec3 &pos, const quaternion &ang) {
-	return new Entity(pos, ang);
+	auto e = new Entity(pos, ang);
+	entities.add(e);
+	return e;
 }
 
 void World::register_entity(Entity *e) {
-	if ([[maybe_unused]] auto m = e->get_component<Model>())
-		register_object(e);
-
-	entities.add(e);
 	e->on_init_rec();
-
 
 	if (auto m = e->get_component<Model>())
 		register_model(m);
@@ -459,39 +451,57 @@ Entity *World::create_object_no_reg(const Path &filename, const vec3 &pos, const
 }
 
 Entity *World::create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
+	auto e = create_entity(pos, ang);
+	auto& m = attach_model_no_reg(*e, filename);
+	m.script_data.name = name;
+	return e;
+}
+
+
+Model& World::attach_model_no_reg(Entity &e, const Path &filename) {
 	if (engine.resetting_game)
 		throw Exception("create_object during game reset");
 
 	if (filename.is_empty())
 		throw Exception("create_object: empty filename");
 
-	auto e = create_entity(pos, ang);
-
 	//msg_write(on);
 	auto *m = engine.resource_manager->load_model(filename);
-	m->script_data.name = name;
 
-	e->_add_component_external_no_init_(m);
+	e._add_component_external_no_init_(m);
 	m->update_matrix();
 
 
 	// automatic components
 	if (m->_template->solid_body) {
-		[[maybe_unused]] auto col = (MeshCollider*)e->add_component_no_init(MeshCollider::_class, "");
-		[[maybe_unused]] auto sb = (SolidBody*)e->add_component_no_init(SolidBody::_class, "");
+		[[maybe_unused]] auto col = (MeshCollider*)e.add_component_no_init(MeshCollider::_class, "");
+		[[maybe_unused]] auto sb = (SolidBody*)e.add_component_no_init(SolidBody::_class, "");
 	}
 
 	if (m->_template->skeleton)
-		e->add_component_no_init(Skeleton::_class, "");
+		e.add_component_no_init(Skeleton::_class, "");
 
 	if (m->_template->animator)
-		e->add_component_no_init(Animator::_class, "");
+		e.add_component_no_init(Animator::_class, "");
 
-	return e;
+	return *m;
+}
+
+Model& World::attach_model(Entity &e, const Path &filename) {
+	auto& m = attach_model_no_reg(e, filename);
+	//m.on_init();
+	e.on_init_rec(); // FIXME might re-initialize too much...
+	register_model(&m);
+
+#if HAS_LIB_BULLET
+	if (auto sb = e.get_component<SolidBody>())
+		dynamicsWorld->addRigidBody(sb->body);
+#endif
+
+	return m;
 }
 
 Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
-
 	auto e = create_entity(vec3::ZERO, quaternion::ID);
 	auto mi = (MultiInstance*)e->add_component_no_init(MultiInstance::_class, "");
 
@@ -506,42 +516,10 @@ Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos,
 }
 
 void World::register_model_multi(MultiInstance *mi) {
-
 	if (mi->model->registered)
 		return;
 
 	mi->model->registered = true;
-}
-
-void World::request_next_object_index(int i) {
-	next_object_index = i;
-}
-
-void World::register_object(Entity *o) {
-	int on = next_object_index;
-	next_object_index = -1;
-	if (on < 0) {
-		// ..... better use a list of "empty" objects???
-		for (int i=num_reserved_objects; i<_objects.num; i++)
-			if (!_objects[i])
-				on = i;
-	} else {
-		if (on >= _objects.num)
-			_objects.resize(on+1);
-		if (_objects[on]) {
-			msg_error("register_object:  object index already in use " + i2s(on));
-			return;
-		}
-	}
-	if (on < 0) {
-		on = _objects.num;
-		_objects.add(nullptr);
-	}
-	_objects[on] = o;
-
-	o->object_id = on;
-
-	//AddNetMsg(NET_MSG_CREATE_OBJECT, o->object_id, filename.str());
 }
 
 
@@ -576,22 +554,6 @@ void World::set_active_physics(Entity *o, bool active, bool passive) { //, bool 
 	//b->test_collisions = test_collisions;
 }
 
-// un-object a model
-void World::unregister_object(Entity *m) {
-	if (m->object_id < 0)
-		return;
-
-	// ego...
-	if (m == ego)
-		ego = nullptr;
-
-	AddNetMsg(NET_MSG_DELETE_OBJECT, m->object_id, "");
-
-	// remove from list
-	_objects[m->object_id] = nullptr;
-	m->object_id = -1;
-}
-
 void World::subscribe(const string &msg, const Callback &f) {
 	observers.add({msg, &f});
 }
@@ -604,8 +566,13 @@ void World::notify(const string &msg) {
 }
 
 void World::unregister_entity(Entity *e) {
-	if (e->object_id >= 0)
-		unregister_object(e);
+	if (false)
+		AddNetMsg(NET_MSG_DELETE_OBJECT, e->object_id, "");
+
+	// ego...
+	if (e == ego)
+		ego = nullptr;
+
 
 #if HAS_LIB_BULLET
 	if (auto sb = e->get_component<SolidBody>())
@@ -687,7 +654,7 @@ void World::register_model(Model *m) {
 		if (m->fx[i])
 			m->fx[i]->enable(true);
 #endif
-	
+
 	m->registered = true;
 	
 	// sub models
