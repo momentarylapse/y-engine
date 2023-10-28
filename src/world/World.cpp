@@ -501,6 +501,17 @@ Model& World::attach_model(Entity &e, const Path &filename) {
 	return m;
 }
 
+void World::unattach_model(Model& m) {
+	unregister_model(&m);
+
+#if HAS_LIB_BULLET
+	if (auto sb = m.owner->get_component<SolidBody>())
+		dynamicsWorld->removeRigidBody(sb->body);
+#endif
+
+	m.owner->delete_component(&m);
+}
+
 Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	auto e = create_entity(vec3::ZERO, quaternion::ID);
 	auto mi = (MultiInstance*)e->add_component_no_init(MultiInstance::_class, "");
@@ -581,19 +592,20 @@ void World::unregister_entity(Entity *e) {
 
 	if (auto m = e->get_component<Model>())
 		unregister_model(m);
-
-	foreachi(auto *o, entities, i)
-		if (o == e) {
-			msg_data.e = o;
-			notify("entity-delete");
-			entities.erase(i);
-			return;
-		}
 }
 
 void World::delete_entity(Entity *e) {
+	int index = entities.find(e);
+	if (index < 0)
+		return;
+
 	unregister_entity(e);
 	e->on_delete_rec();
+
+	msg_data.e = e;
+	notify("entity-delete");
+	entities.erase(index);
+
 	delete e;
 }
 

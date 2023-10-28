@@ -134,6 +134,7 @@ class World
 	func extern mut selfref create_camera(pos: vec3, ang: quaternion) -> Camera&
 	func extern mut selfref create_entity(pos: vec3, ang: quaternion) -> Entity&
 	func extern mut selfref attach_model(e: Entity&, filename: Path) -> Model&
+	func extern mut selfref unattach_model(m: Model&)
 	func extern mut register_entity(e: Entity*)
 	func extern mut set_active_physics(o: Model, active: bool)
 	func extern mut shift_all(dpos: vec3)

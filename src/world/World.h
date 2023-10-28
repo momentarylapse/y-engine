@@ -93,6 +93,7 @@ public:
 
 	Model& attach_model_no_reg(Entity &e, const Path &filename);
 	Model& attach_model(Entity &e, const Path &filename);
+	void unattach_model(Model& m);
 
 	Entity* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 

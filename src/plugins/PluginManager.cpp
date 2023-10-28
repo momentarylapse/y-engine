@@ -264,6 +264,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Entity.get_matrix", &Entity::get_matrix);
 	ext->link_class_func("Entity.__get_component", &Entity::_get_component_untyped_);
 	ext->link_class_func("Entity.__add_component", &Entity::add_component);
+	ext->link_class_func("Entity.delete_component", &Entity::delete_component);
 	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add);
 
 	Component component;
@@ -428,6 +429,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.create_light_cone", &World::create_light_cone);
 	ext->link_class_func("World.create_camera", &World::create_camera);
 	ext->link_class_func("World.attach_model", &_attach_model);
+	ext->link_class_func("World.unattach_model", &World::unattach_model);
 	ext->link_class_func("World.add_link", &World::add_link);
 	ext->link_class_func("World.add_particle", &World::add_legacy_particle);
 	ext->link_class_func("World.add_sound", &World::add_sound);

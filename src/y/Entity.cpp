@@ -73,6 +73,16 @@ void Entity::_add_component_external_no_init_(Component *c) {
 	c->owner = this;
 }
 
+void Entity::delete_component(Component *c) {
+	int i = components.find(c);
+	if (i >= 0) {
+		c->on_delete();
+		c->owner = nullptr;
+		components.erase(i);
+		ComponentManager::delete_component(c);
+	}
+}
+
 Component *Entity::_get_component_untyped_(const kaba::Class *type) const {
 	//msg_write("get " + type->name);
 	for (auto *c: components) {

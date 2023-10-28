@@ -128,6 +128,7 @@ Component *ComponentManager::create_component(const kaba::Class *type, const str
 #endif
 }
 
+// should already be unlinked from entity!
 void ComponentManager::delete_component(Component *c) {
 	auto& list = _get_list_x(c->component_type);
 	list.remove(c);

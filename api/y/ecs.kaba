@@ -25,6 +25,8 @@ struct Entity extends BaseClass
 	func selfref get_component[T]() -> T*
 		return __get_component(T) as T*
 	
+	func extern mut delete_component(c: Component&)
+	
 #	func selfref model() -> Model*
 #		var m: Model* = get_component(Model)
 #		return m
