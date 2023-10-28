@@ -869,8 +869,11 @@ void World::shift_all(const vec3 &dpos) {
 		//if (auto m = e->get_component<Model>())
 		//	m->update_matrix();
 	}
-	auto& list = ComponentManager::get_list_family<Model>();
-	for (auto *m: list)
+
+	for (auto &sb: ComponentManager::get_list_family<SolidBody>())
+		sb->state_to_bullet();
+
+	for (auto *m: ComponentManager::get_list_family<Model>())
 		m->update_matrix();
 #ifdef _X_ALLOW_X_
 	for (auto *s: sounds)
