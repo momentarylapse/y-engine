@@ -26,10 +26,10 @@ struct UBOBlur{
 	float kernel[20];
 };
 
-UniformBuffer *blur_ubo[2];
-DescriptorSet *blur_dset[2];
-GraphicsPipeline *blur_pipeline;
-RenderPass *blur_render_pass;
+UniformBuffer *blur_ubo[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
+DescriptorSet *blur_dset[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
+GraphicsPipeline *blur_pipeline[HDRRendererVulkan::MAX_BLOOM_LEVELS];
+RenderPass *blur_render_pass[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
 
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
@@ -41,7 +41,7 @@ HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, Renderer *r, const Ar
 	pipeline_out = new vulkan::GraphicsPipeline(s, r->parent->render_pass(), 0, "triangles", "3f,3f,2f");
 	pipeline_out->set_culling(CullMode::NONE);
 	pipeline_out->rebuild();
-	dset_out = pool->create_set("buffer,sampler,sampler");
+	dset_out = pool->create_set("buffer,sampler,sampler,sampler,sampler,sampler");
 
 	foreachi (auto *t, tex, i)
 		dset_out->set_texture(1 + i, t);
@@ -107,28 +107,42 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam) : PostProce
 	into = RenderIntoData(this);
 	fb_main = into.fb_main.get();
 
+	Array<vulkan::Texture*> blur_tex;
+	Array<DepthBuffer*> blur_depth;
+	int bloomw = width, bloomh = height;
+	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		bloomw /= BLUR_SCALE;
+		bloomh /= BLUR_SCALE;
+		blur_tex.add(new vulkan::Texture(bloomw, bloomh, "rgba:f16"));
+		blur_tex.add(new vulkan::Texture(bloomw, bloomh, "rgba:f16"));
+		blur_depth.add(new DepthBuffer(bloomw, bloomh, "d:f32", true));
 
-	auto blur_tex1 = new vulkan::Texture(width/BLUR_SCALE, height/BLUR_SCALE, "rgba:f16");
-	auto blur_tex2 = new vulkan::Texture(width/BLUR_SCALE, height/BLUR_SCALE, "rgba:f16");
-	auto blur_depth = new DepthBuffer(width/BLUR_SCALE, height/BLUR_SCALE, "d:f32", true);
-	blur_tex1->set_options("wrap=clamp");
-	blur_tex2->set_options("wrap=clamp");
+		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i]}, "clear");
+		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i]}, "clear");
+		// without clear, we get artifacts from dynamic resolution scaling
+	}
+	for (auto t: blur_tex)
+		t->set_options("wrap=clamp");
 
-	blur_render_pass = new vulkan::RenderPass({blur_tex1, blur_depth}, "clear");
-	// without clear, we get artifacts from dynamic resolution scaling
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
-	blur_pipeline = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass, 0, "triangles", "3f,3f,2f");
-	blur_pipeline->set_z(false, false);
-	blur_pipeline->rebuild();
-	blur_ubo[0] = new UniformBuffer(sizeof(UBOBlur));
-	blur_ubo[1] = new UniformBuffer(sizeof(UBOBlur));
-	blur_dset[0] = pool->create_set(shader_blur.get());
-	blur_dset[1] = pool->create_set(shader_blur.get());
-	fb_small1 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex1, blur_depth});
-	fb_small2 = new vulkan::FrameBuffer(blur_render_pass, {blur_tex2, blur_depth});
+
+	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		blur_pipeline[i] = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass[i*2], 0, "triangles", "3f,3f,2f");
+		blur_pipeline[i]->set_z(false, false);
+		blur_pipeline[i]->rebuild();
+	}
+	for (int i=0; i<MAX_BLOOM_LEVELS*2; i++) {
+		blur_ubo[i] = new UniformBuffer(sizeof(UBOBlur));
+		blur_dset[i] = pool->create_set(shader_blur.get());
+	}
+	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		bloom_levels[i].fb_temp = new vulkan::FrameBuffer(blur_render_pass[i*2], {blur_tex[i*2], blur_depth[i]});
+		bloom_levels[i].fb_out = new vulkan::FrameBuffer(blur_render_pass[i*2+1], {blur_tex[i*2+1], blur_depth[i]});
+	}
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	out = RenderOutData(shader_out.get(), this, {into.fb_main->attachments[0].get(), fb_small2->attachments[0].get()});
+	Array<Texture*> tex = {into.fb_main->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
+	out = RenderOutData(shader_out.get(), this, tex);
 
 
 
@@ -157,8 +171,14 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
-	process_blur(cb, into.fb_main.get(), fb_small1.get(), 1.0f, 0);
-	process_blur(cb, fb_small1.get(), fb_small2.get(), 0.0f, 1);
+	auto bloom_input = into.fb_main.get();
+	float threshold = 1.0f;
+	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		process_blur(cb, bloom_input, bloom_levels[i].fb_temp.get(), threshold, i*2);
+		process_blur(cb, bloom_levels[i].fb_temp.get(), bloom_levels[i].fb_out.get(), 0.0f, i*2+1);
+		bloom_input = bloom_levels[i].fb_out.get();
+		threshold = 0;
+	}
 	PerformanceMonitor::end(ch_post_blur);
 
 }
@@ -176,20 +196,20 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	const vec2 AXIS[2] = {{(float)BLUR_SCALE,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
 	UBOBlur u;
-	u.radius = cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
+	u.radius = 3;//cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
 	u.threshold = threshold / cam->exposure;
-	u.axis = AXIS[iaxis];
+	u.axis = AXIS[iaxis % 2];
 	blur_ubo[iaxis]->update(&u);
 	blur_dset[iaxis]->set_buffer(0, blur_ubo[iaxis]);
 	blur_dset[iaxis]->set_texture(1, source->attachments[0].get());
 	blur_dset[iaxis]->update();
 
-	auto rp = blur_render_pass;
+	auto rp = blur_render_pass[iaxis];
 
 	cb->begin_render_pass(rp, target);
 	cb->set_viewport(dynamicly_scaled_area(target));
 
-	cb->bind_pipeline(blur_pipeline);
+	cb->bind_pipeline(blur_pipeline[iaxis / 2]);
 	cb->bind_descriptor_set(0, blur_dset[iaxis]);
 
 	cb->draw(vb_2d.get());

@@ -50,8 +50,13 @@ public:
 
 
 	FrameBuffer *fb_main;
-	shared<FrameBuffer> fb_small1;
-	shared<FrameBuffer> fb_small2;
+
+	static const int MAX_BLOOM_LEVELS = 4;
+
+	struct BloomLevel {
+		shared<FrameBuffer> fb_temp;
+		shared<FrameBuffer> fb_out;
+	} bloom_levels[MAX_BLOOM_LEVELS];
 
 	FrameBuffer *frame_buffer() const override { return into.fb_main.get(); };
 	DepthBuffer *depth_buffer() const override { return into._depth_buffer; };

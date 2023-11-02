@@ -149,11 +149,13 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	auto bloom_input = fb_main.get();
+	float threshold = 1.0f;
 	for (int i=0; i<4; i++) {
-		process_blur(bloom_input, bloom_levels[i].fb_temp.get(), r*BLOOM_LEVEL_SCALE, 1.0f, {1,0});
+		process_blur(bloom_input, bloom_levels[i].fb_temp.get(), r*BLOOM_LEVEL_SCALE, threshold, {1,0});
 		process_blur(bloom_levels[i].fb_temp.get(), bloom_levels[i].fb_out.get(), r, 0.0f, {0,1});
 		bloom_input = bloom_levels[i].fb_out.get();
 		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
+		threshold = 0;
 	}
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 	break_point();
