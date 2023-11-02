@@ -779,8 +779,8 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_size("HDRRenderer", sizeof(HR));
 	ext->declare_class_element("HDRRenderer.fb_main", &HR::fb_main);
-	ext->declare_class_element("HDRRenderer.fb_small1", &HR::fb_small1);
-	ext->declare_class_element("HDRRenderer.fb_small2", &HR::fb_small2);
+	ext->declare_class_element("HDRRenderer.fb_small1", &HR::bloom_levels);
+	ext->declare_class_element("HDRRenderer.fb_small2", &HR::bloom_levels);
 
 
 	ext->declare_class_size("FrameBuffer", sizeof(FrameBuffer));

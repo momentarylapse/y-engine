@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler,sampler]]
+	bindings = [[buffer,sampler,sampler,sampler,sampler,sampler]]
 	pushsize = 20
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -70,6 +70,9 @@ uniform float scale_y = 1.0;
 
 layout(binding = 1) uniform sampler2D tex0;
 layout(binding = 2) uniform sampler2D tex1;
+layout(binding = 3) uniform sampler2D tex2;
+layout(binding = 4) uniform sampler2D tex3;
+layout(binding = 5) uniform sampler2D tex4;
 
 //layout(location = 0) in vec4 outPos;
 layout(location = 0) in vec2 in_uv;
@@ -100,6 +103,16 @@ void main() {
 	
 	vec3 bloom = textureLod(tex1, uv, 0).rgb;
 	out_color.rgb += bloom * bloom_factor;
+	
+	vec3 bloom2 = textureLod(tex2, uv, 0).rgb;
+	out_color.rgb += bloom2 * bloom_factor;
+	
+	vec3 bloom3 = textureLod(tex3, uv, 0).rgb;
+	out_color.rgb += bloom3 * bloom_factor;
+	
+	vec3 bloom4 = textureLod(tex4, uv, 0).rgb;
+	out_color.rgb += bloom4 * bloom_factor;
+	
 	out_color.rgb = tone_map(out_color.rgb);
 
 #ifdef vulkan

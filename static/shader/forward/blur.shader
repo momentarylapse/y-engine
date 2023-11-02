@@ -46,8 +46,6 @@ float brightness(vec3 c) {
 	return dot(c, vec3(0.2126, 0.7152, 0.0722));
 }
 
-
-
 vec3 blur() {
 	//vec2 DD = 1.0 / textureSize(tex0, 0);
 	ivec2 uv0 = ivec2(in_tex_coord * textureSize(tex0, 0));
@@ -55,9 +53,10 @@ vec3 blur() {
 	float sum = 0.0;
 	//float d = 0.0015;
 	int R = int(radius);
-	int RR = R-2;
+	int RR = max(R-1, 0);
 	for (int i=-RR; i<=RR; i+=1) {
 		float fi = i;
+		//float w = kernel[i + RR];
 		float w = exp(-((fi*fi) / (radius*radius)) * 4.0);
 		vec3 c = texelFetch(tex0, uv0 + ivec2(axis * fi), 0).rgb;
 		float br = brightness(c);

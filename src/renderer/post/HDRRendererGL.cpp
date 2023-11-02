@@ -16,10 +16,13 @@
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../Config.h"
+#include "../../y/EngineData.h"
 #include "../../world/Camera.h"
 
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
+
+static int BLOOM_LEVEL_SCALE = 4;
 
 void apply_shader_data(Shader *s, const Any &shader_data);
 
@@ -52,15 +55,20 @@ HDRRendererGL::HDRRendererGL(Renderer *parent, Camera *_cam) : PostProcessorStag
 			_depth_buffer});
 			//new nix::RenderBuffer(width, height, "d24s8)});
 
-	fb_small1 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
-	fb_small2 = new nix::FrameBuffer({
-		new nix::Texture(width/2, height/2, "rgba:f16")});
+	int bloomw = width, bloomh = height;
+	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		bloomw /= BLOOM_LEVEL_SCALE;
+		bloomh /= BLOOM_LEVEL_SCALE;
+		bloom_levels[i].fb_temp = new nix::FrameBuffer({
+			new nix::Texture(bloomw, bloomh, "rgba:f16")});
+		bloom_levels[i].fb_out = new nix::FrameBuffer({
+			new nix::Texture(bloomw, bloomh, "rgba:f16")});
+		bloom_levels[i].fb_temp->color_attachments[0]->set_options("wrap=clamp");
+		bloom_levels[i].fb_out->color_attachments[0]->set_options("wrap=clamp");
+	}
 
 	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
 	fb_main->color_attachments[0]->set_options("magfilter=" + config.resolution_scale_filter);
-	fb_small1->color_attachments[0]->set_options("wrap=clamp");
-	fb_small2->color_attachments[0]->set_options("wrap=clamp");
 
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
@@ -138,8 +146,16 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	}
 
 	PerformanceMonitor::begin(ch_post_blur);
-	process_blur(fb_main.get(), fb_small1.get(), 1.0f, {2,0});
-	process_blur(fb_small1.get(), fb_small2.get(), 0.0f, {0,1});
+	//float r = cam->bloom_radius * engine.resolution_scale_x;
+	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
+	auto bloom_input = fb_main.get();
+	for (int i=0; i<4; i++) {
+		process_blur(bloom_input, bloom_levels[i].fb_temp.get(), r*BLOOM_LEVEL_SCALE, 1.0f, {1,0});
+		process_blur(bloom_levels[i].fb_temp.get(), bloom_levels[i].fb_out.get(), r, 0.0f, {0,1});
+		bloom_input = bloom_levels[i].fb_out.get();
+		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
+	}
+	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 	break_point();
 	PerformanceMonitor::end(ch_post_blur);
 }
@@ -152,12 +168,12 @@ void HDRRendererGL::draw(const RenderParams& params) {
 	data.map_set("scale_y", resolution_scale_y);
 
 
-	render_out_through_shader(this, {fb_main->color_attachments[0].get(), fb_small2->color_attachments[0].get()}, shader_out.get(), data, vb_2d.get(), params);
+	Array<Texture*> tex = {fb_main->color_attachments[0].get(), bloom_levels[0].fb_out->color_attachments[0].get(), bloom_levels[1].fb_out->color_attachments[0].get(), bloom_levels[2].fb_out->color_attachments[0].get(), bloom_levels[3].fb_out->color_attachments[0].get()};
+	render_out_through_shader(this, tex, shader_out.get(), data, vb_2d.get(), params);
 	//render_out(fb_main.get(), fb_small2->color_attachments[0].get());
 }
 
-void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float threshold, const vec2 &axis) {
-	float r = cam->bloom_radius * resolution_scale_x;
+void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float r, float threshold, const vec2 &axis) {
 	shader_blur->set_float("radius", r);
 	shader_blur->set_float("threshold", threshold / cam->exposure);
 	shader_blur->set_floats("axis", &axis.x, 2);
