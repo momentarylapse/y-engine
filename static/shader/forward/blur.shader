@@ -6,11 +6,9 @@
 	version = 420
 </Layout>
 <VertexShader>
-#extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec3 in_position;
 layout(location = 2) in vec2 in_tex_coord;
-
 layout(location = 0) out vec2 out_tex_coord;
 
 void main() {
@@ -19,7 +17,6 @@ void main() {
 }
 </VertexShader>
 <FragmentShader>
-#extension GL_ARB_separate_shader_objects : enable
 
 #ifdef vulkan
 layout(binding=0) uniform Parameters {
@@ -36,9 +33,7 @@ uniform float kernel[20];
 #endif
 
 layout(binding = 1) uniform sampler2D tex0;
-
 layout(location = 0) in vec2 in_tex_coord;
-
 layout(location = 0) out vec4 out_color;
 
 
@@ -51,7 +46,6 @@ vec3 blur() {
 	ivec2 uv0 = ivec2(in_tex_coord * textureSize(tex0, 0));
 	vec3 bb = vec3(0,0,0);
 	float sum = 0.0;
-	//float d = 0.0015;
 	int R = int(radius);
 	int RR = max(R-1, 0);
 	for (int i=-RR; i<=RR; i+=1) {
@@ -69,8 +63,6 @@ vec3 blur() {
 }
 
 void main() {
-	//out_color.rgb = texture(tex0, in_tex_coord).rgb;
-	//out_color.rgb = vec3(brightness(out_color.rgb));
 	out_color.rgb = blur();
 	out_color.a = 1;
 }

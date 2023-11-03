@@ -6,7 +6,6 @@
 	version = 420
 </Layout>
 <VertexShader>
-#extension GL_ARB_separate_shader_objects : enable
 
 struct Matrix {
 	mat4 model;
@@ -24,8 +23,6 @@ uniform Matrix matrix;
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec2 in_uv;
-
-//layout(location = 0) out vec4 out_pos;
 layout(location = 0) out vec2 out_uv;
 
 void main() {
@@ -34,7 +31,6 @@ void main() {
 }
 </VertexShader>
 <FragmentShader>
-#extension GL_ARB_separate_shader_objects : enable
 
 /*struct Matrix {
 	mat4 model;
@@ -43,8 +39,6 @@ void main() {
 };*/
 
 #ifdef vulkan
-
-
 layout(push_constant) uniform ParameterData {
 	//Matrix matrix;
 	mat4 model;
@@ -56,16 +50,13 @@ layout(push_constant) uniform ParameterData {
 	float scale_x;
 	float scale_y;
 };
-
 #else
-
 //uniform Matrix matrix;
 uniform float exposure = 1.0;
 uniform float bloom_factor = 0.2;
 uniform float gamma = 2.2;
 uniform float scale_x = 1.0;
 uniform float scale_y = 1.0;
-
 #endif
 
 layout(binding = 1) uniform sampler2D tex0;
@@ -74,11 +65,8 @@ layout(binding = 3) uniform sampler2D tex2;
 layout(binding = 4) uniform sampler2D tex3;
 layout(binding = 5) uniform sampler2D tex4;
 
-//layout(location = 0) in vec4 outPos;
 layout(location = 0) in vec2 in_uv;
-
 layout(location = 0) out vec4 out_color;
-
 
 float brightness(vec3 c) {
 	return dot(c, vec3(0.2126, 0.7152, 0.0722));
@@ -90,7 +78,9 @@ vec3 tone_map(vec3 c) {
 	float b = brightness(c);
 	if (b < 0.8)
 		return c;
-	return mix(c / b * 0.8, vec3(1,1,1), 1-exp(0.8-b));
+	return mix(c / b * 0.8, vec3(1,1,1), 1-pow(exp(0.8-b), 2));
+	// exp(0.8-b)^4 is smoother, but too washed out
+	
 	//return vec3(1.0) - exp(-c * exposure*0.5);
 	//return pow(c * exposure, vec3(1,1,1)*0.2);
 }
