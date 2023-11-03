@@ -327,6 +327,7 @@ bool World::load(const LevelData &ld) {
 		cc->min_depth = c.min_depth;
 		cc->max_depth = c.max_depth;
 		cc->exposure = c.exposure;
+		cc->bloom_factor = c.bloom_factor;
 		cc->fov = c.fov;
 
 		add_components_no_init(cam_main->owner, c.components);

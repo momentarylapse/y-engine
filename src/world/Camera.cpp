@@ -46,7 +46,7 @@ Camera::Camera() {
 	fov = pi / 4;
 	exposure = 1.0f;
 	bloom_radius = 10;
-	bloom_factor = 0.2f;
+	bloom_factor = 0.15f;
 
 	focus_enabled = false;
 	focal_length = 2000;
