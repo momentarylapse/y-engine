@@ -42,6 +42,7 @@ layout(location = 4) in vec4 in_bone_weight;
 layout(location = 0) out vec4 out_pos; // world space
 layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec2 out_uv;
+layout(location = 3) out vec4 out_color;
 
 void main() {
 	mat4 bm = bone_matrix[in_bone_index.x] * in_bone_weight.x;
