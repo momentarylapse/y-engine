@@ -29,8 +29,8 @@ public:
 	//virtual void render_into_texture(FrameBuffer *fb, Camera *cam) = 0;
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vec3 &pos);
 
-	GeometryRendererGL *geo_renderer;
-	ShadowRendererGL *shadow_renderer;
+	owned<GeometryRendererGL> geo_renderer;
+	owned<ShadowRendererGL> shadow_renderer;
 
 	void prepare_lights();
 };

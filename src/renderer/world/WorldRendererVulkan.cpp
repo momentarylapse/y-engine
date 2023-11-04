@@ -97,14 +97,11 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, C
 
 void WorldRendererVulkan::create_more() {
 	shadow_renderer = new ShadowRendererVulkan(this);
-	fb_shadow1 = shadow_renderer->fb[0];
-	fb_shadow2 = shadow_renderer->fb[1];
+	scene_view.fb_shadow1 = shadow_renderer->fb[0];
+	scene_view.fb_shadow2 = shadow_renderer->fb[1];
 
-	geo_renderer = new GeometryRendererVulkan(type, this);
-	geo_renderer->cube_map = cube_map;
+	geo_renderer = new GeometryRendererVulkan(type, scene_view, this);
 	geo_renderer->material_shadow = shadow_renderer->material;
-	geo_renderer->fb_shadow1 = shadow_renderer->fb[0];
-	geo_renderer->fb_shadow2 = shadow_renderer->fb[1];
 
 }
 
@@ -147,21 +144,8 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_prepare_lights);
 
-	lights.clear();
-	auto& all_lights = ComponentManager::get_list_family<Light>();
-	for (auto *l: all_lights) {
-		if (!l->enabled)
-			continue;
-
-		l->update(cam, shadow_box_size, geo_renderer->using_view_space);
-
-		if (l->allow_shadow) {
-			shadow_index = lights.num;
-			shadow_proj = l->shadow_projection;
-		}
-		lights.add(l->light);
-	}
-	rvd.ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
+	scene_view.prepare_lights(shadow_box_size);
+	rvd.ubo_light->update_part(&scene_view.lights[0], 0, scene_view.lights.num * sizeof(scene_view.lights[0]));
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 

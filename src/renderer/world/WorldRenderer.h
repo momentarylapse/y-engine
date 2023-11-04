@@ -16,6 +16,7 @@
 #include "../../lib/base/pointer.h"
 
 #include "geometry/GeometryRenderer.h"
+#include "geometry/SceneView.h"
 
 class ShadowMapRenderer;
 class PerformanceMonitor;
@@ -25,7 +26,6 @@ class mat4;
 class vec3;
 class quaternion;
 class Material;
-class UBOLight;
 
 
 enum class RenderPathType {
@@ -51,21 +51,12 @@ public:
 
 	bool wireframe = false;
 
-
-	shared<FrameBuffer> fb_shadow1;
-	shared<FrameBuffer> fb_shadow2;
-	Camera *cam;
+	SceneView scene_view;
 
 	shared<Shader> shader_fx;
 
-	Array<UBOLight> lights;
-	UniformBuffer *ubo_light = nullptr;
-	int shadow_index = -1;
-	mat4 shadow_proj;
-
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;
-	shared<CubeMap> cube_map;
 
 	void reset();
 };

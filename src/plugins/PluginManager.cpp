@@ -48,6 +48,7 @@
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
+#include "../renderer/world/geometry/SceneView.h"
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
@@ -749,10 +750,10 @@ void PluginManager::export_kaba() {
 #endif
 	ext->declare_class_size("RenderPath", sizeof(RP));
 	ext->declare_class_element("RenderPath.type", &RP::type);
-	ext->declare_class_element("RenderPath.cube_map", &RP::cube_map);
+//	ext->declare_class_element("RenderPath.cube_map", &RP::cube_map);
 	ext->declare_class_element("RenderPath.shader_fx", &RP::shader_fx);
-	ext->declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow1);
-	ext->declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);
+//	ext->declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow1);
+//	ext->declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);
 #ifdef USING_OPENGL
 	ext->declare_class_element("RenderPath.gbuffer", &RPD::gbuffer);
 #else

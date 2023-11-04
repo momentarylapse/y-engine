@@ -55,24 +55,22 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent, Camera *cam) : 
 void WorldRendererGLForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
-	if (!cam)
-		cam = cam_main;
-	geo_renderer->cam = cam;
-	shadow_renderer->cam = cam;
+	if (!scene_view.cam)
+		scene_view.cam = cam_main;
 
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
 		if (world.ego)
-			render_into_cubemap(depth_cube.get(), cube_map.get(), world.ego->pos);
+			render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), world.ego->pos);
 		_frame = 0;
 	}
 
 	prepare_lights();
 	geo_renderer->prepare(params);
 
-	if (shadow_index >= 0)
-		shadow_renderer->render(shadow_proj);
+	if (scene_view.shadow_index >= 0)
+		shadow_renderer->render(scene_view);
 
 	PerformanceMonitor::end(channel);
 }
@@ -90,6 +88,7 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 		 m *= jitter(fb->width, fb->height, 0);
 
 	// skyboxes
+	auto cam = scene_view.cam;
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	cam->update_matrices(params.desired_aspect_ratio);
@@ -110,13 +109,13 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
 
-	nix::bind_buffer(1, ubo_light);
+	nix::bind_buffer(1, scene_view.ubo_light.get());
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
 
 	geo_renderer->draw_opaque();
-	geo_renderer->draw_transparent();
+	geo_renderer->draw_transparent(params);
 	break_point();
 	PerformanceMonitor::end(ch_world);
 

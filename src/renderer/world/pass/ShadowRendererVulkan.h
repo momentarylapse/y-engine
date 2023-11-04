@@ -26,10 +26,11 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}
 
-    void render(vulkan::CommandBuffer *cb, const mat4 &m);
+    void render(vulkan::CommandBuffer *cb, SceneView &parent_scene_view);
 
     void render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd);
 
+	SceneView scene_view;
 
 	RenderPass *_render_pass = nullptr;
     RenderPass *render_pass() const override { return _render_pass; }
@@ -38,7 +39,6 @@ public:
     mat4 proj;
     Material *material;
 	RenderViewDataVK rvd[2];
-	Camera *cam = nullptr;
 
     GeometryRendererVulkan *geo_renderer;
 };

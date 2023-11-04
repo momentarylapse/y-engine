@@ -191,6 +191,7 @@ set(SOURCE
 	src/renderer/world/geometry/GeometryRenderer.cpp
 	src/renderer/world/geometry/GeometryRendererGL.cpp
 	src/renderer/world/geometry/GeometryRendererVulkan.cpp
+	src/renderer/world/geometry/SceneView.cpp
 	src/renderer/world/pass/ShadowRendererGL.cpp
 	src/renderer/world/pass/ShadowRendererVulkan.cpp
 	src/renderer/world/WorldRenderer.cpp

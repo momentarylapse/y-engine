@@ -19,7 +19,9 @@
 #include "../../../Config.h"
 
 
-ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent) {
+ShadowRendererGL::ShadowRendererGL(Renderer *parent) :
+		Renderer("shadow", parent)
+{
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 
@@ -33,14 +35,12 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) : Renderer("shadow", parent
 	material = new Material(resource_manager);
 	material->shader_path = "shadow.shader";
 
-	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, this);
+	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, scene_view, this);
 	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 	geo_renderer->material_shadow = material;
-	geo_renderer->num_lights = 0;
 }
 
 void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
-	geo_renderer->cam = cam;
 	geo_renderer->prepare(RenderParams::into_texture(sfb, 1.0f));
 
 	nix::bind_frame_buffer(sfb);
@@ -71,8 +71,9 @@ void ShadowRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::end(channel);
 }
 
-void ShadowRendererGL::render(const mat4 &m) {
-	proj = m;
+void ShadowRendererGL::render(SceneView &parent_scene_view) {
+	scene_view.cam = parent_scene_view.cam;
+	proj = parent_scene_view.shadow_proj;
 	prepare(RenderParams::WHATEVER);
 }
 

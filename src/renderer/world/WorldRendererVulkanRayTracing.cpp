@@ -41,7 +41,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 	device = _device;
 
 	//create_more();
-	geo_renderer = new GeometryRendererVulkan(type, this);
+	geo_renderer = new GeometryRendererVulkan(type, scene_view, this);
 
 	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;
@@ -111,14 +111,14 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 static int cur_query_offset;
 
 void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
-	if (!cam)
-		cam = cam_main;
+	if (!scene_view.cam)
+		scene_view.cam = cam_main;
 	
 	prepare_lights(dummy_cam, geo_renderer->rvd_def);
 
-	pc.iview = cam_main->view_matrix().inverse();
+	pc.iview = scene_view.cam->view_matrix().inverse();
 	pc.background = background();
-	pc.num_lights = lights.num;
+	pc.num_lights = scene_view.lights.num;
 
 	auto cb = command_buffer();
 
@@ -154,7 +154,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		md.matrix = mat4::translation(o->pos);
 		md.albedo = t->material->albedo.with_alpha(t->material->roughness);
 		md.emission = t->material->emission.with_alpha(t->material->metal);
-		t->prepare_draw(cam->owner->pos);
+		t->prepare_draw(scene_view.cam->owner->pos);
 		md.num_triangles = t->vertex_buffer->output_count / 3;
 		md.address_vertices = t->vertex_buffer->vertex_buffer.get_device_address();
 		meshes.add(md);
@@ -262,7 +262,7 @@ void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 		mat4 p, m, v;
 		float x[32];
 	};
-	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, cam->exposure};
+	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, scene_view.cam->exposure};
     pco.x[3] = 1; // scale_x
     pco.x[4] = 1;
 	cb->push_constant(0, sizeof(mat4) * 3 + 5 * sizeof(float), &pco);

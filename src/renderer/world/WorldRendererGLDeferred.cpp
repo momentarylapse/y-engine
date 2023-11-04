@@ -74,21 +74,15 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam) 
 
 	create_more();
 
-	geo_renderer_trans = new GeometryRendererGL(RenderPathType::FORWARD, this);
-	geo_renderer_trans->cube_map = cube_map;
+	geo_renderer_trans = new GeometryRendererGL(RenderPathType::FORWARD, scene_view, this);
 	geo_renderer_trans->material_shadow = shadow_renderer->material;
-	geo_renderer_trans->fb_shadow1 = shadow_renderer->fb[0];
-	geo_renderer_trans->fb_shadow2 = shadow_renderer->fb[1];
 }
 
 void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
-	if (!cam)
-		cam = cam_main;
-	geo_renderer->cam = cam;
-	geo_renderer_trans->cam = cam;
-	shadow_renderer->cam = cam;
+	if (!scene_view.cam)
+		scene_view.cam = cam_main;
 
 	auto sub_params = params.with_target(gbuffer.get());
 
@@ -96,13 +90,9 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 
 	geo_renderer->prepare(sub_params);
 	geo_renderer_trans->prepare(params); // keep drawing into direct target
-	geo_renderer_trans->ubo_light = ubo_light;
-	geo_renderer_trans->num_lights = lights.num;
-	geo_renderer_trans->shadow_index = shadow_index;
-	geo_renderer_trans->shadow_proj = shadow_proj;
 
-	if (shadow_index >= 0)
-		shadow_renderer->render(shadow_proj);
+	if (scene_view.shadow_index >= 0)
+		shadow_renderer->render(scene_view);
 
 	render_into_gbuffer(gbuffer.get(), sub_params);
 
@@ -123,13 +113,16 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_trans);
 	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
+	auto cam = scene_view.cam;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
-	nix::bind_buffer(1, ubo_light);
+	nix::bind_buffer(1, scene_view.ubo_light.get());
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 
-	geo_renderer_trans->draw_transparent();
+	nix::set_cull(nix::CullMode::CW);
+	geo_renderer_trans->draw_transparent(params);
+	nix::set_cull(nix::CullMode::DEFAULT);
 
 	nix::set_z(false, false);
 	nix::set_projection_matrix(mat4::ID);
@@ -142,6 +135,7 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_bg);
 
+	auto cam = scene_view.cam;
 //	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	bool flip_y = params.target_is_window;
@@ -163,17 +157,17 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, 
 	if (geo_renderer->using_view_space)
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	else
-		s->set_floats("eye_pos", &cam->owner->pos.x, 3); // NAH
-	s->set_int("num_lights", lights.num);
-	s->set_int("shadow_index", shadow_index);
+		s->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH
+	s->set_int("num_lights", scene_view.lights.num);
+	s->set_int("shadow_index", scene_view.shadow_index);
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
 	nix::bind_buffer(13, ssao_sample_buffer);
 
-	nix::bind_buffer(1, ubo_light);
+	nix::bind_buffer(1, scene_view.ubo_light.get());
 	auto tex = weak(source->color_attachments);
 	tex.add(source->depth_buffer.get());
-	tex.add(fb_shadow1->depth_buffer.get());
-	tex.add(fb_shadow2->depth_buffer.get());
+	tex.add(scene_view.fb_shadow1->depth_buffer.get());
+	tex.add(scene_view.fb_shadow2->depth_buffer.get());
 	nix::set_textures(tex);
 
 
@@ -206,6 +200,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	fb->clear_color(0, color(-1, 0,1,0));
 
 
+	auto cam = scene_view.cam;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
 

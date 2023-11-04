@@ -19,7 +19,7 @@ public:
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
-	GeometryRendererGL *geo_renderer_trans = nullptr;
+	owned<GeometryRendererGL> geo_renderer_trans;
 
 	WorldRendererGLDeferred(Renderer *parent, Camera *cam);
 	void prepare(const RenderParams& params) override;

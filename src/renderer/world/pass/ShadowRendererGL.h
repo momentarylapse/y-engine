@@ -11,11 +11,13 @@
 #include "../../../graphics-fwd.h"
 #ifdef USING_OPENGL
 #include "../../../lib/math/mat4.h"
+#include "../geometry/SceneView.h"
 
 class Camera;
 class PerformanceMonitor;
 class Material;
 class GeometryRendererGL;
+struct SceneView;
 
 class ShadowRendererGL : public Renderer {
 public:
@@ -28,11 +30,11 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}
 
-    void render(const mat4 &m);
+    void render(SceneView &parent_scene_view);
 
-    mat4 proj;
     Material *material;
-    Camera *cam = nullptr;
+	mat4 proj;
+	SceneView scene_view;
 
     GeometryRendererGL *geo_renderer;
 };

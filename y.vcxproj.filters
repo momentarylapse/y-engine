@@ -556,6 +556,9 @@
     <ClCompile Include="src\renderer\world\geometry\GeometryRendererVulkan.cpp">
       <Filter>src\renderer\world\geometry</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\world\geometry\SceneView.cpp">
+      <Filter>src\renderer\world\geometry</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\world\pass\ShadowRendererGL.cpp">
       <Filter>src\renderer\world\pass</Filter>
     </ClCompile>
@@ -1201,6 +1204,9 @@
       <Filter>src\renderer\world\geometry</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\world\geometry\GeometryRendererVulkan.h">
+      <Filter>src\renderer\world\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\world\geometry\SceneView.h">
       <Filter>src\renderer\world\geometry</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\world\pass\ShadowRendererGL.h">

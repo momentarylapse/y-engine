@@ -301,6 +301,7 @@
     <ClCompile Include="src\renderer\world\geometry\GeometryRenderer.cpp" />
     <ClCompile Include="src\renderer\world\geometry\GeometryRendererGL.cpp" />
     <ClCompile Include="src\renderer\world\geometry\GeometryRendererVulkan.cpp" />
+    <ClCompile Include="src\renderer\world\geometry\SceneView.cpp" />
     <ClCompile Include="src\renderer\world\pass\ShadowRendererGL.cpp" />
     <ClCompile Include="src\renderer\world\pass\ShadowRendererVulkan.cpp" />
     <ClCompile Include="src\renderer\world\WorldRenderer.cpp" />
@@ -518,6 +519,7 @@
     <ClInclude Include="src\renderer\world\geometry\GeometryRenderer.h" />
     <ClInclude Include="src\renderer\world\geometry\GeometryRendererGL.h" />
     <ClInclude Include="src\renderer\world\geometry\GeometryRendererVulkan.h" />
+    <ClInclude Include="src\renderer\world\geometry\SceneView.h" />
     <ClInclude Include="src\renderer\world\pass\ShadowRendererGL.h" />
     <ClInclude Include="src\renderer\world\pass\ShadowRendererVulkan.h" />
     <ClInclude Include="src\renderer\world\WorldRenderer.h" />

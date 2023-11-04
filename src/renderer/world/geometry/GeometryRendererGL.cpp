@@ -46,7 +46,7 @@
 #include <lib/os/msg.h>
 
 
-GeometryRendererGL::GeometryRendererGL(RenderPathType type, Renderer *parent) : GeometryRenderer(type, parent) {
+GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
 
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
 	vb_fx_points = new nix::VertexBuffer("3f,f,4f");
@@ -57,8 +57,6 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, Renderer *parent) : 
 	const string &rpt = RENDER_PATH_NAME[(int)type];
 	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
 	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
-
-	cam = cam_main;
 }
 
 void GeometryRendererGL::prepare(const RenderParams& params) {
@@ -77,11 +75,11 @@ void GeometryRendererGL::set_material(ShaderCache &cache, Material *m, RenderPat
 void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
 	nix::set_shader(s);
 	if (using_view_space)
-		s->set_floats("eye_pos", &cam->owner->pos.x, 3); // NAH....
+		s->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH....
 	else
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
-	s->set_int("num_lights", num_lights);
-	s->set_int("shadow_index", shadow_index);
+	s->set_int("num_lights", scene_view.lights.num);
+	s->set_int("shadow_index", scene_view.shadow_index);
 	for (auto &u: m->uniforms)
 		s->set_floats(u.name, u.p, u.size/4);
 
@@ -131,6 +129,8 @@ void GeometryRendererGL::draw_particles() {
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	nix::set_z(false, true);
 	nix::set_cull(nix::CullMode::NONE);
+
+	auto cam = scene_view.cam;
 
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
@@ -224,7 +224,7 @@ void GeometryRendererGL::draw_particles() {
 void GeometryRendererGL::draw_skyboxes() {
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
-	nix::set_view_matrix(mat4::rotation(cam->owner->ang).transpose());
+	nix::set_view_matrix(mat4::rotation(scene_view.cam->owner->ang).transpose());
 	for (auto *sb: world.skybox) {
 		sb->_matrix = mat4::rotation(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
@@ -313,7 +313,7 @@ struct DrawCallData {
 	float z;
 };
 
-void GeometryRendererGL::draw_objects_transparent() {
+void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	if (is_shadow_pass())
 		return;
 	nix::set_z(false, true);
@@ -337,7 +337,7 @@ void GeometryRendererGL::draw_objects_transparent() {
 			auto material = weak(m->material)[i];
 			m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
 			auto shader = m->shader_cache[i].get_shader(type);
-			draw_calls.add({m->_matrix, m->mesh[0]->sub[i].vertex_buffer, material, shader, (m->owner->pos - cam->owner->pos).length()});
+			draw_calls.add({m->_matrix, m->mesh[0]->sub[i].vertex_buffer, material, shader, (m->owner->pos - scene_view.cam->owner->pos).length()});
 		}
 	}
 
@@ -348,6 +348,7 @@ void GeometryRendererGL::draw_objects_transparent() {
 	for (const auto& dc: draw_calls) {
 		nix::set_model_matrix(dc.matrix);
 		set_material_x(dc.material, dc.shader);
+		nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
 		nix::draw_triangles(dc.vb);
 	}
 
@@ -400,11 +401,11 @@ void GeometryRendererGL::prepare_instanced_matrices() {
 void GeometryRendererGL::draw_opaque() {
 	if (!is_shadow_pass()) {
 		nix::set_z(true, true);
-		nix::set_view_matrix(cam->view_matrix());
-		nix::bind_buffer(1, ubo_light.get());
-		nix::bind_texture(3, fb_shadow1->depth_buffer.get());
-		nix::bind_texture(4, fb_shadow2->depth_buffer.get());
-		nix::bind_texture(5, cube_map.get());
+		nix::set_view_matrix(scene_view.cam->view_matrix());
+		nix::bind_buffer(1, scene_view.ubo_light.get());
+		nix::bind_texture(3, scene_view.fb_shadow1->depth_buffer.get());
+		nix::bind_texture(4, scene_view.fb_shadow2->depth_buffer.get());
+		nix::bind_texture(5, scene_view.cube_map.get());
 	}
 
 	// opaque
@@ -414,16 +415,16 @@ void GeometryRendererGL::draw_opaque() {
 	draw_user_meshes(false);
 }
 
-void GeometryRendererGL::draw_transparent() {
-	nix::set_view_matrix(cam->view_matrix());
+void GeometryRendererGL::draw_transparent(const RenderParams& params) {
+	nix::set_view_matrix(scene_view.cam->view_matrix());
 	//nix::set_z(true, true);
 
-	nix::bind_buffer(1, ubo_light.get());
-	nix::bind_texture(3, fb_shadow1->depth_buffer.get());
-	nix::bind_texture(4, fb_shadow2->depth_buffer.get());
-	nix::bind_texture(5, cube_map.get());
+	nix::bind_buffer(1, scene_view.ubo_light.get());
+	nix::bind_texture(3, scene_view.fb_shadow1->depth_buffer.get());
+	nix::bind_texture(4, scene_view.fb_shadow2->depth_buffer.get());
+	nix::bind_texture(5, scene_view.cube_map.get());
 
-	draw_objects_transparent();
+	draw_objects_transparent(params);
 	draw_user_meshes(true);
 	draw_particles();
 }

@@ -19,6 +19,7 @@ class Camera;
 class PerformanceMonitor;
 class Material;
 class UBOLight;
+struct SceneView;
 
 enum class RenderPathType;
 
@@ -57,7 +58,7 @@ public:
 		SHADOW_PASS = 4,
 	} flags;
 
-	GeometryRenderer(RenderPathType type, Renderer *parent);
+	GeometryRenderer(RenderPathType type, SceneView &scene_view, Renderer *parent);
 
 	bool is_shadow_pass() const;
 
@@ -68,21 +69,12 @@ public:
 
 	owned<Material> material_shadow;
 
-	Camera *cam;
+	SceneView &scene_view;
 
 	shared<Shader> shader_fx;
 	shared<Shader> shader_fx_points;
 	owned<VertexBuffer> vb_fx;
 	owned<VertexBuffer> vb_fx_points;
-
-	// FIXME  manually set from ShadowRenderer*
-	owned<UniformBuffer> ubo_light;
-	int num_lights = 0;
-	mat4 shadow_proj;
-	int shadow_index = -1;
-	shared<FrameBuffer> fb_shadow1;
-	shared<FrameBuffer> fb_shadow2;
-	shared<CubeMap> cube_map;
 };
 
 inline GeometryRenderer::Flags operator|(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {

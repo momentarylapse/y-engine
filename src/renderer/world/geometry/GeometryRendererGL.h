@@ -21,7 +21,7 @@ enum class ShaderVariant;
 
 class GeometryRendererGL : public GeometryRenderer {
 public:
-	GeometryRendererGL(RenderPathType type, Renderer *parent);
+	GeometryRendererGL(RenderPathType type, SceneView &scene_view, Renderer *parent);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}
@@ -33,13 +33,13 @@ public:
 	void draw_particles();
 	void draw_terrains();
 	void draw_objects_opaque();
-	void draw_objects_transparent();
+	void draw_objects_transparent(const RenderParams& params);
 	void draw_objects_instanced();
 	void draw_user_meshes(bool transparent);
 	void prepare_instanced_matrices();
 
 	void draw_opaque();
-	void draw_transparent();
+	void draw_transparent(const RenderParams& params);
 };
 
 #endif

@@ -12,7 +12,10 @@
 
 bool GeometryRenderer::using_view_space = true;
 
-GeometryRenderer::GeometryRenderer(RenderPathType _type, Renderer *parent) : Renderer("geo", parent) {
+GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view, Renderer *parent) :
+		Renderer("geo", parent),
+		scene_view(_scene_view)
+{
 	type = _type;
 	flags = Flags::ALLOW_OPAQUE | Flags::ALLOW_TRANSPARENT;
 
@@ -23,7 +26,6 @@ GeometryRenderer::GeometryRenderer(RenderPathType _type, Renderer *parent) : Ren
 	ch_prepare_lights = PerformanceMonitor::create_channel("lights", channel);
 
 	using_view_space = true;
-	cam = nullptr;
 }
 
 bool GeometryRenderer::is_shadow_pass() const {

@@ -44,10 +44,8 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 static int cur_query_offset;
 
 void WorldRendererVulkanForward::prepare(const RenderParams& params) {
-	if (!cam)
-		cam = cam_main;
-	geo_renderer->cam = cam;
-	shadow_renderer->cam = cam;
+	if (!scene_view.cam)
+		scene_view.cam = cam_main;
 
 
 	static int pool_no = 0;
@@ -72,14 +70,14 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	}
 #endif
 
-	cam->update_matrices(params.desired_aspect_ratio);
+	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
-	prepare_lights(cam, geo_renderer->rvd_def);
+	prepare_lights(scene_view.cam, geo_renderer->rvd_def);
 	
 	geo_renderer->prepare(params);
 
-	if (shadow_index >= 0)
-		shadow_renderer->render(cb, shadow_proj);
+	if (scene_view.shadow_index >= 0)
+		shadow_renderer->render(cb, scene_view);
 
 	cb->timestamp(cur_query_offset + 1);
 }
@@ -94,10 +92,10 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	geo_renderer->draw_skyboxes(cb, rp, params.desired_aspect_ratio, rvd);
 
 	UBO ubo;
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
-	ubo.num_lights = lights.num;
-	ubo.shadow_index = shadow_index;
+	ubo.p = scene_view.cam->m_projection;
+	ubo.v = scene_view.cam->m_view;
+	ubo.num_lights = scene_view.lights.num;
+	ubo.shadow_index = scene_view.shadow_index;
 
 	geo_renderer->draw_terrains(cb, rp, ubo, rvd);
 	geo_renderer->draw_objects_opaque(cb, rp, ubo, rvd);
@@ -112,10 +110,8 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 }
 
 void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
-	auto cam0 = this->cam;
-	this->cam = cam;
-
-	geo_renderer->cam = cam;
+	auto cam0 = this->scene_view.cam;
+	scene_view.cam = cam;
 
 	prepare_lights(cam, rvd);
 
@@ -130,8 +126,8 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 	UBO ubo;
 	ubo.p = cam->m_projection;
 	ubo.v = cam->m_view;
-	ubo.num_lights = lights.num;
-	ubo.shadow_index = shadow_index;
+	ubo.num_lights = scene_view.lights.num;
+	ubo.shadow_index = scene_view.shadow_index;
 
 	geo_renderer->draw_terrains(cb, rp, ubo, rvd);
 	geo_renderer->draw_objects_opaque(cb, rp, ubo, rvd);
@@ -141,7 +137,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 
 	cb->end_render_pass();
 
-	this->cam = cam0;
+	scene_view.cam = cam0;
 }
 
 #endif

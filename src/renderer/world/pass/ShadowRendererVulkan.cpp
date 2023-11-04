@@ -38,15 +38,17 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 	material = new Material(resource_manager);
 	material->shader_path = "shadow.shader";
 
-	geo_renderer = new GeometryRendererVulkan(RenderPathType::FORWARD, this);
+
+
+	geo_renderer = new GeometryRendererVulkan(RenderPathType::FORWARD, scene_view, this);
 	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 	geo_renderer->material_shadow = material;
-	geo_renderer->ubo_light = new UniformBuffer(8); // dummy
-	geo_renderer->num_lights = 0;
+	//scene_view.ubo_light = new UniformBuffer(8); // dummy
 }
 
-void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, const mat4 &m) {
-	proj = m;
+void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, SceneView &parent_scene_view) {
+	scene_view.cam = parent_scene_view.cam;
+	proj = parent_scene_view.shadow_proj;
 	prepare(RenderParams::WHATEVER);
 }
 
@@ -57,7 +59,6 @@ void ShadowRendererVulkan::prepare(const RenderParams& params) {
 }
 
 void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
-	geo_renderer->cam = cam;
 	geo_renderer->prepare(RenderParams::into_texture(sfb, 1.0f));
 
 	cb->begin_render_pass(render_pass(), sfb);

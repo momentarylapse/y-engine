@@ -60,11 +60,9 @@ const int MAX_LIGHTS = 1024;
 const int MAX_INSTANCES = 1<<11;
 
 
-GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, Renderer *parent) : GeometryRenderer(type, parent) {
+GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
 
 	vb_fx = new VertexBuffer("3f,4f,2f");
-
-	cam = cam_main;
 
 
 
@@ -158,12 +156,12 @@ void GeometryRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, co
 			if (tex[k])
 				dset->set_texture(i0 + k, tex[k]);
 	}
-	if (fb_shadow1)
-		dset->set_texture(LOCATION_SHADOW0, fb_shadow1->attachments[1].get());
-	if (fb_shadow1)
-		dset->set_texture(LOCATION_SHADOW1, fb_shadow2->attachments[1].get());
-	if (cube_map)
-		dset->set_texture(LOCATION_CUBE, cube_map.get());
+	if (scene_view.fb_shadow1)
+		dset->set_texture(LOCATION_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
+	if (scene_view.fb_shadow1)
+		dset->set_texture(LOCATION_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
+	if (scene_view.cube_map)
+		dset->set_texture(LOCATION_CUBE, scene_view.cube_map.get());
 }
 
 
@@ -172,6 +170,7 @@ void GeometryRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, co
 void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_fx);
 	auto &rda = rvd.rda_fx;
+	auto cam = scene_view.cam;
 
 	cb->bind_pipeline(pipeline_fx);
 
@@ -312,6 +311,7 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 
 void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, float aspect, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_sky;
+	auto cam = scene_view.cam;
 
 	int index = 0;
 	UBO ubo;
@@ -501,6 +501,7 @@ struct DrawCallData {
 
 void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_ob_trans;
+	auto cam = scene_view.cam;
 	int index = 0;
 
 	Array<DrawCallData> draw_calls;
