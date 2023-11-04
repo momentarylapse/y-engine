@@ -180,12 +180,16 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 		m->alpha.mode = TransparencyMode::COLOR_KEY_HARD;
 	} else if (mode == "key-smooth") {
 		m->alpha.mode = TransparencyMode::COLOR_KEY_SMOOTH;
+	} else if (mode == "mix") {
+		m->alpha.mode = TransparencyMode::MIX;
+	} else if (mode == "with-transmissivity-pass") {
+		m->alpha.mode = TransparencyMode::WITH_TRANSMISSIVITY_PASS;
 	} else if (mode != "") {
 		msg_error("unknown transparency mode: " + mode);
 	}
+	m->alpha.transmissivity_shader_path = c.get_str("transparency.transmissivity-shader", "");
 
 	mode = c.get_str("reflection.mode", "");
-
 	if (mode == "static") {
 		m->reflection.mode = ReflectionMode::CUBE_MAP_STATIC;
 		texture_files = c.get_str_array("reflection.cubemap");
@@ -239,6 +243,10 @@ bool Material::is_transparent() const {
 	if (alpha.mode == TransparencyMode::FUNCTIONS)
 		return true;
 	if (alpha.mode == TransparencyMode::FACTOR)
+		return true;
+	if (alpha.mode == TransparencyMode::MIX)
+		return true;
+	if (alpha.mode == TransparencyMode::WITH_TRANSMISSIVITY_PASS)
 		return true;
 	return false;
 }

@@ -20,6 +20,8 @@ enum class TransparencyMode {
 	COLOR_KEY_HARD = 2,
 	COLOR_KEY_SMOOTH = 3,
 	FACTOR = 4,
+	MIX = 5,
+	WITH_TRANSMISSIVITY_PASS = 6,
 	DEFAULT = -1,
 };
 
@@ -72,6 +74,7 @@ public:
 		Alpha source, destination;
 		float factor;
 		bool z_buffer;
+		Path transmissivity_shader_path;
 	} alpha;
 
 	struct Reflection {

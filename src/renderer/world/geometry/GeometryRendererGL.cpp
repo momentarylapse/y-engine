@@ -45,7 +45,7 @@
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
 
-Shader *magic_shader = nullptr;
+//Shader *magic_shader = nullptr;
 
 GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
 
@@ -59,7 +59,7 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_vie
 	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
 	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
 
-	if (!magic_shader)
+/*	if (!magic_shader)
 		magic_shader = resource_manager->create_shader(R"foo(
 <Layout>
 	version = 420
@@ -85,7 +85,7 @@ void main() {
 	out_color = vec4(T,1);
 }
 </FragmentShader>
-)foo");
+)foo");*/
 }
 
 void GeometryRendererGL::prepare(const RenderParams& params) {
@@ -115,6 +115,8 @@ void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
 	if (m->alpha.mode == TransparencyMode::FUNCTIONS)
 		nix::set_alpha(m->alpha.source, m->alpha.destination);
 	else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD)
+		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+	else if (m->alpha.mode == TransparencyMode::MIX)
 		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	else
 		nix::disable_alpha();
@@ -339,6 +341,7 @@ struct DrawCallData {
 	VertexBuffer *vb;
 	Material *material;
 	Shader *shader;
+	Shader *transmissivity_shader;
 	float z;
 };
 
@@ -346,7 +349,6 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	if (is_shadow_pass())
 		return;
 	nix::set_z(false, true);
-	//nix::set_cull(nix::CullMode::NONE);
 
 	Array<DrawCallData> draw_calls;
 
@@ -366,7 +368,11 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 			auto material = weak(m->material)[i];
 			m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
 			auto shader = m->shader_cache[i].get_shader(type);
-			draw_calls.add({m->_matrix, m->mesh[0]->sub[i].vertex_buffer, material, shader, (m->owner->pos - scene_view.cam->owner->pos).length()});
+			shared<Shader> tshader;
+			if (material->alpha.mode == TransparencyMode::WITH_TRANSMISSIVITY_PASS)
+				tshader = material->resource_manager->load_surface_shader(material->alpha.transmissivity_shader_path, "forward", m->_template->vertex_shader_module, "");
+
+			draw_calls.add({m->_matrix, m->mesh[0]->sub[i].vertex_buffer, material, shader, tshader.get(), (m->owner->pos - scene_view.cam->owner->pos).length()});
 		}
 	}
 
@@ -376,24 +382,36 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	// draw!
 	for (const auto& dc: draw_calls) {
 		nix::set_model_matrix(dc.matrix);
+		if (dc.material->alpha.mode == TransparencyMode::WITH_TRANSMISSIVITY_PASS) {
 
-		nix::set_cull(nix::CullMode::CCW);
-		set_material_x(dc.material, magic_shader);
-		//nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
-		nix::set_alpha(nix::Alpha::DEST_COLOR, nix::Alpha::ZERO);
-		nix::draw_triangles(dc.vb);
-		set_material_x(dc.material, dc.shader);
-		nix::set_alpha(nix::Alpha::ONE, nix::Alpha::ONE);
-		nix::draw_triangles(dc.vb);
+			// pass 1: back side - transmission
+			nix::set_cull(nix::CullMode::CCW);
+			set_material_x(dc.material, dc.transmissivity_shader);
+			//nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
+			nix::set_alpha(nix::Alpha::DEST_COLOR, nix::Alpha::ZERO);
+			nix::draw_triangles(dc.vb);
 
-		nix::set_cull(nix::CullMode::CW);
-		set_material_x(dc.material, magic_shader);
-		//nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
-		nix::set_alpha(nix::Alpha::DEST_COLOR, nix::Alpha::ZERO);
-		nix::draw_triangles(dc.vb);
-		set_material_x(dc.material, dc.shader);
-		nix::set_alpha(nix::Alpha::ONE, nix::Alpha::ONE);
-		nix::draw_triangles(dc.vb);
+			// pass 2: back side - reflection
+			set_material_x(dc.material, dc.shader);
+			nix::set_alpha(nix::Alpha::ONE, nix::Alpha::ONE);
+			nix::draw_triangles(dc.vb);
+
+			// pass 3: front side - transmission
+			nix::set_cull(nix::CullMode::CW);
+			set_material_x(dc.material, dc.transmissivity_shader);
+			//nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
+			nix::set_alpha(nix::Alpha::DEST_COLOR, nix::Alpha::ZERO);
+			nix::draw_triangles(dc.vb);
+
+			// pass 4: front side - reflection
+			set_material_x(dc.material, dc.shader);
+			nix::set_alpha(nix::Alpha::ONE, nix::Alpha::ONE);
+			nix::draw_triangles(dc.vb);
+		} else {
+			nix::set_cull(nix::CullMode::NONE);
+			set_material_x(dc.material, dc.shader);
+			nix::draw_triangles(dc.vb);
+		}
 	}
 
 	nix::disable_alpha();

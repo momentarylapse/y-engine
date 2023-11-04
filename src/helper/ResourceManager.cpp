@@ -135,7 +135,7 @@ string ResourceManager::expand_geometry_shader_source(const string &source, cons
 }
 
 shared<Shader> ResourceManager::load_surface_shader(const Path& _filename, const string &render_path, const string &vertex_module, const string &geometry_module) {
-	msg_write("load_surface_shader: " + str(_filename) + "  " + render_path + "  " + vertex_module + "  " + geometry_module);
+	//msg_write("load_surface_shader: " + str(_filename) + "  " + render_path + "  " + vertex_module + "  " + geometry_module);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
 	auto filename = _filename;
