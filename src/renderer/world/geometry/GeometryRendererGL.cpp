@@ -11,15 +11,9 @@
 #ifdef USING_OPENGL
 #include "../WorldRendererGL.h"
 #include "../../base.h"
-#include "../../../lib/nix/nix.h"
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../world/Material.h"
 #include "../../../Config.h"
-#include "../../../lib/image/image.h"
-#include "../../../lib/math/vec3.h"
-#include "../../../lib/math/complex.h"
-#include "../../../lib/math/rect.h"
-#include "../../../lib/os/msg.h"
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../helper/ResourceManager.h"
 #include "../../../plugins/PluginManager.h"
@@ -43,6 +37,13 @@
 #include "../../../y/Entity.h"
 #include "../../../y/ComponentManager.h"
 #include "../../../meta.h"
+#include <lib/base/sort.h>
+#include <lib/nix/nix.h>
+#include <lib/image/image.h>
+#include <lib/math/vec3.h>
+#include <lib/math/complex.h>
+#include <lib/math/rect.h>
+#include <lib/os/msg.h>
 
 
 GeometryRendererGL::GeometryRendererGL(RenderPathType type, Renderer *parent) : GeometryRenderer(type, parent) {
@@ -304,15 +305,25 @@ void GeometryRendererGL::draw_objects_opaque() {
 	}
 }
 
+struct DrawCallData {
+	mat4 matrix;
+	VertexBuffer *vb;
+	Material *material;
+	Shader *shader;
+	float z;
+};
+
 void GeometryRendererGL::draw_objects_transparent() {
 	if (is_shadow_pass())
 		return;
 	nix::set_z(false, true);
 	//nix::set_cull(nix::CullMode::NONE);
+
+	Array<DrawCallData> draw_calls;
+
 	auto& list = ComponentManager::get_list_family<Model>();
 	for (auto *m: list) {
 		m->update_matrix();
-		nix::set_model_matrix(m->_matrix);
 
 		/*if (auto ani = m->owner->get_component<Animator>()) {
 			ani->buf->update_array(ani->dmatrix);
@@ -322,10 +333,24 @@ void GeometryRendererGL::draw_objects_transparent() {
 		for (int i=0; i<m->material.num; i++) {
 			if (!m->material[i]->is_transparent())
 				continue;
-			set_material(m->shader_cache[i], weak(m->material)[i], type, m->_template->vertex_shader_module, "");
-			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
+
+			auto material = weak(m->material)[i];
+			m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
+			auto shader = m->shader_cache[i].get_shader(type);
+			draw_calls.add({m->_matrix, m->mesh[0]->sub[i].vertex_buffer, material, shader, (m->owner->pos - cam->owner->pos).length()});
 		}
 	}
+
+	// sort: far to near
+	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z > b.z; });
+
+	// draw!
+	for (const auto& dc: draw_calls) {
+		nix::set_model_matrix(dc.matrix);
+		set_material_x(dc.material, dc.shader);
+		nix::draw_triangles(dc.vb);
+	}
+
 	nix::disable_alpha();
 	nix::set_z(true, true);
 	nix::set_cull(nix::CullMode::DEFAULT);

@@ -15,11 +15,6 @@
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../world/Material.h"
 #include "../../../Config.h"
-#include "../../../lib/image/image.h"
-#include "../../../lib/math/vec3.h"
-#include "../../../lib/math/complex.h"
-#include "../../../lib/math/rect.h"
-#include "../../../lib/os/msg.h"
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../helper/ResourceManager.h"
 #include "../../../plugins/PluginManager.h"
@@ -43,6 +38,12 @@
 #include "../../../y/Entity.h"
 #include "../../../y/ComponentManager.h"
 #include "../../../meta.h"
+#include <lib/base/sort.h>
+#include <lib/image/image.h>
+#include <lib/math/vec3.h>
+#include <lib/math/complex.h>
+#include <lib/math/rect.h>
+#include <lib/os/msg.h>
 
 
 
@@ -489,9 +490,20 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 	}
 }
 
+
+struct DrawCallData {
+	VertexBuffer *vb;
+	DescriptorSet *dset;
+	Material *material;
+	GraphicsPipeline *pipeline;
+	float z;
+};
+
 void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
 	auto &rda = rvd.rda_ob_trans;
 	int index = 0;
+
+	Array<DrawCallData> draw_calls;
 
 	ubo.m = mat4::ID;
 
@@ -523,11 +535,23 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 				rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
-			set_material(cb, rp, rda[index].dset, m->shader_cache[i], material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+			m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
+			auto shader = m->shader_cache[i].get_shader(type);
+			auto pipeline = get_pipeline(shader, rp, material, PrimitiveTopology::TRIANGLES, vb);
+			draw_calls.add({vb, rda[index].dset, material, pipeline, (m->owner->pos - cam->owner->pos).length()});
 
-			cb->draw(vb);
 			index ++;
 		}
+	}
+
+
+	// sort: far to near
+	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z > b.z; });
+
+	// draw!
+	for (const auto& dc: draw_calls) {
+		set_material_x(cb, rp, dc.dset, dc.material, dc.pipeline);
+		cb->draw(dc.vb);
 	}
 }
 
