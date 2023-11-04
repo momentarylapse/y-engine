@@ -308,7 +308,7 @@ void GeometryRendererGL::draw_objects_transparent() {
 	if (is_shadow_pass())
 		return;
 	nix::set_z(false, true);
-	nix::set_cull(nix::CullMode::NONE);
+	//nix::set_cull(nix::CullMode::NONE);
 	auto& list = ComponentManager::get_list_family<Model>();
 	for (auto *m: list) {
 		m->update_matrix();
