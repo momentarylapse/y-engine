@@ -45,6 +45,7 @@
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
 
+Shader *magic_shader = nullptr;
 
 GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
 
@@ -57,6 +58,34 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_vie
 	const string &rpt = RENDER_PATH_NAME[(int)type];
 	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
 	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
+
+	if (!magic_shader)
+		magic_shader = resource_manager->create_shader(R"foo(
+<Layout>
+	version = 420
+	bindings = [[buffer,buffer,sampler,sampler,sampler,sampler,sampler,buffer]]
+	pushsize = 0
+	input = [vec3,vec3,vec2]
+	topology = triangles
+</Layout>
+<FragmentShader>
+
+layout(location = 0) in vec4 in_pos; // view space
+layout(location = 1) in vec3 in_normal;
+layout(location = 2) in vec2 in_uv;
+layout(location = 0) out vec4 out_color;
+
+layout(binding = 4) uniform sampler2D tex0;
+
+void main() {
+	vec3 n = normalize(in_normal);
+	vec3 T = texture(tex0, in_uv).rgb;
+	T *= pow(abs(n.z), 2);
+	//vec3 T = vec3(1,1,0) * abs(n.z);
+	out_color = vec4(T,1);
+}
+</FragmentShader>
+)foo");
 }
 
 void GeometryRendererGL::prepare(const RenderParams& params) {
@@ -347,8 +376,23 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	// draw!
 	for (const auto& dc: draw_calls) {
 		nix::set_model_matrix(dc.matrix);
+
+		nix::set_cull(nix::CullMode::CCW);
+		set_material_x(dc.material, magic_shader);
+		//nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
+		nix::set_alpha(nix::Alpha::DEST_COLOR, nix::Alpha::ZERO);
+		nix::draw_triangles(dc.vb);
 		set_material_x(dc.material, dc.shader);
-		nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
+		nix::set_alpha(nix::Alpha::ONE, nix::Alpha::ONE);
+		nix::draw_triangles(dc.vb);
+
+		nix::set_cull(nix::CullMode::CW);
+		set_material_x(dc.material, magic_shader);
+		//nix::bind_texture(9, params.frame_buffer->color_attachments[0].get());
+		nix::set_alpha(nix::Alpha::DEST_COLOR, nix::Alpha::ZERO);
+		nix::draw_triangles(dc.vb);
+		set_material_x(dc.material, dc.shader);
+		nix::set_alpha(nix::Alpha::ONE, nix::Alpha::ONE);
 		nix::draw_triangles(dc.vb);
 	}
 
