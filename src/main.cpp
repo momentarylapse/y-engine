@@ -219,7 +219,13 @@ public:
 			w = vidmode->width;
 			h = vidmode->height;
 		}
-		GLFWwindow* window = glfwCreateWindow(w, h, "y-engine", monitor, nullptr);
+		string title = "y-engine";
+#ifdef USING_VULKAN
+		title += " (vulkan)";
+#else
+		title += " (gl)";
+#endif
+		GLFWwindow* window = glfwCreateWindow(w, h, title.c_str(), monitor, nullptr);
 
 		glfwSetWindowUserPointer(window, this);
 		glfwMakeContextCurrent(window);
