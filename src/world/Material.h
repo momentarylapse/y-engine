@@ -21,7 +21,6 @@ enum class TransparencyMode {
 	COLOR_KEY_SMOOTH = 3,
 	FACTOR = 4,
 	MIX = 5,
-	WITH_TRANSMISSIVITY_PASS = 6,
 	DEFAULT = -1,
 };
 
@@ -69,13 +68,20 @@ public:
 
 	bool cast_shadow;
 
-	struct Transparency {
+	struct RenderPassData {
 		TransparencyMode mode;
 		Alpha source, destination;
 		float factor;
 		bool z_buffer;
-		Path transmissivity_shader_path;
-	} alpha;
+		int cull_mode;
+		Path shader_path;
+	};
+
+	struct ExtendedData {
+		RenderPassData pass[4];
+		int num_passes = 0;
+	};
+	owned<ExtendedData> extended;
 
 	struct Reflection {
 		ReflectionMode mode;
@@ -90,7 +96,6 @@ public:
 	} friction;
 
 	Material(ResourceManager *resource_manager);
-	~Material();
 	xfer<Material> copy();
 
 	bool is_transparent() const;
@@ -99,6 +104,7 @@ public:
 struct ShaderCache {
 	shared<Shader> shader[2]; // * #(render paths)
 	void _prepare_shader(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module);
+	void _prepare_shader_multi_pass(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module, int k);
 	Shader *get_shader(RenderPathType render_path_type);
 };
 

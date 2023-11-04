@@ -54,12 +54,6 @@ Material::Material(ResourceManager *rm) {
 
 	cast_shadow = true;
 
-	alpha.mode = TransparencyMode::NONE;
-	alpha.source = Alpha::ZERO;
-	alpha.destination = Alpha::ZERO;
-	alpha.factor = 1;
-	alpha.z_buffer = true;
-
 	reflection.mode = ReflectionMode::NONE;
 	reflection.density = 0;
 	reflection.cube_map_size = 0;
@@ -68,9 +62,6 @@ Material::Material(ResourceManager *rm) {
 	friction._static = 0.8f;
 	friction.sliding = 0.4f;
 	friction.rolling = 0.90f;
-}
-
-Material::~Material() {
 }
 
 void Material::add_uniform(const string &name, float *p, int size) {
@@ -88,7 +79,10 @@ xfer<Material> Material::copy() {
 	m->textures = textures;
 	m->cast_shadow = cast_shadow;
 
-	m->alpha = alpha;
+	if (extended) {
+		m->extended = new ExtendedData;
+		*m->extended = *extended;
+	}
 	m->reflection = reflection;
 	m->reflection.cube_map = reflection.cube_map;
 /*	if ((cube_map < 0) and (m2->cube_map_size > 0) and (reflection.mode == ReflectionCubeMapDynamical)){
@@ -104,10 +98,44 @@ float col_frac(const color &a, const color &b) {
 	return (a.r+a.g+a.b) / (b.r+b.g+b.b);
 }
 
-static const Alpha FILE_ALPHAS[] = {Alpha::ZERO, Alpha::ONE, Alpha::SOURCE_COLOR, Alpha::SOURCE_INV_COLOR, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, Alpha::DEST_COLOR, Alpha::DEST_INV_COLOR, Alpha::DEST_ALPHA, Alpha::DEST_INV_ALPHA};
+static const Alpha FILE_ALPHAS[] = {
+		Alpha::ZERO,
+		Alpha::ONE,
+		Alpha::SOURCE_COLOR,
+		Alpha::SOURCE_INV_COLOR,
+		Alpha::SOURCE_ALPHA,
+		Alpha::SOURCE_INV_ALPHA,
+		Alpha::DEST_COLOR,
+		Alpha::DEST_INV_COLOR,
+		Alpha::DEST_ALPHA,
+		Alpha::DEST_INV_ALPHA};
 
-Alpha parse_alpha(int a) {
+Alpha parse_alpha_i(int a) {
 	return FILE_ALPHAS[clamp(a, 0, 10)];
+}
+
+Alpha parse_alpha(const string& s) {
+	if (s == "zero")
+		return Alpha::ZERO;
+	if (s == "one")
+		return Alpha::ONE;
+	if (s == "source-color")
+		return Alpha::SOURCE_COLOR;
+	if (s == "source-inv-color")
+		return Alpha::SOURCE_INV_COLOR;
+	if (s == "source-alpha")
+		return Alpha::SOURCE_ALPHA;
+	if (s == "source-inv-alpha")
+		return Alpha::SOURCE_INV_ALPHA;
+	if (s == "dest-color")
+		return Alpha::DEST_COLOR;
+	if (s == "dest-inv-color")
+		return Alpha::DEST_INV_COLOR;
+	if (s == "dest-alpha")
+		return Alpha::DEST_ALPHA;
+	if (s == "dest-inv-alpha")
+		return Alpha::DEST_INV_ALPHA;
+	return parse_alpha_i(s._int());
 }
 
 color any2color(const Any &a) {
@@ -166,30 +194,50 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	m->friction.rolling = c.get_float("friction.roll", 0.5f);
 	m->friction.jump = c.get_float("friction.jump", 0.5f);
 
-	string mode = c.get_str("transparency.mode", "");
-	if (mode == "factor") {
-		m->alpha.mode = TransparencyMode::FACTOR;
-		m->alpha.factor = c.get_float("transparency.factor");
-		m->alpha.z_buffer = false;
-	} else if (mode == "function") {
-		m->alpha.mode = TransparencyMode::FUNCTIONS;
-		m->alpha.source = parse_alpha(c.get_int("transparency.source", 0));
-		m->alpha.destination = parse_alpha(c.get_int("transparency.dest", 0));
-		m->alpha.z_buffer = false;
-	} else if (mode == "key-hard") {
-		m->alpha.mode = TransparencyMode::COLOR_KEY_HARD;
-	} else if (mode == "key-smooth") {
-		m->alpha.mode = TransparencyMode::COLOR_KEY_SMOOTH;
-	} else if (mode == "mix") {
-		m->alpha.mode = TransparencyMode::MIX;
-	} else if (mode == "with-transmissivity-pass") {
-		m->alpha.mode = TransparencyMode::WITH_TRANSMISSIVITY_PASS;
-	} else if (mode != "") {
-		msg_error("unknown transparency mode: " + mode);
-	}
-	m->alpha.transmissivity_shader_path = c.get_str("transparency.transmissivity-shader", "");
+	auto add_pass = [m] () -> Material::RenderPassData& {
+		if (!m->extended)
+			m->extended = new Material::ExtendedData;
+		return m->extended->pass[m->extended->num_passes ++];
+	};
+	auto try_parse_pass = [m, &c, add_pass] (const string& key) {
+		if (!c.has(key + ".mode"))
+			return;
+		auto& p = add_pass();
+		p.shader_path = c.get_str(key + ".shader", "");
+		string mode = c.get_str(key + ".cull", "ccw");
+		p.cull_mode = 1;
+		if (mode == "none")
+			p.cull_mode = 0;
+		else if (mode == "cw")
+			p.cull_mode = 2;
 
-	mode = c.get_str("reflection.mode", "");
+		mode = c.get_str(key + ".mode", "");
+		if (mode == "factor") {
+			p.mode = TransparencyMode::FACTOR;
+			p.factor = c.get_float(key + ".factor");
+			p.z_buffer = false;
+		} else if (mode == "function") {
+			p.mode = TransparencyMode::FUNCTIONS;
+			p.source = parse_alpha(c.get_str(key + ".source", "zero"));
+			p.destination = parse_alpha(c.get_str(key + ".dest", "zero"));
+			p.z_buffer = false;
+		} else if (mode == "key-hard") {
+			p.mode = TransparencyMode::COLOR_KEY_HARD;
+		} else if (mode == "key-smooth") {
+			p.mode = TransparencyMode::COLOR_KEY_SMOOTH;
+		} else if (mode == "mix") {
+			p.mode = TransparencyMode::MIX;
+		} else if (mode != "") {
+			msg_error("unknown transparency mode: " + mode);
+		}
+	};
+
+	try_parse_pass("transparency");
+
+	for (int i=0; i<4; i++)
+		try_parse_pass(format("pass%d", i));
+
+	string mode = c.get_str("reflection.mode", "");
 	if (mode == "static") {
 		m->reflection.mode = ReflectionMode::CUBE_MAP_STATIC;
 		texture_files = c.get_str_array("reflection.cubemap");
@@ -231,6 +279,14 @@ void ShaderCache::_prepare_shader(RenderPathType render_path_type, Material *mat
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
 	shader[i] = material->resource_manager->load_surface_shader(material->shader_path, rpt, vertex_module, geometry_module);
 }
+void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module, int k) {
+	int i = shader_index(render_path_type);
+	if (shader[i])
+		return;
+	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
+	shader[i] = material->resource_manager->load_surface_shader(material->extended->pass[k].shader_path, rpt, vertex_module, geometry_module);
+}
 
 Shader *ShaderCache::get_shader(RenderPathType render_path_type) {
 	int i = shader_index(render_path_type);
@@ -239,14 +295,17 @@ Shader *ShaderCache::get_shader(RenderPathType render_path_type) {
 }
 
 bool Material::is_transparent() const {
+	if (!extended)
+		return false;
+	return true;
 	//!alpha.z_buffer; //false;
-	if (alpha.mode == TransparencyMode::FUNCTIONS)
+	/*if (alpha.mode == TransparencyMode::FUNCTIONS)
 		return true;
 	if (alpha.mode == TransparencyMode::FACTOR)
 		return true;
 	if (alpha.mode == TransparencyMode::MIX)
 		return true;
 	if (alpha.mode == TransparencyMode::WITH_TRANSMISSIVITY_PASS)
-		return true;
+		return true;*/
 	return false;
 }
