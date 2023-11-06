@@ -398,9 +398,12 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("CollisionData.pos", &CollisionData::pos);
 	ext->declare_class_element("CollisionData.n", &CollisionData::n);
 
+	ext->declare_class_size("MaterialPass", sizeof(Material::RenderPassData));
+	ext->declare_class_element("MaterialPass.shader_path", &Material::RenderPassData::shader_path);
+
 	ext->declare_class_size("Material", sizeof(Material));
 	ext->declare_class_element("Material.textures", &Material::textures);
-	ext->declare_class_element("Material.shader_path", &Material::shader_path);
+	ext->declare_class_element("Material.pass0", &Material::pass0);
 	ext->declare_class_element("Material.albedo", &Material::albedo);
 	ext->declare_class_element("Material.roughness", &Material::roughness);
 	ext->declare_class_element("Material.metal", &Material::metal);

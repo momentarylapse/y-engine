@@ -234,13 +234,11 @@ public:
 
 		auto alpha_mode = (TransparencyMode)f->read_int();
 		if (alpha_mode != TransparencyMode::DEFAULT) {
-			me->extended = new Material::ExtendedData;
-			me->extended->num_passes = 1;
-			me->extended->pass[0].mode = alpha_mode;
-			me->extended->pass[0].source = parse_alpha_i(f->read_int());
-			me->extended->pass[0].destination = parse_alpha_i(f->read_int());
-			me->extended->pass[0].factor = f->read_float();
-			me->extended->pass[0].z_buffer = f->read_bool();
+			me->pass0.mode = alpha_mode;
+			me->pass0.source = parse_alpha_i(f->read_int());
+			me->pass0.destination = parse_alpha_i(f->read_int());
+			me->pass0.factor = f->read_float();
+			me->pass0.z_buffer = f->read_bool();
 		} else {
 			f->read_int();
 			f->read_int();

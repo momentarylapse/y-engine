@@ -14,7 +14,6 @@ MaterialManager::MaterialManager(ResourceManager *_resource_manager) {
 	resource_manager = _resource_manager;
 	// create the default material
 	trivial_material = new Material(resource_manager);
-	trivial_material->name = "-default-";
 	//trivial_material->shader_path = Shader::default_3d;
 
 	set_default(trivial_material);
@@ -25,6 +24,8 @@ MaterialManager::~MaterialManager() {
 }
 
 void MaterialManager::reset() {
+	for (auto&& [f, m]: materials)
+		delete m;
 	materials.clear();
 
 	set_default(trivial_material);
@@ -70,7 +71,6 @@ void Material::add_uniform(const string &name, float *p, int size) {
 
 xfer<Material> Material::copy() {
 	auto m = new Material(resource_manager);
-	m->name = name;
 	m->albedo = albedo;
 	m->roughness = roughness;
 	m->metal = metal;
@@ -79,6 +79,8 @@ xfer<Material> Material::copy() {
 	m->textures = textures;
 	m->cast_shadow = cast_shadow;
 
+	m->pass0 = pass0;
+	m->num_passes = num_passes;
 	if (extended) {
 		m->extended = new ExtendedData;
 		*m->extended = *extended;
@@ -89,7 +91,6 @@ xfer<Material> Material::copy() {
 		cube_map = FxCubeMapNew(m2->cube_map_size);
 		FxCubeMapCreate(cube_map, model);
 	}*/
-	m->shader_path = shader_path;
 	m->friction = friction;
 	return m;
 }
@@ -159,8 +160,8 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	if (filename.is_empty())
 		return default_material->copy();
 
-	for (Material *m: materials)
-		if (m->name == filename)
+	for (auto&& [f, m]: materials)
+		if (f == filename)
 			return m->copy();
 
 
@@ -176,7 +177,6 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 		}*/
 	}
 	Material *m = new Material(resource_manager);
-	m->name = filename;
 
 	m->albedo = any2color(c.get("color.albedo"));
 	m->roughness = c.get_float("color.roughness", 0.5f);
@@ -186,7 +186,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	auto texture_files = c.get_str_array("textures");
 	for (auto &f: texture_files)
 		m->textures.add(resource_manager->load_texture(f));
-	m->shader_path = c.get_str("shader", "");
+	m->pass0.shader_path = c.get_str("shader", "");
 	m->cast_shadow = c.get_bool("shadow.cast", true);
 
 	m->friction._static = c.get_float("friction.static", 0.5f);
@@ -194,15 +194,16 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	m->friction.rolling = c.get_float("friction.roll", 0.5f);
 	m->friction.jump = c.get_float("friction.jump", 0.5f);
 
-	auto add_pass = [m] () -> Material::RenderPassData& {
-		if (!m->extended)
+	auto add_pass = [m] (int index) -> Material::RenderPassData& {
+		if (index == 1)
 			m->extended = new Material::ExtendedData;
-		return m->extended->pass[m->extended->num_passes ++];
+		m->num_passes = max(m->num_passes, index + 1);
+		return m->pass(index);
 	};
-	auto try_parse_pass = [m, &c, add_pass] (const string& key) {
+	auto try_parse_pass = [m, &c, add_pass] (const string& key, int index) {
 		if (!c.has(key + ".mode"))
 			return;
-		auto& p = add_pass();
+		auto& p = add_pass(index);
 		p.shader_path = c.get_str(key + ".shader", "");
 		string mode = c.get_str(key + ".cull", "ccw");
 		p.cull_mode = 1;
@@ -232,10 +233,10 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 		}
 	};
 
-	try_parse_pass("transparency");
+	try_parse_pass("transparency", 0);
 
 	for (int i=0; i<4; i++)
-		try_parse_pass(format("pass%d", i));
+		try_parse_pass(format("pass%d", i), i);
 
 	string mode = c.get_str("reflection.mode", "");
 	if (mode == "static") {
@@ -262,7 +263,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 		msg_error("unknown reflection mode: " + mode);
 	}
 
-	materials.add(m);
+	materials.set(filename, m);
 	return m->copy();
 }
 
@@ -277,7 +278,7 @@ void ShaderCache::_prepare_shader(RenderPathType render_path_type, Material *mat
 		return;
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = material->resource_manager->load_surface_shader(material->shader_path, rpt, vertex_module, geometry_module);
+	shader[i] = material->resource_manager->load_surface_shader(material->pass0.shader_path, rpt, vertex_module, geometry_module);
 }
 void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, Material *material, const string& vertex_module, const string& geometry_module, int k) {
 	int i = shader_index(render_path_type);
@@ -285,7 +286,7 @@ void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, Ma
 		return;
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = material->resource_manager->load_surface_shader(material->extended->pass[k].shader_path, rpt, vertex_module, geometry_module);
+	shader[i] = material->resource_manager->load_surface_shader(material->pass(k).shader_path, rpt, vertex_module, geometry_module);
 }
 
 Shader *ShaderCache::get_shader(RenderPathType render_path_type) {
@@ -294,18 +295,22 @@ Shader *ShaderCache::get_shader(RenderPathType render_path_type) {
 	return shader[i].get();
 }
 
+
+Material::RenderPassData& Material::pass(int k) {
+	if (k == 0)
+		return pass0;
+	return extended->pass[k - 1];
+}
+
 bool Material::is_transparent() const {
-	if (!extended)
-		return false;
-	return true;
+	if (extended)
+		return true;
 	//!alpha.z_buffer; //false;
-	/*if (alpha.mode == TransparencyMode::FUNCTIONS)
+	if (pass0.mode == TransparencyMode::FUNCTIONS)
 		return true;
-	if (alpha.mode == TransparencyMode::FACTOR)
+	if (pass0.mode == TransparencyMode::FACTOR)
 		return true;
-	if (alpha.mode == TransparencyMode::MIX)
+	if (pass0.mode == TransparencyMode::MIX)
 		return true;
-	if (alpha.mode == TransparencyMode::WITH_TRANSMISSIVITY_PASS)
-		return true;*/
 	return false;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/base/base.h>
+#include <lib/base/map.h>
 #include <lib/base/pointer.h>
 #include <lib/os/path.h>
 #include <lib/image/color.h>
@@ -47,12 +48,9 @@ enum class RenderPathType;
 // visual and physical properties
 class Material {
 public:
-	// name of the material
-	Path name;
 	ResourceManager *resource_manager;
 
 	shared_array<Texture> textures;
-	Path shader_path;
 
 	struct ShaderUniform {
 		string name;
@@ -76,10 +74,11 @@ public:
 		int cull_mode;
 		Path shader_path;
 	};
+	int num_passes = 1;
+	RenderPassData pass0;
 
 	struct ExtendedData {
 		RenderPassData pass[4];
-		int num_passes = 0;
 	};
 	owned<ExtendedData> extended;
 
@@ -99,6 +98,7 @@ public:
 	xfer<Material> copy();
 
 	bool is_transparent() const;
+	RenderPassData& pass(int k);
 };
 
 struct ShaderCache {
@@ -124,7 +124,7 @@ private:
 	ResourceManager *resource_manager;
 	Material *default_material;
 	Material *trivial_material;
-	owned_array<Material> materials; // "originals"
+	base::map<Path, Material*> materials; // "originals" owned!
 };
 
 

@@ -112,16 +112,14 @@ void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
 	for (auto &u: m->uniforms)
 		s->set_floats(u.name, u.p, u.size/4);
 
-	if (m->extended) {
-		if (m->extended->pass[0].mode == TransparencyMode::FUNCTIONS)
-			nix::set_alpha(m->extended->pass[0].source, m->extended->pass[0].destination);
-		else if (m->extended->pass[0].mode == TransparencyMode::COLOR_KEY_HARD)
-			nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-		else if (m->extended->pass[0].mode == TransparencyMode::MIX)
-			nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-		else
-			nix::disable_alpha();
-	}
+	if (m->pass0.mode == TransparencyMode::FUNCTIONS)
+		nix::set_alpha(m->pass0.source, m->pass0.destination);
+	else if (m->pass0.mode == TransparencyMode::COLOR_KEY_HARD)
+		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+	else if (m->pass0.mode == TransparencyMode::MIX)
+		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+	else
+		nix::disable_alpha();
 
 	nix::set_textures(weak(m->textures));
 
@@ -368,8 +366,8 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 
 			auto material = weak(m->material)[i];
 			Array<Shader*> shaders;
-			for (int k=0; k<material->extended->num_passes; k++) {
-				auto &p = material->extended->pass[k];
+			for (int k=0; k<material->num_passes; k++) {
+				auto &p = material->pass(k);
 				if (!multi_pass_shader_cache[k].contains(material))
 					multi_pass_shader_cache[k].set(material, {});
 				auto &shader_cache = multi_pass_shader_cache[k][material];
@@ -388,8 +386,8 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	// draw!
 	for (const auto& dc: draw_calls) {
 		nix::set_model_matrix(dc.matrix);
-		for (int k=0; k<dc.material->extended->num_passes; k++) {
-			auto& p = dc.material->extended->pass[k];
+		for (int k=0; k<dc.material->num_passes; k++) {
+			auto& p = dc.material->pass(k);
 
 			set_material_x(dc.material, dc.shaders[k]);
 
