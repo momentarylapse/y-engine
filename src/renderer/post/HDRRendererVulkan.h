@@ -38,7 +38,7 @@ public:
 
 	struct RenderOutData {
 		RenderOutData(){}
-		RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex);
+		RenderOutData(Shader *s, RenderPass *render_pass, const Array<Texture*> &tex);
 		void render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params);
 		shared<Shader> shader_out;
 		GraphicsPipeline* pipeline_out;
@@ -64,6 +64,10 @@ public:
 	owned<VertexBuffer> vb_2d;
 
 	int ch_post_blur = -1, ch_out = -1;
+
+	RenderPass *get_render_pass() override {
+		return into._render_pass;
+	}
 };
 
 #endif

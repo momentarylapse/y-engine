@@ -72,7 +72,7 @@ GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &s
 
 
 	shader_fx = resource_manager->load_shader("vulkan/3d-fx.shader");
-	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), render_pass(), 0, "triangles", "3f,4f,2f");
+	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), parent->get_render_pass(), 0, "triangles", "3f,4f,2f");
 	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
 	pipeline_fx->set_z(true, false);
 	pipeline_fx->set_culling(CullMode::NONE);
@@ -599,7 +599,7 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 			material = m->material.get();
 			shader = user_mesh_shader(resource_manager, m, type);//t);
 		}
-		auto pipeline = get_pipeline(shader, render_pass(), material->pass0, m->topology, m->vertex_buffer.get());
+		auto pipeline = get_pipeline(shader, rp, material->pass0, m->topology, m->vertex_buffer.get());
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),

@@ -53,8 +53,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	cur_query_offset = pool_no * 8;
 	device->reset_query_pool(cur_query_offset, 8);
 
-	auto cb = command_buffer();
-
+	auto cb = params.command_buffer;
 	cb->timestamp(cur_query_offset + 0);
 
 
@@ -84,8 +83,8 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 
 void WorldRendererVulkanForward::draw(const RenderParams& params) {
 
-	auto cb = command_buffer();
-	auto rp = render_pass();
+	auto cb = params.command_buffer;
+	auto rp = params.render_pass;
 
 	auto &rvd = geo_renderer->rvd_def;
 

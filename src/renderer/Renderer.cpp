@@ -63,17 +63,3 @@ color Renderer::background() const {
 	return Red;
 }
 
-#ifdef USING_VULKAN
-RenderPass *Renderer::render_pass() const {
-	if (!parent)
-		return nullptr;
-	return parent->render_pass();
-}
-
-CommandBuffer *Renderer::command_buffer() const {
-	if (!parent)
-		return nullptr;
-	return parent->command_buffer();
-}
-#endif
-

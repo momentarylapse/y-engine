@@ -37,7 +37,8 @@
 static const int MAX_RT_TRIAS = 65536;
 static const int MAX_RT_MESHES = 1024;
 
-WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device, Camera *cam, int w, int h) : WorldRendererVulkan("rt", parent, cam, RenderPathType::FORWARD) {
+WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *_device, Camera *cam, int w, int h) :
+		WorldRendererVulkan("rt", parent, cam, RenderPathType::FORWARD) {
 	device = _device;
 	width = w;
 	height = h;
@@ -92,7 +93,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 
 	shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
-	pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), parent->render_pass(), 0, "triangles", "3f,3f,2f");
+	pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), parent->get_render_pass(), 0, "triangles", "3f,3f,2f");
 	pipeline_out->set_culling(CullMode::NONE);
 	pipeline_out->rebuild();
 	dset_out = pool->create_set("sampler");
@@ -122,7 +123,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	pc.background = background();
 	pc.num_lights = scene_view.lights.num;
 
-	auto cb = command_buffer();
+	auto cb = params.command_buffer;
 
 	cb->image_barrier(offscreen_image,
 		vulkan::AccessFlags::NONE, vulkan::AccessFlags::SHADER_WRITE_BIT,
@@ -254,7 +255,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 
 void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 
-	auto cb = command_buffer();
+	auto cb = params.command_buffer;
 
     //vb_2d->create_quad(rect::ID_SYM, rect::ID);//dynamicly_scaled_source());
 

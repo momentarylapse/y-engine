@@ -24,7 +24,7 @@ public:
 	Array<UniformBuffer*> ubo;
 	owned<VertexBuffer> vb;
 	void prepare_gui(FrameBuffer *source, const RenderParams& params);
-	void draw_gui(CommandBuffer *cb);
+	void draw_gui(CommandBuffer *cb, RenderPass *render_pass);
 };
 
 #endif

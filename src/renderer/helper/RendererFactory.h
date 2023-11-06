@@ -8,6 +8,8 @@
 #ifndef SRC_RENDERER_HELPER_RENDERERFACTORY_H_
 #define SRC_RENDERER_HELPER_RENDERERFACTORY_H_
 
+#include <graphics-fwd.h>
+
 struct GLFWwindow;
 class Renderer;
 class Camera;

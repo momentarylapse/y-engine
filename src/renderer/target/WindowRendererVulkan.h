@@ -53,9 +53,7 @@ public:
 	void _create_swap_chain_and_stuff();
 	void rebuild_default_stuff();
 
-
-	RenderPass *render_pass() const override;
-	CommandBuffer *command_buffer() const override;
+	RenderPass *get_render_pass() override { return _default_render_pass; };
 };
 
 #endif

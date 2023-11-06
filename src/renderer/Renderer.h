@@ -24,6 +24,11 @@ struct RenderParams {
 	float desired_aspect_ratio;
 	bool target_is_window;
 	FrameBuffer *frame_buffer;
+#ifdef USING_VULKAN
+	RenderPass *render_pass;
+	CommandBuffer *command_buffer;
+#endif
+
 	RenderParams with_target(FrameBuffer *fb) const;
 	static const RenderParams WHATEVER;
 	static RenderParams into_window(FrameBuffer *frame_buffer, float aspect_ratio);
@@ -51,8 +56,11 @@ public:
 	virtual color background() const;
 
 #ifdef USING_VULKAN
-	virtual RenderPass *render_pass() const;
-	virtual CommandBuffer *command_buffer() const;
+	virtual RenderPass *get_render_pass() {
+		if (parent)
+			return parent->get_render_pass();
+		return nullptr;
+	};
 #endif
 
 

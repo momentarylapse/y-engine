@@ -67,16 +67,6 @@ void WindowRendererVulkan::rebuild_default_stuff() {
 }
 
 
-
-RenderPass* WindowRendererVulkan::render_pass() const {
-	return _default_render_pass;
-}
-
-CommandBuffer* WindowRendererVulkan::command_buffer() const {
-	return _command_buffers[image_index];
-}
-
-
 bool WindowRendererVulkan::start_frame() {
 
 	if (!swap_chain->acquire_image(&image_index, image_available_semaphore)) {
@@ -114,7 +104,10 @@ void WindowRendererVulkan::end_frame() {
 }
 
 RenderParams WindowRendererVulkan::create_params(float aspect_ratio) {
-	return RenderParams::into_window(_frame_buffers[image_index], aspect_ratio);
+	auto p = RenderParams::into_window(_frame_buffers[image_index], aspect_ratio);
+	p.command_buffer = _command_buffers[image_index];
+	p.render_pass = _default_render_pass;
+	return p;
 }
 
 void WindowRendererVulkan::prepare(const RenderParams& params) {
@@ -122,21 +115,20 @@ void WindowRendererVulkan::prepare(const RenderParams& params) {
 }
 
 void WindowRendererVulkan::draw(const RenderParams& params) {
-	auto cb = command_buffer();
-	auto rp = render_pass();
+	auto cb = params.command_buffer;
+	auto rp = params.render_pass;
 	auto fb = params.frame_buffer;
-	auto sub_params = RenderParams::into_window(fb, params.desired_aspect_ratio);
 
 	cb->begin();
 	for (auto c: children)
-		c->prepare(sub_params);
+		c->prepare(params);
 
 	cb->set_viewport({0, (float)swap_chain->width, 0, (float)swap_chain->height});
 	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
 
 	for (auto c: children)
-		c->draw(sub_params);
+		c->draw(params);
 
 	cb->end_render_pass();
 	cb->end();

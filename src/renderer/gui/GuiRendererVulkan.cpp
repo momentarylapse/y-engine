@@ -32,7 +32,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 
 
 	shader = resource_manager->load_shader("vulkan/2d.shader");
-	pipeline = PipelineManager::get_gui(shader.get(), parent->render_pass(), "3f,3f,2f");
+	pipeline = PipelineManager::get_gui(shader.get(), parent->get_render_pass(), "3f,3f,2f");
 
 
 	vb = new VertexBuffer("3f,3f,2f");
@@ -43,7 +43,7 @@ void GuiRendererVulkan::draw(const RenderParams& params) {
 	for (auto c: children)
 		c->draw(params);
 	prepare_gui(params.frame_buffer, params);
-	draw_gui(command_buffer());
+	draw_gui(params.command_buffer, params.render_pass);
 }
 
 void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& params) {
@@ -91,7 +91,7 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& par
 	PerformanceMonitor::end(ch_gui);
 }
 
-void GuiRendererVulkan::draw_gui(CommandBuffer *cb) {
+void GuiRendererVulkan::draw_gui(CommandBuffer *cb, RenderPass *render_pass) {
 	PerformanceMonitor::begin(ch_gui);
 
 	cb->bind_pipeline(pipeline);
@@ -103,7 +103,7 @@ void GuiRendererVulkan::draw_gui(CommandBuffer *cb) {
 		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 			if (p->shader) {
-				auto pl = PipelineManager::get_gui(p->shader.get(), parent->render_pass(), "3f,3f,2f");
+				auto pl = PipelineManager::get_gui(p->shader.get(), render_pass, "3f,3f,2f");
 				cb->bind_pipeline(pl);
 			}
 

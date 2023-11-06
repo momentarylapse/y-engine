@@ -28,9 +28,13 @@ class ModelManager;
 #ifdef USING_VULKAN
 class WindowRendererVulkan;
 using WindowRenderer = WindowRendererVulkan;
+class HDRRendererVulkan;
+using HDRRenderer = HDRRendererVulkan;
 #else
 class WindowRendererGL;
 using WindowRenderer = WindowRendererGL;
+class HDRRendererGL;
+using HDRRenderer = HDRRendererGL;
 #endif
 
 class EngineData {
@@ -90,7 +94,7 @@ public:
 	WindowRenderer *window_renderer;
 	Renderer *gui_renderer;
 	Renderer *region_renderer;
-	Renderer *hdr_renderer;
+	HDRRenderer *hdr_renderer;
 	PostProcessor *post_processor;
 	WorldRenderer *world_renderer;
 };

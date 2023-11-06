@@ -28,8 +28,8 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 	auto depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
 	auto depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
 	_render_pass = new vulkan::RenderPass({tex1, depth1}, "clear");
-	fb[0] = new vulkan::FrameBuffer(render_pass(), {tex1, depth1});
-	fb[1] = new vulkan::FrameBuffer(render_pass(), {tex2, depth2});
+	fb[0] = new vulkan::FrameBuffer(_render_pass, {tex1, depth1});
+	fb[1] = new vulkan::FrameBuffer(_render_pass, {tex2, depth2});
 
 
 	rvd[0].ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
@@ -49,11 +49,14 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, SceneView &parent_scene_view) {
 	scene_view.cam = parent_scene_view.cam;
 	proj = parent_scene_view.shadow_proj;
-	prepare(RenderParams::WHATEVER);
+	auto params = RenderParams::WHATEVER;
+	params.command_buffer = cb;
+	params.render_pass = _render_pass;
+	prepare(params);
 }
 
 void ShadowRendererVulkan::prepare(const RenderParams& params) {
-	auto cb = command_buffer();
+	auto cb = params.command_buffer;
 	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);
 	render_shadow_map(cb, fb[1].get(), 1, rvd[1]);
 }
@@ -61,7 +64,7 @@ void ShadowRendererVulkan::prepare(const RenderParams& params) {
 void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
 	geo_renderer->prepare(RenderParams::into_texture(sfb, 1.0f));
 
-	cb->begin_render_pass(render_pass(), sfb);
+	cb->begin_render_pass(_render_pass, sfb);
 	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));
 
 	//shadow_pass->set(shadow_proj, scale, &rvd);

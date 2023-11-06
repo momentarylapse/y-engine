@@ -36,9 +36,9 @@ static float resolution_scale_y = 1.0f;
 
 static int BLUR_SCALE = 4;
 
-HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, Renderer *r, const Array<Texture*> &tex) {
+HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, RenderPass *render_pass, const Array<Texture*> &tex) {
 	shader_out = s;
-	pipeline_out = new vulkan::GraphicsPipeline(s, r->parent->render_pass(), 0, "triangles", "3f,3f,2f");
+	pipeline_out = new vulkan::GraphicsPipeline(s, render_pass, 0, "triangles", "3f,3f,2f");
 	pipeline_out->set_culling(CullMode::NONE);
 	pipeline_out->rebuild();
 	dset_out = pool->create_set("buffer,sampler,sampler,sampler,sampler,sampler");
@@ -84,7 +84,7 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 	if (!r)
 		return;
 
-	auto cb = r->command_buffer();
+	auto cb = params.command_buffer;
 
 	//vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
@@ -142,7 +142,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam, int width, 
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
 	Array<Texture*> tex = {into.fb_main->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
-	out = RenderOutData(shader_out.get(), this, tex);
+	out = RenderOutData(shader_out.get(), parent->get_render_pass(), tex);
 
 
 
@@ -167,7 +167,7 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 
 	into.render_into(children[0], sub_params);
 
-	auto cb = command_buffer();
+	auto cb = params.command_buffer;
 
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
@@ -184,7 +184,7 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 }
 
 void HDRRendererVulkan::draw(const RenderParams& params) {
-	auto cb = command_buffer();
+	auto cb = params.command_buffer;
 
 
 	PerformanceMonitor::begin(ch_out);
