@@ -21,7 +21,7 @@ using Device = vulkan::Device;
 
 class WindowRendererVulkan : public TargetRenderer {
 public:
-	WindowRendererVulkan(GLFWwindow* win, int w, int h, Device *device);
+	WindowRendererVulkan(GLFWwindow* win, Device *device);
 	virtual ~WindowRendererVulkan();
 
 

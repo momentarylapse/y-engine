@@ -69,10 +69,10 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 }
 
 
-HDRRendererVulkan::RenderIntoData::RenderIntoData(Renderer *r) {
-	auto tex = new vulkan::Texture(r->width, r->height, "rgba:f16");
+HDRRendererVulkan::RenderIntoData::RenderIntoData(int width, int height) {
+	auto tex = new vulkan::Texture(width, height, "rgba:f16");
 	tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
-	_depth_buffer = new DepthBuffer(r->width, r->height, "d:f32", true);
+	_depth_buffer = new DepthBuffer(width, height, "d:f32", true);
 	_render_pass = new vulkan::RenderPass({tex, _depth_buffer}, "clear");
 
 	fb_main = new vulkan::FrameBuffer(_render_pass, {
@@ -99,12 +99,12 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 }
 
 
-HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam) : PostProcessorStage("hdr", parent) {
+HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam, int width, int height) : PostProcessorStage("hdr", parent) {
 	cam = _cam;
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
-	into = RenderIntoData(this);
+	into = RenderIntoData(width, height);
 	fb_main = into.fb_main.get();
 
 	Array<vulkan::Texture*> blur_tex;

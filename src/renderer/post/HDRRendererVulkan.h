@@ -15,7 +15,7 @@ class Camera;
 
 class HDRRendererVulkan : public PostProcessorStage {
 public:
-	HDRRendererVulkan(Renderer *parent, Camera* cam);
+	HDRRendererVulkan(Renderer *parent, Camera* cam, int width, int height);
 	virtual ~HDRRendererVulkan();
 
 	void prepare(const RenderParams& params) override;
@@ -25,7 +25,7 @@ public:
 
 	struct RenderIntoData {
 		RenderIntoData() {}
-		RenderIntoData(Renderer *r);
+		RenderIntoData(int width, int height);
 		void render_into(Renderer *r, const RenderParams& params);
 
 		shared<FrameBuffer> fb_main;

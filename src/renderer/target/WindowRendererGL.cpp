@@ -12,12 +12,10 @@
 #include "../../lib/nix/nix.h"
 #include "../../helper/PerformanceMonitor.h"
 
-WindowRendererGL::WindowRendererGL(GLFWwindow* win, int w, int h) : TargetRenderer("win") {
+WindowRendererGL::WindowRendererGL(GLFWwindow* win) : TargetRenderer("win") {
 	window = win;
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
-	width = w;
-	height = h;
 
 	_frame_buffer = context->default_framebuffer;
 }

@@ -16,7 +16,7 @@ struct GLFWwindow;
 
 class WindowRendererGL : public TargetRenderer {
 public:
-	WindowRendererGL(GLFWwindow* win, int w, int h);
+	WindowRendererGL(GLFWwindow* win);
 
 
 	bool start_frame() override;

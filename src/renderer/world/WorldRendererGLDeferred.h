@@ -21,7 +21,7 @@ public:
 
 	owned<GeometryRendererGL> geo_renderer_trans;
 
-	WorldRendererGLDeferred(Renderer *parent, Camera *cam);
+	WorldRendererGLDeferred(Renderer *parent, Camera *cam, int width, int height);
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 

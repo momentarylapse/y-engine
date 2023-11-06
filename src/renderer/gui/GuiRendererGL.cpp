@@ -14,6 +14,7 @@
 #include "../../gui/Picture.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
+#include <y/EngineData.h>
 
 GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
 	ch_gui = PerformanceMonitor::create_channel("gui", channel);
@@ -82,8 +83,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 			if (p->angle == 0) {
 				nix::set_model_matrix(mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(p->eff_area.width(), p->eff_area.height(), 0));
 			} else {
-				// TODO this should use the physical ratio
-				float r = (float)width / (float)height;
+				float r = engine.physical_aspect_ratio;
 				nix::set_model_matrix(mat4::translation(vec3(p->eff_area.x1, p->eff_area.y1, /*0.999f - p->eff_z/1000*/ 0.5f)) * mat4::scale(1/r, 1, 0) * mat4::rotation_z(p->angle) * mat4::scale(p->eff_area.width() * r, p->eff_area.height(), 0));
 			}
 			vb->create_quad(rect::ID, p->source);

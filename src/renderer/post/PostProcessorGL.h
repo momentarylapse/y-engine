@@ -17,7 +17,7 @@ class Any;
 
 class PostProcessorGL : public PostProcessor {
 public:
-	PostProcessorGL(Renderer *parent);
+	PostProcessorGL(Renderer *parent, int width, int height);
 	virtual ~PostProcessorGL();
 
 	void prepare(const RenderParams& params) override;

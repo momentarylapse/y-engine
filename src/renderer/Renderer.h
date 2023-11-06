@@ -35,9 +35,6 @@ public:
 	Renderer(const string &name, Renderer *parent = nullptr);
 	virtual ~Renderer();
 
-	int width, height;
-	rect area() const;
-
 	Renderer *parent = nullptr;
 	Array<Renderer*> children;
 	void add_child(Renderer *child);
@@ -61,12 +58,7 @@ public:
 	virtual CommandBuffer *command_buffer() const;
 #endif
 
-//	virtual bool forwarding_into_window() const;
-//	bool rendering_into_window() const;
 
-
-	//int ch_render= -1;
-	//int ch_end = -1;
 	int channel;
 	Context *context;
 	ResourceManager *resource_manager;

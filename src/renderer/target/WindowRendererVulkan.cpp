@@ -14,12 +14,9 @@
 #include "../../Config.h" // for timing experiment
 
 
-WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, int w, int h, Device *_device) : TargetRenderer("win") {
+WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, Device *_device) : TargetRenderer("win") {
 	window = _window;
 	glfwMakeContextCurrent(window);
-	//glfwGetFramebufferSize(window, &width, &height);
-	width = w;
-	height = h;
 
 	device = _device;
 
@@ -50,8 +47,6 @@ void WindowRendererVulkan::_create_swap_chain_and_stuff() {
 	_depth_buffer = swap_chain->create_depth_buffer();
 	_default_render_pass = swap_chain->create_render_pass(_depth_buffer);
 	_frame_buffers = swap_chain->create_frame_buffers(_default_render_pass, _depth_buffer);
-	width = swap_chain->width;
-	height = swap_chain->height;
 }
 
 
@@ -140,7 +135,7 @@ void WindowRendererVulkan::draw(const RenderParams& params) {
 	for (auto c: children)
 		c->prepare(sub_params);
 
-	cb->set_viewport(area());
+	cb->set_viewport({0, (float)swap_chain->width, 0, (float)swap_chain->height});
 	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
 

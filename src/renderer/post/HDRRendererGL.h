@@ -15,7 +15,7 @@ class Camera;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
-	HDRRendererGL(Renderer *parent, Camera *cam);
+	HDRRendererGL(Renderer *parent, Camera *cam, int width, int height);
 	virtual ~HDRRendererGL();
 
 	void prepare(const RenderParams& params) override;

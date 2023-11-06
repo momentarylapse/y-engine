@@ -22,7 +22,7 @@
 //static float resolution_scale_y = 1.0f;
 
 
-PostProcessorGL::PostProcessorGL(Renderer *parent) : PostProcessor(parent) {
+PostProcessorGL::PostProcessorGL(Renderer *parent, int width, int height) : PostProcessor(parent) {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 

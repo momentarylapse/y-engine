@@ -61,9 +61,9 @@ void print_render_chain() {
 
 TargetRenderer *create_window_renderer(GLFWwindow* window) {
 #ifdef USING_VULKAN
-	return new WindowRendererVulkan(window, engine.width, engine.height, device);
+	return new WindowRendererVulkan(window, device);
 #else
-	return new WindowRendererGL(window, engine.width, engine.height);
+	return new WindowRendererGL(window);
 #endif
 }
 
@@ -85,9 +85,9 @@ RegionRenderer *create_region_renderer(Renderer *parent) {
 
 PostProcessorStage *create_hdr_renderer(PostProcessor *parent, Camera *cam) {
 #ifdef USING_VULKAN
-	return new HDRRendererVulkan(parent, cam);
+	return new HDRRendererVulkan(parent, cam, engine.width, engine.height);
 #else
-	return new HDRRendererGL(parent, cam);
+	return new HDRRendererGL(parent, cam, engine.width, engine.height);
 #endif
 }
 
@@ -95,19 +95,19 @@ PostProcessor *create_post_processor(Renderer *parent) {
 #ifdef USING_VULKAN
 	return new PostProcessorVulkan(parent);
 #else
-	return new PostProcessorGL(parent);
+	return new PostProcessorGL(parent, engine.width, engine.height);
 #endif
 }
 
 WorldRenderer *create_world_renderer(Renderer *parent, Camera *cam) {
 #ifdef USING_VULKAN
 	if (config.get_str("renderer.path", "forward") == "raytracing")
-		return new WorldRendererVulkanRayTracing(parent, device, cam);
+		return new WorldRendererVulkanRayTracing(parent, device, cam, engine.width, engine.height);
 	else
 		return new WorldRendererVulkanForward(parent, device, cam);
 #else
 	if (config.get_str("renderer.path", "forward") == "deferred")
-		return new WorldRendererGLDeferred(parent, cam);
+		return new WorldRendererGLDeferred(parent, cam, engine.width, engine.height);
 	else
 		return new WorldRendererGLForward(parent, cam);
 #endif

@@ -14,7 +14,7 @@ class Camera;
 
 class WorldRendererVulkanRayTracing : public WorldRendererVulkan {
 public:
-	WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *device, Camera *cam);
+	WorldRendererVulkanRayTracing(Renderer *parent, vulkan::Device *device, Camera *cam, int width, int height);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
@@ -31,6 +31,7 @@ public:
 
 	vulkan::StorageTexture *offscreen_image;
 	vulkan::Texture *offscreen_image2;
+	int width, height;
 
 	struct MeshDescription {
 		mat4 matrix;

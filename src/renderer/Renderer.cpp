@@ -33,18 +33,12 @@ RenderParams RenderParams::into_texture(FrameBuffer *frame_buffer, float aspect_
 
 
 Renderer::Renderer(const string &name, Renderer *_parent) {
-	width = engine.width;
-	height = engine.height;
 	parent = _parent;
 	if (parent) {
-		width = parent->width;
-		height = parent->height;
 		parent->add_child(this);
 	}
 
 	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
-	//ch_render = PerformanceMonitor::create_channel("render");
-	//ch_end = PerformanceMonitor::create_channel("end", ch_render);
 	msg_write("NEW: " + name);
 	msg_write(p2s(engine.context));
 	msg_write(p2s(engine.resource_manager));
@@ -54,10 +48,6 @@ Renderer::Renderer(const string &name, Renderer *_parent) {
 
 
 Renderer::~Renderer() {
-}
-
-rect Renderer::area() const {
-	return rect(0, width, 0, height);
 }
 
 void Renderer::add_child(Renderer *child) {
@@ -99,15 +89,3 @@ CommandBuffer *Renderer::command_buffer() const {
 }
 #endif
 
-
-/*bool Renderer::rendering_into_window() const {
-	if (!parent)
-		return false;
-	return parent->forwarding_into_window();
-}
-
-bool Renderer::forwarding_into_window() const {
-	if (!parent)
-		return false;
-	return parent->forwarding_into_window();
-}*/
