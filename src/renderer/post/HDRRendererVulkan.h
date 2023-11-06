@@ -58,9 +58,6 @@ public:
 		shared<FrameBuffer> fb_out;
 	} bloom_levels[MAX_BLOOM_LEVELS];
 
-	FrameBuffer *frame_buffer() const override { return into.fb_main.get(); };
-	DepthBuffer *depth_buffer() const override { return into._depth_buffer; };
-
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
 

@@ -358,8 +358,7 @@ public:
 			return;
 		Scheduler::handle_draw_pre();
 		timer_render.peek();
-		const auto params = RenderParams::into_window(nullptr, engine.physical_aspect_ratio);
-		engine.window_renderer->draw(params);
+		engine.window_renderer->draw(engine.window_renderer->create_params(engine.physical_aspect_ratio));
 		render_times.add(timer_render.get());
 		engine.window_renderer->end_frame();
 	}

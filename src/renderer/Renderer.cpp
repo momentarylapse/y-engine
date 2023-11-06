@@ -63,18 +63,6 @@ color Renderer::background() const {
 	return Red;
 }
 
-FrameBuffer *Renderer::frame_buffer() const {
-	if (!parent)
-		return nullptr;
-	return parent->frame_buffer();
-}
-
-DepthBuffer *Renderer::depth_buffer() const {
-	if (!parent)
-		return nullptr;
-	return parent->depth_buffer();
-}
-
 #ifdef USING_VULKAN
 RenderPass *Renderer::render_pass() const {
 	if (!parent)

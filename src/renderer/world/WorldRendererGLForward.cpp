@@ -80,7 +80,7 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 void WorldRendererGLForward::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
-	auto fb = frame_buffer();
+	auto fb = params.frame_buffer;
 	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(ch_bg);

@@ -104,7 +104,7 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
-	auto target = parent->frame_buffer();
+	auto target = params.frame_buffer;
 
 	draw_background(target, params);
 

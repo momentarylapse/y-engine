@@ -29,7 +29,7 @@ void RegionRendererVulkan::prepare(const RenderParams& params) {
 
 void RegionRendererVulkan::draw(const RenderParams& params) {
 	auto cb = command_buffer();
-	auto fb = frame_buffer();
+	auto fb = params.frame_buffer;
 	const rect area = rect(0, fb->width, 0, fb->height);
 
 	for (auto& r: regions) {

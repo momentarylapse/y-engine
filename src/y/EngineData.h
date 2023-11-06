@@ -25,6 +25,13 @@ class PostProcessor;
 class ResourceManager;
 class MaterialManager;
 class ModelManager;
+#ifdef USING_VULKAN
+class WindowRendererVulkan;
+using WindowRenderer = WindowRendererVulkan;
+#else
+class WindowRendererGL;
+using WindowRenderer = WindowRendererGL;
+#endif
 
 class EngineData {
 public:
@@ -80,7 +87,7 @@ public:
 	Context *context;
 	ResourceManager *resource_manager;
 
-	TargetRenderer *window_renderer;
+	WindowRenderer *window_renderer;
 	Renderer *gui_renderer;
 	Renderer *region_renderer;
 	Renderer *hdr_renderer;

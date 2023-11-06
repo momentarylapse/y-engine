@@ -21,15 +21,6 @@ WindowRendererGL::WindowRendererGL(GLFWwindow* win) : TargetRenderer("win") {
 }
 
 
-FrameBuffer *WindowRendererGL::frame_buffer() const {
-	return _frame_buffer;
-}
-
-DepthBuffer *WindowRendererGL::depth_buffer() const {
-	return _depth_buffer;
-}
-
-
 bool WindowRendererGL::start_frame() {
 	nix::start_frame_glfw(context, window);
 	//jitter_iterate();
@@ -41,6 +32,11 @@ void WindowRendererGL::end_frame() {
 	nix::end_frame_glfw();
 	break_point();
 	PerformanceMonitor::end(ch_end);
+}
+
+
+RenderParams WindowRendererGL::create_params(float aspect_ratio) {
+	return RenderParams::into_window(_frame_buffer, aspect_ratio);
 }
 
 void WindowRendererGL::prepare(const RenderParams& params) {

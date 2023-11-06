@@ -42,7 +42,7 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 void GuiRendererVulkan::draw(const RenderParams& params) {
 	for (auto c: children)
 		c->draw(params);
-	prepare_gui(frame_buffer(), params);
+	prepare_gui(params.frame_buffer, params);
 	draw_gui(command_buffer());
 }
 

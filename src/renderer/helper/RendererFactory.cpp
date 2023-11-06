@@ -59,7 +59,7 @@ void print_render_chain() {
 }
 
 
-TargetRenderer *create_window_renderer(GLFWwindow* window) {
+WindowRenderer *create_window_renderer(GLFWwindow* window) {
 #ifdef USING_VULKAN
 	return new WindowRendererVulkan(window, device);
 #else

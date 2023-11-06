@@ -31,7 +31,7 @@ void RegionRendererGL::draw(const RenderParams& params) {
 	for (int i=0; i<children.num; i++)
 		regions[i].renderer = children[i];
 
-	const rect area = frame_buffer()->area();
+	const rect area = params.frame_buffer->area();
 
 	for (auto& r: regions) {
 		if (r.renderer) {

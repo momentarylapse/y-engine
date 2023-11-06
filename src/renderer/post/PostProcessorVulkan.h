@@ -37,9 +37,6 @@ public:
 	shared<FrameBuffer> fb2;
 	FrameBuffer *next_fb(FrameBuffer *cur);
 
-	FrameBuffer *frame_buffer() const override;
-	DepthBuffer *depth_buffer() const override;
-
 	DepthBuffer *_depth_buffer = nullptr;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;

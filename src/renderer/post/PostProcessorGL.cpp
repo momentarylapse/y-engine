@@ -73,20 +73,6 @@ PostProcessorGL::PostProcessorGL(Renderer *parent, int width, int height) : Post
 PostProcessorGL::~PostProcessorGL() {
 }
 
-FrameBuffer *PostProcessorGL::frame_buffer() const {
-	if (stages.num == 0)
-		if (parent)
-			return parent->frame_buffer();
-	return fb1.get();
-
-}
-DepthBuffer *PostProcessorGL::depth_buffer() const {
-	if (stages.num == 0)
-		if (parent)
-			return parent->depth_buffer();
-	return _depth_buffer;
-}
-
 FrameBuffer *PostProcessorGL::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }

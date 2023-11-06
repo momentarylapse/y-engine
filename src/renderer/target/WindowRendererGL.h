@@ -25,14 +25,12 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
+	RenderParams create_params(float aspect_ratio);
+
 	GLFWwindow* window;
 
 	DepthBuffer* _depth_buffer;
 	FrameBuffer* _frame_buffer;
-
-
-	FrameBuffer *frame_buffer() const override;
-	DepthBuffer *depth_buffer() const override;
 };
 
 #endif

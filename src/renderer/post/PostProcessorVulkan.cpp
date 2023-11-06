@@ -73,20 +73,6 @@ PostProcessorVulkan::PostProcessorVulkan(Renderer *parent) : PostProcessor(paren
 PostProcessorVulkan::~PostProcessorVulkan() {
 }
 
-FrameBuffer *PostProcessorVulkan::frame_buffer() const {
-	if (stages.num == 0)
-		if (parent)
-			return parent->frame_buffer();
-	return fb1.get();
-
-}
-DepthBuffer *PostProcessorVulkan::depth_buffer() const {
-	if (stages.num == 0)
-		if (parent)
-			return parent->depth_buffer();
-	return _depth_buffer;
-}
-
 FrameBuffer *PostProcessorVulkan::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }

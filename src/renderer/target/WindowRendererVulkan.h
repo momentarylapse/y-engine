@@ -31,6 +31,8 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
+	RenderParams create_params(float aspect_ratio);
+
 	GLFWwindow* window;
 
 	Fence* in_flight_fence;
@@ -53,8 +55,6 @@ public:
 
 
 	RenderPass *render_pass() const override;
-	FrameBuffer *frame_buffer() const override;
-	DepthBuffer *depth_buffer() const override;
 	CommandBuffer *command_buffer() const override;
 };
 

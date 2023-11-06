@@ -50,9 +50,6 @@ public:
 
 	virtual color background() const;
 
-
-	virtual FrameBuffer *frame_buffer() const;
-	virtual DepthBuffer *depth_buffer() const;
 #ifdef USING_VULKAN
 	virtual RenderPass *render_pass() const;
 	virtual CommandBuffer *command_buffer() const;

@@ -72,14 +72,6 @@ RenderPass* WindowRendererVulkan::render_pass() const {
 	return _default_render_pass;
 }
 
-FrameBuffer* WindowRendererVulkan::frame_buffer() const {
-	return _frame_buffers[image_index];
-}
-
-DepthBuffer *WindowRendererVulkan::depth_buffer() const {
-	return _depth_buffer;
-}
-
 CommandBuffer* WindowRendererVulkan::command_buffer() const {
 	return _command_buffers[image_index];
 }
@@ -121,6 +113,10 @@ void WindowRendererVulkan::end_frame() {
 	}
 }
 
+RenderParams WindowRendererVulkan::create_params(float aspect_ratio) {
+	return RenderParams::into_window(_frame_buffers[image_index], aspect_ratio);
+}
+
 void WindowRendererVulkan::prepare(const RenderParams& params) {
 
 }
@@ -128,7 +124,7 @@ void WindowRendererVulkan::prepare(const RenderParams& params) {
 void WindowRendererVulkan::draw(const RenderParams& params) {
 	auto cb = command_buffer();
 	auto rp = render_pass();
-	auto fb = frame_buffer();
+	auto fb = params.frame_buffer;
 	auto sub_params = RenderParams::into_window(fb, params.desired_aspect_ratio);
 
 	cb->begin();
