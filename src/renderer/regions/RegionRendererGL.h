@@ -8,26 +8,16 @@
 #ifndef SRC_RENDERER_REGIONS_REGIONRENDERERGL_H_
 #define SRC_RENDERER_REGIONS_REGIONRENDERERGL_H_
 
-#include "../Renderer.h"
+#include "RegionRendererCommon.h"
 #ifdef USING_OPENGL
 
 #include <lib/math/rect.h>
 
-class RegionRendererGL : public Renderer {
+class RegionRendererGL : public RegionRendererCommon {
 public:
 	RegionRendererGL(Renderer *parent);
 
-	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
-
-	Renderer *add_region(const rect &dest);
-
-	struct Region {
-		rect dest;
-		Renderer *renderer;
-	};
-
-	Array<Region> regions;
 };
 
 #endif

@@ -532,6 +532,9 @@
     <ClCompile Include="src\renderer\post\PostProcessorVulkan.cpp">
       <Filter>src\renderer\post</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\regions\RegionRendererCommon.cpp">
+      <Filter>src\renderer\regions</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\regions\RegionRendererGL.cpp">
       <Filter>src\renderer\regions</Filter>
     </ClCompile>
@@ -1181,6 +1184,9 @@
     </ClInclude>
     <ClInclude Include="src\renderer\post\PostProcessorVulkan.h">
       <Filter>src\renderer\post</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\regions\RegionRendererCommon.h">
+      <Filter>src\renderer\regions</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\regions\RegionRendererGL.h">
       <Filter>src\renderer\regions</Filter>

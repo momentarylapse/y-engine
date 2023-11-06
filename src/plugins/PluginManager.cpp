@@ -734,18 +734,14 @@ void PluginManager::export_kaba() {
 
 #ifdef USING_VULKAN
 //	using WR = WindowRendererVulkan;
-	using HR = HDRRendererVulkan;
 //	using GR = GuiRendererVulkan;
-	using RR = RegionRendererVulkan;
 	using RP = WorldRendererVulkan;
 	using RPF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
 //	using WR = WindowRendererGL;
-	using HR = HDRRendererGL;
 //	using GR = GuiRendererGL;
-	using RR = RegionRendererGL;
 	using RP = WorldRendererGL;
 	using RPF = WorldRendererGLForward;
 	using RPD = WorldRendererGLDeferred;
@@ -767,9 +763,14 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 
 
-	ext->declare_class_size("RegionsRenderer", sizeof(RR));
-	ext->declare_class_element("RegionRenderer.regions", &RR::regions);
-	ext->link_class_func("RegionRenderer.add_region", &RR::add_region);
+	ext->declare_class_size("RegionsRenderer", sizeof(RegionRenderer));
+	ext->declare_class_element("RegionRenderer.regions", &RegionRenderer::regions);
+	ext->link_class_func("RegionRenderer.add_region", &RegionRenderer::add_region);
+
+	ext->declare_class_size("RegionRenderer.Region", sizeof(RegionRenderer::Region));
+	ext->declare_class_element("RegionRenderer.Region.dest", &RegionRenderer::Region::dest);
+	ext->declare_class_element("RegionRenderer.Region.z", &RegionRenderer::Region::z);
+	ext->declare_class_element("RegionRenderer.Region.renderer", &RegionRenderer::Region::renderer);
 
 	ext->declare_class_size("PostProcessor", sizeof(PP));
 	ext->declare_class_element("PostProcessor.fb1", &PP::fb1);
@@ -781,10 +782,10 @@ void PluginManager::export_kaba() {
 	ext->declare_class_size("WindowRenderer", sizeof(RP));
 	ext->declare_class_element("RenderPath.type", &RP::type);
 
-	ext->declare_class_size("HDRRenderer", sizeof(HR));
-	ext->declare_class_element("HDRRenderer.fb_main", &HR::fb_main);
-	ext->declare_class_element("HDRRenderer.fb_small1", &HR::bloom_levels);
-	ext->declare_class_element("HDRRenderer.fb_small2", &HR::bloom_levels);
+	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
+	ext->declare_class_element("HDRRenderer.fb_main", &HDRRenderer::fb_main);
+	ext->declare_class_element("HDRRenderer.fb_small1", &HDRRenderer::bloom_levels);
+	ext->declare_class_element("HDRRenderer.fb_small2", &HDRRenderer::bloom_levels);
 
 
 	ext->declare_class_size("FrameBuffer", sizeof(FrameBuffer));

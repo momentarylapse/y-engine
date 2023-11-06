@@ -25,8 +25,6 @@ GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
 }
 
 void GuiRendererGL::draw(const RenderParams& params) {
-	for (auto c: children)
-		c->draw(params);
 	draw_gui(nullptr);
 }
 

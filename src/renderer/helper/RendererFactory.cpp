@@ -130,10 +130,9 @@ Renderer *create_render_path(Renderer *parent, Camera *cam) {
 void create_full_renderer(GLFWwindow* window, Camera *cam) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
-		engine.gui_renderer = create_gui_renderer(engine.window_renderer);
-		auto region_renderer = create_region_renderer(engine.gui_renderer);
-		engine.region_renderer = region_renderer;
-		auto p = create_render_path(region_renderer->add_region(rect::ID), cam);
+		engine.region_renderer = create_region_renderer(engine.window_renderer);
+		auto p = create_render_path(engine.region_renderer->add_region(rect::ID, 0), cam);
+		engine.gui_renderer = create_gui_renderer(engine.region_renderer->add_region(rect::ID, 999));
 	} catch(Exception &e) {
 		hui::ShowError(e.message());
 		throw e;

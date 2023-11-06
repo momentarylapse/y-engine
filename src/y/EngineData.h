@@ -30,11 +30,15 @@ class WindowRendererVulkan;
 using WindowRenderer = WindowRendererVulkan;
 class HDRRendererVulkan;
 using HDRRenderer = HDRRendererVulkan;
+class RegionRendererVulkan;
+using RegionRenderer = RegionRendererVulkan;
 #else
 class WindowRendererGL;
 using WindowRenderer = WindowRendererGL;
 class HDRRendererGL;
 using HDRRenderer = HDRRendererGL;
+class RegionRendererGL;
+using RegionRenderer = RegionRendererGL;
 #endif
 
 class EngineData {
@@ -93,7 +97,7 @@ public:
 
 	WindowRenderer *window_renderer;
 	Renderer *gui_renderer;
-	Renderer *region_renderer;
+	RegionRenderer *region_renderer;
 	HDRRenderer *hdr_renderer;
 	PostProcessor *post_processor;
 	WorldRenderer *world_renderer;
