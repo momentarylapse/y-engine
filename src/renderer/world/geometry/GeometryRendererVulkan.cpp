@@ -89,12 +89,21 @@ void GeometryRendererVulkan::prepare(const RenderParams& params) {
 }
 
 
+vulkan::CullMode vk_cull(int culling) {
+	if (culling == 0)
+		return vulkan::CullMode::NONE;
+	if (culling == 2)
+		return vulkan::CullMode::BACK;
+	if (culling == 1)
+		return vulkan::CullMode::FRONT;
+	return vulkan::CullMode::NONE;
+}
 
-GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp, Material *m, PrimitiveTopology top, VertexBuffer *vb) {
-	if (m->alpha.mode == TransparencyMode::FUNCTIONS) {
-		return PipelineManager::get_alpha(s, rp, top, vb, m->alpha.source, m->alpha.destination, false);
-	} else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD) {
-		return PipelineManager::get_alpha(s, rp, top, vb, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, true);
+GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp, Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
+	if (pass.mode == TransparencyMode::FUNCTIONS) {
+		return PipelineManager::get_alpha(s, rp, top, vb, pass.source, pass.destination, false, vk_cull(pass.cull_mode));
+	} else if (pass.mode == TransparencyMode::COLOR_KEY_HARD) {
+		return PipelineManager::get_alpha(s, rp, top, vb, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, true, vk_cull(pass.cull_mode));
 	} else {
 		return PipelineManager::get(s, rp, top, vb);
 	}
@@ -103,7 +112,7 @@ GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp
 void GeometryRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, ShaderCache &cache, Material *m, RenderPathType t, const string &vertex_module, const string &geometry_module, PrimitiveTopology top, VertexBuffer *vb) {
 	cache._prepare_shader(t, m, vertex_module, geometry_module);
 	auto s = cache.get_shader(t);
-	auto p = get_pipeline(s, rp, m, top, vb);
+	auto p = get_pipeline(s, rp, m->pass0, top, vb);
 	set_material_x(cb, rp, dset, m, p);
 }
 
@@ -495,7 +504,7 @@ struct DrawCallData {
 	VertexBuffer *vb;
 	DescriptorSet *dset;
 	Material *material;
-	GraphicsPipeline *pipeline;
+	Array<GraphicsPipeline*> pipelines;
 	float z;
 };
 
@@ -536,10 +545,19 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 				rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
 
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
-			m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
-			auto shader = m->shader_cache[i].get_shader(type);
-			auto pipeline = get_pipeline(shader, rp, material, PrimitiveTopology::TRIANGLES, vb);
-			draw_calls.add({vb, rda[index].dset, material, pipeline, (m->owner->pos - cam->owner->pos).length()});
+
+			Array<GraphicsPipeline*> pipelines;
+			for (int k=0; k<material->num_passes; k++) {
+				auto &p = material->pass(k);
+				if (!multi_pass_shader_cache[k].contains(material))
+					multi_pass_shader_cache[k].set(material, {});
+				auto &shader_cache = multi_pass_shader_cache[k][material];
+
+				shader_cache._prepare_shader_multi_pass(type, material, m->_template->vertex_shader_module, "", k);
+				auto shader = shader_cache.get_shader(type);
+				pipelines.add(get_pipeline(shader, rp, p, PrimitiveTopology::TRIANGLES, vb));
+			}
+			draw_calls.add({vb, rda[index].dset, material, pipelines, (m->owner->pos - cam->owner->pos).length()});
 
 			index ++;
 		}
@@ -551,8 +569,10 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 
 	// draw!
 	for (const auto& dc: draw_calls) {
-		set_material_x(cb, rp, dc.dset, dc.material, dc.pipeline);
-		cb->draw(dc.vb);
+		for (int k=0; k<dc.material->num_passes; k++) {
+			set_material_x(cb, rp, dc.dset, dc.material, dc.pipelines[k]);
+			cb->draw(dc.vb);
+		}
 	}
 }
 
@@ -579,7 +599,7 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 			material = m->material.get();
 			shader = user_mesh_shader(resource_manager, m, type);//t);
 		}
-		auto pipeline = get_pipeline(shader, render_pass(), material, m->topology, m->vertex_buffer.get());
+		auto pipeline = get_pipeline(shader, render_pass(), material->pass0, m->topology, m->vertex_buffer.get());
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),

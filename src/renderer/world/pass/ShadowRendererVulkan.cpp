@@ -36,7 +36,7 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow"
 	rvd[1].ubo_light = new UniformBuffer(3 * sizeof(UBOLight));
 
 	material = new Material(resource_manager);
-	material->shader_path = "shadow.shader";
+	material->pass0.shader_path = "shadow.shader";
 
 
 

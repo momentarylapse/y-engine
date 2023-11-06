@@ -13,8 +13,31 @@
 
 namespace PipelineManager {
 
+struct AlphaPipelineKey {
+	Shader* s;
+	Alpha src, dst;
+	vulkan::CullMode culling;
+	bool write_z;
+	bool operator==(const AlphaPipelineKey &o) const {
+		return s == o.s and src == o.src and dst == o.dst and culling == o.culling and write_z == o.write_z;
+	}
+	bool operator>(const AlphaPipelineKey &o) const {
+		if (s != o.s)
+			return s > o.s;
+		if (src != o.src)
+			return src > o.src;
+		if (dst != o.dst)
+			return dst > o.dst;
+		if (culling != o.culling)
+			return culling > o.culling;
+		if (write_z != o.write_z)
+			return write_z > o.write_z;
+		return false;
+	}
+};
+
 static base::map<Shader*,GraphicsPipeline*> ob_pipelines;
-static base::map<Shader*,GraphicsPipeline*> ob_pipelines_alpha;
+static base::map<AlphaPipelineKey,GraphicsPipeline*> ob_pipelines_alpha;
 static base::map<Shader*,GraphicsPipeline*> ob_pipelines_gui;
 
 string topology2vk(PrimitiveTopology top) {
@@ -37,17 +60,18 @@ GraphicsPipeline *get(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBu
 	ob_pipelines.add({s, p});
 	return p;
 }
-GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb, Alpha src, Alpha dst, bool write_z) {
-	if (ob_pipelines_alpha.contains(s))
-		return ob_pipelines_alpha[s];
+GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb, Alpha src, Alpha dst, bool write_z, vulkan::CullMode culling) {
+	AlphaPipelineKey key = {s, src, dst, culling, write_z};
+	if (ob_pipelines_alpha.contains(key))
+		return ob_pipelines_alpha[key];
 	msg_write(format("NEW PIPELINE ALPHA %d %d", (int)src, (int)dst));
 	auto p = new GraphicsPipeline(s, rp, 0, topology2vk(top), vb);
 	if (!write_z)
 		p->set_z(true, false);
 	p->set_blend(src, dst);
-	//p->set_culling(0);
+	p->set_culling(culling);
 	p->rebuild();
-	ob_pipelines_alpha.add({s, p});
+	ob_pipelines_alpha.add({key, p});
 	return p;
 }
 

@@ -68,7 +68,7 @@ public:
 	RenderViewDataVK rvd_def;
 
 
-	GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, Material *m, PrimitiveTopology top, VertexBuffer *vb);
+	GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
 	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, ShaderCache &cache, Material *m, RenderPathType type, const string &vertex_module, const string &geometry_module, PrimitiveTopology top, VertexBuffer *vb);
 	void set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, GraphicsPipeline *p);
 	void set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex);

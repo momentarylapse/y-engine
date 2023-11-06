@@ -75,6 +75,8 @@ public:
 	shared<Shader> shader_fx_points;
 	owned<VertexBuffer> vb_fx;
 	owned<VertexBuffer> vb_fx_points;
+
+	base::map<Material*, ShaderCache> multi_pass_shader_cache[4];
 };
 
 inline GeometryRenderer::Flags operator|(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {

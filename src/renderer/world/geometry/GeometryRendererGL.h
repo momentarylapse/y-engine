@@ -41,8 +41,6 @@ public:
 
 	void draw_opaque();
 	void draw_transparent(const RenderParams& params);
-
-	base::map<Material*, ShaderCache> multi_pass_shader_cache[4];
 };
 
 #endif
