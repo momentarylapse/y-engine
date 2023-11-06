@@ -20,7 +20,7 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
+	void render_into_texture(FrameBuffer *fb, Camera *cam) override;
 };
 
 #endif

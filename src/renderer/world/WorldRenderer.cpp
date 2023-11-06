@@ -44,6 +44,7 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent, Camera *_cam)
 
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
+	cube_resolution = config.get_int("cubemap.resolution", 64);
 
 	scene_view.cam = _cam;
 }

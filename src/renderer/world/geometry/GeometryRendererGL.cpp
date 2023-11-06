@@ -122,6 +122,8 @@ void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
 		nix::disable_alpha();
 
 	nix::set_textures(weak(m->textures));
+	nix::bind_texture(7, scene_view.cube_map.get());
+
 
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);
 }

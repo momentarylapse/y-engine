@@ -12,10 +12,10 @@
 #include "../geometry/GeometryRendererGL.h"
 #include "../WorldRendererGL.h"
 #include "../../base.h"
-#include "../../../lib/nix/nix.h"
+#include <lib/nix/nix.h>
 #include "../../../helper/PerformanceMonitor.h"
-#include "../../../world/Material.h"
-#include "../../../world/Camera.h"
+#include <world/Material.h>
+#include <world/Camera.h>
 #include "../../../Config.h"
 
 

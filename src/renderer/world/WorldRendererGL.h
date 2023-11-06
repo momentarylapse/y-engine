@@ -26,7 +26,7 @@ public:
 	WorldRendererGL(const string &name, Renderer *parent, Camera *cam, RenderPathType type);
 	void create_more();
 
-	//virtual void render_into_texture(FrameBuffer *fb, Camera *cam) = 0;
+	virtual void render_into_texture(FrameBuffer *fb, Camera *cam) {};
 	void render_into_cubemap(DepthBuffer *fb, CubeMap *cube, const vec3 &pos);
 
 	owned<GeometryRendererGL> geo_renderer;

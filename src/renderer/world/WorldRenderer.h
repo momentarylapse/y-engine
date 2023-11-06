@@ -48,6 +48,7 @@ public:
 
 	float shadow_box_size;
 	int shadow_resolution;
+	int cube_resolution;
 
 	bool wireframe = false;
 

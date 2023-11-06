@@ -40,9 +40,6 @@
 #include "../../meta.h"
 
 
-const int CUBE_SIZE = 128;
-
-
 
 WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, Camera *cam, RenderPathType _type) : WorldRenderer(name, parent, cam) {
 	type = _type;
@@ -50,18 +47,18 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, C
 	vb_2d = nullptr;
 
 
-	cube_map = new CubeMap(CUBE_SIZE, "rgba:i8");
+	cube_map = new CubeMap(cube_resolution, "rgba:i8");
 	if (false) {
 		Image im;
-		im.create(CUBE_SIZE, CUBE_SIZE, Red);
+		im.create(cube_resolution, cube_resolution, Red);
 		cube_map->write_side(0, im);
-		im.create(CUBE_SIZE, CUBE_SIZE, color(1, 1,0.5f,0));
+		im.create(cube_resolution, cube_resolution, color(1, 1,0.5f,0));
 		cube_map->write_side(1, im);
-		im.create(CUBE_SIZE, CUBE_SIZE, color(1, 1,0,1));
+		im.create(cube_resolution, cube_resolution, color(1, 1,0,1));
 		cube_map->write_side(2, im);
 	}
 
-	depth_cube = new DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d:f32", true);
+	depth_cube = new DepthBuffer(cube_resolution, cube_resolution, "d:f32", true);
 
 	render_pass_cube = new vulkan::RenderPass({cube_map.get(), depth_cube.get()}, "clear");
 	fb_cube = new vulkan::FrameBuffer(render_pass_cube, {cube_map.get(), depth_cube.get()});

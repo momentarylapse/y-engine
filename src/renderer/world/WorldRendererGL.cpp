@@ -16,8 +16,10 @@
 #include <graphics-impl.h>
 #include <world/World.h>
 #include <world/Light.h>
+#include <world/Camera.h>
 #include <helper/PerformanceMonitor.h>
 #include <y/ComponentManager.h>
+#include <lib/os/msg.h>
 
 
 namespace nix {
@@ -25,16 +27,14 @@ namespace nix {
 }
 void apply_shader_data(Shader *s, const Any &shader_data);
 
-const int CUBE_SIZE = 128;
-
 
 WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, Camera *cam, RenderPathType _type) :
 		WorldRenderer(name, parent, cam) {
 	type = _type;
 
-	depth_cube = new nix::DepthBuffer(CUBE_SIZE, CUBE_SIZE, "d24s8");
+	depth_cube = new nix::DepthBuffer(cube_resolution, cube_resolution, "d24s8");
 	fb_cube = nullptr;
-	scene_view.cube_map = new nix::CubeMap(CUBE_SIZE, "rgba:i8");
+	scene_view.cube_map = new nix::CubeMap(cube_resolution, "rgba:i8");
 	scene_view.ubo_light = new nix::UniformBuffer();
 }
 
@@ -54,11 +54,11 @@ void WorldRendererGL::prepare_lights() {
 }
 
 void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
-	#if 0
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
 	Entity o(pos, quaternion::ID);
-	Camera cam(rect::ID);
+	Camera cam;
+	cam.min_depth = 1000;
 	cam.owner = &o;
 	cam.fov = pi/2;
 	for (int i=0; i<6; i++) {
@@ -80,11 +80,10 @@ void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, con
 			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vec3(0,pi,0));
-		prepare_lights(&cam);
+		//prepare_lights(&cam);
 		render_into_texture(fb_cube.get(), &cam);
 	}
 	cam.owner = nullptr;
-	#endif
 }
 
 
