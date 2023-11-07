@@ -95,7 +95,6 @@ void PostProcessorVulkan::prepare(const RenderParams& params) {
 	//PerformanceMonitor::begin(ch_post_blur);
 	//process_blur(fb_main.get(), fb_small1.get(), 1.0f, {2,0});
 	//process_blur(fb_small1.get(), fb_small2.get(), 0.0f, {0,1});
-	//break_point();
 	//PerformanceMonitor::end(ch_post_blur);
 }
 
@@ -119,7 +118,6 @@ FrameBuffer* PostProcessorVulkan::do_post_processing(FrameBuffer *source) {
 	for (auto *p: stages) {
 		PerformanceMonitor::begin(p->channel);
 //		cur = (*p->func)(cur);
-		break_point();
 		PerformanceMonitor::end(p->channel);
 	}
 
@@ -133,7 +131,6 @@ FrameBuffer* PostProcessorVulkan::do_post_processing(FrameBuffer *source) {
 		next = next_fb(cur);
 		process_depth(cur, next, complex(0,1));
 		cur = next;
-		break_point();
 		PerformanceMonitor::end(ch_post_focus);
 	}
 #endif

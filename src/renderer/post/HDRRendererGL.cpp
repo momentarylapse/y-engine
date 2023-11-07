@@ -114,7 +114,6 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 	nix::draw_triangles(vb_2d);
 
 	nix::set_cull(nix::CullMode::DEFAULT);
-	break_point();
 	PerformanceMonitor::end(r->ch_draw);
 }
 
@@ -159,7 +158,6 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 		threshold = 0;
 	}
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
-	break_point();
 	PerformanceMonitor::end(ch_post_blur);
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -222,7 +220,6 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const Render
 	nix::draw_triangles(vb_2d.get());
 
 	nix::set_cull(nix::CullMode::DEFAULT);
-	break_point();
 	PerformanceMonitor::end(ch_out);
 }
 

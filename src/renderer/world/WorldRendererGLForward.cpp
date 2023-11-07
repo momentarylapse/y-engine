@@ -104,7 +104,6 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 
 	geo_renderer->draw_opaque();
 	geo_renderer->draw_transparent(params);
-	break_point();
 	PerformanceMonitor::end(ch_world);
 
 	//nix::set_scissor(rect::EMPTY);

@@ -250,7 +250,6 @@ void GeometryRendererGL::draw_particles() {
 
 	nix::set_z(true, true);
 	nix::disable_alpha();
-	break_point();
 	PerformanceMonitor::end(ch_fx);
 }
 
@@ -268,7 +267,6 @@ void GeometryRendererGL::draw_skyboxes() {
 	}
 	nix::set_cull(nix::CullMode::DEFAULT);
 	nix::disable_alpha();
-	break_point();
 }
 
 void GeometryRendererGL::draw_terrains() {

@@ -30,7 +30,6 @@ bool WindowRendererGL::start_frame() {
 void WindowRendererGL::end_frame() {
 	PerformanceMonitor::begin(ch_end);
 	nix::end_frame_glfw();
-	break_point();
 	PerformanceMonitor::end(ch_end);
 }
 

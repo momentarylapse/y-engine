@@ -92,7 +92,6 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 
 	nix::disable_alpha();
 
-	break_point();
 	PerformanceMonitor::end(ch_draw);
 }
 

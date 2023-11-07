@@ -52,6 +52,13 @@ void PerformanceMonitor::end(int channel) {
 	current_frame_timing.cpu0.add({channel | (int)0x80000000, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
 }
 
+void PerformanceMonitor::begin_gpu(int channel, float t) {
+	current_frame_timing.gpu.add({channel | (int)0x80000000, t});
+}
+void PerformanceMonitor::end_gpu(int channel, float t) {
+	current_frame_timing.gpu.add({channel, t});
+}
+
 void PerformanceMonitor::next_frame() {
 	auto now = std::chrono::high_resolution_clock::now();
 

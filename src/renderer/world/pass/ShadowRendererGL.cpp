@@ -66,8 +66,6 @@ void ShadowRendererGL::prepare(const RenderParams& params) {
 	render_shadow_map(fb[1].get(), 1);
 	render_shadow_map(fb[0].get(), 4);
 
-
-	break_point();
 	PerformanceMonitor::end(ch_prepare);
 }
 

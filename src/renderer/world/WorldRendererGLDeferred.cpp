@@ -173,8 +173,6 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, 
 	// ...
 	//geo_renderer->draw_transparent();
 
-
-	break_point();
 	PerformanceMonitor::end(ch_gbuf_out);
 }
 
@@ -199,7 +197,6 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 
 	geo_renderer->draw_opaque();
 	Scheduler::handle_render_inject();
-	break_point();
 	PerformanceMonitor::end(ch_world);
 
 	nix::set_cull(nix::CullMode::DEFAULT);

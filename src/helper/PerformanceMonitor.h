@@ -55,6 +55,9 @@ public:
 	static void begin(int channel);
 	static void end(int channel);
 
+	static void begin_gpu(int channel, float t);
+	static void end_gpu(int channel, float t);
+
 	static void next_frame();
 	static void _reset();
 

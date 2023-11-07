@@ -16,8 +16,6 @@ struct GLFWwindow;
 Context* api_init(GLFWwindow* window);
 void api_end();
 
-void break_point();
-
 extern Texture *tex_white;
 extern Texture *tex_black;
 

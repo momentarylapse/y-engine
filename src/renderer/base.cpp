@@ -70,8 +70,6 @@ void api_end() {
 	delete instance;
 }
 
-void break_point() {}
-
 #endif
 
 #ifdef USING_OPENGL
@@ -98,12 +96,6 @@ Context* api_init(GLFWwindow* window) {
 }
 
 void api_end() {
-}
-
-void break_point() {
-	/*if (config.debug_level) {
-		nix::flush();
-	}*/
 }
 
 #endif
