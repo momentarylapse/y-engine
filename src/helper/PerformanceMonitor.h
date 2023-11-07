@@ -34,11 +34,15 @@ struct PerformanceChannel {
 	int count = 0;
 };
 
+struct TimingData {
+	int channel;
+	float offset;
+};
+
 class PerformanceMonitor {
 public:
 	//PerformanceMonitor();
 
-	static Array<PerformanceChannel> channels;
 	static int create_channel(const string &name, int parent = -1);
 	static string get_name(int channel);
 
@@ -49,29 +53,17 @@ public:
 	static void _reset();
 
 
-	//static void _reset_old();
-	//static const int NUM_LOCATIONS = 16;
-
 	static int frames;
 	static bool just_cleared;
-	static std::chrono::high_resolution_clock::time_point prev_frame;
+	static std::chrono::high_resolution_clock::time_point frame_start;
 
 	static float temp_frame_time;
 	static float avg_frame_time;
 
-	/*struct {
-		float frame_time;
-		float location[NUM_LOCATIONS];
-	} static temp;
+	static Array<PerformanceChannel> channels;
+	static Array<TimingData> current_frame_timing;
+	static Array<TimingData> previous_frame_timing;
 
-	struct {
-		float frame_time;
-		float location[NUM_LOCATIONS];
-	} static avg;*/
 	static float frame_dt;
-
-
-	//static void frame();
-	//static void tick(PMLabel label);
 };
 
