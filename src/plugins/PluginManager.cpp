@@ -606,6 +606,8 @@ void PluginManager::export_kaba() {
 	ext->link_virtual("Node.__delete__", &gui::Node::__delete__, &node);
 	ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
 	ext->link_class_func("Node.add", &gui::Node::add);
+	ext->link_class_func("Node.remove", &gui::Node::remove);
+	ext->link_class_func("Node.remove_all_children", &gui::Node::remove_all_children);
 	ext->link_class_func("Node.set_area", &gui::Node::set_area);
 	ext->link_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);
 	ext->link_virtual("Node.on_enter", &gui::Node::on_enter, &node);

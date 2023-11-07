@@ -71,6 +71,8 @@ class Node as shared
 	func extern mut __del_override__()
 		
 	func extern mut add(n: shared![Node])
+	func extern mut remove_all_children()
+	func extern mut remove(n: Node&)
 		
 	func extern virtual mut on_iterate(dt: float)
 	func extern virtual mut on_enter()
