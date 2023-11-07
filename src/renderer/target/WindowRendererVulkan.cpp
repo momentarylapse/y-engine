@@ -115,6 +115,7 @@ void WindowRendererVulkan::prepare(const RenderParams& params) {
 }
 
 void WindowRendererVulkan::draw(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_draw);
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
 	auto fb = params.frame_buffer;
@@ -132,6 +133,7 @@ void WindowRendererVulkan::draw(const RenderParams& params) {
 
 	cb->end_render_pass();
 	cb->end();
+	PerformanceMonitor::end(ch_draw);
 }
 
 

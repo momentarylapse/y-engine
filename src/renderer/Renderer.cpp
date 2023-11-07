@@ -39,9 +39,9 @@ Renderer::Renderer(const string &name, Renderer *_parent) {
 	}
 
 	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
-	msg_write("NEW: " + name);
-	msg_write(p2s(engine.context));
-	msg_write(p2s(engine.resource_manager));
+	ch_draw = PerformanceMonitor::create_channel(name + ".d", channel);
+	ch_prepare = PerformanceMonitor::create_channel(name + ".p", channel);
+
 	context = engine.context;
 	resource_manager = engine.resource_manager;
 }

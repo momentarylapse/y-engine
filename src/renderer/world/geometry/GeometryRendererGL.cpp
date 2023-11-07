@@ -89,11 +89,11 @@ void main() {
 }
 
 void GeometryRendererGL::prepare(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
+	PerformanceMonitor::begin(ch_prepare);
 
 	prepare_instanced_matrices();
 
-	PerformanceMonitor::end(channel);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void GeometryRendererGL::set_material(ShaderCache &cache, Material *m, RenderPathType t, const string &vertex_module, const string &geometry_module) {

@@ -16,8 +16,6 @@ public:
 
 	void draw(const RenderParams& params) override;
 
-	int ch_gui = -1;
-
 	shared<Shader> shader;
 	GraphicsPipeline* pipeline;
 	Array<DescriptorSet*> dset;

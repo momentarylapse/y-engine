@@ -44,6 +44,7 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 static int cur_query_offset;
 
 void WorldRendererVulkanForward::prepare(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_prepare);
 	if (!scene_view.cam)
 		scene_view.cam = cam_main;
 
@@ -79,9 +80,11 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 		shadow_renderer->render(cb, scene_view);
 
 	cb->timestamp(cur_query_offset + 1);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void WorldRendererVulkanForward::draw(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_draw);
 
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
@@ -106,6 +109,7 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	geo_renderer->draw_user_meshes(cb, rp, ubo, true, rvd);
 
 	cb->timestamp(cur_query_offset + 2);
+	PerformanceMonitor::begin(ch_draw);
 }
 
 void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {

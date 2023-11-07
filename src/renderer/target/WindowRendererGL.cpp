@@ -44,6 +44,7 @@ void WindowRendererGL::prepare(const RenderParams& params) {
 }
 
 void WindowRendererGL::draw(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_draw);
 	auto sub_params = RenderParams::into_window(_frame_buffer, params.desired_aspect_ratio);
 	for (auto c: children)
 		c->prepare(sub_params);
@@ -56,6 +57,7 @@ void WindowRendererGL::draw(const RenderParams& params) {
 		c->draw(sub_params);
 
 	nix::set_srgb(prev_srgb);
+	PerformanceMonitor::end(ch_draw);
 }
 
 #endif

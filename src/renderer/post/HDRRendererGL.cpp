@@ -95,7 +95,7 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 
 	bool flip_y = params.target_is_window;
 
-	PerformanceMonitor::begin(r->channel);
+	PerformanceMonitor::begin(r->ch_draw);
 
 	nix::set_textures(source);
 	nix::set_shader(shader);
@@ -115,10 +115,11 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 
 	nix::set_cull(nix::CullMode::DEFAULT);
 	break_point();
-	PerformanceMonitor::end(r->channel);
+	PerformanceMonitor::end(r->ch_draw);
 }
 
 void HDRRendererGL::prepare(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_prepare);
 	auto sub_params = params.with_target((config.antialiasing_method == AntialiasingMethod::MSAA) ? fb_main_ms.get() : fb_main.get());
 
 	if (!cam)
@@ -160,6 +161,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 	break_point();
 	PerformanceMonitor::end(ch_post_blur);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void HDRRendererGL::draw(const RenderParams& params) {

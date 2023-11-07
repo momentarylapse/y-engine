@@ -39,7 +39,7 @@ WorldRendererGLForward::WorldRendererGLForward(Renderer *parent, Camera *cam) : 
 }
 
 void WorldRendererGLForward::prepare(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
+	PerformanceMonitor::begin(ch_prepare);
 
 	if (!scene_view.cam)
 		scene_view.cam = cam_main;
@@ -60,11 +60,11 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 		_frame = 0;
 	}
 
-	PerformanceMonitor::end(channel);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void WorldRendererGLForward::draw(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
+	PerformanceMonitor::begin(ch_draw);
 
 	auto fb = params.frame_buffer;
 	bool flip_y = params.target_is_window;
@@ -112,7 +112,7 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 	nix::set_cull(nix::CullMode::DEFAULT);
 	nix::set_wire(false);
 
-	PerformanceMonitor::end(channel);
+	PerformanceMonitor::end(ch_draw);
 }
 
 void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {

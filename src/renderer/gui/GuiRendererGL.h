@@ -20,7 +20,6 @@ public:
 
 	shared<Shader> shader;
 	owned<VertexBuffer> vb;
-	int ch_gui = -1;
 };
 
 #endif

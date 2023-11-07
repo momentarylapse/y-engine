@@ -6,11 +6,13 @@
  */
 
 #include "RegionRendererCommon.h"
+#include <helper/PerformanceMonitor.h>
 
-RegionRendererCommon::RegionRendererCommon(Renderer *parent) : Renderer("region", parent) {
+RegionRendererCommon::RegionRendererCommon(Renderer *parent) : Renderer("rgn", parent) {
 }
 
 void RegionRendererCommon::prepare(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_prepare);
 	for (int i=0; i<children.num; i++)
 		regions[i].renderer = children[i];
 
@@ -21,6 +23,7 @@ void RegionRendererCommon::prepare(const RenderParams& params) {
 			r->renderer->prepare(sub_params);
 		}
 	}
+	PerformanceMonitor::end(ch_prepare);
 }
 
 Renderer* RegionRendererCommon::add_region(const rect &dest, int z) {

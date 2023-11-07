@@ -27,9 +27,7 @@ struct UBOGUI {
 };
 
 
-GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent) {
-	ch_gui = PerformanceMonitor::create_channel("gui", channel);
-
+GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("ui", parent) {
 
 	shader = resource_manager->load_shader("vulkan/2d.shader");
 	pipeline = PipelineManager::get_gui(shader.get(), parent->get_render_pass(), "3f,3f,2f");
@@ -40,12 +38,13 @@ GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("gui", parent)
 }
 
 void GuiRendererVulkan::draw(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_draw);
 	prepare_gui(params.frame_buffer, params);
 	draw_gui(params.command_buffer, params.render_pass);
+	PerformanceMonitor::end(ch_draw);
 }
 
 void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& params) {
-	PerformanceMonitor::begin(ch_gui);
 	gui::update();
 
 	UBOGUI u;
@@ -86,11 +85,9 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& par
 			index ++;
 		}
 	}
-	PerformanceMonitor::end(ch_gui);
 }
 
 void GuiRendererVulkan::draw_gui(CommandBuffer *cb, RenderPass *render_pass) {
-	PerformanceMonitor::begin(ch_gui);
 
 	cb->bind_pipeline(pipeline);
 
@@ -113,9 +110,6 @@ void GuiRendererVulkan::draw_gui(CommandBuffer *cb, RenderPass *render_pass) {
 			index ++;
 		}
 	}
-
-	//break_point();
-	PerformanceMonitor::end(ch_gui);
 }
 
 #endif

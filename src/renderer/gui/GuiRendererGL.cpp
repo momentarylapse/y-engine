@@ -17,7 +17,6 @@
 #include <y/EngineData.h>
 
 GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
-	ch_gui = PerformanceMonitor::create_channel("gui", channel);
 	shader = resource_manager->load_shader("forward/2d.shader");
 
 	vb = new VertexBuffer("3f,3f,2f");
@@ -55,7 +54,7 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 }
 
 void GuiRendererGL::draw_gui(FrameBuffer *source) {
-	PerformanceMonitor::begin(ch_gui);
+	PerformanceMonitor::begin(ch_draw);
 	gui::update();
 
 	nix::set_projection_ortho_relative();
@@ -94,7 +93,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 	nix::disable_alpha();
 
 	break_point();
-	PerformanceMonitor::end(ch_gui);
+	PerformanceMonitor::end(ch_draw);
 }
 
 

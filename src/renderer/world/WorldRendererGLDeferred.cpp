@@ -70,7 +70,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam, 
 }
 
 void WorldRendererGLDeferred::prepare(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
+	PerformanceMonitor::begin(ch_prepare);
 
 	if (!scene_view.cam)
 		scene_view.cam = cam_main;
@@ -89,11 +89,11 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 
 	//auto source = do_post_processing(fb_main.get());
 
-	PerformanceMonitor::end(channel);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void WorldRendererGLDeferred::draw(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
+	PerformanceMonitor::begin(ch_draw);
 
 	auto target = params.frame_buffer;
 
@@ -120,7 +120,7 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	nix::set_view_matrix(mat4::ID);
 	PerformanceMonitor::end(ch_trans);
 
-	PerformanceMonitor::end(channel);
+	PerformanceMonitor::end(ch_draw);
 }
 
 void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const RenderParams& params) {

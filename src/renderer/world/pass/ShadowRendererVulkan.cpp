@@ -19,7 +19,7 @@
 #include "../../../Config.h"
 
 
-ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shadow", parent) {
+ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shdw", parent) {
 	int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 

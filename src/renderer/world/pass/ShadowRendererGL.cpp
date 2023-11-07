@@ -20,7 +20,7 @@
 
 
 ShadowRendererGL::ShadowRendererGL(Renderer *parent) :
-		Renderer("shadow", parent)
+		Renderer("shdw", parent)
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
@@ -61,14 +61,14 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 }
 
 void ShadowRendererGL::prepare(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
+	PerformanceMonitor::begin(ch_prepare);
 
 	render_shadow_map(fb[1].get(), 1);
 	render_shadow_map(fb[0].get(), 4);
 
 
 	break_point();
-	PerformanceMonitor::end(channel);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void ShadowRendererGL::render(SceneView &parent_scene_view) {

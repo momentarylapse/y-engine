@@ -9,12 +9,14 @@
 
 #ifdef USING_OPENGL
 #include "../base.h"
-#include "../../lib/nix/nix.h"
+#include <lib/nix/nix.h>
+#include <helper/PerformanceMonitor.h>
 
 RegionRendererGL::RegionRendererGL(Renderer *parent) : RegionRendererCommon(parent) {
 }
 
 void RegionRendererGL::draw(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_draw);
 	for (int i=0; i<children.num; i++)
 		regions[i].renderer = children[i];
 
@@ -32,6 +34,7 @@ void RegionRendererGL::draw(const RenderParams& params) {
 	}
 	nix::set_scissor(rect::EMPTY);
 	nix::set_viewport(area);
+	PerformanceMonitor::end(ch_draw);
 }
 
 #endif
