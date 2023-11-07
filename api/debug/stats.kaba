@@ -22,7 +22,7 @@ class StatDisplay extends Picture
 	func mut update()
 		remove_all_children()
 		
-		let frame_t = PerformanceMonitor.previous_frame_timing[-1].offset
+		let frame_t = PerformanceMonitor.previous_frame_timing.total_time
 		var scale = 1.5 / frame_t
 		
 		# ms ticks
@@ -36,7 +36,7 @@ class StatDisplay extends Picture
 			add(give(p))
 		
 		var started: PerformanceMonitor.TimingData[]
-		for t in PerformanceMonitor.previous_frame_timing
+		for t in PerformanceMonitor.previous_frame_timing.cpu0
 			if (t.channel & 0x80000000) == 0
 				started.add(t)
 			else

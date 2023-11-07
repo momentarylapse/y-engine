@@ -18,8 +18,8 @@ float PerformanceMonitor::frame_dt = 0;
 
 Array<PerformanceChannel> PerformanceMonitor::channels;
 
-Array<TimingData> PerformanceMonitor::current_frame_timing;
-Array<TimingData> PerformanceMonitor::previous_frame_timing;
+FrameTimingData PerformanceMonitor::current_frame_timing;
+FrameTimingData PerformanceMonitor::previous_frame_timing;
 
 void PerformanceMonitor::_reset() {
 	temp_frame_time = 0;
@@ -42,21 +42,20 @@ string PerformanceMonitor::get_name(int channel) {
 void PerformanceMonitor::begin(int channel) {
 	auto now = std::chrono::high_resolution_clock::now();
 	channels[channel].prev = now;
-	current_frame_timing.add({channel, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
+	current_frame_timing.cpu0.add({channel, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
 }
 
 void PerformanceMonitor::end(int channel) {
 	auto now = std::chrono::high_resolution_clock::now();
 	channels[channel].dt += std::chrono::duration<float, std::chrono::seconds::period>(now - channels[channel].prev).count();
 	channels[channel].count ++;
-	current_frame_timing.add({channel | (int)0x80000000, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
+	current_frame_timing.cpu0.add({channel | (int)0x80000000, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
 }
 
 void PerformanceMonitor::next_frame() {
 	auto now = std::chrono::high_resolution_clock::now();
 
-	// frame finished marker
-	current_frame_timing.add({-1, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
+	current_frame_timing.total_time = std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count();
 
 	if (!just_cleared) {
 		frame_dt = std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count();
@@ -73,7 +72,9 @@ void PerformanceMonitor::next_frame() {
 		_reset();
 	}
 
-	previous_frame_timing.exchange(current_frame_timing);
-	current_frame_timing.clear();
-	current_frame_timing.simple_reserve(256);
+	previous_frame_timing = current_frame_timing;
+	current_frame_timing.cpu0.clear();
+	current_frame_timing.cpu0.simple_reserve(256);
+	current_frame_timing.gpu.clear();
+	current_frame_timing.gpu.simple_reserve(256);
 }

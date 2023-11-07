@@ -39,6 +39,12 @@ struct TimingData {
 	float offset;
 };
 
+struct FrameTimingData {
+	Array<TimingData> cpu0;
+	Array<TimingData> gpu;
+	float total_time;
+};
+
 class PerformanceMonitor {
 public:
 	//PerformanceMonitor();
@@ -61,8 +67,8 @@ public:
 	static float avg_frame_time;
 
 	static Array<PerformanceChannel> channels;
-	static Array<TimingData> current_frame_timing;
-	static Array<TimingData> previous_frame_timing;
+	static FrameTimingData current_frame_timing;
+	static FrameTimingData previous_frame_timing;
 
 	static float frame_dt;
 };

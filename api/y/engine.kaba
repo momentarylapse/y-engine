@@ -79,9 +79,13 @@ class PerformanceMonitor
 	struct TimingData
 		var channel: int
 		var offset: float
+	struct FrameTimingData
+		var cpu0: TimingData[]
+		var gpu: TimingData[]
+		var total_time: float
 	func extern static get_name(channel: int)
 	var extern static channels: Channel[]
-	var extern static previous_frame_timing: TimingData[]
+	var extern static previous_frame_timing: FrameTimingData
 	var extern static avg_frame_time: float
 	var extern static frames: int
 	#class Average

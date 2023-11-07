@@ -685,6 +685,11 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("PerformanceMonitor.TimingData.channel", &TimingData::channel);
 	ext->declare_class_element("PerformanceMonitor.TimingData.offset", &TimingData::offset);
 
+	ext->declare_class_size("PerformanceMonitor.FrameTimingData", sizeof(FrameTimingData));
+	ext->declare_class_element("PerformanceMonitor.FrameTimingData.cpu0", &FrameTimingData::cpu0);
+	ext->declare_class_element("PerformanceMonitor.FrameTimingData.gpu", &FrameTimingData::gpu);
+	ext->declare_class_element("PerformanceMonitor.FrameTimingData.total_time", &FrameTimingData::total_time);
+
 	ext->declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
 	ext->link("PerformanceMonitor.get_name", (void*)&PerformanceMonitor::get_name);
 	ext->link("PerformanceMonitor.avg_frame_time", &PerformanceMonitor::avg_frame_time);
