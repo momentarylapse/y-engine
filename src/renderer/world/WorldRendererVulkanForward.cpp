@@ -41,22 +41,12 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan:
 	create_more();
 }
 
-static int cur_query_offset;
-
 void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	if (!scene_view.cam)
 		scene_view.cam = cam_main;
 
-
-	static int pool_no = 0;
-	pool_no = (pool_no + 1) % 16;
-	cur_query_offset = pool_no * 8;
-	device->reset_query_pool(cur_query_offset, 8);
-
 	auto cb = params.command_buffer;
-	cb->timestamp(cur_query_offset + 0);
-
 
 
 
@@ -79,15 +69,15 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	if (scene_view.shadow_index >= 0)
 		shadow_renderer->render(cb, scene_view);
 
-	cb->timestamp(cur_query_offset + 1);
 	PerformanceMonitor::end(ch_prepare);
 }
 
 void WorldRendererVulkanForward::draw(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_draw);
-
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
+
+	PerformanceMonitor::begin(ch_draw);
+	gpu_timestamp_begin(cb, ch_draw);
 
 	auto &rvd = geo_renderer->rvd_def;
 
@@ -108,7 +98,7 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	geo_renderer->draw_particles(cb, rp, rvd);
 	geo_renderer->draw_user_meshes(cb, rp, ubo, true, rvd);
 
-	cb->timestamp(cur_query_offset + 2);
+	gpu_timestamp_end(cb, ch_draw);
 	PerformanceMonitor::begin(ch_draw);
 }
 

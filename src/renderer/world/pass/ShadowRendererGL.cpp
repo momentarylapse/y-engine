@@ -62,10 +62,12 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
 
 void ShadowRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
+	gpu_timestamp_begin(ch_prepare);
 
 	render_shadow_map(fb[1].get(), 1);
 	render_shadow_map(fb[0].get(), 4);
 
+	gpu_timestamp_end(ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
 }
 

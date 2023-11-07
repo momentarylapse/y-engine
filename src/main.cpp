@@ -239,6 +239,8 @@ public:
 	void main_loop() {
 		while (!glfwWindowShouldClose(window) and !engine.end_requested) {
 			PerformanceMonitor::next_frame();
+			reset_gpu_timestamp_queries();
+			//gpu_timestamp(-1);
 			engine.elapsed_rt = PerformanceMonitor::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
@@ -255,11 +257,12 @@ public:
 				load_world(world.next_filename);
 				world.next_filename = "";
 			}
+			auto tt = gpu_read_timestamps();
+			for (int i=0; i<tt.num; i++)
+				PerformanceMonitor::current_frame_timing.gpu.add({gpu_timestamp_queries[i], tt[i]});
 		}
 
-#ifdef USING_VULKAN
-		device->wait_idle();
-#endif
+		gpu_flush();
 	}
 
 	void reset_game() {
@@ -308,9 +311,8 @@ public:
 
 
 	void update_statistics() {
-#ifdef USING_VULKAN
-		device->wait_idle();
-#endif
+		gpu_flush();
+
 		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
 		fps_display->visible = (config.debug_level >= 1);
 	}

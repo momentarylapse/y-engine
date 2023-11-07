@@ -17,6 +17,9 @@
 Texture *tex_white = nullptr;
 Texture *tex_black = nullptr;
 
+static const int MAX_TIMESTAMP_QUERIES = 4096;
+
+Array<int> gpu_timestamp_queries;
 
 #ifdef USING_VULKAN
 
@@ -50,7 +53,7 @@ Context* api_init(GLFWwindow* window) {
 		msg_write("WARNING:  device found: neither RTX not COMPUTE");
 	}
 
-	device->create_query_pool(16384);
+	device->create_query_pool(MAX_TIMESTAMP_QUERIES);
 	pool = new vulkan::DescriptorPool("buffer:4096,sampler:4096", 65536);
 
 	tex_white = new Texture();
@@ -68,6 +71,41 @@ void api_end() {
 	if (device)
 		delete device;
 	delete instance;
+}
+
+
+void reset_gpu_timestamp_queries() {
+	gpu_timestamp_queries.clear();
+	gpu_timestamp_queries.simple_reserve(256);
+	device->reset_query_pool(0, MAX_TIMESTAMP_QUERIES);
+}
+
+void gpu_timestamp(CommandBuffer *cb, int channel) {
+	if (gpu_timestamp_queries.num >= MAX_TIMESTAMP_QUERIES)
+		return;
+	cb->timestamp(gpu_timestamp_queries.num);
+	gpu_timestamp_queries.add(channel);
+}
+
+void gpu_timestamp_begin(CommandBuffer *cb, int channel) {
+	gpu_timestamp(cb, channel);
+}
+
+void gpu_timestamp_end(CommandBuffer *cb, int channel) {
+	gpu_timestamp(cb, channel | (int)0x80000000);
+}
+
+Array<float> gpu_read_timestamps() {
+	auto tt = device->get_timestamps(0, gpu_timestamp_queries.num);
+	Array<float> result;
+	result.resize(gpu_timestamp_queries.num);
+	for (int i=0; i<gpu_timestamp_queries.num; i++)
+		result[i] = (float)(tt[i] - tt[0]) * device->physical_device_properties.limits.timestampPeriod * 1e-9f;
+	return result;
+}
+
+void gpu_flush() {
+	device->wait_idle();
 }
 
 #endif
@@ -88,11 +126,47 @@ Context* api_init(GLFWwindow* window) {
 		msg_write(format("VRAM: %d mb  of  %d mb available", gl->available_mem() / 1024, gl->total_mem() / 1024));
 	}
 
+	nix::create_query_pool(MAX_TIMESTAMP_QUERIES);
+
 	tex_white = new nix::Texture(16, 16, "rgba:i8");
 	tex_black = new nix::Texture(16, 16, "rgba:i8");
 	tex_white->write(Image(16, 16, White));
 	tex_black->write(Image(16, 16, Black));
+
 	return gl;
+}
+
+void reset_gpu_timestamp_queries() {
+	gpu_timestamp_queries.clear();
+	gpu_timestamp_queries.simple_reserve(256);
+}
+
+void gpu_timestamp(int channel) {
+	if (gpu_timestamp_queries.num >= MAX_TIMESTAMP_QUERIES)
+		return;
+	nix::query_timestamp(gpu_timestamp_queries.num);
+	gpu_timestamp_queries.add(channel);
+}
+
+void gpu_timestamp_begin(int channel) {
+	gpu_timestamp(channel);
+}
+
+void gpu_timestamp_end(int channel) {
+	gpu_timestamp(channel | (int)0x80000000);
+}
+
+Array<float> gpu_read_timestamps() {
+	auto tt = nix::get_timestamps(0, gpu_timestamp_queries.num);
+	Array<float> result;
+	result.resize(tt.num);
+	for (int i=0; i<tt.num; i++)
+		result[i] = (float)(tt[i] - tt[0]) * 1e-9f;
+	return result;
+}
+
+void gpu_flush() {
+	nix::flush();
 }
 
 void api_end() {

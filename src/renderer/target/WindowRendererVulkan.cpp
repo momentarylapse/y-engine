@@ -82,25 +82,14 @@ bool WindowRendererVulkan::start_frame() {
 }
 
 void WindowRendererVulkan::end_frame() {
-	//PerformanceMonitor::begin(ch_end);
+	PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
 	device->present_queue.submit(_command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
 
 	swap_chain->present(image_index, {render_finished_semaphore});
 
 	device->wait_idle();
-	//PerformanceMonitor::end(ch_end);
-
-	static int frame = 0;
-	frame ++;
-	if ((frame%100 == 0) and (config.debug_level >= 2)) {
-		auto tt = device->get_timestamps(0, 3);
-		//msg_write(ia2s(tt));
-		//msg_write(f2s(device->device_properties.limits.timestampPeriod, 9));
-		msg_write("vulkan timing:");
-		msg_write(f2s(device->physical_device_properties.limits.timestampPeriod * (tt[1] - tt[0]) * 0.000001f, 3));
-		msg_write(f2s(device->physical_device_properties.limits.timestampPeriod * (tt[2] - tt[0]) * 0.000001f, 3));
-	}
+	PerformanceMonitor::end(ch_end);
 }
 
 RenderParams WindowRendererVulkan::create_params(float aspect_ratio) {

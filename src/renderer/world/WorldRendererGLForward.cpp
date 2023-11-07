@@ -65,6 +65,7 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 
 void WorldRendererGLForward::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
+	gpu_timestamp_begin(ch_draw);
 
 	auto fb = params.frame_buffer;
 	bool flip_y = params.target_is_window;
@@ -111,6 +112,7 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 	nix::set_cull(nix::CullMode::DEFAULT);
 	nix::set_wire(false);
 
+	gpu_timestamp_end(ch_draw);
 	PerformanceMonitor::end(ch_draw);
 }
 

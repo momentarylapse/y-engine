@@ -29,7 +29,9 @@ bool WindowRendererGL::start_frame() {
 
 void WindowRendererGL::end_frame() {
 	PerformanceMonitor::begin(ch_end);
+	gpu_timestamp_begin(ch_end);
 	nix::end_frame_glfw();
+	gpu_timestamp_end(ch_end);
 	PerformanceMonitor::end(ch_end);
 }
 

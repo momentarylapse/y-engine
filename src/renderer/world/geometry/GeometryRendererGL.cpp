@@ -45,7 +45,6 @@
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
 
-//Shader *magic_shader = nullptr;
 
 GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
 
@@ -58,34 +57,6 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_vie
 	const string &rpt = RENDER_PATH_NAME[(int)type];
 	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
 	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
-
-/*	if (!magic_shader)
-		magic_shader = resource_manager->create_shader(R"foo(
-<Layout>
-	version = 420
-	bindings = [[buffer,buffer,sampler,sampler,sampler,sampler,sampler,buffer]]
-	pushsize = 0
-	input = [vec3,vec3,vec2]
-	topology = triangles
-</Layout>
-<FragmentShader>
-
-layout(location = 0) in vec4 in_pos; // view space
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_uv;
-layout(location = 0) out vec4 out_color;
-
-layout(binding = 4) uniform sampler2D tex0;
-
-void main() {
-	vec3 n = normalize(in_normal);
-	vec3 T = texture(tex0, in_uv).rgb;
-	T *= pow(abs(n.z), 2);
-	//vec3 T = vec3(1,1,0) * abs(n.z);
-	out_color = vec4(T,1);
-}
-</FragmentShader>
-)foo");*/
 }
 
 void GeometryRendererGL::prepare(const RenderParams& params) {
@@ -157,6 +128,7 @@ void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const col
 
 void GeometryRendererGL::draw_particles() {
 	PerformanceMonitor::begin(ch_fx);
+	gpu_timestamp_begin(ch_fx);
 
 	nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
@@ -250,10 +222,13 @@ void GeometryRendererGL::draw_particles() {
 
 	nix::set_z(true, true);
 	nix::disable_alpha();
+	gpu_timestamp_end(ch_fx);
 	PerformanceMonitor::end(ch_fx);
 }
 
 void GeometryRendererGL::draw_skyboxes() {
+	PerformanceMonitor::begin(ch_bg);
+	gpu_timestamp_begin(ch_bg);
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_view_matrix(mat4::rotation(scene_view.cam->owner->ang).transpose());
@@ -267,9 +242,13 @@ void GeometryRendererGL::draw_skyboxes() {
 	}
 	nix::set_cull(nix::CullMode::DEFAULT);
 	nix::disable_alpha();
+	gpu_timestamp_end(ch_bg);
+	PerformanceMonitor::end(ch_bg);
 }
 
 void GeometryRendererGL::draw_terrains() {
+	PerformanceMonitor::begin(ch_terrains);
+	gpu_timestamp_begin(ch_terrains);
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: terrains) {
 		if (!t->material->cast_shadow and is_shadow_pass())
@@ -287,9 +266,13 @@ void GeometryRendererGL::draw_terrains() {
 		t->prepare_draw(cam_main->owner->pos);
 		nix::draw_triangles(t->vertex_buffer.get());
 	}
+	gpu_timestamp_end(ch_terrains);
+	PerformanceMonitor::end(ch_terrains);
 }
 
 void GeometryRendererGL::draw_objects_instanced() {
+	PerformanceMonitor::begin(ch_models);
+	gpu_timestamp_begin(ch_models);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
 		auto m = mi->model;
@@ -307,9 +290,13 @@ void GeometryRendererGL::draw_objects_instanced() {
 			nix::draw_instanced_triangles(m->mesh[0]->sub[i].vertex_buffer, mi->matrices.num);
 		}
 	}
+	gpu_timestamp_end(ch_models);
+	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRendererGL::draw_objects_opaque() {
+	PerformanceMonitor::begin(ch_models);
+	gpu_timestamp_begin(ch_models);
 	auto& list = ComponentManager::get_list_family<Model>();
 	for (auto *m: list) {
 		m->update_matrix();
@@ -334,6 +321,8 @@ void GeometryRendererGL::draw_objects_opaque() {
 			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
+	gpu_timestamp_end(ch_models);
+	PerformanceMonitor::end(ch_models);
 }
 
 struct DrawCallDataMultiPass {
@@ -347,6 +336,8 @@ struct DrawCallDataMultiPass {
 void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	if (is_shadow_pass())
 		return;
+	PerformanceMonitor::begin(ch_models);
+	gpu_timestamp_begin(ch_models);
 	nix::set_z(false, true);
 
 	Array<DrawCallDataMultiPass> draw_calls;
@@ -414,9 +405,13 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	nix::disable_alpha();
 	nix::set_z(true, true);
 	nix::set_cull(nix::CullMode::DEFAULT);
+	gpu_timestamp_end(ch_models);
+	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRendererGL::draw_user_meshes(bool transparent) {
+	PerformanceMonitor::begin(ch_user);
+	gpu_timestamp_begin(ch_user);
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 	for (auto *m: meshes) {
 		if (m->material->is_transparent() != transparent)
@@ -441,6 +436,8 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 		else if (m->topology == PrimitiveTopology::LINESTRIP)
 			nix::draw_lines(m->vertex_buffer.get(), true);
 	}
+	gpu_timestamp_end(ch_user);
+	PerformanceMonitor::end(ch_user);
 }
 
 

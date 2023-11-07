@@ -146,6 +146,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	}
 
 	PerformanceMonitor::begin(ch_post_blur);
+	gpu_timestamp_begin(ch_post_blur);
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	auto bloom_input = fb_main.get();
@@ -158,6 +159,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 		threshold = 0;
 	}
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
+	gpu_timestamp_end(ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -203,6 +205,7 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const Render
 	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(ch_out);
+	gpu_timestamp_begin(ch_out);
 
 	nix::set_textures({source->color_attachments[0].get(), bloom});
 	nix::set_shader(shader_out.get());
@@ -220,6 +223,7 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const Render
 	nix::draw_triangles(vb_2d.get());
 
 	nix::set_cull(nix::CullMode::DEFAULT);
+	gpu_timestamp_end(ch_out);
 	PerformanceMonitor::end(ch_out);
 }
 

@@ -18,6 +18,32 @@ class StatDisplay extends Picture
 		self.color = [0,0,0, 0.7]
 		
 		visible = false
+	
+	func mut add_graph(data: PerformanceMonitor.TimingData[], scale: float, y0: float)
+		var started: PerformanceMonitor.TimingData[]
+		for t in data
+			if (t.channel & 0x80000000) == 0
+				started.add(t)
+			else
+				let c = t.channel & 0x0000ffff
+				for i=>s in started
+					if s.channel == c
+						let level = len(started) - 1 # channel_level(c)
+						let x = s.offset * scale
+						let dt = t.offset - s.offset
+						let w = dt * scale
+						let y = y0 - CHANNEL_HEIGHT * (level+1)
+						var p = new Picture([x, x + w, y, y + CHANNEL_HEIGHT], tex_white)
+						p.color = color.hsb(c * 3.4151, 0.5, 0.5, 0.5)
+						add(give(p))
+						if w > 0.02
+							var ll = PerformanceMonitor.channels[c].name
+							if w > 0.1
+								ll += " {{dt * 1000|0.2}}"
+							let label = new Text(ll, CHANNEL_HEIGHT, [x+0.001, y])
+							add(give(label))
+						started.remove(i)
+						break
 		
 	func mut update()
 		remove_all_children()
@@ -34,31 +60,9 @@ class StatDisplay extends Picture
 			var p = new Picture([frame_t*scale, frame_t*scale+0.002, 0, DISPLAY_HEIGHT], tex_white)
 			p.color = [1,1,1,0.2]
 			add(give(p))
-		
-		var started: PerformanceMonitor.TimingData[]
-		for t in PerformanceMonitor.previous_frame_timing.cpu0
-			if (t.channel & 0x80000000) == 0
-				started.add(t)
-			else
-				let c = t.channel & 0x0000ffff
-				for i=>s in started
-					if s.channel == c
-						let level = len(started) - 1 # channel_level(c)
-						let x = s.offset * scale
-						let dt = t.offset - s.offset
-						let w = dt * scale
-						let y = DISPLAY_HEIGHT - CHANNEL_HEIGHT * (level+1)
-						var p = new Picture([x, x + w, y, y + CHANNEL_HEIGHT], tex_white)
-						p.color = color.hsb(c * 3.4151, 0.5, 0.5, 0.5)
-						add(give(p))
-						if w > 0.02
-							var ll = PerformanceMonitor.channels[c].name
-							if w > 0.1
-								ll += " {{dt * 1000|0.2}}"
-							let label = new Text(ll, CHANNEL_HEIGHT, [x+0.001, y])
-							add(give(label))
-						started.remove(i)
-						break
+			
+		add_graph(PerformanceMonitor.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT)
+		add_graph(PerformanceMonitor.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2)
 
 
 

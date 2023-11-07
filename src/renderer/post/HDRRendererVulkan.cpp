@@ -155,6 +155,10 @@ HDRRendererVulkan::~HDRRendererVulkan() {
 }
 
 void HDRRendererVulkan::prepare(const RenderParams& params) {
+	auto cb = params.command_buffer;
+	PerformanceMonitor::begin(ch_prepare);
+	gpu_timestamp_begin(cb, ch_prepare);
+
 	if (!cam)
 		cam = cam_main;
 
@@ -167,10 +171,9 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 
 	into.render_into(children[0], sub_params);
 
-	auto cb = params.command_buffer;
-
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
+	gpu_timestamp_begin(cb, ch_post_blur);
 	auto bloom_input = into.fb_main.get();
 	float threshold = 1.0f;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
@@ -179,7 +182,10 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 		bloom_input = bloom_levels[i].fb_out.get();
 		threshold = 0;
 	}
+	gpu_timestamp_end(cb, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
+	gpu_timestamp_end(cb, ch_prepare);
+	PerformanceMonitor::end(ch_prepare);
 
 }
 

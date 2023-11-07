@@ -15,8 +15,9 @@
 #include "../../../graphics-impl.h"
 #include "../../../world/Light.h"
 #include "../../../world/Material.h"
-#include "../../../lib/nix/nix.h"
 #include "../../../Config.h"
+#include <lib/nix/nix.h>
+#include <helper/PerformanceMonitor.h>
 
 
 ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shdw", parent) {
@@ -57,8 +58,13 @@ void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, SceneView &parent_s
 
 void ShadowRendererVulkan::prepare(const RenderParams& params) {
 	auto cb = params.command_buffer;
+
+	PerformanceMonitor::begin(ch_prepare);
+	gpu_timestamp_begin(cb, ch_prepare);
 	render_shadow_map(cb, fb[0].get(), 4, rvd[0]);
 	render_shadow_map(cb, fb[1].get(), 1, rvd[1]);
+	gpu_timestamp_end(cb, ch_prepare);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {

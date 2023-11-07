@@ -55,6 +55,7 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 
 void GuiRendererGL::draw_gui(FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_draw);
+	gpu_timestamp_begin(ch_draw);
 	gui::update();
 
 	nix::set_projection_ortho_relative();
@@ -92,6 +93,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 
 	nix::disable_alpha();
 
+	gpu_timestamp_end(ch_draw);
 	PerformanceMonitor::end(ch_draw);
 }
 

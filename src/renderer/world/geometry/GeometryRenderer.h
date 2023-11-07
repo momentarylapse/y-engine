@@ -62,7 +62,7 @@ public:
 
 	bool is_shadow_pass() const;
 
-	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;
+	int ch_pre, ch_bg, ch_fx, ch_terrains, ch_models, ch_user, ch_prepare_lights;
 
 	static bool using_view_space;
 	RenderPathType type;

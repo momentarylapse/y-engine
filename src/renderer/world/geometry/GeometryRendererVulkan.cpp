@@ -178,6 +178,7 @@ void GeometryRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, co
 
 void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd) {
 	PerformanceMonitor::begin(ch_fx);
+	gpu_timestamp_begin(cb, ch_fx);
 	auto &rda = rvd.rda_fx;
 	auto cam = scene_view.cam;
 
@@ -314,11 +315,13 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 		index ++;
 	}
 
-
+	gpu_timestamp_end(cb, ch_fx);
 	PerformanceMonitor::end(ch_fx);
 }
 
 void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, float aspect, RenderViewDataVK &rvd) {
+	PerformanceMonitor::begin(ch_bg);
+	gpu_timestamp_begin(cb, ch_bg);
 	auto &rda = rvd.rda_sky;
 	auto cam = scene_view.cam;
 
@@ -367,9 +370,13 @@ void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, fl
 
 	cam->max_depth = max_depth;
 	cam->update_matrices(aspect);
+	gpu_timestamp_end(cb, ch_bg);
+	PerformanceMonitor::end(ch_bg);
 }
 
 void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
+	PerformanceMonitor::begin(ch_terrains);
+	gpu_timestamp_begin(cb, ch_terrains);
 	auto &rda = rvd.rda_tr;
 	int index = 0;
 
@@ -405,9 +412,13 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 		cb->draw(t->vertex_buffer.get());
 		index ++;
 	}
+	gpu_timestamp_end(cb, ch_terrains);
+	PerformanceMonitor::end(ch_terrains);
 }
 
 void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
+	PerformanceMonitor::begin(ch_models);
+	gpu_timestamp_begin(cb, ch_models);
 	auto &rda = rvd.rda_ob_multi;
 	int index = 0;
 	ubo.m = mat4::ID;
@@ -450,9 +461,13 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 			index ++;
 		}
 	}
+	gpu_timestamp_end(cb, ch_models);
+	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
+	PerformanceMonitor::begin(ch_models);
+	gpu_timestamp_begin(cb, ch_models);
 	auto &rda = rvd.rda_ob;
 	int index = 0;
 
@@ -497,6 +512,8 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 			index ++;
 		}
 	}
+	gpu_timestamp_end(cb, ch_models);
+	PerformanceMonitor::end(ch_models);
 }
 
 
@@ -509,6 +526,8 @@ struct DrawCallData {
 };
 
 void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd) {
+	PerformanceMonitor::begin(ch_models);
+	gpu_timestamp_begin(cb, ch_models);
 	auto &rda = rvd.rda_ob_trans;
 	auto cam = scene_view.cam;
 	int index = 0;
@@ -574,9 +593,13 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 			cb->draw(dc.vb);
 		}
 	}
+	gpu_timestamp_end(cb, ch_models);
+	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp, UBO &ubo, bool transparent, RenderViewDataVK &rvd) {
+	PerformanceMonitor::begin(ch_user);
+	gpu_timestamp_begin(cb, ch_user);
 	auto &rda = rvd.rda_user;
 	int index = 0;
 
@@ -623,6 +646,8 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		cb->draw(m->vertex_buffer.get());
 		index ++;
 	}
+	gpu_timestamp_end(cb, ch_user);
+	PerformanceMonitor::end(ch_user);
 }
 
 
