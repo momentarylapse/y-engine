@@ -33,21 +33,7 @@
 
 WorldRendererGLForward::WorldRendererGLForward(Renderer *parent, Camera *cam) : WorldRendererGL("world", parent, cam, RenderPathType::FORWARD) {
 
-	resource_manager->default_shader = "default.shader";
-	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
-		resource_manager->load_shader_module("module-lighting-pbr.shader");
-	} else {
-		resource_manager->load_shader_module("module-lighting-simple.shader");
-	}
 	resource_manager->load_shader_module("forward/module-surface.shader");
-	resource_manager->load_shader_module("module-vertex-default.shader");
-	resource_manager->load_shader_module("module-vertex-animated.shader");
-	resource_manager->load_shader_module("module-vertex-instanced.shader");
-	resource_manager->load_shader_module("module-vertex-lines.shader");
-	resource_manager->load_shader_module("module-vertex-points.shader");
-	resource_manager->load_shader_module("module-vertex-fx.shader");
-	resource_manager->load_shader_module("module-geometry-lines.shader");
-	resource_manager->load_shader_module("module-geometry-points.shader");
 
 	create_more();
 }

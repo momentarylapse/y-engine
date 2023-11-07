@@ -44,21 +44,8 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam, 
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
 
-	resource_manager->default_shader = "default.shader";
-	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
-		resource_manager->load_shader_module("module-lighting-pbr.shader");
-	} else {
-		resource_manager->load_shader_module("module-lighting-simple.shader");
-	}
 	resource_manager->load_shader_module("forward/module-surface.shader");
 	resource_manager->load_shader_module("deferred/module-surface.shader");
-	resource_manager->load_shader_module("module-vertex-default.shader");
-	resource_manager->load_shader_module("module-vertex-animated.shader");
-	resource_manager->load_shader_module("module-vertex-instanced.shader");
-	resource_manager->load_shader_module("module-vertex-points.shader");
-	resource_manager->load_shader_module("module-vertex-fx.shader");
-	resource_manager->load_shader_module("module-geometry-points.shader");
-	resource_manager->load_shader_module("module-geometry-lines.shader");
 
 	shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))

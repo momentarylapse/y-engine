@@ -8,6 +8,7 @@
 #include "WorldRenderer.h"
 #include "../../graphics-impl.h"
 #include "../../helper/PerformanceMonitor.h"
+#include "../../helper/ResourceManager.h"
 #include "../../fx/Particle.h"
 #include "../../gui/Picture.h"
 #include "../../world/Camera.h"
@@ -47,6 +48,21 @@ WorldRenderer::WorldRenderer(const string &name, Renderer *parent, Camera *_cam)
 	cube_resolution = config.get_int("cubemap.resolution", 64);
 
 	scene_view.cam = _cam;
+
+	resource_manager->default_shader = "default.shader";
+	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
+		resource_manager->load_shader_module("module-lighting-pbr.shader");
+	} else {
+		resource_manager->load_shader_module("module-lighting-simple.shader");
+	}
+	resource_manager->load_shader_module("module-vertex-default.shader");
+	resource_manager->load_shader_module("module-vertex-animated.shader");
+	resource_manager->load_shader_module("module-vertex-instanced.shader");
+	resource_manager->load_shader_module("module-vertex-lines.shader");
+	resource_manager->load_shader_module("module-vertex-points.shader");
+	resource_manager->load_shader_module("module-vertex-fx.shader");
+	resource_manager->load_shader_module("module-geometry-lines.shader");
+	resource_manager->load_shader_module("module-geometry-points.shader");
 }
 
 WorldRenderer::~WorldRenderer() {

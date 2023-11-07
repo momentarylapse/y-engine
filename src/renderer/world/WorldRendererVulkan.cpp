@@ -70,22 +70,7 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, C
 
 
 
-
-	resource_manager->default_shader = "default.shader";
-	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
-		resource_manager->load_shader_module("module-lighting-pbr.shader");
-	} else {
-		resource_manager->load_shader_module("module-lighting-simple.shader");
-	}
 	resource_manager->load_shader_module("vulkan/module-surface-dummy.shader");
-	resource_manager->load_shader_module("module-vertex-default.shader");
-	resource_manager->load_shader_module("module-vertex-animated.shader");
-	resource_manager->load_shader_module("module-vertex-instanced.shader");
-	resource_manager->load_shader_module("module-vertex-fx.shader");
-	resource_manager->load_shader_module("module-vertex-points.shader");
-	resource_manager->load_shader_module("module-vertex-lines.shader");
-	resource_manager->load_shader_module("module-geometry-points.shader");
-	resource_manager->load_shader_module("module-geometry-lines.shader");
 }
 
 void WorldRendererVulkan::create_more() {
