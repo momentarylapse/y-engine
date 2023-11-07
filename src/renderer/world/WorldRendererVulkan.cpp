@@ -72,15 +72,11 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, C
 
 
 	resource_manager->default_shader = "default.shader";
-	/*if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
+	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
 		resource_manager->load_shader_module("module-lighting-pbr.shader");
-		resource_manager->load_shader_module("forward/module-surface-pbr.shader");
 	} else {
-		resource_manager->load_shader_module("forward/module-surface.shader");
+		resource_manager->load_shader_module("module-lighting-simple.shader");
 	}
-	resource_manager->load_shader_module("module-vertex-default.shader");
-	resource_manager->load_shader_module("module-vertex-animated.shader");
-	resource_manager->load_shader_module("module-vertex-instanced.shader");*/
 	resource_manager->load_shader_module("vulkan/module-surface-dummy.shader");
 	resource_manager->load_shader_module("module-vertex-default.shader");
 	resource_manager->load_shader_module("module-vertex-animated.shader");

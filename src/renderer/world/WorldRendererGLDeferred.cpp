@@ -45,9 +45,13 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam, 
 
 
 	resource_manager->default_shader = "default.shader";
-	resource_manager->load_shader_module("module-lighting-pbr.shader");
+	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
+		resource_manager->load_shader_module("module-lighting-pbr.shader");
+	} else {
+		resource_manager->load_shader_module("module-lighting-simple.shader");
+	}
+	resource_manager->load_shader_module("forward/module-surface.shader");
 	resource_manager->load_shader_module("deferred/module-surface.shader");
-	resource_manager->load_shader_module("forward/module-surface-pbr.shader");
 	resource_manager->load_shader_module("module-vertex-default.shader");
 	resource_manager->load_shader_module("module-vertex-animated.shader");
 	resource_manager->load_shader_module("module-vertex-instanced.shader");

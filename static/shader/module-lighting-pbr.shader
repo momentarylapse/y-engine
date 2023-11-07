@@ -5,6 +5,8 @@
 <Module>
 
 
+#ifdef vulkan
+#else
 struct Light {
 	mat4 proj;
 	vec4 pos;
@@ -12,6 +14,7 @@ struct Light {
 	vec4 color;
 	float radius, theta, harshness;
 };
+
 uniform int num_lights;
 uniform int shadow_index = -1;
 
@@ -24,9 +27,11 @@ struct Fog {
 	float distance;
 };
 /*layout(binding = 3)*/ uniform Fog fog;
+#endif
 
 
 const float PI = 3.141592654;
+
 
 // https://learnopengl.com/PBR/Theory
 // https://learnopengl.com/PBR/Lighting
@@ -102,6 +107,7 @@ float _surf_brightness(Light l, vec3 p) {
 	return b * (1 - smoothstep(tmax*0.8, tmax, t));
 }
 
+// amount of shadow
 float _surf_shadow_pcf_step(vec3 p, vec2 dd, ivec2 ts) {
 	vec2 d = dd / ts * 0.8;
 	vec2 tp = p.xy + d;
@@ -138,15 +144,23 @@ float _surf_shadow_pcf(vec3 p) {
 	return value / N;
 }
 
-float _surf_shadow_factor(Light l, vec3 p) {
+vec3 _surf_light_proj(Light l, vec3 p) {
 	vec4 proj = l.proj * vec4(p,1);
 	proj.xyz /= proj.w;
 	proj.x = (proj.x +1)/2;
 	proj.y = (proj.y +1)/2;
+#ifdef vulkan
+	proj.y = 1 - proj.y;
+#endif
 	//proj.z = (proj.z +1)/2;
+	return proj.xyz;
+}
+
+float _surf_shadow_factor(Light l, vec3 p) {
+	vec3 proj = _surf_light_proj(l, p);
 	
 	if (proj.x > 0.01 && proj.x < 0.99 && proj.y > 0.01 && proj.y < 0.99 && proj.z < 1.0)
-		return 1.0 - _surf_shadow_pcf(proj.xyz) * l.harshness;
+		return 1.0 - _surf_shadow_pcf(proj) * l.harshness;
 	
 	return 1.0;
 }
@@ -204,10 +218,54 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	
 	roughness = max(roughness, 0.03);
 	
-///	float reflectivity = 1-((1-xxx.x) * (1-exp(-pow(dot(d, n),2) * 100)));
+	
+	vec4 color = emission;
+	
+	
+#ifndef vulkan
+#if 0
+		/*mat3 R = transpose(mat3(matrix.view));
+		vec3 L = reflect(view_dir, n);
+		//for (int i=0; i<30; i++) {
+		//vec3 L = normalize(L0 + vec3(_surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5) / 50);
+	//out_color = texture(tex_cube, reflect(view_dir, n));
+	out_color = texture(tex_cube, R * n);
+	return;*/
 	
 
-	vec4 color = emission;
+	//if (metal > 0.01 && false) {
+	if (metal > 0.9 && roughness < 0.2) {
+		mat3 R = transpose(mat3(matrix.view));
+		vec3 L = reflect(view_dir, n);
+		//for (int i=0; i<30; i++) {
+		//vec3 L = normalize(L0 + vec3(_surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5, _surf_rand3d(p)-0.5) / 50);
+		vec4 r = texture(tex_cube, R*L);
+		//out_color = r;
+		//return;
+		/*if (roughness > 0.1) {
+			r += texture(tex_cube, reflect(view_dir, normalize(n + vec3(_surf_rand3d(p),0,1) * roughness/10)));
+			r += texture(tex_cube, reflect(view_dir, normalize(n + vec3(1,_surf_rand3d(p),0) * roughness/10)));
+			r += texture(tex_cube, reflect(view_dir, normalize(n + vec3(0,1,_surf_rand3d(p)) * roughness/10)));
+			r /= 5;
+		}
+		out_color += r * reflectivity;*/
+		
+		
+		
+	//	float R = (1-roughness) + roughness * pow(1 - dot(n, L), 5);
+	//	out_color.rgb += R * r.rgb;
+
+		vec3 F;
+        	vec3 specular = min(_surf_specular(albedo.rgb, metal, roughness, -view_dir, L, n, F), vec3(1));
+        	float NdotL = max(dot(n, L), 0.0);
+        	color.rgb += specular * r.rgb * NdotL;
+        	//out_color.rgb = specular * NdotL;
+        	return color;
+	}
+#endif
+#endif
+	
+
 	for (int i=0; i<num_lights; i++)
 		color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, i == shadow_index).rgb;
 	
