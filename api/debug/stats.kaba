@@ -1,5 +1,12 @@
 use y
 
+class FpsDisplay extends Text
+	func __init__()
+		super.__init__("", 0.02, [0.01,0.01])
+		dz = 999
+	func mut update()
+		set_text("{{1.0/PerformanceMonitor.avg_frame_time|0.1}}")
+
 func channel_level(channel: int) -> int
 	let parent = PerformanceMonitor.channels[channel].parent
 	if parent < 0
@@ -67,12 +74,15 @@ class StatDisplay extends Picture
 
 
 class Test extends Controller
-	var t: float
+	var t = 0.0
 	var stat_display: shared![StatDisplay]
+	var fps_display: shared![FpsDisplay]
 	
 	func override on_init()
 		stat_display = new StatDisplay()
 		toplevel.add(stat_display)
+		fps_display = new FpsDisplay()
+		toplevel.add(fps_display)
 
 	func override on_key_down(k: Key)
 		if k == Key.CONTROL + Key.T
@@ -83,6 +93,8 @@ class Test extends Controller
 
 
 	func override on_iterate(dt: float)
-		#if PerformanceMonitor.frames == 0
-		#	stat_display.update()
+		t += engine.elapsed_rt
+		if t > 0.3
+			fps_display.update()
+			t = 0
 

@@ -105,8 +105,7 @@ public:
 //private:
 	GLFWwindow* window;
 
-	gui::Text *fps_display;
-	int ch_iter = -1, ch_ustat = -1;
+	int ch_iter = -1;
 
 	void init(const Array<string> &arg) {
 		config.load(arg);
@@ -116,7 +115,6 @@ public:
 		kaba::init();
 		NetworkManager::init();
 		ch_iter = PerformanceMonitor::create_channel("iter");
-		ch_ustat = PerformanceMonitor::create_channel("ustat");
 		ComponentManager::init();
 		Scheduler::init(ch_iter);
 
@@ -170,10 +168,6 @@ public:
 		reset_game();
 
 		GodLoadWorld(filename);
-
-		fps_display = new gui::Text("", 0.020f, {0.01f, 0.01f});
-		fps_display->dz = 900;
-		gui::toplevel->add(fps_display);
 
 		for (auto &s: world.scripts)
 			PluginManager::add_controller(s.filename, s.variables);
@@ -239,9 +233,12 @@ public:
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window) and !engine.end_requested) {
+			gpu_flush();
 			PerformanceMonitor::next_frame();
 			reset_gpu_timestamp_queries();
-			//gpu_timestamp(-1);
+#ifdef USING_OPENGL
+			gpu_timestamp(-1);
+#endif
 			engine.elapsed_rt = PerformanceMonitor::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
@@ -261,6 +258,7 @@ public:
 			auto tt = gpu_read_timestamps();
 			for (int i=0; i<tt.num; i++)
 				PerformanceMonitor::current_frame_timing.gpu.add({gpu_timestamp_queries[i], tt[i]});
+
 		}
 
 		gpu_flush();
@@ -309,17 +307,6 @@ public:
 
 
 
-
-
-	void update_statistics() {
-		PerformanceMonitor::begin(ch_ustat);
-		gpu_flush();
-
-		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
-		fps_display->visible = (config.debug_level >= 1);
-		PerformanceMonitor::end(ch_ustat);
-	}
-
 	static Array<float> render_times;
 	os::Timer timer_render;
 
@@ -354,9 +341,6 @@ public:
 
 
 	void draw_frame() {
-		if (PerformanceMonitor::frames == 0)
-			update_statistics();
-
 		update_dynamic_resolution();
 
 		if (!engine.window_renderer->start_frame())
