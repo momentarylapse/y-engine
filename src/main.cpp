@@ -106,7 +106,7 @@ public:
 	GLFWwindow* window;
 
 	gui::Text *fps_display;
-	int ch_iter = -1;
+	int ch_iter = -1, ch_ustat = -1;
 
 	void init(const Array<string> &arg) {
 		config.load(arg);
@@ -116,6 +116,7 @@ public:
 		kaba::init();
 		NetworkManager::init();
 		ch_iter = PerformanceMonitor::create_channel("iter");
+		ch_ustat = PerformanceMonitor::create_channel("ustat");
 		ComponentManager::init();
 		Scheduler::init(ch_iter);
 
@@ -311,10 +312,12 @@ public:
 
 
 	void update_statistics() {
+		PerformanceMonitor::begin(ch_ustat);
 		gpu_flush();
 
 		fps_display->set_text(format("%.1f", 1.0f / PerformanceMonitor::avg_frame_time));
 		fps_display->visible = (config.debug_level >= 1);
+		PerformanceMonitor::end(ch_ustat);
 	}
 
 	static Array<float> render_times;
