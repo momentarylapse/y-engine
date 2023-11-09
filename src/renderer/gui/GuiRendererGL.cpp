@@ -89,7 +89,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 		}
 	}
 	nix::set_z(true, true);
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
 
 	nix::disable_alpha();
 

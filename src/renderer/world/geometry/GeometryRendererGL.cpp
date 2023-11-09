@@ -240,7 +240,7 @@ void GeometryRendererGL::draw_skyboxes() {
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
 	nix::disable_alpha();
 	gpu_timestamp_end(ch_bg);
 	PerformanceMonitor::end(ch_bg);
@@ -394,9 +394,9 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 			if (p.cull_mode == 0)
 				nix::set_cull(nix::CullMode::NONE);
 			else if (p.cull_mode == 2)
-				nix::set_cull(nix::CullMode::CW);
+				nix::set_cull(nix::CullMode::FRONT);
 			else
-				nix::set_cull(nix::CullMode::CCW);
+				nix::set_cull(nix::CullMode::BACK);
 
 			nix::draw_triangles(dc.vb);
 		}
@@ -404,7 +404,7 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 
 	nix::disable_alpha();
 	nix::set_z(true, true);
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
 	gpu_timestamp_end(ch_models);
 	PerformanceMonitor::end(ch_models);
 }

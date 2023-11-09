@@ -85,7 +85,7 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 
 	nix::clear_color(world.background);
 	nix::clear_z();
-	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
+	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 	nix::set_wire(wireframe);
 
 	geo_renderer->draw_skyboxes();
@@ -101,7 +101,7 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 	nix::bind_buffer(1, scene_view.ubo_light.get());
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
-	nix::set_cull(flip_y ? nix::CullMode::CCW : nix::CullMode::CW);
+	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
 	geo_renderer->draw_opaque();
 	geo_renderer->draw_transparent(params);
@@ -109,7 +109,8 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 
 	//nix::set_scissor(rect::EMPTY);
 
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
+	nix::set_front(nix::Orientation::CW);
 	nix::set_wire(false);
 
 	gpu_timestamp_end(ch_draw);

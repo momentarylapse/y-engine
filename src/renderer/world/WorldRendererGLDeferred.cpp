@@ -110,10 +110,11 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	nix::bind_buffer(1, scene_view.ubo_light.get());
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
+	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
-	nix::set_cull(nix::CullMode::CW);
 	geo_renderer_trans->draw_transparent(params);
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
+	nix::set_front(nix::Orientation::CW);
 
 	nix::set_z(false, false);
 	nix::set_projection_matrix(mat4::ID);
@@ -163,6 +164,8 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, 
 
 
 	nix::set_z(false, false);
+	nix::set_front(nix::Orientation::CW);
+	nix::set_cull(nix::CullMode::NONE);
 	float resolution_scale_x = 1.0f;
 	s->set_floats("resolution_scale", &resolution_scale_x, 2);
 	nix::set_shader(s);
@@ -193,13 +196,15 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
 
-	nix::set_cull(nix::CullMode::CW);
+	nix::set_cull(nix::CullMode::BACK);
+	nix::set_front(nix::Orientation::CCW);
 
 	geo_renderer->draw_opaque();
 	Scheduler::handle_render_inject();
 	PerformanceMonitor::end(ch_world);
 
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
+	nix::set_front(nix::Orientation::CCW);
 	geo_renderer->draw_particles();
 }
 

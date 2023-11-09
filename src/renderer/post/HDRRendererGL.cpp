@@ -113,7 +113,7 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 
 	nix::draw_triangles(vb_2d);
 
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
 	PerformanceMonitor::end(r->ch_draw);
 }
 
@@ -222,7 +222,7 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const Render
 
 	nix::draw_triangles(vb_2d.get());
 
-	nix::set_cull(nix::CullMode::DEFAULT);
+	nix::set_cull(nix::CullMode::BACK);
 	gpu_timestamp_end(ch_out);
 	PerformanceMonitor::end(ch_out);
 }
