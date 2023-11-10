@@ -29,6 +29,10 @@ layout(push_constant, std140) uniform PushConstants {
 	int num_lights;
 	int num_meshes;
 	int _a;
+	int out_width;
+	int out_height;
+	float out_ratio;
+	int _b;
 } push;
 
 
@@ -185,8 +189,8 @@ void main() {
 	ivec2 store_pos = ivec2(gl_GlobalInvocationID.xy);
 	float aspect = float(imageSize(image).x) / float(imageSize(image).y);
 		
-	vec2 r = vec2(gl_GlobalInvocationID.xy) / imageSize(image);
-	vec3 dir = normalize(vec3((r.x - 0.5) * aspect, 0.5 - r.y, 1));
+	vec2 r = vec2(gl_GlobalInvocationID.xy) / vec2(push.out_width, push.out_height);
+	vec3 dir = normalize(vec3((r.x - 0.5) * push.out_ratio, 0.5 - r.y, 1));
 	dir = (push.iview * vec4(dir,0)).xyz;
 	vec3 cam_pos = (push.iview * vec4(0,0,0,1)).xyz;
 

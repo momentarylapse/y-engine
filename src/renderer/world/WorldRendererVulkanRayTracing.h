@@ -50,6 +50,9 @@ public:
 		int num_lights;
 		int num_meshes;
 		int _a;
+		int out_width, out_height;
+		float out_ratio;
+		int _b;
 	} pc;
 
 	vulkan::UniformBuffer *buffer_meshes;

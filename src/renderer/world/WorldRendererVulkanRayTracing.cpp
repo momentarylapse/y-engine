@@ -31,6 +31,7 @@
 #include "../../world/World.h"
 #include "../../y/ComponentManager.h"
 #include "../../y/Entity.h"
+#include "../../y/EngineData.h"
 #include "../../Config.h"
 #include "../../meta.h"
 
@@ -118,6 +119,9 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		scene_view.cam = cam_main;
 	
 	prepare_lights(dummy_cam, geo_renderer->rvd_def);
+
+	int w = width * engine.resolution_scale_x;
+	int h = height * engine.resolution_scale_y;
 
 	pc.iview = scene_view.cam->view_matrix().inverse();
 	pc.background = background();
@@ -225,12 +229,15 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		cb->bind_descriptor_set(0, rtx.dset);
 		//cb->push_constant(0, sizeof(pc), &pc);
 
-		cb->trace_rays(width, height, 1);
+		cb->trace_rays(w, h, 1);
 		
 	} else if (mode == Mode::COMPUTE) {
 
 		pc.num_trias = 0;
 		pc.num_meshes = meshes.num;
+		pc.out_width = w;
+		pc.out_height = h;
+		pc.out_ratio = engine.physical_aspect_ratio;
 
 
 		cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
@@ -238,7 +245,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		cb->bind_descriptor_set(0, compute.dset);
 		cb->push_constant(0, sizeof(pc), &pc);
 		const int GROUP_SIZE = 16;
-		cb->dispatch(width / GROUP_SIZE, height / GROUP_SIZE, 1);
+		cb->dispatch(w / GROUP_SIZE, h / GROUP_SIZE, 1);
 	}
 
 	cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
@@ -246,7 +253,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	/*cb->image_barrier(offscreen_image,
 		vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
 		vulkan::ImageLayout::GENERAL, vulkan::ImageLayout::SHADER_READ_ONLY_OPTIMAL);*/
-	cb->copy_image(offscreen_image, offscreen_image2, {0,0,width,height,0,0});
+	cb->copy_image(offscreen_image, offscreen_image2, {0,0,w,h,0,0});
 
 	cb->image_barrier(offscreen_image,
 		vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
@@ -259,6 +266,7 @@ void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 	auto cb = params.command_buffer;
 
     //vb_2d->create_quad(rect::ID_SYM, rect::ID);//dynamicly_scaled_source());
+	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 	cb->bind_pipeline(pipeline_out);
 	cb->bind_descriptor_set(0, dset_out);
