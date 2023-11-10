@@ -209,7 +209,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 		p.cull_mode = 1;
 		if (mode == "none")
 			p.cull_mode = 0;
-		else if (mode == "cw")
+		else if (mode == "cw" or mode == "front")
 			p.cull_mode = 2;
 
 		mode = c.get_str(key + ".mode", "");
