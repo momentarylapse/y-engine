@@ -297,6 +297,7 @@
     <ClCompile Include="src\renderer\regions\RegionRendererGL.cpp" />
     <ClCompile Include="src\renderer\regions\RegionRendererVulkan.cpp" />
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp" />
+    <ClCompile Include="src\renderer\target\TextureRendererGL.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererGL.cpp" />
     <ClCompile Include="src\renderer\target\WindowRendererVulkan.cpp" />
     <ClCompile Include="src\renderer\world\geometry\GeometryRenderer.cpp" />
@@ -401,7 +402,6 @@
     <ClInclude Include="src\lib\kaba\compiler\CommandList.h" />
     <ClInclude Include="src\lib\kaba\compiler\Compiler.h" />
     <ClInclude Include="src\lib\kaba\compiler\Serializer.h" />
-    <ClInclude Include="src\lib\kaba\compiler\serializer.h" />
     <ClInclude Include="src\lib\kaba\compiler\SerialNode.h" />
     <ClInclude Include="src\lib\kaba\dynamic\call.h" />
     <ClInclude Include="src\lib\kaba\dynamic\dynamic.h" />
@@ -516,6 +516,7 @@
     <ClInclude Include="src\renderer\regions\RegionRendererGL.h" />
     <ClInclude Include="src\renderer\regions\RegionRendererVulkan.h" />
     <ClInclude Include="src\renderer\target\TargetRenderer.h" />
+    <ClInclude Include="src\renderer\target\TextureRendererGL.h" />
     <ClInclude Include="src\renderer\target\WindowRendererGL.h" />
     <ClInclude Include="src\renderer\target\WindowRendererVulkan.h" />
     <ClInclude Include="src\renderer\world\geometry\GeometryRenderer.h" />

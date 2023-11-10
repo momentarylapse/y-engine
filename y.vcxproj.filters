@@ -544,6 +544,9 @@
     <ClCompile Include="src\renderer\target\TargetRenderer.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\target\TextureRendererGL.cpp">
+      <Filter>src\renderer\target</Filter>
+    </ClCompile>
     <ClCompile Include="src\renderer\target\WindowRendererGL.cpp">
       <Filter>src\renderer\target</Filter>
     </ClCompile>
@@ -850,9 +853,6 @@
       <Filter>src\lib\kaba\compiler</Filter>
     </ClInclude>
     <ClInclude Include="src\lib\kaba\compiler\Serializer.h">
-      <Filter>src\lib\kaba\compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="src\lib\kaba\compiler\serializer.h">
       <Filter>src\lib\kaba\compiler</Filter>
     </ClInclude>
     <ClInclude Include="src\lib\kaba\compiler\SerialNode.h">
@@ -1195,6 +1195,9 @@
       <Filter>src\renderer\regions</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\target\TargetRenderer.h">
+      <Filter>src\renderer\target</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\target\TextureRendererGL.h">
       <Filter>src\renderer\target</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\target\WindowRendererGL.h">

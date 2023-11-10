@@ -187,6 +187,7 @@ set(SOURCE
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
 	src/renderer/target/TargetRenderer.cpp
+	src/renderer/target/TextureRendererGL.cpp
 	src/renderer/target/WindowRendererGL.cpp
 	src/renderer/target/WindowRendererVulkan.cpp
 	src/renderer/world/geometry/GeometryRenderer.cpp
