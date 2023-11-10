@@ -237,7 +237,8 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		cb->bind_pipeline(compute.pipeline);
 		cb->bind_descriptor_set(0, compute.dset);
 		cb->push_constant(0, sizeof(pc), &pc);
-		cb->dispatch(width, height, 1);
+		const int GROUP_SIZE = 16;
+		cb->dispatch(width / GROUP_SIZE, height / GROUP_SIZE, 1);
 	}
 
 	cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
