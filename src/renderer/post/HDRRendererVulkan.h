@@ -10,6 +10,7 @@
 
 #include "PostProcessor.h"
 #ifdef USING_VULKAN
+#include <lib/math/rect.h>
 
 class Camera;
 
@@ -44,6 +45,7 @@ public:
 		GraphicsPipeline* pipeline_out = nullptr;
 		DescriptorSet *dset_out;
 		VertexBuffer *vb_2d;
+		rect vb_2d_current_source = rect::EMPTY;
 	} out;
 
 	Camera *cam;
@@ -62,6 +64,7 @@ public:
 	shared<Shader> shader_out;
 
 	owned<VertexBuffer> vb_2d;
+	rect vb_2d_current_source = rect::EMPTY;
 
 	int ch_post_blur = -1, ch_out = -1;
 };

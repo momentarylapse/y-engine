@@ -46,11 +46,15 @@ HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, const Array<Texture*>
 
 	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
+	vb_2d_current_source = rect::ID_SYM;
 }
 
-
 void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params) {
-	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+	auto source = dynamicly_scaled_source();
+	if (source != vb_2d_current_source) {
+		vb_2d->create_quad(rect::ID_SYM, source);
+		vb_2d_current_source = source;
+	}
 
 	if (!pipeline_out) {
 		pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
@@ -169,7 +173,11 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 	for (auto c: children)
 		c->prepare(sub_params);
 
-	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+	auto source = dynamicly_scaled_source();
+	if (vb_2d_current_source != source) {
+		vb_2d->create_quad(rect::ID_SYM, source);
+		vb_2d_current_source = source;
+	}
 
 	into.render_into(children[0], sub_params);
 
