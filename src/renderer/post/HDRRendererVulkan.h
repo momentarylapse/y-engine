@@ -15,7 +15,7 @@ class Camera;
 
 class HDRRendererVulkan : public PostProcessorStage {
 public:
-	HDRRendererVulkan(Renderer *parent, Camera* cam, int width, int height);
+	HDRRendererVulkan(Camera* cam, int width, int height);
 	virtual ~HDRRendererVulkan();
 
 	void prepare(const RenderParams& params) override;

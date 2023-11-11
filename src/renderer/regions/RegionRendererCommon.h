@@ -14,7 +14,7 @@
 
 class RegionRendererCommon : public Renderer {
 public:
-	RegionRendererCommon(Renderer *parent);
+	RegionRendererCommon();
 
 	void prepare(const RenderParams& params) override;
 

@@ -15,8 +15,6 @@
 
 class RegionRendererVulkan : public RegionRendererCommon {
 public:
-	RegionRendererVulkan(Renderer *parent);
-
 	void draw(const RenderParams& params) override;
 };
 

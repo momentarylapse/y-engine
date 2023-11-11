@@ -21,7 +21,7 @@ struct SceneView;
 
 class ShadowRendererGL : public Renderer {
 public:
-	ShadowRendererGL(Renderer *parent);
+	ShadowRendererGL();
 
 	shared<FrameBuffer> fb[2];
 

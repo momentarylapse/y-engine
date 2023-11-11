@@ -31,7 +31,7 @@ namespace nix {
 }
 
 
-HDRRendererGL::HDRRendererGL(Renderer *parent, Camera *_cam, int width, int height) : PostProcessorStage("hdr", parent) {
+HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 

@@ -12,8 +12,6 @@
 #include <lib/nix/nix.h>
 #include <helper/PerformanceMonitor.h>
 
-RegionRendererGL::RegionRendererGL(Renderer *parent) : RegionRendererCommon(parent) {
-}
 
 void RegionRendererGL::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);

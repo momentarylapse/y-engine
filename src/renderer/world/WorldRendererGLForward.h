@@ -15,7 +15,7 @@ class PerformanceMonitor;
 
 class WorldRendererGLForward : public WorldRendererGL {
 public:
-	WorldRendererGLForward(Renderer *parent, Camera *cam);
+	WorldRendererGLForward(Camera *cam);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

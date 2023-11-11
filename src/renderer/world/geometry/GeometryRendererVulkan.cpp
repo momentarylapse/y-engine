@@ -60,7 +60,7 @@ const int MAX_LIGHTS = 1024;
 const int MAX_INSTANCES = 1<<11;
 
 
-GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
+GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &scene_view) : GeometryRenderer(type, scene_view) {
 
 	vb_fx = new VertexBuffer("3f,4f,2f");
 

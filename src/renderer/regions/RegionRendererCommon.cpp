@@ -8,7 +8,7 @@
 #include "RegionRendererCommon.h"
 #include <helper/PerformanceMonitor.h>
 
-RegionRendererCommon::RegionRendererCommon(Renderer *parent) : Renderer("rgn", parent) {
+RegionRendererCommon::RegionRendererCommon() : Renderer("rgn") {
 }
 
 void RegionRendererCommon::prepare(const RenderParams& params) {

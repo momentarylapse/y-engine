@@ -12,9 +12,6 @@
 #include <graphics-impl.h>
 #include <helper/PerformanceMonitor.h>
 
-RegionRendererVulkan::RegionRendererVulkan(Renderer *parent) : RegionRendererCommon(parent) {
-}
-
 void RegionRendererVulkan::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
 	auto cb = params.command_buffer;

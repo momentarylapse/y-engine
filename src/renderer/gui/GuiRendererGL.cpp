@@ -16,7 +16,7 @@
 #include "../../helper/ResourceManager.h"
 #include <y/EngineData.h>
 
-GuiRendererGL::GuiRendererGL(Renderer *parent) : Renderer("gui", parent) {
+GuiRendererGL::GuiRendererGL() : Renderer("gui") {
 	shader = resource_manager->load_shader("forward/2d.shader");
 
 	vb = new VertexBuffer("3f,3f,2f");

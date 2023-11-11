@@ -58,7 +58,7 @@ public:
 		SHADOW_PASS = 4,
 	} flags;
 
-	GeometryRenderer(RenderPathType type, SceneView &scene_view, Renderer *parent);
+	GeometryRenderer(RenderPathType type, SceneView &scene_view);
 
 	bool is_shadow_pass() const;
 

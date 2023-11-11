@@ -10,7 +10,7 @@
 #include <graphics-impl.h>
 //#include "../../helper/PerformanceMonitor.h"
 
-TextureRendererGL::TextureRendererGL(FrameBuffer *_fb) : Renderer("tex", nullptr) {
+TextureRendererGL::TextureRendererGL(FrameBuffer *_fb) : Renderer("tex") {
 	fb = _fb;
 }
 

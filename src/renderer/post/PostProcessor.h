@@ -17,7 +17,7 @@ class Any;
 class PostProcessor;
 
 struct PostProcessorStage : public Renderer {
-	PostProcessorStage(const string &name, Renderer *parent);
+	PostProcessorStage(const string &name);
 	PostProcessor *post = nullptr;
 
 	VertexBuffer *vb_2d;
@@ -36,7 +36,7 @@ struct PostProcessorStageUser : public PostProcessorStage {
 
 class PostProcessor : public Renderer {
 public:
-	PostProcessor(Renderer *parent);
+	PostProcessor();
 	virtual ~PostProcessor();
 
 	Array<PostProcessorStage*> stages;

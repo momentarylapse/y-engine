@@ -12,7 +12,7 @@
 
 class GuiRendererGL : public Renderer {
 public:
-	GuiRendererGL(Renderer *parent);
+	GuiRendererGL();
 
 	void draw(const RenderParams& params) override;
 

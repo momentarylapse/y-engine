@@ -22,7 +22,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 
-PostProcessorVulkan::PostProcessorVulkan(Renderer *parent) : PostProcessor(parent) {
+PostProcessorVulkan::PostProcessorVulkan() {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 

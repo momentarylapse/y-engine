@@ -9,7 +9,7 @@
 #include "../../helper/PerformanceMonitor.h"
 
 
-TargetRenderer::TargetRenderer(const string &name) : Renderer(name, nullptr) {
+TargetRenderer::TargetRenderer(const string &name) : Renderer(name) {
 	ch_end = PerformanceMonitor::create_channel(name + ".end", channel);
 }
 

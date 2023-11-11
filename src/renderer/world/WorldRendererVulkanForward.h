@@ -17,7 +17,7 @@ class ShadowRendererVulkan;
 
 class WorldRendererVulkanForward : public WorldRendererVulkan {
 public:
-	WorldRendererVulkanForward(Renderer *parent, vulkan::Device *device, Camera *cam);
+	WorldRendererVulkanForward(vulkan::Device *device, Camera *cam);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

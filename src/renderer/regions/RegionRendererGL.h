@@ -15,8 +15,6 @@
 
 class RegionRendererGL : public RegionRendererCommon {
 public:
-	RegionRendererGL(Renderer *parent);
-
 	void draw(const RenderParams& params) override;
 };
 

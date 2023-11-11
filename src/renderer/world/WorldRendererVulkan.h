@@ -62,7 +62,7 @@ public:
 	void create_more();
 
 
-	WorldRendererVulkan(const string &name, Renderer *parent, Camera *cam, RenderPathType type);
+	WorldRendererVulkan(const string &name, Camera *cam, RenderPathType type);
 	virtual ~WorldRendererVulkan();
 
 	virtual void render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) = 0;

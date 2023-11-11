@@ -12,7 +12,7 @@
 
 class GuiRendererVulkan : public Renderer {
 public:
-	GuiRendererVulkan(Renderer *parent);
+	GuiRendererVulkan();
 
 	void draw(const RenderParams& params) override;
 

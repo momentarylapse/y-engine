@@ -41,7 +41,7 @@
 
 
 
-WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, Camera *cam, RenderPathType _type) : WorldRenderer(name, parent, cam) {
+WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, RenderPathType _type) : WorldRenderer(name, cam) {
 	type = _type;
 
 	vb_2d = nullptr;
@@ -74,12 +74,12 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Renderer *parent, C
 }
 
 void WorldRendererVulkan::create_more() {
-	shadow_renderer = new ShadowRendererVulkan(this);
+	shadow_renderer = new ShadowRendererVulkan();
 	scene_view.fb_shadow1 = shadow_renderer->fb[0];
 	scene_view.fb_shadow2 = shadow_renderer->fb[1];
 	add_child(shadow_renderer.get());
 
-	geo_renderer = new GeometryRendererVulkan(type, scene_view, this);
+	geo_renderer = new GeometryRendererVulkan(type, scene_view);
 	add_child(geo_renderer.get());
 
 }

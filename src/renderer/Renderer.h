@@ -37,7 +37,7 @@ struct RenderParams {
 
 class Renderer {
 public:
-	Renderer(const string &name, Renderer *parent = nullptr);
+	Renderer(const string &name);
 	virtual ~Renderer();
 
 	Array<Renderer*> children;

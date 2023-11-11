@@ -27,7 +27,7 @@ struct UBOGUI {
 };
 
 
-GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("ui", parent) {
+GuiRendererVulkan::GuiRendererVulkan() : Renderer("ui") {
 
 	shader = resource_manager->load_shader("vulkan/2d.shader");
 

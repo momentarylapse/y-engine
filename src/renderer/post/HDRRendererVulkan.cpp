@@ -101,7 +101,7 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 }
 
 
-HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam, int width, int height) : PostProcessorStage("hdr", parent) {
+HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
 	cam = _cam;
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);

@@ -37,9 +37,9 @@ class RegionRenderer
 	struct Region
 		var dest: rect
 		var z: int
-		var renderer: Renderer*
+		var renderer: Renderer&
 	var regions: Region[]
-	func extern add_region(dest: rect, z: int) -> Renderer&
+	func extern add_region(r: Renderer&, dest: rect, z: int)
 
 class RenderPath
 	enum Type

@@ -31,7 +31,7 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-WorldRendererGLForward::WorldRendererGLForward(Renderer *parent, Camera *cam) : WorldRendererGL("world", parent, cam, RenderPathType::FORWARD) {
+WorldRendererGLForward::WorldRendererGLForward(Camera *cam) : WorldRendererGL("world", cam, RenderPathType::FORWARD) {
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
 

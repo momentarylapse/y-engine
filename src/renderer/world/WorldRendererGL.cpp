@@ -28,8 +28,8 @@ namespace nix {
 void apply_shader_data(Shader *s, const Any &shader_data);
 
 
-WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, Camera *cam, RenderPathType _type) :
-		WorldRenderer(name, parent, cam) {
+WorldRendererGL::WorldRendererGL(const string &name, Camera *cam, RenderPathType _type) :
+		WorldRenderer(name, cam) {
 	type = _type;
 
 	depth_cube = new nix::DepthBuffer(cube_resolution, cube_resolution, "d24s8");
@@ -39,12 +39,12 @@ WorldRendererGL::WorldRendererGL(const string &name, Renderer *parent, Camera *c
 }
 
 void WorldRendererGL::create_more() {
-	shadow_renderer = new ShadowRendererGL(this);
+	shadow_renderer = new ShadowRendererGL();
 	scene_view.fb_shadow1 = shadow_renderer->fb[0];
 	scene_view.fb_shadow2 = shadow_renderer->fb[1];
 	add_child(shadow_renderer.get());
 
-	geo_renderer = new GeometryRendererGL(type, scene_view, this);
+	geo_renderer = new GeometryRendererGL(type, scene_view);
 	add_child(geo_renderer.get());
 }
 

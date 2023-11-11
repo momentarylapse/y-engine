@@ -35,7 +35,7 @@
 #include "../../meta.h"
 
 
-WorldRendererVulkanForward::WorldRendererVulkanForward(Renderer *parent, vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("fw", parent, cam, RenderPathType::FORWARD) {
+WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("fw", cam, RenderPathType::FORWARD) {
 	device = _device;
 
 	create_more();

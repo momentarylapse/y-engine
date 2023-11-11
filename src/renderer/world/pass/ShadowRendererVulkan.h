@@ -21,7 +21,7 @@ class GeometryRendererVulkan;
 
 class ShadowRendererVulkan : public Renderer {
 public:
-	ShadowRendererVulkan(Renderer *parent);
+	ShadowRendererVulkan();
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}

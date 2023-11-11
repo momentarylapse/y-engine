@@ -34,7 +34,7 @@ mat4 mtr(const vec3 &t, const quaternion &a) {
 	return mt * mr;
 }
 
-WorldRenderer::WorldRenderer(const string &name, Renderer *parent, Camera *_cam) : Renderer(name, parent) {
+WorldRenderer::WorldRenderer(const string &name, Camera *_cam) : Renderer(name) {
 	ch_pre = PerformanceMonitor::create_channel("pre", channel);
 	ch_post = PerformanceMonitor::create_channel("post", channel);
 	ch_post_focus = PerformanceMonitor::create_channel("focus", ch_post);

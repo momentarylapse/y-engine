@@ -19,8 +19,8 @@
 #include "../../../Config.h"
 
 
-ShadowRendererGL::ShadowRendererGL(Renderer *parent) :
-		Renderer("shdw", parent)
+ShadowRendererGL::ShadowRendererGL() :
+		Renderer("shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
@@ -35,7 +35,7 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) :
 	material = new Material(resource_manager);
 	material->pass0.shader_path = "shadow.shader";
 
-	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, scene_view, this);
+	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, scene_view);
 	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 	geo_renderer->material_shadow = material.get();
 	add_child(geo_renderer.get());

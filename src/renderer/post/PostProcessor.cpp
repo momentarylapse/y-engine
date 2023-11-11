@@ -10,12 +10,12 @@
 
 string callable_name(const void *c);
 
-PostProcessorStage::PostProcessorStage(const string &name, Renderer *parent) : Renderer(name, parent) {
+PostProcessorStage::PostProcessorStage(const string &name) : Renderer(name) {
 }
 
 
 PostProcessorStageUser::PostProcessorStageUser(const PostProcessorStageUser::Callback *p, const PostProcessorStageUser::Callback *d) :
-		PostProcessorStage(callable_name(d), nullptr) {
+		PostProcessorStage(callable_name(d)) {
 	func_prepare = p;
 	func_draw = d;
 }
@@ -29,7 +29,7 @@ void PostProcessorStageUser::draw(const RenderParams& params) {
 		(*func_draw)(params);
 }
 
-PostProcessor::PostProcessor(Renderer *parent) : Renderer("post", parent) {
+PostProcessor::PostProcessor() : Renderer("post") {
 }
 
 PostProcessor::~PostProcessor() {

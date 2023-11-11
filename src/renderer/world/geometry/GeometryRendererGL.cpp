@@ -46,7 +46,7 @@
 #include <lib/os/msg.h>
 
 
-GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view, Renderer *parent) : GeometryRenderer(type, scene_view, parent) {
+GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view) : GeometryRenderer(type, scene_view) {
 
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
 	vb_fx_points = new nix::VertexBuffer("3f,f,4f");

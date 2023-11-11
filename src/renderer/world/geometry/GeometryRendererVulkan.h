@@ -59,7 +59,7 @@ struct RenderViewDataVK {
 
 class GeometryRendererVulkan : public GeometryRenderer {
 public:
-	GeometryRendererVulkan(RenderPathType type, SceneView &scene_view, Renderer *parent);
+	GeometryRendererVulkan(RenderPathType type, SceneView &scene_view);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}

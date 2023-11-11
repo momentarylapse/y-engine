@@ -67,61 +67,61 @@ WindowRenderer *create_window_renderer(GLFWwindow* window) {
 #endif
 }
 
-Renderer *create_gui_renderer(Renderer *parent) {
+Renderer *create_gui_renderer() {
 #ifdef USING_VULKAN
-	return new GuiRendererVulkan(parent);
+	return new GuiRendererVulkan();
 #else
-	return new GuiRendererGL(parent);
+	return new GuiRendererGL();
 #endif
 }
 
-RegionRenderer *create_region_renderer(Renderer *parent) {
+RegionRenderer *create_region_renderer() {
 #ifdef USING_VULKAN
-	return new RegionRendererVulkan(parent);
+	return new RegionRendererVulkan();
 #else
-	return new RegionRendererGL(parent);
+	return new RegionRendererGL();
 #endif
 }
 
-HDRRenderer *create_hdr_renderer(Renderer *parent, Camera *cam) {
+HDRRenderer *create_hdr_renderer(Camera *cam) {
 #ifdef USING_VULKAN
-	return new HDRRendererVulkan(parent, cam, engine.width, engine.height);
+	return new HDRRendererVulkan(cam, engine.width, engine.height);
 #else
-	return new HDRRendererGL(parent, cam, engine.width, engine.height);
+	return new HDRRendererGL(cam, engine.width, engine.height);
 #endif
 }
 
-PostProcessor *create_post_processor(Renderer *parent) {
+PostProcessor *create_post_processor() {
 #ifdef USING_VULKAN
-	return new PostProcessorVulkan(parent);
+	return new PostProcessorVulkan();
 #else
-	return new PostProcessorGL(parent, engine.width, engine.height);
+	return new PostProcessorGL(engine.width, engine.height);
 #endif
 }
 
-WorldRenderer *create_world_renderer(Renderer *parent, Camera *cam) {
+WorldRenderer *create_world_renderer(Camera *cam) {
 #ifdef USING_VULKAN
 	if (config.get_str("renderer.path", "forward") == "raytracing")
-		return new WorldRendererVulkanRayTracing(parent, device, cam, engine.width, engine.height);
+		return new WorldRendererVulkanRayTracing(device, cam, engine.width, engine.height);
 	else
-		return new WorldRendererVulkanForward(parent, device, cam);
+		return new WorldRendererVulkanForward(device, cam);
 #else
 	if (config.get_str("renderer.path", "forward") == "deferred")
-		return new WorldRendererGLDeferred(parent, cam, engine.width, engine.height);
+		return new WorldRendererGLDeferred(cam, engine.width, engine.height);
 	else
-		return new WorldRendererGLForward(parent, cam);
+		return new WorldRendererGLForward(cam);
 #endif
 }
 
-Renderer *create_render_path(Renderer *parent, Camera *cam) {
+Renderer *create_render_path(Camera *cam) {
 	if (config.get_str("renderer.path", "forward") == "direct") {
-		engine.world_renderer = create_world_renderer(parent, cam);
+		engine.world_renderer = create_world_renderer(cam);
 		return engine.world_renderer;
 	} else {
 	//	engine.post_processor = create_post_processor(parent);
 	//	engine.hdr_renderer = create_hdr_renderer(engine.post_processor, cam);
-		engine.hdr_renderer = create_hdr_renderer(parent, cam);
-		engine.world_renderer = create_world_renderer(engine.hdr_renderer, cam);
+		engine.hdr_renderer = create_hdr_renderer(cam);
+		engine.world_renderer = create_world_renderer(cam);
 		engine.hdr_renderer->add_child(engine.world_renderer);
 		//post_processor->set_hdr(hdr_renderer);
 		return engine.hdr_renderer;
@@ -131,9 +131,9 @@ Renderer *create_render_path(Renderer *parent, Camera *cam) {
 void create_full_renderer(GLFWwindow* window, Camera *cam) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
-		engine.region_renderer = create_region_renderer(engine.window_renderer);
-		auto p = create_render_path(engine.region_renderer, cam);
-		engine.gui_renderer = create_gui_renderer(engine.region_renderer);
+		engine.region_renderer = create_region_renderer();
+		auto p = create_render_path(cam);
+		engine.gui_renderer = create_gui_renderer();
 		engine.window_renderer->add_child(engine.region_renderer);
 		engine.region_renderer->add_region(p, rect::ID, 0);
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);

@@ -29,7 +29,7 @@ class TimeTable
 	func extern iterate(dt: float)
 
 
-func extern create_render_path(parent: Renderer&, cam: Camera&) -> xfer[Renderer]
+func extern create_render_path(cam: Camera&) -> xfer[Renderer]
 
 
 var extern cam: Camera&

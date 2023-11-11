@@ -12,8 +12,8 @@
 
 bool GeometryRenderer::using_view_space = true;
 
-GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view, Renderer *parent) :
-		Renderer("geo", parent),
+GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view) :
+		Renderer("geo"),
 		scene_view(_scene_view)
 {
 	type = _type;
