@@ -213,10 +213,10 @@ vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float ro
         return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, float roughness, float ambient_occlusion, vec3 eye_pos) {
+vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, float roughness0, float ambient_occlusion, vec3 eye_pos) {
 	vec3 view_dir = normalize(p - eye_pos);
 	
-	roughness = max(roughness, 0.03);
+	float roughness = max(roughness0, 0.03);
 	
 	
 	vec4 color = emission;
@@ -274,6 +274,21 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	out_color.rgb = f * out_color.rgb + (1-f) * fog.color.rgb;
 	
 	*/
+	
+	
+#ifndef vulkan
+	if (roughness0 < 0.2 && metal > 0.8) {
+		if (textureSize(tex_cube, 0).x > 10) {
+			vec3 p = in_pos.xyz / in_pos.w;
+			mat3 R = transpose(mat3(matrix.view));
+			vec3 L = reflect(p, n);
+			vec4 cube = texture(tex_cube, R*L);
+			color += cube * ((metal-0.8) / 0.2) * ((0.2 - roughness0) / 0.2) * 0.5;
+		}
+	}
+#endif
+	
+	
 	color.a = albedo.a;
 	return color;
 }

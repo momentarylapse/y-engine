@@ -56,6 +56,8 @@ public:
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;
 
+	vec3 suggest_cube_map_pos() const;
+
 	void reset();
 };
 

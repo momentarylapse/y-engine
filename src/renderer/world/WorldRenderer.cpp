@@ -18,6 +18,7 @@
 #include "../../world/World.h"
 #include "../../lib/base/callable.h"
 #include "../../Config.h"
+#include <y/ComponentManager.h>
 
 
 struct GeoPush {
@@ -63,6 +64,27 @@ WorldRenderer::WorldRenderer(const string &name, Camera *_cam) : Renderer(name) 
 	resource_manager->load_shader_module("module-vertex-fx.shader");
 	resource_manager->load_shader_module("module-geometry-lines.shader");
 	resource_manager->load_shader_module("module-geometry-points.shader");
+}
+
+/*void WorldRenderer::update_cube_maps(const RenderParams& params) {
+	render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), suggest_cube_map_pos());
+}*/
+
+vec3 WorldRenderer::suggest_cube_map_pos() const {
+	if (world.ego)
+		return world.ego->pos;
+	auto& list = ComponentManager::get_list_family<Model>();
+	float max_score = 0;
+	vec3 pos_best = scene_view.cam->m_view * vec3(0,0,1000);
+	for (auto m: list)
+		for (auto mat: m->material) {
+			float score = mat->metal;
+			if (score > max_score) {
+				max_score = score;
+				pos_best = m->owner->pos;
+			}
+		}
+	return pos_best;
 }
 
 

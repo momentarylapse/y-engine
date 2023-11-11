@@ -53,10 +53,7 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
-		if (world.ego)
-			render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), world.ego->pos);
-		else
-			render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), scene_view.cam->m_view * vec3(0,0,1000));
+		render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), suggest_cube_map_pos());
 		_frame = 0;
 	}
 
