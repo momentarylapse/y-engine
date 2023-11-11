@@ -241,6 +241,27 @@ void timetable_at(TimeTable *tt, float t, Callable<void()> *f) {
 	tt->at(t, [f] { (*f)(); });
 }
 
+
+CubeMap* world_renderer_get_cubemap(WorldRenderer &r) {
+	return r.scene_view.cube_map.get();
+}
+
+Array<FrameBuffer*> world_renderer_get_fb_shadow(WorldRenderer &r) {
+	return {r.scene_view.fb_shadow1.get(), r.scene_view.fb_shadow2.get()};
+}
+
+FrameBuffer* world_renderer_get_gbuffer(WorldRenderer &r) {
+#ifdef USING_OPENGL
+	if (r.type == RenderPathType::DEFERRED)
+		return reinterpret_cast<WorldRendererGLDeferred&>(r).gbuffer.get();
+#endif
+	return nullptr;
+}
+
+Array<FrameBuffer*> hdr_renderer_get_fb_bloom(HDRRenderer &r) {
+	return {r.bloom_levels[0].fb_out.get(), r.bloom_levels[1].fb_out.get(), r.bloom_levels[2].fb_out.get(), r.bloom_levels[3].fb_out.get()};
+}
+
 void PluginManager::init(int ch_iter) {
 	ch_controller = PerformanceMonitor::create_channel("controller", ch_iter);
 	export_kaba();
@@ -761,19 +782,14 @@ void PluginManager::export_kaba() {
 	using PP = PostProcessorGL;
 #endif
 	ext->declare_class_size("RenderPath", sizeof(RP));
-	ext->declare_class_element("RenderPath.type", &RP::type);
-//	ext->declare_class_element("RenderPath.cube_map", &RP::cube_map);
-	ext->declare_class_element("RenderPath.shader_fx", &RP::shader_fx);
-//	ext->declare_class_element("RenderPath.fb_shadow", &RP::fb_shadow1);
-//	ext->declare_class_element("RenderPath.fb_shadow2", &RP::fb_shadow2);
-#ifdef USING_OPENGL
-	ext->declare_class_element("RenderPath.gbuffer", &RPD::gbuffer);
-#else
-	//ext->declare_class_element("RenderPath.gbuffer", &RP::fb2); // TODO
-#endif
-	ext->declare_class_element("RenderPath.wireframe", &RP::wireframe);
+	ext->declare_class_element("RenderPath.type", &WorldRenderer::type);
+	ext->declare_class_element("RenderPath.shader_fx", &WorldRenderer::shader_fx);
+	ext->declare_class_element("RenderPath.wireframe", &WorldRenderer::wireframe);
 //	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
+	ext->link_class_func("RenderPath.get_cubemap", &world_renderer_get_cubemap);
+	ext->link_class_func("RenderPath.get_fb_shadow", &world_renderer_get_fb_shadow);
+	ext->link_class_func("RenderPath.get_gbuffer", &world_renderer_get_gbuffer);
 
 
 	ext->declare_class_size("RegionsRenderer", sizeof(RegionRenderer));
@@ -797,8 +813,7 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
 	ext->declare_class_element("HDRRenderer.fb_main", &HDRRenderer::fb_main);
-	ext->declare_class_element("HDRRenderer.fb_small1", &HDRRenderer::bloom_levels);
-	ext->declare_class_element("HDRRenderer.fb_small2", &HDRRenderer::bloom_levels);
+	ext->link_class_func("HDRRenderer.fb_bloom", &hdr_renderer_get_fb_bloom);
 
 
 	ext->declare_class_size("FrameBuffer", sizeof(FrameBuffer));

@@ -10,14 +10,15 @@
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_tex_coord;
+layout(location = 2) in vec2 in_uv;
 
-//layout(location = 0) out vec4 out_pos;
-layout(location = 0) out vec2 out_tex_coord;
+layout(location = 0) out vec4 out_pos;
+layout(location = 2) out vec2 out_uv;
 
 void main() {
 	gl_Position = vec4(in_position, 1.0);
-	out_tex_coord = in_tex_coord;
+	out_pos = gl_Position; // fake
+	out_uv = in_uv;
 }
 </VertexShader>
 <FragmentShader>
@@ -31,6 +32,7 @@ layout(binding = 6) uniform sampler2D tex3;//sampler_normal;
 layout(binding = 7) uniform sampler2D tex4;//sampler_z;
 layout(binding = 8) uniform sampler2D tex5;//sampler_shadow;
 layout(binding = 9) uniform sampler2D tex6;
+layout(binding = 10) uniform samplerCube tex7;
 //layout(binding = 7) uniform sampler2DShadow sampler_shadow;
 
 #define tex_albedo   tex0
@@ -40,8 +42,7 @@ layout(binding = 9) uniform sampler2D tex6;
 #define tex_z        tex4
 #define tex_shadow0  tex5
 #define tex_shadow1  tex6
-
-#import lighting
+#define tex_cube     tex7
 
 struct Matrix { mat4 model, view, project; };
 /*layout(binding = 0)*/ uniform Matrix matrix;
@@ -50,9 +51,16 @@ struct Matrix { mat4 model, view, project; };
 
 
 //layout(location = 0) in vec4 outPos;
-layout(location = 0) in vec2 in_tex_coord;
+//layout(location = 0) in vec2 in_tex_coord;
+
+layout(location = 0) in vec4 in_pos; // view space
+//layout(location = 1) in vec3 in_normal;
+layout(location = 2) in vec2 in_uv;
 
 layout(location = 0) out vec4 out_color;
+
+
+#import lighting
 
 
 uniform vec3 eye_pos = vec3(0,0,0);
@@ -119,14 +127,14 @@ float get_ambient_occlusion(vec3 p, vec3 n) {
 
 void main() {
 
-	vec4 albedo = texture(tex_albedo, in_tex_coord);
-	vec4 em = texture(tex_emission, in_tex_coord);
+	vec4 albedo = texture(tex_albedo, in_uv);
+	vec4 em = texture(tex_emission, in_uv);
 	vec3 emission = em.rgb;
-	vec4 nr = texture(tex_normal, in_tex_coord);
+	vec4 nr = texture(tex_normal, in_uv);
 	vec3 n = normalize(nr.xyz);
 	float roughness = nr.w;
 	float metal = em.a;
-	vec3 p = texture(tex_pos, in_tex_coord).xyz;
+	vec3 p = texture(tex_pos, in_uv).xyz;
 	
 	if (albedo.a < 0) {
 		discard;

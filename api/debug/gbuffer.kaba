@@ -5,7 +5,7 @@ class X extends Controller
 	
 	func override on_init()
 		if engine.render_path.type == RenderPath.Type.DEFERRED
-			for gbuf in engine.render_path.gbuffer
+			for gbuf in engine.render_path.get_gbuffer()
 				for i in 0:4
 					pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], gbuf.color_attachments()[i]))
 			#	for d in gbuf.depth_buffer()

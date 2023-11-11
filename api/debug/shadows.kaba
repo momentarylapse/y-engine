@@ -5,10 +5,9 @@ class X extends Controller
 	
 	func override on_init()
 		if engine.render_path
-			for shared db in engine.render_path.fb_shadow.depth_buffer()
-				pic.add(new Picture([1.2,1.4, 0.6, 0.8], db))
-			for shared db in engine.render_path.fb_shadow2.depth_buffer()
-				pic.add(new Picture([1.2,1.4, 0.8, 1.0], db))
+			for i=>fb in engine.render_path.get_fb_shadow()
+				for shared db in fb.depth_buffer()
+					pic.add(new Picture([1.2,1.4, 0.6 + i*0.2, 0.8+i*0.2], db))
 		
 		for p in pic
 			toplevel.add(p)
