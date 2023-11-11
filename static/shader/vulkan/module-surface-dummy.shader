@@ -4,48 +4,7 @@
 </Layout>
 <Module>
 
-struct Matrices {
-	mat4 model;
-	mat4 view;
-	mat4 project;
-};
-
-struct Material {
-	vec4 albedo, emission;
-	float roughness, metal;
-	int _dummy1, _dummy2;
-};
-
-struct Light {
-	mat4 proj;
-	vec4 pos;
-	vec4 dir;
-	vec4 color;
-	float radius, theta, harshness;
-};
-
-layout(binding = 0) uniform ParameterData {
-	Matrices matrix;
-	Material material;
-	int num_lights;
-	int shadow_index;
-};
-layout(binding = 1) uniform LightData {
-	Light light[32];
-};
-
-layout(location = 0) in vec4 in_pos; // view space
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_uv;
-
-layout(location = 0) out vec4 out_color;
-
-
-layout(binding = 2) uniform sampler2D tex_shadow0;
-layout(binding = 3) uniform sampler2D tex_shadow1;
-layout(binding = 5) uniform samplerCube tex_cube;
-
-
+#import basic-data
 #import lighting
 
 

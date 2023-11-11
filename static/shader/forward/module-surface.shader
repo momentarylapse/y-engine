@@ -4,34 +4,7 @@
 </Layout>
 <Module>
 
-layout(binding = 2) uniform sampler2D tex3;//sampler_shadow;
-layout(binding = 3) uniform sampler2D tex4;//sampler_shadow2;
-layout(binding = 4) uniform samplerCube tex_cube;//sampler_shadow2;
-
-#define tex_shadow0 tex3
-#define tex_shadow1 tex4
-
-
-struct Material { vec4 albedo, emission; float roughness, metal; };
-uniform Material material;
-//struct Matrix { mat4 model, view, project; };
-///*layout(binding = 0)*/ uniform Matrix matrix;
-
-//uniform vec3 eye_pos;
-const vec3 eye_pos = vec3(0,0,0);
-
-struct Matrix { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrix matrix;
-
-
-layout(location = 0) in vec4 in_pos; // view space
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec2 in_uv;
-
-layout(location = 0) out vec4 out_color;
-
-
-
+#import basic-data
 #import lighting
 
 

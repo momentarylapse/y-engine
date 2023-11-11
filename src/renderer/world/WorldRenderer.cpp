@@ -52,6 +52,7 @@ WorldRenderer::WorldRenderer(const string &name, Camera *_cam) : Renderer(name) 
 	scene_view.cam = _cam;
 
 	resource_manager->default_shader = "default.shader";
+	resource_manager->load_shader_module("module-basic-data.shader");
 	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
 		resource_manager->load_shader_module("module-lighting-pbr.shader");
 	} else {
