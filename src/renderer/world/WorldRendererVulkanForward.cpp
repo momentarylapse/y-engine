@@ -51,7 +51,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 
 	static int _frame = 0;
 	_frame ++;
-	if (_frame > 10) {
+	if (_frame >= cube_update_rate) {
 		render_into_cubemap(params, scene_view.cube_map.get(), suggest_cube_map_pos());
 		_frame = 0;
 	}
