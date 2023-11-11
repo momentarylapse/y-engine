@@ -48,6 +48,7 @@ void PostProcessor::reset() {
 }
 
 void PostProcessor::rebuild() {
+#if 0
 	auto stages_eff = stages;
 	//if (hdr)
 	//	stages_eff.insert(hdr, 0);
@@ -62,6 +63,7 @@ void PostProcessor::rebuild() {
 		stages_eff[i]->children = {stages_eff[i-1]};
 	for (int i=0; i<stages_eff.num-1; i++)
 		stages_eff[i]->parent = stages_eff[i+1];
+#endif
 }
 
 void PostProcessor::set_hdr(PostProcessorStage *_hdr) {

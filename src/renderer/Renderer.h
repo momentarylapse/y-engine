@@ -40,7 +40,6 @@ public:
 	Renderer(const string &name, Renderer *parent = nullptr);
 	virtual ~Renderer();
 
-	Renderer *parent = nullptr;
 	Array<Renderer*> children;
 	void add_child(Renderer *child);
 

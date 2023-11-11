@@ -33,12 +33,11 @@ RenderParams RenderParams::into_texture(FrameBuffer *frame_buffer, float aspect_
 
 
 Renderer::Renderer(const string &name, Renderer *_parent) {
-	parent = _parent;
-	if (parent) {
-		parent->add_child(this);
+	if (_parent) {
+		_parent->add_child(this);
 	}
 
-	channel = PerformanceMonitor::create_channel(name, parent ? parent->channel : -1);
+	channel = PerformanceMonitor::create_channel(name, -1);
 	ch_draw = PerformanceMonitor::create_channel(name + ".d", channel);
 	ch_prepare = PerformanceMonitor::create_channel(name + ".p", channel);
 
