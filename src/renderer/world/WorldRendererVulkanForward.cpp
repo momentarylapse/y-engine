@@ -77,6 +77,7 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 
 	auto &rvd = geo_renderer->rvd_def;
 
+	cb->clear({world.background}, 1.0f);
 	geo_renderer->draw_skyboxes(cb, rp, params.desired_aspect_ratio, rvd);
 
 	UBO ubo;

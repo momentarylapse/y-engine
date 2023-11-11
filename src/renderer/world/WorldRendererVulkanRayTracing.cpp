@@ -269,6 +269,7 @@ void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 	if (!pipeline_out) {
 		pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
 		pipeline_out->set_culling(CullMode::NONE);
+		pipeline_out->set_z(false, false);
 		pipeline_out->rebuild();
 	}
 

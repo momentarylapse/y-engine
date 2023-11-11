@@ -45,7 +45,7 @@ void WindowRendererVulkan::_create_swap_chain_and_stuff() {
 		command_buffers.add(device->command_pool->create_command_buffer());
 
 	depth_buffer = swap_chain->create_depth_buffer();
-	default_render_pass = swap_chain->create_render_pass(depth_buffer, {"autoclear"});
+	default_render_pass = swap_chain->create_render_pass(depth_buffer);
 	frame_buffers = swap_chain->create_frame_buffers(default_render_pass, depth_buffer);
 }
 
@@ -114,7 +114,6 @@ void WindowRendererVulkan::draw(const RenderParams& params) {
 		c->prepare(params);
 
 	cb->set_viewport({0, (float)swap_chain->width, 0, (float)swap_chain->height});
-	//rp->clear_color = {White};
 	cb->begin_render_pass(rp, fb);
 
 	for (auto c: children)
