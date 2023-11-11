@@ -96,6 +96,7 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(r->ch_draw);
+	gpu_timestamp_begin(r->ch_draw);
 
 	nix::set_textures(source);
 	nix::set_shader(shader);
@@ -114,6 +115,7 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 	nix::draw_triangles(vb_2d);
 
 	nix::set_cull(nix::CullMode::BACK);
+	gpu_timestamp_end(r->ch_draw);
 	PerformanceMonitor::end(r->ch_draw);
 }
 

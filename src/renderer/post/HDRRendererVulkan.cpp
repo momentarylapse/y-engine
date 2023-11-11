@@ -196,7 +196,9 @@ void HDRRendererVulkan::draw(const RenderParams& params) {
 
 
 	PerformanceMonitor::begin(ch_out);
+	gpu_timestamp_begin(cb, ch_out);
 	out.render_out(cb, {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y}, cam->exposure, params);
+	gpu_timestamp_end(cb, ch_out);
 	PerformanceMonitor::end(ch_out);
 }
 
