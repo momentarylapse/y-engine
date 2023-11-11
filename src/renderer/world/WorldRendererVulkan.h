@@ -53,10 +53,6 @@ public:
 
 	VertexBuffer *vb_2d;
 
-	shared<DepthBuffer> depth_cube;
-	shared<FrameBuffer> fb_cube;
-	shared<CubeMap> cube_map;
-
 	RenderViewDataVK rvd_cube[6];
 
 	void create_more();

@@ -46,22 +46,21 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, Render
 
 	vb_2d = nullptr;
 
-
-	cube_map = new CubeMap(cube_resolution, "rgba:i8");
+	scene_view.cube_map = new CubeMap(cube_resolution, "rgba:i8");
 	if (false) {
 		Image im;
 		im.create(cube_resolution, cube_resolution, Red);
-		cube_map->write_side(0, im);
+		scene_view.cube_map->write_side(0, im);
 		im.create(cube_resolution, cube_resolution, color(1, 1,0.5f,0));
-		cube_map->write_side(1, im);
+		scene_view.cube_map->write_side(1, im);
 		im.create(cube_resolution, cube_resolution, color(1, 1,0,1));
-		cube_map->write_side(2, im);
+		scene_view.cube_map->write_side(2, im);
 	}
 
 	depth_cube = new DepthBuffer(cube_resolution, cube_resolution, "d:f32", true);
 
-	render_pass_cube = new vulkan::RenderPass({cube_map.get(), depth_cube.get()}, "clear");
-	fb_cube = new vulkan::FrameBuffer(render_pass_cube, {cube_map.get(), depth_cube.get()});
+	render_pass_cube = new vulkan::RenderPass({scene_view.cube_map.get(), depth_cube.get()}, "clear");
+	fb_cube = new vulkan::FrameBuffer(render_pass_cube, {scene_view.cube_map.get(), depth_cube.get()});
 
 
 

@@ -52,7 +52,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
-		render_into_cubemap(params, cube_map.get(), suggest_cube_map_pos());
+		render_into_cubemap(params, scene_view.cube_map.get(), suggest_cube_map_pos());
 		_frame = 0;
 	}
 
@@ -107,6 +107,7 @@ void WorldRendererVulkanForward::render_into_texture(FrameBuffer *fb, Camera *ca
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 	std::swap(scene_view.cam, cam);
+	scene_view.cam->update_matrices(params.desired_aspect_ratio); // argh, need more UBOs
 	//prepare_lights(scene_view.cam, );
 	auto sub_params = params.with_target(fb);
 	draw(sub_params);

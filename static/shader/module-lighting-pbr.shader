@@ -276,7 +276,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	*/
 	
 	
-#ifndef vulkan
+//#ifndef vulkan
 	if (roughness0 < 0.2 && metal > 0.8) {
 		if (textureSize(tex_cube, 0).x > 10) {
 			vec3 p = in_pos.xyz / in_pos.w;
@@ -286,7 +286,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 			color += cube * ((metal-0.8) / 0.2) * ((0.2 - roughness0) / 0.2) * 0.5;
 		}
 	}
-#endif
+//#endif
 	
 	
 	color.a = albedo.a;
