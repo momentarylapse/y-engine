@@ -77,9 +77,10 @@ void WorldRendererVulkan::create_more() {
 	shadow_renderer = new ShadowRendererVulkan(this);
 	scene_view.fb_shadow1 = shadow_renderer->fb[0];
 	scene_view.fb_shadow2 = shadow_renderer->fb[1];
+	add_child(shadow_renderer.get());
 
 	geo_renderer = new GeometryRendererVulkan(type, scene_view, this);
-	geo_renderer->material_shadow = shadow_renderer->material;
+	add_child(geo_renderer.get());
 
 }
 

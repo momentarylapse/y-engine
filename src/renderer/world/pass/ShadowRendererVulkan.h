@@ -36,10 +36,10 @@ public:
 
 	shared<FrameBuffer> fb[2];
     mat4 proj;
-    Material *material;
+    owned<Material> material;
 	RenderViewDataVK rvd[2];
 
-    GeometryRendererVulkan *geo_renderer;
+	owned<GeometryRendererVulkan> geo_renderer;
 };
 
 #endif

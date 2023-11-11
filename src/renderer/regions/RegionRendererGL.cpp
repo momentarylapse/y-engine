@@ -17,8 +17,6 @@ RegionRendererGL::RegionRendererGL(Renderer *parent) : RegionRendererCommon(pare
 
 void RegionRendererGL::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
-	for (int i=0; i<children.num; i++)
-		regions[i].renderer = children[i];
 
 	const rect area = params.frame_buffer->area();
 

@@ -18,7 +18,7 @@ public:
 
 	void prepare(const RenderParams& params) override;
 
-	Renderer *add_region(const rect &dest, int z);
+	void add_region(Renderer *renderer, const rect &dest, int z);
 
 	struct Region {
 		rect dest;

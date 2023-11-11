@@ -66,7 +66,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Renderer *parent, Camera *cam, 
 	create_more();
 
 	geo_renderer_trans = new GeometryRendererGL(RenderPathType::FORWARD, scene_view, this);
-	geo_renderer_trans->material_shadow = shadow_renderer->material;
+	add_child(geo_renderer_trans.get());
 }
 
 void WorldRendererGLDeferred::prepare(const RenderParams& params) {

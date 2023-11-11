@@ -67,7 +67,7 @@ public:
 	static bool using_view_space;
 	RenderPathType type;
 
-	owned<Material> material_shadow;
+	Material *material_shadow = nullptr; // ref to ShadowRenderer
 
 	SceneView &scene_view;
 

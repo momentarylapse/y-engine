@@ -256,7 +256,7 @@ void GeometryRendererGL::draw_terrains() {
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
 		if (is_shadow_pass()) {
-			set_material(t->shader_cache_shadow, material_shadow.get(), type, t->vertex_shader_module, "");
+			set_material(t->shader_cache_shadow, material_shadow, type, t->vertex_shader_module, "");
 		} else {
 			set_material(t->shader_cache, t->material.get(), type, t->vertex_shader_module, "");
 			auto s = t->shader_cache.get_shader(type);
@@ -281,7 +281,7 @@ void GeometryRendererGL::draw_objects_instanced() {
 				continue;
 			nix::set_model_matrix(mi->matrices[0]);//m->_matrix);
 			if (is_shadow_pass()) {
-				set_material(m->shader_cache_shadow[i], material_shadow.get(), type, "instanced", "");
+				set_material(m->shader_cache_shadow[i], material_shadow, type, "instanced", "");
 			} else {
 				set_material(m->shader_cache[i], m->material[i], type, "instanced", "");
 			}
@@ -314,7 +314,7 @@ void GeometryRendererGL::draw_objects_opaque() {
 				continue;
 
 			if (is_shadow_pass()) {
-				set_material(m->shader_cache_shadow[i], material_shadow.get(), type, m->_template->vertex_shader_module, "");
+				set_material(m->shader_cache_shadow[i], material_shadow, type, m->_template->vertex_shader_module, "");
 			} else {
 				set_material(m->shader_cache[i], weak(m->material)[i], type, m->_template->vertex_shader_module, "");
 			}
@@ -421,8 +421,8 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
 		if (is_shadow_pass()) {
-			auto shader = user_mesh_shadow_shader(resource_manager, m, material_shadow.get(), type);
-			set_material_x(material_shadow.get(), shader);
+			auto shader = user_mesh_shadow_shader(resource_manager, m, material_shadow, type);
+			set_material_x(material_shadow, shader);
 		} else {
 			auto shader = user_mesh_shader(resource_manager, m, type);
 			set_material_x(m->material.get(), shader);

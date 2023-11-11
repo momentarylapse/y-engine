@@ -43,7 +43,8 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shdw", 
 
 	geo_renderer = new GeometryRendererVulkan(RenderPathType::FORWARD, scene_view, this);
 	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
-	geo_renderer->material_shadow = material;
+	geo_renderer->material_shadow = material.get();
+	add_child(geo_renderer.get());
 	//scene_view.ubo_light = new UniformBuffer(8); // dummy
 }
 

@@ -32,11 +32,11 @@ public:
 
     void render(SceneView &parent_scene_view);
 
-    Material *material;
+    owned<Material> material;
 	mat4 proj;
 	SceneView scene_view;
 
-    GeometryRendererGL *geo_renderer;
+    owned<GeometryRendererGL> geo_renderer;
 };
 
 #endif

@@ -13,9 +13,6 @@ RegionRendererCommon::RegionRendererCommon(Renderer *parent) : Renderer("rgn", p
 
 void RegionRendererCommon::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-	for (int i=0; i<children.num; i++)
-		regions[i].renderer = children[i];
-
 	for (auto r: sorted_regions) {
 		if (r->renderer) {
 			auto sub_params = params;
@@ -26,8 +23,10 @@ void RegionRendererCommon::prepare(const RenderParams& params) {
 	PerformanceMonitor::end(ch_prepare);
 }
 
-Renderer* RegionRendererCommon::add_region(const rect &dest, int z) {
-	regions.add({dest, z, nullptr});
+void RegionRendererCommon::add_region(Renderer *renderer, const rect &dest, int z) {
+	add_child(renderer);
+
+	regions.add({dest, z, renderer});
 
 	// resort
 	sorted_regions.clear();
@@ -37,8 +36,6 @@ Renderer* RegionRendererCommon::add_region(const rect &dest, int z) {
 		for (int k=i+1; k<sorted_regions.num; k++)
 			if (sorted_regions[i]->z > sorted_regions[k]->z)
 				sorted_regions.swap(i, k);
-
-	return this;
 }
 
 

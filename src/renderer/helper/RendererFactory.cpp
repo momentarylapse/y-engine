@@ -122,8 +122,9 @@ Renderer *create_render_path(Renderer *parent, Camera *cam) {
 	//	engine.hdr_renderer = create_hdr_renderer(engine.post_processor, cam);
 		engine.hdr_renderer = create_hdr_renderer(parent, cam);
 		engine.world_renderer = create_world_renderer(engine.hdr_renderer, cam);
+		engine.hdr_renderer->add_child(engine.world_renderer);
 		//post_processor->set_hdr(hdr_renderer);
-		return engine.post_processor;
+		return engine.hdr_renderer;
 	}
 }
 
@@ -131,8 +132,11 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
 		engine.region_renderer = create_region_renderer(engine.window_renderer);
-		auto p = create_render_path(engine.region_renderer->add_region(rect::ID, 0), cam);
-		engine.gui_renderer = create_gui_renderer(engine.region_renderer->add_region(rect::ID, 999));
+		auto p = create_render_path(engine.region_renderer, cam);
+		engine.gui_renderer = create_gui_renderer(engine.region_renderer);
+		engine.window_renderer->add_child(engine.region_renderer);
+		engine.region_renderer->add_region(p, rect::ID, 0);
+		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
 	} catch(Exception &e) {
 		hui::ShowError(e.message());
 		throw e;

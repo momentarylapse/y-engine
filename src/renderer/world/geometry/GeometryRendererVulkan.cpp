@@ -406,7 +406,7 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 		rda[index].ubo->update(&ubo);
 
 		if (is_shadow_pass()) {
-			set_material(cb, rp, rda[index].dset, t->shader_cache_shadow, material_shadow.get(), type, t->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, t->vertex_buffer.get());
+			set_material(cb, rp, rda[index].dset, t->shader_cache_shadow, material_shadow, type, t->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, t->vertex_buffer.get());
 		} else {
 			set_material(cb, rp, rda[index].dset, t->shader_cache, t->material.get(), type, t->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, t->vertex_buffer.get());
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
@@ -457,7 +457,7 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
 			if (is_shadow_pass())
-				set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[i], material_shadow.get(), type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
+				set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[i], material_shadow, type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
 			else
 				set_material(cb, rp, rda[index].dset, m->shader_cache[i], material, type, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
 
@@ -508,7 +508,7 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
 			if (is_shadow_pass())
-				set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[i], material_shadow.get(), type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+				set_material(cb, rp, rda[index].dset, m->shader_cache_shadow[i], material_shadow, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
 			else
 				set_material(cb, rp, rda[index].dset, m->shader_cache[i], material, type, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
 
@@ -620,7 +620,7 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		Shader *shader;
 		Material *material;
 		if (is_shadow_pass()) {
-			material = material_shadow.get();
+			material = material_shadow;
 			shader = user_mesh_shadow_shader(resource_manager, m, material, type);
 		} else {
 			material = m->material.get();
@@ -643,7 +643,7 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
 		if (is_shadow_pass())
-			set_material_x(cb, rp, rda[index].dset, material_shadow.get(), pipeline);
+			set_material_x(cb, rp, rda[index].dset, material_shadow, pipeline);
 		else
 			set_material_x(cb, rp, rda[index].dset, m->material.get(), pipeline);
 

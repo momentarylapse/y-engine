@@ -47,8 +47,8 @@ class WorldRendererVulkan : public WorldRenderer {
 public:
 	RenderPass *render_pass_cube = nullptr;
 
-	ShadowRendererVulkan *shadow_renderer = nullptr;
-	GeometryRendererVulkan *geo_renderer = nullptr;
+	owned<ShadowRendererVulkan> shadow_renderer;
+	owned<GeometryRendererVulkan> geo_renderer;
 
 
 	VertexBuffer *vb_2d;

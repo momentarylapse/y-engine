@@ -37,7 +37,8 @@ ShadowRendererGL::ShadowRendererGL(Renderer *parent) :
 
 	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, scene_view, this);
 	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
-	geo_renderer->material_shadow = material;
+	geo_renderer->material_shadow = material.get();
+	add_child(geo_renderer.get());
 }
 
 void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale) {
