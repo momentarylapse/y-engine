@@ -79,7 +79,7 @@ HDRRendererVulkan::RenderIntoData::RenderIntoData(int width, int height) {
 	auto tex = new vulkan::Texture(width, height, "rgba:f16");
 	tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
 	_depth_buffer = new DepthBuffer(width, height, "d:f32", true);
-	_render_pass = new vulkan::RenderPass({tex, _depth_buffer}, "clear");
+	_render_pass = new vulkan::RenderPass({tex, _depth_buffer});
 
 	fb_main = new vulkan::FrameBuffer(_render_pass, {
 		tex,
@@ -92,12 +92,10 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 
 	auto cb = params.command_buffer;
 
-	//vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-
 	cb->set_viewport(dynamicly_scaled_area(fb_main.get()));
 
-	_render_pass->clear_color = {world.background};
 	cb->begin_render_pass(_render_pass, fb_main.get());
+	cb->clear({world.background}, 1.0f);
 
 	r->draw(params);
 
@@ -123,8 +121,8 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 		blur_tex.add(new vulkan::Texture(bloomw, bloomh, "rgba:f16"));
 		blur_depth.add(new DepthBuffer(bloomw, bloomh, "d:f32", true));
 
-		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i]}, "clear");
-		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i]}, "clear");
+		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i]}, {"autoclear"});
+		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i]}, {"autoclear"});
 		// without clear, we get artifacts from dynamic resolution scaling
 	}
 	for (auto t: blur_tex)

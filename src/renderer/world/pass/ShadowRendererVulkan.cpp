@@ -28,7 +28,7 @@ ShadowRendererVulkan::ShadowRendererVulkan() : Renderer("shdw") {
 	auto tex2 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 	auto depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
 	auto depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-	render_pass = new vulkan::RenderPass({tex1, depth1}, "clear");
+	render_pass = new vulkan::RenderPass({tex1, depth1}, {"autoclear"});
 	fb[0] = new vulkan::FrameBuffer(render_pass, {tex1, depth1});
 	fb[1] = new vulkan::FrameBuffer(render_pass, {tex2, depth2});
 

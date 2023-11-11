@@ -59,7 +59,7 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, Render
 
 	depth_cube = new DepthBuffer(cube_resolution, cube_resolution, "d:f32", true);
 
-	render_pass_cube = new vulkan::RenderPass({scene_view.cube_map.get(), depth_cube.get()}, "clear");
+	render_pass_cube = new vulkan::RenderPass({scene_view.cube_map.get(), depth_cube.get()}, {"autoclear"});
 	fb_cube = new vulkan::FrameBuffer(render_pass_cube, {scene_view.cube_map.get(), depth_cube.get()});
 
 
