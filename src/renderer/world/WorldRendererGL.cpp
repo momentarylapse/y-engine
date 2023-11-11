@@ -54,12 +54,12 @@ void WorldRendererGL::prepare_lights() {
 	PerformanceMonitor::end(ch_prepare_lights);
 }
 
-void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const vec3 &pos) {
+void WorldRendererGL::render_into_cubemap(DepthBuffer *depth, CubeMap *cube, const CubeMapParams &params) {
 	if (!fb_cube)
 		fb_cube = new nix::FrameBuffer({depth});
-	Entity o(pos, quaternion::ID);
+	Entity o(params.pos, quaternion::ID);
 	Camera cam;
-	cam.min_depth = 1000;
+	cam.min_depth = params.min_depth;
 	cam.owner = &o;
 	cam.fov = pi/2;
 	for (int i=0; i<6; i++) {

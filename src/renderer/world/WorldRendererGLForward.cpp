@@ -55,6 +55,7 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 	if (_frame > 10) {
 		render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), suggest_cube_map_pos());
 		_frame = 0;
+		prepare_lights();
 	}
 
 	PerformanceMonitor::end(ch_prepare);
@@ -118,6 +119,7 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam) {
 	nix::bind_frame_buffer(fb);
 
 	std::swap(scene_view.cam, cam);
+	prepare_lights();
 	draw(RenderParams::into_texture(fb, 1.0f));
 	std::swap(scene_view.cam, cam);
 }

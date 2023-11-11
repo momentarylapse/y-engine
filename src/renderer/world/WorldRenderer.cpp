@@ -70,21 +70,21 @@ WorldRenderer::WorldRenderer(const string &name, Camera *_cam) : Renderer(name) 
 	render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), suggest_cube_map_pos());
 }*/
 
-vec3 WorldRenderer::suggest_cube_map_pos() const {
+WorldRenderer::CubeMapParams WorldRenderer::suggest_cube_map_pos() const {
 	if (world.ego)
-		return world.ego->pos;
+		return {world.ego->pos, 200};
 	auto& list = ComponentManager::get_list_family<Model>();
 	float max_score = 0;
-	vec3 pos_best = scene_view.cam->m_view * vec3(0,0,1000);
+	CubeMapParams best = {scene_view.cam->m_view * vec3(0,0,1000), 1000};
 	for (auto m: list)
 		for (auto mat: m->material) {
 			float score = mat->metal;
 			if (score > max_score) {
 				max_score = score;
-				pos_best = m->owner->pos;
+				best = {m->owner->pos, m->prop.radius};
 			}
 		}
-	return pos_best;
+	return best;
 }
 
 

@@ -52,7 +52,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	static int _frame = 0;
 	_frame ++;
 	if (_frame > 10) {
-		render_into_cubemap(cb, cube_map.get(), suggest_cube_map_pos());
+		render_into_cubemap(params, cube_map.get(), suggest_cube_map_pos());
 		_frame = 0;
 	}
 
@@ -98,15 +98,17 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
 }
 
-void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPass *rp, FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
+void WorldRendererVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
+	auto cb = params.command_buffer;
+	auto rp = params.render_pass;
 	rp->clear_color[0] = world.background;
 
 	cb->begin_render_pass(rp, fb);
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));
 
 	std::swap(scene_view.cam, cam);
+	//prepare_lights(scene_view.cam, );
 	auto sub_params = params.with_target(fb);
-	sub_params.render_pass = rp;
 	draw(sub_params);
 	std::swap(scene_view.cam, cam);
 

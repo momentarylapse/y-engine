@@ -56,7 +56,11 @@ public:
 	shared<DepthBuffer> depth_cube;
 	shared<FrameBuffer> fb_cube;
 
-	vec3 suggest_cube_map_pos() const;
+	struct CubeMapParams {
+		vec3 pos;
+		float min_depth;
+	};
+	CubeMapParams suggest_cube_map_pos() const;
 
 	void reset();
 };

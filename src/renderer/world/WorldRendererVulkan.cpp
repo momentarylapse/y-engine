@@ -88,13 +88,14 @@ WorldRendererVulkan::~WorldRendererVulkan() {
 }
 
 
-void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, const vec3 &pos) {
+void WorldRendererVulkan::render_into_cubemap(const RenderParams& params, CubeMap *cube, const CubeMapParams &cube_params) {
 	if (!fb_cube)
 		fb_cube = new FrameBuffer(render_pass_cube, {depth_cube.get()});
-	Entity o(pos, quaternion::ID);
+	Entity o(cube_params.pos, quaternion::ID);
 	Camera cube_cam;
 	cube_cam.owner = &o;
 	cube_cam.fov = pi/2;
+	cube_cam.min_depth = cube_params.min_depth;
 	for (int i=0; i<6; i++) {
 		try {
 			fb_cube->update_x(render_pass_cube, {cube, depth_cube.get()}, i);
@@ -114,7 +115,9 @@ void WorldRendererVulkan::render_into_cubemap(CommandBuffer *cb, CubeMap *cube, 
 			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vec3(0,pi,0));
-		render_into_texture(cb, render_pass_cube, fb_cube.get(), &cube_cam, rvd_cube[i], RenderParams::into_texture(fb_cube.get(), 1.0f));
+		auto sub_params = params.with_target(fb_cube.get());
+		sub_params.render_pass = render_pass_cube;
+		render_into_texture(fb_cube.get(), &cube_cam, rvd_cube[i], sub_params);
 	}
 	cube_cam.owner = nullptr;
 }
