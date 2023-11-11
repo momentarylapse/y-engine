@@ -26,8 +26,8 @@ layout(binding = 0) uniform ParameterData {
 };
 //layout(binding = 2) uniform BoneData {  };
 #else
-struct Matrix { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrix matrix;
+struct Matrices { mat4 model, view, project; };
+/*layout(binding = 0)*/ uniform Matrices matrix;
 /*layout(binding = 7)*/ uniform BoneData { mat4 bone_matrix[128]; };
 #endif
 

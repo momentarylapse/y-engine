@@ -21,8 +21,8 @@ layout(binding = 7) uniform Multi {
 };
 
 #else
-struct Matrix { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrix matrix;
+struct Matrices { mat4 model, view, project; };
+/*layout(binding = 0)*/ uniform Matrices matrix;
 
 uniform Multi {
 	mat4 multi[1024];

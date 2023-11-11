@@ -23,7 +23,7 @@ void main() {
 </VertexShader>
 <FragmentShader>
 //#extension GL_ARB_separate_shader_objects : enable
-
+/*
 //layout(binding = 1) uniform sampler2D tex;
 layout(binding = 3) uniform sampler2D tex0;//sampler_color;
 layout(binding = 4) uniform sampler2D tex1;//sampler_emission;
@@ -45,7 +45,7 @@ layout(binding = 10) uniform samplerCube tex7;
 #define tex_cube     tex7
 
 struct Matrix { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrix matrix;
+uniform Matrix matrix;
 
 
 
@@ -59,11 +59,21 @@ layout(location = 2) in vec2 in_uv;
 
 layout(location = 0) out vec4 out_color;
 
+uniform vec3 eye_pos = vec3(0,0,0);
 
+const float PI = 3.141592954;*/
+
+#import basic-data
 #import lighting
 
 
-uniform vec3 eye_pos = vec3(0,0,0);
+#define tex_albedo   tex0
+#define tex_emission tex1
+#define tex_pos      tex2
+#define tex_normal   tex3
+#define tex_z        tex4
+
+
 uniform vec2 resolution_scale;
 
 

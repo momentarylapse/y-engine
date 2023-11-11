@@ -4,34 +4,7 @@
 </Layout>
 <Module>
 
-
-#ifdef vulkan
-#else
-struct Light {
-	mat4 proj;
-	vec4 pos;
-	vec4 dir;
-	vec4 color;
-	float radius, theta, harshness;
-};
-
-uniform int num_lights;
-uniform int shadow_index = -1;
-
-layout(std140 /*,binding = 1*/) uniform LightData {
-	Light light[32];
-};
-
-struct Fog {
-	vec4 color;
-	float distance;
-};
-/*layout(binding = 3)*/ uniform Fog fog;
-#endif
-
-
-const float PI = 3.141592654;
-
+// import basic-data first!
 
 // https://learnopengl.com/PBR/Theory
 // https://learnopengl.com/PBR/Lighting

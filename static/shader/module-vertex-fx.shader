@@ -14,8 +14,8 @@ layout(binding = 0) uniform Parameters {
 	Matrices matrix;
 };
 #else
-struct Matrix { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrix matrix;
+struct Matrices { mat4 model, view, project; };
+/*layout(binding = 0)*/ uniform Matrices matrix;
 #endif
 
 layout(location = 0) in vec3 in_position;

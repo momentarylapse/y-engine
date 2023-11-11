@@ -3,7 +3,7 @@
 </Layout>
 <Module>
 
-struct Matrix {
+struct Matrices {
 	mat4 model;
 	mat4 view;
 	mat4 project;
@@ -11,10 +11,10 @@ struct Matrix {
 
 #ifdef vulkan
 layout(binding = 0) uniform Parameters {
-	Matrix matrix;
+	Matrices matrix;
 };
 #else
-/*layout(binding = 0)*/ uniform Matrix matrix;
+/*layout(binding = 0)*/ uniform Matrices matrix;
 #endif
 
 layout(location = 0) in vec3 in_position;
