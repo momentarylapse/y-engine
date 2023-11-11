@@ -95,7 +95,7 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	geo_renderer->draw_user_meshes(cb, rp, ubo, true, rvd);
 
 	gpu_timestamp_end(cb, ch_draw);
-	PerformanceMonitor::begin(ch_draw);
+	PerformanceMonitor::end(ch_draw);
 }
 
 void WorldRendererVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
