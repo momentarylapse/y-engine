@@ -30,8 +30,6 @@ struct UBOGUI {
 GuiRendererVulkan::GuiRendererVulkan(Renderer *parent) : Renderer("ui", parent) {
 
 	shader = resource_manager->load_shader("vulkan/2d.shader");
-	pipeline = PipelineManager::get_gui(shader.get(), parent->get_render_pass(), "3f,3f,2f");
-
 
 	vb = new VertexBuffer("3f,3f,2f");
 	vb->create_quad(rect::ID);
@@ -90,6 +88,8 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& par
 }
 
 void GuiRendererVulkan::draw_gui(CommandBuffer *cb, RenderPass *render_pass) {
+	if (!pipeline)
+		pipeline = PipelineManager::get_gui(shader.get(), render_pass, "3f,3f,2f");
 
 	cb->bind_pipeline(pipeline);
 

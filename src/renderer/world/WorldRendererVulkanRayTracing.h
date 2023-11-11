@@ -74,7 +74,7 @@ public:
 
 
 	shared<Shader> shader_out;
-	GraphicsPipeline* pipeline_out;
+	GraphicsPipeline* pipeline_out = nullptr;
 	DescriptorSet *dset_out;
 	owned<VertexBuffer> vb_2d;
 

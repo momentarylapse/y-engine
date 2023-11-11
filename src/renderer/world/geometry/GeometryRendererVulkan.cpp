@@ -72,11 +72,6 @@ GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &s
 
 
 	shader_fx = resource_manager->load_shader("vulkan/3d-fx.shader");
-	pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), parent->get_render_pass(), 0, "triangles", "3f,4f,2f");
-	pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
-	pipeline_fx->set_z(true, false);
-	pipeline_fx->set_culling(CullMode::NONE);
-	pipeline_fx->rebuild();
 
 }
 
@@ -181,6 +176,15 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 	gpu_timestamp_begin(cb, ch_fx);
 	auto &rda = rvd.rda_fx;
 	auto cam = scene_view.cam;
+
+
+	if (!pipeline_fx) {
+		pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), rp, 0, "triangles", "3f,4f,2f");
+		pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
+		pipeline_fx->set_z(true, false);
+		pipeline_fx->set_culling(CullMode::NONE);
+		pipeline_fx->rebuild();
+	}
 
 	cb->bind_pipeline(pipeline_fx);
 

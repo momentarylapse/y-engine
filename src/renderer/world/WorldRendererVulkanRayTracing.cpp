@@ -94,9 +94,6 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Renderer *parent, v
 
 
 	shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
-	pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), parent->get_render_pass(), 0, "triangles", "3f,3f,2f");
-	pipeline_out->set_culling(CullMode::NONE);
-	pipeline_out->rebuild();
 	dset_out = pool->create_set("sampler");
 
 	dset_out->set_texture(0, offscreen_image2);
@@ -267,6 +264,13 @@ void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 
     //vb_2d->create_quad(rect::ID_SYM, rect::ID);//dynamicly_scaled_source());
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+
+
+	if (!pipeline_out) {
+		pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
+		pipeline_out->set_culling(CullMode::NONE);
+		pipeline_out->rebuild();
+	}
 
 	cb->bind_pipeline(pipeline_out);
 	cb->bind_descriptor_set(0, dset_out);

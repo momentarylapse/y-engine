@@ -17,7 +17,7 @@ public:
 	void draw(const RenderParams& params) override;
 
 	shared<Shader> shader;
-	GraphicsPipeline* pipeline;
+	GraphicsPipeline* pipeline = nullptr;
 	Array<DescriptorSet*> dset;
 	Array<UniformBuffer*> ubo;
 	owned<VertexBuffer> vb;

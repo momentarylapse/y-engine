@@ -38,10 +38,10 @@ public:
 
 	struct RenderOutData {
 		RenderOutData(){}
-		RenderOutData(Shader *s, RenderPass *render_pass, const Array<Texture*> &tex);
+		RenderOutData(Shader *s, const Array<Texture*> &tex);
 		void render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params);
 		shared<Shader> shader_out;
-		GraphicsPipeline* pipeline_out;
+		GraphicsPipeline* pipeline_out = nullptr;
 		DescriptorSet *dset_out;
 		VertexBuffer *vb_2d;
 	} out;

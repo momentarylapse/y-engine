@@ -36,11 +36,8 @@ static float resolution_scale_y = 1.0f;
 
 static int BLUR_SCALE = 4;
 
-HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, RenderPass *render_pass, const Array<Texture*> &tex) {
+HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, const Array<Texture*> &tex) {
 	shader_out = s;
-	pipeline_out = new vulkan::GraphicsPipeline(s, render_pass, 0, "triangles", "3f,3f,2f");
-	pipeline_out->set_culling(CullMode::NONE);
-	pipeline_out->rebuild();
 	dset_out = pool->create_set("buffer,sampler,sampler,sampler,sampler,sampler");
 
 	foreachi (auto *t, tex, i)
@@ -55,6 +52,11 @@ HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, RenderPass *render_pa
 void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params) {
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
+	if (!pipeline_out) {
+		pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
+		pipeline_out->set_culling(CullMode::NONE);
+		pipeline_out->rebuild();
+	}
 
 	cb->bind_pipeline(pipeline_out);
 	cb->bind_descriptor_set(0, dset_out);
@@ -142,7 +144,7 @@ HDRRendererVulkan::HDRRendererVulkan(Renderer *parent, Camera *_cam, int width, 
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
 	Array<Texture*> tex = {into.fb_main->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
-	out = RenderOutData(shader_out.get(), parent->get_render_pass(), tex);
+	out = RenderOutData(shader_out.get(), tex);
 
 
 

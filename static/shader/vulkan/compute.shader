@@ -187,7 +187,6 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 
 void main() {
 	ivec2 store_pos = ivec2(gl_GlobalInvocationID.xy);
-	float aspect = float(imageSize(image).x) / float(imageSize(image).y);
 		
 	vec2 r = vec2(gl_GlobalInvocationID.xy) / vec2(push.out_width, push.out_height);
 	vec3 dir = normalize(vec3((r.x - 0.5) * push.out_ratio, 0.5 - r.y, 1));
