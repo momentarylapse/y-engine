@@ -37,9 +37,6 @@ enum class RenderPathType {
 class WorldRenderer : public Renderer {
 public:
 	WorldRenderer(const string &name, Camera *cam);
-	virtual ~WorldRenderer();
-
-	color background() const override;
 
 	int ch_post = -1, ch_post_focus = -1;
 	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;

@@ -54,7 +54,3 @@ void Renderer::prepare(const RenderParams& params) {
 		c->prepare(params);
 }
 
-color Renderer::background() const {
-	return Red;
-}
-

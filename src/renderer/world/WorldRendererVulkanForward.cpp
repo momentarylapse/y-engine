@@ -108,7 +108,7 @@ void WorldRendererVulkanForward::render_into_texture(CommandBuffer *cb, RenderPa
 
 	prepare_lights(cam, rvd);
 
-	rp->clear_color[0] = background();
+	rp->clear_color[0] = world.background;
 
 	cb->begin_render_pass(rp, fb);
 	cb->set_viewport(rect(0, fb->width, 0, fb->height));

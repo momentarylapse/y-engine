@@ -121,7 +121,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	int h = height * engine.resolution_scale_y;
 
 	pc.iview = scene_view.cam->view_matrix().inverse();
-	pc.background = background();
+	pc.background = world.background;
 	pc.num_lights = scene_view.lights.num;
 
 	auto cb = params.command_buffer;

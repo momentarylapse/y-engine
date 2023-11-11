@@ -92,7 +92,7 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 
 	cb->set_viewport(dynamicly_scaled_area(fb_main.get()));
 
-	_render_pass->clear_color = {r->background()};
+	_render_pass->clear_color = {world.background};
 	cb->begin_render_pass(_render_pass, fb_main.get());
 
 	r->draw(params);

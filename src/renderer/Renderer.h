@@ -52,8 +52,6 @@ public:
 	// just draw into that
 	virtual void draw(const RenderParams& params) = 0;
 
-	virtual color background() const;
-
 
 	int channel;
 	int ch_draw;

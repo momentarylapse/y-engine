@@ -65,14 +65,6 @@ WorldRenderer::WorldRenderer(const string &name, Camera *_cam) : Renderer(name) 
 	resource_manager->load_shader_module("module-geometry-points.shader");
 }
 
-WorldRenderer::~WorldRenderer() {
-}
-
-
-color WorldRenderer::background() const {
-	return world.background;
-}
-
 
 void WorldRenderer::reset() {
 }
