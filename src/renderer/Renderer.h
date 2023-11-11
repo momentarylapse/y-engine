@@ -55,14 +55,6 @@ public:
 
 	virtual color background() const;
 
-#ifdef USING_VULKAN
-	virtual RenderPass *get_render_pass() {
-		if (parent)
-			return parent->get_render_pass();
-		return nullptr;
-	};
-#endif
-
 
 	int channel;
 	int ch_draw;

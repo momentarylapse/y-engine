@@ -42,11 +42,11 @@ void WindowRendererVulkan::_create_swap_chain_and_stuff() {
 		wait_for_frame_fences.add(new vulkan::Fence(device));
 
 	for (auto t: swap_images)
-		_command_buffers.add(device->command_pool->create_command_buffer());
+		command_buffers.add(device->command_pool->create_command_buffer());
 
-	_depth_buffer = swap_chain->create_depth_buffer();
-	_default_render_pass = swap_chain->create_render_pass(_depth_buffer);
-	_frame_buffers = swap_chain->create_frame_buffers(_default_render_pass, _depth_buffer);
+	depth_buffer = swap_chain->create_depth_buffer();
+	default_render_pass = swap_chain->create_render_pass(depth_buffer);
+	frame_buffers = swap_chain->create_frame_buffers(default_render_pass, depth_buffer);
 }
 
 
@@ -84,7 +84,7 @@ bool WindowRendererVulkan::start_frame() {
 void WindowRendererVulkan::end_frame() {
 	PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
-	device->present_queue.submit(_command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
+	device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
 
 	swap_chain->present(image_index, {render_finished_semaphore});
 
@@ -93,9 +93,9 @@ void WindowRendererVulkan::end_frame() {
 }
 
 RenderParams WindowRendererVulkan::create_params(float aspect_ratio) {
-	auto p = RenderParams::into_window(_frame_buffers[image_index], aspect_ratio);
-	p.command_buffer = _command_buffers[image_index];
-	p.render_pass = _default_render_pass;
+	auto p = RenderParams::into_window(frame_buffers[image_index], aspect_ratio);
+	p.command_buffer = command_buffers[image_index];
+	p.render_pass = default_render_pass;
 	return p;
 }
 

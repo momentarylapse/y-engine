@@ -64,10 +64,6 @@ public:
 	owned<VertexBuffer> vb_2d;
 
 	int ch_post_blur = -1, ch_out = -1;
-
-	RenderPass *get_render_pass() override {
-		return into._render_pass;
-	}
 };
 
 #endif

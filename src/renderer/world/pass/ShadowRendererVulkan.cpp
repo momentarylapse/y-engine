@@ -28,9 +28,9 @@ ShadowRendererVulkan::ShadowRendererVulkan(Renderer *parent) : Renderer("shdw", 
 	auto tex2 = new vulkan::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 	auto depth1 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
 	auto depth2 = new vulkan::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-	_render_pass = new vulkan::RenderPass({tex1, depth1}, "clear");
-	fb[0] = new vulkan::FrameBuffer(_render_pass, {tex1, depth1});
-	fb[1] = new vulkan::FrameBuffer(_render_pass, {tex2, depth2});
+	render_pass = new vulkan::RenderPass({tex1, depth1}, "clear");
+	fb[0] = new vulkan::FrameBuffer(render_pass, {tex1, depth1});
+	fb[1] = new vulkan::FrameBuffer(render_pass, {tex2, depth2});
 
 
 	rvd[0].ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
@@ -52,7 +52,7 @@ void ShadowRendererVulkan::render(vulkan::CommandBuffer *cb, SceneView &parent_s
 	proj = parent_scene_view.shadow_proj;
 	auto params = RenderParams::WHATEVER;
 	params.command_buffer = cb;
-	params.render_pass = _render_pass;
+	params.render_pass = render_pass;
 	prepare(params);
 }
 
@@ -70,7 +70,7 @@ void ShadowRendererVulkan::prepare(const RenderParams& params) {
 void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb, float scale, RenderViewDataVK &rvd) {
 	geo_renderer->prepare(RenderParams::into_texture(sfb, 1.0f));
 
-	cb->begin_render_pass(_render_pass, sfb);
+	cb->begin_render_pass(render_pass, sfb);
 	cb->set_viewport(rect(0, sfb->width, 0, sfb->height));
 
 	//shadow_pass->set(shadow_proj, scale, &rvd);
@@ -85,10 +85,10 @@ void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb
 	ubo.num_lights = 0;
 	ubo.shadow_index = -1;
 
-	geo_renderer->draw_terrains(cb, _render_pass, ubo, rvd);
-	geo_renderer->draw_objects_opaque(cb, _render_pass, ubo, rvd);
-	geo_renderer->draw_objects_instanced(cb, _render_pass, ubo, rvd);
-	geo_renderer->draw_user_meshes(cb, _render_pass, ubo, false, rvd);
+	geo_renderer->draw_terrains(cb, render_pass, ubo, rvd);
+	geo_renderer->draw_objects_opaque(cb, render_pass, ubo, rvd);
+	geo_renderer->draw_objects_instanced(cb, render_pass, ubo, rvd);
+	geo_renderer->draw_user_meshes(cb, render_pass, ubo, false, rvd);
 
 
 	cb->end_render_pass();

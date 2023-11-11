@@ -32,7 +32,7 @@ public:
 
 	SceneView scene_view;
 
-	RenderPass *_render_pass = nullptr;
+	RenderPass *render_pass = nullptr;
 
 	shared<FrameBuffer> fb[2];
     mat4 proj;
@@ -40,8 +40,6 @@ public:
 	RenderViewDataVK rvd[2];
 
     GeometryRendererVulkan *geo_renderer;
-
-	RenderPass *get_render_pass() override { return _render_pass; };
 };
 
 #endif
