@@ -47,14 +47,15 @@
 
 
 
-const int LOCATION_PARAMS = 0;
-const int LOCATION_LIGHT = 1;
-const int LOCATION_SHADOW0 = 2;
-const int LOCATION_SHADOW1 = 3;
-const int LOCATION_CUBE = 8;
-const int LOCATION_TEX0 = 4;
-const int LOCATION_INSTANCE_MATRICES = 7;
-const int LOCATION_FX_TEX0 = 1;
+const int LOCATION_TEX0 = 0;
+const int LOCATION_SHADOW0 = 5;
+const int LOCATION_SHADOW1 = 6;
+const int LOCATION_CUBE = 7;
+const int LOCATION_PARAMS = 8;
+const int LOCATION_LIGHT = 9;
+const int LOCATION_INSTANCE_MATRICES = 10;
+
+const int LOCATION_FX_TEX0 = 0;
 
 const int MAX_LIGHTS = 1024;
 const int MAX_INSTANCES = 1<<11;
@@ -114,7 +115,7 @@ void GeometryRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, Des
 void GeometryRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, Material *m, GraphicsPipeline *p) {
 	cb->bind_pipeline(p);
 
-	set_textures(dset, LOCATION_TEX0, max(m->textures.num, 1), weak(m->textures));
+	set_textures(dset, weak(m->textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
 
@@ -141,25 +142,9 @@ void GeometryRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, D
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);*/
 }
 
-void GeometryRendererVulkan::set_textures(DescriptorSet *dset, int i0, int n, const Array<Texture*> &tex) {
-	/*auto tt = tex;
-	if (tt.num == 0)
-		tt.add(tex_white.get());
-	if (tt.num == 1)
-		tt.add(tex_white.get());
-	if (tt.num == 2)
-		tt.add(tex_white.get());
-	//tt.add(fb_shadow->depth_buffer.get());
-	//tt.add(fb_shadow2->depth_buffer.get());
-	//tt.add(cube_map.get());
-	foreachi (auto t, tt, i)
-		dset->set_texture(i0 + i, t);*/
-	for (int k=0; k<n; k++) {
-		dset->set_texture(i0 + k, tex_white);
-		if (k < tex.num)
-			if (tex[k])
-				dset->set_texture(i0 + k, tex[k]);
-	}
+void GeometryRendererVulkan::set_textures(DescriptorSet *dset, const Array<Texture*> &tex) {
+	foreachi (auto t, tex, i)
+		dset->set_texture(LOCATION_TEX0 + i, t);
 	if (scene_view.fb_shadow1)
 		dset->set_texture(LOCATION_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
 	if (scene_view.fb_shadow1)

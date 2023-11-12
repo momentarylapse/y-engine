@@ -10,7 +10,7 @@ struct Matrices {
 	mat4 project;
 };
 
-layout(binding = 0) uniform Parameters {
+layout(binding = 8) uniform Parameters {
 	Matrices matrix;
 };
 #else

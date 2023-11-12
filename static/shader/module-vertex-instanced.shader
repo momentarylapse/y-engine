@@ -13,10 +13,10 @@ struct Matrices {
 	mat4 project;
 };
 
-layout(binding = 0) uniform Parameters {
+layout(binding = 8) uniform Parameters {
 	Matrices matrix;
 };
-layout(binding = 7) uniform Multi {
+layout(binding = 10) uniform Multi {
 	mat4 multi[1024];
 };
 

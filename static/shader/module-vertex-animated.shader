@@ -16,7 +16,7 @@ struct Material {
 	int _dummy1, _dummy2;
 };
 
-layout(binding = 0) uniform ParameterData {
+layout(binding = 8) uniform ParameterData {
 	Matrices matrix;
 	Material material;
 	int num_lights;

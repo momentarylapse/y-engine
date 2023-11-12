@@ -10,7 +10,7 @@ struct Matrix {
 };
 
 #ifdef vulkan
-layout(binding = 0) uniform Parameters {
+layout(binding = 8) uniform Parameters {
 	Matrix matrix;
 };
 #else

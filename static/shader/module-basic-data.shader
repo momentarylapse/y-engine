@@ -32,22 +32,23 @@ struct Light {
   Vulkan
 \*---------------------------------------*/
 
-layout(binding = 0) uniform ParameterData {
+layout(binding = 8) uniform ParameterData {
 	Matrices matrix;
 	Material material;
 	int num_lights;
 	int shadow_index;
 };
-layout(binding = 1) uniform LightData {
+layout(binding = 9) uniform LightData {
 	Light light[32];
 };
 
-layout(binding = 4) uniform sampler2D tex0;
-layout(binding = 5) uniform sampler2D tex1;
-layout(binding = 6) uniform sampler2D tex2;
-layout(binding = 2) uniform sampler2D tex_shadow0;
-layout(binding = 3) uniform sampler2D tex_shadow1;
-layout(binding = 8) uniform samplerCube tex_cube;
+layout(binding = 0) uniform sampler2D tex0;
+layout(binding = 1) uniform sampler2D tex1;
+layout(binding = 2) uniform sampler2D tex2;
+layout(binding = 3) uniform sampler2D tex3;
+layout(binding = 5) uniform sampler2D tex_shadow0;
+layout(binding = 6) uniform sampler2D tex_shadow1;
+layout(binding = 7) uniform samplerCube tex_cube;
 
 #else
 

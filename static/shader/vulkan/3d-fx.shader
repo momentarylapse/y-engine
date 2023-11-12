@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler]]
+	bindings = [[sampler,sampler,sampler,sampler,sampler,sampler,sampler,sampler,buffer,buffer]]
 	pushsize = 0
 	input = [vec3,vec4,vec2]
 	topology = triangles
@@ -15,7 +15,7 @@ struct Matrix {
 	mat4 view;
 	mat4 project;
 };
-layout(binding = 0) uniform Parameters {
+layout(binding = 8) uniform Parameters {
 	Matrix matrix;
 };
 
@@ -39,7 +39,7 @@ void main() {
 #extension GL_ARB_separate_shader_objects : enable
 
 
-layout(binding = 1) uniform sampler2D tex;
+layout(binding = 0) uniform sampler2D tex0;
 
 layout(location = 0) in vec4 in_pos;
 layout(location = 1) in vec4 in_color;
@@ -60,7 +60,7 @@ void main() {
 //	vec3 ppp = in_pos_proj.xyz / in_pos_proj.w;
 	
 	// previous pixel pos (screen space)
-	out_color = texture(tex, in_uv) * in_color;
+	out_color = texture(tex0, in_uv) * in_color;
 	//out_color = vec4(1,0,0,1);
 	//out_color.rgb = out_color.rgb * (1-fog_density) + fog_color.rgb * fog_density;
 }
