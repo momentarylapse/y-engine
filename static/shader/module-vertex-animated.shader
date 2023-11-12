@@ -2,35 +2,7 @@
 	name = vertex-animated
 </Layout>
 <Module>
-
-#ifdef vulkan
-struct Matrices {
-	mat4 model;
-	mat4 view;
-	mat4 project;
-};
-
-struct Material {
-	vec4 albedo, emission;
-	float roughness, metal;
-	int _dummy1, _dummy2;
-};
-
-layout(binding = 8) uniform ParameterData {
-	Matrices matrix;
-	Material material;
-	int num_lights;
-	int shadow_index;
-	int _dummy3, _dummy4;
-	mat4 bone_matrix[128];
-};
-//layout(binding = 2) uniform BoneData {  };
-#else
-struct Matrices { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrices matrix;
-/*layout(binding = 7)*/ uniform BoneData { mat4 bone_matrix[128]; };
-#endif
-
+#import basic-interface
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;

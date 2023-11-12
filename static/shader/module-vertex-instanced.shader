@@ -3,32 +3,7 @@
 	name = vertex-instanced
 </Layout>
 <Module>
-
-
-
-#ifdef vulkan
-struct Matrices {
-	mat4 model;
-	mat4 view;
-	mat4 project;
-};
-
-layout(binding = 8) uniform Parameters {
-	Matrices matrix;
-};
-layout(binding = 10) uniform Multi {
-	mat4 multi[1024];
-};
-
-#else
-struct Matrices { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrices matrix;
-
-uniform Multi {
-	mat4 multi[1024];
-};
-
-#endif
+#import basic-interface
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
@@ -38,8 +13,6 @@ layout(location = 0) out vec4 out_pos; // world space
 layout(location = 1) out vec3 out_normal;
 layout(location = 2) out vec2 out_uv;
 layout(location = 3) out vec4 out_color; // optional
-
-
 
 
 void main() {

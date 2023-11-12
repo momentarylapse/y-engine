@@ -2,20 +2,7 @@
 	name = vertex-points
 </Layout>
 <Module>
-
-struct Matrix {
-	mat4 model;
-	mat4 view;
-	mat4 project;
-};
-
-#ifdef vulkan
-layout(binding = 8) uniform Parameters {
-	Matrix matrix;
-};
-#else
-/*layout(binding = 0)*/ uniform Matrix matrix;
-#endif
+#import basic-interface
 
 layout(location = 0) in vec3 in_pos;
 layout(location = 1) in float in_r;

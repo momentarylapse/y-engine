@@ -2,21 +2,7 @@
 	name = vertex-fx
 </Layout>
 <Module>
-
-#ifdef vulkan
-struct Matrices {
-	mat4 model;
-	mat4 view;
-	mat4 project;
-};
-
-layout(binding = 8) uniform Parameters {
-	Matrices matrix;
-};
-#else
-struct Matrices { mat4 model, view, project; };
-/*layout(binding = 0)*/ uniform Matrices matrix;
-#endif
+#import basic-interface
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;

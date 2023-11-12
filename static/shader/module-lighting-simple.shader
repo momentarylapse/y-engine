@@ -4,33 +4,6 @@
 </Layout>
 <Module>
 
-
-#ifdef vulkan
-#else
-struct Light {
-	mat4 proj;
-	vec4 pos;
-	vec4 dir;
-	vec4 color;
-	float radius, theta, harshness;
-};
-
-uniform int num_lights;
-uniform int shadow_index = -1;
-
-layout(std140 /*,binding = 1*/) uniform LightData {
-	Light light[32];
-};
-
-struct Fog {
-	vec4 color;
-	float distance;
-};
-/*layout(binding = 3)*/ uniform Fog fog;
-#endif
-
-const float PI = 3.141592654;
-
 float _surf_rand3d(vec3 p) {
 	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234))) * 43758.5453);
 }
