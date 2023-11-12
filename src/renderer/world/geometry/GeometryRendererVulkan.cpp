@@ -144,7 +144,8 @@ void GeometryRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, D
 
 void GeometryRendererVulkan::set_textures(DescriptorSet *dset, const Array<Texture*> &tex) {
 	foreachi (auto t, tex, i)
-		dset->set_texture(LOCATION_TEX0 + i, t);
+		if (t)
+			dset->set_texture(LOCATION_TEX0 + i, t);
 	if (scene_view.fb_shadow1)
 		dset->set_texture(LOCATION_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
 	if (scene_view.fb_shadow1)
