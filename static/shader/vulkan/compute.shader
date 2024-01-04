@@ -159,7 +159,7 @@ vec3 calc_direct_light(vec3 albedo, vec3 p, vec3 n, int N) {
 	for (int i=0; i<push.num_lights; i++) {
 		if (light[i].radius < 0) {
 			// directional
-			vec3 L = light[i].dir.xyz;
+			vec3 L = (push.iview * vec4(light[i].dir.xyz, 0)).xyz;
 			float light_visibility = calc_light_visibility(p + n * 0.1, L, N);
 			float f = max(-dot(n, L), 0.1) * light_visibility;
 			color += f * albedo * light[i].color.rgb;

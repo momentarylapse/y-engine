@@ -118,7 +118,7 @@ vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel, int N) {
 
 		} else {
 			// directional
-			vec3 L = light[i].dir.xyz;
+			vec3 L = (push.iview * vec4(light[i].dir.xyz,0)).xyz;
 			float light_visibility = calc_light_visibility_directional(p + n * 0.01, L, 0.02, N);
 			f = max(-dot(n, L), 0.05) * light_visibility;
 		}
