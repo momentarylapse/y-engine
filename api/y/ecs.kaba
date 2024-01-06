@@ -17,8 +17,8 @@ struct Entity extends BaseClass
 	func extern get_matrix() -> mat4
 	func extern __del_override__()
 	
-	func extern selfref mut __add_component(t: Class*, vars: string) -> Component&
-	func extern selfref __get_component(t: Class*) -> Component*
+	func extern selfref mut __add_component(t: kaba.Class*, vars: string) -> Component&
+	func extern selfref __get_component(t: kaba.Class*) -> Component*
 	
 	func selfref mut add_component[T](vars: string) -> T&
 		return __add_component(T, vars) as T&
@@ -53,11 +53,11 @@ class Component
 	var owner: Entity&
 	use owner
 
-func extern __get_component_list(t: Class*) -> (Component&)[]&
+func extern __get_component_list(t: kaba.Class*) -> (Component&)[]&
 func get_component_list[T]() -> (T&)[]&
 	return __get_component_list(T) as (T&)[]&
 
-func extern __get_component_family_list(t: Class*) -> (Component&)[]&
+func extern __get_component_family_list(t: kaba.Class*) -> (Component&)[]&
 func get_component_family_list[T]() -> (T&)[]&
 	return __get_component_family_list(T) as (T&)[]&
 

@@ -1,5 +1,5 @@
-use y.ecs
-use y.gfx
+use ecs.*
+use gfx.*
 
 class LegacyParticle extends BaseClass
 	var pos, vel: vec3

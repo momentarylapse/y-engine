@@ -1,6 +1,6 @@
 use os
-use y.gfx
-use image
+use gfx.*
+use image.Image
 
 class EngineData
 	var context: void&
@@ -21,7 +21,7 @@ class EngineData
 	var fps_min, fps_max: float
 	var resolution_scale: vec2
 	
-	var initial_world_file, second_world_file: Path
+	var initial_world_file, second_world_file: os.Path
 	#Font* default_font
 	var renderer: Renderer&
 	var region_renderer: RegionRenderer&

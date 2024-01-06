@@ -1,9 +1,9 @@
 use net
-use y.ecs
+use ecs.*
 
 class Connection
-	var s: owned![Socket]
-	var buffer: owned![BinaryBuffer]
+	var s: owned![net.Socket]
+	var buffer: owned![net.BinaryBuffer]
 	func extern mut start_block(id: string)
 	func extern mut end_block()
 	func extern mut send()

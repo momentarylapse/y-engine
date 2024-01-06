@@ -1,4 +1,4 @@
-use image
+use image.Image
 use os
 
 
@@ -52,6 +52,6 @@ class VertexBuffer
 
 var extern tex_white: shared![Texture]
 
-func extern load_shader(filename: Path) -> shared![Shader]
+func extern load_shader(filename: os.Path) -> shared![Shader]
 func extern create_shader(source: string) -> xfer[Shader]
-func extern load_texture(filename: Path) -> shared![Texture]
+func extern load_texture(filename: os.Path) -> shared![Texture]

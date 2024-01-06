@@ -1,4 +1,4 @@
-use y
+use y.*
 
 class WireframeController extends Controller
 	func override on_key_down(k: Key)

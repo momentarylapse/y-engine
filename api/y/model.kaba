@@ -1,6 +1,6 @@
 use os
-use y.gfx
-use y.ecs
+use gfx.*
+use ecs.*
 
 class Material
 	var albedo: color
@@ -12,7 +12,7 @@ class Material
 	var cast_shadow: bool
 	func extern mut add_uniform(name: string, p: float*, size: int)
 	
-func extern load_material(filename: Path) -> xfer[Material]
+func extern load_material(filename: os.Path) -> xfer[Material]
 
 class Model extends Component
 	class Mesh as shared
@@ -62,4 +62,4 @@ class Skeleton extends Component
 	var parents: int[]
 	func extern mut reset()
 
-func extern load_model(filename: Path) -> xfer[Model]
+func extern load_model(filename: os.Path) -> xfer[Model]

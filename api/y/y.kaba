@@ -1,15 +1,15 @@
 use os
 use kaba
-use image
-use y.gfx
-use y.ecs
-use y.model
-use y.audio
-use y.ui
-use y.engine
-use y.fx
-use y.world
-use y.net
+use image.Image
+use gfx.*
+use ecs.*
+use model.*
+use audio.*
+use ui.*
+use engine.*
+use fx.*
+use world.*
+use networking.*
 
 
 let EXPORT_IMPORTS = true
