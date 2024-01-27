@@ -105,7 +105,7 @@ AudioFile load_wave_file(const Path &filename) {
 	r.buffer = NULL;
 //	ProgressStatus(_("lade wave"), 0);
 	auto f = os::fs::open(filename, "rb");
-	char *data = new char[f->get_size()];
+	char *data = new char[f->size()];
 	char header[44];
 	f->read_basic(header, 44);
 	if ((header[0] != 'R') or (header[1] != 'I') or (header[2] != 'F') or (header[3] != 'F')){
@@ -133,9 +133,9 @@ AudioFile load_wave_file(const Path &filename) {
 		return r;
 	}
 	int size = *(int*)&header[40];
-	if ((size > f->get_size() - 44) or (size < 0)){
+	if ((size > f->size() - 44) or (size < 0)){
 		msg_write("wave file gives wrong data size");
-		size = f->get_size() - 44;
+		size = f->size() - 44;
 	}
 	r.samples = size / byte_per_sample;
 //	ProgressStatus(_("lade wave"), 0.1f);
