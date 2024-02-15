@@ -43,6 +43,7 @@ class Terrain extends Component
 	# ...
 
 class Light extends Component
+	var dir: vec3
 	var color: color
 	var radius: float
 	var theta: float

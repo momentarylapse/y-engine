@@ -503,6 +503,7 @@ void PluginManager::export_kaba() {
 
 	Light light(Black, 0, 0);
 	ext->declare_class_size("Light", sizeof(Light));
+	ext->declare_class_element("Light.dir", _OFFSET(light, light.dir));
 	ext->declare_class_element("Light.color", _OFFSET(light, light.col));
 	ext->declare_class_element("Light.radius", _OFFSET(light, light.radius));
 	ext->declare_class_element("Light.theta", _OFFSET(light, light.theta));
