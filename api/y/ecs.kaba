@@ -61,6 +61,10 @@ func extern __get_component_family_list(t: kaba.Class*) -> (Component&)[]&
 func get_component_family_list[T]() -> (T&)[]&
 	return __get_component_family_list(T) as (T&)[]&
 
+func extern __get_component_list2(t1: kaba.Class*, t2: kaba.Class*) -> (Entity&,Component&,Component&)[]&
+#func get_component_list2[T1,T2]() -> (Entity&,T1&,T2&)[]&
+#	return __get_component_list2(T1,T2) as (Entity&,T1&,T2&)[]&
+
 #func ffff()
 #	get_component_list[int]()
 

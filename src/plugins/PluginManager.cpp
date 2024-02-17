@@ -531,6 +531,7 @@ void PluginManager::export_kaba() {
 
 	ext->link("__get_component_list", (void*)&ComponentManager::_get_list);
 	ext->link("__get_component_family_list", (void*)&ComponentManager::_get_list_family);
+	ext->link("__get_component_list2", (void*)&ComponentManager::_get_list2);
 
 	ext->declare_class_size("Particle", sizeof(Particle));
 	ext->declare_class_element("Particle.pos", &Particle::pos);

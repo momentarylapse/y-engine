@@ -7,6 +7,7 @@
 
 #include "ComponentManager.h"
 #include "Component.h"
+#include "Entity.h"
 #include <lib/base/map.h>
 #include <lib/config.h>
 #ifdef _X_ALLOW_X_
@@ -165,5 +166,19 @@ void ComponentManager::iterate(float dt) {
 #ifdef _X_ALLOW_X_
 	PerformanceMonitor::end(ch_component);
 #endif
+}
+
+
+ComponentManager::PairList& ComponentManager::_get_list2(const kaba::Class *type_a, const kaba::Class *type_b) {
+	static PairList _list;
+
+	// TODO cache
+	_list.clear();
+	for (auto c1: _get_list(type_a)) {
+		if (auto c2 = c1->owner->_get_component_untyped_(type_b))
+			_list.add({c1->owner, c1, c2});
+	}
+
+	return _list;
 }
 
