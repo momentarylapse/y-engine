@@ -868,28 +868,39 @@ vec3 World::get_g(const vec3 &pos) const {
 	return gravity;
 }
 
-bool World::trace(const vec3 &p1, const vec3 &p2, CollisionData &d, bool simple_test, Entity *o_ignore) {
+enum TraceMode {
+	PHYSICAL = 1,
+	VISIBLE = 2,
+	SIMPLE = 4
+};
+
+base::optional<CollisionData> World::trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore) {
+	if (mode & TraceMode::PHYSICAL) {
 #if HAS_LIB_BULLET
-	btCollisionWorld::ClosestRayResultCallback ray_callback(bt_set_v(p1), bt_set_v(p2));
-	//ray_callback.m_collisionFilterMask = FILTER_CAMERA;
+		btCollisionWorld::ClosestRayResultCallback ray_callback(bt_set_v(p1), bt_set_v(p2));
+		//ray_callback.m_collisionFilterMask = FILTER_CAMERA;
 
-// Perform raycast
-	this->dynamicsWorld->getCollisionWorld()->rayTest(bt_set_v(p1), bt_set_v(p2), ray_callback);
-	if (ray_callback.hasHit()) {
-		auto sb = static_cast<SolidBody*>(ray_callback.m_collisionObject->getUserPointer());
-		d.pos = bt_get_v(ray_callback.m_hitPointWorld);
-		d.n = bt_get_v(ray_callback.m_hitNormalWorld);
-		d.entity = sb->owner;
-		d.body = sb;
+		// Perform raycast
+		this->dynamicsWorld->getCollisionWorld()->rayTest(bt_set_v(p1), bt_set_v(p2), ray_callback);
+		if (ray_callback.hasHit()) {
+			CollisionData d;
+			auto sb = static_cast<SolidBody *>(ray_callback.m_collisionObject->getUserPointer());
+			d.pos = bt_get_v(ray_callback.m_hitPointWorld);
+			d.n = bt_get_v(ray_callback.m_hitNormalWorld);
+			d.entity = sb->owner;
+			d.body = sb;
 
-		// ignore...
-		if (sb and sb->owner == o_ignore) {
-			vec3 dir = (p2 - p1).normalized();
-			return trace(d.pos + dir * 2, p2, d, simple_test, o_ignore);
+			// ignore...
+			if (sb and sb->owner == o_ignore) {
+				vec3 dir = (p2 - p1).normalized();
+				return trace(d.pos + dir * 2, p2, mode, o_ignore);
+			}
+			return d;
 		}
-		return true;
-	}
 #endif
-	return false;
+	} else if (mode & TraceMode::VISIBLE) {
+
+	}
+	return base::None;
 }
 

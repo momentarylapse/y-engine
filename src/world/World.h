@@ -11,6 +11,7 @@
 
 
 #include <lib/base/base.h>
+#include <lib/base/optional.h>
 #include <lib/base/pointer.h>
 #include <lib/base/callable.h>
 #include <lib/os/path.h>
@@ -161,7 +162,7 @@ public:
 	PhysicsMode physics_mode;
 
 
-	bool _cdecl trace(const vec3 &p1, const vec3 &p2, CollisionData &d, bool simple_test, Entity *o_ignore = nullptr);
+	base::optional<CollisionData> trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore = nullptr);
 
 	Array<audio::Sound*> sounds;
 	void add_sound(audio::Sound *s);

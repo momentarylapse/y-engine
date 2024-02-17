@@ -36,7 +36,7 @@ struct Entity extends BaseClass
 
 
 
-class CollisionData
+struct CollisionData
 	var entity: Entity&
 	#var body: SolidBody*
 	var pos, n: vec3
