@@ -103,6 +103,19 @@ class Link extends BaseClass
 #	...
 
 
+enum PhysicsMode
+	NONE
+	SIMPLE
+	FULL_INTERNAL
+	FULL_EXTERNAL
+		
+
+enum TraceMode
+	PHYSICAL = 1
+	VISIBLE = 2
+	SIMPLE = 4
+
+
 class World
 	var ego: Entity*
 	
@@ -114,11 +127,6 @@ class World
 	
 	var links: Link&[]
 	
-	enum PhysicsMode
-		NONE
-		SIMPLE
-		FULL_INTERNAL
-		FULL_EXTERNAL
 	var physics_mode: PhysicsMode
 	
 	func extern mut load_soon(filename: os.Path)
@@ -140,10 +148,6 @@ class World
 	func extern mut set_active_physics(o: Model, active: bool)
 	func extern mut shift_all(dpos: vec3)
 	func extern get_g(pos: vec3) -> vec3
-	enum TraceMode
-		PHYSICAL = 1
-		VISIBLE = 2
-		SIMPLE = 4
 	func extern trace(p1: vec3, p2: vec3, mode: TraceMode, ignore: Entity*) -> CollisionData?
 	
 	func selfref objects() -> Model&[]&
