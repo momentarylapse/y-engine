@@ -169,10 +169,10 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 
 	Configuration c;
 	if (!c.load(engine.material_dir | filename.with(".material"))) {
-		/*if (engine.ignore_missing_files) {
+		//if (engine.ignore_missing_files) {
 			msg_error("material file missing: " + filename.str());
 			return default_material->copy();
-		} else {
+		/*} else {
 			throw Exception("material file missing: " + filename.str());
 		}*/
 	}

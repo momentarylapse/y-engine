@@ -1,10 +1,14 @@
 *.o
 *.dll
-/y
+/y-gl
+/y-vk
 /message.txt
 /.settings
 /.vs
 /Debug/y.tlog
 /x64/Release
 /y.vcxproj.user
+/.idea
+/build*
+/cmake-build*
 *.exe
