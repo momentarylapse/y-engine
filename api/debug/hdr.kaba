@@ -18,6 +18,6 @@ class X extends Controller
 		
 			
 	func override on_draw_pre()
-		for p in pic
+		for mut p in pic
 			p.source = [0,engine.resolution_scale.x, 0,engine.resolution_scale.y]
 
