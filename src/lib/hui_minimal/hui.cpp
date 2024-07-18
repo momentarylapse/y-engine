@@ -112,7 +112,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 #endif
 
 #endif
-#if  defined(OS_LINUX) || defined(OS_MINGW)
+#if  defined(OS_LINUX) || defined(OS_MINGW) || defined(OS_MAC)
 
 int main(int num_args, char* args[]) {
 	return hui_main(hui::make_args(num_args, args));

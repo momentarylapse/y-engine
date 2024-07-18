@@ -58,7 +58,7 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& par
 	for (auto *n: gui::sorted_nodes) {
 		if (!n->eff_visible)
 			continue;
-		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
+		if (n->type == gui::Node::Type::PICTURE or n->type == gui::Node::Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 
 			if (index >= ubo.num) {
@@ -97,7 +97,7 @@ void GuiRendererVulkan::draw_gui(CommandBuffer *cb, RenderPass *render_pass) {
 	for (auto *n: gui::sorted_nodes) {
 		if (!n->eff_visible)
 			continue;
-		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
+		if (n->type == gui::Node::Type::PICTURE or n->type == gui::Node::Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 			if (p->shader) {
 				auto pl = PipelineManager::get_gui(p->shader.get(), render_pass, "3f,3f,2f");

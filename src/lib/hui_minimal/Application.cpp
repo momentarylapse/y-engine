@@ -93,7 +93,7 @@ void Application::guess_directories(const Array<string> &arg, const string &app_
 
 
 	// executable file
-#if defined(OS_LINUX) || defined(OS_MINGW) //defined(__GNUC__) || defined(OS_LINUX)
+#if defined(OS_LINUX) || defined(OS_MAC) || defined(OS_MINGW) //defined(__GNUC__) || defined(OS_LINUX)
 	if (arg.num > 0)
 		filename = arg[0];
 #else // OS_WINDOWS

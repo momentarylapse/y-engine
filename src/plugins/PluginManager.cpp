@@ -939,7 +939,7 @@ void PluginManager::assign_variables(void *_p, const kaba::Class *c, const Array
 		for (auto &e: c->elements) {
 			if (v.name == e.name.lower().replace("_", "")) {
 				//msg_write("  " + e.type->long_name() + " " + e.name + " = " + v.value);
-				if (e.type == kaba::TypeInt)
+				if (e.type == kaba::TypeInt32)
 					*(int*)(p + e.offset) = v.value._int();
 				else if (e.type == kaba::TypeFloat32)
 					*(float*)(p + e.offset) = v.value._float();
