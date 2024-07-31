@@ -50,7 +50,7 @@ Context* api_init(GLFWwindow* window) {
 
 	if (!device) {
 		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation"});
-		msg_write("WARNING:  device found: neither RTX not COMPUTE");
+		msg_write("WARNING:  device found: neither RTX nor COMPUTE");
 	}
 
 	device->create_query_pool(MAX_TIMESTAMP_QUERIES);
