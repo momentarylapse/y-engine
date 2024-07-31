@@ -163,6 +163,8 @@ Path find_system_font_file(const string &name) {
 			return base | f;
 #ifdef OS_WINDOWS
 	return "c:\\Windows\\Fonts\\arial.ttf";
+#elif defined(OS_MAC)
+	return "/System/Library/Fonts/Supplemental/Verdana.ttf";
 #else
 	if (os::fs::exists(base | "truetype/noto/NotoSans-Regular.ttf"))
 		return base | "truetype/noto/NotoSans-Regular.ttf";
