@@ -30,8 +30,7 @@ WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, Device *_device)
 	_create_swap_chain_and_stuff();
 }
 
-WindowRendererVulkan::~WindowRendererVulkan() {
-}
+WindowRendererVulkan::~WindowRendererVulkan() = default;
 
 
 

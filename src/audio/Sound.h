@@ -20,7 +20,7 @@ public:
 	Sound();
 	~Sound() override;
 
-	void _cdecl __delete__();
+	void _cdecl __delete__() override;
 	void _cdecl play(bool loop);
 	void _cdecl stop();
 	void _cdecl pause(bool pause);

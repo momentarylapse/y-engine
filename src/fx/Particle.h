@@ -33,11 +33,11 @@ public:
 class LegacyParticle : public BaseClass {
 public:
 	LegacyParticle(const vec3 &pos, float r, shared<Texture> tex, float ttl);
-	virtual ~LegacyParticle();
+	~LegacyParticle() override;
 
 	void __init__(const vec3 &pos, float r, shared<Texture> tex, float ttl);
 	void __delete__() override;
-	virtual void on_iterate(float dt) {}
+	void on_iterate(float dt) override {}
 
 	vec3 pos;
 	vec3 vel;

@@ -275,14 +275,14 @@ static shaderc_compiler_t shaderc = nullptr;
 
 		ShaderMetaData meta;
 		for (auto p: parts) {
-			if (p.type == TYPE_MODULE) {
+			if ((int)p.type == TYPE_MODULE) {
 				ShaderModule m;
 				m.source = p.source;
 				m.meta = meta;
 				shader_modules.add(m);
 				msg_write("new module '" + m.meta.name + "'");
 				return nullptr;
-			} else if (p.type == TYPE_LAYOUT) {
+			} else if ((int)p.type == TYPE_LAYOUT) {
 				meta = parse_meta(p.source);
 			} else {
 				auto mm = create_vk_shader(p.source, p.type, meta);

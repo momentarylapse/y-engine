@@ -22,7 +22,7 @@ using Device = vulkan::Device;
 class WindowRendererVulkan : public TargetRenderer {
 public:
 	WindowRendererVulkan(GLFWwindow* win, Device *device);
-	virtual ~WindowRendererVulkan();
+	~WindowRendererVulkan() override;
 
 
 	bool start_frame() override;

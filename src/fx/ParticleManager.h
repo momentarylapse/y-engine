@@ -17,7 +17,7 @@ class vec3;
 
 class LegacyParticleGroup {
 public:
-	LegacyParticleGroup(Texture *t);
+	explicit LegacyParticleGroup(Texture *t);
 	~LegacyParticleGroup();
 	Array<LegacyParticle*> particles;
 	Array<LegacyBeam*> beams;
