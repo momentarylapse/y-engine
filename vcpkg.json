@@ -1,0 +1,15 @@
+{
+  "dependencies": [
+    "bullet3",
+    "fftw3",
+    "freetype",
+    "glfw3",
+    "libogg",
+    "libvorbis",
+    "opengl",
+    "shaderc",
+    "vulkan",
+    "vulkan-headers",
+    "zlib"
+  ]
+}
