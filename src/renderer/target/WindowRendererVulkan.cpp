@@ -16,7 +16,6 @@
 
 WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, Device *_device) : TargetRenderer("win") {
 	window = _window;
-	glfwMakeContextCurrent(window);
 
 	device = _device;
 
