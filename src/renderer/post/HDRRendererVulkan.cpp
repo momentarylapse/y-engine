@@ -12,6 +12,7 @@
 #include <Config.h>
 #include <helper/PerformanceMonitor.h>
 #include <helper/ResourceManager.h>
+#include <lib/base/iter.h>
 #include <lib/math/rect.h>
 #include <lib/math/vec2.h>
 #include <world/Camera.h>
@@ -40,7 +41,7 @@ HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, const Array<Texture*>
 	shader_out = s;
 	dset_out = pool->create_set("buffer,sampler,sampler,sampler,sampler,sampler");
 
-	foreachi (auto *t, tex, i)
+	for (auto&& [i, t]: enumerate(tex))
 		dset_out->set_texture(1 + i, t);
 	dset_out->update();
 

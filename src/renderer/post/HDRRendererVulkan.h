@@ -17,7 +17,7 @@ class Camera;
 class HDRRendererVulkan : public PostProcessorStage {
 public:
 	HDRRendererVulkan(Camera* cam, int width, int height);
-	virtual ~HDRRendererVulkan();
+	~HDRRendererVulkan() override;
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
@@ -25,7 +25,7 @@ public:
 	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
 
 	struct RenderIntoData {
-		RenderIntoData() {}
+		RenderIntoData() = default;
 		RenderIntoData(int width, int height);
 		void render_into(Renderer *r, const RenderParams& params);
 
@@ -38,7 +38,7 @@ public:
 
 
 	struct RenderOutData {
-		RenderOutData(){}
+		RenderOutData() = default;
 		RenderOutData(Shader *s, const Array<Texture*> &tex);
 		void render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params);
 		shared<Shader> shader_out;

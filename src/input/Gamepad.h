@@ -23,21 +23,21 @@ public:
 class Gamepad: public Sharable<base::Empty> {
 public:
 	enum class Button {
-		CROSS,
-		CIRCLE,
-		SQUARE,
-		TRIANGLE,
+		Cross,
+		Circle,
+		Square,
+		Triangle,
 		L1,
 		R1,
-		OPTIONS,
-		SHARE,
+		Options,
+		Share,
 		PS,
 		L3,
 		R3,
 		UP,
-		RIGHT,
-		DOWN,
-		LEFT
+		Right,
+		Down,
+		Left
 	};
 
 
@@ -46,7 +46,7 @@ public:
 	int index;
 	float deadzone = 0.05f;
 
-	Gamepad(int index);
+	explicit Gamepad(int index);
 	~Gamepad();
 
 	bool is_present() const;

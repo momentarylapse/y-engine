@@ -29,8 +29,7 @@ Gamepad::Gamepad(int _index) {
 	state_prev = new GLFWgamepadstate;
 }
 
-Gamepad::~Gamepad() {
-}
+Gamepad::~Gamepad() = default;
 
 bool Gamepad::is_present() const {
 	return glfwJoystickIsGamepad(index) == 1;

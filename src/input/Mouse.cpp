@@ -76,6 +76,12 @@ void init_mouse(GLFWwindow *window) {
 	glfwSetScrollCallback(window, scroll_callback);
 }
 
+void remove_mouse(GLFWwindow *window) {
+	glfwSetCursorPosCallback(window, nullptr);
+	glfwSetMouseButtonCallback(window, nullptr);
+	glfwSetScrollCallback(window, nullptr);
+}
+
 
 void iterate_mouse_pre() {
 	mouse_state.d = mouse_state.m - mouse_state_prev.m;

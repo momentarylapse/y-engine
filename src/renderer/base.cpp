@@ -65,11 +65,11 @@ Context* api_init(GLFWwindow* window) {
 }
 
 void api_end() {
+	gpu_flush();
 	PipelineManager::clear();
 	engine.resource_manager->clear();
 	delete pool;
-	if (device)
-		delete device;
+	delete device;
 	delete instance;
 }
 

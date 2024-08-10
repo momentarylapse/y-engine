@@ -14,6 +14,7 @@ namespace input {
 
 
 void init_mouse(GLFWwindow *window);
+void remove_mouse(GLFWwindow *window);
 void iterate_mouse_pre();
 void iterate_mouse();
 

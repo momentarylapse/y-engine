@@ -16,6 +16,7 @@ namespace input {
 class Gamepad;
 
 void init(GLFWwindow *window);
+void remove(GLFWwindow *window);
 
 void iterate();
 

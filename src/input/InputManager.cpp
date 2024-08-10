@@ -27,6 +27,12 @@ void init(GLFWwindow *window) {
 	init_pads();
 }
 
+void remove(GLFWwindow *window) {
+	remove_mouse(window);
+	remove_keyboard(window);
+	//remove_pads();
+}
+
 void iterate() {
 	PerformanceMonitor::begin(channel);
 	iterate_mouse_pre();

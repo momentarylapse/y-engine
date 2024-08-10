@@ -38,6 +38,10 @@ void init_keyboard(GLFWwindow *window) {
 	glfwSetKeyCallback(window, key_callback);
 }
 
+void remove_keyboard(GLFWwindow *window) {
+	glfwSetKeyCallback(window, nullptr);
+}
+
 void iterate_keyboard_pre() {
 	keyboard_state_prev = keyboard_state;
 }

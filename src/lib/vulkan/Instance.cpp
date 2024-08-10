@@ -5,6 +5,7 @@
  *      Author: michi
  */
 
+#include <lib/os/time.h>
 #if HAS_LIB_VULKAN
 
 #include "vulkan.h"

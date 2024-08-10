@@ -11,8 +11,6 @@
 #include <lib/os/msg.h>
 #include <lib/os/time.h>
 #include <lib/math/math.h>
-#include <lib/image/color.h>
-#include <lib/image/image.h>
 #include <lib/kaba/kaba.h>
 
 #include <lib/hui_minimal/hui.h>
@@ -33,8 +31,6 @@
 #include "fx/ParticleManager.h"
 
 #include "gui/gui.h"
-#include "gui/Picture.h"
-#include "gui/Text.h"
 
 #include "y/EngineData.h"
 #include "y/ComponentManager.h"
@@ -42,7 +38,6 @@
 
 
 #include "plugins/PluginManager.h"
-#include "plugins/Controller.h"
 
 #include "renderer/base.h"
 #include "renderer/helper/RendererFactory.h"
@@ -55,11 +50,6 @@
 
 #include "Config.h"
 #include "world/Camera.h"
-#include "world/Light.h"
-#include "world/Material.h"
-#include "world/Model.h"
-#include "world/Object.h"
-#include "world/Terrain.h"
 #include "world/World.h"
 
 const string app_name = "y";
@@ -276,10 +266,14 @@ public:
 		reset_game();
 		GodEnd();
 
+		input::remove(window);
+		gpu_flush();
+		// sometimes there is a weird crash in another thread (I don't know in which library) otherwise
+		os::sleep(0.25f);
+
 		delete engine.world_renderer;
 		delete engine.window_renderer;
 		api_end();
-
 		glfwDestroyWindow(window);
 
 		glfwTerminate();

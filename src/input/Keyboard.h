@@ -13,6 +13,7 @@ struct GLFWwindow;
 namespace input {
 
 void init_keyboard(GLFWwindow *window);
+void remove_keyboard(GLFWwindow *window);
 void iterate_keyboard_pre();
 void iterate_keyboard();
 
