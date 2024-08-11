@@ -29,7 +29,7 @@ public:
 		RenderIntoData(int width, int height);
 		void render_into(Renderer *r, const RenderParams& params);
 
-		shared<FrameBuffer> fb_main;
+		shared<FrameBuffer> fb;
 		DepthBuffer *_depth_buffer = nullptr;
 
 		//shared<RenderPass> render_pass;

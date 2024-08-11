@@ -83,7 +83,7 @@ HDRRendererVulkan::RenderIntoData::RenderIntoData(int width, int height) {
 	_depth_buffer = new DepthBuffer(width, height, "d:f32", true);
 	_render_pass = new vulkan::RenderPass({tex, _depth_buffer});
 
-	fb_main = new vulkan::FrameBuffer(_render_pass, {
+	fb = new vulkan::FrameBuffer(_render_pass, {
 		tex,
 		_depth_buffer});
 }
@@ -94,9 +94,9 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 
 	auto cb = params.command_buffer;
 
-	cb->set_viewport(dynamicly_scaled_area(fb_main.get()));
+	cb->set_viewport(dynamicly_scaled_area(fb.get()));
 
-	cb->begin_render_pass(_render_pass, fb_main.get());
+	cb->begin_render_pass(_render_pass, fb.get());
 
 	r->draw(params);
 
@@ -110,7 +110,7 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	into = RenderIntoData(width, height);
-	fb_main = into.fb_main.get();
+	fb_main = into.fb.get();
 
 	Array<vulkan::Texture*> blur_tex;
 	Array<DepthBuffer*> blur_depth;
@@ -146,7 +146,7 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 	}
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	Array<Texture*> tex = {into.fb_main->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
+	Array<Texture*> tex = {into.fb->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
 	out = RenderOutData(shader_out.get(), tex);
 
 
@@ -156,8 +156,7 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 
 }
 
-HDRRendererVulkan::~HDRRendererVulkan() {
-}
+HDRRendererVulkan::~HDRRendererVulkan() = default;
 
 void HDRRendererVulkan::prepare(const RenderParams& params) {
 	auto cb = params.command_buffer;
@@ -167,7 +166,8 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 	if (!cam)
 		cam = cam_main;
 
-	auto sub_params = params.with_target(into.fb_main.get());
+	auto sub_params = params.with_target(into.fb.get());
+	sub_params.render_pass = into._render_pass;
 
 	for (auto c: children)
 		c->prepare(sub_params);
@@ -183,7 +183,7 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
 	gpu_timestamp_begin(cb, ch_post_blur);
-	auto bloom_input = into.fb_main.get();
+	auto bloom_input = into.fb.get();
 	float threshold = 1.0f;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		process_blur(cb, bloom_input, bloom_levels[i].fb_temp.get(), threshold, i*2);
