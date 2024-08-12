@@ -640,9 +640,13 @@ void Serializer::serialize_inline_function(Node *com, const Array<SerialNodePara
 			cmd.add_cmd(Asm::InstID::CMP, param[0], param_imm(TypePointer, 0));
 			cmd.add_cmd(Asm::InstID::SETNZ, ret);
 			break;
+		case InlineID::INT32_TO_UINT8:
+		case InlineID::UINT8_TO_INT32:
+			cmd.add_cmd(Asm::InstID::MOVZX, ret, param[0]);
+			break;
 		case InlineID::INT32_TO_INT8:
 		case InlineID::INT8_TO_INT32:
-			cmd.add_cmd(Asm::InstID::MOVZX, ret, param[0]);
+			cmd.add_cmd(Asm::InstID::MOVSX, ret, param[0]);
 			break;
 		case InlineID::RECT_SET:
 		case InlineID::VECTOR_SET:
@@ -891,6 +895,10 @@ void Serializer::serialize_inline_function(Node *com, const Array<SerialNodePara
 		case InlineID::INT8_GREATER_EQUAL:
 		case InlineID::INT8_SMALLER:
 		case InlineID::INT8_SMALLER_EQUAL:
+		case InlineID::UINT8_GREATER:
+		case InlineID::UINT8_GREATER_EQUAL:
+		case InlineID::UINT8_SMALLER:
+		case InlineID::UINT8_SMALLER_EQUAL:
 			cmd.add_cmd(Asm::InstID::CMP, param[0], param[1]);
 			if ((index == InlineID::INT8_EQUAL) or (index == InlineID::BOOL_EQUAL))
 				cmd.add_cmd(Asm::InstID::SETZ, ret);
@@ -904,6 +912,15 @@ void Serializer::serialize_inline_function(Node *com, const Array<SerialNodePara
 				cmd.add_cmd(Asm::InstID::SETL, ret);
 			else if (index == InlineID::INT8_SMALLER_EQUAL)
 				cmd.add_cmd(Asm::InstID::SETLE, ret);
+			else if (index == InlineID::UINT8_GREATER)
+				cmd.add_cmd(Asm::InstID::SETNBE, ret);
+			else if (index == InlineID::UINT8_GREATER_EQUAL)
+				cmd.add_cmd(Asm::InstID::SETNB, ret);
+			else if (index == InlineID::UINT8_SMALLER)
+				cmd.add_cmd(Asm::InstID::SETB, ret);
+			else if (index == InlineID::UINT8_SMALLER_EQUAL)
+				cmd.add_cmd(Asm::InstID::SETBE, ret);
+			// "above/below" -> unsigned, "greater/less" -> signed
 			break;
 		case InlineID::BOOL_AND:
 			cmd.add_cmd(Asm::InstID::AND, ret, param[0], param[1]);
@@ -971,7 +988,11 @@ void Serializer::serialize_inline_function(Node *com, const Array<SerialNodePara
 		case InlineID::VEC2_DIVIDE_ASSIGN:
 			for (int i=0;i<2;i++)
 				cmd.add_cmd(Asm::InstID::FDIV, param_shift(param[0], i * 4, TypeFloat32), param[1]);
-			break;
+		break;
+	case InlineID::VEC2_NEGATIVE:
+		for (int i=0;i<2;i++)
+			cmd.add_cmd(Asm::InstID::XOR, param_shift(ret, i * 4, TypeFloat32), param_shift(param[0], i * 4, TypeFloat32), param_imm(TypeInt32, 0x80000000));
+		break;
 // complex
 		case InlineID::COMPLEX_MULTIPLY:{
 			auto t1 = add_temp(TypeFloat32);
