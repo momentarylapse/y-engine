@@ -7,8 +7,9 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 layout(location=0) in vec4 in_pos[];
-layout(location=1) in float in_r[];
-layout(location=2) in vec4 in_color[];
+layout(location=1) in vec3 in_n[];
+layout(location=2) in vec2 in_uv[];
+layout(location=3) in vec4 in_color[];
 
 layout(location=0) out vec4 out_pos;
 layout(location=1) out vec3 out_n;
@@ -35,29 +36,34 @@ void main() {
         
         // implicit perspective scaling! (p0 is un-normalized!)
 	//float dx = in_r[0] * (target_height / target_width); //0.6;
-	float dx = in_r[0] * 0.6;
-	float dy = in_r[0];
+	float in_r = in_uv[0].x;
+	float dx = in_r * 0.6;
+	float dy = in_r;
 	// TODO correct aspect scaling!
 
         gl_Position = p0 + vec4(-dx,-dy,0,0);
+        out_pos = gl_Position;
 	out_n = vec3(0,0,-1);
         out_uv = vec2(source_uv[0], source_uv[2]);
         out_color = in_color[0];
         EmitVertex();
 
         gl_Position = p0 + vec4(dx,-dy,0,0);
+        out_pos = gl_Position;
 	out_n = vec3(0,0,-1);
         out_uv = vec2(source_uv[1], source_uv[2]);
         out_color = in_color[0];
         EmitVertex();
     
         gl_Position = p0 + vec4(-dx,dy,0,0);
+        out_pos = gl_Position;
 	out_n = vec3(0,0,-1);
         out_uv = vec2(source_uv[0], source_uv[3]);
         out_color = in_color[0];
         EmitVertex();
 
         gl_Position = p0 + vec4(dx,dy,0,0);
+        out_pos = gl_Position;
 	out_n = vec3(0,0,-1);
         out_uv = vec2(source_uv[1], source_uv[3]);
         out_color = in_color[0];

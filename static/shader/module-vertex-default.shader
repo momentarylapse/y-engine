@@ -33,6 +33,7 @@ void main() {
 	out_uv = in_uv;
 	out_pos = matrix.view * matrix.model * vec4(in_position, 1);
 	//out_pos = matrix.model * vec4(in_position, 1);
+	out_color = vec4(1);
 }
 
 </Module>
