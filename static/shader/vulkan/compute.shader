@@ -46,7 +46,7 @@ struct Light {
 };
 
 layout(binding=0, rgba16f) uniform writeonly image2D image;
-layout(binding=1, std430) uniform MeshData { Mesh mesh[256]; };
+layout(binding=1, std430) uniform MeshData { Mesh mesh[256>>3]; };
 layout(binding=2) uniform LightData { Light light[32]; };
 layout(local_size_x=16, local_size_y=16) in;
 

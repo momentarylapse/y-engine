@@ -142,7 +142,7 @@ Alpha parse_alpha(const string& s) {
 color any2color(const Any &a) {
 	if (a.is_string())
 		return color::parse(a.str());
-	if (a.is_array() and (a.length() >= 3)) {
+	if (a.is_list() and (a.length() >= 3)) {
 		color c = White;
 		c.r = a[0]._float();
 		c.g = a[1]._float();
