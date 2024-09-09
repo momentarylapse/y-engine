@@ -168,10 +168,10 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 
 void HDRRendererGL::draw(const RenderParams& params) {
 	Any data;
-	data.map_set("exposure", cam->exposure);
-	data.map_set("bloom_factor", cam->bloom_factor);
-	data.map_set("scale_x", resolution_scale_x);
-	data.map_set("scale_y", resolution_scale_y);
+	data.dict_set("exposure", cam->exposure);
+	data.dict_set("bloom_factor", cam->bloom_factor);
+	data.dict_set("scale_x", resolution_scale_x);
+	data.dict_set("scale_y", resolution_scale_y);
 
 
 	Array<Texture*> tex = {fb_main->color_attachments[0].get(), bloom_levels[0].fb_out->color_attachments[0].get(), bloom_levels[1].fb_out->color_attachments[0].get(), bloom_levels[2].fb_out->color_attachments[0].get(), bloom_levels[3].fb_out->color_attachments[0].get()};

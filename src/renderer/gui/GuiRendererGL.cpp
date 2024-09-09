@@ -30,7 +30,7 @@ void GuiRendererGL::draw(const RenderParams& params) {
 void apply_shader_data(Shader *s, const Any &shader_data) {
 	if (shader_data.is_empty()) {
 		return;
-	} else if (shader_data.is_map()) {
+	} else if (shader_data.is_dict()) {
 		for (auto &key: shader_data.keys()) {
 			auto &val = shader_data[key];
 			if (val.is_float()) {
@@ -39,11 +39,11 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 				s->set_float(key, val.as_int());
 			} else if (val.is_bool()) {
 				s->set_int(key, (int)val.as_bool());
-			} else if (val.is_array()) {
+			} else if (val.is_list()) {
 				float ff[4];
-				for (int i=0; i<val.as_array().num; i++)
-					ff[i] = val.as_array()[i].as_float();
-				s->set_floats(key, ff, val.as_array().num);
+				for (int i=0; i<val.as_list().num; i++)
+					ff[i] = val.as_list()[i].as_float();
+				s->set_floats(key, ff, val.as_list().num);
 			} else {
 				msg_write("invalid shader data item: " + val.str());
 			}
@@ -67,7 +67,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 	for (auto *n: gui::sorted_nodes) {
 		if (!n->eff_visible)
 			continue;
-		if (n->type == n->Type::PICTURE or n->type == n->Type::TEXT) {
+		if (n->type == gui::Node::Type::PICTURE or n->type == gui::Node::Type::TEXT) {
 			auto *p = (gui::Picture*)n;
 			auto s = shader.get();
 			if (p->shader) {
