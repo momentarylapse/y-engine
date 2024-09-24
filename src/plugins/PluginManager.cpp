@@ -48,6 +48,7 @@
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
+
 #include "../renderer/world/geometry/SceneView.h"
 #include "../y/EngineData.h"
 #include "../y/Component.h"
@@ -233,10 +234,6 @@ xfer<Material> __load_material(const Path& filename) {
 }
 
 
-void timetable_init(TimeTable *tt) {
-	new(tt) TimeTable();
-}
-
 void timetable_at(TimeTable *tt, float t, Callable<void()> *f) {
 	tt->at(t, [f] { (*f)(); });
 }
@@ -260,6 +257,16 @@ FrameBuffer* world_renderer_get_gbuffer(WorldRenderer &r) {
 
 Array<FrameBuffer*> hdr_renderer_get_fb_bloom(HDRRenderer &r) {
 	return {r.bloom_levels[0].fb_out.get(), r.bloom_levels[1].fb_out.get(), r.bloom_levels[2].fb_out.get(), r.bloom_levels[3].fb_out.get()};
+}
+
+template<class T>
+void generic_init(T* t) {
+	new(t) T;
+}
+
+template<class T>
+void generic_delete(T* t) {
+	t->~T();
 }
 
 void PluginManager::init(int ch_iter) {
@@ -848,7 +855,7 @@ void PluginManager::export_kaba() {
 
 
 	ext->declare_class_size("TimeTable", sizeof(TimeTable));
-	ext->link_class_func("TimeTable.__init__", &timetable_init);
+	ext->link_class_func("TimeTable.__init__", &generic_init<TimeTable>);
 	ext->link_class_func("TimeTable.iterate", &TimeTable::iterate);
 	ext->link_class_func("TimeTable.at", &timetable_at);
 
