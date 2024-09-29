@@ -20,18 +20,18 @@
 
 
 #ifdef OS_WINDOWS
-	#include <AL/al.h>
+	#include <al.h>
 	//#include <alut.h>
-	#include <AL/alc.h>
+	#include <alc.h>
 	//#pragma comment(lib,"alut.lib")
 	#pragma comment(lib,"OpenAL32.lib")
 	/*#pragma comment(lib,"libogg.lib")
 	#pragma comment(lib,"libvorbis.lib")
 	#pragma comment(lib,"libvorbisfile.lib")*/
 #else
-	#include <AL/al.h>
+	#include <al.h>
 	//#include <AL/alut.h>
-	#include <AL/alc.h>
+	#include <alc.h>
 #endif
 
 namespace audio {
