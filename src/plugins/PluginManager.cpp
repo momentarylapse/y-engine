@@ -843,6 +843,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Texture.__delete__", &texture_delete);
 	ext->link_class_func("Texture.write", &texture_write);
 	ext->link_class_func("Texture.write_float", &texture_write_float);
+	ext->link_class_func("Texture.set_options", &Texture::set_options);
 
 	ext->link_class_func("CubeMap.__init__", &cubemap_init);
 
