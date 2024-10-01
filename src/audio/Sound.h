@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audio.h"
 #include "../lib/config.h"
 #include "../lib/math/vec3.h"
 #include "../lib/base/pointer.h"
@@ -31,29 +32,6 @@ public:
 
 	static xfer<Sound> _cdecl load(const Path &filename);
 	static xfer<Sound> _cdecl emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
-};
-
-class AudioFile {
-public:
-	int channels, bits, samples, freq;
-	char *buffer;
-};
-
-class AudioStream {
-public:
-	int channels, bits, samples, freq;
-	char *buffer;
-	int buf_samples;
-	void *vf;
-	int type;
-
-	enum class State {
-		ERROR,
-		READY,
-		END
-	} state;
-
-	bool stream(int buf);
 };
 
 class Music {

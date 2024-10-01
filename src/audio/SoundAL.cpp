@@ -11,6 +11,7 @@
 
 #include "Sound.h"
 #include "audio.h"
+#include "Loading.h"
 #include "../y/EngineData.h"
 #include "../lib/math/vec3.h"
 #include "../lib/math/quaternion.h"
@@ -39,10 +40,6 @@ struct SmallAudio {
 };
 Array<SmallAudio> small_audio_cache;
 
-AudioFile load_sound_file(const Path &filename);
-AudioStream load_sound_start(const Path &filename);
-void load_sound_step(AudioStream *as);
-void load_sound_end(AudioStream *as);
 
 xfer<Sound> Sound::load(const Path &filename) {
 	// cached?
@@ -55,9 +52,9 @@ xfer<Sound> Sound::load(const Path &filename) {
 		}
 
 	// no -> load from file
-	AudioFile af = {0,0,0,0, nullptr};
+	AudioBuffer af = {};
 	if (cached < 0)
-		af = load_sound_file(engine.sound_dir | filename);
+		af = load_buffer(engine.sound_dir | filename);
 
 	Sound *s = new Sound;
 	
@@ -196,7 +193,7 @@ void set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float
 bool AudioStream::stream(int buf) {
 	if (state != AudioStream::State::READY)
 		return false;
-	load_sound_step(this);
+	load_stream_step(this);
 	if (channels == 2) {
 		if (bits == 8)
 			alBufferData(buf, AL_FORMAT_STEREO8, buffer, buf_samples * 2, freq);
@@ -213,7 +210,7 @@ bool AudioStream::stream(int buf) {
 
 Music *Music::load(const Path &filename) {
 	msg_write("loading sound " + str(filename));
-	auto as = load_sound_start(engine.sound_dir | filename);
+	auto as = load_stream_start(engine.sound_dir | filename);
 
 	Music *m = new Music();
 
@@ -251,7 +248,7 @@ Music::Music() {
 Music::~Music() {
 	stop();
 	alSourceUnqueueBuffers(al_source, 2, al_buffer);
-	load_sound_end(&stream);
+	load_stream_end(&stream);
 	alDeleteBuffers(2, al_buffer);
 	alDeleteSources(1, &al_source);
 }

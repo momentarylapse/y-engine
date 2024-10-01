@@ -21,6 +21,31 @@ void reset();
 void clear_small_cache();
 
 
+
+class AudioBuffer {
+public:
+	int channels, bits, samples, freq;
+	char *buffer;
+};
+
+
+class AudioStream {
+public:
+	int channels, bits, samples, freq;
+	char *buffer;
+	int buf_samples;
+	void *vf;
+	int type;
+
+	enum class State {
+		ERROR,
+		READY,
+		END
+	} state;
+
+	bool stream(int buf);
+};
+
 };
 
 
