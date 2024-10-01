@@ -8,6 +8,7 @@
 #include "Font.h"
 #include "gui.h"
 #include "../Config.h"
+#include "../y/EngineData.h"
 #include "../lib/image/image.h"
 #include "../lib/os/msg.h"
 #include "../lib/os/filesystem.h"
@@ -180,12 +181,19 @@ Path find_system_font_file(const string &name) {
 #endif
 }
 
+Path find_font_file(const string &name) {
+	const Path local = engine.font_dir | (name + ".ttf");
+	if (os::fs::exists(local))
+		return local;
+	return find_system_font_file(name);
+}
+
 
 void *ft_load_font(const string &name, float font_size) {
 	FT_Face face = nullptr;
 
-	//msg_write(">>> " + find_system_font_file(name).str());
-	auto error = FT_New_Face(ft2, find_system_font_file(name).c_str(), 0, &face);
+	//msg_error(">>> " + find_font_file(name).str());
+	auto error = FT_New_Face(ft2, find_font_file(name).c_str(), 0, &face);
 	if (error == FT_Err_Unknown_File_Format) {
 		throw Exception("font unsupported");
 	} else if (error) {
@@ -207,9 +215,9 @@ void Font::init_fonts() {
 		throw Exception("can not initialize freetype2 library");
 	}
 #ifdef OS_WINDOWS
-	_default = Font::load(config.get_str("default-font", "Arial"));
+	_default = Font::load(config.get_str("default.font", "Arial"));
 #else
-	_default = Font::load(config.get_str("default-font", "NotoSans"));
+	_default = Font::load(config.get_str("default.font", "NotoSans"));
 #endif
 #endif
 }
