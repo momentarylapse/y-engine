@@ -4,6 +4,8 @@
 
 #include "audio.h"
 #include "../lib/base/base.h"
+#include "../lib/math/vec3.h"
+#include "../lib/math/quaternion.h"
 
 namespace audio {
 
@@ -51,10 +53,27 @@ void exit() {
 }
 
 
+void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {
+	ALfloat ListenerOri[6];
+	vec3 dir = ang * vec3::EZ;
+	ListenerOri[0] = dir.x;
+	ListenerOri[1] = dir.y;
+	ListenerOri[2] = dir.z;
+	vec3 up = ang * vec3::EY;
+	ListenerOri[3] = up.x;
+	ListenerOri[4] = up.y;
+	ListenerOri[5] = up.z;
+	alListener3f(AL_POSITION,    pos.x, pos.y, pos.z);
+	alListener3f(AL_VELOCITY,    vel.x, vel.y, vel.z);
+	alListenerfv(AL_ORIENTATION, ListenerOri);
+	alSpeedOfSound(v_sound);
+}
+
 #else
 
 void init() {}
 void exit() {}
+void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {}
 
 #endif
 

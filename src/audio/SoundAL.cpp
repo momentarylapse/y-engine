@@ -174,22 +174,6 @@ void Sound::set_data(const vec3 &_pos, const vec3 &_vel, float min_dist, float m
 	alSourcef (al_source, AL_MAX_DISTANCE, max_dist);
 }
 
-void set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float v_sound) {
-	ALfloat ListenerOri[6];
-	vec3 dir = ang * vec3::EZ;
-	ListenerOri[0] = dir.x;
-	ListenerOri[1] = dir.y;
-	ListenerOri[2] = dir.z;
-	vec3 up = ang * vec3::EY;
-	ListenerOri[3] = up.x;
-	ListenerOri[4] = up.y;
-	ListenerOri[5] = up.z;
-	alListener3f(AL_POSITION,    pos.x, pos.y, pos.z);
-	alListener3f(AL_VELOCITY,    vel.x, vel.y, vel.z);
-	alListenerfv(AL_ORIENTATION, ListenerOri);
-	alSpeedOfSound(v_sound);
-}
-
 bool AudioStream::stream(int buf) {
 	if (state != AudioStream::State::READY)
 		return false;
@@ -322,7 +306,6 @@ void Sound::pause(bool pause){}
 bool Sound::is_playing(){ return false; }
 bool Sound::has_ended(){ return false; }
 void Sound::set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume){}
-void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {}
 Music *Music::load(const Path &filename){ return nullptr; }
 Music::~Music(){}
 void Music::play(bool repeat){}
