@@ -875,6 +875,12 @@ void PluginManager::export_kaba() {
 	ext->link("load_material", (void*)&__load_material);
 	ext->link("screenshot", (void*)&screenshot);
 	ext->link("create_render_path", (void*)&create_render_path);
+
+
+	ext->link("load_sound", (void*)&audio::load_sound);
+	ext->link("emit_sound", (void*)&audio::emit_sound);
+	ext->link("create_sound", (void*)&audio::create_sound);
+	ext->link("emit_sound_buffer", (void*)&audio::emit_sound_buffer);
 }
 
 template<class C>

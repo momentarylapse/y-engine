@@ -83,9 +83,40 @@ xfer<Sound> load_sound(const Path &filename) {
 	return s;
 }
 
+xfer<Sound> create_sound(const Array<float>& buffer) {
+	Sound *s = new Sound;
+
+	alGenSources(1, &s->al_source);
+
+	// fill data into al-buffer
+	alGenBuffers(1, &s->al_buffer);
+	Array<short> buf16;
+	buf16.resize(buffer.num);
+	for (int i=0; i<buffer.num; i++)
+		buf16[i] = (int)(buffer[i] * 32768.0f);
+	alBufferData(s->al_buffer, AL_FORMAT_MONO16, &buf16[0], buffer.num * 2, 44100);
+
+
+	// set up al-source
+	alSourcei (s->al_source, AL_BUFFER,   s->al_buffer);
+	alSourcef (s->al_source, AL_PITCH,    s->speed);
+	alSourcef (s->al_source, AL_GAIN,     s->volume * VolumeSound);
+	alSource3f(s->al_source, AL_POSITION, s->pos.x, s->pos.y, s->pos.z);
+	alSource3f(s->al_source, AL_VELOCITY, s->vel.x, s->vel.y, s->vel.z);
+	alSourcei (s->al_source, AL_LOOPING,  false);
+	return s;
+}
 
 xfer<Sound> emit_sound(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
 	Sound *s = load_sound(filename);
+	s->suicidal = true;
+	s->set_data(pos, v_0, min_dist, max_dist, speed, volume);
+	s->play(loop);
+	return s;
+}
+
+xfer<Sound> emit_sound_buffer(const Array<float>& buffer, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop) {
+	Sound *s = create_sound(buffer);
 	s->suicidal = true;
 	s->set_data(pos, v_0, min_dist, max_dist, speed, volume);
 	s->play(loop);
