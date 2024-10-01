@@ -43,6 +43,7 @@
 #endif
 
 #ifdef _X_ALLOW_X_
+#include "../audio/audio.h"
 #include "../audio/Sound.h"
 #endif
 

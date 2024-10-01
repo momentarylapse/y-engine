@@ -8,6 +8,7 @@
 \*----------------------------------------------------------------------------*/
 
 #include "Sound.h"
+#include "audio.h"
 #include "../y/EngineData.h"
 #include "../lib/math/math.h"
 #include "../lib/os/file.h"

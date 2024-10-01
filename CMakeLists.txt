@@ -203,6 +203,7 @@ list(APPEND DEPS Threads::Threads)
 #=======================================================================================
 
 add_executable(y
+	src/audio/audio.cpp
 	src/audio/Sound.cpp
 	src/audio/SoundAL.cpp
 	src/fx/Beam.cpp

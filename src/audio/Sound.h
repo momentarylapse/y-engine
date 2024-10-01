@@ -79,17 +79,6 @@ public:
 	static Music* _cdecl load(const Path &filename);
 };
 
-extern float VolumeMusic, VolumeSound;
-
-
-void init();
-void exit();
-void calc_move();
-void _cdecl set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float v_sound);
-void reset();
-void clear_small_cache();
-
-
 // writing
 //void _cdecl SoundSaveFile(const string &filename, const Array<float> &data_r, const Array<float> &data_l, int freq, int channels, int bits);
 

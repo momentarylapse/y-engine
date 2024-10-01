@@ -10,6 +10,7 @@
 // TODO: cache small buffers...
 
 #include "Sound.h"
+#include "audio.h"
 #include "../y/EngineData.h"
 #include "../lib/math/vec3.h"
 #include "../lib/math/quaternion.h"
@@ -18,21 +19,12 @@
  
 #if HAS_LIB_OPENAL
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-#ifdef OS_WINDOWS
-	#include <al.h>
-	//#include <alut.h>
-	#include <alc.h>
-	//#pragma comment(lib,"alut.lib")
-	#pragma comment(lib,"OpenAL32.lib")
-	/*#pragma comment(lib,"libogg.lib")
-	#pragma comment(lib,"libvorbis.lib")
-	#pragma comment(lib,"libvorbisfile.lib")*/
-#else
-	#include <al.h>
-	//#include <AL/alut.h>
-	#include <alc.h>
-#endif
+#include <al.h>
+//#include <AL/alut.h>
+#include <alc.h>
 
 namespace audio {
 
@@ -51,40 +43,6 @@ AudioFile load_sound_file(const Path &filename);
 AudioStream load_sound_start(const Path &filename);
 void load_sound_step(AudioStream *as);
 void load_sound_end(AudioStream *as);
-
-
-ALCdevice *al_dev = NULL;
-ALCcontext *al_context = NULL;
-
-void init() {
-	al_dev = alcOpenDevice(NULL);
-	if (al_dev) {
-		al_context = alcCreateContext(al_dev, NULL);
-		if (al_context)
-			alcMakeContextCurrent(al_context);
-		else
-			throw Exception("could not create openal context");
-	} else {
-		throw Exception("could not open openal device");
-	}
-	bool ok = (al_context);
-
-	
-	//bool ok = alutInit(NULL, 0);
-	if (!ok)
-		throw Exception("sound init (openal)");
-}
-
-void exit() {
-	reset();
-	if (al_context)
-		alcDestroyContext(al_context);
-	al_context = NULL;
-	if (al_dev)
-		alcCloseDevice(al_dev);
-	al_dev = NULL;
-//	alutExit();
-}
 
 xfer<Sound> Sound::load(const Path &filename) {
 	// cached?
@@ -348,13 +306,13 @@ void Music::iterate() {
 
 }
 
+#pragma GCC diagnostic pop
+
 #else
 
 
 namespace audio {
 
-void init(){}
-void exit(){}
 xfer<Sound> Sound::load(const Path &filename){ return nullptr; }
 xfer<Sound> Sound::emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
 Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {}

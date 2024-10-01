@@ -21,7 +21,7 @@
 #include "helper/Scheduler.h"
 #include "helper/ResourceManager.h"
 
-#include "audio/Sound.h"
+#include "audio/audio.h"
 
 #include "input/InputManager.h"
 #include "input/Keyboard.h"
