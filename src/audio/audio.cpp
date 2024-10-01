@@ -1,13 +1,7 @@
-//
-// Created by Michael Ankele on 2024-10-01.
-//
-
 #include "audio.h"
 #include "../lib/base/base.h"
 #include "../lib/math/vec3.h"
 #include "../lib/math/quaternion.h"
-
-namespace audio {
 
 #if HAS_LIB_OPENAL
 
@@ -15,9 +9,9 @@ namespace audio {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include <al.h>
-//#include <AL/alut.h>
 #include <alc.h>
 
+namespace audio {
 
 ALCdevice *al_dev = nullptr;
 ALCcontext *al_context = nullptr;
@@ -33,12 +27,6 @@ void init() {
 	} else {
 		throw Exception("could not open openal device");
 	}
-	bool ok = (al_context);
-
-
-	//bool ok = alutInit(nullptr, 0);
-	if (!ok)
-		throw Exception("sound init (openal)");
 }
 
 void exit() {
@@ -49,9 +37,35 @@ void exit() {
 	if (al_dev)
 		alcCloseDevice(al_dev);
 	al_dev = nullptr;
-	//	alutExit();
 }
 
+
+//Array<Sound*> Sounds;
+//Array<Music*> Musics;
+
+float VolumeMusic = 1.0f, VolumeSound = 1.0f;
+
+#if 0
+void iterate(float dt)
+{
+	for (int i=Sounds.num-1;i>=0;i--)
+		if (Sounds[i]->Suicidal)
+			if (Sounds[i]->Ended())
+				delete(Sounds[i]);
+	for (int i=0;i<Musics.num;i++)
+		Musics[i]->Iterate();
+}
+#endif
+
+void reset() {
+	/*for (int i=Sounds.num-1;i>=0;i--)
+		delete(Sounds[i]);
+	Sounds.clear();
+	for (int i=Musics.num-1;i>=0;i--)
+		delete(Musics[i]);
+	Musics.clear();*/
+	clear_small_cache();
+}
 
 void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {
 	ALfloat ListenerOri[6];
@@ -69,12 +83,15 @@ void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float
 	alSpeedOfSound(v_sound);
 }
 
+}
+
 #else
 
+namespace audio {
 void init() {}
 void exit() {}
 void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {}
+}
 
 #endif
 
-}

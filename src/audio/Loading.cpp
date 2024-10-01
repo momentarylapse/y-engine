@@ -12,7 +12,7 @@
 namespace audio {
 
 
-AudioBuffer EmptyAudioBuffer = {0, 0, 0, 0, nullptr};
+AudioBuffer EmptyAudioBuffer = {0, 0, 0, 0};
 AudioStream EmptyAudioStream = {0, 0, 0, 0, nullptr, 0, nullptr, 0, AudioStream::State::READY};
 
 AudioBuffer load_wave_file(const Path &filename);
@@ -65,10 +65,9 @@ void load_stream_end(AudioStream *as) {
 
 AudioBuffer load_wave_file(const Path &filename) {
 	AudioBuffer r;
-	r.buffer = NULL;
 //	ProgressStatus(_("lade wave"), 0);
 	auto f = os::fs::open(filename, "rb");
-	char *data = new char[f->size()];
+	r.buffer.resize(f->size());
 	char header[44];
 	f->read_basic(header, 44);
 	if ((header[0] != 'R') or (header[1] != 'I') or (header[2] != 'F') or (header[3] != 'F')){
@@ -109,7 +108,7 @@ AudioBuffer load_wave_file(const Path &filename) {
 		int toread = 65536;
 		if (toread > size - read)
 			toread = size - read;
-		int rr = f->read_basic(&data[read], toread);
+		int rr = f->read_basic(&r.buffer[read], toread);
 		nn ++;
 /*		if (nn > 16){
 			ProgressStatus(_("lade wave"), perc_read + dperc_read * (float)read / (float)size);
@@ -124,7 +123,6 @@ AudioBuffer load_wave_file(const Path &filename) {
 	}
 
 	delete f;
-	r.buffer = data;
 
 	return r;
 }
@@ -176,7 +174,7 @@ AudioStream load_ogg_start(const Path &filename) {
 	r.type = AudioStreamOgg;
 	r.vf = new OggVorbis_File;
 	r.state = AudioStream::State::READY;
-	r.buffer = NULL;
+	r.buffer = nullptr;
 	r.buf_samples = 0;
 
 	if (ov_fopen((char*)filename.c_str(), (OggVorbis_File*)r.vf)){
@@ -186,7 +184,7 @@ AudioStream load_ogg_start(const Path &filename) {
 	}
 	vorbis_info *vi = ov_info((OggVorbis_File*)r.vf, -1);
 	r.bits = 16;
-	if (vi){
+	if (vi) {
 		r.channels = vi->channels;
 		r.freq = vi->rate;
 	}

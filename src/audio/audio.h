@@ -2,8 +2,10 @@
 // Created by Michael Ankele on 2024-10-01.
 //
 
-#ifndef AUDIO_H
-#define AUDIO_H
+#ifndef AUDIO_AUDIO_H
+#define AUDIO_AUDIO_H
+
+#include "../lib/base/base.h"
 
 class vec3;
 class quaternion;
@@ -25,7 +27,7 @@ void clear_small_cache();
 class AudioBuffer {
 public:
 	int channels, bits, samples, freq;
-	char *buffer;
+	bytes buffer;
 };
 
 
@@ -50,4 +52,4 @@ public:
 
 
 
-#endif //AUDIO_H
+#endif //AUDIO_AUDIO_H

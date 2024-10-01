@@ -613,8 +613,8 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Sound.pause", &audio::Sound::pause);
 	ext->link_class_func("Sound.has_ended", &audio::Sound::has_ended);
 	ext->link_class_func("Sound.set", &audio::Sound::set_data);
-	ext->link_class_func("Sound.load", &audio::Sound::load);
-	ext->link_class_func("Sound.emit", &audio::Sound::emit);
+	ext->link_class_func("Sound.load", &audio::load_sound);
+	ext->link_class_func("Sound.emit", &audio::emit_sound);
 	ext->link_class_func("Sound.__del_override__", &DeletionQueue::add);
 
 	gui::Node node(rect::ID);

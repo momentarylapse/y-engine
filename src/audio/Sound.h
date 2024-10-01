@@ -21,44 +21,18 @@ public:
 	Sound();
 	~Sound() override;
 
-	void _cdecl __delete__() override;
-	void _cdecl play(bool loop);
-	void _cdecl stop();
-	void _cdecl pause(bool pause);
-	bool _cdecl is_playing();
-	bool _cdecl has_ended();
-	void _cdecl set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume);
-
-
-	static xfer<Sound> _cdecl load(const Path &filename);
-	static xfer<Sound> _cdecl emit(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
+	void __delete__() override;
+	void play(bool loop);
+	void stop();
+	void pause(bool pause);
+	bool is_playing();
+	bool has_ended();
+	void set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume);
 };
 
-class Music {
-public:
-	float volume, speed;
 
-	unsigned int al_source, al_buffer[2];
-	AudioStream stream;
-
-	Music();
-	~Music();
-	void _cdecl __delete__();
-	void _cdecl play(bool loop);
-	void _cdecl set_rate(float rate);
-	void _cdecl stop();
-	void _cdecl pause(bool pause);
-	bool _cdecl is_playing();
-	bool _cdecl has_ended();
-
-	void iterate();
-
-
-	static Music* _cdecl load(const Path &filename);
-};
-
-// writing
-//void _cdecl SoundSaveFile(const string &filename, const Array<float> &data_r, const Array<float> &data_l, int freq, int channels, int bits);
+xfer<Sound> load_sound(const Path &filename);
+xfer<Sound> emit_sound(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
 
 }
 
