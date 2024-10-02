@@ -395,12 +395,12 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vec3 &pos) {
 
 	auto o = create_entity(pos, quaternion::ID);
 
-	auto t = (Terrain*)o->add_component(Terrain::_class, "");
+	auto t = o->add_component<Terrain>();
 	t->load(engine.resource_manager, filename);
 
-	[[maybe_unused]] auto col = (TerrainCollider*)o->add_component(TerrainCollider::_class, "");
+	[[maybe_unused]] auto col = o->add_component<TerrainCollider>();
 
-	auto sb = (SolidBody*)o->add_component(SolidBody::_class, "");
+	auto sb = o->add_component<SolidBody>();
 	sb->mass = 10000.0f;
 	sb->theta_0 = mat3::ZERO;
 	sb->passive = true;

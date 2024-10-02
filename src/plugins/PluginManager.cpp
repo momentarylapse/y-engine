@@ -292,14 +292,14 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Entity.parent", &Entity::parent);
 	ext->link_class_func("Entity.get_matrix", &Entity::get_matrix);
 	ext->link_class_func("Entity.__get_component", &Entity::_get_component_untyped_);
-	ext->link_class_func("Entity.__add_component", &Entity::add_component);
+	ext->link_class_func("Entity.__add_component", &Entity::_add_component_untyped_);
 	ext->link_class_func("Entity.delete_component", &Entity::delete_component);
 	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add);
 
 	Component component;
 	ext->declare_class_size("Component", sizeof(Component));
 	ext->declare_class_element("Component.owner", &Component::owner);
-	ext->link_class_func("Component.__init__", &Component::__init__);
+	ext->link_class_func("Component.__init__", &generic_init<Component>);
 	ext->link_virtual("Component.__delete__", &Component::__delete__, &component);
 	ext->link_virtual("Component.on_init", &Component::on_init, &component);
 	ext->link_virtual("Component.on_delete", &Component::on_delete, &component);

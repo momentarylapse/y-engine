@@ -53,7 +53,7 @@ void Entity::on_delete_rec() {
 
 
 // TODO (later) optimize...
-Component *Entity::add_component(const kaba::Class *type, const string &var) {
+Component *Entity::_add_component_untyped_(const kaba::Class *type, const string &var) {
 	auto c = add_component_no_init(type, var);
 
 	c->on_init();
