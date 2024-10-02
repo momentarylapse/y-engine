@@ -1,0 +1,26 @@
+use os
+
+func upgrade(dir: os.Path)
+	let src = os.Path("api")
+	if not os.fs.exists(src)
+		raise(new Exception("'api/' not found in current directory. Please run from the engine root directory!"))
+		
+	let files = os.fs.search(src, "*.kaba", "fr")
+	for f in files
+		let dst = dir | "Scripts" | f
+		if os.fs.exists(dst)
+			if os.fs.read_text(src | f) == os.fs.read_text(dst)
+				print(" {{str(f)|-24}} {{os.terminal.GREEN}}ok{{os.terminal.END}}")
+			else
+				print(" {{str(f)|-24}} {{os.terminal.RED}}needs upgrade{{os.terminal.END}}")
+				os.fs.copy(src | f, dst)
+		else
+			print(" {{str(f)|-24}} {{os.terminal.RED}}missing{{os.terminal.END}}")
+			os.fs.copy(src | f, dst)
+			
+
+func main(args: string[])
+	for a in args
+		upgrade(a)
+	
+	
