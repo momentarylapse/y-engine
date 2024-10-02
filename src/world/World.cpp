@@ -346,10 +346,10 @@ bool World::load(const LevelData &ld) {
 			//try {
 				auto q = quaternion::rotation(o.ang);
 				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q);
-				add_components_no_init(oo, o.components);
-				register_entity(oo);
+				add_components_no_init(oo->owner, o.components);
+				register_entity(oo->owner);
 				if (ld.ego_index == i)
-					ego = oo;
+					ego = oo->owner;
 				if (i % 5 == 0)
 					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
 
@@ -442,21 +442,21 @@ void World::register_entity(Entity *e) {
 	notify("entity-add");
 }
 
-Entity *World::create_object(const Path &filename, const vec3 &pos, const quaternion &ang) {
+Model *World::create_object(const Path &filename, const vec3 &pos, const quaternion &ang) {
 	auto o = create_object_no_reg_x(filename, "", pos, ang);
-	register_entity(o);
+	register_entity(o->owner);
 	return o;
 }
 
-Entity *World::create_object_no_reg(const Path &filename, const vec3 &pos, const quaternion &ang) {
+Model *World::create_object_no_reg(const Path &filename, const vec3 &pos, const quaternion &ang) {
 	return create_object_no_reg_x(filename, "", pos, ang);
 }
 
-Entity *World::create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
+Model *World::create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
 	auto e = create_entity(pos, ang);
 	auto& m = attach_model_no_reg(*e, filename);
 	m.script_data.name = name;
-	return e;
+	return &m;
 }
 
 
@@ -514,7 +514,7 @@ void World::unattach_model(Model& m) {
 	m.owner->delete_component(&m);
 }
 
-Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
+MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	auto e = create_entity(vec3::ZERO, quaternion::ID);
 	auto mi = (MultiInstance*)e->add_component_no_init(MultiInstance::_class, "");
 
@@ -525,7 +525,7 @@ Entity* World::create_object_multi(const Path &filename, const Array<vec3> &pos,
 
 	register_model_multi(mi);
 
-	return e;
+	return mi;
 }
 
 void World::register_model_multi(MultiInstance *mi) {

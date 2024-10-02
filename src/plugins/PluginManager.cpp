@@ -93,17 +93,17 @@ int ch_controller = -1;
 #pragma GCC optimize("no-inline")
 #pragma GCC optimize("0")
 
-Entity* _create_object(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
+Model* _create_object(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object(filename, pos, ang); );
 	return nullptr;
 }
 
-Entity* _create_object_no_reg(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
+Model* _create_object_no_reg(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_no_reg(filename, pos, ang); );
 	return nullptr;
 }
 
-Entity* _create_object_multi(World *w, const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
+MultiInstance* _create_object_multi(World *w, const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_multi(filename, pos, ang); );
 	return nullptr;
 }

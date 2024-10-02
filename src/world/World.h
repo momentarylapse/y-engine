@@ -86,9 +86,9 @@ public:
 	void register_entity(Entity *e);
 	void unregister_entity(Entity *e);
 
-	Entity *create_object(const Path &filename, const vec3 &pos, const quaternion &ang);
-	Entity *create_object_no_reg(const Path &filename, const vec3 &pos, const quaternion &ang);
-	Entity *create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang);
+	Model *create_object(const Path &filename, const vec3 &pos, const quaternion &ang);
+	Model *create_object_no_reg(const Path &filename, const vec3 &pos, const quaternion &ang);
+	Model *create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang);
 	Terrain *create_terrain(const Path &filename, const vec3 &pos);
 	Terrain *create_terrain_no_reg(const Path &filename, const vec3 &pos);
 
@@ -96,7 +96,7 @@ public:
 	Model& attach_model(Entity &e, const Path &filename);
 	void unattach_model(Model& m);
 
-	Entity* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
+	MultiInstance* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 
 	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 

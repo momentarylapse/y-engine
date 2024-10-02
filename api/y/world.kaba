@@ -136,9 +136,9 @@ class World
 	func extern mut selfref create_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
 	func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
 	func extern mut selfref add_sound(s: xfer[Sound])
-	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: quaternion) -> Entity&
-	func extern mut selfref create_object_no_reg(filename: os.Path, pos: vec3, ang: quaternion) -> Entity&
-	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: quaternion[]) -> Entity&
+	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
+	func extern mut selfref create_object_no_reg(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
+	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: quaternion[]) -> MultiInstance&
 	func extern mut selfref create_terrain(filename: os.Path, pos: vec3) -> Terrain&
 	func extern mut selfref create_camera(pos: vec3, ang: quaternion) -> Camera&
 	func extern mut selfref create_entity(pos: vec3, ang: quaternion) -> Entity&
