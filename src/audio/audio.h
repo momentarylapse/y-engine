@@ -9,6 +9,7 @@
 
 class vec3;
 class quaternion;
+class Path;
 
 namespace audio {
 
@@ -51,6 +52,9 @@ public:
 
 	bool stream(int buf);
 };
+
+AudioBuffer* load_buffer(const Path& filename);
+AudioBuffer* create_buffer(const Array<float>& samples);
 
 };
 

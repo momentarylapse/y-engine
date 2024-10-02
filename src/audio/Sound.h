@@ -1,7 +1,6 @@
 #pragma once
 
 #include "audio.h"
-#include "../lib/config.h"
 #include "../lib/math/vec3.h"
 #include "../lib/base/pointer.h"
 #include "../y/BaseClass.h"
