@@ -64,7 +64,6 @@ void reset() {
 	for (int i=Musics.num-1;i>=0;i--)
 		delete(Musics[i]);
 	Musics.clear();*/
-	clear_small_cache();
 }
 
 void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {

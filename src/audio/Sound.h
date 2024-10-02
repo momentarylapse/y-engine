@@ -16,12 +16,13 @@ public:
 	vec3 pos, vel;
 	float volume, speed;
 
-	unsigned int al_source, al_buffer;
+	AudioBuffer* buffer;
 
-	Sound();
+	unsigned int al_source;
+
+	explicit Sound(AudioBuffer* buffer);
 	~Sound() override;
 
-	void __delete__() override;
 	void play(bool loop);
 	void stop();
 	void pause(bool pause);

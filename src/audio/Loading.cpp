@@ -1,6 +1,7 @@
 #include "Loading.h"
 #include "../lib/os/file.h"
 #include "../lib/os/msg.h"
+#include "../y/EngineData.h"
 
 
 #ifdef HAS_LIB_OGG
@@ -12,11 +13,11 @@
 namespace audio {
 
 
-AudioBuffer EmptyAudioBuffer = {0, 0, 0, 0};
+RawAudioBuffer EmptyAudioBuffer = {0, 0, 0, 0};
 AudioStream EmptyAudioStream = {0, 0, 0, 0, nullptr, 0, nullptr, 0, AudioStream::State::READY};
 
-AudioBuffer load_wave_file(const Path &filename);
-AudioBuffer load_ogg_file(const Path &filename);
+RawAudioBuffer load_wave_file(const Path &filename);
+RawAudioBuffer load_ogg_file(const Path &filename);
 AudioStream load_ogg_start(const Path &filename);
 void load_ogg_step(AudioStream *as);
 void load_ogg_end(AudioStream *as);
@@ -27,14 +28,14 @@ enum {
 	AudioStreamFlac,
 };
 
-AudioBuffer load_buffer(const Path& filename) {
+RawAudioBuffer load_raw_buffer(const Path& filename) {
 	msg_write("loading sound: " + filename.str());
 	string ext = filename.extension();
 	if (ext == "wav")
-		return load_wave_file(filename);
+		return load_wave_file(engine.sound_dir | filename);
 #ifdef HAS_LIB_OGG
 	else if (ext == "ogg")
-		return load_ogg_file(filename);
+		return load_ogg_file(engine.sound_dir | filename);
 #endif
 	return EmptyAudioBuffer;
 }
@@ -42,9 +43,9 @@ AudioBuffer load_buffer(const Path& filename) {
 AudioStream load_stream_start(const Path &filename) {
 	string ext = filename.extension();
 	/*if (ext == "wav")
-		return load_wave_start(filename);
+		return load_wave_start(engine.sound_dir | filename);
 	else*/ if (ext == "ogg")
-		return load_ogg_start(filename);
+		return load_ogg_start(engine.sound_dir | filename);
 	return EmptyAudioStream;
 }
 
@@ -63,8 +64,8 @@ void load_stream_end(AudioStream *as) {
 }
 
 
-AudioBuffer load_wave_file(const Path &filename) {
-	AudioBuffer r;
+RawAudioBuffer load_wave_file(const Path &filename) {
+	RawAudioBuffer r;
 //	ProgressStatus(_("lade wave"), 0);
 	auto f = os::fs::open(filename, "rb");
 	r.buffer.resize(f->size());
@@ -132,8 +133,8 @@ AudioBuffer load_wave_file(const Path &filename) {
 
 char ogg_buffer[4096];
 
-AudioBuffer load_ogg_file(const Path &filename) {
-	AudioBuffer r = EmptyAudioBuffer;
+RawAudioBuffer load_ogg_file(const Path &filename) {
+	RawAudioBuffer r = EmptyAudioBuffer;
 	OggVorbis_File vf;
 
 	if (ov_fopen((char*)filename.c_str(), &vf)) {
@@ -228,7 +229,7 @@ void load_ogg_end(AudioStream* as) {
 
 #else
 
-AudioBuffer load_ogg_file(const Path& filename) { return {}; }
+RawAudioBuffer load_ogg_file(const Path& filename) { return {}; }
 AudioStream load_ogg_start(const Path& filename) { return {}; }
 void load_ogg_step(AudioStream* as) {}
 void load_ogg_end(AudioStream* as) {}

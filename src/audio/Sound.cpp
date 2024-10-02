@@ -9,8 +9,7 @@
 
 #include "Sound.h"
 #include "Loading.h"
-#include "../y/EngineData.h"
-#include "../lib/math/math.h"
+#include "../lib/base/map.h"
 #include "../lib/os/file.h"
 #include "../lib/os/msg.h"
 
@@ -25,85 +24,52 @@
 
 namespace audio {
 
-struct SmallAudio {
-	unsigned int al_buffer;
-	Path filename;
-	int ref_count;
-};
-Array<SmallAudio> small_audio_cache;
+base::map<Path, owned<AudioBuffer>> loaded_audio_buffers;
+Array<AudioBuffer*> created_audio_buffers;
+
+AudioBuffer* load_buffer(const Path& filename) {
+	int i = loaded_audio_buffers.find(filename);
+	if (i >= 0)
+		return loaded_audio_buffers.by_index(i).get();
+
+	auto af = load_raw_buffer(filename);
+	auto buffer = new AudioBuffer;
+
+	alGenBuffers(1, &buffer->al_buffer);
+	if (af.bits == 8)
+		alBufferData(buffer->al_buffer, AL_FORMAT_MONO8, &af.buffer[0], af.samples, af.freq);
+	else if (af.bits == 16)
+		alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &af.buffer[0], af.samples * 2, af.freq);
+
+	loaded_audio_buffers[filename] = buffer;
+	return buffer;
+}
+
+AudioBuffer* create_buffer(const Array<float>& samples) {
+	auto buffer = new AudioBuffer;
+
+	alGenBuffers(1, &buffer->al_buffer);
+	Array<short> buf16;
+	buf16.resize(samples.num);
+	for (int i=0; i<samples.num; i++)
+		buf16[i] = (int)(samples[i] * 32768.0f);
+	alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, 44100);
+
+	created_audio_buffers.add(buffer);
+	return buffer;
+}
+
 
 
 xfer<Sound> load_sound(const Path &filename) {
-	// cached?
-	int cached = -1;
-	for (int i=0;i<small_audio_cache.num;i++)
-		if (small_audio_cache[i].filename == filename){
-			small_audio_cache[i].ref_count ++;
-			cached = i;
-			break;
-		}
-
-	// no -> load from file
-	AudioBuffer af = {};
-	if (cached < 0)
-		af = load_buffer(engine.sound_dir | filename);
-
-	Sound *s = new Sound;
-
-	if (((af.channels == 1) and af.buffer.num > 0) or (cached >= 0)){
-
-		alGenSources(1, &s->al_source);
-		if (cached >= 0){
-			s->al_buffer = small_audio_cache[cached].al_buffer;
-		}else{
-
-			// fill data into al-buffer
-			alGenBuffers(1, &s->al_buffer);
-			if (af.bits == 8)
-				alBufferData(s->al_buffer, AL_FORMAT_MONO8, &af.buffer[0], af.samples, af.freq);
-			else if (af.bits == 16)
-				alBufferData(s->al_buffer, AL_FORMAT_MONO16, &af.buffer[0], af.samples * 2, af.freq);
-
-			// put into small audio cache
-			SmallAudio sa;
-			sa.filename = filename;
-			sa.al_buffer = s->al_buffer;
-			sa.ref_count = 1;
-			small_audio_cache.add(sa);
-		}
-
-		// set up al-source
-		alSourcei (s->al_source, AL_BUFFER,   s->al_buffer);
-		alSourcef (s->al_source, AL_PITCH,    s->speed);
-		alSourcef (s->al_source, AL_GAIN,     s->volume * VolumeSound);
-		alSource3f(s->al_source, AL_POSITION, s->pos.x, s->pos.y, s->pos.z);
-		alSource3f(s->al_source, AL_VELOCITY, s->vel.x, s->vel.y, s->vel.z);
-		alSourcei (s->al_source, AL_LOOPING,  false);
-	}
+	auto buffer = load_buffer(filename);
+	Sound *s = new Sound(buffer);
 	return s;
 }
 
-xfer<Sound> create_sound(const Array<float>& buffer) {
-	Sound *s = new Sound;
-
-	alGenSources(1, &s->al_source);
-
-	// fill data into al-buffer
-	alGenBuffers(1, &s->al_buffer);
-	Array<short> buf16;
-	buf16.resize(buffer.num);
-	for (int i=0; i<buffer.num; i++)
-		buf16[i] = (int)(buffer[i] * 32768.0f);
-	alBufferData(s->al_buffer, AL_FORMAT_MONO16, &buf16[0], buffer.num * 2, 44100);
-
-
-	// set up al-source
-	alSourcei (s->al_source, AL_BUFFER,   s->al_buffer);
-	alSourcef (s->al_source, AL_PITCH,    s->speed);
-	alSourcef (s->al_source, AL_GAIN,     s->volume * VolumeSound);
-	alSource3f(s->al_source, AL_POSITION, s->pos.x, s->pos.y, s->pos.z);
-	alSource3f(s->al_source, AL_VELOCITY, s->vel.x, s->vel.y, s->vel.z);
-	alSourcei (s->al_source, AL_LOOPING,  false);
+xfer<Sound> create_sound(const Array<float>& samples) {
+	auto buffer = create_buffer(samples);
+	Sound *s = new Sound(buffer);
 	return s;
 }
 
@@ -123,35 +89,37 @@ xfer<Sound> emit_sound_buffer(const Array<float>& buffer, const vec3 &pos, float
 	return s;
 }
 
-Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {
+Sound::Sound(AudioBuffer* _buffer) : BaseClass(BaseClass::Type::SOUND) {
+	buffer = _buffer;
+	buffer->ref_count ++;
 	suicidal = false;
 	pos = v_0;
 	vel = v_0;
 	volume = 1;
 	speed = 1;
 	al_source = 0;
-	al_buffer = 0;
 	loop = false;
+
+
+
+	alGenSources(1, &al_source);
+
+	// set up al-source
+	alSourcei (al_source, AL_BUFFER,   buffer->al_buffer);
+	alSourcef (al_source, AL_PITCH,    speed);
+	alSourcef (al_source, AL_GAIN,     volume * VolumeSound);
+	alSource3f(al_source, AL_POSITION, pos.x, pos.y, pos.z);
+	alSource3f(al_source, AL_VELOCITY, vel.x, vel.y, vel.z);
+	alSourcei (al_source, AL_LOOPING,  false);
 }
 
 Sound::~Sound() {
 	stop();
-	for (int i=0;i<small_audio_cache.num;i++)
-		if (al_buffer == small_audio_cache[i].al_buffer)
-			small_audio_cache[i].ref_count --;
+	buffer->ref_count --;
 	//alDeleteBuffers(1, &al_buffer);
 	alDeleteSources(1, &al_source);
 }
 
-void Sound::__delete__() {
-	this->~Sound();
-}
-
-void clear_small_cache() {
-	for (int i=0; i<small_audio_cache.num; i++)
-		alDeleteBuffers(1, &small_audio_cache[i].al_buffer);
-	small_audio_cache.clear();
-}
 
 void Sound::play(bool loop) {
 	alSourcei(al_source, AL_LOOPING, loop);
@@ -207,9 +175,8 @@ namespace audio {
 
 xfer<Sound> load_sound(const Path &filename){ return nullptr; }
 xfer<Sound> emit_sound(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
-Sound::Sound() : BaseClass(BaseClass::Type::SOUND) {}
-Sound::~Sound(){}
-void Sound::__delete__(){}
+Sound::Sound(AudioBuffer*) : BaseClass(BaseClass::Type::SOUND) {}
+Sound::~Sound() = default;
 void SoundClearSmallCache(){}
 void Sound::play(bool repeat){}
 void Sound::stop(){}

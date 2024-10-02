@@ -11,7 +11,7 @@ class Path;
 
 namespace audio {
 
-AudioBuffer load_buffer(const Path& filename);
+RawAudioBuffer load_raw_buffer(const Path& filename);
 AudioStream load_stream_start(const Path& filename);
 void load_stream_step(AudioStream* as);
 void load_stream_end(AudioStream* as);

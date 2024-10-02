@@ -20,15 +20,19 @@ void exit();
 void iterate(float dt);
 void set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float v_sound);
 void reset();
-void clear_small_cache();
 
 
 
-class AudioBuffer {
-public:
+struct RawAudioBuffer {
 	int channels, bits, samples, freq;
 	bytes buffer;
 };
+
+struct AudioBuffer {
+	unsigned int al_buffer = 0;
+	int ref_count = 0;
+};
+
 
 
 class AudioStream {
