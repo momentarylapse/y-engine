@@ -54,7 +54,7 @@ public:
 };
 
 AudioBuffer* load_buffer(const Path& filename);
-AudioBuffer* create_buffer(const Array<float>& samples);
+AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate);
 
 };
 

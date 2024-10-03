@@ -34,9 +34,6 @@ class LegacyParticle;
 class Link;
 class LevelData;
 enum class LinkType;
-namespace audio {
-	class Sound;
-}
 
 
 class btDefaultCollisionConfiguration;
@@ -103,7 +100,6 @@ public:
 	bool unregister(BaseClass *o);
 	void delete_entity(Entity *e);
 	void delete_legacy_particle(LegacyParticle *p);
-	void delete_sound(audio::Sound *s);
 	void delete_link(Link *l);
 
 	void register_model(Model *m);
@@ -163,9 +159,6 @@ public:
 
 
 	base::optional<CollisionData> trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore = nullptr);
-
-	Array<audio::Sound*> sounds;
-	void add_sound(audio::Sound *s);
 
 	typedef void callback();
 	using Callback = Callable<void()>;

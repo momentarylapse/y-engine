@@ -135,7 +135,6 @@ class World
 	func extern mut selfref create_light_point(pos: vec3, c: color, radius: float) -> Light&
 	func extern mut selfref create_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
 	func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
-	func extern mut selfref add_sound(s: xfer[Sound])
 	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
 	func extern mut selfref create_object_no_reg(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: quaternion[]) -> MultiInstance&
@@ -161,7 +160,6 @@ class World
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)
 	func extern delete_particle(e: LegacyParticle*)
-	func extern delete_sound(e: Sound*)
 	func extern delete_link(e: Link*)
 	
 	class MessageData

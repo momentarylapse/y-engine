@@ -464,14 +464,12 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.unattach_model", &World::unattach_model);
 	ext->link_class_func("World.add_link", &World::add_link);
 	ext->link_class_func("World.add_particle", &World::add_legacy_particle);
-	ext->link_class_func("World.add_sound", &World::add_sound);
 	ext->link_class_func("World.shift_all", &World::shift_all);
 	ext->link_class_func("World.get_g", &World::get_g);
 	ext->link_class_func("World.trace", &World::trace);
 	ext->link_class_func("World.unregister", &World::unregister);
 	ext->link_class_func("World.delete_entity", &World::delete_entity);
 	ext->link_class_func("World.delete_particle", &World::delete_legacy_particle);
-	ext->link_class_func("World.delete_sound", &World::delete_sound);
 	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
 
@@ -606,15 +604,18 @@ void PluginManager::export_kaba() {
 	}
 
 	ext->declare_class_size("Sound", sizeof(audio::Sound));
-	ext->declare_class_element("Sound.pos", &audio::Sound::pos);
-	ext->declare_class_element("Sound.vel", &audio::Sound::vel);
+	ext->declare_class_element("Sound.loop", &audio::Sound::loop);
+	ext->declare_class_element("Sound.suicidal", &audio::Sound::suicidal);
+	ext->declare_class_element("Sound.min_distance", &audio::Sound::min_distance);
+	ext->declare_class_element("Sound.max_distance", &audio::Sound::max_distance);
+	ext->declare_class_element("Sound.volume", &audio::Sound::volume);
+	ext->declare_class_element("Sound.speed", &audio::Sound::speed);
 	ext->link_class_func("Sound.play", &audio::Sound::play);
 	ext->link_class_func("Sound.stop", &audio::Sound::stop);
 	ext->link_class_func("Sound.pause", &audio::Sound::pause);
 	ext->link_class_func("Sound.has_ended", &audio::Sound::has_ended);
-	ext->link_class_func("Sound.set", &audio::Sound::set_data);
-	ext->link_class_func("Sound.load", &audio::load_sound);
-	ext->link_class_func("Sound.emit", &audio::emit_sound);
+	ext->link_class_func("Sound.update", &audio::Sound::_apply_data);
+	ext->link_class_func("Sound.set_buffer", &audio::Sound::set_buffer);
 	ext->link_class_func("Sound.__del_override__", &DeletionQueue::add);
 
 	gui::Node node(rect::ID);
@@ -877,9 +878,7 @@ void PluginManager::export_kaba() {
 	ext->link("create_render_path", (void*)&create_render_path);
 
 
-	ext->link("load_sound", (void*)&audio::load_sound);
-	ext->link("emit_sound", (void*)&audio::emit_sound);
-	ext->link("create_sound", (void*)&audio::create_sound);
+	ext->link("emit_sound_file", (void*)&audio::emit_sound_file);
 	ext->link("emit_sound_buffer", (void*)&audio::emit_sound_buffer);
 }
 
@@ -916,6 +915,9 @@ void PluginManager::import_kaba() {
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
 	import_component_class<ParticleEmitter>(m_fx, "ParticleEmitter");
+
+	auto m_audio = kaba::default_context->load_module("y/audio.kaba");
+	import_component_class<audio::Sound>(m_audio, "Sound");
 
 	auto m_y = kaba::default_context->load_module("y/y.kaba");
 	import_component_class<UserMesh>(m_y, "UserMesh");
@@ -1027,6 +1029,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new Light(White, -1, -1);
 	if (c == Camera::_class)
 		return new Camera;
+	if (c == audio::Sound::_class)
+		return new audio::Sound;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

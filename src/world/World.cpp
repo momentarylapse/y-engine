@@ -42,11 +42,6 @@
 #include "../helper/PerformanceMonitor.h"
 #endif
 
-#ifdef _X_ALLOW_X_
-#include "../audio/audio.h"
-#include "../audio/Sound.h"
-#endif
-
 #if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
@@ -231,15 +226,6 @@ void World::reset() {
 #endif
 
 
-#ifdef _X_ALLOW_X_
-	// music
-	for (auto *s: sounds)
-		delete s;
-	sounds.clear();
-	/*if (meta->MusicEnabled){
-		NixSoundStop(MusicCurrent);
-	}*/
-#endif
 
 	// skybox
 	//   (models deleted by meta)
@@ -617,13 +603,6 @@ void World::delete_legacy_particle(LegacyParticle *p) {
 #endif
 }
 
-void World::delete_sound(audio::Sound *s) {
-#ifdef _X_ALLOW_X_
-	if (unregister(s))
-		delete s;
-#endif
-}
-
 void World::delete_link(Link *l) {
 	if (unregister(l))
 		delete l;
@@ -642,13 +621,6 @@ bool World::unregister(BaseClass* x) {
 				return true;
 			}
 #ifdef _X_ALLOW_X_
-	} else if (x->type == BaseClass::Type::SOUND) {
-		foreachi(auto *s, sounds, i)
-			if (s == x) {
-				//msg_write(" -> SOUND");
-				sounds.erase(i);
-				return true;
-			}
 	} else if (x->type == BaseClass::Type::LEGACY_PARTICLE or x->type == BaseClass::Type::LEGACY_BEAM) {
 		if (particle_manager->unregister_legacy((LegacyParticle*)x))
 			return true;
@@ -770,16 +742,6 @@ void World::iterate(float dt) {
 					m->update_matrix();*/
 	}
 
-#ifdef _X_ALLOW_X_
-	foreachi (auto *s, sounds, i) {
-		if (s->suicidal and s->has_ended()) {
-			sounds.erase(i);
-			delete s;
-		}
-	}
-	audio::set_listener(cam_main->owner->pos, cam_main->owner->ang, v_0, 100000);
-#endif
-
 	PerformanceMonitor::end(ch_iterate);
 #endif
 }
@@ -839,10 +801,6 @@ LegacyParticle* World::add_legacy_particle(xfer<LegacyParticle> p) {
 	return p;
 }
 
-void World::add_sound(audio::Sound *s) {
-	sounds.add(s);
-}
-
 
 void World::shift_all(const vec3 &dpos) {
 	for (auto *e: entities) {
@@ -857,8 +815,6 @@ void World::shift_all(const vec3 &dpos) {
 	for (auto *m: ComponentManager::get_list_family<Model>())
 		m->update_matrix();
 #ifdef _X_ALLOW_X_
-	for (auto *s: sounds)
-		s->pos += dpos;
 	particle_manager->shift_all(dpos);
 #endif
 	msg_data.v = dpos;

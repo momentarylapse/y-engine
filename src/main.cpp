@@ -286,6 +286,7 @@ public:
 		network_manager.iterate();
 
 		world.iterate(engine.elapsed);
+		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
 
 		Scheduler::handle_iterate(engine.elapsed);

@@ -31,8 +31,6 @@ void delete_all() {
 			world.delete_entity(static_cast<Entity*>(c));
 		else if (c->type == BaseClass::Type::LEGACY_PARTICLE or c->type == BaseClass::Type::LEGACY_BEAM)
 			world.delete_legacy_particle(static_cast<LegacyParticle*>(c));
-		else if (c->type == BaseClass::Type::SOUND)
-			world.delete_sound(static_cast<audio::Sound*>(c));
 		else
 			msg_error(format("unable to delete: %d", (int)c->type));
 	}

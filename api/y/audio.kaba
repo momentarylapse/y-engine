@@ -2,19 +2,21 @@ use ecs.*
 use os
 
 # TODO
-class Sound extends BaseClass
+class Sound extends Component
 	func extern pause(pause: bool)
-	func extern play(loop: bool)
-	func extern set(pos: vec3, vel: vec3, r_min: float, r_max: float, speed: float = 1.0, volume: float = 1.0)
+	func extern play()
 	func extern stop()
+	func extern update()
 	func extern __del_override__()
+	
+	var loop, suicidal: bool
+	var volume, speed: f32
+	var min_distance, max_distance: f32
 
 
 
-func extern emit_sound(filename: os.Path, pos: vec3, r_min: float, r_max: float, speed: float = 1.0, volume: float = 1.0, loop: bool = false) -> xfer[Sound]
-func extern load_sound(filename: os.Path) -> xfer[Sound]
-func extern emit_sound_buffer(buffer: f32[], pos: vec3, r_min: float, r_max: float, speed: float = 1.0, volume: float = 1.0, loop: bool = false) -> xfer[Sound]
-func extern create_sound(buffer: f32[]) -> xfer[Sound]
+func extern emit_sound_file(filename: os.Path, pos: vec3) -> Sound&
+func extern emit_sound_buffer(buffer: f32[], sample_rate: f32, pos: vec3) -> Sound&
 
 
 class Music extends Entity

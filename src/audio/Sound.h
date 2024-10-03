@@ -3,40 +3,42 @@
 #include "audio.h"
 #include "../lib/math/vec3.h"
 #include "../lib/base/pointer.h"
-#include "../y/BaseClass.h"
+#include "../y/Component.h"
 
 class Path;
 
 namespace audio {
 
-class Sound : public BaseClass {
+class Sound : public Component {
 public:
 	bool loop, suicidal;
-	vec3 pos, vel;
 	float volume, speed;
+	float min_distance, max_distance;
 
 	AudioBuffer* buffer;
 
 	unsigned int al_source;
 
-	explicit Sound(AudioBuffer* buffer);
+	Sound();
 	~Sound() override;
+
+	void set_buffer(AudioBuffer* buffer);
+	void set_buffer_from_file(const Path& filename);
+	void set_buffer_from_samples(const Array<float>& samples);
 
 	void play(bool loop);
 	void stop();
 	void pause(bool pause);
-	bool is_playing();
-	bool has_ended();
-	void set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume);
+	bool is_playing() const;
+	bool has_ended() const;
+
+	void _apply_data();
+
+	static const kaba::Class *_class;
 };
 
-// TODO use ECS here!
-
-xfer<Sound> load_sound(const Path &filename);
-xfer<Sound> emit_sound(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
-
-xfer<Sound> create_sound(const Array<float>& buffer);
-xfer<Sound> emit_sound_buffer(const Array<float>& buffer, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop);
+Sound& emit_sound_file(const Path &filename, const vec3 &pos);
+Sound& emit_sound_buffer(const Array<float>& buffer, float sample_rate, const vec3 &pos);
 
 }
 

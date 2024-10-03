@@ -1,5 +1,10 @@
 #include "audio.h"
 #include "Loading.h"
+#include "Sound.h"
+#include "../helper/DeletionQueue.h"
+#include "../world/Camera.h" // FIXME
+#include "../y/ComponentManager.h"
+#include "../y/Entity.h"
 #include "../lib/base/base.h"
 #include "../lib/base/map.h"
 #include "../lib/base/pointer.h"
@@ -60,6 +65,14 @@ void garbage_collection() {
 }
 
 void iterate(float dt) {
+	auto& sounds = ComponentManager::get_list<Sound>();
+	for (auto s: sounds) {
+		s->_apply_data();
+		if (s->suicidal and s->has_ended())
+			DeletionQueue::add(s->owner);
+	}
+	DeletionQueue::delete_all();
+	set_listener(cam_main->owner->pos, cam_main->owner->ang, v_0, 100000);
 #if 0
 	for (int i=Sounds.num-1;i>=0;i--)
 		if (Sounds[i]->Suicidal)
@@ -114,7 +127,7 @@ AudioBuffer* load_buffer(const Path& filename) {
 	return buffer;
 }
 
-AudioBuffer* create_buffer(const Array<float>& samples) {
+AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
 	auto buffer = new AudioBuffer;
 
 	alGenBuffers(1, &buffer->al_buffer);
@@ -122,7 +135,7 @@ AudioBuffer* create_buffer(const Array<float>& samples) {
 	buf16.resize(samples.num);
 	for (int i=0; i<samples.num; i++)
 		buf16[i] = (int)(samples[i] * 32768.0f);
-	alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, 44100);
+	alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, (int)sample_rate);
 
 	created_audio_buffers.add(buffer);
 	return buffer;
