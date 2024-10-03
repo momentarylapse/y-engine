@@ -10,6 +10,7 @@
 class vec3;
 class quaternion;
 class Path;
+class Entity;
 
 namespace audio {
 
@@ -18,8 +19,8 @@ extern float VolumeMusic, VolumeSound;
 
 void init();
 void exit();
+void attach_listener(Entity* e);
 void iterate(float dt);
-void set_listener(const vec3 &pos, const quaternion &ang, const vec3 &vel, float v_sound);
 void reset();
 
 

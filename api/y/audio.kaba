@@ -24,6 +24,9 @@ func extern emit_sound(buffer: AudioBuffer&, pos: vec3) -> SoundSource&
 func extern emit_sound_file(filename: os.Path, pos: vec3) -> SoundSource&
 
 
+class Listener extends Component
+
+
 # deprecated:
 class Music extends Entity
 	func pause(pause: bool)

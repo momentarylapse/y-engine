@@ -158,6 +158,7 @@ public:
 		reset_game();
 
 		GodLoadWorld(filename);
+		audio::attach_listener(cam_main->owner);
 
 		for (auto &s: world.scripts)
 			PluginManager::add_controller(s.filename, s.variables);

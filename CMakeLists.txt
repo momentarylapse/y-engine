@@ -204,6 +204,7 @@ list(APPEND DEPS Threads::Threads)
 
 add_executable(y
 	src/audio/audio.cpp
+	src/audio/Listener.cpp
 	src/audio/Loading.cpp
 	src/audio/Music.cpp
 	src/audio/SoundSource.cpp

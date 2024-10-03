@@ -9,6 +9,7 @@
 #include "Controller.h"
 #include "../lib/kaba/kaba.h"
 #include "../audio/SoundSource.h"
+#include "../audio/Listener.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleEmitter.h"
@@ -618,6 +619,10 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("SoundSource.set_buffer", &audio::SoundSource::set_buffer);
 	ext->link_class_func("SoundSource.__del_override__", &DeletionQueue::add);
 
+
+	ext->declare_class_size("Listener", sizeof(audio::Listener));
+
+
 	gui::Node node(rect::ID);
 	ext->declare_class_size("Node", sizeof(gui::Node));
 	ext->declare_class_element("Node.x", &gui::Node::pos);
@@ -920,6 +925,7 @@ void PluginManager::import_kaba() {
 
 	auto m_audio = kaba::default_context->load_module("y/audio.kaba");
 	import_component_class<audio::SoundSource>(m_audio, "SoundSource");
+	import_component_class<audio::Listener>(m_audio, "Listener");
 
 	auto m_y = kaba::default_context->load_module("y/y.kaba");
 	import_component_class<UserMesh>(m_y, "UserMesh");

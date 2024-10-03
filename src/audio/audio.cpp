@@ -1,8 +1,9 @@
 #include "audio.h"
+
+#include "Listener.h"
 #include "Loading.h"
 #include "SoundSource.h"
 #include "../helper/DeletionQueue.h"
-#include "../world/Camera.h" // FIXME
 #include "../world/World.h" // FIXME
 #include "../y/ComponentManager.h"
 #include "../y/Entity.h"
@@ -51,6 +52,10 @@ void exit() {
 	al_dev = nullptr;
 }
 
+void attach_listener(Entity* e) {
+	if (e)
+		e->add_component<Listener>();
+}
 
 float VolumeMusic = 1.0f, VolumeSound = 1.0f;
 
@@ -73,7 +78,9 @@ void iterate(float dt) {
 			DeletionQueue::add(s->owner);
 	}
 	DeletionQueue::delete_all();
-	set_listener(cam_main->owner->pos, cam_main->owner->ang, v_0, 100000);
+	auto& listeners = ComponentManager::get_list<Listener>();
+	if (listeners.num >= 1)
+		listeners[0]->apply_data();
 #if 0
 	for (int i=Sounds.num-1;i>=0;i--)
 		if (Sounds[i]->Suicidal)
@@ -91,22 +98,6 @@ void reset() {
 	for (int i=Musics.num-1;i>=0;i--)
 		delete(Musics[i]);
 	Musics.clear();*/
-}
-
-void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {
-	ALfloat ListenerOri[6];
-	vec3 dir = ang * vec3::EZ;
-	ListenerOri[0] = -dir.x;
-	ListenerOri[1] = dir.y;
-	ListenerOri[2] = dir.z;
-	vec3 up = ang * vec3::EY;
-	ListenerOri[3] = -up.x;
-	ListenerOri[4] = up.y;
-	ListenerOri[5] = up.z;
-	alListener3f(AL_POSITION,    -pos.x, pos.y, pos.z);
-	alListener3f(AL_VELOCITY,    -vel.x, vel.y, vel.z);
-	alListenerfv(AL_ORIENTATION, ListenerOri);
-	alSpeedOfSound(v_sound);
 }
 
 
