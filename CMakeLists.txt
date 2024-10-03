@@ -206,7 +206,7 @@ add_executable(y
 	src/audio/audio.cpp
 	src/audio/Loading.cpp
 	src/audio/Music.cpp
-	src/audio/Sound.cpp
+	src/audio/SoundSource.cpp
 	src/fx/Beam.cpp
 	src/fx/Particle.cpp
 	src/fx/ParticleEmitter.cpp

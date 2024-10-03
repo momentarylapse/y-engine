@@ -56,6 +56,12 @@ public:
 AudioBuffer* load_buffer(const Path& filename);
 AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate);
 
+class SoundSource;
+
+// TODO move to World?
+SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos);
+SoundSource& emit_sound_file(const Path &filename, const vec3 &pos);
+
 };
 
 

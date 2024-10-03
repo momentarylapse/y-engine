@@ -9,7 +9,7 @@ class Path;
 
 namespace audio {
 
-class Sound : public Component {
+class SoundSource : public Component {
 public:
 	bool loop, suicidal;
 	float volume, speed;
@@ -19,12 +19,10 @@ public:
 
 	unsigned int al_source;
 
-	Sound();
-	~Sound() override;
+	SoundSource();
+	~SoundSource() override;
 
 	void set_buffer(AudioBuffer* buffer);
-	void set_buffer_from_file(const Path& filename);
-	void set_buffer_from_samples(const Array<float>& samples);
 
 	void play(bool loop);
 	void stop();
@@ -36,9 +34,6 @@ public:
 
 	static const kaba::Class *_class;
 };
-
-Sound& emit_sound_file(const Path &filename, const vec3 &pos);
-Sound& emit_sound_buffer(const Array<float>& buffer, float sample_rate, const vec3 &pos);
 
 }
 

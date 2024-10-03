@@ -1,12 +1,15 @@
 use ecs.*
 use os
 
-# TODO
-class Sound extends Component
+class AudioBuffer
+	# hidden stuff
+
+class SoundSource extends Component
 	func extern pause(pause: bool)
 	func extern play()
 	func extern stop()
 	func extern update()
+	func extern set_buffer(buffer: AudioBuffer&)
 	func extern __del_override__()
 	
 	var loop, suicidal: bool
@@ -14,11 +17,14 @@ class Sound extends Component
 	var min_distance, max_distance: f32
 
 
+func extern load_buffer(filename: os.Path) -> AudioBuffer&
+func extern create_buffer(samples: f32[], sample_rate: f32) -> AudioBuffer&
 
-func extern emit_sound_file(filename: os.Path, pos: vec3) -> Sound&
-func extern emit_sound_buffer(buffer: f32[], sample_rate: f32, pos: vec3) -> Sound&
+func extern emit_sound(buffer: AudioBuffer&, pos: vec3) -> SoundSource&
+func extern emit_sound_file(filename: os.Path, pos: vec3) -> SoundSource&
 
 
+# deprecated:
 class Music extends Entity
 	func pause(pause: bool)
 	func play(loop: bool)

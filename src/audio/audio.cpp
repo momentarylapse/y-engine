@@ -1,8 +1,9 @@
 #include "audio.h"
 #include "Loading.h"
-#include "Sound.h"
+#include "SoundSource.h"
 #include "../helper/DeletionQueue.h"
 #include "../world/Camera.h" // FIXME
+#include "../world/World.h" // FIXME
 #include "../y/ComponentManager.h"
 #include "../y/Entity.h"
 #include "../lib/base/base.h"
@@ -65,8 +66,8 @@ void garbage_collection() {
 }
 
 void iterate(float dt) {
-	auto& sounds = ComponentManager::get_list<Sound>();
-	for (auto s: sounds) {
+	auto& sources = ComponentManager::get_list<SoundSource>();
+	for (auto s: sources) {
 		s->_apply_data();
 		if (s->suicidal and s->has_ended())
 			DeletionQueue::add(s->owner);
@@ -139,6 +140,20 @@ AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
 
 	created_audio_buffers.add(buffer);
 	return buffer;
+}
+
+
+SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos) {
+	auto e = world.create_entity(pos, quaternion::ID);
+	auto s = e->add_component<SoundSource>();
+	s->set_buffer(buffer);
+	s->suicidal = true;
+	s->play(false);
+	return *s;
+}
+
+SoundSource& emit_sound_file(const Path &filename, const vec3 &pos) {
+	return emit_sound(load_buffer(filename), pos);
 }
 
 }

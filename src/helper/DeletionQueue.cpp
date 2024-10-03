@@ -9,7 +9,6 @@
 #include "../world/World.h"
 #include "../gui/gui.h"
 #include "../fx/Particle.h"
-#include "../audio/Sound.h"
 #include "../lib/os/msg.h"
 
 namespace DeletionQueue {
