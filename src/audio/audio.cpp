@@ -28,7 +28,7 @@ namespace audio {
 ALCdevice *al_dev = nullptr;
 ALCcontext *al_context = nullptr;
 
-base::map<Path, owned<AudioBuffer>> loaded_audio_buffers;
+base::map<Path, AudioBuffer*> loaded_audio_buffers;
 Array<AudioBuffer*> created_audio_buffers;
 
 void init() {
@@ -73,6 +73,7 @@ void garbage_collection() {
 void iterate(float dt) {
 	auto& sources = ComponentManager::get_list<SoundSource>();
 	for (auto s: sources) {
+		// TODO owner->get_component<SolidBody>()->vel
 		s->_apply_data();
 		if (s->suicidal and s->has_ended())
 			DeletionQueue::add(s->owner);
@@ -104,7 +105,7 @@ void reset() {
 AudioBuffer* load_buffer(const Path& filename) {
 	int i = loaded_audio_buffers.find(filename);
 	if (i >= 0)
-		return loaded_audio_buffers.by_index(i).get();
+		return loaded_audio_buffers.by_index(i);
 
 	auto af = load_raw_buffer(filename);
 	auto buffer = new AudioBuffer;
@@ -115,7 +116,7 @@ AudioBuffer* load_buffer(const Path& filename) {
 	else if (af.bits == 16)
 		alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &af.buffer[0], af.samples * 2, af.freq);
 
-	loaded_audio_buffers[filename] = buffer;
+	loaded_audio_buffers.set(filename, buffer);
 	return buffer;
 }
 
@@ -134,17 +135,19 @@ AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
 }
 
 
-SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos) {
+SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 	auto e = world.create_entity(pos, quaternion::ID);
 	auto s = e->add_component<SoundSource>();
 	s->set_buffer(buffer);
+	s->min_distance = radius1;
+	s->max_distance = radius1 * 100;
 	s->suicidal = true;
 	s->play(false);
 	return *s;
 }
 
-SoundSource& emit_sound_file(const Path &filename, const vec3 &pos) {
-	return emit_sound(load_buffer(filename), pos);
+SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius1) {
+	return emit_sound(load_buffer(filename), pos, radius1);
 }
 
 }

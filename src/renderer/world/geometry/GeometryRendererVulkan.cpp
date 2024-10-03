@@ -574,7 +574,7 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 
 
 	// sort: far to near
-	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z > b.z; });
+	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z >= b.z; });
 
 	// draw!
 	for (const auto& dc: draw_calls) {

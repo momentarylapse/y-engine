@@ -21,7 +21,6 @@ public:
 		ENTITY,
 		CONTROLLER,
 		LINK,
-		SOUND,
 		LEGACY_PARTICLE,
 		LEGACY_BEAM,
 		UI_NODE,
@@ -30,20 +29,10 @@ public:
 		UI_MODEL,
 	};
 
-	BaseClass(Type t);
-	virtual void _cdecl on_iterate(float dt){}
-	virtual void _cdecl on_init(){}
-	virtual void _cdecl on_delete(){}
+	explicit BaseClass(Type t);
+	virtual void _cdecl on_iterate(float dt) {}
+	virtual void _cdecl on_init() {}
+	virtual void _cdecl on_delete() {}
 
 	Type type;
-};
-
-
-class EntityManager {
-public:
-	static void reset();
-	static void delete_later(BaseClass *p);
-	static void delete_selection();
-private:
-	static Array<BaseClass*> selection;
 };
