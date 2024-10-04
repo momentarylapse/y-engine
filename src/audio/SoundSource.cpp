@@ -105,13 +105,14 @@ xfer<SoundSource> load_sound(const Path &filename){ return nullptr; }
 xfer<SoundSource> emit_sound(const Path &filename, const vec3 &pos, float min_dist, float max_dist, float speed, float volume, bool loop){ return nullptr; }
 SoundSource::SoundSource() {}
 SoundSource::~SoundSource() = default;
-void SoundClearSmallCache(){}
-void SoundSource::play(bool repeat){}
-void SoundSource::stop(){}
-void SoundSource::pause(bool pause){}
-bool SoundSource::is_playing(){ return false; }
-bool SoundSource::has_ended(){ return false; }
-void SoundSource::set_data(const vec3 &pos, const vec3 &vel, float min_dist, float max_dist, float speed, float volume){}
+void SoundClearSmallCache() {}
+void SoundSource::play(bool repeat) {}
+void SoundSource::stop() {}
+void SoundSource::pause(bool pause) {}
+bool SoundSource::is_playing() const { return false; }
+bool SoundSource::has_ended() const { return false; }
+void SoundSource::set_buffer(AudioBuffer* _buffer) {}
+void SoundSource::_apply_data() {}
 
 void clear_small_cache() {}
 

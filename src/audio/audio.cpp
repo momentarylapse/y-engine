@@ -9,10 +9,8 @@
 #include "../y/Entity.h"
 #include "../lib/base/base.h"
 #include "../lib/base/map.h"
-#include "../lib/base/pointer.h"
 #include "../lib/base/algo.h"
 #include "../lib/math/vec3.h"
-#include "../lib/math/quaternion.h"
 #include "../lib/os/path.h"
 
 #if HAS_LIB_OPENAL
@@ -23,15 +21,20 @@
 #include <al.h>
 #include <alc.h>
 
+#endif
+
 namespace audio {
 
+#if HAS_LIB_OPENAL
 ALCdevice *al_dev = nullptr;
 ALCcontext *al_context = nullptr;
+#endif
 
 base::map<Path, AudioBuffer*> loaded_audio_buffers;
 Array<AudioBuffer*> created_audio_buffers;
 
 void init() {
+#if HAS_LIB_OPENAL
 	al_dev = alcOpenDevice(nullptr);
 	if (!al_dev)
 		throw Exception("could not open openal device");
@@ -40,16 +43,20 @@ void init() {
 			throw Exception("could not create openal context");
 	alcMakeContextCurrent(al_context);
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+#endif
 }
 
 void exit() {
 	reset();
+
+#if HAS_LIB_OPENAL
 	if (al_context)
 		alcDestroyContext(al_context);
 	al_context = nullptr;
 	if (al_dev)
 		alcCloseDevice(al_dev);
 	al_dev = nullptr;
+#endif
 }
 
 void attach_listener(Entity* e) {
@@ -110,11 +117,13 @@ AudioBuffer* load_buffer(const Path& filename) {
 	auto af = load_raw_buffer(filename);
 	auto buffer = new AudioBuffer;
 
+#if HAS_LIB_OPENAL
 	alGenBuffers(1, &buffer->al_buffer);
 	if (af.bits == 8)
 		alBufferData(buffer->al_buffer, AL_FORMAT_MONO8, &af.buffer[0], af.samples, af.freq);
 	else if (af.bits == 16)
 		alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &af.buffer[0], af.samples * 2, af.freq);
+#endif
 
 	loaded_audio_buffers.set(filename, buffer);
 	return buffer;
@@ -123,12 +132,14 @@ AudioBuffer* load_buffer(const Path& filename) {
 AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
 	auto buffer = new AudioBuffer;
 
+#if HAS_LIB_OPENAL
 	alGenBuffers(1, &buffer->al_buffer);
 	Array<short> buf16;
 	buf16.resize(samples.num);
 	for (int i=0; i<samples.num; i++)
 		buf16[i] = (int)(samples[i] * 32768.0f);
 	alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, (int)sample_rate);
+#endif
 
 	created_audio_buffers.add(buffer);
 	return buffer;
@@ -149,17 +160,6 @@ SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius1) {
 	return emit_sound(load_buffer(filename), pos, radius1);
 }
-
 }
 
-#else
-
-namespace audio {
-void init() {}
-void exit() {}
-void iterate(float dt) {}
-void set_listener(const vec3& pos, const quaternion& ang, const vec3& vel, float v_sound) {}
-}
-
-#endif
 
