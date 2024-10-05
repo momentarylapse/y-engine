@@ -45,6 +45,7 @@ public:
 	}
 
 	static void _register(Component *c);
+	static void _unregister(Component *c);
 
 	static const kaba::Class *get_component_type_family(const kaba::Class *type);
 

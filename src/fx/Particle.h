@@ -13,7 +13,8 @@
 #include "../lib/math/vec3.h"
 #include "../lib/math/rect.h"
 #include "../lib/image/color.h"
-#include "../y/BaseClass.h"
+#include <y/BaseClass.h>
+#include <y/Component.h>
 
 
 class Particle {
@@ -30,7 +31,7 @@ public:
 	bool enabled;
 };
 
-class LegacyParticle : public BaseClass {
+class LegacyParticle : public Component {
 public:
 	LegacyParticle();
 	~LegacyParticle() override;
@@ -39,13 +40,14 @@ public:
 	void __delete__() override;
 	void on_iterate(float dt) override {}
 
-	vec3 pos;
 	vec3 vel;
 	color col;
 	rect source;
 	shared<Texture> texture;
 	float radius;
 	float time_to_live;
-	bool enabled;
+	bool enabled, is_beam;
+
+	static const kaba::Class *_class;
 };
 

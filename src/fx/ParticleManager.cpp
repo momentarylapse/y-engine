@@ -10,77 +10,37 @@
 #include "Particle.h"
 #include "Beam.h"
 #include "ParticleEmitter.h"
-#include "../lib/os/msg.h"
+#include <y/Entity.h>
+#include <y/ComponentManager.h>
 
-
-LegacyParticleGroup::LegacyParticleGroup(Texture *t) {
-	texture = t;
-	ubo = nullptr;
-#if USE_API_VULKAN
-	ubo = new UniformBuffer(256);
-	dset = rp_create_dset_fx(t, ubo);
-#endif
-}
-
-LegacyParticleGroup::~LegacyParticleGroup() {
-	for (auto *p: particles)
-		delete p;
-	for (auto *b: beams)
-		delete b;
-#if USE_API_VULKAN
-	delete dset;
-	delete ubo;
-#endif
-}
 
 void LegacyParticleGroup::add(LegacyParticle *p) {
-	if (p->type == BaseClass::Type::LEGACY_PARTICLE)
-		particles.add(p);
-	else if (p->type == BaseClass::Type::LEGACY_BEAM)
+	if (p->is_beam)
 		beams.add((LegacyBeam*)p);
+	else
+		particles.add(p);
 }
 
-bool LegacyParticleGroup::unregister(LegacyParticle *p) {
-	if (p->type == BaseClass::Type::LEGACY_PARTICLE) {
-		foreachi (auto *pp, particles, i)
-			if (pp == p) {
-				//msg_write("  -> PARTICLE");
-				particles.erase(i);
-				return true;
-			}
-	} else if (p->type == BaseClass::Type::LEGACY_BEAM) {
-		foreachi (auto *pp, beams, i)
-			if (pp == p) {
-				//msg_write("  -> BEAM");
-				beams.erase(i);
-				return true;
-			}
-	}
-	return false;
-}
+void rebuild_legacy_groups(Array<LegacyParticleGroup>& groups) {
+	for (auto& g: groups)
+		g.particles.clear();
 
-
-void ParticleManager::add_legacy(LegacyParticle *p) {
-	for (auto *g: legacy_groups)
-		if (g->texture == p->texture) {
-			g->add(p);
-			return;
+	auto& list = ComponentManager::get_list_family<LegacyParticle>();
+	for (auto p: list) {
+		bool found = false;
+		for (auto& g: groups)
+			if (g.texture == p->texture) {
+				g.add(p);
+				found = true;
+				break;
+			}
+		if (!found) {
+			LegacyParticleGroup g;
+			g.texture = p->texture.get();
+			g.add(p);
+			groups.add(g);
 		}
-	auto *gg = new LegacyParticleGroup(p->texture.get());
-	gg->add(p);
-	legacy_groups.add(gg);
-}
-
-bool ParticleManager::unregister_legacy(LegacyParticle *p) {
-	for (auto *g: legacy_groups)
-		if (g->unregister(p))
-			return true;
-	return false;
-}
-
-void ParticleManager::_delete_legacy(LegacyParticle *p) {
-	if (unregister_legacy(p))
-		delete(p);
+	}
 }
 
 
@@ -98,44 +58,36 @@ bool ParticleManager::unregister_particle_group(ParticleGroup *g) {
 }
 
 void ParticleManager::clear() {
-	for (auto *g: legacy_groups)
-		delete g;
 	legacy_groups.clear();
 }
 
-static void iterate_legacy_particles(Array<LegacyParticle*> *particles, float dt) {
-	foreachi (auto p, *particles, i) {
-		p->pos += p->vel * dt;
+static void iterate_legacy_particles(Array<LegacyParticle*>& particles, float dt) {
+	Array<LegacyParticle*> to_del;
+	foreachi (auto p, particles, i) {
+		p->owner->pos += p->vel * dt;
 		if (p->time_to_live >= 0) {
 			p->time_to_live -= dt;
 			if (p->time_to_live < 0) {
-				//msg_write("PARTICLE SUICIDE");
-				particles->erase(i);
-				delete p;
-				i --;
+				//msg_write("PARTICLE SUICIDE  " + p->component_type->name);
+				to_del.add(p);
 				continue;
 			}
 		}
 		p->on_iterate(dt);
 	}
+
+	for (auto p: to_del)
+		p->owner->delete_component(p);
 }
 
 void ParticleManager::iterate(float dt) {
-	for (auto g: legacy_groups) {
-		iterate_legacy_particles(&g->particles, dt);
-		iterate_legacy_particles((Array<LegacyParticle*>*)&g->beams, dt);
-	}
+	auto& list = ComponentManager::get_list_family<LegacyParticle>();
+	iterate_legacy_particles(list, dt);
+
 	for (auto g: particle_groups)
 		g->on_iterate(dt);
-}
 
-void ParticleManager::shift_all(const vec3 &dpos) {
-	for (auto g: legacy_groups) {
-		for (auto *p: g->particles)
-			p->pos += dpos;
-		for (auto *p: g->beams)
-			p->pos += dpos;
-	}
+	rebuild_legacy_groups(legacy_groups);
 }
 
 

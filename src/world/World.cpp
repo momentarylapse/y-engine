@@ -35,9 +35,7 @@
 
 #ifdef _X_ALLOW_X_
 #include "Light.h"
-#include "../fx/Particle.h"
 #include "../fx/ParticleManager.h"
-#include "../fx/ParticleEmitter.h"
 #include "../plugins/PluginManager.h"
 #include "../helper/PerformanceMonitor.h"
 #endif
@@ -45,7 +43,6 @@
 #if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
-#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #endif
 
 #include "Camera.h"
@@ -597,12 +594,6 @@ void World::delete_entity(Entity *e) {
 	delete e;
 }
 
-void World::delete_legacy_particle(LegacyParticle *p) {
-#ifdef _X_ALLOW_X_
-	particle_manager->_delete_legacy(p);
-#endif
-}
-
 void World::delete_link(Link *l) {
 	if (unregister(l))
 		delete l;
@@ -620,11 +611,6 @@ bool World::unregister(BaseClass* x) {
 				links.erase(i);
 				return true;
 			}
-#ifdef _X_ALLOW_X_
-	} else if (x->type == BaseClass::Type::LEGACY_PARTICLE or x->type == BaseClass::Type::LEGACY_BEAM) {
-		if (particle_manager->unregister_legacy((LegacyParticle*)x))
-			return true;
-#endif
 	}
 	return false;
 }
@@ -794,13 +780,6 @@ Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 	return c;
 }
 
-LegacyParticle* World::add_legacy_particle(xfer<LegacyParticle> p) {
-#ifdef _X_ALLOW_X_
-	particle_manager->add_legacy(p);
-#endif
-	return p;
-}
-
 
 void World::shift_all(const vec3 &dpos) {
 	for (auto *e: entities) {
@@ -814,9 +793,7 @@ void World::shift_all(const vec3 &dpos) {
 
 	for (auto *m: ComponentManager::get_list_family<Model>())
 		m->update_matrix();
-#ifdef _X_ALLOW_X_
-	particle_manager->shift_all(dpos);
-#endif
+
 	msg_data.v = dpos;
 	notify("shift");
 }

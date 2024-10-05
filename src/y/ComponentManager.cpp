@@ -102,11 +102,20 @@ void ComponentManager::_register(Component *c) {
 	lf.add(c);
 }
 
+void ComponentManager::_unregister(Component *c) {
+	auto& list = _get_list_x(c->component_type);
+	list.remove(c);
+
+	auto type_family = get_component_type_family(c->component_type);
+	auto& flist = _get_list_x_family(type_family);
+	flist.remove(c);
+}
+
 
 const kaba::Class *ComponentManager::get_component_type_family(const kaba::Class *type) {
 #ifdef _X_ALLOW_X_
 	while (type->parent) {
-		if ((type->parent->name == "Component") or (type->parent->name == "Component3D"))
+		if (type->parent->name == "Component")
 			return type;
 		type = type->parent;
 	}
@@ -131,11 +140,11 @@ Component *ComponentManager::create_component(const kaba::Class *type, const str
 
 // should already be unlinked from entity!
 void ComponentManager::delete_component(Component *c) {
-	auto& list = _get_list_x(c->component_type);
-	list.remove(c);
-	auto type_family = get_component_type_family(c->component_type);
-	auto& flist = _get_list_x_family(type_family);
-	flist.remove(c);
+	if (c->owner) {
+		msg_error("trying to delete a component that is still attached to an entity");
+		return;
+	}
+	_unregister(c);
 	delete c;
 }
 

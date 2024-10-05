@@ -25,4 +25,6 @@ public:
 	void __init_beam__();
 
 	vec3 length;
+
+	static const kaba::Class *_class;
 };

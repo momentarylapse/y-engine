@@ -139,13 +139,13 @@ void GeometryRendererGL::draw_particles() {
 
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
-	for (auto g: world.particle_manager->legacy_groups) {
-		nix::bind_texture(0, g->texture);
+	for (auto& g: world.particle_manager->legacy_groups) {
+		nix::bind_texture(0, g.texture);
 
 		Array<VertexFx> v;
-		for (auto p: g->particles)
+		for (auto p: g.particles)
 			if (p->enabled) {
-				auto m = mat4::translation(p->pos) * r * mat4::scale(p->radius, p->radius, p->radius);
+				auto m = mat4::translation(p->owner->pos) * r * mat4::scale(p->radius, p->radius, p->radius);
 
 				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
 				v.add({m * vec3( 1, 1,0), p->col, p->source.x2, p->source.y1});

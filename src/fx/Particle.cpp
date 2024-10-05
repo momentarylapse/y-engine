@@ -21,14 +21,16 @@ Particle::Particle(const vec3 &p, const color& _col, float r, float ttl) {
 }
 
 
-LegacyParticle::LegacyParticle() : BaseClass(Type::LEGACY_PARTICLE) {
-	pos = vec3::ZERO;
+const kaba::Class* LegacyParticle::_class = nullptr;
+
+LegacyParticle::LegacyParticle() {
 	vel = vec3::ZERO;
 	col = White;
 	radius = 1;
 	time_to_live = -1;
 	source = rect::ID;
 	enabled = true;
+	is_beam = false;
 }
 
 LegacyParticle::~LegacyParticle() = default;

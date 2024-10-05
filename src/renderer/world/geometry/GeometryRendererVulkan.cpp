@@ -182,7 +182,7 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
 	int index = 0;
-	for (auto g: world.particle_manager->legacy_groups) {
+	for (auto& g: world.particle_manager->legacy_groups) {
 
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
@@ -190,14 +190,15 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 				new VertexBuffer("3f,4f,2f")});
 			//rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
 			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(LOCATION_FX_TEX0, g->texture);
+			rda[index].dset->set_texture(LOCATION_FX_TEX0, g.texture);
 			rda[index].dset->update();
 		}
 
 		Array<VertexFx> v;
-		for (auto p: g->particles)
+		v.__reserve(g.particles.num * 6);
+		for (auto p: g.particles)
 			if (p->enabled) {
-				auto m = mat4::translation(p->pos) * r * mat4::scale(p->radius, p->radius, p->radius);
+				auto m = mat4::translation(p->owner->pos) * r * mat4::scale(p->radius, p->radius, p->radius);
 
 				v.add({m * vec3(-1, 1,0), p->col, p->source.x1, p->source.y1});
 				v.add({m * vec3( 1, 1,0), p->col, p->source.x2, p->source.y1});

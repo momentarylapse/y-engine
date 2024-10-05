@@ -114,13 +114,15 @@ Model* _attach_model(World *w, Entity& e, const Path &filename) {
 	return nullptr;
 }
 
-LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, const vec3& pos, float radius, const color& c, shared<Texture>& tex) {
-	auto p = reinterpret_cast<LegacyParticle*>(PluginManager::create_instance(type, ""));
-	p->pos = pos;
+LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, const vec3& pos, float radius, const color& c, shared<Texture>& tex, float ttl) {
+	auto e = w->create_entity(pos, quaternion::ID);
+	auto p = reinterpret_cast<LegacyParticle*>(e->_add_component_untyped_(type, ""));
+	//auto p = reinterpret_cast<LegacyParticle*>(PluginManager::create_instance(type, ""));
 	p->radius = radius;
 	p->col = c;
 	p->texture = tex;
-	w->add_legacy_particle(p);
+	p->time_to_live = ttl;
+	//w->add_legacy_particle(p);
 	return p;
 }
 
@@ -480,7 +482,6 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.trace", &World::trace);
 	ext->link_class_func("World.unregister", &World::unregister);
 	ext->link_class_func("World.delete_entity", &World::delete_entity);
-	ext->link_class_func("World.delete_particle", &World::delete_legacy_particle);
 	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
 
@@ -565,7 +566,6 @@ void PluginManager::export_kaba() {
 	{
 		LegacyParticle particle;
 		ext->declare_class_size("LegacyParticle", sizeof(LegacyParticle));
-		ext->declare_class_element("LegacyParticle.pos", &LegacyParticle::pos);
 		ext->declare_class_element("LegacyParticle.vel", &LegacyParticle::vel);
 		ext->declare_class_element("LegacyParticle.radius", &LegacyParticle::radius);
 		ext->declare_class_element("LegacyParticle.time_to_live", &LegacyParticle::time_to_live);
@@ -933,6 +933,8 @@ void PluginManager::import_kaba() {
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
 	import_component_class<ParticleEmitter>(m_fx, "ParticleEmitter");
+	import_component_class<LegacyParticle>(m_fx, "LegacyParticle");
+	import_component_class<LegacyBeam>(m_fx, "LegacyBeam");
 
 	auto m_audio = kaba::default_context->load_module("y/audio.kaba");
 	import_component_class<audio::SoundSource>(m_audio, "SoundSource");
@@ -1050,6 +1052,10 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new Camera;
 	if (c == audio::SoundSource::_class)
 		return new audio::SoundSource;
+	if (c == LegacyParticle::_class)
+		return new LegacyParticle;
+	if (c == LegacyBeam::_class)
+		return new LegacyBeam;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

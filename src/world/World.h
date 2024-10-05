@@ -99,7 +99,6 @@ public:
 
 	bool unregister(BaseClass *o);
 	void delete_entity(Entity *e);
-	void delete_legacy_particle(LegacyParticle *p);
 	void delete_link(Link *l);
 
 	void register_model(Model *m);
@@ -121,7 +120,6 @@ public:
 	Camera *create_camera(const vec3 &pos, const quaternion &ang);
 
 	ParticleManager *particle_manager;
-	LegacyParticle *add_legacy_particle(xfer<LegacyParticle> p);
 
 	void iterate(float dt);
 	void iterate_physics(float dt);

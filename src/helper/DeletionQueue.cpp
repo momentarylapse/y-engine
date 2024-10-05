@@ -8,7 +8,6 @@
 #include "DeletionQueue.h"
 #include "../world/World.h"
 #include "../gui/gui.h"
-#include "../fx/Particle.h"
 #include "../lib/os/msg.h"
 
 namespace DeletionQueue {
@@ -28,8 +27,6 @@ void delete_all() {
 	for (auto c: queue) {
 		if (c->type == BaseClass::Type::ENTITY)
 			world.delete_entity(static_cast<Entity*>(c));
-		else if (c->type == BaseClass::Type::LEGACY_PARTICLE or c->type == BaseClass::Type::LEGACY_BEAM)
-			world.delete_legacy_particle(static_cast<LegacyParticle*>(c));
 		else
 			msg_error(format("unable to delete: %d", (int)c->type));
 	}

@@ -13,9 +13,11 @@ Beam::Beam(const vec3 &_pos, const vec3 &_length, const color& _col, float _r, f
 }
 
 
+const kaba::Class* LegacyBeam::_class = nullptr;
+
 LegacyBeam::LegacyBeam() {
-	type = Type::LEGACY_BEAM;
 	length = vec3::EZ;
+	is_beam = true;
 }
 
 void LegacyBeam::__init_beam__() {

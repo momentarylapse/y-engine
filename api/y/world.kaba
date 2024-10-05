@@ -136,9 +136,9 @@ class World
 	func extern mut selfref create_light_point(pos: vec3, c: color, radius: float) -> Light&
 	func extern mut selfref create_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
 	#func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
-	func extern mut selfref _add_particle(type: kaba.Class*, pos: vec3, radius: f32, c: color, tex: shared![Texture]) -> LegacyParticle&
-	func mut selfref create_particle[T](pos: vec3, radius: f32, c: color = color.WHITE, tex: shared![Texture] = tex_white) -> T&
-		return _add_particle(T, pos, radius, c, tex) as T&
+	func extern mut selfref _add_particle(type: kaba.Class*, pos: vec3, radius: f32, c: color, tex: shared![Texture], ttl: f32 = -1.0) -> LegacyParticle&
+	func mut selfref create_particle[T](pos: vec3, radius: f32, c: color = color.WHITE, tex: shared![Texture] = tex_white, ttl: f32 = -1.0) -> T&
+		return _add_particle(T, pos, radius, c, tex, ttl) as T&
 	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
 	func extern mut selfref create_object_no_reg(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: quaternion[]) -> MultiInstance&
@@ -163,7 +163,6 @@ class World
 #	extern void unregister(void* o) # Model, Link, Light, Particle, Beam
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)
-	func extern delete_particle(e: LegacyParticle*)
 	func extern delete_link(e: Link*)
 	
 	class MessageData
