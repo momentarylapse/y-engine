@@ -177,6 +177,24 @@ else()
 endif()
 
 
+# lib: spirv (optional)
+set(LIB_SPIRV_ENABLED true CACHE BOOL "Use spirv library?")
+pkg_check_modules(SPIRV spirv)
+if(SPIRV_FOUND)
+else()
+	set(LIB_SPIRV_ENABLED false CACHE BOOL "spirv library not found" FORCE)
+endif()
+if(${LIB_SPIRV_ENABLED})
+	list(APPEND INCLUDE_DIRECTORIES ${SPIRV_INCLUDE_DIRS})
+	list(APPEND LINK_DIRECTORIES ${SPIRV_LIBRARY_DIRS})
+	list(APPEND DEPS ${SPIRV_LIBRARIES})
+	list(APPEND COMPILE_OPTIONS ${SPIRV_CFLAGS_OTHER})
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_SPIRV=1)
+else()
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_SPIRV=0)
+endif()
+
+
 # lib: fftw3 (optional)
 set(LIB_FFTW3_ENABLED true CACHE BOOL "Use fftw3 library?")
 pkg_check_modules(FFTW3F fftw3f)
@@ -436,7 +454,6 @@ target_compile_options(y PUBLIC ${COMPILE_OPTIONS})
 target_compile_definitions(y PUBLIC ${COMPILE_DEFINITIONS} INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 target_link_libraries(y PUBLIC ${DEPS})
 target_include_directories(y PUBLIC src/)
-target_include_directories(y PUBLIC src/lib/)
 
 #=======================================================================================
 #    install
