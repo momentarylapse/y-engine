@@ -21,24 +21,20 @@ Particle::Particle(const vec3 &p, const color& _col, float r, float ttl) {
 }
 
 
-LegacyParticle::LegacyParticle(const vec3 &p, float r, shared<Texture> t, float ttl) : BaseClass(Type::LEGACY_PARTICLE) {
-	pos = p;
+LegacyParticle::LegacyParticle() : BaseClass(Type::LEGACY_PARTICLE) {
+	pos = vec3::ZERO;
 	vel = vec3::ZERO;
 	col = White;
-	radius = r;
+	radius = 1;
 	time_to_live = -1;
-	texture = t;
 	source = rect::ID;
-	time_to_live = ttl;
-	suicidal = ttl > 0;
 	enabled = true;
 }
 
-LegacyParticle::~LegacyParticle() {
-}
+LegacyParticle::~LegacyParticle() = default;
 
-void LegacyParticle::__init__(const vec3 &p, float r, shared<Texture> t, float ttl) {
-	new(this) LegacyParticle(p, r, t, ttl);
+void LegacyParticle::__init__() {
+	new(this) LegacyParticle();
 }
 
 void LegacyParticle::__delete__() {

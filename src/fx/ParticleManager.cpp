@@ -103,10 +103,10 @@ void ParticleManager::clear() {
 	legacy_groups.clear();
 }
 
-static void iterate_particles(Array<LegacyParticle*> *particles, float dt) {
+static void iterate_legacy_particles(Array<LegacyParticle*> *particles, float dt) {
 	foreachi (auto p, *particles, i) {
 		p->pos += p->vel * dt;
-		if (p->suicidal) {
+		if (p->time_to_live >= 0) {
 			p->time_to_live -= dt;
 			if (p->time_to_live < 0) {
 				//msg_write("PARTICLE SUICIDE");
@@ -122,8 +122,8 @@ static void iterate_particles(Array<LegacyParticle*> *particles, float dt) {
 
 void ParticleManager::iterate(float dt) {
 	for (auto g: legacy_groups) {
-		iterate_particles(&g->particles, dt);
-		iterate_particles((Array<LegacyParticle*>*)&g->beams, dt);
+		iterate_legacy_particles(&g->particles, dt);
+		iterate_legacy_particles((Array<LegacyParticle*>*)&g->beams, dt);
 	}
 	for (auto g: particle_groups)
 		g->on_iterate(dt);

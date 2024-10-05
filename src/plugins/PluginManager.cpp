@@ -114,6 +114,16 @@ Model* _attach_model(World *w, Entity& e, const Path &filename) {
 	return nullptr;
 }
 
+LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, const vec3& pos, float radius, const color& c, shared<Texture>& tex) {
+	auto p = reinterpret_cast<LegacyParticle*>(PluginManager::create_instance(type, ""));
+	p->pos = pos;
+	p->radius = radius;
+	p->col = c;
+	p->texture = tex;
+	w->add_legacy_particle(p);
+	return p;
+}
+
 void framebuffer_init(FrameBuffer *fb, const shared_array<Texture> &tex) {
 #ifdef USING_VULKAN
 	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__() for vulkan"));
@@ -464,7 +474,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("World.attach_model", &_attach_model);
 	ext->link_class_func("World.unattach_model", &World::unattach_model);
 	ext->link_class_func("World.add_link", &World::add_link);
-	ext->link_class_func("World.add_particle", &World::add_legacy_particle);
+	ext->link_class_func("World._add_particle", &_world_add_legacy_particle);
 	ext->link_class_func("World.shift_all", &World::shift_all);
 	ext->link_class_func("World.get_g", &World::get_g);
 	ext->link_class_func("World.trace", &World::trace);
@@ -552,22 +562,23 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Beam.length", &Beam::length);
 
 
-	LegacyParticle particle(vec3::ZERO, 0, nullptr, -1);
-	ext->declare_class_size("LegacyParticle", sizeof(LegacyParticle));
-	ext->declare_class_element("LegacyParticle.pos", &LegacyParticle::pos);
-	ext->declare_class_element("LegacyParticle.vel", &LegacyParticle::vel);
-	ext->declare_class_element("LegacyParticle.radius", &LegacyParticle::radius);
-	ext->declare_class_element("LegacyParticle.time_to_live", &LegacyParticle::time_to_live);
-	ext->declare_class_element("LegacyParticle.suicidal", &LegacyParticle::suicidal);
-	ext->declare_class_element("LegacyParticle.texture", &LegacyParticle::texture);
-	ext->declare_class_element("LegacyParticle.color", &LegacyParticle::col);
-	ext->declare_class_element("LegacyParticle.source", &LegacyParticle::source);
-	ext->declare_class_element("LegacyParticle.enabled", &LegacyParticle::enabled);
-	ext->link_class_func("LegacyParticle.__init__", &LegacyParticle::__init__);
-	ext->link_virtual("LegacyParticle.__delete__", &LegacyParticle::__delete__, &particle);
-	//ext->link_virtual("LegacyParticle.on_iterate", &Particle::on_iterate, &particle);
-	//ext->link_class_func("LegacyParticle.__del_override__", &global_delete);
-	ext->link_class_func("LegacyParticle.__del_override__", &DeletionQueue::add);
+	{
+		LegacyParticle particle;
+		ext->declare_class_size("LegacyParticle", sizeof(LegacyParticle));
+		ext->declare_class_element("LegacyParticle.pos", &LegacyParticle::pos);
+		ext->declare_class_element("LegacyParticle.vel", &LegacyParticle::vel);
+		ext->declare_class_element("LegacyParticle.radius", &LegacyParticle::radius);
+		ext->declare_class_element("LegacyParticle.time_to_live", &LegacyParticle::time_to_live);
+		ext->declare_class_element("LegacyParticle.texture", &LegacyParticle::texture);
+		ext->declare_class_element("LegacyParticle.color", &LegacyParticle::col);
+		ext->declare_class_element("LegacyParticle.source", &LegacyParticle::source);
+		ext->declare_class_element("LegacyParticle.enabled", &LegacyParticle::enabled);
+		ext->link_class_func("LegacyParticle.__init__", &LegacyParticle::__init__);
+		ext->link_virtual("LegacyParticle.__delete__", &LegacyParticle::__delete__, &particle);
+		//ext->link_virtual("LegacyParticle.on_iterate", &Particle::on_iterate, &particle);
+		//ext->link_class_func("LegacyParticle.__del_override__", &global_delete);
+		ext->link_class_func("LegacyParticle.__del_override__", &DeletionQueue::add);
+	}
 
 	ext->declare_class_size("LegacyBeam", sizeof(LegacyBeam));
 	ext->declare_class_element("LegacyBeam.length", &LegacyBeam::length);

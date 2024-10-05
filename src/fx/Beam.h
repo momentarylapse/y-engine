@@ -20,9 +20,9 @@ public:
 
 class LegacyBeam : public LegacyParticle {
 public:
-	LegacyBeam(const vec3 &pos, const vec3 &length, float r, shared<Texture> tex, float ttl);
+	LegacyBeam();
 
-	void __init_beam__(const vec3 &pos, const vec3 &length, float r, shared<Texture> tex, float ttl);
+	void __init_beam__();
 
 	vec3 length;
 };

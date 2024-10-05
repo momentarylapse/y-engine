@@ -1,4 +1,5 @@
 use os
+use kaba
 use gfx.*
 use fx.*
 use ecs.*
@@ -134,7 +135,10 @@ class World
 	func extern mut selfref create_light_parallel(ang: quaternion, c: color) -> Light&
 	func extern mut selfref create_light_point(pos: vec3, c: color, radius: float) -> Light&
 	func extern mut selfref create_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
-	func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
+	#func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
+	func extern mut selfref _add_particle(type: kaba.Class*, pos: vec3, radius: f32, c: color, tex: shared![Texture]) -> LegacyParticle&
+	func mut selfref create_particle[T](pos: vec3, radius: f32, c: color = color.WHITE, tex: shared![Texture] = tex_white) -> T&
+		return _add_particle(T, pos, radius, c, tex) as T&
 	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
 	func extern mut selfref create_object_no_reg(filename: os.Path, pos: vec3, ang: quaternion) -> Model&
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: quaternion[]) -> MultiInstance&

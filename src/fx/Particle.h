@@ -32,10 +32,10 @@ public:
 
 class LegacyParticle : public BaseClass {
 public:
-	LegacyParticle(const vec3 &pos, float r, shared<Texture> tex, float ttl);
+	LegacyParticle();
 	~LegacyParticle() override;
 
-	void __init__(const vec3 &pos, float r, shared<Texture> tex, float ttl);
+	void __init__();
 	void __delete__() override;
 	void on_iterate(float dt) override {}
 
@@ -46,7 +46,6 @@ public:
 	shared<Texture> texture;
 	float radius;
 	float time_to_live;
-	bool suicidal;
 	bool enabled;
 };
 

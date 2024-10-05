@@ -3,19 +3,19 @@ use gfx.*
 
 class LegacyParticle extends BaseClass
 	var pos, vel: vec3
-	var radius: float
-	var time_to_live: float
-	var suicidal: bool
+	var radius = 1.0
+	var time_to_live = 2.0
 	var texture: shared![Texture]
-	var color: color
-	var source: rect
-	var enabled: bool
-	func extern __init__(p: vec3, r: float, t: shared![Texture], ttl: float)
+	var color = color.WHITE
+	var source = rect.ID
+	var enabled = true
+	#func extern __init__(p: vec3, r: float, t: shared![Texture], ttl: float)
+	func extern override __init__()
 	func extern override __delete__()
 
 class LegacyBeam extends LegacyParticle
-	var length: vec3
-	func extern __init__(p: vec3, l: vec3, r: float, t: shared![Texture], ttl: float)
+	var length = vec3.EZ
+	#func extern __init__(p: vec3, l: vec3, r: float, t: shared![Texture], ttl: float)
 
 
 class Particle

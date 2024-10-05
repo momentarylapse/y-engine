@@ -4,7 +4,7 @@ use kaba
 #class extern SolidBody
 
 struct BaseClass
-#	extern void __init__()
+	#func extern __init__()
 	func extern virtual __delete__()
 	func extern virtual mut on_init()
 	func extern virtual mut on_delete()
