@@ -1,0 +1,75 @@
+use os
+
+func create_game_ini(root: os.Path)
+	var ini: os.Configuration
+	ini["default.world"] = "main"
+	ini["default.font"] = ""
+	ini["default.main-script"] = ""
+	ini["default.material"] = ""
+	ini["default.second-world"] = ""
+	ini["default.additional-scripts"] = dyn([])
+	ini["screen.width"] = 1920
+	ini["screen.height"] = 1080
+	ini["screen.mode"] = "windowed"
+	ini["shadow.boxsize"] = 2000
+	ini["shadow.resolution"] = 2048
+	ini["renderer.path"] = "forward"
+	ini["renderer.resolution-scale-min"] = "0.5"
+	ini["renderer.target-framerate"] = "60"
+	ini["debug.level"] = 1
+	ini["debug.scripts1"] = dyn(["debug/stats.kaba", "debug/wireframe.kaba"])
+	ini["debug.scripts2"] = dyn(["debug/hdr.kaba", "debug/gbuffer.kaba", "debug/shadows.kaba"])
+	ini.save(root | "game.ini")
+
+
+func copy_api(root: os.Path)
+	let src = os.Path("api")
+	if not os.fs.exists(src)
+		raise(new Exception("'api/' not found in current directory. Please run from the engine root directory!"))
+	
+	let files = os.fs.search(src, "*.kaba", "fr")
+	for f in files
+		let dst = root | "Scripts" | f
+		os.fs.create_directory(dst.parent())
+		os.fs.copy(src | f, dst)
+
+
+func create_empty_world(file: os.Path)
+	os.fs.write_text(file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<world>
+	<meta>
+		<background color=\"0.033 0.133 0.319 1.000\" />
+		<physics enabled=\"false\" gravity=\"0.000 -981.000 0.000\" mode=\"simple\" />
+	</meta>
+	<3d>
+		<camera pos=\"0 0 0\" ang=\"0.000 0.000 0.000\" fov=\"0.785\" minDepth=\"1.000\" maxDepth=\"10000.000\" exposure=\"1.000\" />
+		<light type=\"directional\" color=\"1.000 1.000 1.000 1.000\" harshness=\"0.7500\" ang=\"0.815 -1.327 -1.392\" />
+	</3d>
+</world>
+")
+
+
+func create(args: string[])
+	let root = os.Path(args[0])
+	os.fs.create_directory(root)
+	os.fs.create_directory(root | "Maps")
+	os.fs.create_directory(root | "Materials")
+	os.fs.create_directory(root | "Objects")
+	os.fs.create_directory(root | "Textures")
+	os.fs.create_directory(root | "Sounds")
+	os.fs.create_directory(root | "Scripts")
+	
+	copy_api(root)
+	
+	create_game_ini(root)
+	
+	create_empty_world(root | "Maps" | "main.world")
+	
+
+
+func main(args: string[])
+	var p: os.CommandLineParser
+	p.cmd("", "DIR", "create a new game", create)
+	p.parse(args)
+	
+	
