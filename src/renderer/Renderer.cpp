@@ -42,8 +42,7 @@ Renderer::Renderer(const string &name) {
 }
 
 
-Renderer::~Renderer() {
-}
+Renderer::~Renderer() = default;
 
 void Renderer::add_child(Renderer *child) {
 	children.add(child);

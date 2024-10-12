@@ -28,7 +28,7 @@ vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
 
 Context* api_init(GLFWwindow* window) {
-	instance = vulkan::init({"glfw", "validation", "api=1.2", "rtx?", "verbosity=2"});
+	instance = vulkan::init({"glfw", "validation", "api=1.3", "rtx?", "verbosity=2"});
 	try {
 		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx", "compute"});
 		msg_write("device found: RTX + COMPUTE");
@@ -54,7 +54,7 @@ Context* api_init(GLFWwindow* window) {
 	}
 
 	device->create_query_pool(MAX_TIMESTAMP_QUERIES);
-	pool = new vulkan::DescriptorPool("buffer:4096,sampler:4096", 65536);
+	pool = new vulkan::DescriptorPool("buffer:65536,sampler:65536", 65536);
 
 	tex_white = new Texture();
 	tex_black = new Texture();
