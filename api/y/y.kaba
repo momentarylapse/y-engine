@@ -23,10 +23,12 @@ class UserMesh extends Component
 	geometry_shader_module: string
 
 
-class TimeTable
+class Scheduler
 	func extern __init__()
-	func extern mut at(t: float, f: void->void)
-	func extern iterate(dt: float)
+	func extern __delete__()
+	func extern mut later(dt: f32, f: void->void)
+	func extern mut repeat(dt: f32, f: void->void)
+	func extern mut clear()
 
 
 func extern create_render_path(cam: Camera&) -> xfer[Renderer]

@@ -11,15 +11,28 @@
 
 class Scheduler {
 public:
+	Scheduler();
+	~Scheduler();
+
+	void clear();
+	void repeat(float dt, const Callable<void()> &f);
+	void later(float dt, const Callable<void()> &f);
+
+	void iterate(float dt);
+
+	struct ScheduleListener {
+		float dt;
+		float t;
+		bool repeated;
+		const Callable<void()> *f;
+	};
+	Array<ScheduleListener> listeners;
+};
+
+class SchedulerManager {
+public:
 	static void init(int ch_iter);
 	static void reset();
-	static void subscribe(float dt, const Callable<void()> &f);
-	static void iterate_subscriptions(float dt);
 
-	static void handle_iterate_pre(float dt);
-	static void handle_iterate(float dt);
-	static void handle_input();
-	static void handle_draw_pre();
-	static void handle_render_inject();
-	static void handle_render_inject2();
+	static void iterate(float dt);
 };

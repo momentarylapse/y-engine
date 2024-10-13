@@ -68,9 +68,6 @@ class PostProcessor
 	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
 	func extern mut add_stage(on_prepare: void->void, on_draw: void->void)
 
-class Scheduler
-	func static extern mut subscribe(dt: float, f: void->void)
-
 
 class PerformanceMonitor
 	struct Channel

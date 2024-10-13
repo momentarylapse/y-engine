@@ -22,7 +22,6 @@
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
-#include "../helper/TimeTable.h"
 #include "../input/InputManager.h"
 #include "../input/Gamepad.h"
 #include "../input/Keyboard.h"
@@ -241,11 +240,6 @@ shared<Texture> __load_texture(const Path& filename) {
 
 xfer<Material> __load_material(const Path& filename) {
 	return engine.resource_manager->load_material(filename);
-}
-
-
-void timetable_at(TimeTable *tt, float t, Callable<void()> *f) {
-	tt->at(t, [f] { (*f)(); });
 }
 
 
@@ -868,10 +862,12 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Shader.set_floats", &shader_set_floats);
 
 
-	ext->declare_class_size("TimeTable", sizeof(TimeTable));
-	ext->link_class_func("TimeTable.__init__", &generic_init<TimeTable>);
-	ext->link_class_func("TimeTable.iterate", &TimeTable::iterate);
-	ext->link_class_func("TimeTable.at", &timetable_at);
+	ext->declare_class_size("Scheduler", sizeof(Scheduler));
+	ext->link_class_func("Scheduler.__init__", &generic_init<Scheduler>);
+	ext->link_class_func("Scheduler.__delete__", &generic_delete<Scheduler>);
+	ext->link_class_func("Scheduler.later", &Scheduler::later);
+	ext->link_class_func("Scheduler.repeat", &Scheduler::repeat);
+	ext->link_class_func("Scheduler.clear", &Scheduler::clear);
 
 
 	ext->link("tex_white", &tex_white);
@@ -879,7 +875,6 @@ void PluginManager::export_kaba() {
 	ext->link("cam", &cam_main);
 	ext->link("engine", &engine);
 	ext->link("__get_controller", (void*)&ControllerManager::get_controller);
-	ext->link("Scheduler.subscribe", (void*)&Scheduler::subscribe);
 
 	ext->link("load_model", (void*)&__load_model);
 	ext->link("load_shader", (void*)&__load_shader);

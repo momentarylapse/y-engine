@@ -107,7 +107,7 @@ public:
 		NetworkManager::init();
 		ch_iter = PerformanceMonitor::create_channel("iter");
 		ComponentManager::init();
-		Scheduler::init(ch_iter);
+		SchedulerManager::init(ch_iter);
 
 		engine.app_name = app_name;
 		engine.version = app_version;
@@ -236,7 +236,7 @@ public:
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
 			input::iterate();
-			Scheduler::handle_input();
+			ControllerManager::handle_input();
 
 			iterate();
 			draw_frame();
@@ -260,6 +260,7 @@ public:
 	void reset_game() {
 		engine.world_renderer->reset();
 		ControllerManager::reset();
+		SchedulerManager::reset();
 		CameraReset();
 		world.reset();
 		gui::reset();
@@ -284,7 +285,7 @@ public:
 
 	void iterate() {
 		PerformanceMonitor::begin(ch_iter);
-		Scheduler::handle_iterate_pre(engine.elapsed);
+		ControllerManager::handle_iterate_pre(engine.elapsed);
 
 		network_manager.iterate();
 
@@ -292,7 +293,9 @@ public:
 		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
 
-		Scheduler::handle_iterate(engine.elapsed);
+		ControllerManager::handle_iterate(engine.elapsed);
+		SchedulerManager::iterate(engine.elapsed);
+		ComponentManager::iterate(engine.elapsed);
 
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
@@ -343,7 +346,7 @@ public:
 
 		if (!engine.window_renderer->start_frame())
 			return;
-		Scheduler::handle_draw_pre();
+		ControllerManager::handle_draw_pre();
 		timer_render.peek();
 		engine.window_renderer->draw(engine.window_renderer->create_params(engine.physical_aspect_ratio));
 		render_times.add(timer_render.get());

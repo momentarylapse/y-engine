@@ -23,6 +23,13 @@ public:
 	static void add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables);
 	static Controller *get_controller(const kaba::Class *_class);
 
+	static void handle_iterate_pre(float dt);
+	static void handle_iterate(float dt);
+	static void handle_input();
+	static void handle_draw_pre();
+	static void handle_render_inject();
+	static void handle_render_inject2();
+
 	static Array<Controller*> controllers;
 };
 
