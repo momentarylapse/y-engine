@@ -54,7 +54,6 @@ void _inplace_quick_sort_step(Array<T> &array, int first, int last, F f) {
 
 	auto partition = [first, last] (Array<T> &array, F f) {
 		int ipivot = (first + last) / 2;
-		//printf("  %d %d  %d\n", first, last, ipivot);
 		T pivot = array[ipivot];
 #if DEBUG_SORT>=2
 		if constexpr (std::is_same<T, int>::value)
