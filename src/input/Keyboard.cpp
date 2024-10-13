@@ -8,7 +8,7 @@
 #include "Keyboard.h"
 #include "InputManager.h"
 #include "../lib/hui_minimal/hui.h"
-#include "../plugins/PluginManager.h"
+#include "../plugins/ControllerManager.h"
 #include "../plugins/Controller.h"
 #include <GLFW/glfw3.h>
 

@@ -11,7 +11,6 @@
 #include "../lib/base/base.h"
 
 class Path;
-class Controller;
 class PerformanceMonitor;
 class TemplateDataScriptVariable;
 namespace kaba {
@@ -20,11 +19,9 @@ namespace kaba {
 
 class PluginManager {
 public:
-	static void init(int ch_iter);
+	static void init();
 	static void export_kaba();
 	static void import_kaba();
-
-	static void reset();
 
 	static const kaba::Class *find_class(const Path &filename, const string &name);
 	static const kaba::Class *find_class_derived(const Path &filename, const string &base_class);
@@ -34,10 +31,6 @@ public:
 	static void assign_variables(void *p, const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables);
 	static void assign_variables(void *p, const kaba::Class *c, const string &variables);
 
-	static void add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables);
-	static Controller *get_controller(const kaba::Class *_class);
-
-	static Array<Controller*> controllers;
 };
 
 #endif /* SRC_PLUGINS_PLUGINMANAGER_H_ */

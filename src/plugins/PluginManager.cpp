@@ -7,6 +7,7 @@
 
 #include "PluginManager.h"
 #include "Controller.h"
+#include "ControllerManager.h"
 #include "../lib/kaba/kaba.h"
 #include "../audio/SoundSource.h"
 #include "../audio/Listener.h"
@@ -72,10 +73,6 @@
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
 #include "../lib/os/msg.h"
-
-
-Array<Controller*> PluginManager::controllers;
-int ch_controller = -1;
 
 
 /*void global_delete(BaseClass *e) {
@@ -282,8 +279,7 @@ void generic_delete(T* t) {
 	t->~T();
 }
 
-void PluginManager::init(int ch_iter) {
-	ch_controller = PerformanceMonitor::create_channel("controller", ch_iter);
+void PluginManager::init() {
 	export_kaba();
 	import_kaba();
 }
@@ -882,7 +878,7 @@ void PluginManager::export_kaba() {
 	ext->link("world", &world);
 	ext->link("cam", &cam_main);
 	ext->link("engine", &engine);
-	ext->link("__get_controller", (void*)&PluginManager::get_controller);
+	ext->link("__get_controller", (void*)&ControllerManager::get_controller);
 	ext->link("Scheduler.subscribe", (void*)&Scheduler::subscribe);
 
 	ext->link("load_model", (void*)&__load_model);
@@ -946,14 +942,6 @@ void PluginManager::import_kaba() {
 	//msg_write(MeshCollider::_class->name);
 	//msg_write(MeshCollider::_class->parent->name);
 	//msg_write(MeshCollider::_class->parent->parent->name);
-}
-
-void PluginManager::reset() {
-	msg_write("del controller");
-	for (auto *c: controllers)
-		delete c;
-	controllers.clear();
-	Scheduler::reset();
 }
 
 Array<TemplateDataScriptVariable> parse_variables(const string &var) {
@@ -1067,24 +1055,6 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 	if (!c)
 		return nullptr;
 	return create_instance(c, variables);
-}
-
-void PluginManager::add_controller(const Path &name, const Array<TemplateDataScriptVariable> &variables) {
-	msg_write("add controller: " + name.str());
-	auto type = find_class_derived(name, "ui.Controller");;
-	auto *c = (Controller*)create_instance(type, variables);
-	c->_class = type;
-	c->ch_iterate = PerformanceMonitor::create_channel(type->long_name(), ch_controller);
-
-	controllers.add(c);
-	c->on_init();
-}
-
-Controller *PluginManager::get_controller(const kaba::Class *type) {
-	for (auto c: controllers)
-		if (c->_class == type)
-			return c;
-	return nullptr;
 }
 
 

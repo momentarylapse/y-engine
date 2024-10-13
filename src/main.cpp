@@ -38,6 +38,7 @@
 
 
 #include "plugins/PluginManager.h"
+#include "plugins/ControllerManager.h"
 
 #include "renderer/base.h"
 #include "renderer/helper/RendererFactory.h"
@@ -134,7 +135,8 @@ public:
 		audio::init();
 
 		GodInit(ch_iter);
-		PluginManager::init(ch_iter);
+		PluginManager::init();
+		ControllerManager::init(ch_iter);
 
 		ErrorHandler::init();
 
@@ -161,9 +163,9 @@ public:
 		audio::attach_listener(cam_main->owner);
 
 		for (auto &s: world.scripts)
-			PluginManager::add_controller(s.filename, s.variables);
+			ControllerManager::add_controller(s.filename, s.variables);
 		for (auto &s: config.additional_scripts)
-			PluginManager::add_controller(s, {});
+			ControllerManager::add_controller(s, {});
 
 		msg_left();
 		msg_write("|                                                      |");
@@ -257,7 +259,7 @@ public:
 
 	void reset_game() {
 		engine.world_renderer->reset();
-		PluginManager::reset();
+		ControllerManager::reset();
 		CameraReset();
 		world.reset();
 		gui::reset();

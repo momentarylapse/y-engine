@@ -6,9 +6,12 @@
  */
 
 #include "Scheduler.h"
+
+#include <plugins/ControllerManager.h>
+
 #include "PerformanceMonitor.h"
 #include "../y/ComponentManager.h"
-#include "../plugins/PluginManager.h"
+#include "../plugins/ControllerManager.h"
 #include "../plugins/Controller.h"
 #include "../lib/kaba/kaba.h"
 
@@ -51,7 +54,7 @@ void Scheduler::iterate_subscriptions(float dt) {
 
 void Scheduler::handle_iterate(float dt) {
 	PerformanceMonitor::begin(ch_controller);
-	for (auto *c: PluginManager::controllers) {
+	for (auto *c: ControllerManager::controllers) {
 		PerformanceMonitor::begin(c->ch_iterate);
 		c->on_iterate(dt);
 		PerformanceMonitor::end(c->ch_iterate);
@@ -67,31 +70,31 @@ void Scheduler::handle_iterate(float dt) {
 
 void Scheduler::handle_iterate_pre(float dt) {
 	PerformanceMonitor::begin(ch_con_iter_pre);
-	for (auto *c: PluginManager::controllers)
+	for (auto *c: ControllerManager::controllers)
 		c->on_iterate_pre(dt);
 	PerformanceMonitor::end(ch_con_iter_pre);
 }
 
 void Scheduler::handle_input() {
 	PerformanceMonitor::begin(ch_con_input);
-	for (auto *c: PluginManager::controllers)
+	for (auto *c: ControllerManager::controllers)
 		c->on_input();
 	PerformanceMonitor::end(ch_con_input);
 }
 
 void Scheduler::handle_draw_pre() {
 	PerformanceMonitor::begin(ch_con_draw_pre);
-	for (auto *c: PluginManager::controllers)
+	for (auto *c: ControllerManager::controllers)
 		c->on_draw_pre();
 	PerformanceMonitor::end(ch_con_draw_pre);
 }
 
 void Scheduler::handle_render_inject() {
-	for (auto *c: PluginManager::controllers)
+	for (auto *c: ControllerManager::controllers)
 		c->on_render_inject();
 }
 
 void Scheduler::handle_render_inject2() {
-	for (auto *c: PluginManager::controllers)
+	for (auto *c: ControllerManager::controllers)
 		c->on_render_inject2();
 }

@@ -6,8 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
 
+
 #=======================================================================================
-#    libs
+#    libraries
 #=======================================================================================
 
 find_package(PkgConfig REQUIRED)
@@ -216,6 +217,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 list(APPEND DEPS Threads::Threads)
 
+
 #=======================================================================================
 #    target y
 #=======================================================================================
@@ -390,6 +392,7 @@ add_executable(y
 	src/lib/vulkan/vulkan.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/Controller.cpp
+	src/plugins/ControllerManager.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
@@ -455,9 +458,15 @@ target_compile_definitions(y PUBLIC ${COMPILE_DEFINITIONS} INSTALL_PREFIX="${CMA
 target_link_libraries(y PUBLIC ${DEPS})
 target_include_directories(y PUBLIC src/)
 
+
 #=======================================================================================
 #    install
 #=======================================================================================
 
-install(TARGETS y DESTINATION bin)
-install(DIRECTORY "static/shader" DESTINATION share/y)
+set(RESOURCE_DESTINATION share/y)
+
+# binaries
+install(TARGETS y DESTINATION bin)	
+
+# resources
+install(DIRECTORY "static" DESTINATION ${RESOURCE_DESTINATION})

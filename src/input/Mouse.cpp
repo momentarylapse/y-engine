@@ -7,7 +7,7 @@
 
 #include "Mouse.h"
 #include "InputManager.h"
-#include "../plugins/PluginManager.h"
+#include "../plugins/ControllerManager.h"
 #include "../plugins/Controller.h"
 #include "../gui/Node.h"
 #include "../gui/gui.h"
