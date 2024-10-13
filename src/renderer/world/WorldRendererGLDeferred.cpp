@@ -20,7 +20,7 @@
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../helper/Scheduler.h"
+#include "../../plugins/ControllerManager.h"
 #include "../../plugins/PluginManager.h"
 #include "../../world/Camera.h"
 #include "../../world/Light.h"
@@ -203,7 +203,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	nix::set_front(nix::Orientation::CCW);
 
 	geo_renderer->draw_opaque();
-	Scheduler::handle_render_inject();
+	ControllerManager::handle_render_inject();
 
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CCW);
