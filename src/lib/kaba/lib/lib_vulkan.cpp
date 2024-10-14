@@ -40,7 +40,7 @@ xfer<void> __vulkan_init(const Array<string> &op) {
 }
 
 xfer<void> __vulkan_device_create_simple(vulkan::Instance *instance, GLFWwindow* window, const Array<string> &op) {
-	KABA_EXCEPTION_WRAPPER(return vulkan::Device::create_simple(instance, window, op));
+	//KABA_EXCEPTION_WRAPPER(return vulkan::Device::create_simple(instance, window, op));
 	return nullptr;
 }
 
@@ -194,9 +194,6 @@ public:
 
 class VulkanSwapChain : public vulkan::SwapChain {
 public:
-	void __init__(GLFWwindow* window, vulkan::Device *device) {
-		new(this) vulkan::SwapChain(window, device);
-	}
 	void __delete__() {
 		this->~VulkanSwapChain();
 	}
@@ -609,9 +606,9 @@ void SIAddPackageVulkan(Context *c) {
 		class_add_element("width", TypeInt32, vul_p(&vulkan::SwapChain::width));
 		class_add_element("height", TypeInt32, vul_p(&vulkan::SwapChain::height));
 		class_add_element("format", TypeInt32, vul_p(&vulkan::SwapChain::image_format));
-		class_add_func(Identifier::func::Init, TypeVoid, vul_p(&VulkanSwapChain::__init__), Flags::Mutable);
-			func_add_param("win", TypePointer);
+		/*class_add_func("create_for_glfw", TypeSwapChainXfer, vul_p(&VulkanSwapChain::create_for_glfw), Flags::Static);
 			func_add_param("device", TypeDeviceP);
+			func_add_param("win", TypePointer);*/
 		class_add_func(Identifier::func::Delete, TypeVoid, vul_p(&VulkanSwapChain::__delete__), Flags::Mutable);
 		class_add_func("create_depth_buffer", TypeDepthBufferXfer, vul_p(&vulkan::SwapChain::create_depth_buffer), Flags::Mutable);
 		class_add_func("create_render_pass", TypeRenderPassXfer, vul_p(&vulkan::SwapChain::create_render_pass), Flags::Mutable);
@@ -621,7 +618,6 @@ void SIAddPackageVulkan(Context *c) {
 			func_add_param("render_pass", TypeRenderPassP);
 			func_add_param("depth_buffer", TypeDepthBufferP);
 		class_add_func("create_textures", TypeTextureXferList, vul_p(&vulkan::SwapChain::create_textures), Flags::Mutable);
-		class_add_func("rebuild", TypeVoid, vul_p(&vulkan::SwapChain::rebuild), Flags::Mutable);
 		class_add_func("present", TypeBool, vul_p(&vulkan::SwapChain::present), Flags::Mutable);
 			func_add_param("image_index", TypeInt32);
 			func_add_param("wait_sem", TypeSemaphorePList);

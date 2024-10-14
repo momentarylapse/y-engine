@@ -26,30 +26,32 @@ Array<int> gpu_timestamp_queries;
 vulkan::Instance *instance = nullptr;
 vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
+vulkan::Surface surface;
 
 Context* api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.3", "rtx?", "verbosity=2"});
+	surface = instance->create_glfw_surface(window);
 	try {
-		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx", "compute"});
+		device = vulkan::Device::create_simple(instance, surface, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx", "compute"});
 		msg_write("device found: RTX + COMPUTE");
 	} catch (...) {}
 
 	if (!device) {
 		try {
-			device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx"});
+			device = vulkan::Device::create_simple(instance, surface, {"graphics", "present", "swapchain", "anisotropy", "validation", "rtx"});
 			msg_write("device found: RTX");
 		} catch (...) {}
 	}
 
 	if (!device) {
 		try {
-			device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation", "compute"});
+			device = vulkan::Device::create_simple(instance, surface, {"graphics", "present", "swapchain", "anisotropy", "validation", "compute"});
 			msg_write("device found: COMPUTE");
 		} catch (...) {}
 	}
 
 	if (!device) {
-		device = vulkan::Device::create_simple(instance, window, {"graphics", "present", "swapchain", "anisotropy", "validation"});
+		device = vulkan::Device::create_simple(instance, surface, {"graphics", "present", "swapchain", "anisotropy", "validation"});
 		msg_write("WARNING:  device found: neither RTX nor COMPUTE");
 	}
 

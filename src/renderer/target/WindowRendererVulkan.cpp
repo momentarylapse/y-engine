@@ -34,7 +34,7 @@ WindowRendererVulkan::~WindowRendererVulkan() = default;
 
 
 void WindowRendererVulkan::_create_swap_chain_and_stuff() {
-	swap_chain = new vulkan::SwapChain(window, device);
+	swap_chain = vulkan::SwapChain::create_for_glfw(device, window);
 	auto swap_images = swap_chain->create_textures();
 	for (auto t: swap_images)
 		wait_for_frame_fences.add(new vulkan::Fence(device));
