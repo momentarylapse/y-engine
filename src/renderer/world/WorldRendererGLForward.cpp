@@ -9,7 +9,6 @@
 #include "pass/ShadowRendererGL.h"
 #include "geometry/GeometryRendererGL.h"
 
-#include <GLFW/glfw3.h>
 #ifdef USING_OPENGL
 #include "../base.h"
 #include "../helper/jitter.h"

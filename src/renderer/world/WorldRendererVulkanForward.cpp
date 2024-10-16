@@ -10,29 +10,14 @@
 #include "pass/ShadowRendererVulkan.h"
 #include "../../graphics-impl.h"
 #include "../base.h"
-#include "../../lib/os/msg.h"
+#include <lib/os/msg.h>
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../helper/Scheduler.h"
-#include "../../plugins/PluginManager.h"
 #include "../../gui/gui.h"
 #include "../../gui/Node.h"
-#include "../../gui/Picture.h"
-#include "../../gui/Text.h"
-#include "../../fx/Particle.h"
-#include "../../fx/Beam.h"
-#include "../../fx/ParticleManager.h"
 #include "../../world/Camera.h"
-#include "../../world/Light.h"
-#include "../../world/Material.h"
-#include "../../world/Model.h"
-#include "../../world/Object.h" // meh
-#include "../../world/Terrain.h"
 #include "../../world/World.h"
-#include "../../y/Entity.h"
-#include "../../Config.h"
-#include "../../meta.h"
 
 
 WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("fw", cam, RenderPathType::FORWARD) {

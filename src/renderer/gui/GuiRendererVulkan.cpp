@@ -14,8 +14,8 @@
 #include "../../gui/Picture.h"
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../lib/math/mat4.h"
-#include "../../lib/math/rect.h"
+#include <lib/math/mat4.h>
+#include <lib/math/rect.h>
 
 
 

@@ -7,7 +7,6 @@
 
 #include "ShadowRendererVulkan.h"
 
-#include <GLFW/glfw3.h>
 #ifdef USING_VULKAN
 #include "../WorldRendererVulkan.h"
 #include "../geometry/GeometryRendererVulkan.h"

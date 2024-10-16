@@ -10,7 +10,7 @@
 
 #include "../Renderer.h"
 #include "../../graphics-fwd.h"
-#include "../../lib/base/callable.h"
+#include <lib/base/callable.h>
 
 class vec2;
 class Any;

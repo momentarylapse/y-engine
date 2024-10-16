@@ -8,36 +8,18 @@
 #include "WorldRendererVulkan.h"
 #ifdef USING_VULKAN
 #include "pass/ShadowRendererVulkan.h"
-#include "../base.h"
-#include "../helper/PipelineManager.h"
 #include "../../graphics-impl.h"
-#include "../../lib/image/image.h"
-#include "../../lib/math/vec3.h"
-#include "../../lib/math/complex.h"
-#include "../../lib/math/rect.h"
-#include "../../lib/os/msg.h"
+#include <lib/image/image.h>
+#include <lib/math/vec3.h>
+#include <lib/math/complex.h>
+#include <lib/math/rect.h>
+#include <lib/os/msg.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../plugins/PluginManager.h"
 #include "../../fx/Particle.h"
-#include "../../fx/Beam.h"
-#include "../../fx/ParticleManager.h"
-#include "../../gui/gui.h"
-#include "../../gui/Picture.h"
 #include "../../world/Camera.h"
-#include "../../world/Material.h"
-#include "../../world/Model.h"
-#include "../../world/Object.h" // meh
-#include "../../world/Terrain.h"
-#include "../../world/World.h"
 #include "../../world/Light.h"
-#include "../../world/components/Animator.h"
-#include "../../world/components/UserMesh.h"
-#include "../../world/components/MultiInstance.h"
 #include "../../y/Entity.h"
-#include "../../y/ComponentManager.h"
-#include "../../Config.h"
-#include "../../meta.h"
 
 
 

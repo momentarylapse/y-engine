@@ -11,7 +11,7 @@
 #include "../../../graphics-fwd.h"
 #ifdef USING_VULKAN
 #include "../WorldRendererVulkan.h"
-#include "../../../lib/math/mat4.h"
+#include <lib/math/mat4.h>
 
 class Camera;
 class Material;

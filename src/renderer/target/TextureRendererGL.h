@@ -13,7 +13,7 @@
 
 class TextureRendererGL : public Renderer {
 public:
-	TextureRendererGL(FrameBuffer *fb);
+	explicit TextureRendererGL(FrameBuffer *fb);
 
 	void render(float aspect_ratio);
 

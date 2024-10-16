@@ -9,33 +9,28 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 #include "../../helper/PerformanceMonitor.h"
-#include "../../lib/os/msg.h"
-#include "../../lib/math/rect.h"
+#include <lib/os/msg.h>
+#include <lib/math/rect.h>
 #include "../../Config.h" // for timing experiment
 
 
-WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, Device *_device) : TargetRenderer("win") {
-	window = _window;
-
+SurfaceRendererVulkan::SurfaceRendererVulkan(const string& name, Device *_device) : TargetRenderer(name) {
 	device = _device;
-
 
 	image_available_semaphore = new vulkan::Semaphore(device);
 	render_finished_semaphore = new vulkan::Semaphore(device);
 
 
 	framebuffer_resized = false;
-
-	_create_swap_chain_and_stuff();
 }
 
-WindowRendererVulkan::~WindowRendererVulkan() = default;
+SurfaceRendererVulkan::~SurfaceRendererVulkan() = default;
 
 
 
-void WindowRendererVulkan::_create_swap_chain_and_stuff() {
-	swap_chain = vulkan::SwapChain::create_for_glfw(device, window);
-	auto swap_images = swap_chain->create_textures();
+void SurfaceRendererVulkan::_create_swap_chain_and_stuff() {
+	create_swap_chain();
+	swap_images = swap_chain->create_textures();
 	for (auto t: swap_images)
 		wait_for_frame_fences.add(new vulkan::Fence(device));
 
@@ -55,7 +50,7 @@ void WindowRendererVulkan::_create_swap_chain_and_stuff() {
 	del depth_buffer
 	del swap_chain*/
 
-void WindowRendererVulkan::rebuild_default_stuff() {
+void SurfaceRendererVulkan::rebuild_default_stuff() {
 	msg_write("recreate swap chain");
 
 	device->wait_idle();
@@ -65,7 +60,7 @@ void WindowRendererVulkan::rebuild_default_stuff() {
 }
 
 
-bool WindowRendererVulkan::start_frame() {
+bool SurfaceRendererVulkan::start_frame() {
 
 	if (!swap_chain->acquire_image(&image_index, image_available_semaphore)) {
 		rebuild_default_stuff();
@@ -79,7 +74,7 @@ bool WindowRendererVulkan::start_frame() {
 	return true;
 }
 
-void WindowRendererVulkan::end_frame() {
+void SurfaceRendererVulkan::end_frame() {
 	PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
 	device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
@@ -90,18 +85,18 @@ void WindowRendererVulkan::end_frame() {
 	PerformanceMonitor::end(ch_end);
 }
 
-RenderParams WindowRendererVulkan::create_params(float aspect_ratio) {
+RenderParams SurfaceRendererVulkan::create_params(float aspect_ratio) {
 	auto p = RenderParams::into_window(frame_buffers[image_index], aspect_ratio);
 	p.command_buffer = command_buffers[image_index];
 	p.render_pass = default_render_pass;
 	return p;
 }
 
-void WindowRendererVulkan::prepare(const RenderParams& params) {
+void SurfaceRendererVulkan::prepare(const RenderParams& params) {
 
 }
 
-void WindowRendererVulkan::draw(const RenderParams& params) {
+void SurfaceRendererVulkan::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
@@ -123,7 +118,39 @@ void WindowRendererVulkan::draw(const RenderParams& params) {
 }
 
 
+#ifdef HAS_LIB_GLFW
+WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, Device *_device) :
+		SurfaceRendererVulkan("win", _device) {
+	window = _window;
+}
 
+void WindowRendererVulkan::create_swap_chain() {
+	swap_chain = vulkan::SwapChain::create_for_glfw(device, window);
+}
+
+xfer<WindowRendererVulkan> WindowRendererVulkan::create(GLFWwindow* window, Device *device) {
+	//auto surface = device->instance->create_glfw_surface(window);
+	auto r = new WindowRendererVulkan(window, device);
+	r->_create_swap_chain_and_stuff();
+	return r;
+}
+#endif
+
+HeadlessSurfaceRendererVulkan::HeadlessSurfaceRendererVulkan(Device *_device, int _width, int _height) :
+		SurfaceRendererVulkan("headless", _device) {
+	width = _width;
+	height = _height;
+}
+
+void HeadlessSurfaceRendererVulkan::create_swap_chain() {
+	swap_chain = vulkan::SwapChain::create(device, width, height);
+}
+
+xfer<HeadlessSurfaceRendererVulkan> HeadlessSurfaceRendererVulkan::create(Device *device, int width, int height) {
+	auto r = new HeadlessSurfaceRendererVulkan(device, width, height);
+	r->_create_swap_chain_and_stuff();
+	return r;
+}
 
 
 #endif

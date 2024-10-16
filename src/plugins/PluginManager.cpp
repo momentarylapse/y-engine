@@ -22,10 +22,13 @@
 #include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
+#if __has_include("../input/InputManager.h")
 #include "../input/InputManager.h"
 #include "../input/Gamepad.h"
 #include "../input/Keyboard.h"
 #include "../input/Mouse.h"
+#define HAS_INPUT
+#endif
 #include "../net/NetworkManager.h"
 #include "../renderer/base.h"
 #include "../renderer/Renderer.h"
@@ -678,11 +681,11 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("HBox.__init__", &gui::HBox::__init__);
 	ext->link_class_func("VBox.__init__", &gui::VBox::__init__);
 
+#ifdef HAS_INPUT
 	ext->link("key_state", (void*)&input::get_key);
 	ext->link("key_down", (void*)&input::get_key_down);
 	ext->link("key_up", (void*)&input::get_key_up);
 	ext->link("button", (void*)&input::get_button);
-	ext->link("toplevel", &gui::toplevel);
 	ext->link("mouse", &input::mouse);
 	ext->link("dmouse", &input::dmouse);
 	ext->link("scroll", &input::scroll);
@@ -697,6 +700,29 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Gamepad.axis", &input::Gamepad::axis);
 	ext->link_class_func("Gamepad.button", &input::Gamepad::button);
 	ext->link_class_func("Gamepad.clicked", &input::Gamepad::clicked);
+#else
+	int dummy;
+	ext->link("key_state", &dummy);
+	ext->link("key_down", &dummy);
+	ext->link("key_up", &dummy);
+	ext->link("button", &dummy);
+	ext->link("mouse", &dummy);
+	ext->link("dmouse", &dummy);
+	ext->link("scroll", &dummy);
+	ext->link("link_mouse_and_keyboard_into_pad", &dummy);
+	ext->link("get_pad", &dummy);
+
+	ext->declare_class_size("Gamepad", 1);
+	ext->declare_class_element("Gamepad.deadzone", &dummy);
+	ext->link_class_func("Gamepad.update", &dummy);
+	ext->link_class_func("Gamepad.is_present", &dummy);
+	ext->link_class_func("Gamepad.name", &dummy);
+	ext->link_class_func("Gamepad.axis", &dummy);
+	ext->link_class_func("Gamepad.button", &dummy);
+	ext->link_class_func("Gamepad.clicked", &dummy);
+#endif
+
+	ext->link("toplevel", &gui::toplevel);
 
 	ext->declare_class_size("NetworkManager", sizeof(NetworkManager));
 	ext->declare_class_element("NewtorkManager.cur_con", &NetworkManager::cur_con);

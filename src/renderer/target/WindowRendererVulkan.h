@@ -10,6 +10,8 @@
 #include "TargetRenderer.h"
 #ifdef USING_VULKAN
 
+#include <lib/vulkan/vulkan.h>
+
 struct GLFWwindow;
 
 
@@ -19,10 +21,10 @@ using SwapChain = vulkan::SwapChain;
 using RenderPass = vulkan::RenderPass;
 using Device = vulkan::Device;
 
-class WindowRendererVulkan : public TargetRenderer {
+class SurfaceRendererVulkan : public TargetRenderer {
 public:
-	WindowRendererVulkan(GLFWwindow* win, Device *device);
-	~WindowRendererVulkan() override;
+	SurfaceRendererVulkan(const string& name, Device *device);
+	~SurfaceRendererVulkan() override;
 
 
 	bool start_frame() override;
@@ -31,26 +33,52 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	RenderParams create_params(float aspect_ratio);
+	virtual void create_swap_chain() = 0;
 
-	GLFWwindow* window;
+	RenderParams create_params(float aspect_ratio);
 
 	Fence* in_flight_fence;
 	Array<Fence*> wait_for_frame_fences;
-	Semaphore *image_available_semaphore, *render_finished_semaphore;
+	Semaphore *image_available_semaphore = nullptr;
+	Semaphore *render_finished_semaphore = nullptr;
 
 	Array<CommandBuffer*> command_buffers;
 
 	Device *device;
-	SwapChain *swap_chain;
-	RenderPass* default_render_pass;
-	DepthBuffer* depth_buffer;
+	SwapChain *swap_chain = nullptr;
+	Array<Texture*> swap_images;
+	RenderPass* default_render_pass = nullptr;
+	DepthBuffer* depth_buffer = nullptr;
 	Array<FrameBuffer*> frame_buffers;
-	int image_index;
-	bool framebuffer_resized;
+	int image_index = 0;
+	bool framebuffer_resized = false;
 
 	void _create_swap_chain_and_stuff();
 	void rebuild_default_stuff();
+};
+
+#ifdef HAS_LIB_GLFW
+class WindowRendererVulkan : public SurfaceRendererVulkan {
+public:
+	WindowRendererVulkan(GLFWwindow* win, Device *device);
+
+	void create_swap_chain() override;
+
+	GLFWwindow* window;
+
+	static xfer<WindowRendererVulkan> create(GLFWwindow* win, Device *device);
+};
+#endif
+
+class HeadlessSurfaceRendererVulkan : public SurfaceRendererVulkan {
+public:
+	HeadlessSurfaceRendererVulkan(Device *device, int width, int height);
+
+	void create_swap_chain() override;
+
+	int width, height;
+
+	static xfer<HeadlessSurfaceRendererVulkan> create(Device *device, int width, int height);
 };
 
 #endif

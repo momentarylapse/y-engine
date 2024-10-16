@@ -16,7 +16,7 @@
 #include "../../world/Model.h"
 #include "../../world/Terrain.h"
 #include "../../world/World.h"
-#include "../../lib/base/callable.h"
+#include <lib/base/callable.h>
 #include "../../Config.h"
 #include <y/ComponentManager.h>
 

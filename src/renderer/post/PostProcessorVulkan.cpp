@@ -10,9 +10,9 @@
 #ifdef USING_VULKAN
 #include "../base.h"
 #include "../../graphics-impl.h"
-#include "../../lib/math/vec2.h"
-#include "../../lib/math/rect.h"
-#include "../../lib/os/msg.h"
+#include <lib/math/vec2.h>
+#include <lib/math/rect.h>
+#include <lib/os/msg.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../Config.h"

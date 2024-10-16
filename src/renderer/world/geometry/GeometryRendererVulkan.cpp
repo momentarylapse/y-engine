@@ -7,7 +7,6 @@
 
 #include "GeometryRendererVulkan.h"
 
-#include <GLFW/glfw3.h>
 #ifdef USING_VULKAN
 #include "../WorldRendererVulkan.h"
 #include "../../helper/PipelineManager.h"
@@ -17,13 +16,10 @@
 #include "../../../Config.h"
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../helper/ResourceManager.h"
-#include "../../../plugins/PluginManager.h"
 #include "../../../fx/Particle.h"
 #include "../../../fx/Beam.h"
 #include "../../../fx/ParticleEmitter.h"
 #include "../../../fx/ParticleManager.h"
-#include "../../../gui/gui.h"
-#include "../../../gui/Picture.h"
 #include "../../../world/Camera.h"
 #include "../../../world/Material.h"
 #include "../../../world/Model.h"

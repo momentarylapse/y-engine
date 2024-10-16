@@ -33,7 +33,11 @@
 #include <y/EngineData.h>
 #include <world/Camera.h>
 #include <lib/os/msg.h>
+#if __has_include(<lib/hui_minimal/hui.h>)
 #include <lib/hui_minimal/hui.h>
+#elif __has_include(<lib/hui/hui.h>)
+#include <lib/hui/hui.h>
+#endif
 #include <helper/PerformanceMonitor.h>
 #include <Config.h>
 
@@ -60,10 +64,14 @@ void print_render_chain() {
 
 
 WindowRenderer *create_window_renderer(GLFWwindow* window) {
+#ifdef HAS_LIB_GLFW
 #ifdef USING_VULKAN
-	return new WindowRendererVulkan(window, device);
+	return WindowRendererVulkan::create(window, device);
 #else
 	return new WindowRendererGL(window);
+#endif
+#else
+	return nullptr;
 #endif
 }
 
@@ -138,7 +146,9 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		engine.region_renderer->add_region(p, rect::ID, 0);
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
 	} catch(Exception &e) {
+#if __has_include(<lib/hui_minimal/hui.h>)
 		hui::ShowError(e.message());
+#endif
 		throw e;
 	}
 	print_render_chain();

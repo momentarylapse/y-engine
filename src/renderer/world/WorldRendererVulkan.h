@@ -10,10 +10,10 @@
 #include "WorldRenderer.h"
 #ifdef USING_VULKAN
 #include "geometry/GeometryRendererVulkan.h"
-#include "../../lib/base/pointer.h"
-#include "../../lib/base/callable.h"
-#include "../../lib/math/vec3.h"
-#include "../../lib/math/rect.h"
+#include <lib/base/pointer.h>
+#include <lib/base/callable.h>
+#include <lib/math/vec3.h>
+#include <lib/math/rect.h>
 
 namespace vulkan {
 	class Instance;

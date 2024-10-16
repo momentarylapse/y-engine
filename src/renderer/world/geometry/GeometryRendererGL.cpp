@@ -7,7 +7,6 @@
 
 #include "GeometryRendererGL.h"
 
-#include <GLFW/glfw3.h>
 #ifdef USING_OPENGL
 #include "../WorldRendererGL.h"
 #include "../../base.h"

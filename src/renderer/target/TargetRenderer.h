@@ -12,7 +12,7 @@
 
 class TargetRenderer : public Renderer {
 public:
-	TargetRenderer(const string &name);
+	explicit TargetRenderer(const string &name);
 
 	void draw(const RenderParams& params) override;
 

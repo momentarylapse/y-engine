@@ -28,6 +28,7 @@ vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
 vulkan::Surface surface;
 
+#if HAS_LIB_GLFW
 Context* api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.3", "rtx?", "verbosity=2"});
 	surface = instance->create_glfw_surface(window);
@@ -65,6 +66,7 @@ Context* api_init(GLFWwindow* window) {
 
 	return new Context;
 }
+#endif
 
 void api_end() {
 	gpu_flush();

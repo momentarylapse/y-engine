@@ -9,7 +9,7 @@
 
 #include "GeometryRenderer.h"
 #ifdef USING_VULKAN
-#include "../../../lib/math/mat4.h"
+#include <lib/math/mat4.h>
 
 class Camera;
 class PerformanceMonitor;

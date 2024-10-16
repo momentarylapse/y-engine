@@ -9,9 +9,9 @@
 
 #include "../../Renderer.h"
 #include "../../../graphics-fwd.h"
-#include "../../../lib/math/vec3.h"
-#include "../../../lib/image/color.h"
-#include "../../../lib/math/mat4.h"
+#include <lib/math/vec3.h>
+#include <lib/image/color.h>
+#include <lib/math/mat4.h>
 #include "../../../world/Light.h"
 #include "../../../world/Material.h"
 
