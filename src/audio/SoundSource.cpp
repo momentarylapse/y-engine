@@ -19,7 +19,6 @@ const kaba::Class *SoundSource::_class = nullptr;
 
 SoundSource::SoundSource() {
 	component_type = _class;
-	buffer = nullptr;
 	suicidal = false;
 	volume = 1;
 	speed = 1;
@@ -46,6 +45,26 @@ void SoundSource::set_buffer(AudioBuffer* _buffer) {
 	if (buffer) {
 		buffer->ref_count ++;
 		alSourcei (al_source, AL_BUFFER, buffer->al_buffer);
+	}
+}
+
+void SoundSource::set_stream(AudioStream* _stream) {
+	if (buffer) {
+		buffer->ref_count --;
+	}
+	if (stream) {
+
+	}
+	buffer = nullptr;
+	stream = _stream;
+	if (stream) {
+		// start streaming
+		int num_buffers = 0;
+		if (stream->raw.stream(stream->al_buffer[0]))
+			num_buffers ++;
+		if (stream->raw.stream(stream->al_buffer[1]))
+			num_buffers ++;
+		alSourceQueueBuffers(al_source, num_buffers, stream->al_buffer);
 	}
 }
 

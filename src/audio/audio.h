@@ -36,11 +36,10 @@ struct AudioBuffer {
 };
 
 
-
-class AudioStream {
+class RawAudioStream {
 public:
 	int channels, bits, samples, freq;
-	char *buffer;
+	bytes buffer;
 	int buf_samples;
 	void *vf;
 	int type;
@@ -51,17 +50,29 @@ public:
 		END
 	} state;
 
-	bool stream(int buf);
+	bool stream(unsigned int buf);
+};
+
+class AudioStream {
+public:
+	unsigned int al_buffer[2] = {0, 0};
+	RawAudioStream raw;
+
+	AudioStream();
+	~AudioStream();
 };
 
 AudioBuffer* load_buffer(const Path& filename);
 AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate);
+
+AudioStream* load_stream(const Path& filename);
 
 class SoundSource;
 
 // TODO move to World?
 SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1);
 SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius1);
+SoundSource& emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1);
 
 };
 

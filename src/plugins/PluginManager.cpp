@@ -621,6 +621,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("SoundSource.has_ended", &audio::SoundSource::has_ended);
 	ext->link_class_func("SoundSource.update", &audio::SoundSource::_apply_data);
 	ext->link_class_func("SoundSource.set_buffer", &audio::SoundSource::set_buffer);
+	ext->link_class_func("SoundSource.set_stream", &audio::SoundSource::set_stream);
 	ext->link_class_func("SoundSource.__del_override__", &DeletionQueue::add);
 
 
@@ -913,8 +914,10 @@ void PluginManager::export_kaba() {
 
 	ext->link("load_buffer", (void*)&audio::load_buffer);
 	ext->link("create_buffer", (void*)&audio::create_buffer);
+	ext->link("load_audio_stream", (void*)&audio::load_stream);
 	ext->link("emit_sound", (void*)&audio::emit_sound);
 	ext->link("emit_sound_file", (void*)&audio::emit_sound_file);
+	ext->link("emit_sound_stream", (void*)&audio::emit_sound_stream);
 }
 
 template<class C>

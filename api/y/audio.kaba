@@ -4,12 +4,16 @@ use os
 class AudioBuffer
 	# hidden stuff
 
+class AudioStream
+	# hidden stuff
+
 class SoundSource extends Component
 	func extern pause(pause: bool)
 	func extern play()
 	func extern stop()
 	func extern update()
 	func extern set_buffer(buffer: AudioBuffer&)
+	func extern set_stream(stream: AudioStream&)
 	func extern __del_override__()
 	
 	var loop, suicidal: bool
@@ -20,20 +24,16 @@ class SoundSource extends Component
 func extern load_buffer(filename: os.Path) -> AudioBuffer&
 func extern create_buffer(samples: f32[], sample_rate: f32) -> AudioBuffer&
 
+func extern load_audio_stream(filename: os.Path) -> AudioStream&
+
 func extern emit_sound(buffer: AudioBuffer&, pos: vec3, radius1: f32) -> SoundSource&
 func extern emit_sound_file(filename: os.Path, pos: vec3, radius1: f32) -> SoundSource&
+func extern emit_sound_stream(stream: AudioStream&, pos: vec3, radius1: f32) -> SoundSource&
 
 
 class Listener extends Component
 
 
-# deprecated:
-class Music extends Entity
-	func pause(pause: bool)
-	func play(loop: bool)
-	func set_rate(rate: float)
-	func stop()
-func load_music(filename: os.Path) -> Music*
 #void save_sound(Path filename, float[] buf_r, float[] buf_l, int freq, int channels, int bits)
-var volume_music: float
-var volume_sounds: float
+var volume_music: f32
+var volume_sounds: f32

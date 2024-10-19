@@ -7,6 +7,7 @@
 #include "../world/World.h" // FIXME
 #include "../y/ComponentManager.h"
 #include "../y/Entity.h"
+#include "../y/EngineData.h"
 #include "../lib/base/base.h"
 #include "../lib/base/map.h"
 #include "../lib/base/algo.h"
@@ -84,6 +85,17 @@ void iterate(float dt) {
 		s->_apply_data();
 		if (s->suicidal and s->has_ended())
 			DeletionQueue::add(s->owner);
+
+		else if (s->stream) {
+			int processed;
+			alGetSourcei(s->al_source, AL_BUFFERS_PROCESSED, &processed);
+			while (processed --) {
+				ALuint buf;
+				alSourceUnqueueBuffers(s->al_source, 1, &buf);
+				if (s->stream->raw.stream(buf))
+					alSourceQueueBuffers(s->al_source, 1, &buf);
+			}
+		}
 	}
 	DeletionQueue::delete_all();
 	auto& listeners = ComponentManager::get_list<Listener>();
@@ -145,6 +157,43 @@ AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
 	return buffer;
 }
 
+AudioStream::AudioStream() {
+#if HAS_LIB_OPENAL
+	alGenBuffers(2, al_buffer);
+#endif
+}
+
+AudioStream::~AudioStream() {
+#if HAS_LIB_OPENAL
+	alDeleteBuffers(2, al_buffer);
+#endif
+}
+
+bool RawAudioStream::stream(unsigned int buf) {
+	if (state != RawAudioStream::State::READY)
+		return false;
+	load_stream_step(this);
+	if (channels == 2) {
+		if (bits == 8)
+			alBufferData(buf, AL_FORMAT_STEREO8, &buffer[0], buf_samples * 2, freq);
+		else if (bits == 16)
+			alBufferData(buf, AL_FORMAT_STEREO16, &buffer[0], buf_samples * 4, freq);
+	} else {
+		if (bits == 8)
+			alBufferData(buf, AL_FORMAT_MONO8, &buffer[0], buf_samples, freq);
+		else if (bits == 16)
+			alBufferData(buf, AL_FORMAT_MONO16, &buffer[0], buf_samples * 2, freq);
+	}
+	return true;
+}
+
+AudioStream* load_stream(const Path& filename) {
+	auto stream = new AudioStream;
+	stream->raw = load_stream_start(filename);
+	return stream;
+}
+
+
 
 SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 	auto e = world.create_entity(pos, quaternion::ID);
@@ -159,6 +208,17 @@ SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 
 SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius1) {
 	return emit_sound(load_buffer(filename), pos, radius1);
+}
+
+SoundSource& emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1) {
+	auto e = world.create_entity(pos, quaternion::ID);
+	auto s = e->add_component<SoundSource>();
+	s->set_stream(stream);
+	s->min_distance = radius1;
+	s->max_distance = radius1 * 100;
+	s->suicidal = true;
+	s->play(false);
+	return *s;
 }
 }
 
