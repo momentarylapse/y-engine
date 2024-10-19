@@ -11,10 +11,10 @@
 #include "geometry/GeometryRendererGL.h"
 #include "pass/ShadowRendererGL.h"
 #include "../base.h"
-#include "../../lib/nix/nix.h"
-#include "../../lib/os/msg.h"
-#include "../../lib/math/random.h"
-#include "../../lib/math/vec4.h"
+#include <lib/nix/nix.h>
+#include <lib/os/msg.h>
+#include <lib/math/random.h>
+#include <lib/math/vec4.h>
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"

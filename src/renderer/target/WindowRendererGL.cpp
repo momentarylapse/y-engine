@@ -5,34 +5,45 @@
  *      Author: michi
  */
 
+
 #include "WindowRendererGL.h"
 #ifdef USING_OPENGL
+#if HAS_LIB_GLFW
 #include <GLFW/glfw3.h>
+#endif
 #include "../base.h"
-#include "../../lib/nix/nix.h"
+#include <lib/nix/nix.h>
 #include "../../helper/PerformanceMonitor.h"
 
 WindowRendererGL::WindowRendererGL(GLFWwindow* win) : TargetRenderer("win") {
 	window = win;
+#if HAS_LIB_GLFW
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
+#endif
 
 	_frame_buffer = context->default_framebuffer;
 }
 
 
 bool WindowRendererGL::start_frame() {
+#if HAS_LIB_GLFW
 	nix::start_frame_glfw(context, window);
 	//jitter_iterate();
 	return true;
+#else
+	return false;
+#endif
 }
 
 void WindowRendererGL::end_frame() {
+#if HAS_LIB_GLFW
 	PerformanceMonitor::begin(ch_end);
 	gpu_timestamp_begin(ch_end);
 	nix::end_frame_glfw();
 	gpu_timestamp_end(ch_end);
 	PerformanceMonitor::end(ch_end);
+#endif
 }
 
 

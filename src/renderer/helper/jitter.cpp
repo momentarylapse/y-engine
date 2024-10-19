@@ -6,8 +6,8 @@
  */
 
 #include "jitter.h"
-#include "../../lib/math/mat4.h"
-#include "../../lib/math/vec3.h"
+#include <lib/math/mat4.h>
+#include <lib/math/vec3.h>
 
 
 const float HALTON2[] = {1/2.0f, 1/4.0f, 3/4.0f, 1/8.0f, 5/8.0f, 3/8.0f, 7/8.0f, 1/16.0f, 9/16.0f, 3/16.0f, 11/16.0f, 5/16.0f, 13/16.0f};

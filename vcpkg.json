@@ -3,6 +3,7 @@
     "bullet3",
     "fftw3",
     "freetype",
+    "glew",
     "glfw3",
     "libogg",
     "libvorbis",

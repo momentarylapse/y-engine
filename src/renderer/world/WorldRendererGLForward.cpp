@@ -12,9 +12,9 @@
 #ifdef USING_OPENGL
 #include "../base.h"
 #include "../helper/jitter.h"
-#include "../../lib/nix/nix.h"
-#include "../../lib/image/image.h"
-#include "../../lib/os/msg.h"
+#include <lib/nix/nix.h>
+#include <lib/image/image.h>
+#include <lib/os/msg.h>
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"

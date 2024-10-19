@@ -10,7 +10,7 @@
 #include "../../Renderer.h"
 #include "../../../graphics-fwd.h"
 #ifdef USING_OPENGL
-#include "../../../lib/math/mat4.h"
+#include <lib/math/mat4.h>
 #include "../geometry/SceneView.h"
 
 class Camera;

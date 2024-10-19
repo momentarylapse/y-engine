@@ -8,11 +8,11 @@
 #include "HDRRendererGL.h"
 #ifdef USING_OPENGL
 #include "../base.h"
-#include "../../lib/nix/nix.h"
-#include "../../lib/math/vec2.h"
-#include "../../lib/math/rect.h"
-#include "../../lib/os/msg.h"
-#include "../../lib/any/any.h"
+#include <lib/nix/nix.h>
+#include <lib/math/vec2.h>
+#include <lib/math/rect.h>
+#include <lib/os/msg.h>
+#include <lib/any/any.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../Config.h"
@@ -77,8 +77,7 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 	vb_2d->create_quad(rect::ID_SYM);
 }
 
-HDRRendererGL::~HDRRendererGL() {
-}
+HDRRendererGL::~HDRRendererGL() = default;
 
 
 void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, VertexBuffer *vb_2d, const RenderParams& params) {

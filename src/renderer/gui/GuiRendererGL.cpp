@@ -8,8 +8,8 @@
 #include "GuiRendererGL.h"
 #ifdef USING_OPENGL
 #include "../base.h"
-#include "../../lib/nix/nix.h"
-#include "../../lib/os/msg.h"
+#include <graphics-impl.h>
+#include <lib/os/msg.h>
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"
 #include "../../helper/PerformanceMonitor.h"
