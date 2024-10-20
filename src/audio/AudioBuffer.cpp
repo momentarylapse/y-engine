@@ -18,6 +18,32 @@ namespace audio {
 Array<AudioBuffer*> created_audio_buffers;
 base::map<Path, AudioBuffer*> loaded_audio_buffers;
 
+void fill_buffer_f32(unsigned int buffer, const Array<float>& samples, float sample_rate) {
+#if HAS_LIB_OPENAL
+	Array<short> buf16;
+	buf16.resize(samples.num);
+	for (int i = 0; i < samples.num; i++)
+		buf16[i] = (short)(samples[i] * 32768.0f);
+	alBufferData(buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, (int)sample_rate);
+#endif
+}
+
+void fill_buffer_raw(unsigned int buffer, const RawAudioBuffer& raw) {
+#if HAS_LIB_OPENAL
+	if (raw.channels == 2) {
+		if (raw.bits == 8)
+			alBufferData(buffer, AL_FORMAT_STEREO8, raw.buffer.data, raw.buffer.num, raw.sample_rate);
+		else if (raw.bits == 16)
+			alBufferData(buffer, AL_FORMAT_STEREO16, raw.buffer.data, raw.buffer.num, raw.sample_rate);
+	} else {
+		if (raw.bits == 8)
+			alBufferData(buffer, AL_FORMAT_MONO8, raw.buffer.data, raw.buffer.num, raw.sample_rate);
+		else if (raw.bits == 16)
+			alBufferData(buffer, AL_FORMAT_MONO16, raw.buffer.data, raw.buffer.num, raw.sample_rate);
+	}
+#endif
+}
+
 AudioBuffer::AudioBuffer() {
 #if HAS_LIB_OPENAL
 	alGenBuffers(1, &al_buffer);
@@ -31,25 +57,13 @@ AudioBuffer::~AudioBuffer() {
 }
 
 void AudioBuffer::fill(const RawAudioBuffer& buf) {
-#if HAS_LIB_OPENAL
-	if (buf.bits == 8)
-		alBufferData(al_buffer, AL_FORMAT_MONO8, buf.buffer.data, buf.samples, buf.freq);
-	else if (buf.bits == 16)
-		alBufferData(al_buffer, AL_FORMAT_MONO16, buf.buffer.data, buf.samples * 2, buf.freq);
-#endif
+	fill_buffer_raw(al_buffer, buf);
 }
 
 
 AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
 	auto buffer = new AudioBuffer;
-
-#if HAS_LIB_OPENAL
-	Array<short> buf16;
-	buf16.resize(samples.num);
-	for (int i=0; i<samples.num; i++)
-		buf16[i] = (int)(samples[i] * 32768.0f);
-	alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, (int)sample_rate);
-#endif
+	fill_buffer_f32(buffer->al_buffer, samples, sample_rate);
 
 	created_audio_buffers.add(buffer);
 	return buffer;

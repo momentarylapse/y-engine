@@ -2,6 +2,7 @@
 #define AUDIO_AUDIOSTREAM_H
 
 #include <lib/base/base.h>
+#include <functional>
 
 class Path;
 
@@ -16,6 +17,7 @@ struct AudioStream {
 };
 
 AudioStream* load_stream(const Path& filename);
+AudioStream* create_stream(std::function<Array<float>(int)> f, float sample_rate);
 
 }
 

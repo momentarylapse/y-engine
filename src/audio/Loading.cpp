@@ -58,7 +58,7 @@ RawAudioBuffer load_wave_file(const Path &filename) {
 		return r;
 	}
 	r.channels = *(short*)&header[22];
-	r.freq = *(int*)&header[24];
+	r.sample_rate = *(int*)&header[24];
 	[[maybe_unused]] int block_align = *(short*)&header[32];
 	r.bits = *(short*)&header[34];
 	int byte_per_sample = (r.bits / 8) * r.channels;
@@ -116,7 +116,7 @@ RawAudioBuffer load_ogg_file(const Path &filename) {
 	r.bits = 16;
 	if (vi) {
 		r.channels = vi->channels;
-		r.freq = vi->rate;
+		r.sample_rate = vi->rate;
 	}
 	int bytes_per_sample = (r.bits / 8) * r.channels;
 	r.samples = (int)ov_pcm_total(&vf, -1);

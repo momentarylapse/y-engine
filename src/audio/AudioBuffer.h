@@ -9,7 +9,7 @@ namespace audio {
 
 
 struct RawAudioBuffer {
-	int channels, bits, samples, freq;
+	int channels, bits, samples, sample_rate;
 	bytes buffer;
 };
 

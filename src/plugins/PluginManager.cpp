@@ -268,6 +268,10 @@ Array<FrameBuffer*> hdr_renderer_get_fb_bloom(HDRRenderer &r) {
 	return {r.bloom_levels[0].fb_out.get(), r.bloom_levels[1].fb_out.get(), r.bloom_levels[2].fb_out.get(), r.bloom_levels[3].fb_out.get()};
 }
 
+audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float sample_rate) {
+	return audio::create_stream([&f] (int n) { return f(n); }, sample_rate);
+}
+
 template<class T>
 void generic_init(T* t) {
 	new(t) T;
@@ -917,6 +921,7 @@ void PluginManager::export_kaba() {
 	ext->link("load_buffer", (void*)&audio::load_buffer);
 	ext->link("create_buffer", (void*)&audio::create_buffer);
 	ext->link("load_audio_stream", (void*)&audio::load_stream);
+	ext->link("create_audio_stream", (void*)&__create_audio_stream);
 	ext->link("emit_sound", (void*)&audio::emit_sound);
 	ext->link("emit_sound_file", (void*)&audio::emit_sound_file);
 	ext->link("emit_sound_stream", (void*)&audio::emit_sound_stream);

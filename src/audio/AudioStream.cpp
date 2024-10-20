@@ -1,6 +1,8 @@
 #include "AudioStream.h"
 #include "Loading.h"
 
+#include "../lib/os/msg.h"
+
 #if HAS_LIB_OPENAL
 
 #pragma GCC diagnostic push
@@ -13,6 +15,7 @@
 
 namespace audio {
 
+void fill_buffer_f32(unsigned int buffer, const Array<float>& samples, float sample_rate);
 
 AudioStream::AudioStream() {
 #if HAS_LIB_OPENAL
@@ -46,6 +49,26 @@ bool AudioStreamFile::stream(unsigned int buf) {
 
 AudioStream* load_stream(const Path& filename) {
 	return load_stream_start(filename);
+}
+
+struct AudioStreamUser : AudioStream {
+	std::function<Array<float>(int)> f;
+	float sample_rate = 44100;
+
+	bool stream(unsigned int buf) override {
+		const auto samples = f(65536);
+		if (samples.num == 0)
+			return false;
+		fill_buffer_f32(buf, samples, sample_rate);
+		return true;
+	}
+};
+
+AudioStream* create_stream(std::function<Array<float>(int)> f, float sample_rate) {
+	auto stream = new AudioStreamUser;
+	stream->f = std::move(f);
+
+	return stream;
 }
 
 }
