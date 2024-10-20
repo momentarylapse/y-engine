@@ -1,5 +1,6 @@
 #include "SoundSource.h"
 #include "AudioBuffer.h"
+#include "AudioStream.h"
 #include "Loading.h"
 #include "../y/Entity.h"
 
@@ -61,9 +62,9 @@ void SoundSource::set_stream(AudioStream* _stream) {
 	if (stream) {
 		// start streaming
 		int num_buffers = 0;
-		if (stream->raw.stream(stream->al_buffer[0]))
+		if (stream->stream(stream->al_buffer[0]))
 			num_buffers ++;
-		if (stream->raw.stream(stream->al_buffer[1]))
+		if (stream->stream(stream->al_buffer[1]))
 			num_buffers ++;
 		alSourceQueueBuffers(al_source, num_buffers, stream->al_buffer);
 	}

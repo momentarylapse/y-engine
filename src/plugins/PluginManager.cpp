@@ -11,6 +11,7 @@
 #include "../lib/kaba/kaba.h"
 #include "../audio/SoundSource.h"
 #include "../audio/AudioBuffer.h"
+#include "../audio/AudioStream.h"
 #include "../audio/Listener.h"
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"

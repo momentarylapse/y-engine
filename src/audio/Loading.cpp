@@ -1,5 +1,6 @@
 #include "Loading.h"
 #include "AudioBuffer.h"
+#include "AudioStream.h"
 
 #include <lib/os/filesystem.h>
 #include <lib/os/file.h>
@@ -17,19 +18,9 @@ namespace audio {
 
 
 RawAudioBuffer EmptyAudioBuffer = {0, 0, 0, 0};
-RawAudioStream EmptyAudioStream = {0, 0, 0, 0, {}, 0, nullptr, 0, RawAudioStream::State::READY};
 
 RawAudioBuffer load_wave_file(const Path &filename);
 RawAudioBuffer load_ogg_file(const Path &filename);
-RawAudioStream load_ogg_start(const Path &filename);
-void load_ogg_step(RawAudioStream *as);
-void load_ogg_end(RawAudioStream *as);
-
-enum {
-	AudioStreamWave,
-	AudioStreamOgg,
-	AudioStreamFlac,
-};
 
 RawAudioBuffer load_raw_buffer(const Path& filename) {
 	msg_write("loading sound: " + filename.str());
@@ -41,29 +32,6 @@ RawAudioBuffer load_raw_buffer(const Path& filename) {
 		return load_ogg_file(engine.sound_dir | filename);
 #endif
 	return EmptyAudioBuffer;
-}
-
-RawAudioStream load_stream_start(const Path &filename) {
-	string ext = filename.extension();
-	/*if (ext == "wav")
-		return load_wave_start(engine.sound_dir | filename);
-	else*/ if (ext == "ogg")
-		return load_ogg_start(engine.sound_dir | filename);
-	return EmptyAudioStream;
-}
-
-void load_stream_step(RawAudioStream *as) {
-	/*if (as->type == AudioStreamWave)
-		load_ogg_step(as);
-	else*/ if (as->type == AudioStreamOgg)
-		load_ogg_step(as);
-}
-
-void load_stream_end(RawAudioStream *as) {
-	/*if (as->type == AudioStreamWave)
-		load_ogg_end(as);
-	else*/ if (as->type == AudioStreamOgg)
-		load_ogg_end(as);
 }
 
 
@@ -172,67 +140,68 @@ RawAudioBuffer load_ogg_file(const Path &filename) {
 	return r;
 }
 
-RawAudioStream load_ogg_start(const Path &filename) {
-	RawAudioStream r;
-	r.type = AudioStreamOgg;
-	r.vf = new OggVorbis_File;
-	r.state = RawAudioStream::State::READY;
-	r.buffer = nullptr;
-	r.buf_samples = 0;
+struct AudioStreamOgg : AudioStreamFile {
+	OggVorbis_File vf;
 
-	if (int res = ov_fopen((char*)filename.c_str(), (OggVorbis_File*)r.vf)) {
-		r.state = RawAudioStream::State::ERROR;
-		msg_error("ogg: ov_fopen failed: " + str(res));
-		return r;
-	}
-	vorbis_info *vi = ov_info((OggVorbis_File*)r.vf, -1);
-	r.bits = 16;
-	if (vi) {
-		r.channels = vi->channels;
-		r.freq = vi->rate;
-	}
-	r.samples = (int)ov_pcm_total((OggVorbis_File*)r.vf, -1);
-	r.buffer.resize(65536 * 4 + 1024);
-	return r;
-}
+	explicit AudioStreamOgg(const Path& filename) {
+		state = State::READY;
+		buf_samples = 0;
 
-void load_ogg_step(RawAudioStream *as) {
-	if (as->state != RawAudioStream::State::READY)
-		return;
-	int current_section;
-	int bytes_per_sample = (as->bits / 8) * as->channels;
-	int wanted = 65536 * bytes_per_sample;
-
-	int read = 0;
-	while (read < wanted) {
-		int toread = min(wanted - read, 4096);
-		int rr = ov_read((OggVorbis_File*)as->vf, (char*)&as->buffer[read], toread, 0, 2, 1, &current_section); // 0,2,1 = little endian, 16bit, signed
-		if (rr == 0) {
-			as->state = RawAudioStream::State::END;
-			break;
+		if (int res = ov_fopen((char*)filename.c_str(), &vf)) {
+			state = State::ERROR;
+			msg_error("ogg: ov_fopen failed: " + str(res));
+			return;
 		}
-		if (rr < 0) {
-			as->state = RawAudioStream::State::ERROR;
-			msg_error("ogg: ov_read failed");
-			break;
+		vorbis_info *vi = ov_info(&vf, -1);
+		bits = 16;
+		if (vi) {
+			channels = vi->channels;
+			freq = vi->rate;
 		}
-		read += rr;
+		samples = (int)ov_pcm_total(&vf, -1);
+		buffer.resize(65536 * 4 + 1024);
 	}
-	as->buf_samples = read / bytes_per_sample;
-}
+	~AudioStreamOgg() override {
+		ov_clear(&vf);
+	}
+	void step() override {
+		if (state != State::READY)
+			return;
+		int current_section;
+		int bytes_per_sample = (bits / 8) * channels;
+		int wanted = 65536 * bytes_per_sample;
 
-void load_ogg_end(RawAudioStream* as) {
-	ov_clear((OggVorbis_File*)as->vf);
-	if (as->vf)
-		delete((OggVorbis_File*)as->vf);
-}
-
-#else
-
-RawAudioBuffer load_ogg_file(const Path& filename) { return {}; }
-RawAudioStream load_ogg_start(const Path& filename) { return {}; }
-void load_ogg_step(RawAudioStream* as) {}
-void load_ogg_end(RawAudioStream* as) {}
+		int read = 0;
+		while (read < wanted) {
+			int toread = min(wanted - read, 4096);
+			int rr = ov_read(&vf, (char*)&buffer[read], toread, 0, 2, 1, &current_section); // 0,2,1 = little endian, 16bit, signed
+			if (rr == 0) {
+				state = State::END;
+				break;
+			}
+			if (rr < 0) {
+				state = State::ERROR;
+				msg_error("ogg: ov_read failed");
+				break;
+			}
+			read += rr;
+		}
+		buf_samples = read / bytes_per_sample;
+	}
+};
 
 #endif
+
+
+AudioStreamFile* load_stream_start(const Path &filename) {
+	string ext = filename.extension();
+	/*if (ext == "wav")
+		return load_wave_start(engine.sound_dir | filename);*/
+#ifdef HAS_LIB_OGG
+	if (ext == "ogg")
+		return new AudioStreamOgg(engine.sound_dir | filename);
+#endif
+	return nullptr;
+}
+
 }
