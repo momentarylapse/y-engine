@@ -1,4 +1,5 @@
 #include "SoundSource.h"
+#include "AudioBuffer.h"
 #include "Loading.h"
 #include "../y/Entity.h"
 

@@ -14,6 +14,8 @@ class Entity;
 
 namespace audio {
 
+struct AudioBuffer;
+
 extern float VolumeMusic, VolumeSound;
 
 
@@ -25,19 +27,8 @@ void reset();
 
 
 
-struct RawAudioBuffer {
-	int channels, bits, samples, freq;
-	bytes buffer;
-};
 
-struct AudioBuffer {
-	unsigned int al_buffer = 0;
-	int ref_count = 0;
-};
-
-
-class RawAudioStream {
-public:
+struct  RawAudioStream {
 	int channels, bits, samples, freq;
 	bytes buffer;
 	int buf_samples;
@@ -61,9 +52,6 @@ public:
 	AudioStream();
 	~AudioStream();
 };
-
-AudioBuffer* load_buffer(const Path& filename);
-AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate);
 
 AudioStream* load_stream(const Path& filename);
 

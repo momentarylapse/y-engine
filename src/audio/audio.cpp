@@ -1,5 +1,5 @@
 #include "audio.h"
-
+#include "AudioBuffer.h"
 #include "Listener.h"
 #include "Loading.h"
 #include "SoundSource.h"
@@ -31,8 +31,6 @@ ALCdevice *al_dev = nullptr;
 ALCcontext *al_context = nullptr;
 #endif
 
-base::map<Path, AudioBuffer*> loaded_audio_buffers;
-Array<AudioBuffer*> created_audio_buffers;
 
 void init() {
 #if HAS_LIB_OPENAL
@@ -101,60 +99,9 @@ void iterate(float dt) {
 	auto& listeners = ComponentManager::get_list<Listener>();
 	if (listeners.num >= 1)
 		listeners[0]->apply_data();
-#if 0
-	for (int i=Sounds.num-1;i>=0;i--)
-		if (Sounds[i]->Suicidal)
-			if (Sounds[i]->Ended())
-				delete(Sounds[i]);
-	for (int i=0;i<Musics.num;i++)
-		Musics[i]->Iterate();
-#endif
 }
 
 void reset() {
-	/*for (int i=Sounds.num-1;i>=0;i--)
-		delete(Sounds[i]);
-	Sounds.clear();
-	for (int i=Musics.num-1;i>=0;i--)
-		delete(Musics[i]);
-	Musics.clear();*/
-}
-
-
-AudioBuffer* load_buffer(const Path& filename) {
-	int i = loaded_audio_buffers.find(filename);
-	if (i >= 0)
-		return loaded_audio_buffers.by_index(i);
-
-	auto af = load_raw_buffer(filename);
-	auto buffer = new AudioBuffer;
-
-#if HAS_LIB_OPENAL
-	alGenBuffers(1, &buffer->al_buffer);
-	if (af.bits == 8)
-		alBufferData(buffer->al_buffer, AL_FORMAT_MONO8, &af.buffer[0], af.samples, af.freq);
-	else if (af.bits == 16)
-		alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &af.buffer[0], af.samples * 2, af.freq);
-#endif
-
-	loaded_audio_buffers.set(filename, buffer);
-	return buffer;
-}
-
-AudioBuffer* create_buffer(const Array<float>& samples, float sample_rate) {
-	auto buffer = new AudioBuffer;
-
-#if HAS_LIB_OPENAL
-	alGenBuffers(1, &buffer->al_buffer);
-	Array<short> buf16;
-	buf16.resize(samples.num);
-	for (int i=0; i<samples.num; i++)
-		buf16[i] = (int)(samples[i] * 32768.0f);
-	alBufferData(buffer->al_buffer, AL_FORMAT_MONO16, &buf16[0], samples.num * 2, (int)sample_rate);
-#endif
-
-	created_audio_buffers.add(buffer);
-	return buffer;
 }
 
 AudioStream::AudioStream() {
