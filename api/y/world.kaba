@@ -7,20 +7,22 @@ use model.*
 use audio.*
 
 class SolidBody extends Component
-	var vel: vec3
-	var rot: vec3
-	var mass: float
-	var theta: mat3
+	var vel: vec3 # world frame
+	var rot: vec3 # world frame
+	var mass: f32
+	var theta: mat3 # local frame
 	var physics_active: bool
 	var physics_passive: bool
-	var g_factor: float
+	var g_factor: f32
 	
+	# all parameters in world frame!
 	func extern mut add_force(f: vec3, rho: vec3 = vec3.0)
 	func extern mut add_impulse(p: vec3, rho: vec3 = vec3.0)
 	func extern mut add_torque(t: vec3)
 	func extern mut add_torque_impulse(l: vec3)
+	
 	func extern mut update_mass()
-	func extern mut update_motion(mask: int)
+	func extern mut update_motion(mask: i32)
 
 class Collider extends Component
 class MeshCollider extends Collider
@@ -35,26 +37,27 @@ class MultiInstance extends Component
 
 class Terrain extends Component
 	var pattern: vec3
-	var num_x, num_z: int
-	var height: float[]
+	var num_x, num_z: i32
+	var height: f32[]
 	var vertex_shader_module: string
 	var material: owned![Material]
-	func extern get_height(p: vec3) -> float
-	func extern mut update(x1: int, x2: int, y1: int, y2: int, mask: int)
+	var texture_scale: vec3[8]
+	func extern get_height(p: vec3) -> f32
+	func extern mut update(x1: i32, x2: i32, y1: i32, y2: i32, mask: i32)
 	# ...
 
 class Light extends Component
 	var dir: vec3
 	var color: color
-	var radius: float
-	var theta: float
-	var harshness: float
+	var radius: f32
+	var theta: f32
+	var harshness: f32
 	var enabled: bool
 	var allow_shadow: bool
 	var user_shadow_control: bool
-	var user_shadow_theta: float
-	var shadow_dist_min: float
-	var shadow_dist_max: float
+	var user_shadow_theta: f32
+	var shadow_dist_min: f32
+	var shadow_dist_max: f32
 	func extern mut set_direction(dir: vec3)
 
 #	class Spherical extends Light

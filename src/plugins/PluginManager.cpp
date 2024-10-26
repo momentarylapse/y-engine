@@ -429,6 +429,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Terrain.num_x", &Terrain::num_x);
 	ext->declare_class_element("Terrain.num_z", &Terrain::num_z);
 	ext->declare_class_element("Terrain.vertex_shader_module", &Terrain::vertex_shader_module);
+	ext->declare_class_element("Terrain.texture_scale", &Terrain::texture_scale);
 	ext->link_class_func("Terrain.update", &Terrain::update);
 	ext->link_class_func("Terrain.get_height", &Terrain::gimme_height);
 
