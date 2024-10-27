@@ -133,6 +133,7 @@ void SoundSource::pause(bool pause) {}
 bool SoundSource::is_playing() const { return false; }
 bool SoundSource::has_ended() const { return false; }
 void SoundSource::set_buffer(AudioBuffer* _buffer) {}
+void SoundSource::set_stream(AudioStream* _stream) {}
 void SoundSource::_apply_data() {}
 
 void clear_small_cache() {}

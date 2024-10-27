@@ -12,8 +12,9 @@ class rect;
 
 #include "../graphics-fwd.h"
 #include "../lib/base/pointer.h"
+#include "../lib/base/optional.h"
+#include "../lib/math/rect.h"
 
-class rect;
 class color;
 class ResourceManager;
 
@@ -24,6 +25,7 @@ struct RenderParams {
 	float desired_aspect_ratio;
 	bool target_is_window;
 	FrameBuffer *frame_buffer;
+	rect area;
 #ifdef USING_VULKAN
 	RenderPass *render_pass;
 	CommandBuffer *command_buffer;
@@ -31,13 +33,13 @@ struct RenderParams {
 
 	RenderParams with_target(FrameBuffer *fb) const;
 	static const RenderParams WHATEVER;
-	static RenderParams into_window(FrameBuffer *frame_buffer, float aspect_ratio);
-	static RenderParams into_texture(FrameBuffer *frame_buffer, float aspect_ratio);
+	static RenderParams into_window(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
+	static RenderParams into_texture(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
 };
 
 class Renderer {
 public:
-	Renderer(const string &name);
+	explicit Renderer(const string &name);
 	virtual ~Renderer();
 
 	Array<Renderer*> children;
@@ -50,7 +52,7 @@ public:
 	// assume, parent has already bound the frame buffer
 	// (vulkan: INSIDE an already started render pass)
 	// just draw into that
-	virtual void draw(const RenderParams& params) = 0;
+	virtual void draw(const RenderParams& params);
 
 
 	int channel;

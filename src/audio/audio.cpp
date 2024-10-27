@@ -79,10 +79,11 @@ void iterate(float dt) {
 	for (auto s: sources) {
 		// TODO owner->get_component<SolidBody>()->vel
 		s->_apply_data();
-		if (s->suicidal and s->has_ended())
+		if (s->suicidal and s->has_ended()) {
 			DeletionQueue::add(s->owner);
 
-		else if (s->stream) {
+		} else if (s->stream) {
+#if HAS_LIB_OPENAL
 			int processed;
 			alGetSourcei(s->al_source, AL_BUFFERS_PROCESSED, &processed);
 			while (processed --) {
@@ -91,6 +92,7 @@ void iterate(float dt) {
 				if (s->stream->stream(buf))
 					alSourceQueueBuffers(s->al_source, 1, &buf);
 			}
+#endif
 		}
 	}
 	DeletionQueue::delete_all();

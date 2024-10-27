@@ -32,6 +32,7 @@ AudioStream::~AudioStream() {
 bool AudioStreamFile::stream(unsigned int buf) {
 	if (state != AudioStreamFile::State::READY)
 		return false;
+#if HAS_LIB_OPENAL
 	step();
 	if (channels == 2) {
 		if (bits == 8)
@@ -44,6 +45,7 @@ bool AudioStreamFile::stream(unsigned int buf) {
 		else if (bits == 16)
 			alBufferData(buf, AL_FORMAT_MONO16, &buffer[0], buf_samples * 2, freq);
 	}
+#endif
 	return true;
 }
 
