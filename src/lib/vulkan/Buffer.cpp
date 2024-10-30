@@ -34,7 +34,7 @@ Buffer::~Buffer() {
 }
 
 void Buffer::create(VkDeviceSize _size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) {
-	size = _size;
+	size = max(_size, (VkDeviceSize)16);
 	VkBufferCreateInfo info = {};
 	info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	info.size = size;
