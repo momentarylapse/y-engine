@@ -98,6 +98,7 @@ void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
 	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);
 }
 
+
 #if 0
 void GeometryRendererGL::set_textures(const Array<Texture*> &tex) {
 	auto tt = tex;
@@ -262,7 +263,6 @@ void GeometryRendererGL::draw_terrains() {
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
-		t->prepare_draw(cam_main->owner->pos);
 		nix::draw_triangles(t->vertex_buffer.get());
 	}
 	gpu_timestamp_end(ch_terrains);

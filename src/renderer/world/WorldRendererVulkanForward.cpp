@@ -43,6 +43,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	}
 #endif
 
+	scene_view.check_terrains(cam_main->owner->pos);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
 	prepare_lights(scene_view.cam, geo_renderer->rvd_def);

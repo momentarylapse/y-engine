@@ -417,7 +417,6 @@ unsigned int OGLGetAlphaMode(Alpha mode) {
 
 void set_alpha(Alpha src, Alpha dst) {
 	glEnable(GL_BLEND);
-	//glDisable(GL_ALPHA_TEST);
 	glBlendFunc(OGLGetAlphaMode(src), OGLGetAlphaMode(dst));
 }
 
@@ -432,9 +431,7 @@ void _cdecl set_alpha_split(Alpha color_src, Alpha color_dst, Alpha alpha_src, A
 
 void disable_alpha() {
 	glDisable(GL_BLEND);
-	//glDisable(GL_ALPHA_TEST);
 }
-
 
 void set_stencil(StencilOp mode, unsigned long param) {
 	glStencilMask(0xffffffff);

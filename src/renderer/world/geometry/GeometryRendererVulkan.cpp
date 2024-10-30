@@ -395,7 +395,6 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
 			cb->push_constant(4, 4, &t->texture_scale[1].x);
 		}
-		t->prepare_draw(cam_main->owner->pos);
 		cb->draw(t->vertex_buffer.get());
 		index ++;
 	}

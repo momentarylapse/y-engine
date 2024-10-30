@@ -10,15 +10,14 @@
 #include "Terrain.h"
 #include "Material.h"
 #include "World.h"
-#include "../y/Entity.h"
 #include "../y/EngineData.h"
-#include <lib/config.h>
-#include <lib/math/vec3.h>
-#include <lib/math/plane.h>
 #include "../helper/ResourceManager.h"
 #include "../graphics-impl.h"
+#include <lib/math/vec3.h>
+#include <lib/math/plane.h>
 #include <lib/os/file.h>
 #include <lib/os/msg.h>
+#include <lib/os/time.h>
 
 const kaba::Class *Terrain::_class = nullptr;
 
@@ -468,6 +467,7 @@ bool Terrain::trace(const vec3 &p1, const vec3 &p2, const vec3 &dir, float range
 }
 
 void Terrain::build_vertex_buffer() {
+	os::Timer tt;
 	//Array<vulkan::Vertex1> vertices;
 	Array<vec3> p,n;
 	Array<float> uv;
@@ -610,7 +610,10 @@ void Terrain::build_vertex_buffer() {
 	for (int i=0; i<p.num; i++) {
 		vertex.add({p[i], n[i], uv[i*2], uv[i*2+1]});
 	}
+	float t1 = tt.get();
 	vertex_buffer->update(vertex);
+	float t2 = tt.get();
+	msg_write(format("UPDATE TERRAIN   %.1f    %.1f", t1*1000, t2*1000));
 }
 
 void Terrain::prepare_draw(const vec3 &cam_pos) {

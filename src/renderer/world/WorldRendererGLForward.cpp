@@ -43,6 +43,7 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 	if (!scene_view.cam)
 		scene_view.cam = cam_main;
 
+	scene_view.check_terrains(cam_main->owner->pos);
 	prepare_lights();
 	geo_renderer->prepare(params);
 
