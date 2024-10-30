@@ -12,6 +12,7 @@
 
 class Camera;
 struct UBOLight;
+struct XTerrainVBUpdater;
 
 class TerrainUpdateThread;
 
@@ -32,7 +33,8 @@ struct SceneView {
 
 	void check_terrains(const vec3& cam_pos);
 
-	TerrainUpdateThread* terrain_update_thread = nullptr;
+	//TerrainUpdateThread* terrain_update_thread = nullptr;
+	Array<XTerrainVBUpdater*> updater;
 };
 
 
