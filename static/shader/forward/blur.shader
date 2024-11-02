@@ -51,7 +51,7 @@ vec3 blur() {
 	for (int i=-RR; i<=RR; i+=1) {
 		float fi = i;
 		//float w = kernel[i + RR];
-		float w = exp(-((fi*fi) / (radius*radius)) * 4.0);
+		float w = exp(-((fi*fi) / (radius*radius)) * 3.3);
 		vec3 c = texelFetch(tex0, uv0 + ivec2(axis * fi), 0).rgb;
 		float br = brightness(c);
 		if (br > threshold) {

@@ -36,6 +36,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 static int BLUR_SCALE = 4;
+static int BLOOM_HEIGHT0 = 256;
 
 HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, const Array<Texture*> &tex) {
 	shader_out = s;
@@ -114,17 +115,24 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 
 	Array<vulkan::Texture*> blur_tex;
 	Array<DepthBuffer*> blur_depth;
-	int bloomw = width, bloomh = height;
+	int bloom_input_w = width/2;
+	int bloom_input_h = height;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
-		bloomw /= BLUR_SCALE;
-		bloomh /= BLUR_SCALE;
-		blur_tex.add(new vulkan::Texture(bloomw, bloomh, "rgba:f16"));
-		blur_tex.add(new vulkan::Texture(bloomw, bloomh, "rgba:f16"));
-		blur_depth.add(new DepthBuffer(bloomw, bloomh, "d:f32", true));
+		int bloom_w = (i == 0) ? (BLOOM_HEIGHT0 * width) / height : bloom_input_w / BLUR_SCALE;
+		int bloom_h = (i == 0) ? BLOOM_HEIGHT0 : bloom_input_h / BLUR_SCALE;
 
-		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i]});
-		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i]});
+		// 1. horizontal
+		blur_tex.add(new vulkan::Texture(bloom_w, bloom_input_h, "rgba:f16"));
+		blur_depth.add(new DepthBuffer(bloom_w, bloom_input_h, "d:f32", true));
+		// 2. vertical
+		blur_tex.add(new vulkan::Texture(bloom_w, bloom_h, "rgba:f16"));
+		blur_depth.add(new DepthBuffer(bloom_w, bloom_h, "d:f32", true));
+
+		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i*2]});
+		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i*2+1]});
 		// without clear, we get artifacts from dynamic resolution scaling
+		bloom_input_w = bloom_w;
+		bloom_input_h = bloom_h;
 	}
 	for (auto t: blur_tex)
 		t->set_options("wrap=clamp");
@@ -210,10 +218,10 @@ void HDRRendererVulkan::draw(const RenderParams& params) {
 }
 
 void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
-	const vec2 AXIS[2] = {{(float)BLUR_SCALE,0}, {0,1}};
+	const vec2 AXIS[2] = {{1,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
 	UBOBlur u;
-	u.radius = 3;//cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
+	u.radius = (iaxis <= 1) ? 5 : 11;//cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
 	u.threshold = threshold / cam->exposure;
 	u.axis = AXIS[iaxis % 2];
 	blur_ubo[iaxis]->update(&u);

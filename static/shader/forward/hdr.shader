@@ -92,16 +92,16 @@ void main() {
 	out_color.rgb = textureLod(tex0, uv, 0).rgb;
 	
 	vec3 bloom = textureLod(tex1, uv, 0).rgb;
-	out_color.rgb += bloom * bloom_factor;
+	out_color.rgb += bloom * bloom_factor * 0.3;
 	
 	vec3 bloom2 = textureLod(tex2, uv, 0).rgb;
-	out_color.rgb += bloom2 * bloom_factor;
+	out_color.rgb += bloom2 * bloom_factor * 1.0;
 	
 	vec3 bloom3 = textureLod(tex3, uv, 0).rgb;
-	out_color.rgb += bloom3 * bloom_factor;
+	out_color.rgb += bloom3 * bloom_factor * 1.0;
 	
 	vec3 bloom4 = textureLod(tex4, uv, 0).rgb;
-	out_color.rgb += bloom4 * bloom_factor;
+	out_color.rgb += bloom4 * bloom_factor * 0.7;
 	
 	out_color.rgb = tone_map(out_color.rgb);
 
