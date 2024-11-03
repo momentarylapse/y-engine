@@ -44,19 +44,6 @@ void rebuild_legacy_groups(Array<LegacyParticleGroup>& groups) {
 }
 
 
-void ParticleManager::register_particle_group(ParticleGroup *g) {
-	particle_groups.add(g);
-}
-
-bool ParticleManager::unregister_particle_group(ParticleGroup *g) {
-	int index = particle_groups.find(g);
-	if (index >= 0) {
-		particle_groups.erase(index);
-		return true;
-	}
-	return false;
-}
-
 void ParticleManager::clear() {
 	legacy_groups.clear();
 }
@@ -83,9 +70,6 @@ static void iterate_legacy_particles(Array<LegacyParticle*>& particles, float dt
 void ParticleManager::iterate(float dt) {
 	auto& list = ComponentManager::get_list_family<LegacyParticle>();
 	iterate_legacy_particles(list, dt);
-
-	for (auto g: particle_groups)
-		g->on_iterate(dt);
 
 	rebuild_legacy_groups(legacy_groups);
 }

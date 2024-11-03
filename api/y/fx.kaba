@@ -2,7 +2,7 @@ use ecs.*
 use gfx.*
 
 class LegacyParticle extends Component
-	var pos, vel: vec3
+	var vel: vec3
 	var radius = 1.0
 	var time_to_live = 2.0
 	var texture: shared![Texture]

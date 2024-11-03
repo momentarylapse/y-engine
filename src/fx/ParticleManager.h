@@ -25,9 +25,6 @@ struct LegacyParticleGroup {
 class ParticleManager {
 public:
 	Array<LegacyParticleGroup> legacy_groups;
-	Array<ParticleGroup*> particle_groups;
-	void register_particle_group(ParticleGroup *g);
-	bool unregister_particle_group(ParticleGroup *g);
 	void clear();
 	void iterate(float dt);
 };
