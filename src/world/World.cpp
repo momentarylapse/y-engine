@@ -218,10 +218,6 @@ void World::reset() {
 		delete o;
 	entities.clear();
 
-#ifdef _X_ALLOW_X_
-	particle_manager->clear();
-#endif
-
 
 
 	// skybox
