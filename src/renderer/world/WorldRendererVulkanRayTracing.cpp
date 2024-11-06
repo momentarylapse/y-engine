@@ -74,7 +74,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
-		auto shader = resource_manager->load_shader("vulkan/compute.shader");
+		auto shader = resource_manager->load_shader("compute/pathtracing.shader");
 		compute.pipeline = new vulkan::ComputePipeline("[[image,buffer,buffer]]", shader.get());
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
