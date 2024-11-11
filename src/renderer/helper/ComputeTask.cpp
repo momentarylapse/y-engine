@@ -17,7 +17,7 @@ void ComputeTask::dispatch(int nx, int ny, int nz) {
             nix::bind_buffer(b.index, static_cast<UniformBuffer*>(b.p));
     }
     shader->dispatch(nx, ny, nz);
-    //nix::image_barrier();
+    nix::image_barrier();
 #endif
 }
 

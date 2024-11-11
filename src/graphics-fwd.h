@@ -91,7 +91,8 @@
 		class VolumeTexture;
 		class ImageTexture;
 		class Buffer;
-		class UniformBuffer;
+		class UniformBuffer;;
+		class ShaderStorageBuffer;
 		enum class Alpha;
 		enum class AlphaMode;
 		enum class CullMode;
@@ -109,6 +110,7 @@
 	using ImageTexture = nix::ImageTexture;
 	using Buffer = nix::Buffer;
 	using UniformBuffer = nix::UniformBuffer;
+	using ShaderStorageBuffer = nix::ShaderStorageBuffer;
 
 	using Alpha = nix::Alpha;
 	using AlphaMode = nix::AlphaMode;

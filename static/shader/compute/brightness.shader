@@ -6,9 +6,9 @@
 uniform int width;
 uniform int height;
 
-uniform sampler2D tex0;
+layout(binding=0) uniform sampler2D tex0;
 
-layout(std430, binding = 3) buffer Histogram {
+layout(std430, binding=1) buffer Histogram {
 	int hist[256];
 };
 
@@ -26,7 +26,8 @@ int rgb_to_bin(vec3 c) {
 
 void main() {
 	hist_g[gl_LocalInvocationIndex] = 0;
-	groupMemoryBarrier();
+	//groupMemoryBarrier();
+	barrier();
 
 	if ((gl_GlobalInvocationID.x < width) && (gl_GlobalInvocationID.y < height)) {
 		vec4 c = texelFetch(tex0, ivec2(gl_GlobalInvocationID.xy), 0);
@@ -34,7 +35,8 @@ void main() {
 		atomicAdd(hist_g[bin], 1);
 	}
 	
-	groupMemoryBarrier();
+	//groupMemoryBarrier();
+	barrier();
 	
 	atomicAdd(hist[gl_LocalInvocationIndex], hist_g[gl_LocalInvocationIndex]);
 }

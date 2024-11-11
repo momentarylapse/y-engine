@@ -12,6 +12,7 @@
 
 class vec2;
 class Camera;
+class ComputeTask;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
@@ -45,6 +46,10 @@ public:
 	owned<VertexBuffer> vb_2d;
 
 	int ch_post_blur = -1, ch_out = -1;
+
+	ComputeTask* expo_compute;
+	//ImageTexture* expo_image;
+	ShaderStorageBuffer* expo_buf;
 };
 
 #endif

@@ -6,8 +6,11 @@
  */
 
 #include "HDRRendererGL.h"
+
+#include <lib/image/image.h>
 #ifdef USING_OPENGL
 #include "../base.h"
+#include "../helper/ComputeTask.h"
 #include <lib/nix/nix.h>
 #include <lib/math/vec2.h>
 #include <lib/math/rect.h>
@@ -75,6 +78,14 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
+
+	expo_compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
+	//expo_image = new ImageTexture(width, height, "rgba:f16");
+	expo_buf = new ShaderStorageBuffer();
+	int histogram[256] = {};
+	expo_buf->update(&histogram[0], sizeof(histogram));
+	expo_compute->bind_texture(0, fb_main->color_attachments[0].get());
+	expo_compute->bind_buffer(1, expo_buf);
 }
 
 HDRRendererGL::~HDRRendererGL() = default;
@@ -163,6 +174,34 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	gpu_timestamp_end(ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
 	PerformanceMonitor::end(ch_prepare);
+
+	Array<int> histogram;
+	histogram.resize(256);
+	expo_buf->update(&histogram[0], 256*4);
+	expo_compute->shader->set_int("width", fb_main->width);
+	expo_compute->shader->set_int("height", fb_main->height);
+	expo_compute->dispatch(fb_main->width/16, fb_main->height/16, 1);
+
+	expo_buf->read(&histogram[0], 256*4);
+	int thresh = fb_main->width * fb_main->height / 100 * 99;
+	int n = 0;
+	int ii = 0;
+	for (int i=0; i<256; i++) {
+		n += histogram[i];
+		if (n > thresh) {
+			ii = i;
+			break;
+		}
+	}
+	float brightness = pow(2.0f, ((float)ii / 255.0f) * 20.0f - 10.0f);
+	//msg_write(ii);
+	//msg_write(str(brightness));
+
+	float exposure = clamp(pow(1.0f / brightness, 0.8f), 0.3f, 4.0f);
+	if (exposure > cam->exposure)
+		cam->exposure *= 1.05f;
+	if (exposure < cam->exposure)
+		cam->exposure /= 1.05f;
 }
 
 void HDRRendererGL::draw(const RenderParams& params) {
