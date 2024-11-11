@@ -30,7 +30,7 @@ list(APPEND COMPILE_DEFINITIONS HAS_LIB_GLFW=1)
 # lib: gl or vulkan (mandatory)
 set(GL_OR_VULKAN "gl" CACHE STRING "Use gl or vulkan?")
 find_package(OpenGL)
-if(OPENGL_FOUND AND NOT APPLE)
+if(OPENGL_FOUND AND NOT APPLE AND NOT WIN32)
 	list(APPEND GL_OR_VULKAN_FOUND "gl")
 endif()
 pkg_check_modules(VULKAN vulkan)
@@ -417,6 +417,7 @@ add_executable(y
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
+	src/renderer/helper/ComputeTask.cpp
 	src/renderer/helper/jitter.cpp
 	src/renderer/helper/Pipeline.cpp
 	src/renderer/helper/PipelineManager.cpp

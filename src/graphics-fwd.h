@@ -55,6 +55,7 @@
 	using DepthBuffer = vulkan::DepthBuffer;
 	using CubeMap = vulkan::CubeMap;
 	using VolumeTexture = vulkan::VolumeTexture;
+	using ImageTexture = vulkan::StorageTexture;
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
 	using GraphicsPipeline = vulkan::GraphicsPipeline;
@@ -88,6 +89,7 @@
 		class DepthBuffer;
 		class CubeMap;
 		class VolumeTexture;
+		class ImageTexture;
 		class Buffer;
 		class UniformBuffer;
 		enum class Alpha;
@@ -104,6 +106,7 @@
 	using DepthBuffer = nix::DepthBuffer;
 	using CubeMap = nix::CubeMap;
 	using VolumeTexture = nix::VolumeTexture;
+	using ImageTexture = nix::ImageTexture;
 	using Buffer = nix::Buffer;
 	using UniformBuffer = nix::UniformBuffer;
 
