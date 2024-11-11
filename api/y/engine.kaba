@@ -61,6 +61,11 @@ class RenderPath
 class HDRRenderer
 	var fb_main: FrameBuffer&
 	func extern fb_bloom() -> FrameBuffer&[]
+	
+	class LightMeter
+		var histogram: i32[]
+		var brightness: f32
+	var light_meter: LightMeter
 
 class PostProcessor
 	var fb1, fb2: FrameBuffer&

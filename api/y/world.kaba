@@ -72,35 +72,40 @@ class Light extends Component
 
 class Camera extends Component
 	var m_view: mat4
-	var exposure: float
-	var bloom_radius: float
-	var bloom_factor: float
+	var exposure: f32
+	var bloom_radius: f32
+	var bloom_factor: f32
+	
+	var auto_exposure: bool
+	var auto_exposure_min: f32
+	var auto_exposure_max: f32
+	var auto_exposure_speed: f32 # ignored
 	
 	var focus_enabled: bool
-	var focal_length: float
-	var focal_blur: float
+	var focal_length: f32
+	var focal_blur: f32
 	
 	var fov: float
-	var min_depth, max_depth: float
+	var min_depth, max_depth: f32
 	
 	var show, enabled: bool
 
 	func extern project(p: vec3) -> vec3
 	func extern unproject(p: vec3) -> vec3
-	func extern mut update_matrices(aspect_ratio: float)
+	func extern mut update_matrices(aspect_ratio: f32)
 
 
 
 class Fog
 	var color: color
-	var distance: float
+	var distance: f32
 	var enabled: bool
 
 class Link extends BaseClass
 	var a, b: Model*
-	func extern mut set_motor(v: float, max: float)
+	func extern mut set_motor(v: f32, max: f32)
 #	extern void mut set_axis(vector v)
-	func extern mut set_frame(n: int, q: quaternion)
+	func extern mut set_frame(n: i32, q: quaternion)
 
 #	class Socket extends Link
 #		extern void __init__(Model* a, Model* b, vector pos)

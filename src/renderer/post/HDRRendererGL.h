@@ -45,11 +45,18 @@ public:
 
 	owned<VertexBuffer> vb_2d;
 
-	int ch_post_blur = -1, ch_post_brightness = -1, ch_out = -1;
+	int ch_post_blur = -1, ch_out = -1;
 
-	ComputeTask* expo_compute;
-	//ImageTexture* expo_image;
-	ShaderStorageBuffer* expo_buf;
+	struct LightMeter {
+		void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
+		ComputeTask* compute;
+		ShaderStorageBuffer* buf;
+		Array<int> histogram;
+		float brightness;
+		int ch_post_brightness = -1;
+		void measure(FrameBuffer* frame_buffer);
+		void adjust_camera(Camera* cam);
+	} light_meter;
 };
 
 #endif

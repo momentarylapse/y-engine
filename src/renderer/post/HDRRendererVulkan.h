@@ -13,6 +13,7 @@
 #include <lib/math/rect.h>
 
 class Camera;
+class ComputeTask;
 
 class HDRRendererVulkan : public PostProcessorStage {
 public:
@@ -67,6 +68,17 @@ public:
 	rect vb_2d_current_source = rect::EMPTY;
 
 	int ch_post_blur = -1, ch_out = -1;
+
+	struct LightMeter {
+		//void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
+		ComputeTask* compute;
+		ShaderStorageBuffer* buf;
+		Array<int> histogram;
+		float brightness;
+		int ch_post_brightness = -1;
+		//void measure(FrameBuffer* frame_buffer);
+		//void adjust_camera(Camera* cam);
+	} light_meter;
 };
 
 #endif

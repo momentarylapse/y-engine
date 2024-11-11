@@ -323,6 +323,10 @@ void PluginManager::export_kaba() {
 	ext->declare_class_size("Camera", sizeof(Camera));
 	ext->declare_class_element("Camera.fov", &Camera::fov);
 	ext->declare_class_element("Camera.exposure", &Camera::exposure);
+	ext->declare_class_element("Camera.auto_exposure", &Camera::auto_exposure);
+	ext->declare_class_element("Camera.auto_exposure_min", &Camera::auto_exposure_min);
+	ext->declare_class_element("Camera.auto_exposure_max", &Camera::auto_exposure_max);
+	ext->declare_class_element("Camera.auto_exposure_speed", &Camera::auto_exposure_speed);
 	ext->declare_class_element("Camera.bloom_radius", &Camera::bloom_radius);
 	ext->declare_class_element("Camera.bloom_factor", &Camera::bloom_factor);
 	ext->declare_class_element("Camera.focus_enabled", &Camera::focus_enabled);
@@ -863,7 +867,12 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
 	ext->declare_class_element("HDRRenderer.fb_main", &HDRRenderer::fb_main);
+	ext->declare_class_element("HDRRenderer.light_meter", &HDRRenderer::light_meter);
 	ext->link_class_func("HDRRenderer.fb_bloom", &hdr_renderer_get_fb_bloom);
+
+	ext->declare_class_size("HDRRenderer.LightMeter", sizeof(HDRRenderer::LightMeter));
+	ext->declare_class_element("HDRRenderer.LightMeter.histogram", &HDRRenderer::LightMeter::histogram);
+	ext->declare_class_element("HDRRenderer.LightMeter.brightness", &HDRRenderer::LightMeter::brightness);
 
 
 	ext->declare_class_size("FrameBuffer", sizeof(FrameBuffer));

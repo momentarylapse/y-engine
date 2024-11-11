@@ -29,7 +29,7 @@ int rgb_to_bin(vec3 c) {
 
 void main() {
 	float u = rand2d(vec2(gl_GlobalInvocationID.xy));
-	float v = rand2d(vec2(gl_GlobalInvocationID.xy));
+	float v = rand2d(vec2(gl_GlobalInvocationID.xy) + vec2(3.252, 9.711));
 	ivec2 i = ivec2(u * width, v * height);
 	
 	//vec4 c = vec4(u,v,1,1);

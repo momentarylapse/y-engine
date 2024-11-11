@@ -2,6 +2,7 @@ use y.*
 
 class X extends Controller
 	var pic: shared![Picture][]
+	var t: shared[Text]
 	
 	func override on_init()
 		for hdr in engine.hdr_renderer
@@ -12,6 +13,10 @@ class X extends Controller
 				pic.add(new Picture([1.0,1.0+h, y0-h, y0], fb.color_attachments()[0]))
 				y0 -= h
 				h *= 0.5
+			
+			var _t = new shared Text("", 0.05, [1.0, 0.0])
+			toplevel.add(_t)
+			t = _t
 		
 		for p in pic
 			toplevel.add(p)
@@ -20,4 +25,7 @@ class X extends Controller
 	func override on_draw_pre()
 		for mut p in pic
 			p.source = [0,engine.resolution_scale.x, 0,engine.resolution_scale.y]
+		for hdr in engine.hdr_renderer
+			t!.set_text("max brightness: {{hdr.light_meter.brightness|.3}}")
+		
 

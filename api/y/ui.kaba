@@ -74,7 +74,7 @@ class Node as shared
 	func extern mut remove_all_children()
 	func extern mut remove(n: Node&)
 		
-	func extern virtual mut on_iterate(dt: float)
+	func extern virtual mut on_iterate(dt: f32)
 	func extern virtual mut on_enter()
 	func extern virtual mut on_leave()
 	func extern virtual mut on_left_button_down() -> bool
@@ -84,12 +84,12 @@ class Node as shared
 	func extern virtual mut on_right_button_down() -> bool
 	func extern virtual mut on_right_button_up() -> bool
 	var pos: vec2
-	var x, y: float
-	var width, height: float
+	var x, y: f32
+	var width, height: f32
 	func extern set_area(r: rect)
 	var _eff_area: rect
 	var margin: rect
-	var dz: float
+	var dz: f32
 	var color: color
 	var align: Align
 	var visible: bool
@@ -106,16 +106,16 @@ class Picture extends Node
 	func extern override __delete__()
 	var source: rect
 	var texture: shared![Texture]
-	var blur: float
-	var angle: float
+	var blur: f32
+	var angle: f32
 	var shader: shared[Shader]
 	var shader_data: any
 
 class Text extends Picture
-	func extern __init__(t: string, font_size: float, p: vec2 = vec2.0)
+	func extern __init__(t: string, font_size: f32, p: vec2 = vec2.0)
 	func extern override __delete__()
 	var text: string
-	var font_size: float
+	var font_size: f32
 	func extern set_text(t: string)
 	
 class Picture3d extends Node
@@ -123,7 +123,7 @@ class Picture3d extends Node
 	var matrix: mat4
 	var world_3d: bool
 	var lighting: bool
-	func __init__(m: Model*, mat: mat4, z: float)
+	func __init__(m: Model*, mat: mat4, z: f32)
 		super.__init__(rect.ID)
 		model = m
 		self.matrix = mat
@@ -145,15 +145,15 @@ class Gamepad as shared
 		OPTIONS, SHARE, PS
 		L3, R3
 		UP, RIGHT, DOWN, LEFT
-	var deadzone: float
+	var deadzone: f32
 	
 	func extern is_present() -> bool
 	func extern name() -> string
-	func extern axis(a: int) -> float
+	func extern axis(a: i32) -> f32
 	func extern button(b: Button) -> bool
 	func extern clicked(b: Button) -> bool
 
-func extern static get_pad(index: int = -1) -> shared![Gamepad]
+func extern static get_pad(index: i32 = -1) -> shared![Gamepad]
 
 
 
@@ -174,7 +174,7 @@ class Controller extends BaseClass
 	func extern virtual mut on_input()
 	
 	# rare
-	func extern virtual mut on_iterate_pre(dt: float)
+	func extern virtual mut on_iterate_pre(dt: f32)
 	func extern virtual mut on_draw_pre()
 	func extern virtual mut on_render_inject()
 
