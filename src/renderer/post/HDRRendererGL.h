@@ -45,7 +45,7 @@ public:
 
 	owned<VertexBuffer> vb_2d;
 
-	int ch_post_blur = -1, ch_out = -1;
+	int ch_post_blur = -1, ch_post_brightness = -1, ch_out = -1;
 
 	ComputeTask* expo_compute;
 	//ImageTexture* expo_image;

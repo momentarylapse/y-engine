@@ -36,6 +36,7 @@ namespace nix {
 
 HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
+	ch_post_brightness = PerformanceMonitor::create_channel("expo", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	cam = _cam;
@@ -173,17 +174,27 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 	gpu_timestamp_end(ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
-	PerformanceMonitor::end(ch_prepare);
+
+	PerformanceMonitor::begin(ch_post_brightness);
+	gpu_timestamp_begin(ch_post_brightness);
 
 	Array<int> histogram;
 	histogram.resize(256);
 	expo_buf->update(&histogram[0], 256*4);
 	expo_compute->shader->set_int("width", fb_main->width);
 	expo_compute->shader->set_int("height", fb_main->height);
-	expo_compute->dispatch(fb_main->width/16, fb_main->height/16, 1);
+	const int N = 256;
+	expo_compute->dispatch(N, 1, 1);
 
 	expo_buf->read(&histogram[0], 256*4);
-	int thresh = fb_main->width * fb_main->height / 100 * 99;
+	//msg_write(str(histogram));
+
+	gpu_timestamp_end(ch_post_brightness);
+	PerformanceMonitor::end(ch_post_brightness);
+
+	PerformanceMonitor::end(ch_prepare);
+
+	int thresh = (N * 16 * 16) / 100 * 99;
 	int n = 0;
 	int ii = 0;
 	for (int i=0; i<256; i++) {

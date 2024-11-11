@@ -12,9 +12,12 @@ layout(std430, binding=1) buffer Histogram {
 	int hist[256];
 };
 
-shared int hist_g[256];
-
 layout (local_size_x = 16, local_size_y = 16) in;
+
+
+float rand2d(vec2 p) {
+	return fract(sin(dot(p ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 int rgb_to_bin(vec3 c) {
 	float luminance = dot(c.rgb, vec3(0.2125, 0.7154, 0.0721));
@@ -25,20 +28,15 @@ int rgb_to_bin(vec3 c) {
 }
 
 void main() {
-	hist_g[gl_LocalInvocationIndex] = 0;
-	//groupMemoryBarrier();
-	barrier();
-
-	if ((gl_GlobalInvocationID.x < width) && (gl_GlobalInvocationID.y < height)) {
-		vec4 c = texelFetch(tex0, ivec2(gl_GlobalInvocationID.xy), 0);
-		int bin = rgb_to_bin(c.rgb);
-		atomicAdd(hist_g[bin], 1);
-	}
+	float u = rand2d(vec2(gl_GlobalInvocationID.xy));
+	float v = rand2d(vec2(gl_GlobalInvocationID.xy));
+	ivec2 i = ivec2(u * width, v * height);
 	
-	//groupMemoryBarrier();
-	barrier();
-	
-	atomicAdd(hist[gl_LocalInvocationIndex], hist_g[gl_LocalInvocationIndex]);
+	//vec4 c = vec4(u,v,1,1);
+	vec4 c = texelFetch(tex0, i, 0);
+	int bin = rgb_to_bin(c.rgb);
+	atomicAdd(hist[bin], 1);
+	//hist[bin] += 1;
 }
 
 </ComputeShader>
