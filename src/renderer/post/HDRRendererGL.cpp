@@ -244,7 +244,7 @@ void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, FrameBuf
 	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
 	buf = new ShaderStorageBuffer();
 	compute->bind_texture(0, frame_buffer->color_attachments[0].get());
-	compute->bind_buffer(1, buf);
+	compute->bind_storage_buffer(1, buf);
 }
 
 void HDRRendererGL::LightMeter::measure(FrameBuffer* frame_buffer) {

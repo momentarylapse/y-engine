@@ -203,6 +203,9 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 	}
 	gpu_timestamp_end(cb, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
+
+	light_meter.measure(cb, fb_main);
+
 	gpu_timestamp_end(cb, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
 
@@ -251,7 +254,54 @@ void HDRRendererVulkan::LightMeter::init(ResourceManager* resource_manager, Fram
 	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
 	buf = new ShaderStorageBuffer(256*4);
 	compute->bind_texture(0, frame_buffer->attachments[0].get());
-	compute->bind_buffer(1, buf);
+	compute->bind_storage_buffer(1, buf);
+}
+
+void HDRRendererVulkan::LightMeter::measure(CommandBuffer* cb, FrameBuffer* frame_buffer) {
+	PerformanceMonitor::begin(ch_post_brightness);
+	gpu_timestamp_begin(cb, ch_post_brightness);
+
+	int NBINS = 256;
+	histogram.resize(NBINS);
+	memset(&histogram[0], 0, NBINS * sizeof(int));
+	buf->update(&histogram[0]);
+//	compute->shader->set_int("width", frame_buffer->width);
+//	compute->shader->set_int("height", frame_buffer->height);
+	const int NSAMPLES = 256;
+	compute->dispatch(cb, NSAMPLES, 1, 1);
+
+	void* p = buf->map();
+	memcpy(&histogram[0], p, NBINS*sizeof(int));
+	buf->unmap();
+	//msg_write(str(histogram));
+
+	gpu_timestamp_end(cb, ch_post_brightness);
+
+	/*int s = 0;
+	for (int i=0; i<NBINS; i++)
+		s += histogram[i];
+	msg_write(format("%d  %d", s, NSAMPLES*256));*/
+
+	int thresh = (NSAMPLES * 16 * 16) / 100 * 99;
+	int n = 0;
+	int ii = 0;
+	for (int i=0; i<NBINS; i++) {
+		n += histogram[i];
+		if (n > thresh) {
+			ii = i;
+			break;
+		}
+	}
+	brightness = pow(2.0f, ((float)ii / (float)NBINS) * 20.0f - 10.0f);
+	PerformanceMonitor::end(ch_post_brightness);
+}
+
+void HDRRendererVulkan::LightMeter::adjust_camera(Camera *cam) {
+	float exposure = clamp((float)pow(1.0f / brightness, 0.8f), cam->auto_exposure_min, cam->auto_exposure_max);
+	if (exposure > cam->exposure)
+		cam->exposure *= 1.05f;
+	if (exposure < cam->exposure)
+		cam->exposure /= 1.05f;
 }
 
 #endif

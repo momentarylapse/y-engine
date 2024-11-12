@@ -27,16 +27,18 @@ public:
 
     void bind_texture(int index, Texture* texture);
     void bind_image(int index, ImageTexture* image);
-    void bind_buffer(int index, Buffer* buffer);
+    void bind_uniform_buffer(int index, Buffer* buffer);
+    void bind_storage_buffer(int index, Buffer* buffer);
 
 #ifdef USING_VULKAN
     owned<vulkan::ComputePipeline> pipeline;
+    owned<vulkan::DescriptorPool> pool;
     owned<vulkan::DescriptorSet> dset;
+    void dispatch(CommandBuffer* cb, int nx, int ny, int nz);
 #endif
 #ifdef USING_OPENGL
-#endif
-
     void dispatch(int nx, int ny, int nz);
+#endif
 };
 
 

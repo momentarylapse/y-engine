@@ -4,10 +4,14 @@
 
 ComputeTask::ComputeTask(const shared<Shader>& _shader) {
     shader = _shader;
+#ifdef USING_VULKAN
+    pool = new vulkan::DescriptorPool("sampler:8,buffer:8,storage-buffer:8,image:8", 1);
+    dset = pool->create_set_from_layout(shader->descr_layouts[0]);
+#endif
 }
 
-void ComputeTask::dispatch(int nx, int ny, int nz) {
 #ifdef USING_OPENGL
+void ComputeTask::dispatch(int nx, int ny, int nz) {
     for (auto& b: bindings) {
         if (b.type == Binding::Type::Texture)
             nix::bind_texture(b.index, static_cast<Texture*>(b.p));
@@ -18,19 +22,56 @@ void ComputeTask::dispatch(int nx, int ny, int nz) {
     }
     shader->dispatch(nx, ny, nz);
     nix::image_barrier();
+}
+#endif
+#ifdef USING_VULKAN
+void ComputeTask::dispatch(CommandBuffer* cb, int nx, int ny, int nz) {
+    cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
+    cb->bind_pipeline(pipeline.get());
+    cb->bind_descriptor_set(0, dset.get());
+    cb->dispatch(nx, ny, nz);
+    cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
+}
+#endif
+
+void ComputeTask::bind_texture(int index, Texture *texture) {
+#ifdef USING_OPENGL
+    bindings.add({index, Binding::Type::Texture, texture});
+#endif
+#ifdef USING_VULKAN
+    dset->set_texture(index, texture);
+    dset->update();
 #endif
 }
 
-void ComputeTask::bind_texture(int index, Texture *texture) {
-    bindings.add({index, Binding::Type::Texture, texture});
-}
-
 void ComputeTask::bind_image(int index, ImageTexture *texture) {
+#ifdef USING_OPENGL
     bindings.add({index, Binding::Type::Image, texture});
+#endif
+#ifdef USING_VULKAN
+    dset->set_storage_image(index, texture);
+    dset->update();
+#endif
 }
 
-void ComputeTask::bind_buffer(int index, Buffer *buffer) {
+void ComputeTask::bind_uniform_buffer(int index, Buffer *buffer) {
+#ifdef USING_OPENGL
     bindings.add({index, Binding::Type::Buffer, buffer});
+#endif
+#ifdef USING_VULKAN
+    dset->set_buffer(index, buffer);
+    dset->update();
+#endif
+}
+
+void ComputeTask::bind_storage_buffer(int index, Buffer *buffer) {
+#ifdef USING_OPENGL
+    bindings.add({index, Binding::Type::Buffer, buffer});
+#endif
+#ifdef USING_VULKAN
+    dset->set_storage_buffer(index, buffer);
+    dset->update();
+#endif
 }
 
 

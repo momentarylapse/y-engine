@@ -1,5 +1,6 @@
 <Layout>
 	version = 430
+	bindings = [[sampler,buffer]]
 </Layout>
 <ComputeShader>
 
