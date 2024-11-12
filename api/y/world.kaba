@@ -152,7 +152,7 @@ class World
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: quaternion[]) -> MultiInstance&
 	func extern mut selfref create_terrain(filename: os.Path, pos: vec3) -> Terrain&
 	func extern mut selfref create_camera(pos: vec3, ang: quaternion) -> Camera&
-	func extern mut selfref create_entity(pos: vec3, ang: quaternion) -> Entity&
+	func extern mut selfref create_entity(pos: vec3, ang: quaternion = quaternion.ID) -> Entity&
 	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> Model&
 	func extern mut selfref unattach_model(m: Model&)
 	func extern mut register_entity(e: Entity*)

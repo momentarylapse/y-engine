@@ -305,6 +305,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Entity.get_matrix", &Entity::get_matrix);
 	ext->link_class_func("Entity.__get_component", &Entity::_get_component_untyped_);
 	ext->link_class_func("Entity.__add_component", &Entity::_add_component_untyped_);
+	ext->link_class_func("Entity.__add_component_no_init", &Entity::add_component_no_init);
 	ext->link_class_func("Entity.delete_component", &Entity::delete_component);
 	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add);
 
