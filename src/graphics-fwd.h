@@ -30,6 +30,7 @@
 		class DepthBuffer;
 		class Buffer;
 		class UniformBuffer;
+		class StorageBuffer;
 		enum class Alpha;
 		enum class AlphaMode;
 		enum class CullMode;
@@ -58,6 +59,7 @@
 	using ImageTexture = vulkan::StorageTexture;
 	using Buffer = vulkan::Buffer;
 	using UniformBuffer = vulkan::UniformBuffer;
+	using ShaderStorageBuffer = vulkan::StorageBuffer;
 	using GraphicsPipeline = vulkan::GraphicsPipeline;
 	using ComputePipeline = vulkan::ComputePipeline;
 	using RayPipeline = vulkan::RayPipeline;

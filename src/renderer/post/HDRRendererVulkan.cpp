@@ -8,6 +8,7 @@
 #include "HDRRendererVulkan.h"
 #ifdef USING_VULKAN
 #include "../base.h"
+#include "../helper/ComputeTask.h"
 #include <graphics-impl.h>
 #include <Config.h>
 #include <helper/PerformanceMonitor.h>
@@ -162,6 +163,7 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 
+	light_meter.init(resource_manager, fb_main, channel);
 }
 
 HDRRendererVulkan::~HDRRendererVulkan() = default;
@@ -242,6 +244,14 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 	cb->end_render_pass();
 
 	//process(cb, {source->attachments[0].get()}, target, shader_blur.get());
+}
+
+void HDRRendererVulkan::LightMeter::init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel) {
+	ch_post_brightness = PerformanceMonitor::create_channel("expo", channel);
+	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
+	buf = new ShaderStorageBuffer(256*4);
+	compute->bind_texture(0, frame_buffer->attachments[0].get());
+	compute->bind_buffer(1, buf);
 }
 
 #endif

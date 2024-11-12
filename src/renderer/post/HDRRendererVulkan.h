@@ -70,7 +70,7 @@ public:
 	int ch_post_blur = -1, ch_out = -1;
 
 	struct LightMeter {
-		//void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
+		void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
 		ComputeTask* compute;
 		ShaderStorageBuffer* buf;
 		Array<int> histogram;
