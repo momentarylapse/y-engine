@@ -270,7 +270,7 @@ void HDRRendererGL::LightMeter::measure(FrameBuffer* frame_buffer) {
 		s += histogram[i];
 	msg_write(format("%d  %d", s, NSAMPLES*256));*/
 
-	int thresh = (NSAMPLES * 16 * 16) / 100 * 99;
+	int thresh = (NSAMPLES * 16 * 16) / 200 * 199;
 	int n = 0;
 	int ii = 0;
 	for (int i=0; i<NBINS; i++) {
