@@ -1,4 +1,7 @@
 #include "ComputeTask.h"
+
+#include <renderer/base.h>
+
 #include "../../graphics-impl.h"
 
 
@@ -7,6 +10,7 @@ ComputeTask::ComputeTask(const shared<Shader>& _shader) {
 #ifdef USING_VULKAN
     pool = new vulkan::DescriptorPool("sampler:8,buffer:8,storage-buffer:8,image:8", 1);
     dset = pool->create_set_from_layout(shader->descr_layouts[0]);
+    pipeline = new vulkan::ComputePipeline(shader.get());
 #endif
 }
 
@@ -31,6 +35,7 @@ void ComputeTask::dispatch(CommandBuffer* cb, int nx, int ny, int nz) {
     cb->bind_descriptor_set(0, dset.get());
     cb->dispatch(nx, ny, nz);
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
+    gpu_flush();
 }
 #endif
 

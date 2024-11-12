@@ -16,6 +16,7 @@
 #include <lib/base/iter.h>
 #include <lib/math/rect.h>
 #include <lib/math/vec2.h>
+#include <lib/os/msg.h>
 #include <world/Camera.h>
 #include <world/World.h>
 
@@ -252,14 +253,19 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 void HDRRendererVulkan::LightMeter::init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel) {
 	ch_post_brightness = PerformanceMonitor::create_channel("expo", channel);
 	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
+	params = new UniformBuffer(8);
 	buf = new ShaderStorageBuffer(256*4);
 	compute->bind_texture(0, frame_buffer->attachments[0].get());
 	compute->bind_storage_buffer(1, buf);
+	compute->bind_uniform_buffer(2, params);
 }
 
 void HDRRendererVulkan::LightMeter::measure(CommandBuffer* cb, FrameBuffer* frame_buffer) {
 	PerformanceMonitor::begin(ch_post_brightness);
 	gpu_timestamp_begin(cb, ch_post_brightness);
+
+	int pp[2] = {frame_buffer->width, frame_buffer->height};
+	params->update(&pp);
 
 	int NBINS = 256;
 	histogram.resize(NBINS);
@@ -273,7 +279,7 @@ void HDRRendererVulkan::LightMeter::measure(CommandBuffer* cb, FrameBuffer* fram
 	void* p = buf->map();
 	memcpy(&histogram[0], p, NBINS*sizeof(int));
 	buf->unmap();
-	//msg_write(str(histogram));
+	msg_write(str(histogram));
 
 	gpu_timestamp_end(cb, ch_post_brightness);
 

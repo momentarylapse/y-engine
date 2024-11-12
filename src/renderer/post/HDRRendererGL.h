@@ -50,6 +50,7 @@ public:
 	struct LightMeter {
 		void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
 		ComputeTask* compute;
+		UniformBuffer* params;
 		ShaderStorageBuffer* buf;
 		Array<int> histogram;
 		float brightness;

@@ -1,11 +1,8 @@
 <Layout>
 	version = 430
-	bindings = [[sampler,buffer]]
+	bindings = [[sampler,buffer,buffer]]
 </Layout>
 <ComputeShader>
-
-uniform int width;
-uniform int height;
 
 layout(binding=0) uniform sampler2D tex0;
 
@@ -13,7 +10,12 @@ layout(std430, binding=1) buffer Histogram {
 	int hist[256];
 };
 
-layout (local_size_x = 16, local_size_y = 16) in;
+layout(std430, binding=2) buffer Parameters {
+	int width;
+	int height;
+};
+
+layout (local_size_x=16, local_size_y=16) in;
 
 
 float rand2d(vec2 p) {
