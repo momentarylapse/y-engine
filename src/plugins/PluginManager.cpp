@@ -918,6 +918,10 @@ void PluginManager::export_kaba() {
 	ext->link("screenshot", (void*)&screenshot);
 	ext->link("create_render_path", (void*)&create_render_path);
 
+	ext->link("attach_light_parallel", (void*)&attach_light_parallel);
+	ext->link("attach_light_point", (void*)&attach_light_point);
+	ext->link("attach_light_cone", (void*)&attach_light_cone);
+
 
 	ext->link("load_buffer", (void*)&audio::load_buffer);
 	ext->link("create_buffer", (void*)&audio::create_buffer);

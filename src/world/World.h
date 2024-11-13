@@ -183,6 +183,10 @@ void GodEnd();
 bool GodLoadWorld(const Path &filename);
 
 
+Light* attach_light_parallel(Entity* e, const color& c);
+Light* attach_light_point(Entity* e, const color& c, float r);
+Light* attach_light_cone(Entity* e, const color& c, float r, float theta);
+
 enum {
 	NET_MSG_CREATE_OBJECT = 1000,
 	NET_MSG_DELETE_OBJECT = 1002,

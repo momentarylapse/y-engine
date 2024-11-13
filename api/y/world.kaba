@@ -70,6 +70,11 @@ class Light extends Component
 #		func extern __init__(pos: vec3, ang: quaternion, c: color, radius: float, theta: float)
 
 
+func extern ref attach_light_parallel(e: Entity, c: color) -> Light&
+func extern ref attach_light_point(e: Entity, c: color, radius: f32) -> Light&
+func extern ref attach_light_cone(e: Entity, c: color, radius: f32, theta: f32) -> Light&
+
+
 class Camera extends Component
 	var m_view: mat4
 	var exposure: f32
@@ -141,8 +146,8 @@ class World
 	func extern mut load_soon(filename: os.Path)
 	
 	func extern mut selfref create_light_parallel(ang: quaternion, c: color) -> Light&
-	func extern mut selfref create_light_point(pos: vec3, c: color, radius: float) -> Light&
-	func extern mut selfref create_light_cone(pos: vec3, ang: quaternion, c: color, radius: float, theta: float) -> Light&
+	func extern mut selfref create_light_point(pos: vec3, c: color, radius: f32) -> Light&
+	func extern mut selfref create_light_cone(pos: vec3, ang: quaternion, c: color, radius: f32, theta: f32) -> Light&
 	#func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
 	func extern mut selfref _add_particle(type: kaba.Class*, pos: vec3, radius: f32, c: color, tex: shared![Texture], ttl: f32 = -1.0) -> LegacyParticle&
 	func mut selfref create_particle[T](pos: vec3, radius: f32, c: color = color.WHITE, tex: shared![Texture] = tex_white, ttl: f32 = -1.0) -> T&

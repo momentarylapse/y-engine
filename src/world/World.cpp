@@ -728,12 +728,31 @@ void World::iterate(float dt) {
 #endif
 }
 
+Light* attach_light_parallel(Entity* e, const color& c) {
+	auto l = e->add_component<Light>();
+	l->light.col = c;
+	return l;
+}
+
+Light* attach_light_point(Entity* e, const color& c, float r) {
+	auto l = e->add_component<Light>();
+	l->light.col = c;
+	l->light.radius = r;
+	return l;
+}
+
+Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
+	auto l = e->add_component<Light>();
+	l->light.col = c;
+	l->light.radius = r;
+	l->light.theta = theta;
+	return l;
+}
+
 Light *World::create_light_parallel(const quaternion &ang, const color &c) {
 #ifdef _X_ALLOW_X_
 	auto o = create_entity(v_0, ang);
-
-	auto l = new Light(c, -1, -1);
-	o->_add_component_external_no_init_(l);
+	auto l = attach_light_parallel(o, c);
 	register_entity(o);
 	return l;
 #else
@@ -744,9 +763,7 @@ Light *World::create_light_parallel(const quaternion &ang, const color &c) {
 Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
 #ifdef _X_ALLOW_X_
 	auto o = create_entity(pos, quaternion::ID);
-
-	auto l = new Light(c, r, -1);
-	o->_add_component_external_no_init_(l);
+	auto l = attach_light_point(o, c, r);
 	register_entity(o);
 	return l;
 #else
@@ -757,9 +774,7 @@ Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
 Light *World::create_light_cone(const vec3 &pos, const quaternion &ang, const color &c, float r, float t) {
 #ifdef _X_ALLOW_X_
 	auto o = create_entity(pos, ang);
-
-	auto l = new Light(c, r, t);
-	o->_add_component_external_no_init_(l);
+	auto l = attach_light_cone(o, c, r, t);
 	register_entity(o);
 	return l;
 #else
