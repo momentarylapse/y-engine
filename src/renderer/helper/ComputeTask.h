@@ -17,7 +17,8 @@ public:
         enum class Type {
             Texture,
             Image,
-            Buffer
+            UniformBuffer,
+            StorageBuffer
         };
         int index;
         Type type;

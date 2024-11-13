@@ -21,8 +21,10 @@ void ComputeTask::dispatch(int nx, int ny, int nz) {
             nix::bind_texture(b.index, static_cast<Texture*>(b.p));
         else if (b.type == Binding::Type::Image)
             nix::bind_image(b.index, static_cast<nix::ImageTexture*>(b.p), 0, 0, true);
-        else if (b.type == Binding::Type::Buffer)
-            nix::bind_buffer(b.index, static_cast<nix::Buffer*>(b.p));
+        else if (b.type == Binding::Type::UniformBuffer)
+            nix::bind_uniform_buffer(b.index, static_cast<nix::UniformBuffer*>(b.p));
+        else if (b.type == Binding::Type::StorageBuffer)
+            nix::bind_storage_buffer(b.index, static_cast<nix::ShaderStorageBuffer*>(b.p));
     }
     shader->dispatch(nx, ny, nz);
     nix::image_barrier();
@@ -61,7 +63,7 @@ void ComputeTask::bind_image(int index, ImageTexture *texture) {
 
 void ComputeTask::bind_uniform_buffer(int index, Buffer *buffer) {
 #ifdef USING_OPENGL
-    bindings.add({index, Binding::Type::Buffer, buffer});
+    bindings.add({index, Binding::Type::UniformBuffer, buffer});
 #endif
 #ifdef USING_VULKAN
     dset->set_buffer(index, buffer);
@@ -71,7 +73,7 @@ void ComputeTask::bind_uniform_buffer(int index, Buffer *buffer) {
 
 void ComputeTask::bind_storage_buffer(int index, Buffer *buffer) {
 #ifdef USING_OPENGL
-    bindings.add({index, Binding::Type::Buffer, buffer});
+    bindings.add({index, Binding::Type::StorageBuffer, buffer});
 #endif
 #ifdef USING_VULKAN
     dset->set_storage_buffer(index, buffer);

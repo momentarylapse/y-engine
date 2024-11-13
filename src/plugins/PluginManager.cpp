@@ -272,16 +272,6 @@ audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float 
 	return audio::create_stream([&f] (int n) { return f(n); }, sample_rate);
 }
 
-template<class T>
-void generic_init(T* t) {
-	new(t) T;
-}
-
-template<class T>
-void generic_delete(T* t) {
-	t->~T();
-}
-
 void PluginManager::init() {
 	export_kaba();
 	import_kaba();
@@ -312,7 +302,7 @@ void PluginManager::export_kaba() {
 	Component component;
 	ext->declare_class_size("Component", sizeof(Component));
 	ext->declare_class_element("Component.owner", &Component::owner);
-	ext->link_class_func("Component.__init__", &generic_init<Component>);
+	ext->link_class_func("Component.__init__", &kaba::generic_init<Component>);
 	ext->link_virtual("Component.__delete__", &Component::__delete__, &component);
 	ext->link_virtual("Component.on_init", &Component::on_init, &component);
 	ext->link_virtual("Component.on_delete", &Component::on_delete, &component);
@@ -907,8 +897,8 @@ void PluginManager::export_kaba() {
 
 
 	ext->declare_class_size("Scheduler", sizeof(Scheduler));
-	ext->link_class_func("Scheduler.__init__", &generic_init<Scheduler>);
-	ext->link_class_func("Scheduler.__delete__", &generic_delete<Scheduler>);
+	ext->link_class_func("Scheduler.__init__", &kaba::generic_init<Scheduler>);
+	ext->link_class_func("Scheduler.__delete__", &kaba::generic_delete<Scheduler>);
 	ext->link_class_func("Scheduler.later", &Scheduler::later);
 	ext->link_class_func("Scheduler.repeat", &Scheduler::repeat);
 	ext->link_class_func("Scheduler.clear", &Scheduler::clear);
