@@ -242,9 +242,11 @@ void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const Render
 void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel) {
 	ch_post_brightness = PerformanceMonitor::create_channel("expo", channel);
 	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
+	params = new UniformBuffer();
 	buf = new ShaderStorageBuffer();
 	compute->bind_texture(0, frame_buffer->color_attachments[0].get());
 	compute->bind_storage_buffer(1, buf);
+	compute->bind_uniform_buffer(2, params);
 }
 
 void HDRRendererGL::LightMeter::measure(FrameBuffer* frame_buffer) {
@@ -255,8 +257,9 @@ void HDRRendererGL::LightMeter::measure(FrameBuffer* frame_buffer) {
 	histogram.resize(NBINS);
 	memset(&histogram[0], 0, NBINS * sizeof(int));
 	buf->update(&histogram[0], NBINS * sizeof(int));
-	compute->shader->set_int("width", frame_buffer->width);
-	compute->shader->set_int("height", frame_buffer->height);
+
+	int pp[2] = {frame_buffer->width, frame_buffer->height};
+	params->update(&pp, sizeof(pp));
 	const int NSAMPLES = 256;
 	compute->dispatch(NSAMPLES, 1, 1);
 

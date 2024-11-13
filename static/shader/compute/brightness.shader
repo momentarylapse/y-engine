@@ -10,7 +10,7 @@ layout(std430, binding=1) buffer Histogram {
 	int hist[256];
 };
 
-layout(std430, binding=2) buffer Parameters {
+layout(std140, binding=2) uniform Parameters {
 	int width;
 	int height;
 };

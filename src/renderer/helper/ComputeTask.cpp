@@ -22,7 +22,7 @@ void ComputeTask::dispatch(int nx, int ny, int nz) {
         else if (b.type == Binding::Type::Image)
             nix::bind_image(b.index, static_cast<nix::ImageTexture*>(b.p), 0, 0, true);
         else if (b.type == Binding::Type::Buffer)
-            nix::bind_buffer(b.index, static_cast<UniformBuffer*>(b.p));
+            nix::bind_buffer(b.index, static_cast<nix::Buffer*>(b.p));
     }
     shader->dispatch(nx, ny, nz);
     nix::image_barrier();
