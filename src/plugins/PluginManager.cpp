@@ -63,7 +63,6 @@
 #include "../world/Link.h"
 #include "../world/Model.h"
 #include "../world/ModelManager.h"
-#include "../world/Object.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../world/Light.h"

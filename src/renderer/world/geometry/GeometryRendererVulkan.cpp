@@ -23,7 +23,6 @@
 #include "../../../world/Camera.h"
 #include "../../../world/Material.h"
 #include "../../../world/Model.h"
-#include "../../../world/Object.h" // meh
 #include "../../../world/Terrain.h"
 #include "../../../world/World.h"
 #include "../../../world/Light.h"

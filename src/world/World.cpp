@@ -23,7 +23,6 @@
 #include "Link.h"
 #include "Material.h"
 #include "Model.h"
-#include "Object.h"
 #include "Terrain.h"
 #include "World.h"
 
