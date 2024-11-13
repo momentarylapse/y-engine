@@ -15,7 +15,7 @@ class ResourceManager;
 
 class Object : public Model {
 public:
-	Object(ResourceManager *resource_manager);
+	explicit Object(ResourceManager *resource_manager);
 //	~Object();
 
 	void make_visible(bool _visible_);

@@ -101,11 +101,6 @@ public:
 	void delete_entity(Entity *e);
 	void delete_link(Link *l);
 
-	void register_model(Model *m);
-	void unregister_model(Model *m);
-
-	void register_model_multi(MultiInstance *mi);
-
 	void add_link(Link *l);
 
 	Path filename;

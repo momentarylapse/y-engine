@@ -409,9 +409,6 @@ Entity *World::create_entity(const vec3 &pos, const quaternion &ang) {
 void World::register_entity(Entity *e) {
 	e->on_init_rec();
 
-	if (auto m = e->get_component<Model>())
-		register_model(m);
-
 #if HAS_LIB_BULLET
 	if (auto sb = e->get_component<SolidBody>())
 		dynamicsWorld->addRigidBody(sb->body);
@@ -472,7 +469,6 @@ Model& World::attach_model(Entity &e, const Path &filename) {
 	auto& m = attach_model_no_reg(e, filename);
 	//m.on_init();
 	e.on_init_rec(); // FIXME might re-initialize too much...
-	register_model(&m);
 
 #if HAS_LIB_BULLET
 	if (auto sb = e.get_component<SolidBody>())
@@ -483,8 +479,6 @@ Model& World::attach_model(Entity &e, const Path &filename) {
 }
 
 void World::unattach_model(Model& m) {
-	unregister_model(&m);
-
 #if HAS_LIB_BULLET
 	if (auto sb = m.owner->get_component<SolidBody>())
 		dynamicsWorld->removeRigidBody(sb->body);
@@ -502,16 +496,7 @@ MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3
 	for (int i=0; i<pos.num; i++)
 		mi->matrices.add(mat4::translation(pos[i]) * mat4::rotation(ang[i]));
 
-	register_model_multi(mi);
-
 	return mi;
-}
-
-void World::register_model_multi(MultiInstance *mi) {
-	if (mi->model->registered)
-		return;
-
-	mi->model->registered = true;
 }
 
 
@@ -570,9 +555,6 @@ void World::unregister_entity(Entity *e) {
 	if (auto sb = e->get_component<SolidBody>())
 		dynamicsWorld->removeRigidBody(sb->body);
 #endif
-
-	if (auto m = e->get_component<Model>())
-		unregister_model(m);
 }
 
 void World::delete_entity(Entity *e) {
@@ -609,60 +591,6 @@ bool World::unregister(BaseClass* x) {
 			}
 	}
 	return false;
-}
-
-// add a model to the (possible) rendering list
-void World::register_model(Model *m) {
-	if (m->registered)
-		return;
-	msg_write("reg model " + m->filename().str());
-
-#ifdef _X_ALLOW_FX_
-	for (int i=0;i<m->fx.num;i++)
-		if (m->fx[i])
-			m->fx[i]->enable(true);
-#endif
-
-	m->registered = true;
-	
-	// sub models
-	//msg_write("R sk");
-	//msg_write(p2s(m->owner));
-	if (m->owner)
-	if (auto sk = m->owner->get_component<Skeleton>()) {
-		//msg_write("....sk");
-		for (auto &b: sk->bones)
-			if (auto *mm = b.get_component<Model>())
-				register_model(mm);
-	}
-	msg_write("/reg");
-}
-
-// remove a model from the (possible) rendering list
-void World::unregister_model(Model *m) {
-	if (!m->registered)
-		return;
-	//printf("%p   %s\n", m, MetaGetModelFilename(m));
-	msg_write("unreg model " + m->filename().str());
-
-#ifdef _X_ALLOW_FX_
-	if (!engine.resetting_game)
-		for (int i=0;i<m->fx.num;i++)
-			if (m->fx[i])
-				m->fx[i]->enable(false);
-#endif
-	
-	m->registered = false;
-	//printf("%d\n", m->NumBones);
-
-	// sub models
-	if (m->owner)
-	if (auto sk = m->owner->get_component<Skeleton>()) {
-		for (auto &b: sk->bones)
-			if (auto *mm = b.get_component<Model>())
-				unregister_model(mm);
-	}
-	msg_write("/unreg");
 }
 
 void World::iterate_physics(float dt) {

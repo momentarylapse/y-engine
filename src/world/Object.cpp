@@ -27,11 +27,5 @@ Object::Object(ResourceManager *resource_manager) {
 
 
 void Object::make_visible(bool _visible_) {
-	if (_visible_ == visible)
-		return;
-	if (_visible_)
-		world.register_model(this);
-	else
-		world.unregister_model(this);
 	visible = _visible_;
 }
