@@ -418,6 +418,7 @@ add_executable(y
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
 	src/renderer/helper/ComputeTask.cpp
+	src/renderer/helper/CubeMapSource.cpp
 	src/renderer/helper/jitter.cpp
 	src/renderer/helper/Pipeline.cpp
 	src/renderer/helper/PipelineManager.cpp

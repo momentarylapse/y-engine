@@ -76,7 +76,9 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 
 	// skyboxes
 	auto cam = scene_view.cam;
+	float min_depth = cam->min_depth;
 	float max_depth = cam->max_depth;
+	cam->min_depth = 1;
 	cam->max_depth = 2000000;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
@@ -93,6 +95,7 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 	// world
 	PerformanceMonitor::begin(ch_world);
 	cam->max_depth = max_depth;
+	cam->min_depth = min_depth;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
 

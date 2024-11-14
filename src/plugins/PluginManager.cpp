@@ -35,6 +35,7 @@
 #include "../renderer/base.h"
 #include "../renderer/Renderer.h"
 #include "../renderer/helper/RendererFactory.h"
+#include "../renderer/helper/CubeMapSource.h"
 #ifdef USING_OPENGL
 #include "../renderer/world/WorldRendererGL.h"
 #include "../renderer/world/WorldRendererGLForward.h"
@@ -330,6 +331,14 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Camera.update_matrices", &Camera::update_matrices);
 	ext->link_class_func("Camera.project", &Camera::project);
 	ext->link_class_func("Camera.unproject", &Camera::unproject);
+
+
+	ext->declare_class_size("CubeMapSource", sizeof(CubeMapSource));
+	ext->declare_class_element("CubeMapSource.min_depth", &CubeMapSource::min_depth);
+	ext->declare_class_element("CubeMapSource.max_depth", &CubeMapSource::max_depth);
+	ext->declare_class_element("CubeMapSource.cube_map", &CubeMapSource::cube_map);
+	ext->declare_class_element("CubeMapSource.resolution", &CubeMapSource::resolution);
+	ext->declare_class_element("CubeMapSource.update_mode", &CubeMapSource::update_mode);
 
 
 	ext->declare_class_size("Model.Mesh", sizeof(Mesh));
@@ -960,6 +969,7 @@ void PluginManager::import_kaba() {
 	import_component_class<Terrain>(m_world, "Terrain");
 	import_component_class<Light>(m_world, "Light");
 	import_component_class<Camera>(m_world, "Camera");
+	import_component_class<CubeMapSource>(m_world, "CubeMapSource");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");

@@ -90,7 +90,7 @@ class Camera extends Component
 	var focal_length: f32
 	var focal_blur: f32
 	
-	var fov: float
+	var fov: f32
 	var min_depth, max_depth: f32
 	
 	var show, enabled: bool
@@ -99,6 +99,12 @@ class Camera extends Component
 	func extern unproject(p: vec3) -> vec3
 	func extern mut update_matrices(aspect_ratio: f32)
 
+
+class CubeMapSource extends Component
+	var min_depth, max_depth: f32
+	var cube_map: shared[CubeMap]
+	var resolution: i32
+	var update_mode: i32
 
 
 class Fog
