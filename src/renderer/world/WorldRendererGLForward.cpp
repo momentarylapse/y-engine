@@ -12,9 +12,11 @@
 #ifdef USING_OPENGL
 #include "../base.h"
 #include "../helper/jitter.h"
+#include "../helper/CubeMapSource.h"
 #include <lib/nix/nix.h>
 #include <lib/image/image.h>
 #include <lib/os/msg.h>
+#include <y/ComponentManager.h>
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
@@ -50,12 +52,18 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 	if (scene_view.shadow_index >= 0)
 		shadow_renderer->render(scene_view);
 
-	static int _frame = 0;
-	_frame ++;
-	if (_frame >= cube_update_rate) {
-		render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), suggest_cube_map_pos());
-		_frame = 0;
-		prepare_lights();
+	suggest_cube_map_pos();
+	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
+	cube_map_sources.add(cube_map_source);
+	for (auto& source: cube_map_sources) {
+		if (source->update_rate <= 0)
+			continue;
+		source->counter ++;
+		if (source->counter >= source->update_rate) {
+			render_into_cubemap(*source);
+			source->counter = 0;
+			prepare_lights();
+		}
 	}
 
 	PerformanceMonitor::end(ch_prepare);

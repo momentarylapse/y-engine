@@ -104,7 +104,7 @@ class CubeMapSource extends Component
 	var min_depth, max_depth: f32
 	var cube_map: shared[CubeMap]
 	var resolution: i32
-	var update_mode: i32
+	var update_rate: i32
 
 
 class Fog

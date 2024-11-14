@@ -338,7 +338,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("CubeMapSource.max_depth", &CubeMapSource::max_depth);
 	ext->declare_class_element("CubeMapSource.cube_map", &CubeMapSource::cube_map);
 	ext->declare_class_element("CubeMapSource.resolution", &CubeMapSource::resolution);
-	ext->declare_class_element("CubeMapSource.update_mode", &CubeMapSource::update_mode);
+	ext->declare_class_element("CubeMapSource.update_rate", &CubeMapSource::update_rate);
 
 
 	ext->declare_class_size("Model.Mesh", sizeof(Mesh));
@@ -1089,6 +1089,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new LegacyParticle;
 	if (c == LegacyBeam::_class)
 		return new LegacyBeam;
+	if (c == CubeMapSource::_class)
+		return new CubeMapSource;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

@@ -12,10 +12,11 @@ public:
 
 	float min_depth, max_depth;
 	shared<CubeMap> cube_map;
+	shared<DepthBuffer> depth_buffer;
 	shared<FrameBuffer> frame_buffer;
 	int resolution;
-	int update_mode;
-	int state;
+	int update_rate;
+	int counter;
 
 	static const kaba::Class *_class;
 };
