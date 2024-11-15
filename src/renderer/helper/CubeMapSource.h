@@ -14,6 +14,9 @@ public:
 	shared<CubeMap> cube_map;
 	shared<DepthBuffer> depth_buffer;
 	shared<FrameBuffer> frame_buffer;
+#ifdef USING_VULKAN
+	owned<vulkan::RenderPass> render_pass;
+#endif
 	int resolution;
 	int update_rate;
 	int counter;

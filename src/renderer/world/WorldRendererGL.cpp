@@ -36,7 +36,7 @@ WorldRendererGL::WorldRendererGL(const string &name, Camera *cam, RenderPathType
 	auto e = new Entity;
 	cube_map_source = new CubeMapSource;
 	cube_map_source->owner = e;
-	cube_map_source->cube_map = new nix::CubeMap(cube_map_source->resolution, "rgba:i8");
+	cube_map_source->cube_map = new CubeMap(cube_map_source->resolution, "rgba:i8");
 
 	scene_view.cube_map = cube_map_source->cube_map;
 
