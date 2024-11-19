@@ -611,7 +611,7 @@ bool XTerrainVBUpdater::build_chunk(int chunk_no) {
 
 				}
 		}
-	return chunk_no >= nx*nz;
+	return chunk_no >= nx*nz-1;
 }
 
 void XTerrainVBUpdater::condense() {

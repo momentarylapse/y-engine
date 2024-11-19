@@ -21,6 +21,7 @@
 #include "ModelManager.h"
 #include "../helper/ResourceManager.h"
 #include "Link.h"
+#include "Light.h"
 #include "Material.h"
 #include "Model.h"
 #include "Terrain.h"
@@ -33,7 +34,6 @@
 #include "components/MultiInstance.h"
 
 #ifdef _X_ALLOW_X_
-#include "Light.h"
 #include "../fx/ParticleManager.h"
 #include "../plugins/PluginManager.h"
 #include "../helper/PerformanceMonitor.h"
@@ -277,7 +277,6 @@ bool World::load(const LevelData &ld) {
 	gravity = ld.gravity;
 	fog = ld.fog;
 
-#ifdef _X_ALLOW_X_
 	for (auto &l: ld.lights) {
 		auto o = new Entity(l.pos, quaternion::rotation(l.ang));
 		auto *ll = new Light(l._color, l.radius, l.theta);
@@ -289,7 +288,6 @@ bool World::load(const LevelData &ld) {
 		add_components_no_init(o, l.components);
 		register_entity(o);
 	}
-#endif
 
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
@@ -677,36 +675,24 @@ Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
 }
 
 Light *World::create_light_parallel(const quaternion &ang, const color &c) {
-#ifdef _X_ALLOW_X_
 	auto o = create_entity(v_0, ang);
 	auto l = attach_light_parallel(o, c);
 	register_entity(o);
 	return l;
-#else
-	return nullptr;
-#endif
 }
 
 Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
-#ifdef _X_ALLOW_X_
 	auto o = create_entity(pos, quaternion::ID);
 	auto l = attach_light_point(o, c, r);
 	register_entity(o);
 	return l;
-#else
-	return nullptr;
-#endif
 }
 
 Light *World::create_light_cone(const vec3 &pos, const quaternion &ang, const color &c, float r, float t) {
-#ifdef _X_ALLOW_X_
 	auto o = create_entity(pos, ang);
 	auto l = attach_light_cone(o, c, r, t);
 	register_entity(o);
 	return l;
-#else
-	return nullptr;
-#endif
 }
 
 Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {

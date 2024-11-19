@@ -20,6 +20,7 @@
 // Vulkan
 
 	namespace vulkan {
+		class Instance;
 		class Texture;
 		class VolumeTexture;
 		class StorageTexture;
@@ -93,7 +94,7 @@
 		class VolumeTexture;
 		class ImageTexture;
 		class Buffer;
-		class UniformBuffer;;
+		class UniformBuffer;
 		class ShaderStorageBuffer;
 		enum class Alpha;
 		enum class AlphaMode;

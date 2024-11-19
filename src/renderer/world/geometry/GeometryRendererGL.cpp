@@ -110,7 +110,7 @@ void GeometryRendererGL::set_textures(const Array<Texture*> &tex) {
 	/*tt.add(fb_shadow1->depth_buffer.get());
 	tt.add(fb_shadow2->depth_buffer.get());
 	tt.add(cube_map.get());*/
-	nix::set_textures(tt);
+	nix::bind_textures(tt);
 }
 #endif
 
@@ -365,7 +365,7 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 
 		/*if (auto ani = m->owner->get_component<Animator>()) {
 			ani->buf->update_array(ani->dmatrix);
-			nix::bind_buffer(7, ani->buf);
+			nix::bind_uniform_buffer(7, ani->buf);
 		}*/
 
 		for (int i=0; i<m->material.num; i++) {
