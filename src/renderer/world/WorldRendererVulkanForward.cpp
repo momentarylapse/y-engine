@@ -105,13 +105,14 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 // rvd is unused   ...i.e. ::draw() will always draw from a fixed camera...
 // TODO what state should be inside GeometryRenderer?!? who keeps rvd's?!?
 // for now, cubemaps are broken
-void WorldRendererVulkanForward::render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
+void WorldRendererVulkanForward::render_into_texture(Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
+	auto fb = params.frame_buffer;
 	rp->clear_color[0] = world.background;
 
 	cb->begin_render_pass(rp, fb);
-	cb->set_viewport(rect(0, fb->width, 0, fb->height));
+	cb->set_viewport(fb->area());
 
 	std::swap(scene_view.cam, cam);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio); // argh, need more UBOs

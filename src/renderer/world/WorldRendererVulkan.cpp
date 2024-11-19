@@ -76,8 +76,16 @@ void WorldRendererVulkan::render_into_cubemap(CubeMapSource& source, const Rende
 		source.cube_map = new CubeMap(source.resolution, "rgba:i8");
 	if (!source.render_pass)
 		source.render_pass = new vulkan::RenderPass({source.cube_map.get(), source.depth_buffer.get()}, {"autoclear"});
-	if (!source.frame_buffer)
-		source.frame_buffer = new FrameBuffer(source.render_pass.get(), {source.depth_buffer.get()});
+	if (!source.frame_buffer[0])
+		for (int i=0; i<6; i++) {
+			source.frame_buffer[i] = new FrameBuffer(source.render_pass.get(), {source.cube_map.get(), source.depth_buffer.get()});
+			try {
+				source.frame_buffer[i]->update_x(source.render_pass.get(), {source.cube_map.get(), source.depth_buffer.get()}, i);
+			} catch(Exception &e) {
+				msg_error(e.message());
+				return;
+			}
+		}
 	Entity o(source.owner->pos, quaternion::ID);
 	Camera cube_cam;
 	cube_cam.owner = &o;
@@ -85,12 +93,6 @@ void WorldRendererVulkan::render_into_cubemap(CubeMapSource& source, const Rende
 	cube_cam.min_depth = source.min_depth;
 	cube_cam.max_depth = source.max_depth;
 	for (int i=0; i<6; i++) {
-		try {
-			source.frame_buffer->update_x(source.render_pass.get(), {source.cube_map.get(), source.depth_buffer.get()}, i);
-		} catch(Exception &e) {
-			msg_error(e.message());
-			return;
-		}
 		if (i == 0)
 			o.ang = quaternion::rotation(vec3(0,pi/2,0));
 		if (i == 1)
@@ -103,11 +105,12 @@ void WorldRendererVulkan::render_into_cubemap(CubeMapSource& source, const Rende
 			o.ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
 			o.ang = quaternion::rotation(vec3(0,pi,0));
-		auto sub_params = params.with_target(source.frame_buffer.get());
+		auto sub_params = params.with_target(source.frame_buffer[i].get());
 		sub_params.render_pass = source.render_pass.get();
-		render_into_texture(source.frame_buffer.get(), &cube_cam, rvd_cube[i], sub_params);
+		render_into_texture(&cube_cam, rvd_cube[i], sub_params);
 	}
 	cube_cam.owner = nullptr;
+	//params.command_buffer->barrier({source.cube_map.get()}, 0);
 }
 
 
