@@ -42,16 +42,16 @@
 
 
 
-const int LOCATION_TEX0 = 0;
-const int LOCATION_SHADOW0 = 5;
-const int LOCATION_SHADOW1 = 6;
-const int LOCATION_CUBE = 7;
-const int LOCATION_PARAMS = 8;
-const int LOCATION_LIGHT = 9;
-const int LOCATION_INSTANCE_MATRICES = 10;
-const int LOCATION_BONE_MATRICES = 11;
+const int BINDING_TEX0 = 0;
+const int BINDING_SHADOW0 = 5;
+const int BINDING_SHADOW1 = 6;
+const int BINDING_CUBE = 7;
+const int BINDING_PARAMS = 8;
+const int BINDING_LIGHT = 9;
+const int BINDING_INSTANCE_MATRICES = 10;
+const int BINDING_BONE_MATRICES = 11;
 
-const int LOCATION_FX_TEX0 = 0;
+const int BINDING_FX_TEX0 = 0;
 
 const int MAX_LIGHTS = 1024;
 const int MAX_INSTANCES = 1<<11;
@@ -141,13 +141,13 @@ void GeometryRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, D
 void GeometryRendererVulkan::set_textures(DescriptorSet *dset, const Array<Texture*> &tex) {
 	foreachi (auto t, tex, i)
 		if (t)
-			dset->set_texture(LOCATION_TEX0 + i, t);
+			dset->set_texture(BINDING_TEX0 + i, t);
 	if (scene_view.fb_shadow1)
-		dset->set_texture(LOCATION_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
+		dset->set_texture(BINDING_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
 	if (scene_view.fb_shadow1)
-		dset->set_texture(LOCATION_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
+		dset->set_texture(BINDING_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
 	if (scene_view.cube_map)
-		dset->set_texture(LOCATION_CUBE, scene_view.cube_map.get());
+		dset->set_texture(BINDING_CUBE, scene_view.cube_map.get());
 }
 
 
@@ -196,9 +196,9 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
 				pool->create_set(shader_fx.get()),
 				new VertexBuffer("3f,4f,2f")});
-			//rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(LOCATION_FX_TEX0, texture);
+			//rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
+			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+			rda[index].dset->set_texture(BINDING_FX_TEX0, texture);
 			rda[index].dset->update();
 		}
 
@@ -257,9 +257,9 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
 				pool->create_set(shader_fx.get()),
 				new VertexBuffer("3f,4f,2f")});
-			//rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(LOCATION_FX_TEX0, g->texture);
+			//rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
+			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+			rda[index].dset->set_texture(BINDING_FX_TEX0, g->texture);
 			rda[index].dset->update();
 		}
 
@@ -294,9 +294,9 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 			rda.add({new UniformBuffer(sizeof(UBOFx)),
 				pool->create_set(shader_fx.get()),
 				new VertexBuffer("3f,4f,2f")});
-			//rda[index].dset->set_buffer(LOCATION_LIGHT, ubo_light);
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(LOCATION_FX_TEX0, g->texture);
+			//rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
+			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+			rda[index].dset->set_texture(BINDING_FX_TEX0, g->texture);
 			rda[index].dset->update();
 		}
 
@@ -372,8 +372,8 @@ void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, fl
 				sb->shader_cache[i]._prepare_shader(type, sb->material[i], "default", "");
 				rda.add({new UniformBuffer(sizeof(UBO)),
 					pool->create_set(sb->shader_cache[i].get_shader(type))});
-				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+				rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+				rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
 			}
 			ubo.albedo = sb->material[i]->albedo;
 			ubo.emission = sb->material[i]->emission;
@@ -416,8 +416,8 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 			t->shader_cache._prepare_shader(type, t->material.get(), t->vertex_shader_module, "");
 			rda.add({new UniformBuffer(sizeof(UBO)),
 				pool->create_set(t->shader_cache.get_shader(type))});
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+			rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
 		}
 
 		rda[index].ubo->update(&ubo);
@@ -458,9 +458,9 @@ void GeometryRendererVulkan::draw_objects_instanced(CommandBuffer *cb, RenderPas
 				m->shader_cache[i]._prepare_shader(type, material, "instanced", "");
 				rda.add({new UniformBuffer(sizeof(UBO)),
 					pool->create_set(m->shader_cache[i].get_shader(type))});
-				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
-				rda[index].dset->set_buffer(LOCATION_INSTANCE_MATRICES, mi->ubo_matrices);
+				rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+				rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
+				rda[index].dset->set_uniform_buffer(BINDING_INSTANCE_MATRICES, mi->ubo_matrices);
 			}
 
 			m->update_matrix();
@@ -506,8 +506,8 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 				m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
 				rda.add({new UniformBuffer(sizeof(UBO)),
 					pool->create_set(m->shader_cache[i].get_shader(type))});
-				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+				rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+				rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
 			}
 
 			m->update_matrix();
@@ -519,7 +519,7 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 			rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 			if (ani) {
 				ani->buf->update_array(ani->dmatrix);
-				rda[index].dset->set_buffer(LOCATION_BONE_MATRICES, ani->buf);
+				rda[index].dset->set_uniform_buffer(BINDING_BONE_MATRICES, ani->buf);
 			}
 
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
@@ -569,8 +569,8 @@ void GeometryRendererVulkan::draw_objects_transparent(CommandBuffer *cb, RenderP
 				m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
 				rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
 					pool->create_set(m->shader_cache[i].get_shader(type))});
-				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+				rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+				rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
 			}
 
 			m->update_matrix();
@@ -647,8 +647,8 @@ void GeometryRendererVulkan::draw_user_meshes(CommandBuffer *cb, RenderPass *rp,
 		if (index >= rda.num) {
 			rda.add({new UniformBuffer(sizeof(UBO)),
 				pool->create_set(shader)});
-			rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
-			rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
+			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+			rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
 		}
 
 		ubo.m = m->owner->get_matrix();

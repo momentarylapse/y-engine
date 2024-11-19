@@ -59,9 +59,9 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer,buffer");
 		rtx.dset->set_storage_image(1, offscreen_image);
-		rtx.dset->set_buffer(2, rtx.buffer_cam);
-		rtx.dset->set_buffer(4, geo_renderer->rvd_def.ubo_light);
-		rtx.dset->set_buffer(5, buffer_meshes);
+		rtx.dset->set_uniform_buffer(2, rtx.buffer_cam);
+		rtx.dset->set_uniform_buffer(4, geo_renderer->rvd_def.ubo_light);
+		rtx.dset->set_uniform_buffer(5, buffer_meshes);
 
 		auto shader_gen = resource_manager->load_shader("vulkan/gen.shader");
 		auto shader1 = resource_manager->load_shader("vulkan/group1.shader");
@@ -78,8 +78,8 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 		compute.pipeline = new vulkan::ComputePipeline(shader.get());
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
-		compute.dset->set_buffer(1, buffer_meshes);
-		compute.dset->set_buffer(2, geo_renderer->rvd_def.ubo_light);
+		compute.dset->set_uniform_buffer(1, buffer_meshes);
+		compute.dset->set_uniform_buffer(2, geo_renderer->rvd_def.ubo_light);
 		compute.dset->update();
 	}
 
