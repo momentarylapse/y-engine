@@ -49,6 +49,7 @@ const int LOCATION_CUBE = 7;
 const int LOCATION_PARAMS = 8;
 const int LOCATION_LIGHT = 9;
 const int LOCATION_INSTANCE_MATRICES = 10;
+const int LOCATION_BONE_MATRICES = 11;
 
 const int LOCATION_FX_TEX0 = 0;
 
@@ -402,8 +403,6 @@ void GeometryRendererVulkan::draw_terrains(CommandBuffer *cb, RenderPass *rp, UB
 	auto &rda = rvd.rda_tr;
 	int index = 0;
 
-	ubo.m = mat4::ID;
-
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: terrains) {
 		auto o = t->owner;
@@ -492,8 +491,6 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 	auto &rda = rvd.rda_ob;
 	int index = 0;
 
-	ubo.m = mat4::ID;
-
 	auto& list = ComponentManager::get_list_family<Model>();
 
 	for (auto m: list) {
@@ -507,7 +504,7 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 
 			if (index >= rda.num) {
 				m->shader_cache[i]._prepare_shader(type, material, m->_template->vertex_shader_module, "");
-				rda.add({new UniformBuffer(ani ? (sizeof(UBO)+sizeof(mat4) * ani->dmatrix.num) : sizeof(UBO)),
+				rda.add({new UniformBuffer(sizeof(UBO)),
 					pool->create_set(m->shader_cache[i].get_shader(type))});
 				rda[index].dset->set_buffer(LOCATION_PARAMS, rda[index].ubo);
 				rda[index].dset->set_buffer(LOCATION_LIGHT, rvd.ubo_light);
@@ -520,8 +517,10 @@ void GeometryRendererVulkan::draw_objects_opaque(CommandBuffer *cb, RenderPass *
 			ubo.metal = material->metal;
 			ubo.roughness = material->roughness;
 			rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
-			if (ani)
-				rda[index].ubo->update_array(ani->dmatrix, sizeof(UBO));
+			if (ani) {
+				ani->buf->update_array(ani->dmatrix);
+				rda[index].dset->set_buffer(LOCATION_BONE_MATRICES, ani->buf);
+			}
 
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
 			if (is_shadow_pass())

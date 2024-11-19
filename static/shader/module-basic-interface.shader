@@ -37,14 +37,15 @@ layout(binding = 8) uniform ParameterData {
 	Material material;
 	int num_lights;
 	int shadow_index;
-	int _dummy3, _dummy4;
-	mat4 bone_matrix[128];
 };
 layout(binding = 9) uniform LightData {
 	Light light[32];
 };
 layout(binding = 10) uniform Multi {
 	mat4 multi[1024];
+};
+layout(binding = 11) uniform BoneData {
+	mat4 bone_matrix[1024];
 };
 
 layout(binding = 0) uniform sampler2D tex0;
