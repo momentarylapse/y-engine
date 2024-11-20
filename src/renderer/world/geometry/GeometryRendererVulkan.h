@@ -38,21 +38,9 @@ struct RenderDataVK {
 	void apply(const RenderParams& params);
 };
 
-struct UBOFx {
-	mat4 m,v,p;
-};
-
-struct RenderDataFxVK {
-	UniformBuffer *ubo;
-	DescriptorSet *dset;
-	VertexBuffer *vb;
-};
-
 struct RenderViewDataVK {
 	UniformBuffer *ubo_light = nullptr;
 	Array<RenderDataVK> rda_ob;
-	Array<RenderDataVK> rda_ob_trans;
-	Array<RenderDataFxVK> rda_fx;
 
 	int index = 0;
 	UBO ubo;
@@ -70,22 +58,19 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}
 
-	GraphicsPipeline *pipeline_fx = nullptr;
 	RenderViewDataVK rvd_def;
 
 
 	static GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
-	void set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, ShaderCache &cache, const Material& m, RenderPathType type, const string &vertex_module, const string &geometry_module, PrimitiveTopology top, VertexBuffer *vb);
-	void set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, const Material& m, GraphicsPipeline *p);
-	void set_textures(DescriptorSet *dset, const Array<Texture*> &tex);
 
-	void draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd);
+	void draw_particles(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_skyboxes(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_terrains(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_opaque(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_transparent(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_instanced(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_user_meshes(const RenderParams& params, bool transparent, RenderViewDataVK &rvd);
+
 	void prepare_instanced_matrices();
 	void prepare_lights(Camera *cam, RenderViewDataVK &rvd);
 };

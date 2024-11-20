@@ -47,7 +47,6 @@ class RenderPath
 		FORWARD
 		DEFERRED
 	var type: Type
-	var shader_fx: Shader*
 	var wireframe: bool
 	
 	# debugging

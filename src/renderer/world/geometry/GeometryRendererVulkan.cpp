@@ -59,17 +59,9 @@ const int MAX_INSTANCES = 1<<11;
 
 GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &scene_view) : GeometryRenderer(type, scene_view) {
 
-	vb_fx = new VertexBuffer("3f,4f,2f");
-
-
-
 	rvd_def.ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 	//for (int i=0; i<6; i++)
 	//	rvd_cube[i].ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
-
-
-	shader_fx = resource_manager->load_shader("vulkan/3d-fx.shader");
-
 }
 
 void GeometryRendererVulkan::prepare(const RenderParams& params) {
@@ -101,61 +93,27 @@ GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp
 	}
 }
 
-void GeometryRendererVulkan::set_material(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, ShaderCache &cache, const Material& m, RenderPathType t, const string &vertex_module, const string &geometry_module, PrimitiveTopology top, VertexBuffer *vb) {
-	cache._prepare_shader(t, m, vertex_module, geometry_module);
-	auto s = cache.get_shader(t);
-	auto p = get_pipeline(s, rp, m.pass0, top, vb);
-	set_material_x(cb, rp, dset, m, p);
-}
-
-void GeometryRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, DescriptorSet *dset, const Material& m, GraphicsPipeline *p) {
-	cb->bind_pipeline(p);
-
-	set_textures(dset, weak(m.textures));
-	dset->update();
-	cb->bind_descriptor_set(0, dset);
-}
-
-void GeometryRendererVulkan::set_textures(DescriptorSet *dset, const Array<Texture*> &tex) {
-	foreachi (auto t, tex, i)
-		if (t)
-			dset->set_texture(BINDING_TEX0 + i, t);
-	if (scene_view.fb_shadow1)
-		dset->set_texture(BINDING_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
-	if (scene_view.fb_shadow1)
-		dset->set_texture(BINDING_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
-	if (scene_view.cube_map)
-		dset->set_texture(BINDING_CUBE, scene_view.cube_map.get());
-}
 
 
-
-
-void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_particles(const RenderParams& params, RenderViewDataVK &rvd) {
+	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_fx);
 	gpu_timestamp_begin(cb, ch_fx);
-	auto &rda = rvd.rda_fx;
 	auto cam = scene_view.cam;
 
-
-	if (!pipeline_fx) {
-		pipeline_fx = new vulkan::GraphicsPipeline(shader_fx.get(), rp, 0, "triangles", "3f,4f,2f");
-		pipeline_fx->set_blend(Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA);
-		pipeline_fx->set_z(true, false);
-		pipeline_fx->set_culling(CullMode::NONE);
-		pipeline_fx->rebuild();
-	}
-
-	cb->bind_pipeline(pipeline_fx);
-
-	UBOFx ubo;
-	ubo.p = cam->m_projection;
-	ubo.v = cam->m_view;
-	ubo.m = mat4::ID;
+	auto& rd = rvd.start(params, type, mat4::ID, fx_shader_cache, fx_material, 0, "fx", "", PrimitiveTopology::TRIANGLES, fx_vertex_buffers[0]);
 
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
 	int index = 0;
+
+	auto get_vb = [this, &index]() {
+		if (index < fx_vertex_buffers.num)
+			return fx_vertex_buffers[index ++];
+		index ++;
+		fx_vertex_buffers.add(new VertexBuffer("3f,4f,2f"));
+		return fx_vertex_buffers.back();
+	};
 
 	base::map<Texture*, Array<LegacyParticle*>> legacy_groups;
 
@@ -170,15 +128,6 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 	}
 
 	for (const auto& [texture, particles]: legacy_groups) {
-		if (index >= rda.num) {
-			rda.add({new UniformBuffer(sizeof(UBOFx)),
-				pool->create_set(shader_fx.get()),
-				new VertexBuffer("3f,4f,2f")});
-			//rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
-			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(BINDING_FX_TEX0, texture);
-			rda[index].dset->update();
-		}
 
 		Array<VertexFx> v;
 		v.__reserve(particles.num * 6);
@@ -217,30 +166,18 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 					v.add({m * vec3(-1,-1,0), p->col, p->source.x1, p->source.y2});
 				}
 			}
-		rda[index].vb->update(v);
+		auto vb = get_vb();
+		vb->update(v);
 
-		rda[index].ubo->update(&ubo);
-
-		cb->bind_descriptor_set(0, rda[index].dset);
-		cb->draw(rda[index].vb);
-
-		index ++;
+		rd.dset->set_texture(BINDING_TEX0, texture);
+		rd.apply(params);
+		cb->draw(vb);
 	}
 
 
 	// new particles
 	auto& particle_groups = ComponentManager::get_list_family<ParticleGroup>();
 	for (auto g: particle_groups) {
-		if (index >= rda.num) {
-			rda.add({new UniformBuffer(sizeof(UBOFx)),
-				pool->create_set(shader_fx.get()),
-				new VertexBuffer("3f,4f,2f")});
-			//rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
-			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(BINDING_FX_TEX0, g->texture);
-			rda[index].dset->update();
-		}
-
 		auto source = g->source;
 		Array<VertexFx> v;
 		for (auto& p: g->particles)
@@ -253,30 +190,18 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 				v.add({m * vec3( 1,-1,0), p.col, source.x2, source.y2});
 				v.add({m * vec3(-1,-1,0), p.col, source.x1, source.y2});
 			}
-		rda[index].vb->update(v);
+		auto vb = get_vb();
+		vb->update(v);
 
-		rda[index].ubo->update(&ubo);
-
-		cb->bind_descriptor_set(0, rda[index].dset);
-		cb->draw(rda[index].vb);
-
-		index ++;
+		rd.dset->set_texture(BINDING_TEX0, g->texture);
+		rd.apply(params);
+		cb->draw(vb);
 	}
 
 	// beams
 	for (auto g: particle_groups) {
 		if (g->beams.num == 0)
 			continue;
-
-		if (index >= rda.num) {
-			rda.add({new UniformBuffer(sizeof(UBOFx)),
-				pool->create_set(shader_fx.get()),
-				new VertexBuffer("3f,4f,2f")});
-			//rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
-			rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
-			rda[index].dset->set_texture(BINDING_FX_TEX0, g->texture);
-			rda[index].dset->update();
-		}
 
 		auto source = g->source;
 		Array<VertexFx> v;
@@ -305,15 +230,10 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 			v.add({p11, p.col, source.x2, source.y2});
 			v.add({p10, p.col, source.x1, source.y2});
 		}
-
-		rda[index].vb->update(v);
-
-		rda[index].ubo->update(&ubo);
-
-		cb->bind_descriptor_set(0, rda[index].dset);
-		cb->draw(rda[index].vb);
-
-		index ++;
+		auto vb = get_vb();
+		vb->update(v);
+		rd.dset->set_texture(BINDING_TEX0, g->texture);
+		cb->draw(vb);
 	}
 
 	gpu_timestamp_end(cb, ch_fx);
