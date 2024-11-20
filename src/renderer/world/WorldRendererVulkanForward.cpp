@@ -78,6 +78,8 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	gpu_timestamp_begin(cb, ch_draw);
 
 	auto &rvd = geo_renderer->rvd_def;
+	rvd.index = 0;
+	rvd.scene_view = &scene_view;
 
 	cb->clear(params.frame_buffer->area(), {world.background}, 1.0f);
 	geo_renderer->draw_skyboxes(cb, rp, params.desired_aspect_ratio, rvd);
@@ -87,15 +89,19 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	ubo.v = scene_view.cam->m_view;
 	ubo.num_lights = scene_view.lights.num;
 	ubo.shadow_index = scene_view.shadow_index;
+	rvd.ubo.p = scene_view.cam->m_projection;
+	rvd.ubo.v = scene_view.cam->m_view;
+	rvd.ubo.num_lights = scene_view.lights.num;
+	rvd.ubo.shadow_index = scene_view.shadow_index;
 
-	geo_renderer->draw_terrains(cb, rp, ubo, rvd);
-	geo_renderer->draw_objects_opaque(cb, rp, ubo, rvd);
-	geo_renderer->draw_objects_instanced(cb, rp, ubo, rvd);
-	geo_renderer->draw_user_meshes(cb, rp, ubo, false, rvd);
+	geo_renderer->draw_terrains(params, rvd);
+	geo_renderer->draw_objects_opaque(params, rvd);
+	geo_renderer->draw_objects_instanced(params, rvd);
+	geo_renderer->draw_user_meshes(params, false, rvd);
+
 	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
-
 	geo_renderer->draw_particles(cb, rp, rvd);
-	geo_renderer->draw_user_meshes(cb, rp, ubo, true, rvd);
+	geo_renderer->draw_user_meshes(params, true, rvd);
 
 	gpu_timestamp_end(cb, ch_draw);
 	PerformanceMonitor::end(ch_draw);
