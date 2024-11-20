@@ -82,7 +82,7 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	rvd.scene_view = &scene_view;
 
 	cb->clear(params.frame_buffer->area(), {world.background}, 1.0f);
-	geo_renderer->draw_skyboxes(cb, rp, params.desired_aspect_ratio, rvd);
+	geo_renderer->draw_skyboxes(params, rvd);
 
 	UBO ubo;
 	ubo.p = scene_view.cam->m_projection;

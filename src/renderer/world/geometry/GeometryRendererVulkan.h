@@ -78,7 +78,7 @@ public:
 	void set_textures(DescriptorSet *dset, const Array<Texture*> &tex);
 
 	void draw_particles(CommandBuffer *cb, RenderPass *rp, RenderViewDataVK &rvd);
-	void draw_skyboxes(CommandBuffer *cb, RenderPass *rp, float aspect, RenderViewDataVK &rvd);
+	void draw_skyboxes(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_terrains(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_opaque(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);

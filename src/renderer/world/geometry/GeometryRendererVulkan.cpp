@@ -114,28 +114,6 @@ void GeometryRendererVulkan::set_material_x(CommandBuffer *cb, RenderPass *rp, D
 	set_textures(dset, weak(m.textures));
 	dset->update();
 	cb->bind_descriptor_set(0, dset);
-
-
-	/*nix::set_shader(s);
-	if (using_view_space)
-		s->set_floats("eye_pos", &cam->owner->pos.x, 3);
-	else
-		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
-	s->set_int("num_lights", lights.num);
-	s->set_int("shadow_index", shadow_index);
-	for (auto &u: m->uniforms)
-		s->set_floats(u.name, u.p, u.size/4);
-
-	if (m->alpha.mode == TransparencyMode::FUNCTIONS)
-		nix::set_alpha(m->alpha.source, m->alpha.destination);
-	else if (m->alpha.mode == TransparencyMode::COLOR_KEY_HARD)
-		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	else
-		nix::disable_alpha();
-
-	set_textures(weak(m->textures));
-
-	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);*/
 }
 
 void GeometryRendererVulkan::set_textures(DescriptorSet *dset, const Array<Texture*> &tex) {
@@ -342,57 +320,43 @@ void GeometryRendererVulkan::draw_particles(CommandBuffer *cb, RenderPass *rp, R
 	PerformanceMonitor::end(ch_fx);
 }
 
-void GeometryRendererVulkan::draw_skyboxes(CommandBuffer *cb, RenderPass *rp, float aspect, RenderViewDataVK &rvd) {
+void GeometryRendererVulkan::draw_skyboxes(const RenderParams& params, RenderViewDataVK &rvd) {
+	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_bg);
 	gpu_timestamp_begin(cb, ch_bg);
-	auto &rda = rvd.rda_sky;
 	auto cam = scene_view.cam;
-
-	int index = 0;
-	UBO ubo;
 
 	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
-	cam->update_matrices(aspect);
+	cam->update_matrices(params.desired_aspect_ratio);
 
-	auto& light_list = ComponentManager::get_list_family<MultiInstance>();
-
-	ubo.p = cam->m_projection;
-	ubo.v = mat4::rotation(cam->owner->ang).transpose();
-	ubo.m = mat4::ID;
-	ubo.num_lights = light_list.num;
+	// overwrite rendering parameters
+	auto mv = rvd.ubo.v;
+	auto mp = rvd.ubo.p;
+	rvd.ubo.v = mat4::rotation(cam->owner->ang).transpose();
+	rvd.ubo.p = cam->m_projection;
+	int nlights = rvd.ubo.num_lights;
+	rvd.ubo.num_lights = 0;
 
 	for (auto *sb: world.skybox) {
 		sb->_matrix = mat4::rotation(sb->owner->ang);
-		ubo.m = sb->_matrix * mat4::scale(10,10,10);
-
 
 		for (int i=0; i<sb->material.num; i++) {
-			if (index >= rda.num) {
-				sb->shader_cache[i]._prepare_shader(type, *sb->material[i], "default", "");
-				rda.add({new UniformBuffer(sizeof(UBO)),
-					pool->create_set(sb->shader_cache[i].get_shader(type))});
-				rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
-				rda[index].dset->set_uniform_buffer(BINDING_LIGHT, rvd.ubo_light);
-			}
-			ubo.albedo = sb->material[i]->albedo;
-			ubo.emission = sb->material[i]->emission;
-			ubo.metal = sb->material[i]->metal;
-			ubo.roughness = sb->material[i]->roughness;
-
-			rda[index].ubo->update(&ubo);
 
 			auto vb = sb->mesh[0]->sub[i].vertex_buffer;
-			set_material(cb, rp, rda[index].dset, sb->shader_cache[i], *weak(sb->material)[i], type, "default", "", PrimitiveTopology::TRIANGLES, vb);
-			cb->draw(vb);
+			auto& rd = rvd.start(params, type, sb->_matrix * mat4::scale(10,10,10), sb->shader_cache[i], *sb->material[i], "default", "", PrimitiveTopology::TRIANGLES, vb);
 
-			index ++;
+			rd.apply(params);
+			cb->draw(vb);
 		}
 	}
 
-
+	// restore parameters
+	rvd.ubo.v = mv;
+	rvd.ubo.p = mp;
+	rvd.ubo.num_lights = nlights;
 	cam->max_depth = max_depth;
-	cam->update_matrices(aspect);
+	cam->update_matrices(params.desired_aspect_ratio);
 	gpu_timestamp_end(cb, ch_bg);
 	PerformanceMonitor::end(ch_bg);
 }
