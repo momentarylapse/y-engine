@@ -52,13 +52,15 @@ struct RenderViewDataVK {
 	UniformBuffer *ubo_light = nullptr;
 	Array<RenderDataVK> rda_ob;
 	Array<RenderDataVK> rda_ob_trans;
-	Array<RenderDataVK> rda_sky;
 	Array<RenderDataFxVK> rda_fx;
 
 	int index = 0;
 	UBO ubo;
 	SceneView* scene_view = nullptr;;
-	RenderDataVK& start(const RenderParams& params, RenderPathType type, const mat4& matrix, ShaderCache& shader_cache, const Material& material, const string& vertex_shader_module, const string& geometry_shader_module, PrimitiveTopology top, VertexBuffer *vb);
+	RenderDataVK& start(const RenderParams& params, RenderPathType type, const mat4& matrix,
+			ShaderCache& shader_cache, const Material& material, int pass_no,
+			const string& vertex_shader_module, const string& geometry_shader_module,
+			PrimitiveTopology top, VertexBuffer *vb);
 };
 
 class GeometryRendererVulkan : public GeometryRenderer {
@@ -81,7 +83,7 @@ public:
 	void draw_skyboxes(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_terrains(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_opaque(const RenderParams& params, RenderViewDataVK &rvd);
-	void draw_objects_transparent(CommandBuffer *cb, RenderPass *rp, UBO &ubo, RenderViewDataVK &rvd);
+	void draw_objects_transparent(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_objects_instanced(const RenderParams& params, RenderViewDataVK &rvd);
 	void draw_user_meshes(const RenderParams& params, bool transparent, RenderViewDataVK &rvd);
 	void prepare_instanced_matrices();

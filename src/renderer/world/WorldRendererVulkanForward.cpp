@@ -99,7 +99,7 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	geo_renderer->draw_objects_instanced(params, rvd);
 	geo_renderer->draw_user_meshes(params, false, rvd);
 
-	geo_renderer->draw_objects_transparent(cb, rp, ubo, rvd);
+	geo_renderer->draw_objects_transparent(params, rvd);
 	geo_renderer->draw_particles(cb, rp, rvd);
 	geo_renderer->draw_user_meshes(params, true, rvd);
 
