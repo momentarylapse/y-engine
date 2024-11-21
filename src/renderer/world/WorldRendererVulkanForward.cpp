@@ -36,8 +36,6 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 
 	auto cb = params.command_buffer;
 
-
-#ifndef OS_MAC
 	suggest_cube_map_pos();
 	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
 	cube_map_sources.add(cube_map_source);
@@ -56,7 +54,6 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 		render_into_cubemap(params, scene_view.cube_map.get(), suggest_cube_map_pos());
 		_frame = 0;
 	}*/
-#endif
 
 	scene_view.check_terrains(cam_main->owner->pos);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
@@ -105,10 +102,6 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	PerformanceMonitor::end(ch_draw);
 }
 
-// FIXME
-// rvd is unused   ...i.e. ::draw() will always draw from a fixed camera...
-// TODO what state should be inside GeometryRenderer?!? who keeps rvd's?!?
-// for now, cubemaps are broken
 void WorldRendererVulkanForward::render_into_texture(Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) {
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
