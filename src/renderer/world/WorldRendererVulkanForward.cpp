@@ -60,7 +60,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	scene_view.check_terrains(cam_main->owner->pos);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
-	prepare_lights(scene_view.cam, rvd);
+	prepare_lights(scene_view.cam, main_rvd);
 	
 	geo_renderer->prepare(params);
 
@@ -71,8 +71,11 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 }
 
 void WorldRendererVulkanForward::draw(const RenderParams& params) {
+	draw_with(params, main_rvd);
+}
+
+void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderViewDataVK& rvd) {
 	auto cb = params.command_buffer;
-	auto rp = params.render_pass;
 
 	PerformanceMonitor::begin(ch_draw);
 	gpu_timestamp_begin(cb, ch_draw);
@@ -116,9 +119,9 @@ void WorldRendererVulkanForward::render_into_texture(Camera *cam, RenderViewData
 
 	std::swap(scene_view.cam, cam);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio); // argh, need more UBOs
-	//prepare_lights(scene_view.cam, );
+	prepare_lights(scene_view.cam, rvd);
 	auto sub_params = params.with_target(fb);
-	draw(sub_params);
+	draw_with(sub_params, rvd);
 	std::swap(scene_view.cam, cam);
 
 	cb->end_render_pass();
