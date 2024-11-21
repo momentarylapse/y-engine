@@ -89,10 +89,10 @@ uniform BoneData { mat4 bone_matrix[128]; };
 
 //uniform Fog fog;
 
+#endif
+
 //uniform vec3 eye_pos;
 const vec3 eye_pos = vec3(0,0,0);
-
-#endif
 
 
 const float PI = 3.141592654;

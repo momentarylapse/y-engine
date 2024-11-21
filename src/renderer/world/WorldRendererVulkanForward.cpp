@@ -25,6 +25,7 @@
 WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("fw", cam, RenderPathType::FORWARD) {
 	device = _device;
 
+	resource_manager->load_shader_module("forward/module-surface.shader");
 	create_more();
 }
 

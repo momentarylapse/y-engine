@@ -123,9 +123,9 @@ vulkan::CullMode vk_cull(int culling) {
 	if (culling == 0)
 		return vulkan::CullMode::NONE;
 	if (culling == 2)
-		return vulkan::CullMode::BACK;
-	if (culling == 1)
 		return vulkan::CullMode::FRONT;
+	if (culling == 1)
+		return vulkan::CullMode::BACK;
 	return vulkan::CullMode::NONE;
 }
 

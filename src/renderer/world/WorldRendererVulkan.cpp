@@ -50,9 +50,6 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, Render
 	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 
-
-
-	resource_manager->load_shader_module("vulkan/module-surface-dummy.shader");
 }
 
 void WorldRendererVulkan::create_more() {

@@ -195,7 +195,6 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	vec4 color = emission;
 	
 	
-#ifndef vulkan
 #if 0
 		/*mat3 R = transpose(mat3(matrix.view));
 		vec3 L = reflect(view_dir, n);
@@ -236,7 +235,6 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
         	return color;
 	}
 #endif
-#endif
 	
 
 	for (int i=0; i<num_lights; i++)
@@ -249,7 +247,6 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	*/
 	
 	
-//#ifndef vulkan
 	if (roughness0 < 0.2 && metal > 0.8) {
 		if (textureSize(tex_cube, 0).x > 10) {
 			vec3 p = in_pos.xyz / in_pos.w;
@@ -259,7 +256,6 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 			color += cube * ((metal-0.8) / 0.2) * ((0.2 - roughness0) / 0.2) * 0.5;
 		}
 	}
-//#endif
 	
 	
 	color.a = albedo.a;
