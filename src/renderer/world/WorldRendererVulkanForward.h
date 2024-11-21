@@ -25,6 +25,7 @@ public:
 	void render_into_texture(Camera *cam, RenderViewDataVK &rvd, const RenderParams& params) override;
 
 	vulkan::Device *device;
+	RenderViewDataVK rvd;
 };
 
 #endif

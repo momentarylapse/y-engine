@@ -60,7 +60,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer,buffer");
 		rtx.dset->set_storage_image(1, offscreen_image);
 		rtx.dset->set_uniform_buffer(2, rtx.buffer_cam);
-		rtx.dset->set_uniform_buffer(4, geo_renderer->rvd_def.ubo_light);
+		rtx.dset->set_uniform_buffer(4, rvd.ubo_light.get());
 		rtx.dset->set_uniform_buffer(5, buffer_meshes);
 
 		auto shader_gen = resource_manager->load_shader("vulkan/gen.shader");
@@ -79,7 +79,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 		compute.dset = compute.pool->create_set("image,buffer,buffer");
 		compute.dset->set_storage_image(0, offscreen_image);
 		compute.dset->set_uniform_buffer(1, buffer_meshes);
-		compute.dset->set_uniform_buffer(2, geo_renderer->rvd_def.ubo_light);
+		compute.dset->set_uniform_buffer(2, rvd.ubo_light.get());
 		compute.dset->update();
 	}
 
@@ -108,7 +108,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 		scene_view.cam = cam_main;
 
 	scene_view.check_terrains(cam_main->owner->pos);
-	prepare_lights(dummy_cam, geo_renderer->rvd_def);
+	prepare_lights(dummy_cam, rvd);
 
 	int w = width * engine.resolution_scale_x;
 	int h = height * engine.resolution_scale_y;

@@ -28,6 +28,7 @@ public:
 	} mode = Mode::NONE;
 
 	vulkan::Device *device;
+	RenderViewDataVK rvd;
 
 	vulkan::StorageTexture *offscreen_image;
 	vulkan::Texture *offscreen_image2;

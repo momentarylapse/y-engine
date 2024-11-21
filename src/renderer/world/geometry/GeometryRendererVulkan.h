@@ -39,12 +39,14 @@ struct RenderDataVK {
 };
 
 struct RenderViewDataVK {
-	UniformBuffer *ubo_light = nullptr;
-	Array<RenderDataVK> rda_ob;
+	RenderViewDataVK();
+
+	owned<UniformBuffer> ubo_light;
+	Array<RenderDataVK> rda;
 
 	int index = 0;
 	UBO ubo;
-	SceneView* scene_view = nullptr;;
+	SceneView* scene_view = nullptr;
 	RenderDataVK& start(const RenderParams& params, RenderPathType type, const mat4& matrix,
 			ShaderCache& shader_cache, const Material& material, int pass_no,
 			const string& vertex_shader_module, const string& geometry_shader_module,
@@ -57,9 +59,6 @@ public:
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}
-
-	RenderViewDataVK rvd_def;
-
 
 	static GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
 

@@ -32,9 +32,6 @@ ShadowRendererVulkan::ShadowRendererVulkan() : Renderer("shdw") {
 	fb[1] = new vulkan::FrameBuffer(render_pass, {tex2, depth2});
 
 
-	rvd[0].ubo_light = new UniformBuffer(3 * sizeof(UBOLight)); // just to fill the dset
-	rvd[1].ubo_light = new UniformBuffer(3 * sizeof(UBOLight));
-
 	material = new Material(resource_manager);
 	material->pass0.shader_path = "shadow.shader";
 

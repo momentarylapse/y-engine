@@ -51,17 +51,63 @@ const int BINDING_LIGHT = 9;
 const int BINDING_INSTANCE_MATRICES = 10;
 const int BINDING_BONE_MATRICES = 11;
 
-const int BINDING_FX_TEX0 = 0;
-
 const int MAX_LIGHTS = 1024;
 const int MAX_INSTANCES = 1<<11;
 
+RenderViewDataVK::RenderViewDataVK() {
+	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
+}
+
+RenderDataVK& RenderViewDataVK::start(
+		const RenderParams& params, RenderPathType type, const mat4& matrix,
+		ShaderCache& shader_cache, const Material& material, int pass_no,
+		const string& vertex_shader_module, const string& geometry_shader_module,
+		PrimitiveTopology top, VertexBuffer *vb) {
+	shader_cache._prepare_shader_multi_pass(type, material, vertex_shader_module, geometry_shader_module, pass_no);
+	if (index >= rda.num) {
+		rda.add({new UniformBuffer(sizeof(UBO)),
+		            pool->create_set(shader_cache.get_shader(type))});
+		rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
+		rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light.get());
+	}
+
+	ubo.m = matrix;
+	ubo.albedo = material.albedo;
+	ubo.emission = material.emission;
+	ubo.metal = material.metal;
+	ubo.roughness = material.roughness;
+	rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
+
+	auto s = shader_cache.get_shader(type);
+	auto p = GeometryRendererVulkan::get_pipeline(s, params.render_pass, material.pass(pass_no), top, vb);
+
+	params.command_buffer->bind_pipeline(p);
+
+	if (scene_view)
+		rda[index].set_textures(*scene_view, weak(material.textures));
+
+	return rda[index ++];
+}
+
+void RenderDataVK::set_textures(const SceneView& scene_view, const Array<Texture*>& tex) {
+	foreachi (auto t, tex, i)
+						if (t)
+							dset->set_texture(BINDING_TEX0 + i, t);
+	if (scene_view.fb_shadow1)
+		dset->set_texture(BINDING_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
+	if (scene_view.fb_shadow1)
+		dset->set_texture(BINDING_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
+	if (scene_view.cube_map)
+		dset->set_texture(BINDING_CUBE, scene_view.cube_map.get());
+}
+
+void RenderDataVK::apply(const RenderParams& params) {
+	dset->update();
+	params.command_buffer->bind_descriptor_set(0, dset);
+}
+
 
 GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &scene_view) : GeometryRenderer(type, scene_view) {
-
-	rvd_def.ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
-	//for (int i=0; i<6; i++)
-	//	rvd_cube[i].ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 }
 
 void GeometryRendererVulkan::prepare(const RenderParams& params) {
@@ -344,54 +390,6 @@ void GeometryRendererVulkan::draw_objects_instanced(const RenderParams& params, 
 	}
 	gpu_timestamp_end(cb, ch_models);
 	PerformanceMonitor::end(ch_models);
-}
-
-RenderDataVK& RenderViewDataVK::start(
-			const RenderParams& params, RenderPathType type, const mat4& matrix,
-			ShaderCache& shader_cache, const Material& material, int pass_no,
-			const string& vertex_shader_module, const string& geometry_shader_module,
-			PrimitiveTopology top, VertexBuffer *vb) {
-	shader_cache._prepare_shader_multi_pass(type, material, vertex_shader_module, geometry_shader_module, pass_no);
-	if (index >= rda_ob.num) {
-		rda_ob.add({new UniformBuffer(sizeof(UBO)),
-			pool->create_set(shader_cache.get_shader(type))});
-		rda_ob[index].dset->set_uniform_buffer(BINDING_PARAMS, rda_ob[index].ubo);
-		rda_ob[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light);
-	}
-
-	ubo.m = matrix;
-	ubo.albedo = material.albedo;
-	ubo.emission = material.emission;
-	ubo.metal = material.metal;
-	ubo.roughness = material.roughness;
-	rda_ob[index].ubo->update_part(&ubo, 0, sizeof(UBO));
-
-	auto s = shader_cache.get_shader(type);
-	auto p = GeometryRendererVulkan::get_pipeline(s, params.render_pass, material.pass(pass_no), top, vb);
-
-	params.command_buffer->bind_pipeline(p);
-
-	if (scene_view)
-		rda_ob[index].set_textures(*scene_view, weak(material.textures));
-
-	return rda_ob[index ++];
-}
-
-void RenderDataVK::set_textures(const SceneView& scene_view, const Array<Texture*>& tex) {
-	foreachi (auto t, tex, i)
-		if (t)
-			dset->set_texture(BINDING_TEX0 + i, t);
-	if (scene_view.fb_shadow1)
-		dset->set_texture(BINDING_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
-	if (scene_view.fb_shadow1)
-		dset->set_texture(BINDING_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
-	if (scene_view.cube_map)
-		dset->set_texture(BINDING_CUBE, scene_view.cube_map.get());
-}
-
-void RenderDataVK::apply(const RenderParams& params) {
-	dset->update();
-	params.command_buffer->bind_descriptor_set(0, dset);
 }
 
 

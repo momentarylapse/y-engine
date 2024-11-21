@@ -60,7 +60,7 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	scene_view.check_terrains(cam_main->owner->pos);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
-	prepare_lights(scene_view.cam, geo_renderer->rvd_def);
+	prepare_lights(scene_view.cam, rvd);
 	
 	geo_renderer->prepare(params);
 
@@ -77,7 +77,6 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
 	gpu_timestamp_begin(cb, ch_draw);
 
-	auto &rvd = geo_renderer->rvd_def;
 	rvd.index = 0;
 	rvd.scene_view = &scene_view;
 
