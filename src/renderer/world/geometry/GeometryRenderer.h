@@ -25,6 +25,7 @@ enum class RenderPathType;
 
 mat4 mtr(const vec3 &t, const quaternion &a);
 
+static constexpr int MAX_LIGHTS = 1024;
 
 
 struct UBOMatrices {
@@ -64,7 +65,7 @@ public:
 
 	int ch_pre, ch_bg, ch_fx, ch_terrains, ch_models, ch_user, ch_prepare_lights;
 
-	static bool using_view_space;
+	static constexpr bool using_view_space = true;
 	RenderPathType type;
 
 	Material *material_shadow = nullptr; // ref to ShadowRenderer

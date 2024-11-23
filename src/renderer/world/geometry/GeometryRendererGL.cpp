@@ -65,12 +65,12 @@ void GeometryRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::end(ch_prepare);
 }
 
-void GeometryRendererGL::set_material(ShaderCache &cache, Material *m, RenderPathType t, const string &vertex_module, const string &geometry_module) {
-	cache._prepare_shader(t, *m, vertex_module, geometry_module);
-	set_material_x(m, cache.get_shader(t));
+void GeometryRendererGL::set_material(const SceneView& scene_view, ShaderCache& cache, const Material& m, RenderPathType t, const string& vertex_module, const string& geometry_module) {
+	cache._prepare_shader(t, m, vertex_module, geometry_module);
+	set_material_x(scene_view, m, cache.get_shader(t));
 }
 
-void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
+void GeometryRendererGL::set_material_x(const SceneView& scene_view, const Material& m, Shader* s) {
 	nix::set_shader(s);
 	if (using_view_space)
 		s->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH....
@@ -78,23 +78,23 @@ void GeometryRendererGL::set_material_x(Material *m, Shader *s) {
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	s->set_int("num_lights", scene_view.lights.num);
 	s->set_int("shadow_index", scene_view.shadow_index);
-	for (auto &u: m->uniforms)
+	for (auto &u: m.uniforms)
 		s->set_floats(u.name, u.p, u.size/4);
 
-	if (m->pass0.mode == TransparencyMode::FUNCTIONS)
-		nix::set_alpha(m->pass0.source, m->pass0.destination);
-	else if (m->pass0.mode == TransparencyMode::COLOR_KEY_HARD)
+	if (m.pass0.mode == TransparencyMode::FUNCTIONS)
+		nix::set_alpha(m.pass0.source, m.pass0.destination);
+	else if (m.pass0.mode == TransparencyMode::COLOR_KEY_HARD)
 		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-	else if (m->pass0.mode == TransparencyMode::MIX)
+	else if (m.pass0.mode == TransparencyMode::MIX)
 		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
 	else
 		nix::disable_alpha();
 
-	nix::bind_textures(weak(m->textures));
+	nix::bind_textures(weak(m.textures));
 	nix::bind_texture(7, scene_view.cube_map.get());
 
 
-	nix::set_material(m->albedo, m->roughness, m->metal, m->emission);
+	nix::set_material(m.albedo, m.roughness, m.metal, m.emission);
 }
 
 
@@ -125,7 +125,7 @@ void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const col
 }
 
 
-void GeometryRendererGL::draw_particles() {
+void GeometryRendererGL::draw_particles(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_fx);
 	gpu_timestamp_begin(ch_fx);
 
@@ -244,7 +244,7 @@ void GeometryRendererGL::draw_particles() {
 	PerformanceMonitor::end(ch_fx);
 }
 
-void GeometryRendererGL::draw_skyboxes() {
+void GeometryRendererGL::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_bg);
 	gpu_timestamp_begin(ch_bg);
 	nix::set_z(false, false);
@@ -254,7 +254,7 @@ void GeometryRendererGL::draw_skyboxes() {
 		sb->_matrix = mat4::rotation(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
-			set_material(sb->shader_cache[i], sb->material[i], type, "default", "");
+			set_material(scene_view, sb->shader_cache[i], *sb->material[i], type, "default", "");
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
@@ -264,7 +264,7 @@ void GeometryRendererGL::draw_skyboxes() {
 	PerformanceMonitor::end(ch_bg);
 }
 
-void GeometryRendererGL::draw_terrains() {
+void GeometryRendererGL::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_terrains);
 	gpu_timestamp_begin(ch_terrains);
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
@@ -274,9 +274,9 @@ void GeometryRendererGL::draw_terrains() {
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
 		if (is_shadow_pass()) {
-			set_material(t->shader_cache_shadow, material_shadow, type, t->vertex_shader_module, "");
+			set_material(scene_view, t->shader_cache_shadow, *material_shadow, type, t->vertex_shader_module, "");
 		} else {
-			set_material(t->shader_cache, t->material.get(), type, t->vertex_shader_module, "");
+			set_material(scene_view, t->shader_cache, *t->material.get(), type, t->vertex_shader_module, "");
 			auto s = t->shader_cache.get_shader(type);
 			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
@@ -287,7 +287,7 @@ void GeometryRendererGL::draw_terrains() {
 	PerformanceMonitor::end(ch_terrains);
 }
 
-void GeometryRendererGL::draw_objects_instanced() {
+void GeometryRendererGL::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(ch_models);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
@@ -298,9 +298,9 @@ void GeometryRendererGL::draw_objects_instanced() {
 				continue;
 			nix::set_model_matrix(mi->matrices[0]);//m->_matrix);
 			if (is_shadow_pass()) {
-				set_material(m->shader_cache_shadow[i], material_shadow, type, "instanced", "");
+				set_material(scene_view, m->shader_cache_shadow[i], *material_shadow, type, "instanced", "");
 			} else {
-				set_material(m->shader_cache[i], m->material[i], type, "instanced", "");
+				set_material(scene_view, m->shader_cache[i], *m->material[i], type, "instanced", "");
 			}
 			nix::bind_uniform_buffer(5, mi->ubo_matrices);
 			//msg_write(s.matrices.num);
@@ -311,7 +311,7 @@ void GeometryRendererGL::draw_objects_instanced() {
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRendererGL::draw_objects_opaque() {
+void GeometryRendererGL::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(ch_models);
 	auto& list = ComponentManager::get_list_family<Model>();
@@ -331,9 +331,9 @@ void GeometryRendererGL::draw_objects_opaque() {
 				continue;
 
 			if (is_shadow_pass()) {
-				set_material(m->shader_cache_shadow[i], material_shadow, type, m->_template->vertex_shader_module, "");
+				set_material(scene_view, m->shader_cache_shadow[i], *material_shadow, type, m->_template->vertex_shader_module, "");
 			} else {
-				set_material(m->shader_cache[i], weak(m->material)[i], type, m->_template->vertex_shader_module, "");
+				set_material(scene_view, m->shader_cache[i], *weak(m->material)[i], type, m->_template->vertex_shader_module, "");
 			}
 			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
 		}
@@ -350,7 +350,7 @@ struct DrawCallDataMultiPass {
 	float z;
 };
 
-void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
+void GeometryRendererGL::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
 	if (is_shadow_pass())
 		return;
 	PerformanceMonitor::begin(ch_models);
@@ -397,7 +397,7 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 		for (int k=0; k<dc.material->num_passes; k++) {
 			auto& p = dc.material->pass(k);
 
-			set_material_x(dc.material, dc.shaders[k]);
+			set_material_x(scene_view, *dc.material, dc.shaders[k]);
 
 			if (p.mode == TransparencyMode::FUNCTIONS)
 				nix::set_alpha(p.source, p.destination);
@@ -426,7 +426,7 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params) {
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRendererGL::draw_user_meshes(bool transparent) {
+void GeometryRendererGL::draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent) {
 	PerformanceMonitor::begin(ch_user);
 	gpu_timestamp_begin(ch_user);
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
@@ -440,9 +440,9 @@ void GeometryRendererGL::draw_user_meshes(bool transparent) {
 
 
 		if (is_shadow_pass()) {
-			set_material(m->shader_cache_shadow, material_shadow, type, m->vertex_shader_module, "");
+			set_material(scene_view, m->shader_cache_shadow, *material_shadow, type, m->vertex_shader_module, "");
 		} else {
-			set_material(m->shader_cache, m->material.get(), type, m->vertex_shader_module, "");
+			set_material(scene_view, m->shader_cache, *m->material.get(), type, m->vertex_shader_module, "");
 		}
 
 		
@@ -473,35 +473,35 @@ void GeometryRendererGL::prepare_instanced_matrices() {
 
 
 
-void GeometryRendererGL::draw_opaque() {
+void GeometryRendererGL::draw_opaque(const RenderParams& params, RenderViewData &rvd) {
 	if (!is_shadow_pass()) {
 		nix::set_z(true, true);
 		nix::set_view_matrix(scene_view.cam->view_matrix());
-		nix::bind_uniform_buffer(1, scene_view.ubo_light.get());
+		nix::bind_uniform_buffer(1, rvd.ubo_light.get());
 		nix::bind_texture(3, scene_view.fb_shadow1->depth_buffer.get());
 		nix::bind_texture(4, scene_view.fb_shadow2->depth_buffer.get());
 		nix::bind_texture(5, scene_view.cube_map.get());
 	}
 
 	// opaque
-	draw_terrains();
-	draw_objects_instanced();
-	draw_objects_opaque();
-	draw_user_meshes(false);
+	draw_terrains(params, rvd);
+	draw_objects_instanced(params, rvd);
+	draw_objects_opaque(params, rvd);
+	draw_user_meshes(params, rvd, false);
 }
 
-void GeometryRendererGL::draw_transparent(const RenderParams& params) {
+void GeometryRendererGL::draw_transparent(const RenderParams& params, RenderViewData &rvd) {
 	nix::set_view_matrix(scene_view.cam->view_matrix());
 	//nix::set_z(true, true);
 
-	nix::bind_uniform_buffer(1, scene_view.ubo_light.get());
+	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
 	nix::bind_texture(3, scene_view.fb_shadow1->depth_buffer.get());
 	nix::bind_texture(4, scene_view.fb_shadow2->depth_buffer.get());
 	nix::bind_texture(5, scene_view.cube_map.get());
 
-	draw_objects_transparent(params);
-	draw_user_meshes(true);
-	draw_particles();
+	draw_objects_transparent(params, rvd);
+	draw_user_meshes(params, rvd, true);
+	draw_particles(params, rvd);
 }
 
 

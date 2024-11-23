@@ -15,10 +15,12 @@
 class Camera;
 class PerformanceMonitor;
 class Material;
-struct ShaderCache;
+class RenderViewData;
 
 enum class RenderPathType;
 enum class ShaderVariant;
+
+
 
 class GeometryRendererGL : public GeometryRenderer {
 public:
@@ -27,20 +29,20 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override {}
 
-	void set_material(ShaderCache &cache, Material *m, RenderPathType type, const string &vertex_module, const string &geometry_module);
-	void set_material_x(Material *m, Shader *shader);
+	static void set_material(const SceneView& scene_view, ShaderCache& cache, const Material& m, RenderPathType type, const string& vertex_module, const string& geometry_module);
+	static void set_material_x(const SceneView& scene_view, const Material& m, Shader* shader);
 
-	void draw_skyboxes();
-	void draw_particles();
-	void draw_terrains();
-	void draw_objects_opaque();
-	void draw_objects_transparent(const RenderParams& params);
-	void draw_objects_instanced();
-	void draw_user_meshes(bool transparent);
+	void draw_skyboxes(const RenderParams& params, RenderViewData &rvd);
+	void draw_particles(const RenderParams& params, RenderViewData &rvd);
+	void draw_terrains(const RenderParams& params, RenderViewData &rvd);
+	void draw_objects_opaque(const RenderParams& params, RenderViewData &rvd);
+	void draw_objects_transparent(const RenderParams& params, RenderViewData &rvd);
+	void draw_objects_instanced(const RenderParams& params, RenderViewData &rvd);
+	void draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent);
 	void prepare_instanced_matrices();
 
-	void draw_opaque();
-	void draw_transparent(const RenderParams& params);
+	void draw_opaque(const RenderParams& params, RenderViewData &rvd);
+	void draw_transparent(const RenderParams& params, RenderViewData &rvd);
 };
 
 #endif
