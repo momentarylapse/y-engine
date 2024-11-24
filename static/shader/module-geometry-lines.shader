@@ -7,7 +7,7 @@ layout (lines) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 layout(location=0) in vec4 in_pos[];
-layout(location=1) in vec3 in_n[];
+layout(location=1) in vec3 in_n[]; // n.x = line width
 layout(location=2) in vec2 in_uv[];
 layout(location=3) in vec4 in_color[];
 

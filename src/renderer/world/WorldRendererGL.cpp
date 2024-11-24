@@ -64,7 +64,7 @@ void WorldRendererGL::render_into_cubemap(CubeMapSource& source) {
 		source.cube_map = new CubeMap(source.resolution, "rgba:i8");
 	if (!source.frame_buffer[0])
 		for (int i=0; i<6; i++) {
-			source.frame_buffer[i] = new nix::FrameBuffer({source.cube_map.get(), source.depth_buffer.get()});
+			source.frame_buffer[i] = new nix::FrameBuffer();
 			try {
 				source.frame_buffer[i]->update_x({source.cube_map.get(), source.depth_buffer.get()}, i);
 			} catch(Exception &e) {
