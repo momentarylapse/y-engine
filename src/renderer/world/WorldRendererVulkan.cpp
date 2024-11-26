@@ -105,7 +105,7 @@ void WorldRendererVulkan::render_into_cubemap(CubeMapSource& source, const Rende
 		auto sub_params = params.with_target(source.frame_buffer[i].get());
 		sub_params.render_pass = source.render_pass.get();
 		sub_params.desired_aspect_ratio = 1.0f;
-		render_into_texture(&cube_cam, rvd_cube[i], sub_params);
+		render_into_texture(&cube_cam, source.rvd[i], sub_params);
 	}
 	cube_cam.owner = nullptr;
 	//params.command_buffer->barrier({source.cube_map.get()}, 0);

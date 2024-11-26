@@ -53,8 +53,6 @@ public:
 
 	VertexBuffer *vb_2d;
 
-	RenderViewData rvd_cube[6];
-
 	void create_more();
 
 

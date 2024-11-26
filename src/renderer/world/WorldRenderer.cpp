@@ -81,6 +81,8 @@ void WorldRenderer::suggest_cube_map_pos() {
 		cube_map_source->min_depth = 200;
 		return;
 	}
+	if (!scene_view.cam)
+		return;
 	auto& list = ComponentManager::get_list_family<Model>();
 	float max_score = 0;
 	cube_map_source->owner->pos = scene_view.cam->m_view * vec3(0,0,1000);

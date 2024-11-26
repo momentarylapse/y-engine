@@ -31,10 +31,9 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, 
 
 void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-	if (!scene_view.cam)
-		scene_view.cam = cam_main;
 
 	auto cb = params.command_buffer;
+	scene_view.check_terrains(cam_main->owner->pos);
 
 	suggest_cube_map_pos();
 	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
@@ -49,7 +48,9 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 		}
 	}
 
-	scene_view.check_terrains(cam_main->owner->pos);
+	//if (!scene_view.cam)
+		scene_view.cam = cam_main;
+
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
 	prepare_lights(scene_view.cam, main_rvd);
@@ -72,19 +73,19 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	PerformanceMonitor::begin(ch_draw);
 	gpu_timestamp_begin(cb, ch_draw);
 
-	rvd.index = 0;
-	rvd.scene_view = &scene_view;
+	rvd.begin_scene(&scene_view);
+
+	rvd.set_projection_matrix(scene_view.cam->m_projection);
+	rvd.set_view_matrix(scene_view.cam->m_view);
+	rvd.ubo.num_lights = scene_view.lights.num;
+	rvd.ubo.shadow_index = scene_view.shadow_index;
 
 	cb->clear(params.frame_buffer->area(), {world.background}, 1.0f);
 	geo_renderer->draw_skyboxes(params, rvd);
 
-	rvd.ubo.p = scene_view.cam->m_projection;
-	rvd.ubo.v = scene_view.cam->m_view;
-	rvd.ubo.num_lights = scene_view.lights.num;
-	rvd.ubo.shadow_index = scene_view.shadow_index;
-
 	geo_renderer->draw_terrains(params, rvd);
 	geo_renderer->draw_objects_opaque(params, rvd);
+
 	geo_renderer->draw_objects_instanced(params, rvd);
 	geo_renderer->draw_user_meshes(params, false, rvd);
 

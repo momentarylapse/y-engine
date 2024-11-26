@@ -33,7 +33,6 @@ public:
 
 	owned<GeometryRendererGL> geo_renderer;
 	owned<ShadowRendererGL> shadow_renderer;
-	RenderViewData rvd_cube[6];
 
 	void prepare_lights(Camera *cam, RenderViewData &rvd);
 };

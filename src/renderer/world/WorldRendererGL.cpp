@@ -91,7 +91,7 @@ void WorldRendererGL::render_into_cubemap(CubeMapSource& source) {
 		if (i == 5)
 			o.ang = quaternion::rotation(vec3(0,pi,0));
 		//prepare_lights(&cam);
-		render_into_texture(source.frame_buffer[i].get(), &cam, rvd_cube[i]);
+		render_into_texture(source.frame_buffer[i].get(), &cam, source.rvd[i]);
 	}
 	cam.owner = nullptr;
 }
