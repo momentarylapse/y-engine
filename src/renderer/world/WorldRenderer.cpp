@@ -79,6 +79,8 @@ void WorldRenderer::suggest_cube_map_pos() {
 	if (world.ego) {
 		cube_map_source->owner->pos = world.ego->pos;
 		cube_map_source->min_depth = 200;
+		if (auto m = world.ego->get_component<Model>())
+			cube_map_source->min_depth = m->prop.radius * 1.1f;
 		return;
 	}
 	if (!scene_view.cam)
