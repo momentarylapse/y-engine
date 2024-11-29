@@ -2,6 +2,9 @@
 #include "../../../graphics-impl.h"
 #ifdef USING_OPENGL
 #include "GeometryRendererGL.h"
+#include "SceneView.h"
+#include <world/Camera.h>
+#include <y/Entity.h>
 
 
 void RenderData::apply(const RenderParams &params) {
@@ -28,7 +31,36 @@ RenderData& RenderViewData::start(const RenderParams& params, RenderPathType typ
                                   const string& vertex_shader_module, const string& geometry_shader_module,
                                   PrimitiveTopology top, VertexBuffer *vb) {
 	nix::set_model_matrix(matrix);
-	GeometryRendererGL::set_material(*scene_view, shader_cache, material, type, vertex_shader_module, geometry_shader_module);
+	shader_cache._prepare_shader_multi_pass(type, material, vertex_shader_module, geometry_shader_module, pass_no);
+
+	auto s = shader_cache.get_shader(type);
+
+	nix::set_shader(s);
+	if (GeometryRendererGL::using_view_space)
+		s->set_floats("eye_pos", &scene_view->cam->owner->pos.x, 3); // NAH....
+	else
+		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
+	s->set_int("num_lights", scene_view->lights.num);
+	s->set_int("shadow_index", scene_view->shadow_index);
+	for (auto &u: material.uniforms)
+		s->set_floats(u.name, u.p, u.size/4);
+
+	auto& pass = material.pass(pass_no);
+	if (pass.mode == TransparencyMode::FUNCTIONS)
+		nix::set_alpha(pass.source, pass.destination);
+	else if (pass.mode == TransparencyMode::COLOR_KEY_HARD)
+		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+	else if (pass.mode == TransparencyMode::MIX)
+		nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
+	else
+		nix::disable_alpha();
+
+	nix::bind_textures(weak(material.textures));
+	nix::bind_texture(7, scene_view->cube_map.get());
+
+
+	nix::set_material(material.albedo, material.roughness, material.metal, material.emission);
+
 	return rd;
 }
 #endif

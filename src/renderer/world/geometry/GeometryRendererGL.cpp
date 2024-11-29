@@ -342,80 +342,61 @@ void GeometryRendererGL::draw_objects_opaque(const RenderParams& params, RenderV
 	PerformanceMonitor::end(ch_models);
 }
 
-struct DrawCallDataMultiPass {
-	mat4 matrix;
-	VertexBuffer *vb;
-	Material *material;
-	Array<Shader*> shaders;
-	float z;
-};
-
 void GeometryRendererGL::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
 	if (is_shadow_pass())
 		return;
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(ch_models);
 	nix::set_z(false, true);
+	auto cam = scene_view.cam;
 
-	Array<DrawCallDataMultiPass> draw_calls;
+
+	struct DrawCallData {
+		Model* model;
+		int material_index;
+		float z;
+	};
+	Array<DrawCallData> draw_calls;
 
 	auto& list = ComponentManager::get_list_family<Model>();
-	for (auto *m: list) {
-		m->update_matrix();
 
-		/*if (auto ani = m->owner->get_component<Animator>()) {
-			ani->buf->update_array(ani->dmatrix);
-			nix::bind_uniform_buffer(7, ani->buf);
-		}*/
-
+	for (auto m: list) {
 		for (int i=0; i<m->material.num; i++) {
-			if (!m->material[i]->is_transparent())
+			auto material = m->material[i];
+			if (!material->is_transparent())
 				continue;
 
-			auto material = weak(m->material)[i];
-			Array<Shader*> shaders;
-			for (int k=0; k<material->num_passes; k++) {
-				auto &p = material->pass(k);
-				if (!multi_pass_shader_cache[k].contains(material))
-					multi_pass_shader_cache[k].set(material, {});
-				auto &shader_cache = multi_pass_shader_cache[k][material];
-
-				shader_cache._prepare_shader_multi_pass(type, *material, m->_template->vertex_shader_module, "", k);
-				shaders.add(shader_cache.get_shader(type));
-			}
-
-			draw_calls.add({m->_matrix, m->mesh[0]->sub[i].vertex_buffer, material, shaders, (m->owner->pos - scene_view.cam->owner->pos).length()});
+			draw_calls.add({m, i, (m->owner->pos - cam->owner->pos).length()});
 		}
 	}
 
 	// sort: far to near
-	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z > b.z; });
+	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z >= b.z; });
 
 	// draw!
 	for (const auto& dc: draw_calls) {
-		nix::set_model_matrix(dc.matrix);
-		for (int k=0; k<dc.material->num_passes; k++) {
-			auto& p = dc.material->pass(k);
+		auto m = dc.model;
+		auto material = dc.model->material[dc.material_index];
+		int i = dc.material_index;
+		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
 
-			set_material_x(scene_view, *dc.material, dc.shaders[k]);
+		m->update_matrix();
+		auto vb = m->mesh[0]->sub[i].vertex_buffer;
 
-			if (p.mode == TransparencyMode::FUNCTIONS)
-				nix::set_alpha(p.source, p.destination);
-			else if (p.mode == TransparencyMode::COLOR_KEY_HARD)
-				nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-			else if (p.mode == TransparencyMode::MIX)
-				nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
-			else
-				nix::disable_alpha();
+		for (int k=0; k<material->num_passes; k++) {
+			if (!multi_pass_shader_cache[k].contains(material))
+				multi_pass_shader_cache[k].set(material, {});
+			auto &shader_cache = multi_pass_shader_cache[k][material];
 
-			if (p.cull_mode == 0)
-				nix::set_cull(nix::CullMode::NONE);
-			else if (p.cull_mode == 2)
-				nix::set_cull(nix::CullMode::FRONT);
-			else
-				nix::set_cull(nix::CullMode::BACK);
+			auto& rd = rvd.start(params, type, m->_matrix, shader_cache, *material, k, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
 
-			nix::draw_triangles(dc.vb);
+			if (ani) {
+				ani->buf->update_array(ani->dmatrix);
+				//rd.dset->set_uniform_buffer(BINDING_BONE_MATRICES, ani->buf);
+			}
+
+			rd.apply(params);
+			nix::draw_triangles(vb);
 		}
 	}
 
