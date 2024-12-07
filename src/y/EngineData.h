@@ -30,16 +30,13 @@ class SurfaceRendererVulkan;
 using WindowRenderer = SurfaceRendererVulkan;
 class HDRRendererVulkan;
 using HDRRenderer = HDRRendererVulkan;
-class RegionRendererVulkan;
-using RegionRenderer = RegionRendererVulkan;
 #else
 class WindowRendererGL;
 using WindowRenderer = WindowRendererGL;
 class HDRRendererGL;
 using HDRRenderer = HDRRendererGL;
-class RegionRendererGL;
-using RegionRenderer = RegionRendererGL;
 #endif
+class RegionRenderer;
 
 class EngineData {
 public:

@@ -12,7 +12,7 @@
 #include <graphics-impl.h>
 #include <helper/PerformanceMonitor.h>
 
-void RegionRendererVulkan::draw(const RenderParams& params) {
+void RegionRenderer::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
 	auto cb = params.command_buffer;
 	auto fb = params.frame_buffer;

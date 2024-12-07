@@ -18,7 +18,6 @@
 	#include "../post/PostProcessorVulkan.h"
 	#include "../regions/RegionRendererVulkan.h"
 	#include "../target/WindowRendererVulkan.h"
-	using RegionRenderer = RegionRendererVulkan;
 #else
 	#include "../world/WorldRendererGL.h"
 	#include "../world/WorldRendererGLForward.h"
@@ -28,7 +27,6 @@
 	#include "../post/PostProcessorGL.h"
 	#include "../regions/RegionRendererGL.h"
 	#include "../target/WindowRendererGL.h"
-	using RegionRenderer = RegionRendererGL;
 #endif
 #include <y/EngineData.h>
 #include <world/Camera.h>
@@ -84,11 +82,7 @@ Renderer *create_gui_renderer() {
 }
 
 RegionRenderer *create_region_renderer() {
-#ifdef USING_VULKAN
-	return new RegionRendererVulkan();
-#else
-	return new RegionRendererGL();
-#endif
+	return new RegionRenderer();
 }
 
 HDRRenderer *create_hdr_renderer(Camera *cam) {

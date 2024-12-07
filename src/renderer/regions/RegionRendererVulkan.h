@@ -11,9 +11,7 @@
 #include "RegionRendererCommon.h"
 #ifdef USING_VULKAN
 
-#include <lib/math/rect.h>
-
-class RegionRendererVulkan : public RegionRendererCommon {
+class RegionRenderer : public RegionRendererCommon {
 public:
 	void draw(const RenderParams& params) override;
 };

@@ -13,7 +13,7 @@
 #include <helper/PerformanceMonitor.h>
 
 
-void RegionRendererGL::draw(const RenderParams& params) {
+void RegionRenderer::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
 
 	const rect area = params.frame_buffer->area();

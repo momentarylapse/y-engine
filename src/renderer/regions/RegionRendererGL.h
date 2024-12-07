@@ -11,9 +11,7 @@
 #include "RegionRendererCommon.h"
 #ifdef USING_OPENGL
 
-#include <lib/math/rect.h>
-
-class RegionRendererGL : public RegionRendererCommon {
+class RegionRenderer : public RegionRendererCommon {
 public:
 	void draw(const RenderParams& params) override;
 };
