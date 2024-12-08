@@ -19,6 +19,11 @@ public:
 	shared_array<Texture> textures;
 	shared<Shader> shader;
 	owned<VertexBuffer> vb_2d;
+
+#ifdef USING_VULKAN
+	GraphicsPipeline* pipeline = nullptr;
+	DescriptorSet *dset = nullptr;
+#endif
 };
 
 #endif //THROUGHSHADERRENDERER_H

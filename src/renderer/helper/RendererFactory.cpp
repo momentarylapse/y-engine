@@ -177,9 +177,9 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		axis_y.list_set(0, 0.0f);
 		axis_y.list_set(1, 1.0f);
 		Any data;
-		data.dict_set("radius", 5.0f);
-		data.dict_set("threshold", 0.0f);
-		data.dict_set("axis", axis_x);
+		data.dict_set("radius:8", 5.0f);
+		data.dict_set("threshold:12", 0.0f);
+		data.dict_set("axis:0", axis_x);
 		tsr->data = data;
 
 
@@ -189,9 +189,9 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		tr->add_child(tsr);
 
 		auto tsr2 = new ThroughShaderRenderer({tex2}, shader);
-		data.dict_set("radius", 5.0f);
-		data.dict_set("threshold", 0.0f);
-		data.dict_set("axis", axis_y);
+		data.dict_set("radius:8", 5.0f);
+		data.dict_set("threshold:12", 0.0f);
+		data.dict_set("axis:0", axis_y);
 		tsr2->data = data;
 		tsr2->add_child(tr);
 

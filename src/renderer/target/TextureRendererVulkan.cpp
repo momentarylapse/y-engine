@@ -2,6 +2,9 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 
+#include <lib/os/msg.h>
+#include <lib/image/image.h>
+
 TextureRenderer::TextureRenderer(const shared_array<Texture>& tex) : RenderTask("tex") {
 	textures = tex; //new Texture(width, height, "bgra:i8");
 //	depth_buffer = new DepthBuffer(texture->width, texture->height, "d:f32", false);
@@ -26,6 +29,7 @@ void TextureRenderer::render(const RenderParams& params) {
 	p.render_pass = render_pass;
 
 	auto cb = params.command_buffer;
+	msg_write("TEX");
 
 	cb->begin_render_pass(render_pass, frame_buffer);
 	cb->set_viewport(area);

@@ -1,6 +1,6 @@
 <Layout>
 	bindings = [[buffer,sampler]]
-	pushsize = 4
+	pushsize = 64
 	input = [vec3,vec3,vec2]
 	topology = triangles
 	version = 420
@@ -19,7 +19,8 @@ void main() {
 <FragmentShader>
 
 #ifdef vulkan
-layout(binding=0) uniform Parameters {
+//layout(binding=0) uniform Parameters {
+layout(push_constant) uniform PushConstants {
 	vec2 axis;
 	float radius;
 	float threshold;
@@ -46,6 +47,7 @@ vec3 blur() {
 	ivec2 uv0 = ivec2(in_tex_coord * textureSize(tex0, 0));
 	vec3 bb = vec3(0,0,0);
 	float sum = 0.0;
+	
 	int R = int(radius);
 	int RR = max(R-1, 0);
 	for (int i=-RR; i<=RR; i+=1) {
