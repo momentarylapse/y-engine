@@ -2,34 +2,67 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 
-TextureRendererVulkan::TextureRendererVulkan(vulkan::Device* d, shared<Texture> tex) : Renderer("xheadless") {
-	device = d;
-	texture = tex; //new Texture(width, height, "bgra:i8");
-	depth_buffer = new DepthBuffer(texture->width, texture->height, "d:f32", false);
-	render_pass = new RenderPass({texture.get(), depth_buffer.get()});
-	frame_buffer = new FrameBuffer(render_pass, {texture, depth_buffer});
-	command_buffer = new CommandBuffer(device->command_pool);
-	fence = new vulkan::Fence(device);
+TextureRenderer::TextureRenderer(const shared_array<Texture>& tex) : RenderTask("tex") {
+	textures = tex; //new Texture(width, height, "bgra:i8");
+//	depth_buffer = new DepthBuffer(texture->width, texture->height, "d:f32", false);
+	render_pass = new RenderPass(weak(textures));
+	frame_buffer = new FrameBuffer(render_pass, textures);
 }
 
-RenderParams TextureRendererVulkan::create_params(const rect& area) const {
-	auto p = RenderParams::into_texture(frame_buffer, area.width() / area.height());
+TextureRenderer::~TextureRenderer() = default;
+
+void TextureRenderer::prepare(const RenderParams &params) {
+	Renderer::prepare(params);
+	render(params);
+}
+
+
+void TextureRenderer::render(const RenderParams& params) {
+	auto area = frame_buffer->area();
+	if (use_params_area)
+		area = params.area;
+
+	auto p = params.with_target(frame_buffer).with_area(area);
+	p.render_pass = render_pass;
+
+	auto cb = params.command_buffer;
+
+	cb->begin_render_pass(render_pass, frame_buffer);
+	cb->set_viewport(area);
+	cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
+	draw(p);
+	cb->end_render_pass();
+}
+
+
+HeadlessRenderer::HeadlessRenderer(vulkan::Device* d, const shared_array<Texture>& tex) : RenderTask("headless")
+{
+	device = d;
+	command_buffer = new CommandBuffer(device->command_pool);
+	fence = new vulkan::Fence(device);
+
+	texture_renderer = new TextureRenderer(tex);
+}
+
+HeadlessRenderer::~HeadlessRenderer() = default;
+
+
+void HeadlessRenderer::prepare(const RenderParams &params) {
+	Renderer::prepare(params);
+	render(params);
+}
+
+RenderParams HeadlessRenderer::create_params(const rect& area) const {
+	auto p = RenderParams::into_texture(texture_renderer->frame_buffer, area.width() / area.height());
 	p.area = area;
 	p.command_buffer = command_buffer;
-	p.render_pass = render_pass;
 	return p;
 }
 
-void TextureRendererVulkan::render_frame(const rect& area, float aspect_ratio) {
-	const auto p = create_params(area);
+void HeadlessRenderer::render(const RenderParams& params) {
+	const auto p = create_params(texture_renderer->frame_buffer->area());
 	command_buffer->begin();
-	prepare(p);
-	command_buffer->begin_render_pass(render_pass, frame_buffer);
-	command_buffer->set_viewport(area);
-	command_buffer->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
 	draw(p);
-	command_buffer->end_render_pass();
-	command_buffer->end();
 	device->graphics_queue.submit(command_buffer, {}, {}, fence);
 	fence->wait();
 	//device->wait_idle();

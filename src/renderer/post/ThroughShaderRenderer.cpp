@@ -12,7 +12,7 @@ void apply_shader_data(Shader *s, const Any &shader_data);
 ThroughShaderRenderer::ThroughShaderRenderer(const shared_array<Texture>& _textures, shared<Shader> _shader) : Renderer("shader") {
 	textures = _textures;
 	shader = _shader;
-	vb_2d = new nix::VertexBuffer("3f,3f,2f");
+	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 }
 
@@ -21,6 +21,16 @@ void ThroughShaderRenderer::set_source(const rect& area) {
 }
 
 void ThroughShaderRenderer::draw(const RenderParams &params) {
+
+#ifdef USING_VULKAN
+	auto cb = params.command_buffer;
+
+	PerformanceMonitor::begin(ch_draw);
+	gpu_timestamp_begin(cb, ch_draw);
+
+	gpu_timestamp_end(cb, ch_draw);
+	PerformanceMonitor::end(ch_draw);
+#else
 	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(ch_draw);
@@ -39,7 +49,9 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	nix::draw_triangles(vb_2d.get());
 
 	nix::set_cull(nix::CullMode::BACK);
+
 	gpu_timestamp_end(ch_draw);
 	PerformanceMonitor::end(ch_draw);
+#endif
 }
 

@@ -4,19 +4,41 @@
 
 #ifdef USING_VULKAN
 
-class TextureRendererVulkan : public Renderer {
+class TextureRenderer : public RenderTask {
 public:
-	vulkan::Device* device;
 	RenderPass* render_pass;
 	FrameBuffer* frame_buffer;
-	shared<Texture> texture;
-	shared<Texture> depth_buffer;
+	shared_array<Texture> textures;
+	bool use_params_area = true;
+
+	explicit TextureRenderer(const shared_array<Texture>& tex);
+	~TextureRenderer() override;
+
+	// TODO move to explicit/dependency graph
+	void prepare(const RenderParams& params) override;
+
+	void render(const RenderParams& params) override;
+};
+
+
+// TODO "task executor"...
+class HeadlessRenderer : public RenderTask {
+public:
+	vulkan::Device* device;
 	CommandBuffer* command_buffer;
 	vulkan::Fence* fence;
 
-	TextureRendererVulkan(vulkan::Device* d, shared<Texture> tex);
+	owned<TextureRenderer> texture_renderer;
+
+	HeadlessRenderer(vulkan::Device* d, const shared_array<Texture>& tex);
+	~HeadlessRenderer() override;
+
+	// TODO move to explicit/dependency graph
+	void prepare(const RenderParams& params) override;
+
+	void render(const RenderParams& params) override;
+
 	RenderParams create_params(const rect& area) const;
-	void render_frame(const rect& area, float aspect_ratio);
 };
 
 #endif

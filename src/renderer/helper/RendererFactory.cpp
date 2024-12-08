@@ -44,6 +44,7 @@
 
 #include <lib/image/image.h>
 #include <renderer/target/TextureRendererGL.h>
+#include <renderer/target/TextureRendererVulkan.h>
 
 
 string render_graph_str(Renderer *r) {
