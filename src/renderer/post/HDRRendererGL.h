@@ -26,7 +26,6 @@ public:
 
 	void process_blur(FrameBuffer *source, FrameBuffer *target, float r, float threshold, const vec2 &axis);
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
-	void render_out(FrameBuffer *source, Texture *bloom, const RenderParams& params);
 
 	Camera *cam;
 
@@ -35,12 +34,18 @@ public:
 	shared<FrameBuffer> fb_main_ms;
 
 	owned<ThroughShaderRenderer> out_renderer;
+	/*owned<TextureRenderer> resolve_ms_renderer;
+	owned<ThroughShaderRenderer> resolve_ms_renderer;*/
 
 	static const int MAX_BLOOM_LEVELS = 4;
 
 	struct BloomLevel {
+		shared<Texture> tex_temp;
+		shared<Texture> tex_out;
 		shared<FrameBuffer> fb_temp;
 		shared<FrameBuffer> fb_out;
+		owned<TextureRenderer> renderer[2];
+		owned<ThroughShaderRenderer> tsr[2];
 	} bloom_levels[MAX_BLOOM_LEVELS];
 
 	DepthBuffer *_depth_buffer = nullptr;

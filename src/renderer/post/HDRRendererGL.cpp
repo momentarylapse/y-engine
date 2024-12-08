@@ -29,8 +29,6 @@ static float resolution_scale_y = 1.0f;
 
 static int BLOOM_LEVEL_SCALE = 4;
 
-void apply_shader_data(Shader *s, const Any &shader_data);
-
 namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
 }
@@ -54,7 +52,6 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 
 		shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
 
-
 		fb_main = new nix::FrameBuffer({
 				new nix::Texture(width, height, "rgba:f16"),
 				_depth_buffer});
@@ -66,29 +63,33 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 		fb_main = texture_renderer->frame_buffer;
 	}
 
+	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		auto& bl = bloom_levels[i];
 		bloomw /= BLOOM_LEVEL_SCALE;
 		bloomh /= BLOOM_LEVEL_SCALE;
-		bloom_levels[i].fb_temp = new nix::FrameBuffer({
-			new nix::Texture(bloomw, bloomh, "rgba:f16")});
-		bloom_levels[i].fb_out = new nix::FrameBuffer({
-			new nix::Texture(bloomw, bloomh, "rgba:f16")});
-		bloom_levels[i].fb_temp->color_attachments[0]->set_options("wrap=clamp");
-		bloom_levels[i].fb_out->color_attachments[0]->set_options("wrap=clamp");
+		bl.tex_temp = new nix::Texture(bloomw, bloomh, "rgba:f16");
+		bl.tex_out = new nix::Texture(bloomw, bloomh, "rgba:f16");
+		bl.tex_temp->set_options("wrap=clamp");
+		bl.tex_out->set_options("wrap=clamp");
+	//	bl.tsr[0] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
+	//	bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
+		bl.renderer[0] = new TextureRenderer({bl.tex_temp});
+		bl.renderer[1] = new TextureRenderer({bl.tex_out});
+		bl.fb_temp = bl.renderer[0]->frame_buffer;
+		bl.fb_out = bl.renderer[1]->frame_buffer;
 	}
 
 	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
 	fb_main->color_attachments[0]->set_options("magfilter=" + config.resolution_scale_filter);
 
-	shader_blur = resource_manager->load_shader("forward/blur.shader");
-	shader_out = resource_manager->load_shader("forward/hdr.shader");
-
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 
 
-	out_renderer = new ThroughShaderRenderer({fb_main->color_attachments[0], bloom_levels[0].fb_out->color_attachments[0], bloom_levels[1].fb_out->color_attachments[0].get(), bloom_levels[2].fb_out->color_attachments[0], bloom_levels[3].fb_out->color_attachments[0]}, shader_out);
+	shader_out = resource_manager->load_shader("forward/hdr.shader");
+	out_renderer = new ThroughShaderRenderer({fb_main->color_attachments[0], bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 
 	light_meter.init(resource_manager, fb_main.get(), channel);
 }
@@ -155,7 +156,6 @@ void HDRRendererGL::draw(const RenderParams& params) {
 	data.dict_set("scale_y", resolution_scale_y);
 
 	out_renderer->data = data;
-	out_renderer->shader = shader_out;
 	out_renderer->draw(params);
 }
 
@@ -181,34 +181,6 @@ void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, 
 	nix::draw_triangles(vb_2d.get());
 	//nix::set_scissor(rect::EMPTY);
 }
-
-void HDRRendererGL::render_out(FrameBuffer *source, Texture *bloom, const RenderParams& params) {
-
-	bool flip_y = params.target_is_window;
-
-	PerformanceMonitor::begin(ch_out);
-	gpu_timestamp_begin(ch_out);
-
-	nix::bind_textures({source->color_attachments[0].get(), bloom});
-	nix::set_shader(shader_out.get());
-	shader_out->set_float("exposure", cam->exposure);
-	shader_out->set_float("bloom_factor", cam->bloom_factor);
-	shader_out->set_float("scale_x", resolution_scale_x);
-	shader_out->set_float("scale_y", resolution_scale_y);
-	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);
-	nix::set_view_matrix(mat4::ID);
-	nix::set_model_matrix(mat4::ID);
-	nix::set_cull(nix::CullMode::NONE);
-
-	nix::set_z(false, false);
-
-	nix::draw_triangles(vb_2d.get());
-
-	nix::set_cull(nix::CullMode::BACK);
-	gpu_timestamp_end(ch_out);
-	PerformanceMonitor::end(ch_out);
-}
-
 
 
 void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel) {
