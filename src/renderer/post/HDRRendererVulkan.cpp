@@ -20,16 +20,18 @@
 #include <world/Camera.h>
 #include <world/World.h>
 
-struct UBOBlur{
+void apply_shader_data(CommandBuffer* cb, const Any &shader_data);
+
+/*struct UBOBlur{
 	vec2 axis;
 	//float dummy1[2];
 	float radius;
 	float threshold;
 	float dummy2[2];
 	float kernel[20];
-};
+};*/
 
-UniformBuffer *blur_ubo[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
+//UniformBuffer *blur_ubo[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
 DescriptorSet *blur_dset[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
 GraphicsPipeline *blur_pipeline[HDRRendererVulkan::MAX_BLOOM_LEVELS];
 RenderPass *blur_render_pass[HDRRendererVulkan::MAX_BLOOM_LEVELS*2];
@@ -145,7 +147,7 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 		blur_pipeline[i]->rebuild();
 	}
 	for (int i=0; i<MAX_BLOOM_LEVELS*2; i++) {
-		blur_ubo[i] = new UniformBuffer(sizeof(UBOBlur));
+//		blur_ubo[i] = new UniformBuffer(sizeof(UBOBlur));
 		blur_dset[i] = pool->create_set(shader_blur.get());
 	}
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
@@ -226,12 +228,12 @@ void HDRRendererVulkan::draw(const RenderParams& params) {
 void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
 	const vec2 AXIS[2] = {{1,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
-	UBOBlur u;
-	u.radius = (iaxis <= 1) ? 5 : 11;//cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
-	u.threshold = threshold / cam->exposure;
-	u.axis = AXIS[iaxis % 2];
-	blur_ubo[iaxis]->update(&u);
-	blur_dset[iaxis]->set_uniform_buffer(0, blur_ubo[iaxis]);
+	//UBOBlur u;
+	float radius = (iaxis <= 1) ? 5 : 11;//cam->bloom_radius * resolution_scale_x * 4 / (float)BLUR_SCALE;
+	//u.threshold = threshold / cam->exposure;
+	//u.axis = AXIS[iaxis % 2];
+	//blur_ubo[iaxis]->update(&u);
+	//blur_dset[iaxis]->set_uniform_buffer(0, blur_ubo[iaxis]);
 	blur_dset[iaxis]->set_texture(1, source->attachments[0].get());
 	blur_dset[iaxis]->update();
 
@@ -242,6 +244,22 @@ void HDRRendererVulkan::process_blur(CommandBuffer *cb, FrameBuffer *source, Fra
 
 	cb->bind_pipeline(blur_pipeline[iaxis / 2]);
 	cb->bind_descriptor_set(0, blur_dset[iaxis]);
+
+	Any axis_x, axis_y;
+	axis_x.list_set(0, 1.0f);
+	axis_x.list_set(1, 0.0f);
+	axis_y.list_set(0, 0.0f);
+	axis_y.list_set(1, 1.0f);
+
+	Any data;
+	data.dict_set("radius:8", radius);
+	data.dict_set("threshold:12", threshold / cam->exposure);
+	if ((iaxis % 2) == 0)
+		data.dict_set("axis:0", axis_x);
+	else
+		data.dict_set("axis:0", axis_y);
+
+	apply_shader_data(cb, data);
 
 	cb->draw(vb_2d.get());
 

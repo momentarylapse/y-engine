@@ -143,13 +143,13 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 
-		bl.tsr[0]->data.dict_set("radius", r * BLOOM_LEVEL_SCALE);
-		bl.tsr[0]->data.dict_set("threshold", threshold);
+		bl.tsr[0]->data.dict_set("radius:8", r * BLOOM_LEVEL_SCALE);
+		bl.tsr[0]->data.dict_set("threshold:12", threshold);
 		bl.tsr[0]->set_source(dynamicly_scaled_source());
 		bl.renderer[0]->render(params.with_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get())));
 
-		bl.tsr[1]->data.dict_set("radius", r);
-		bl.tsr[1]->data.dict_set("threshold", 0.0f);
+		bl.tsr[1]->data.dict_set("radius:8", r);
+		bl.tsr[1]->data.dict_set("threshold:12", 0.0f);
 		bl.tsr[1]->set_source(dynamicly_scaled_source());
 		bl.renderer[1]->render(params.with_area(dynamicly_scaled_area(bl.renderer[1]->frame_buffer.get())));
 
