@@ -22,8 +22,15 @@ void main() {
 <FragmentShader>
 #extension GL_ARB_separate_shader_objects : enable
 
+#ifdef vulkan
+layout(push_constant) uniform PushConstants {
+	float width;
+	float height;
+};
+#else
 uniform float width = 1920.0;
 uniform float height = 1080.0;
+#endif
 
 layout(binding = 1) uniform sampler2DMS tex0;
 

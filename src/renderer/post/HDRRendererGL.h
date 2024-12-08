@@ -15,6 +15,7 @@ class Camera;
 class ComputeTask;
 class TextureRenderer;
 class ThroughShaderRenderer;
+class MultisampleResolver;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
@@ -24,18 +25,17 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	void process_blur(FrameBuffer *source, FrameBuffer *target, float r, float threshold, const vec2 &axis);
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
 
 	Camera *cam;
+
+	owned<MultisampleResolver> ms_resolver;
 
 	owned<TextureRenderer> texture_renderer;
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_main_ms;
 
 	owned<ThroughShaderRenderer> out_renderer;
-	/*owned<TextureRenderer> resolve_ms_renderer;
-	owned<ThroughShaderRenderer> resolve_ms_renderer;*/
 
 	static const int MAX_BLOOM_LEVELS = 4;
 
@@ -49,7 +49,6 @@ public:
 	DepthBuffer *_depth_buffer = nullptr;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
-	shared<Shader> shader_resolve_multisample;
 
 	owned<VertexBuffer> vb_2d;
 

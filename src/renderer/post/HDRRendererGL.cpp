@@ -33,6 +33,35 @@ namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
 }
 
+class MultisampleResolver : public RenderTask {
+public:
+	MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
+		shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
+		tsr = new ThroughShaderRenderer({tex_ms, depth_ms}, shader_resolve_multisample);
+
+		into_texture = new TextureRenderer({tex_out, depth_out});
+		into_texture->add_child(tsr.get());
+		into_texture->use_params_area = true;
+	}
+
+	void render(const RenderParams& params) override {
+		// resolve
+		if (true) {
+			tsr->data.dict_set("width:0", into_texture->frame_buffer->width);
+			tsr->data.dict_set("height:4", into_texture->frame_buffer->height);
+			tsr->set_source(dynamicly_scaled_source());
+			into_texture->render(params.with_area(dynamicly_scaled_area(into_texture->frame_buffer.get())));
+		} else {
+			// not sure, why this does not work... :(
+//			nix::resolve_multisampling(fb_main.get(), fb_main_ms.get());
+		}
+	}
+
+	owned<ThroughShaderRenderer> tsr;
+	owned<TextureRenderer> into_texture;
+	shared<Shader> shader_resolve_multisample;
+};
+
 
 HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
@@ -40,25 +69,22 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 
 	cam = _cam;
 
-	_depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
+	_depth_buffer = new DepthBuffer(width, height, "d24s8");
+	auto tex = new Texture(width, height, "rgba:f16");
+
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 
 		auto tex_ms = new nix::TextureMultiSample(width, height, 4, "rgba:f16");
 		auto depth_ms = new nix::RenderBuffer(width, height, 4, "d24s8");
-		// _depth_buffer
 		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
 		fb_main_ms = texture_renderer->frame_buffer;
 
-		shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
-
-		fb_main = new FrameBuffer({
-				new Texture(width, height, "rgba:f16"),
-				_depth_buffer});
+		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex, _depth_buffer);
+		fb_main = ms_resolver->into_texture->frame_buffer;
 	} else {
 		msg_error("no msaa");
 
-		auto tex = new Texture(width, height, "rgba:f16");
 		texture_renderer = new TextureRenderer({tex, _depth_buffer});
 		fb_main = texture_renderer->frame_buffer;
 	}
@@ -123,17 +149,8 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 	out_renderer->set_source(dynamicly_scaled_source());
 
-	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		// resolve
-		if (true) {
-			shader_resolve_multisample->set_float("width", fb_main_ms->width);
-			shader_resolve_multisample->set_float("height", fb_main_ms->height);
-			process({fb_main_ms->color_attachments[0].get()}, fb_main.get(), shader_resolve_multisample.get());
-		} else {
-			// not sure, why this does not work... :(
-			nix::resolve_multisampling(fb_main.get(), fb_main_ms.get());
-		}
-	}
+	if (config.antialiasing_method == AntialiasingMethod::MSAA)
+		ms_resolver->render(scaled_params);
 
 	PerformanceMonitor::begin(ch_post_blur);
 	gpu_timestamp_begin(ch_post_blur);
@@ -176,13 +193,6 @@ void HDRRendererGL::draw(const RenderParams& params) {
 
 	out_renderer->data = data;
 	out_renderer->draw(params);
-}
-
-void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float r, float threshold, const vec2 &axis) {
-	shader_blur->set_float("radius", r);
-	shader_blur->set_float("threshold", threshold / cam->exposure);
-	shader_blur->set_floats("axis", &axis.x, 2);
-	process(weak(source->color_attachments), target, shader_blur.get());
 }
 
 void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
