@@ -15,9 +15,13 @@ class TextureRenderer : public RenderTask {
 public:
 	explicit TextureRenderer(const shared_array<Texture>& textures);
 
+	// TODO move to explicit/dependency graph
+	void prepare(const RenderParams& params) override;
+
 	void render(const RenderParams& params) override;
 
 	shared<FrameBuffer> frame_buffer;
+	bool use_params_area = true;
 };
 
 #endif

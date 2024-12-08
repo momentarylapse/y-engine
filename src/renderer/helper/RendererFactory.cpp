@@ -9,6 +9,7 @@
 #include "../base.h"
 #include <graphics-impl.h>
 #include "../world/WorldRenderer.h"
+#include "../post/ThroughShaderRenderer.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkan.h"
 	#include "../world/WorldRendererVulkanForward.h"
@@ -38,7 +39,11 @@
 #endif
 #include <helper/PerformanceMonitor.h>
 #include <Config.h>
+#include <helper/ResourceManager.h>
+#include <helper/Scheduler.h>
 
+#include <lib/image/image.h>
+#include <renderer/target/TextureRendererGL.h>
 
 
 string render_graph_str(Renderer *r) {
@@ -130,15 +135,67 @@ Renderer *create_render_path(Camera *cam) {
 	}
 }
 
+/*class TextureWriter : public Renderer {
+public:
+	shared<Texture> texture;
+	TextureWriter(shared<Texture> t) : Renderer("www") {
+		texture = t;
+	}
+	void prepare(const RenderParams& params) override {
+		Renderer::prepare(params);
+
+		Image i;
+		texture->read(i);
+		i.save("o.bmp");
+	}
+};*/
+
 void create_full_renderer(GLFWwindow* window, Camera *cam) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
 		engine.region_renderer = create_region_renderer();
 		auto p = create_render_path(cam);
 		engine.gui_renderer = create_gui_renderer();
-		engine.window_renderer->add_child(engine.region_renderer);
+//		engine.window_renderer->add_child(engine.region_renderer);
 		engine.region_renderer->add_region(p, rect::ID, 0);
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
+
+		int N = 256;
+		Image im;
+		im.create(N, N, Black);
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+				im.set_pixel(i, j, ((i/16+j/16)%2 == 0) ? Black : White);
+		shared tex = new Texture();
+		tex->write(im);
+		auto shader = engine.resource_manager->load_shader("forward/blur.shader");
+		auto tsr = new ThroughShaderRenderer({tex}, shader);
+		Any axis_x, axis_y;
+		axis_x.list_set(0, 1.0f);
+		axis_x.list_set(1, 0.0f);
+		axis_y.list_set(0, 0.0f);
+		axis_y.list_set(1, 1.0f);
+		Any data;
+		data.dict_set("radius", 5.0f);
+		data.dict_set("threshold", 0.0f);
+		data.dict_set("axis", axis_x);
+		tsr->data = data;
+
+
+		shared tex2 = new Texture(N, N, "rgba:i8");
+		auto tr = new TextureRenderer({tex2});
+		tr->use_params_area = false;
+		tr->add_child(tsr);
+
+		auto tsr2 = new ThroughShaderRenderer({tex2}, shader);
+		data.dict_set("radius", 5.0f);
+		data.dict_set("threshold", 0.0f);
+		data.dict_set("axis", axis_y);
+		tsr2->data = data;
+		tsr2->add_child(tr);
+
+		engine.window_renderer->add_child(tsr2);
+
 	} catch(Exception &e) {
 #if __has_include(<lib/hui_minimal/hui.h>)
 		hui::ShowError(e.message());

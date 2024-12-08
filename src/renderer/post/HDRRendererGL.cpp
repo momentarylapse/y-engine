@@ -130,7 +130,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 
 	PerformanceMonitor::begin(ch_post_blur);
 	gpu_timestamp_begin(ch_post_blur);
-#if 0
+#if 1
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	auto bloom_input = fb_main.get();
