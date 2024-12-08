@@ -97,8 +97,6 @@ void ThroughShaderRenderer::set_source(const rect& area) {
 }
 
 void ThroughShaderRenderer::draw(const RenderParams &params) {
-	msg_write("-THROUGH");
-
 #ifdef USING_VULKAN
 	auto cb = params.command_buffer;
 

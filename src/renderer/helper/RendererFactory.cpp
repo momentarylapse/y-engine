@@ -181,12 +181,18 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		data.dict_set("threshold:12", 0.0f);
 		data.dict_set("axis:0", axis_x);
 		tsr->data = data;
-
+		// tsr:  tex -> shader -> ...
 
 		shared tex2 = new Texture(N, N, "rgba:i8");
-		auto tr = new TextureRenderer({tex2});
+#ifdef USING_VULKAN
+		shared<Texture> depth2 = new DepthBuffer(N, N, "d:f32", true);
+#else
+		shared<Texture> depth2 = new DepthBuffer(N, N, "d24s8");
+#endif
+		auto tr = new TextureRenderer({tex2, depth2});
 		tr->use_params_area = false;
 		tr->add_child(tsr);
+		// tr:  ... -> tex2
 
 		auto tsr2 = new ThroughShaderRenderer({tex2}, shader);
 		data.dict_set("radius:8", 5.0f);
@@ -194,6 +200,7 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		data.dict_set("axis:0", axis_y);
 		tsr2->data = data;
 		tsr2->add_child(tr);
+		// tsr2:  tex2 -> shader -> ...
 
 		engine.window_renderer->add_child(tsr2);
 

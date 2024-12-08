@@ -9,14 +9,12 @@
 #ifdef USING_OPENGL
 #include <graphics-impl.h>
 //#include "../../helper/PerformanceMonitor.h"
-#include <lib/os/msg.h>
 
 TextureRenderer::TextureRenderer(const shared_array<Texture>& textures) : RenderTask("tex") {
 	frame_buffer = new FrameBuffer(textures);
 }
 
 void TextureRenderer::render(const RenderParams& params) {
-	msg_write("-TEX");
 	nix::bind_frame_buffer(frame_buffer.get());
 
 	auto area = frame_buffer->area();
