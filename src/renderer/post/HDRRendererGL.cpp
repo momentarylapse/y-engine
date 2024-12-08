@@ -65,6 +65,7 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
+	auto bloom_input = fb_main->color_attachments[0];
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 		bloomw /= BLOOM_LEVEL_SCALE;
@@ -73,12 +74,15 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 		bl.tex_out = new nix::Texture(bloomw, bloomh, "rgba:f16");
 		bl.tex_temp->set_options("wrap=clamp");
 		bl.tex_out->set_options("wrap=clamp");
-	//	bl.tsr[0] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
-	//	bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
+		bl.tsr[0] = new ThroughShaderRenderer({bloom_input}, shader_blur);
+		bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
 		bl.renderer[0] = new TextureRenderer({bl.tex_temp});
 		bl.renderer[1] = new TextureRenderer({bl.tex_out});
+		bl.renderer[0]->add_child(bl.tsr[0].get());
+		bl.renderer[1]->add_child(bl.tsr[1].get());
 		bl.fb_temp = bl.renderer[0]->frame_buffer;
 		bl.fb_out = bl.renderer[1]->frame_buffer;
+		bloom_input = bl.tex_out;
 	}
 
 	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
@@ -126,6 +130,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 
 	PerformanceMonitor::begin(ch_post_blur);
 	gpu_timestamp_begin(ch_post_blur);
+#if 0
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	auto bloom_input = fb_main.get();
@@ -137,6 +142,32 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
 		threshold = 0;
 	}
+#else
+	//float r = cam->bloom_radius * engine.resolution_scale_x;
+	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
+	float threshold = 1.0f / cam->exposure;
+	for (int i=0; i<4; i++) {
+		auto& bl = bloom_levels[i];
+		Any axis_x, axis_y;
+		axis_x.list_set(0, 1.0f);
+		axis_x.list_set(1, 0.0f);
+		axis_y.list_set(0, 0.0f);
+		axis_y.list_set(1, 1.0f);
+		Any data;
+		data.dict_set("radius", r*BLOOM_LEVEL_SCALE);
+		data.dict_set("threshold", threshold);
+		data.dict_set("axis", axis_x);
+		bl.tsr[0]->data = data;
+		data.dict_set("radius", r);
+		data.dict_set("threshold", 0);
+		data.dict_set("axis", axis_y);
+		bl.tsr[1]->data = data;
+		bl.renderer[0]->render(params);
+		bl.renderer[1]->render(params);
+		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
+		threshold = 0;
+	}
+#endif
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 	gpu_timestamp_end(ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
