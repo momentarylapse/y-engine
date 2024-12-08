@@ -1,6 +1,6 @@
 <Layout>
 	bindings = [[buffer,sampler]]
-	pushsize = 4
+	pushsize = 8
 	input = [vec3,vec3,vec2]
 	topology = triangles
 	version = 420

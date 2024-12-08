@@ -11,6 +11,7 @@
 #include <renderer/target/TextureRendererGL.h>
 #ifdef USING_OPENGL
 #include "ThroughShaderRenderer.h"
+#include "MultisampleResolver.h"
 #include "../base.h"
 #include "../helper/ComputeTask.h"
 #include <lib/nix/nix.h>
@@ -29,38 +30,6 @@ static float resolution_scale_y = 1.0f;
 
 static int BLOOM_LEVEL_SCALE = 4;
 
-namespace nix {
-	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
-}
-
-class MultisampleResolver : public RenderTask {
-public:
-	MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
-		shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
-		tsr = new ThroughShaderRenderer({tex_ms, depth_ms}, shader_resolve_multisample);
-
-		into_texture = new TextureRenderer({tex_out, depth_out});
-		into_texture->add_child(tsr.get());
-		into_texture->use_params_area = true;
-	}
-
-	void render(const RenderParams& params) override {
-		// resolve
-		if (true) {
-			tsr->data.dict_set("width:0", into_texture->frame_buffer->width);
-			tsr->data.dict_set("height:4", into_texture->frame_buffer->height);
-			tsr->set_source(dynamicly_scaled_source());
-			into_texture->render(params.with_area(dynamicly_scaled_area(into_texture->frame_buffer.get())));
-		} else {
-			// not sure, why this does not work... :(
-//			nix::resolve_multisampling(fb_main.get(), fb_main_ms.get());
-		}
-	}
-
-	owned<ThroughShaderRenderer> tsr;
-	owned<TextureRenderer> into_texture;
-	shared<Shader> shader_resolve_multisample;
-};
 
 
 HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
@@ -78,7 +47,6 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 		auto tex_ms = new nix::TextureMultiSample(width, height, 4, "rgba:f16");
 		auto depth_ms = new nix::RenderBuffer(width, height, 4, "d24s8");
 		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
-		fb_main_ms = texture_renderer->frame_buffer;
 
 		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex, _depth_buffer);
 		fb_main = ms_resolver->into_texture->frame_buffer;
@@ -121,9 +89,6 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
 	fb_main->color_attachments[0]->set_options("magfilter=" + config.resolution_scale_filter);
 
-	vb_2d = new VertexBuffer("3f,3f,2f");
-	vb_2d->create_quad(rect::ID_SYM);
-
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer({fb_main->color_attachments[0], bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
@@ -146,7 +111,6 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 	texture_renderer->render(scaled_params);
 
-	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 	out_renderer->set_source(dynamicly_scaled_source());
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA)
@@ -193,22 +157,6 @@ void HDRRendererGL::draw(const RenderParams& params) {
 
 	out_renderer->data = data;
 	out_renderer->draw(params);
-}
-
-void HDRRendererGL::process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader) {
-	nix::bind_frame_buffer(target);
-	nix::set_viewport(dynamicly_scaled_area(target));
-	//nix::set_scissor(rect(0, target->width*resolution_scale_x, 0, target->height*resolution_scale_y));
-	nix::set_z(false, false);
-	//nix::set_projection_ortho_relative();
-	//nix::set_view_matrix(matrix::ID);
-	//nix::set_model_matrix(matrix::ID);
-	shader->set_floats("resolution_scale", &resolution_scale_x, 2);
-	nix::set_shader(shader);
-
-	nix::bind_textures(source);
-	nix::draw_triangles(vb_2d.get());
-	//nix::set_scissor(rect::EMPTY);
 }
 
 

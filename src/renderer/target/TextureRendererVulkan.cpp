@@ -6,7 +6,7 @@ TextureRenderer::TextureRenderer(const shared_array<Texture>& tex) : RenderTask(
 	textures = tex; //new Texture(width, height, "bgra:i8");
 //	depth_buffer = new DepthBuffer(texture->width, texture->height, "d:f32", false);
 	render_pass = new RenderPass(weak(textures));
-	frame_buffer = new FrameBuffer(render_pass, textures);
+	frame_buffer = new FrameBuffer(render_pass.get(), textures);
 }
 
 TextureRenderer::~TextureRenderer() = default;
@@ -22,12 +22,12 @@ void TextureRenderer::render(const RenderParams& params) {
 	if (use_params_area)
 		area = params.area;
 
-	auto p = params.with_target(frame_buffer).with_area(area);
-	p.render_pass = render_pass;
+	auto p = params.with_target(frame_buffer.get()).with_area(area);
+	p.render_pass = render_pass.get();
 
 	auto cb = params.command_buffer;
 
-	cb->begin_render_pass(render_pass, frame_buffer);
+	cb->begin_render_pass(render_pass.get(), frame_buffer.get());
 	cb->set_viewport(area);
 	cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
 	draw(p);
@@ -53,7 +53,7 @@ void HeadlessRenderer::prepare(const RenderParams &params) {
 }
 
 RenderParams HeadlessRenderer::create_params(const rect& area) const {
-	auto p = RenderParams::into_texture(texture_renderer->frame_buffer, area.width() / area.height());
+	auto p = RenderParams::into_texture(texture_renderer->frame_buffer.get(), area.width() / area.height());
 	p.area = area;
 	p.command_buffer = command_buffer;
 	return p;

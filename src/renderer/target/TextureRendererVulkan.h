@@ -6,8 +6,8 @@
 
 class TextureRenderer : public RenderTask {
 public:
-	RenderPass* render_pass;
-	FrameBuffer* frame_buffer;
+	owned<RenderPass> render_pass;
+	owned<FrameBuffer> frame_buffer;
 	shared_array<Texture> textures;
 	bool use_params_area = true;
 

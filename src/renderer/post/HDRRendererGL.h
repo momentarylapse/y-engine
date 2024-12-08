@@ -25,15 +25,12 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader);
-
 	Camera *cam;
 
 	owned<MultisampleResolver> ms_resolver;
 
 	owned<TextureRenderer> texture_renderer;
 	shared<FrameBuffer> fb_main;
-	shared<FrameBuffer> fb_main_ms;
 
 	owned<ThroughShaderRenderer> out_renderer;
 
@@ -49,8 +46,6 @@ public:
 	DepthBuffer *_depth_buffer = nullptr;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
-
-	owned<VertexBuffer> vb_2d;
 
 	int ch_post_blur = -1, ch_out = -1;
 
