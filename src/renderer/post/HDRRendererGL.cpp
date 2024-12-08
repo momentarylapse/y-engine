@@ -10,6 +10,7 @@
 #include <lib/image/image.h>
 #include <renderer/target/TextureRendererGL.h>
 #ifdef USING_OPENGL
+#include "ThroughShaderRenderer.h"
 #include "../base.h"
 #include "../helper/ComputeTask.h"
 #include <lib/nix/nix.h>
@@ -86,47 +87,13 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 	vb_2d = new nix::VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 
+
+	out_renderer = new ThroughShaderRenderer({fb_main->color_attachments[0], bloom_levels[0].fb_out->color_attachments[0], bloom_levels[1].fb_out->color_attachments[0].get(), bloom_levels[2].fb_out->color_attachments[0], bloom_levels[3].fb_out->color_attachments[0]}, shader_out);
+
 	light_meter.init(resource_manager, fb_main.get(), channel);
 }
 
 HDRRendererGL::~HDRRendererGL() = default;
-
-void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, const RenderParams& params) {
-
-	nix::bind_frame_buffer(fb);
-	nix::set_viewport(dynamicly_scaled_area(fb));
-
-	for (auto c: r->children)
-		c->draw(params);
-}
-
-void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shader *shader, const Any &data, VertexBuffer *vb_2d, const RenderParams& params) {
-
-	bool flip_y = params.target_is_window;
-
-	PerformanceMonitor::begin(r->ch_draw);
-	gpu_timestamp_begin(r->ch_draw);
-
-	nix::bind_textures(source);
-	nix::set_shader(shader);
-	apply_shader_data(shader, data);
-	/*shader->set_float("exposure", cam->exposure);
-	shader->set_float("bloom_factor", cam->bloom_factor);
-	shader->set_float("scale_x", resolution_scale_x);
-	shader->set_float("scale_y", resolution_scale_y);*/
-	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);
-	nix::set_view_matrix(mat4::ID);
-	nix::set_model_matrix(mat4::ID);
-	nix::set_cull(nix::CullMode::NONE);
-
-	nix::set_z(false, false);
-
-	nix::draw_triangles(vb_2d);
-
-	nix::set_cull(nix::CullMode::BACK);
-	gpu_timestamp_end(r->ch_draw);
-	PerformanceMonitor::end(r->ch_draw);
-}
 
 void HDRRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
@@ -142,6 +109,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	texture_renderer->render(scaled_params);
 
 	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+	out_renderer->set_source(dynamicly_scaled_source());
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		// resolve
@@ -186,10 +154,9 @@ void HDRRendererGL::draw(const RenderParams& params) {
 	data.dict_set("scale_x", resolution_scale_x);
 	data.dict_set("scale_y", resolution_scale_y);
 
-
-	Array<Texture*> tex = {fb_main->color_attachments[0].get(), bloom_levels[0].fb_out->color_attachments[0].get(), bloom_levels[1].fb_out->color_attachments[0].get(), bloom_levels[2].fb_out->color_attachments[0].get(), bloom_levels[3].fb_out->color_attachments[0].get()};
-	render_out_through_shader(this, tex, shader_out.get(), data, vb_2d.get(), params);
-	//render_out(fb_main.get(), fb_small2->color_attachments[0].get());
+	out_renderer->data = data;
+	out_renderer->shader = shader_out;
+	out_renderer->draw(params);
 }
 
 void HDRRendererGL::process_blur(FrameBuffer *source, FrameBuffer *target, float r, float threshold, const vec2 &axis) {

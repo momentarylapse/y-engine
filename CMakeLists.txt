@@ -429,6 +429,7 @@ add_executable(y
 	src/renderer/post/PostProcessor.cpp
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
+	src/renderer/post/ThroughShaderRenderer.cpp
 	src/renderer/regions/RegionRendererCommon.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp

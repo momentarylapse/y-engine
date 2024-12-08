@@ -14,6 +14,7 @@ class vec2;
 class Camera;
 class ComputeTask;
 class TextureRenderer;
+class ThroughShaderRenderer;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
@@ -32,6 +33,8 @@ public:
 	owned<TextureRenderer> texture_renderer;
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_main_ms;
+
+	owned<ThroughShaderRenderer> out_renderer;
 
 	static const int MAX_BLOOM_LEVELS = 4;
 
