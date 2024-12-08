@@ -81,8 +81,10 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	geo_renderer->prepare(sub_params);
 	geo_renderer_trans->prepare(params); // keep drawing into direct target
 
-	if (scene_view.shadow_index >= 0)
-		shadow_renderer->render(scene_view);
+	if (scene_view.shadow_index >= 0) {
+		shadow_renderer->set_scene(scene_view);
+		shadow_renderer->render(params);
+	}
 
 	render_into_gbuffer(gbuffer.get(), sub_params);
 

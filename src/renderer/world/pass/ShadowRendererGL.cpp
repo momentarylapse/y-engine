@@ -18,8 +18,8 @@
 #include "../../../Config.h"
 
 
-ShadowRendererGL::ShadowRendererGL() :
-		Renderer("shdw")
+ShadowRenderer::ShadowRenderer() :
+		RenderTask("shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
@@ -40,7 +40,7 @@ ShadowRendererGL::ShadowRendererGL() :
 	add_child(geo_renderer.get());
 }
 
-void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale, RenderViewData& rvd) {
+void ShadowRenderer::render_shadow_map(FrameBuffer *sfb, float scale, RenderViewData& rvd) {
 	const auto params = RenderParams::into_texture(sfb, 1.0f);
 	geo_renderer->prepare(params);
 
@@ -61,7 +61,12 @@ void ShadowRendererGL::render_shadow_map(FrameBuffer *sfb, float scale, RenderVi
 
 }
 
-void ShadowRendererGL::prepare(const RenderParams& params) {
+void ShadowRenderer::set_scene(SceneView &parent_scene_view) {
+	scene_view.cam = parent_scene_view.cam;
+	proj = parent_scene_view.shadow_proj;
+}
+
+void ShadowRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	gpu_timestamp_begin(ch_prepare);
 
@@ -70,12 +75,6 @@ void ShadowRendererGL::prepare(const RenderParams& params) {
 
 	gpu_timestamp_end(ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
-}
-
-void ShadowRendererGL::render(SceneView &parent_scene_view) {
-	scene_view.cam = parent_scene_view.cam;
-	proj = parent_scene_view.shadow_proj;
-	prepare(RenderParams::WHATEVER);
 }
 
 

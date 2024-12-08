@@ -18,7 +18,7 @@ class Any;
 
 enum class ShaderVariant;
 
-class ShadowRendererGL;
+class ShadowRenderer;
 class GeometryRendererGL;
 class RenderViewData;
 
@@ -32,7 +32,7 @@ public:
 	void render_into_cubemap(CubeMapSource& source);
 
 	owned<GeometryRendererGL> geo_renderer;
-	owned<ShadowRendererGL> shadow_renderer;
+	owned<ShadowRenderer> shadow_renderer;
 
 	void prepare_lights(Camera *cam, RenderViewData &rvd);
 };

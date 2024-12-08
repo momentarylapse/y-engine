@@ -42,7 +42,7 @@ WorldRendererGL::WorldRendererGL(const string &name, Camera *cam, RenderPathType
 }
 
 void WorldRendererGL::create_more() {
-	shadow_renderer = new ShadowRendererGL();
+	shadow_renderer = new ShadowRenderer();
 	scene_view.fb_shadow1 = shadow_renderer->fb[0];
 	scene_view.fb_shadow2 = shadow_renderer->fb[1];
 	add_child(shadow_renderer.get());

@@ -62,8 +62,10 @@ void WorldRendererGLForward::prepare(const RenderParams& params) {
 	}
 	prepare_lights(cam_main, main_rvd);
 
-	if (scene_view.shadow_index >= 0)
-		shadow_renderer->render(scene_view);
+	if (scene_view.shadow_index >= 0) {
+		shadow_renderer->set_scene(scene_view);
+		shadow_renderer->render(params);
+	}
 
 	PerformanceMonitor::end(ch_prepare);
 }

@@ -20,18 +20,19 @@ class Material;
 class GeometryRendererGL;
 struct SceneView;
 
-class ShadowRendererGL : public Renderer {
+class ShadowRenderer : public RenderTask {
 public:
-	ShadowRendererGL();
+	ShadowRenderer();
 
 	shared<FrameBuffer> fb[2];
 
     void render_shadow_map(FrameBuffer *sfb, float scale, RenderViewData& rvd);
 
-	void prepare(const RenderParams& params) override;
+	void prepare(const RenderParams& params) override {};
 	void draw(const RenderParams& params) override {}
 
-    void render(SceneView &parent_scene_view);
+	void set_scene(SceneView &parent_scene_view);
+    void render(const RenderParams& params) override;
 
     owned<Material> material;
 	mat4 proj;
