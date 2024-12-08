@@ -32,6 +32,7 @@ struct RenderParams {
 #endif
 
 	RenderParams with_target(FrameBuffer *fb) const;
+	RenderParams with_area(const rect& area) const;
 	static const RenderParams WHATEVER;
 	static RenderParams into_window(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
 	static RenderParams into_texture(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);

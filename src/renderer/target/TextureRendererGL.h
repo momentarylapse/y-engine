@@ -11,13 +11,13 @@
 #include "../Renderer.h"
 #ifdef USING_OPENGL
 
-class TextureRendererGL : public Renderer {
+class TextureRenderer : public RenderTask {
 public:
-	explicit TextureRendererGL(FrameBuffer *fb);
+	explicit TextureRenderer(const shared_array<Texture>& textures);
 
-	void render(float aspect_ratio);
+	void render(const RenderParams& params) override;
 
-	FrameBuffer *fb;
+	shared<FrameBuffer> frame_buffer;
 };
 
 #endif

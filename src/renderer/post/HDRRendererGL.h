@@ -13,6 +13,7 @@
 class vec2;
 class Camera;
 class ComputeTask;
+class TextureRenderer;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
@@ -28,6 +29,7 @@ public:
 
 	Camera *cam;
 
+	owned<TextureRenderer> texture_renderer;
 	shared<FrameBuffer> fb_main;
 	shared<FrameBuffer> fb_main_ms;
 

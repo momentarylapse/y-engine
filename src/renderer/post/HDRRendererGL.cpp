@@ -8,6 +8,7 @@
 #include "HDRRendererGL.h"
 
 #include <lib/image/image.h>
+#include <renderer/target/TextureRendererGL.h>
 #ifdef USING_OPENGL
 #include "../base.h"
 #include "../helper/ComputeTask.h"
@@ -43,20 +44,26 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 	_depth_buffer = new nix::DepthBuffer(width, height, "d24s8");
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
-		fb_main_ms = new nix::FrameBuffer({
-			new nix::TextureMultiSample(width, height, 4, "rgba:f16"),
-			//_depth_buffer});
-			new nix::RenderBuffer(width, height, 4, "d24s8")});
 
+		auto tex_ms = new nix::TextureMultiSample(width, height, 4, "rgba:f16");
+		auto depth_ms = new nix::RenderBuffer(width, height, 4, "d24s8");
+		// _depth_buffer
+		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
+		fb_main_ms = texture_renderer->frame_buffer;
 
 		shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
+
+
+		fb_main = new nix::FrameBuffer({
+				new nix::Texture(width, height, "rgba:f16"),
+				_depth_buffer});
 	} else {
 		msg_error("no msaa");
+
+		auto tex = new nix::Texture(width, height, "rgba:f16");
+		texture_renderer = new TextureRenderer({tex, _depth_buffer});
+		fb_main = texture_renderer->frame_buffer;
 	}
-	fb_main = new nix::FrameBuffer({
-			new nix::Texture(width, height, "rgba:f16"),
-			_depth_buffer});
-			//new nix::RenderBuffer(width, height, "d24s8)});
 
 	int bloomw = width, bloomh = height;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
@@ -84,8 +91,7 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 
 HDRRendererGL::~HDRRendererGL() = default;
 
-void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, VertexBuffer *vb_2d, const RenderParams& params) {
-	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
+void render_source_into_framebuffer(Renderer *r, FrameBuffer *fb, const RenderParams& params) {
 
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
@@ -124,18 +130,20 @@ void render_out_through_shader(Renderer *r, const Array<Texture*> &source, Shade
 
 void HDRRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-	auto sub_params = params.with_target((config.antialiasing_method == AntialiasingMethod::MSAA) ? fb_main_ms.get() : fb_main.get());
 
 	if (!cam)
 		cam = cam_main;
 
 	for (auto c: children)
-		c->prepare(sub_params);
+		c->prepare(params);
 
+	texture_renderer->children = children;
+	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
+	texture_renderer->render(scaled_params);
+
+	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		render_source_into_framebuffer(this, fb_main_ms.get(), vb_2d.get(), sub_params);
-
 		// resolve
 		if (true) {
 			shader_resolve_multisample->set_float("width", fb_main_ms->width);
@@ -145,9 +153,6 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 			// not sure, why this does not work... :(
 			nix::resolve_multisampling(fb_main.get(), fb_main_ms.get());
 		}
-
-	} else {
-		render_source_into_framebuffer(this, fb_main.get(), vb_2d.get(), sub_params);
 	}
 
 	PerformanceMonitor::begin(ch_post_blur);

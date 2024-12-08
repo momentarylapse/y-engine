@@ -22,6 +22,12 @@ RenderParams RenderParams::with_target(FrameBuffer *fb) const {
 	return r;
 }
 
+RenderParams RenderParams::with_area(const rect& _area) const {
+	RenderParams r = *this;
+	r.area = _area;
+	return r;
+}
+
 float fb_ratio(FrameBuffer* fb) {
 	return (float)fb->width / (float)fb->height;
 }
@@ -62,6 +68,6 @@ void Renderer::draw(const RenderParams& params) {
 }
 
 RenderTask::RenderTask(const string& name) : Renderer(name) {
-	
+
 }
 

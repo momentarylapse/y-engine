@@ -10,13 +10,14 @@
 #include <graphics-impl.h>
 //#include "../../helper/PerformanceMonitor.h"
 
-TextureRendererGL::TextureRendererGL(FrameBuffer *_fb) : Renderer("tex") {
-	fb = _fb;
+TextureRenderer::TextureRenderer(const shared_array<Texture>& textures) : RenderTask("tex") {
+	frame_buffer = new FrameBuffer(textures);
 }
 
-void TextureRendererGL::render(float aspect_ratio) {
-	nix::bind_frame_buffer(fb);
+void TextureRenderer::render(const RenderParams& params) {
+	nix::bind_frame_buffer(frame_buffer.get());
 
-	draw(RenderParams::into_texture(fb, 1.0f));
+	nix::set_viewport(params.area);
+	draw(RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio));
 }
 #endif
