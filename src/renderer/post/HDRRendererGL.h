@@ -42,8 +42,6 @@ public:
 	struct BloomLevel {
 		shared<Texture> tex_temp;
 		shared<Texture> tex_out;
-		shared<FrameBuffer> fb_temp;
-		shared<FrameBuffer> fb_out;
 		owned<TextureRenderer> renderer[2];
 		owned<ThroughShaderRenderer> tsr[2];
 	} bloom_levels[MAX_BLOOM_LEVELS];

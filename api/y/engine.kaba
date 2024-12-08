@@ -59,7 +59,8 @@ class RenderPath
 
 class HDRRenderer
 	var fb_main: FrameBuffer&
-	func extern fb_bloom() -> FrameBuffer&[]
+	#func extern tex_bloom() -> Texture&[]
+	func extern tex_bloom() -> shared![Texture][]
 	
 	class LightMeter
 		var histogram: i32[]

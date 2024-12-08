@@ -9,8 +9,8 @@ class X extends Controller
 			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.fb_main.color_attachments()[0]))
 			var y0 = 1.0
 			var h = 0.2
-			for i=>fb in hdr.fb_bloom()
-				pic.add(new Picture([1.0,1.0+h, y0-h, y0], fb.color_attachments()[0]))
+			for i=>tex in hdr.tex_bloom()
+				pic.add(new Picture([1.0,1.0+h, y0-h, y0], tex))
 				y0 -= h
 				h *= 0.5
 			

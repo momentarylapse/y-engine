@@ -264,8 +264,12 @@ FrameBuffer* world_renderer_get_gbuffer(WorldRenderer &r) {
 	return nullptr;
 }
 
-Array<FrameBuffer*> hdr_renderer_get_fb_bloom(HDRRenderer &r) {
-	return {r.bloom_levels[0].fb_out.get(), r.bloom_levels[1].fb_out.get(), r.bloom_levels[2].fb_out.get(), r.bloom_levels[3].fb_out.get()};
+Array<Texture*> hdr_renderer_get_tex_bloom(HDRRenderer &r) {
+#ifdef USING_OPENGL
+	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
+#else
+	return {r.bloom_levels[0].fb_out->attachments[0].get(), r.bloom_levels[1].fb_out->attachments[0].get(), r.bloom_levels[2].fb_out->attachments[0].get(), r.bloom_levels[3].fb_out->attachments[0].get()};
+#endif
 }
 
 audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float sample_rate) {
@@ -867,7 +871,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
 	ext->declare_class_element("HDRRenderer.fb_main", &HDRRenderer::fb_main);
 	ext->declare_class_element("HDRRenderer.light_meter", &HDRRenderer::light_meter);
-	ext->link_class_func("HDRRenderer.fb_bloom", &hdr_renderer_get_fb_bloom);
+	ext->link_class_func("HDRRenderer.tex_bloom", &hdr_renderer_get_tex_bloom);
 
 	ext->declare_class_size("HDRRenderer.LightMeter", sizeof(HDRRenderer::LightMeter));
 	ext->declare_class_element("HDRRenderer.LightMeter.histogram", &HDRRenderer::LightMeter::histogram);
