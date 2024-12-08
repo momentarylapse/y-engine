@@ -61,3 +61,10 @@ public:
 	Context *context;
 	ResourceManager *resource_manager;
 };
+
+class RenderTask : public  Renderer {
+public:
+	explicit RenderTask(const string &name);
+
+	virtual void render(const RenderParams& params) = 0;
+};

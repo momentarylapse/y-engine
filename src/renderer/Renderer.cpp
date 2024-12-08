@@ -61,3 +61,7 @@ void Renderer::draw(const RenderParams& params) {
 		c->draw(params);
 }
 
+RenderTask::RenderTask(const string& name) : Renderer(name) {
+	
+}
+
