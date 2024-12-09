@@ -20,9 +20,9 @@ enum class RenderPathType;
 enum class ShaderVariant;
 class RenderViewData;
 
-class GeometryRendererVulkan : public GeometryRenderer {
+class GeometryRenderer : public GeometryRendererCommon {
 public:
-	GeometryRendererVulkan(RenderPathType type, SceneView &scene_view);
+	GeometryRenderer(RenderPathType type, SceneView &scene_view);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

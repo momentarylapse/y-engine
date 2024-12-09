@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "ShadowRendererGL.h"
+#include "ShadowRenderer.h"
 
 #ifdef USING_OPENGL
 #include "../geometry/GeometryRendererGL.h"

@@ -10,7 +10,7 @@
 #include "../../../graphics-impl.h"
 #include "../../../helper/PerformanceMonitor.h"
 
-GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view) :
+GeometryRendererCommon::GeometryRendererCommon(RenderPathType _type, SceneView &_scene_view) :
 		Renderer("geo"),
 		scene_view(_scene_view),
 		fx_material(resource_manager)
@@ -35,11 +35,11 @@ GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view)
 	fx_vertex_buffers.add(new VertexBuffer("3f,4f,2f"));
 }
 
-void GeometryRenderer::set(Flags _flags, RenderViewData &rvd) {
+void GeometryRendererCommon::set(Flags _flags, RenderViewData &rvd) {
 	flags = _flags;
 	cur_rvd = &rvd;
 }
 
-bool GeometryRenderer::is_shadow_pass() const {
+bool GeometryRendererCommon::is_shadow_pass() const {
 	return (int)(flags & Flags::SHADOW_PASS);
 }

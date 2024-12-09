@@ -37,7 +37,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	height = h;
 
 	//create_more();
-	geo_renderer = new GeometryRendererVulkan(type, scene_view);
+	geo_renderer = new GeometryRenderer(type, scene_view);
 
 	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;

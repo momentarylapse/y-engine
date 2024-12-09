@@ -7,7 +7,7 @@
 
 #include "WorldRendererVulkan.h"
 #ifdef USING_VULKAN
-#include "pass/ShadowRendererVulkan.h"
+#include "pass/ShadowRenderer.h"
 #include "../../graphics-impl.h"
 #include "../helper/CubeMapSource.h"
 #include <lib/image/image.h>
@@ -53,12 +53,12 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, Render
 }
 
 void WorldRendererVulkan::create_more() {
-	shadow_renderer = new ShadowRendererVulkan();
-	scene_view.fb_shadow1 = shadow_renderer->fb[0];
-	scene_view.fb_shadow2 = shadow_renderer->fb[1];
+	shadow_renderer = new ShadowRenderer();
+	scene_view.fb_shadow1 = shadow_renderer->cascades[0].fb;
+	scene_view.fb_shadow2 = shadow_renderer->cascades[1].fb;
 	add_child(shadow_renderer.get());
 
-	geo_renderer = new GeometryRendererVulkan(type, scene_view);
+	geo_renderer = new GeometryRenderer(type, scene_view);
 	add_child(geo_renderer.get());
 
 }

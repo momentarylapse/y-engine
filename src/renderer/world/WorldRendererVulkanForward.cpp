@@ -7,7 +7,7 @@
 
 #include "WorldRendererVulkanForward.h"
 #ifdef USING_VULKAN
-#include "pass/ShadowRendererVulkan.h"
+#include "pass/ShadowRenderer.h"
 #include "../../graphics-impl.h"
 #include "../helper/CubeMapSource.h"
 #include "../base.h"
@@ -57,8 +57,10 @@ void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	
 	geo_renderer->prepare(params);
 
-	if (scene_view.shadow_index >= 0)
-		shadow_renderer->render(cb, scene_view);
+	if (scene_view.shadow_index >= 0) {
+		shadow_renderer->set_scene(scene_view);
+		shadow_renderer->render(params);
+	}
 
 	PerformanceMonitor::end(ch_prepare);
 }

@@ -38,10 +38,10 @@
 
 
 
-GeometryRendererVulkan::GeometryRendererVulkan(RenderPathType type, SceneView &scene_view) : GeometryRenderer(type, scene_view) {
+GeometryRenderer::GeometryRenderer(RenderPathType type, SceneView &scene_view) : GeometryRendererCommon(type, scene_view) {
 }
 
-void GeometryRendererVulkan::prepare(const RenderParams& params) {
+void GeometryRenderer::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 
 	prepare_instanced_matrices();
@@ -60,7 +60,7 @@ vulkan::CullMode vk_cull(int culling) {
 	return vulkan::CullMode::NONE;
 }
 
-GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
+GraphicsPipeline* GeometryRenderer::get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
 	if (pass.mode == TransparencyMode::FUNCTIONS) {
 		return PipelineManager::get_alpha(s, rp, top, vb, pass.source, pass.destination, false, vk_cull(pass.cull_mode));
 	} else if (pass.mode == TransparencyMode::COLOR_KEY_HARD) {
@@ -72,7 +72,7 @@ GraphicsPipeline* GeometryRendererVulkan::get_pipeline(Shader *s, RenderPass *rp
 
 
 
-void GeometryRendererVulkan::draw_particles(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_fx);
 	gpu_timestamp_begin(cb, ch_fx);
@@ -217,7 +217,7 @@ void GeometryRendererVulkan::draw_particles(const RenderParams& params, RenderVi
 	PerformanceMonitor::end(ch_fx);
 }
 
-void GeometryRendererVulkan::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_bg);
 	gpu_timestamp_begin(cb, ch_bg);
@@ -258,7 +258,7 @@ void GeometryRendererVulkan::draw_skyboxes(const RenderParams& params, RenderVie
 	PerformanceMonitor::end(ch_bg);
 }
 
-void GeometryRendererVulkan::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_terrains);
 	gpu_timestamp_begin(cb, ch_terrains);
@@ -287,7 +287,7 @@ void GeometryRendererVulkan::draw_terrains(const RenderParams& params, RenderVie
 	PerformanceMonitor::end(ch_terrains);
 }
 
-void GeometryRendererVulkan::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(cb, ch_models);
@@ -325,7 +325,7 @@ void GeometryRendererVulkan::draw_objects_instanced(const RenderParams& params, 
 
 
 
-void GeometryRendererVulkan::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(cb, ch_models);
@@ -365,7 +365,7 @@ void GeometryRendererVulkan::draw_objects_opaque(const RenderParams& params, Ren
 }
 
 
-void GeometryRendererVulkan::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(cb, ch_models);
@@ -424,7 +424,7 @@ void GeometryRendererVulkan::draw_objects_transparent(const RenderParams& params
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRendererVulkan::draw_user_meshes(const RenderParams& params, bool transparent, RenderViewData &rvd) {
+void GeometryRenderer::draw_user_meshes(const RenderParams& params, bool transparent, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_user);
 	gpu_timestamp_begin(cb, ch_user);
@@ -455,7 +455,7 @@ void GeometryRendererVulkan::draw_user_meshes(const RenderParams& params, bool t
 }
 
 // keep this outside the drawing function, making sure it only gets called once per frame!
-void GeometryRendererVulkan::prepare_instanced_matrices() {
+void GeometryRenderer::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
@@ -466,7 +466,7 @@ void GeometryRendererVulkan::prepare_instanced_matrices() {
 	PerformanceMonitor::end(ch_pre);
 }
 
-void GeometryRendererVulkan::draw(const RenderParams& params) {
+void GeometryRenderer::draw(const RenderParams& params) {
 	if ((int)(flags & Flags::ALLOW_SKYBOXES))
 		draw_skyboxes(params, *cur_rvd);
 

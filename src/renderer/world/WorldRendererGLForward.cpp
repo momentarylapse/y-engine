@@ -6,7 +6,7 @@
  */
 
 #include "WorldRendererGLForward.h"
-#include "pass/ShadowRendererGL.h"
+#include "pass/ShadowRenderer.h"
 #include "geometry/GeometryRendererGL.h"
 
 #ifdef USING_OPENGL

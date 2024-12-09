@@ -45,7 +45,7 @@ RenderData& RenderViewData::start(const RenderParams& params, RenderPathType typ
 	auto s = shader_cache.get_shader(type);
 
 	nix::set_shader(s);
-	if (GeometryRendererGL::using_view_space)
+	if (GeometryRenderer::using_view_space)
 		s->set_floats("eye_pos", &scene_view->cam->owner->pos.x, 3); // NAH....
 	else
 		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
@@ -116,7 +116,7 @@ RenderData& RenderViewData::start(
 	rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
 	auto s = shader_cache.get_shader(type);
-	auto p = GeometryRendererVulkan::get_pipeline(s, params.render_pass, material.pass(pass_no), top, vb);
+	auto p = GeometryRenderer::get_pipeline(s, params.render_pass, material.pass(pass_no), top, vb);
 
 	params.command_buffer->bind_pipeline(p);
 

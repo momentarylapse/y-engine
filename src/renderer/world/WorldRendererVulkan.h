@@ -39,7 +39,7 @@ class Entity;
 class Any;
 
 enum class ShaderVariant;
-class ShadowRendererVulkan;
+class ShadowRenderer;
 class CubeMapSource;
 
 
@@ -47,8 +47,8 @@ class CubeMapSource;
 
 class WorldRendererVulkan : public WorldRenderer {
 public:
-	owned<ShadowRendererVulkan> shadow_renderer;
-	owned<GeometryRendererVulkan> geo_renderer;
+	owned<ShadowRenderer> shadow_renderer;
+	owned<GeometryRenderer> geo_renderer;
 
 
 	VertexBuffer *vb_2d;

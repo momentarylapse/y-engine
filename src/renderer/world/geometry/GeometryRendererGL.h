@@ -22,9 +22,9 @@ enum class ShaderVariant;
 
 
 
-class GeometryRendererGL : public GeometryRenderer {
+class GeometryRenderer : public GeometryRendererCommon {
 public:
-	GeometryRendererGL(RenderPathType type, SceneView &scene_view);
+	GeometryRenderer(RenderPathType type, SceneView &scene_view);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

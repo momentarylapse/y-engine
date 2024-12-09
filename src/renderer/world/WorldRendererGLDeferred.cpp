@@ -9,7 +9,7 @@
 
 #ifdef USING_OPENGL
 #include "geometry/GeometryRendererGL.h"
-#include "pass/ShadowRendererGL.h"
+#include "pass/ShadowRenderer.h"
 #include "../base.h"
 #include <lib/nix/nix.h>
 #include <lib/os/msg.h>

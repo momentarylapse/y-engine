@@ -52,7 +52,7 @@ struct VertexPoint {
 	color col;
 };
 
-class GeometryRenderer : public Renderer {
+class GeometryRendererCommon : public Renderer {
 public:
 	enum class Flags {
 		ALLOW_OPAQUE = 1,
@@ -61,7 +61,7 @@ public:
 		SHADOW_PASS = 8,
 	} flags;
 
-	GeometryRenderer(RenderPathType type, SceneView &scene_view);
+	GeometryRendererCommon(RenderPathType type, SceneView &scene_view);
 
 	void set(Flags flags, RenderViewData& rvd);
 	bool is_shadow_pass() const;
@@ -89,10 +89,10 @@ public:
 	owned_array<VertexBuffer> fx_vertex_buffers;
 };
 
-inline GeometryRenderer::Flags operator|(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {
-	return (GeometryRenderer::Flags)((int)a | (int)b);
+inline GeometryRendererCommon::Flags operator|(GeometryRendererCommon::Flags a, GeometryRendererCommon::Flags b) {
+	return (GeometryRendererCommon::Flags)((int)a | (int)b);
 }
 
-inline GeometryRenderer::Flags operator&(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {
-	return (GeometryRenderer::Flags)((int)a & (int)b);
+inline GeometryRendererCommon::Flags operator&(GeometryRendererCommon::Flags a, GeometryRendererCommon::Flags b) {
+	return (GeometryRendererCommon::Flags)((int)a & (int)b);
 }

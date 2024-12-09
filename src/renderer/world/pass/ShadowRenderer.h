@@ -1,5 +1,5 @@
 /*
- * ShadowRendererGL.h
+ * ShadowRenderer.h
  *
  *  Created on: Dec 11, 2022
  *      Author: michi
@@ -9,7 +9,6 @@
 
 #include "../../Renderer.h"
 #include "../../../graphics-fwd.h"
-#ifdef USING_OPENGL
 #include "../geometry/RenderViewData.h"
 #include <lib/math/mat4.h>
 #include "../geometry/SceneView.h"
@@ -17,7 +16,7 @@
 class Camera;
 class PerformanceMonitor;
 class Material;
-class GeometryRendererGL;
+class GeometryRenderer;
 class TextureRenderer;
 struct SceneView;
 
@@ -26,8 +25,6 @@ public:
 	ShadowRenderer();
 
 	static constexpr int NUM_CASCADES = 2;
-
-
 
 	void prepare(const RenderParams& params) override {};
 	void draw(const RenderParams& params) override {}
@@ -48,9 +45,16 @@ public:
 		float scale = 1.0f;
 	} cascades[NUM_CASCADES];
 
-    owned<GeometryRendererGL> geo_renderer;
+#ifdef USING_VULKAN
+	RenderPass *render_pass = nullptr;
+#endif
 
+    owned<GeometryRenderer> geo_renderer;
+
+#ifdef USING_VULKAN
+    void render_cascade(const RenderParams& params, Cascade& c);
+#else
     void render_cascade(Cascade& c);
+#endif
 };
 
-#endif
