@@ -25,10 +25,11 @@ public:
 	GeometryRendererVulkan(RenderPathType type, SceneView &scene_view);
 
 	void prepare(const RenderParams& params) override;
-	void draw(const RenderParams& params) override {}
+	void draw(const RenderParams& params) override;
 
 	static GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
 
+private:
 	void draw_particles(const RenderParams& params, RenderViewData &rvd);
 	void draw_skyboxes(const RenderParams& params, RenderViewData &rvd);
 	void draw_terrains(const RenderParams& params, RenderViewData &rvd);

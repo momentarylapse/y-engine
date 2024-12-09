@@ -87,11 +87,8 @@ void ShadowRendererVulkan::render_shadow_map(CommandBuffer *cb, FrameBuffer *sfb
 	params.command_buffer = cb;
 	params.render_pass = render_pass;
 
-	geo_renderer->draw_terrains(params, rvd);
-	geo_renderer->draw_objects_opaque(params, rvd);
-	geo_renderer->draw_objects_instanced(params, rvd);
-	geo_renderer->draw_user_meshes(params, false, rvd);
-
+	geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS, rvd);
+	geo_renderer->draw(params);
 
 	cb->end_render_pass();
 }

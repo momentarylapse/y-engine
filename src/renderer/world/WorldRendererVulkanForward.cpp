@@ -81,17 +81,11 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	rvd.ubo.shadow_index = scene_view.shadow_index;
 
 	cb->clear(params.frame_buffer->area(), {world.background}, 1.0f);
-	geo_renderer->draw_skyboxes(params, rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES, rvd);
+	geo_renderer->draw(params);
 
-	geo_renderer->draw_terrains(params, rvd);
-	geo_renderer->draw_objects_opaque(params, rvd);
-
-	geo_renderer->draw_objects_instanced(params, rvd);
-	geo_renderer->draw_user_meshes(params, false, rvd);
-
-	geo_renderer->draw_objects_transparent(params, rvd);
-	geo_renderer->draw_particles(params, rvd);
-	geo_renderer->draw_user_meshes(params, true, rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT, rvd);
+	geo_renderer->draw(params);
 
 	gpu_timestamp_end(cb, ch_draw);
 	PerformanceMonitor::end(ch_draw);
