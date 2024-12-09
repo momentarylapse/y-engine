@@ -22,6 +22,7 @@ public:
 
 	shared<FrameBuffer> frame_buffer;
 	bool use_params_area = true;
+	bool clear_z = true;
 };
 
 #endif

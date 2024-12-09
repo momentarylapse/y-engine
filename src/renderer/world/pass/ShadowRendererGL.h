@@ -18,15 +18,16 @@ class Camera;
 class PerformanceMonitor;
 class Material;
 class GeometryRendererGL;
+class TextureRenderer;
 struct SceneView;
 
 class ShadowRenderer : public RenderTask {
 public:
 	ShadowRenderer();
 
-	shared<FrameBuffer> fb[2];
+	static constexpr int NUM_CASCADES = 2;
 
-    void render_shadow_map(FrameBuffer *sfb, float scale, RenderViewData& rvd);
+
 
 	void prepare(const RenderParams& params) override {};
 	void draw(const RenderParams& params) override {}
@@ -37,9 +38,19 @@ public:
     owned<Material> material;
 	mat4 proj;
 	SceneView scene_view;
-	RenderViewData rvd[2];
+	struct Cascade {
+		Cascade();
+		~Cascade();
+		DepthBuffer* depth_buffer = nullptr;
+		shared<FrameBuffer> fb;
+		RenderViewData rvd;
+		owned<TextureRenderer> texture_renderer;
+		float scale = 1.0f;
+	} cascades[NUM_CASCADES];
 
     owned<GeometryRendererGL> geo_renderer;
+
+    void render_cascade(Cascade& c);
 };
 
 #endif

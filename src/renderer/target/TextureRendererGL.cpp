@@ -22,6 +22,8 @@ void TextureRenderer::render(const RenderParams& params) {
 		area = params.area;
 
 	nix::set_viewport(area);
+	if (clear_z)
+		nix::clear_z();
 	draw(RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio).with_area(area));
 }
 

@@ -10,6 +10,7 @@ public:
 	owned<FrameBuffer> frame_buffer;
 	shared_array<Texture> textures;
 	bool use_params_area = true;
+	bool clear_z = true;
 
 	explicit TextureRenderer(const shared_array<Texture>& tex);
 	~TextureRenderer() override;
