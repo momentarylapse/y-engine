@@ -31,7 +31,6 @@ ShadowRenderer::ShadowRenderer() :
 	material->pass0.shader_path = "shadow.shader";
 
 	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, scene_view);
-	geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 	geo_renderer->material_shadow = material.get();
 
 	for (int i=0; i<NUM_CASCADES; i++) {
@@ -63,7 +62,8 @@ void ShadowRenderer::render_cascade(Cascade& c) {
 	//c.texture_renderer->render(params);
 
     // all opaque meshes
-	geo_renderer->draw_opaque(params, c.rvd);
+	geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS, c.rvd);
+	geo_renderer->draw(params);
 
 }
 

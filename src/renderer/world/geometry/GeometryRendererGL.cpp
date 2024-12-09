@@ -485,5 +485,12 @@ void GeometryRendererGL::draw_transparent(const RenderParams& params, RenderView
 	draw_particles(params, rvd);
 }
 
+void GeometryRendererGL::draw(const RenderParams& params) {
+	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass())
+		draw_opaque(params, *cur_rvd);
+	if ((int)(flags & Flags::ALLOW_TRANSPARENT))
+		draw_transparent(params, *cur_rvd);
+}
+
 
 #endif

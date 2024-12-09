@@ -114,7 +114,8 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	nix::set_z(true, true);
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
-	geo_renderer_trans->draw_transparent(params, main_rvd);
+	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT, main_rvd);
+	geo_renderer_trans->draw(params);
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CW);
 
@@ -130,18 +131,19 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_bg);
 
+	//nix::clear_color(Green);
+	nix::clear_color(world.background);
+	
 	auto cam = scene_view.cam;
 //	float max_depth = cam->max_depth;
 	cam->max_depth = 2000000;
 	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	cam->update_matrices(params.desired_aspect_ratio);
-	nix::set_projection_matrix(m * cam->m_projection);
+	main_rvd.set_projection_matrix(m * cam->m_projection);
 
-	//nix::clear_color(Green);
-	nix::clear_color(world.background);
-
-	geo_renderer->draw_skyboxes(params, main_rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES, main_rvd);
+	geo_renderer->draw(params);
 	PerformanceMonitor::end(ch_bg);
 
 }
@@ -203,12 +205,14 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CCW);
 
-	geo_renderer->draw_opaque(params, main_rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE, main_rvd);
+	geo_renderer->draw(params);
 	ControllerManager::handle_render_inject();
 
-	nix::set_cull(nix::CullMode::BACK);
+	/*nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CCW);
-	geo_renderer->draw_particles(params, main_rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_FX, main_rvd);
+	geo_renderer->draw(params);*/
 	gpu_timestamp_end(ch_world);
 	PerformanceMonitor::end(ch_world);
 }

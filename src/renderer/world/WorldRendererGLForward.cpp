@@ -96,14 +96,15 @@ void WorldRendererGLForward::draw_with(const RenderParams& params, RenderViewDat
 	cam->min_depth = 1;
 	cam->max_depth = 2000000;
 	cam->update_matrices(params.desired_aspect_ratio);
-	nix::set_projection_matrix(m * cam->m_projection);
+	rvd.set_projection_matrix(m * cam->m_projection);
 
 	nix::clear_color(world.background);
 	nix::clear_z();
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
-	nix::set_wire(wireframe);
+	rvd.set_wire(wireframe);
 
-	geo_renderer->draw_skyboxes(params, rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES, rvd);
+	geo_renderer->draw(params);
 	PerformanceMonitor::end(ch_bg);
 
 
@@ -112,22 +113,22 @@ void WorldRendererGLForward::draw_with(const RenderParams& params, RenderViewDat
 	cam->max_depth = max_depth;
 	cam->min_depth = min_depth;
 	cam->update_matrices(params.desired_aspect_ratio);
-	nix::set_projection_matrix(m * cam->m_projection);
+	rvd.set_projection_matrix(m * cam->m_projection);
 
 	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
-	nix::set_view_matrix(cam->view_matrix());
-	nix::set_z(true, true);
+	rvd.set_view_matrix(cam->view_matrix());
+	rvd.set_z(true, true);
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
-	geo_renderer->draw_opaque(params, rvd);
-	geo_renderer->draw_transparent(params, rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT, rvd);
+	geo_renderer->draw(params);
 	PerformanceMonitor::end(ch_world);
 
 	//nix::set_scissor(rect::EMPTY);
 
-	nix::set_cull(nix::CullMode::BACK);
+	rvd.set_cull(CullMode::BACK);
 	nix::set_front(nix::Orientation::CW);
-	nix::set_wire(false);
+	rvd.set_wire(false);
 
 	gpu_timestamp_end(ch_draw);
 	PerformanceMonitor::end(ch_draw);

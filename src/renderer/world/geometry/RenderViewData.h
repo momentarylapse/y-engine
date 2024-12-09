@@ -71,6 +71,9 @@ struct RenderViewData {
 
 	void set_projection_matrix(const mat4& projection);
 	void set_view_matrix(const mat4& view);
+	void set_z(bool write, bool test);
+	void set_wire(bool enabled);
+	void set_cull(CullMode mode);
 
 	owned<UniformBuffer> ubo_light;
 

@@ -25,6 +25,15 @@ void RenderViewData::set_projection_matrix(const mat4& projection) {
 void RenderViewData::set_view_matrix(const mat4& view) {
 	nix::set_view_matrix(view);
 }
+void RenderViewData::set_z(bool write, bool test) {
+	nix::set_z(write, test);
+}
+void RenderViewData::set_wire(bool enabled) {
+	nix::set_wire(enabled);
+}
+void RenderViewData::set_cull(CullMode mode) {
+	nix::set_cull(mode);
+}
 
 RenderData& RenderViewData::start(const RenderParams& params, RenderPathType type, const mat4& matrix,
                                   ShaderCache& shader_cache, const Material& material, int pass_no,

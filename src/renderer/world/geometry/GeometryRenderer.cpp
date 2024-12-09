@@ -35,6 +35,11 @@ GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view)
 	fx_vertex_buffers.add(new VertexBuffer("3f,4f,2f"));
 }
 
+void GeometryRenderer::set(Flags _flags, RenderViewData &rvd) {
+	flags = _flags;
+	cur_rvd = &rvd;
+}
+
 bool GeometryRenderer::is_shadow_pass() const {
 	return (int)(flags & Flags::SHADOW_PASS);
 }

@@ -20,6 +20,7 @@ class PerformanceMonitor;
 class Material;
 class UBOLight;
 struct SceneView;
+class RenderViewData;
 
 enum class RenderPathType;
 
@@ -56,12 +57,16 @@ public:
 	enum class Flags {
 		ALLOW_OPAQUE = 1,
 		ALLOW_TRANSPARENT = 2,
-		SHADOW_PASS = 4,
+		ALLOW_SKYBOXES = 4,
+		SHADOW_PASS = 8,
 	} flags;
 
 	GeometryRenderer(RenderPathType type, SceneView &scene_view);
 
+	void set(Flags flags, RenderViewData& rvd);
 	bool is_shadow_pass() const;
+
+	RenderViewData* cur_rvd = nullptr;
 
 	int ch_pre, ch_bg, ch_fx, ch_terrains, ch_models, ch_user, ch_prepare_lights;
 
