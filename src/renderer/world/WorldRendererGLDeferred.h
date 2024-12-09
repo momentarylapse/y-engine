@@ -22,7 +22,7 @@ public:
 
 	RenderViewData main_rvd;
 
-	owned<GeometryRendererGL> geo_renderer_trans;
+	owned<GeometryRenderer> geo_renderer_trans;
 
 	WorldRendererGLDeferred(Camera *cam, int width, int height);
 	void prepare(const RenderParams& params) override;

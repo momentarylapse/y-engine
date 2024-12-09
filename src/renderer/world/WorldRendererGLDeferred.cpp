@@ -63,7 +63,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, int width, int hei
 
 	create_more();
 
-	geo_renderer_trans = new GeometryRendererGL(RenderPathType::FORWARD, scene_view);
+	geo_renderer_trans = new GeometryRenderer(RenderPathType::FORWARD, scene_view);
 	add_child(geo_renderer_trans.get());
 }
 

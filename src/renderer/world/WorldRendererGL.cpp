@@ -11,7 +11,7 @@
 
 #ifdef USING_OPENGL
 #include "geometry/GeometryRendererGL.h"
-#include "pass/ShadowRendererGL.h"
+#include "pass/ShadowRenderer.h"
 #include "../base.h"
 #include <graphics-impl.h>
 #include <world/World.h>
@@ -47,7 +47,7 @@ void WorldRendererGL::create_more() {
 	scene_view.fb_shadow2 = shadow_renderer->cascades[1].fb;
 	add_child(shadow_renderer.get());
 
-	geo_renderer = new GeometryRendererGL(type, scene_view);
+	geo_renderer = new GeometryRenderer(type, scene_view);
 	add_child(geo_renderer.get());
 }
 

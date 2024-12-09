@@ -30,7 +30,7 @@ ShadowRenderer::ShadowRenderer() :
 	material = new Material(resource_manager);
 	material->pass0.shader_path = "shadow.shader";
 
-	geo_renderer = new GeometryRendererGL(RenderPathType::FORWARD, scene_view);
+	geo_renderer = new GeometryRenderer(RenderPathType::FORWARD, scene_view);
 	geo_renderer->material_shadow = material.get();
 
 	for (int i=0; i<NUM_CASCADES; i++) {

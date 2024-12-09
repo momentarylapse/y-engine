@@ -44,7 +44,7 @@
 #include <lib/os/msg.h>
 
 
-GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_view) : GeometryRenderer(type, scene_view) {
+GeometryRenderer::GeometryRenderer(RenderPathType type, SceneView &scene_view) : GeometryRendererCommon(type, scene_view) {
 
 	vb_fx = new nix::VertexBuffer("3f,4f,2f");
 	vb_fx_points = new nix::VertexBuffer("3f,f,4f");
@@ -57,7 +57,7 @@ GeometryRendererGL::GeometryRendererGL(RenderPathType type, SceneView &scene_vie
 	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
 }
 
-void GeometryRendererGL::prepare(const RenderParams& params) {
+void GeometryRenderer::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
 	prepare_instanced_matrices();
@@ -65,12 +65,12 @@ void GeometryRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::end(ch_prepare);
 }
 
-void GeometryRendererGL::set_material(const SceneView& scene_view, ShaderCache& cache, const Material& m, RenderPathType t, const string& vertex_module, const string& geometry_module) {
+void GeometryRenderer::set_material(const SceneView& scene_view, ShaderCache& cache, const Material& m, RenderPathType t, const string& vertex_module, const string& geometry_module) {
 	cache._prepare_shader(t, m, vertex_module, geometry_module);
 	set_material_x(scene_view, m, cache.get_shader(t));
 }
 
-void GeometryRendererGL::set_material_x(const SceneView& scene_view, const Material& m, Shader* s) {
+void GeometryRenderer::set_material_x(const SceneView& scene_view, const Material& m, Shader* s) {
 	nix::set_shader(s);
 	if (using_view_space)
 		s->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH....
@@ -125,7 +125,7 @@ void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const col
 }
 
 
-void GeometryRendererGL::draw_particles(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_fx);
 	gpu_timestamp_begin(ch_fx);
 
@@ -244,7 +244,7 @@ void GeometryRendererGL::draw_particles(const RenderParams& params, RenderViewDa
 	PerformanceMonitor::end(ch_fx);
 }
 
-void GeometryRendererGL::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_bg);
 	gpu_timestamp_begin(ch_bg);
 	nix::set_z(false, false);
@@ -264,7 +264,7 @@ void GeometryRendererGL::draw_skyboxes(const RenderParams& params, RenderViewDat
 	PerformanceMonitor::end(ch_bg);
 }
 
-void GeometryRendererGL::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_terrains);
 	gpu_timestamp_begin(ch_terrains);
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
@@ -287,7 +287,7 @@ void GeometryRendererGL::draw_terrains(const RenderParams& params, RenderViewDat
 	PerformanceMonitor::end(ch_terrains);
 }
 
-void GeometryRendererGL::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(ch_models);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
@@ -311,7 +311,7 @@ void GeometryRendererGL::draw_objects_instanced(const RenderParams& params, Rend
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRendererGL::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_models);
 	gpu_timestamp_begin(ch_models);
 	auto& list = ComponentManager::get_list_family<Model>();
@@ -342,7 +342,7 @@ void GeometryRendererGL::draw_objects_opaque(const RenderParams& params, RenderV
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRendererGL::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
 	if (is_shadow_pass())
 		return;
 	PerformanceMonitor::begin(ch_models);
@@ -407,7 +407,7 @@ void GeometryRendererGL::draw_objects_transparent(const RenderParams& params, Re
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRendererGL::draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent) {
+void GeometryRenderer::draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent) {
 	PerformanceMonitor::begin(ch_user);
 	gpu_timestamp_begin(ch_user);
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
@@ -441,7 +441,7 @@ void GeometryRendererGL::draw_user_meshes(const RenderParams& params, RenderView
 }
 
 
-void GeometryRendererGL::prepare_instanced_matrices() {
+void GeometryRenderer::prepare_instanced_matrices() {
 	PerformanceMonitor::begin(ch_pre);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
@@ -454,7 +454,7 @@ void GeometryRendererGL::prepare_instanced_matrices() {
 
 
 
-void GeometryRendererGL::draw_opaque(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_opaque(const RenderParams& params, RenderViewData &rvd) {
 	if (!is_shadow_pass()) {
 		nix::set_z(true, true);
 		nix::set_view_matrix(scene_view.cam->view_matrix());
@@ -471,7 +471,7 @@ void GeometryRendererGL::draw_opaque(const RenderParams& params, RenderViewData 
 	draw_user_meshes(params, rvd, false);
 }
 
-void GeometryRendererGL::draw_transparent(const RenderParams& params, RenderViewData &rvd) {
+void GeometryRenderer::draw_transparent(const RenderParams& params, RenderViewData &rvd) {
 	nix::set_view_matrix(scene_view.cam->view_matrix());
 	//nix::set_z(true, true);
 
@@ -485,7 +485,7 @@ void GeometryRendererGL::draw_transparent(const RenderParams& params, RenderView
 	draw_particles(params, rvd);
 }
 
-void GeometryRendererGL::draw(const RenderParams& params) {
+void GeometryRenderer::draw(const RenderParams& params) {
 	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass())
 		draw_opaque(params, *cur_rvd);
 	if ((int)(flags & Flags::ALLOW_TRANSPARENT))
