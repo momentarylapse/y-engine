@@ -96,14 +96,12 @@ void RenderViewData::set_view_matrix(const mat4& view) {
 }
 
 RenderData& RenderViewData::start(
-		const RenderParams& params, RenderPathType type, const mat4& matrix,
-		ShaderCache& shader_cache, const Material& material, int pass_no,
-		const string& vertex_shader_module, const string& geometry_shader_module,
+		const RenderParams& params, const mat4& matrix,
+		Shader* shader, const Material& material, int pass_no,
 		PrimitiveTopology top, VertexBuffer *vb) {
-	shader_cache._prepare_shader_multi_pass(type, material, vertex_shader_module, geometry_shader_module, pass_no);
 	if (index >= rda.num) {
 		rda.add({new UniformBuffer(sizeof(UBO)),
-		         pool->create_set(shader_cache.get_shader(type))});
+		         pool->create_set(shader)});
 		rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
 		rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light.get());
 	}
@@ -115,8 +113,7 @@ RenderData& RenderViewData::start(
 	ubo.roughness = material.roughness;
 	rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
-	auto s = shader_cache.get_shader(type);
-	auto p = GeometryRenderer::get_pipeline(s, params.render_pass, material.pass(pass_no), top, vb);
+	auto p = GeometryRenderer::get_pipeline(shader, params.render_pass, material.pass(pass_no), top, vb);
 
 	params.command_buffer->bind_pipeline(p);
 

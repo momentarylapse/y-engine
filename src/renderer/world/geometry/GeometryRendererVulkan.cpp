@@ -78,7 +78,9 @@ void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData
 	gpu_timestamp_begin(cb, ch_fx);
 	auto cam = scene_view.cam;
 
-	auto& rd = rvd.start(params, type, mat4::ID, fx_shader_cache, fx_material, 0, "fx", "", PrimitiveTopology::TRIANGLES, fx_vertex_buffers[0]);
+	auto shader = get_shader(&fx_material, 0, "fx", "");
+
+	auto& rd = rvd.start(params, mat4::ID, shader, fx_material, 0, PrimitiveTopology::TRIANGLES, fx_vertex_buffers[0]);
 
 	// particles
 	auto r = mat4::rotation(cam->owner->ang);
@@ -241,7 +243,8 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 		for (int i=0; i<sb->material.num; i++) {
 
 			auto vb = sb->mesh[0]->sub[i].vertex_buffer;
-			auto& rd = rvd.start(params, type, sb->_matrix * mat4::scale(10,10,10), sb->shader_cache[i], *sb->material[i], 0, "default", "", PrimitiveTopology::TRIANGLES, vb);
+			auto shader = get_shader(sb->material[i], 0, "default", "");
+			auto& rd = rvd.start(params, sb->_matrix * mat4::scale(10,10,10), shader, *sb->material[i], 0, PrimitiveTopology::TRIANGLES, vb);
 
 			rd.apply(params);
 			cb->draw(vb);
@@ -268,13 +271,13 @@ void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData 
 		auto o = t->owner;
 
 		auto material = t->material.get();
-		auto shader_cache = &t->shader_cache;
-		if (is_shadow_pass()) {
+		if (is_shadow_pass() and !material->cast_shadow)
+			return;
+		auto shader = get_shader(material, 0, t->vertex_shader_module, "");
+		if (is_shadow_pass())
 			material = material_shadow;
-			shader_cache = &t->shader_cache_shadow;
-		}
 
-		auto& rd = rvd.start(params, type, mat4::translation(o->pos), *shader_cache, *material, 0, t->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, t->vertex_buffer.get());
+		auto& rd = rvd.start(params, mat4::translation(o->pos), shader, *material, 0, PrimitiveTopology::TRIANGLES, t->vertex_buffer.get());
 
 		if (!is_shadow_pass()) {
 			cb->push_constant(0, 4, &t->texture_scale[0].x);
@@ -303,15 +306,11 @@ void GeometryRenderer::draw_objects_instanced(const RenderParams& params, Render
 			if (!material->cast_shadow and is_shadow_pass())
 				continue;
 
-			auto shader_cache = &m->shader_cache[i];
-			if (is_shadow_pass()) {
-				material = material_shadow;
-				shader_cache = &m->shader_cache_shadow[i];
-			}
+			auto shader = get_shader(material, 0, "instanced", "");
 
 			m->update_matrix();
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
-			auto& rd = rvd.start(params, type, mat4::ID, *shader_cache, *material, 0, "instanced", "", PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb);
 
 			rd.dset->set_uniform_buffer(BINDING_INSTANCE_MATRICES, mi->ubo_matrices);
 
@@ -341,15 +340,13 @@ void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderVie
 			if (!material->cast_shadow and is_shadow_pass())
 				continue;
 
-			auto shader_cache = &m->shader_cache[i];
-			if (is_shadow_pass()) {
+			auto shader = get_shader(material, 0, m->_template->vertex_shader_module, "");
+			if (is_shadow_pass())
 				material = material_shadow;
-				shader_cache = &m->shader_cache_shadow[i];
-			}
 
 			m->update_matrix();
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
-			auto& rd = rvd.start(params, type, m->_matrix, *shader_cache, *material, 0, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, m->_matrix, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb);
 
 			if (ani) {
 				ani->buf->update_array(ani->dmatrix);
@@ -405,11 +402,9 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 		auto vb = m->mesh[0]->sub[i].vertex_buffer;
 
 		for (int k=0; k<material->num_passes; k++) {
-			if (!multi_pass_shader_cache[k].contains(material))
-				multi_pass_shader_cache[k].set(material, {});
-			auto &shader_cache = multi_pass_shader_cache[k][material];
+			auto shader = get_shader(material, k, m->_template->vertex_shader_module, "");
 
-			auto& rd = rvd.start(params, type, m->_matrix, shader_cache, *material, k, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, m->_matrix, shader, *material, k, PrimitiveTopology::TRIANGLES, vb);
 
 			if (ani) {
 				ani->buf->update_array(ani->dmatrix);
@@ -438,14 +433,12 @@ void GeometryRenderer::draw_user_meshes(const RenderParams& params, bool transpa
 			continue;
 
 		auto material = m->material.get();
-		auto shader_cache = &m->shader_cache;
-		if (is_shadow_pass()) {
+		if (is_shadow_pass())
 			material = material_shadow;
-			shader_cache = &m->shader_cache_shadow;
-		}
 
 		auto vb = m->vertex_buffer.get();
-		auto& rd = rvd.start(params, type, m->owner->get_matrix(), *shader_cache, *material, 0, m->vertex_shader_module, m->geometry_shader_module, m->topology, vb);
+		auto shader = get_shader(material, 0, m->vertex_shader_module, m->geometry_shader_module);
+		auto& rd = rvd.start(params, m->owner->get_matrix(), shader, *material, 0, m->topology, vb);
 
 		rd.apply(params);
 		cb->draw(m->vertex_buffer.get());

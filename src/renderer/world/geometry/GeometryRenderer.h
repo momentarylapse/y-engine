@@ -83,7 +83,8 @@ public:
 	owned<VertexBuffer> vb_fx_points;
 
 	base::map<Material*, ShaderCache> multi_pass_shader_cache[4];
-	ShaderCache fx_shader_cache;
+	// material as id!
+	Shader* get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module);
 	Material fx_material;
 
 	owned_array<VertexBuffer> fx_vertex_buffers;

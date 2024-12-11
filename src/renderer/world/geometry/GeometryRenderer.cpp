@@ -35,6 +35,17 @@ GeometryRendererCommon::GeometryRendererCommon(RenderPathType _type, SceneView &
 	fx_vertex_buffers.add(new VertexBuffer("3f,4f,2f"));
 }
 
+Shader* GeometryRendererCommon::get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module) {
+	if (!multi_pass_shader_cache[pass_no].contains(material))
+		multi_pass_shader_cache[pass_no].set(material, {});
+	auto& cache = multi_pass_shader_cache[pass_no][material];
+	if (is_shadow_pass())
+		cache._prepare_shader_multi_pass(type, *material_shadow, vertex_shader_module, geometry_shader_module, pass_no);
+	else
+		cache._prepare_shader_multi_pass(type, *material, vertex_shader_module, geometry_shader_module, pass_no);
+	return cache.get_shader(type);
+}
+
 void GeometryRendererCommon::set(Flags _flags, RenderViewData &rvd) {
 	flags = _flags;
 	cur_rvd = &rvd;

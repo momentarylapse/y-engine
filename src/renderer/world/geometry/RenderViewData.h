@@ -79,9 +79,8 @@ struct RenderViewData {
 
 	SceneView* scene_view = nullptr;
 	RenderData rd;
-	RenderData& start(const RenderParams& params, RenderPathType type, const mat4& matrix,
-	                  ShaderCache& shader_cache, const Material& material, int pass_no,
-	                  const string& vertex_shader_module, const string& geometry_shader_module,
+	RenderData& start(const RenderParams& params, const mat4& matrix,
+	                  Shader* shader, const Material& material, int pass_no,
 	                  PrimitiveTopology top, VertexBuffer *vb);
 };
 
