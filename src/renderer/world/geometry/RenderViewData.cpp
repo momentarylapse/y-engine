@@ -35,24 +35,20 @@ void RenderViewData::set_cull(CullMode mode) {
 	nix::set_cull(mode);
 }
 
-RenderData& RenderViewData::start(const RenderParams& params, RenderPathType type, const mat4& matrix,
-                                  ShaderCache& shader_cache, const Material& material, int pass_no,
-                                  const string& vertex_shader_module, const string& geometry_shader_module,
+RenderData& RenderViewData::start(const RenderParams& params, const mat4& matrix,
+                                  Shader* shader, const Material& material, int pass_no,
                                   PrimitiveTopology top, VertexBuffer *vb) {
 	nix::set_model_matrix(matrix);
-	shader_cache._prepare_shader_multi_pass(type, material, vertex_shader_module, geometry_shader_module, pass_no);
 
-	auto s = shader_cache.get_shader(type);
-
-	nix::set_shader(s);
+	nix::set_shader(shader);
 	if (GeometryRenderer::using_view_space)
-		s->set_floats("eye_pos", &scene_view->cam->owner->pos.x, 3); // NAH....
+		shader->set_floats("eye_pos", &scene_view->cam->owner->pos.x, 3); // NAH....
 	else
-		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
-	s->set_int("num_lights", scene_view->lights.num);
-	s->set_int("shadow_index", scene_view->shadow_index);
+		shader->set_floats("eye_pos", &vec3::ZERO.x, 3);
+	shader->set_int("num_lights", scene_view->lights.num);
+	shader->set_int("shadow_index", scene_view->shadow_index);
 	for (auto &u: material.uniforms)
-		s->set_floats(u.name, u.p, u.size/4);
+		shader->set_floats(u.name, u.p, u.size/4);
 
 	auto& pass = material.pass(pass_no);
 	if (pass.mode == TransparencyMode::FUNCTIONS)

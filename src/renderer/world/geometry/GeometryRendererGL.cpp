@@ -254,7 +254,8 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 		sb->_matrix = mat4::rotation(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
 		for (int i=0; i<sb->material.num; i++) {
-			set_material(scene_view, sb->shader_cache[i], *sb->material[i], type, "default", "");
+			auto shader = get_shader(sb->material[i], 0, "default", "");
+			set_material_x(scene_view, *sb->material[i], shader);
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
@@ -273,13 +274,16 @@ void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData 
 			continue;
 		auto o = t->owner;
 		nix::set_model_matrix(mat4::translation(o->pos));
-		if (is_shadow_pass()) {
-			set_material(scene_view, t->shader_cache_shadow, *material_shadow, type, t->vertex_shader_module, "");
-		} else {
-			set_material(scene_view, t->shader_cache, *t->material.get(), type, t->vertex_shader_module, "");
-			auto s = t->shader_cache.get_shader(type);
-			s->set_floats("pattern0", &t->texture_scale[0].x, 3);
-			s->set_floats("pattern1", &t->texture_scale[1].x, 3);
+		auto material = t->material.get();
+
+		auto shader = get_shader(material, 0, t->vertex_shader_module, "");
+		if (is_shadow_pass())
+			material = material_shadow;
+
+		set_material_x(scene_view, *t->material.get(), shader);
+		if (!is_shadow_pass()) {
+			shader->set_floats("pattern0", &t->texture_scale[0].x, 3);
+			shader->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
 		nix::draw_triangles(t->vertex_buffer.get());
 	}
@@ -296,12 +300,15 @@ void GeometryRenderer::draw_objects_instanced(const RenderParams& params, Render
 		for (int i=0; i<m->material.num; i++) {
 			if (!m->material[i]->cast_shadow and is_shadow_pass())
 				continue;
+
+			auto material = m->material[i];
+			auto shader = get_shader(material, 0, "instanced", "");
+			if (is_shadow_pass())
+				material = material_shadow;
+
 			nix::set_model_matrix(mi->matrices[0]);//m->_matrix);
-			if (is_shadow_pass()) {
-				set_material(scene_view, m->shader_cache_shadow[i], *material_shadow, type, "instanced", "");
-			} else {
-				set_material(scene_view, m->shader_cache[i], *m->material[i], type, "instanced", "");
-			}
+			if (is_shadow_pass())
+				set_material_x(scene_view, *material, shader);
 			nix::bind_uniform_buffer(5, mi->ubo_matrices);
 			//msg_write(s.matrices.num);
 			nix::draw_instanced_triangles(m->mesh[0]->sub[i].vertex_buffer, mi->matrices.num);
@@ -325,16 +332,17 @@ void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderVie
 		}
 
 		for (int i=0; i<m->material.num; i++) {
+			auto material = m->material[i];
 			if (m->material[i]->is_transparent())
 				continue;
 			if (!m->material[i]->cast_shadow and is_shadow_pass())
 				continue;
 
-			if (is_shadow_pass()) {
-				set_material(scene_view, m->shader_cache_shadow[i], *material_shadow, type, m->_template->vertex_shader_module, "");
-			} else {
-				set_material(scene_view, m->shader_cache[i], *weak(m->material)[i], type, m->_template->vertex_shader_module, "");
-			}
+			auto shader = get_shader(material, 0, m->_template->vertex_shader_module, "");
+			if (is_shadow_pass())
+				material = material_shadow;
+
+			set_material_x(scene_view, *material, shader);
 			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
@@ -384,11 +392,9 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 		auto vb = m->mesh[0]->sub[i].vertex_buffer;
 
 		for (int k=0; k<material->num_passes; k++) {
-			if (!multi_pass_shader_cache[k].contains(material))
-				multi_pass_shader_cache[k].set(material, {});
-			auto &shader_cache = multi_pass_shader_cache[k][material];
+			auto shader = get_shader(material, 0, m->_template->vertex_shader_module, "");
 
-			auto& rd = rvd.start(params, type, m->_matrix, shader_cache, *material, k, m->_template->vertex_shader_module, "", PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, m->_matrix, shader, *material, k, PrimitiveTopology::TRIANGLES, vb);
 
 			if (ani) {
 				ani->buf->update_array(ani->dmatrix);
@@ -412,19 +418,19 @@ void GeometryRenderer::draw_user_meshes(const RenderParams& params, RenderViewDa
 	gpu_timestamp_begin(ch_user);
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 	for (auto *m: meshes) {
-		if (m->material->is_transparent() != transparent)
+		auto material = m->material.get();
+		if (material->is_transparent() != transparent)
 			continue;
-		if (!m->material->cast_shadow and is_shadow_pass())
+		if (!material->cast_shadow and is_shadow_pass())
 			continue;
 		auto o = m->owner;
 		nix::set_model_matrix(o->get_matrix());
 
+		auto shader = get_shader(material, 0, m->vertex_shader_module, m->geometry_shader_module);
+		if (is_shadow_pass())
+			material = material_shadow;
 
-		if (is_shadow_pass()) {
-			set_material(scene_view, m->shader_cache_shadow, *material_shadow, type, m->vertex_shader_module, "");
-		} else {
-			set_material(scene_view, m->shader_cache, *m->material.get(), type, m->vertex_shader_module, "");
-		}
+		set_material_x(scene_view, *material, shader);
 
 		
 		if (m->topology == PrimitiveTopology::TRIANGLES)

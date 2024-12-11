@@ -30,23 +30,23 @@ ShadowRenderer::ShadowRenderer() :
 	material = new Material(resource_manager);
 	material->pass0.shader_path = "shadow.shader";
 
-	geo_renderer = new GeometryRenderer(RenderPathType::FORWARD, scene_view);
-	geo_renderer->material_shadow = material.get();
-
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
+		c.geo_renderer = new GeometryRenderer(RenderPathType::FORWARD, scene_view);
+		c.geo_renderer->material_shadow = material.get();
+
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d24s8");
 		c.texture_renderer = new TextureRenderer({tex, c.depth_buffer});
 		c.fb = c.texture_renderer->frame_buffer;
 		c.scale = (i == 0) ? 4.0f : 1.0f;
-		c.texture_renderer->add_child(geo_renderer.get());
+		c.texture_renderer->add_child(c.geo_renderer.get());
 	}
 }
 
 void ShadowRenderer::render_cascade(Cascade& c) {
 	const auto params = RenderParams::into_texture(c.fb.get(), 1.0f);
-	geo_renderer->prepare(params);
+	c.geo_renderer->prepare(params);
 
 	nix::bind_frame_buffer(c.fb.get());
 
@@ -62,8 +62,8 @@ void ShadowRenderer::render_cascade(Cascade& c) {
 	//c.texture_renderer->render(params);
 
     // all opaque meshes
-	geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS, c.rvd);
-	geo_renderer->draw(params);
+	c.geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS, c.rvd);
+	c.geo_renderer->draw(params);
 
 }
 
