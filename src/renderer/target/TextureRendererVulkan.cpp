@@ -2,10 +2,9 @@
 #ifdef USING_VULKAN
 #include "../../graphics-impl.h"
 
-TextureRenderer::TextureRenderer(const shared_array<Texture>& tex) : RenderTask("tex") {
-	textures = tex; //new Texture(width, height, "bgra:i8");
-//	depth_buffer = new DepthBuffer(texture->width, texture->height, "d:f32", false);
-	render_pass = new RenderPass(weak(textures));
+TextureRenderer::TextureRenderer(const shared_array<Texture>& tex, const Array<string>& options) : RenderTask("tex") {
+	textures = tex;
+	render_pass = new RenderPass(weak(textures), options);
 	frame_buffer = new FrameBuffer(render_pass.get(), textures);
 }
 

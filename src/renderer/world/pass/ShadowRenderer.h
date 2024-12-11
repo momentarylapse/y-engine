@@ -43,13 +43,9 @@ public:
 		RenderViewData rvd;
 		owned<TextureRenderer> texture_renderer;
 		float scale = 1.0f;
+	    owned<GeometryRenderer> geo_renderer;
 	} cascades[NUM_CASCADES];
 
-#ifdef USING_VULKAN
-	RenderPass *render_pass = nullptr;
-#endif
-
-    owned<GeometryRenderer> geo_renderer;
 
 #ifdef USING_VULKAN
     void render_cascade(const RenderParams& params, Cascade& c);

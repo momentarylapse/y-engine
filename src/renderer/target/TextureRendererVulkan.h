@@ -7,12 +7,12 @@
 class TextureRenderer : public RenderTask {
 public:
 	owned<RenderPass> render_pass;
-	owned<FrameBuffer> frame_buffer;
+	shared<FrameBuffer> frame_buffer;
 	shared_array<Texture> textures;
 	bool use_params_area = true;
 	bool clear_z = true;
 
-	explicit TextureRenderer(const shared_array<Texture>& tex);
+	explicit TextureRenderer(const shared_array<Texture>& tex, const Array<string>& options = {});
 	~TextureRenderer() override;
 
 	// TODO move to explicit/dependency graph
