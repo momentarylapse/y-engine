@@ -392,7 +392,7 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 		auto vb = m->mesh[0]->sub[i].vertex_buffer;
 
 		for (int k=0; k<material->num_passes; k++) {
-			auto shader = get_shader(material, 0, m->_template->vertex_shader_module, "");
+			auto shader = get_shader(material, k, m->_template->vertex_shader_module, "");
 
 			auto& rd = rvd.start(params, m->_matrix, shader, *material, k, PrimitiveTopology::TRIANGLES, vb);
 
