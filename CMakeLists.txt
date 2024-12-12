@@ -446,8 +446,7 @@ add_executable(y
 	src/renderer/world/geometry/GeometryRendererVulkan.cpp
 	src/renderer/world/geometry/RenderViewData.cpp
 	src/renderer/world/geometry/SceneView.cpp
-	src/renderer/world/pass/ShadowRendererGL.cpp
-	src/renderer/world/pass/ShadowRendererVulkan.cpp
+	src/renderer/world/pass/ShadowRenderer.cpp
 	src/renderer/world/WorldRenderer.cpp
 	src/renderer/world/WorldRendererGL.cpp
 	src/renderer/world/WorldRendererGLDeferred.cpp
