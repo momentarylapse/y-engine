@@ -57,7 +57,7 @@ public:
 		Array<int> histogram;
 		float brightness;
 		int ch_post_brightness = -1;
-		void measure(FrameBuffer* frame_buffer);
+		void measure(const RenderParams& params, FrameBuffer* frame_buffer);
 		void adjust_camera(Camera* cam);
 	} light_meter;
 };

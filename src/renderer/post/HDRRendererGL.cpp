@@ -117,7 +117,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 		ms_resolver->render(scaled_params);
 
 	PerformanceMonitor::begin(ch_post_blur);
-	gpu_timestamp_begin(ch_post_blur);
+	gpu_timestamp_begin(params, ch_post_blur);
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	float threshold = 1.0f;
@@ -138,10 +138,10 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 		threshold = 0;
 	}
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
-	gpu_timestamp_end(ch_post_blur);
+	gpu_timestamp_end(params, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
 
-	light_meter.measure(fb_main.get());
+	light_meter.measure(params, fb_main.get());
 	if (cam->auto_exposure)
 		light_meter.adjust_camera(cam);
 
@@ -170,9 +170,9 @@ void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, FrameBuf
 	compute->bind_uniform_buffer(2, params);
 }
 
-void HDRRendererGL::LightMeter::measure(FrameBuffer* frame_buffer) {
+void HDRRendererGL::LightMeter::measure(const RenderParams& _params, FrameBuffer* frame_buffer) {
 	PerformanceMonitor::begin(ch_post_brightness);
-	gpu_timestamp_begin(ch_post_brightness);
+	gpu_timestamp_begin(_params, ch_post_brightness);
 
 	int NBINS = 256;
 	histogram.resize(NBINS);
@@ -187,7 +187,7 @@ void HDRRendererGL::LightMeter::measure(FrameBuffer* frame_buffer) {
 	buf->read(&histogram[0], NBINS*sizeof(int));
 	//msg_write(str(histogram));
 
-	gpu_timestamp_end(ch_post_brightness);
+	gpu_timestamp_end(_params, ch_post_brightness);
 
 	/*int s = 0;
 	for (int i=0; i<NBINS; i++)

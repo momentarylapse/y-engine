@@ -74,7 +74,7 @@ bool SurfaceRendererVulkan::start_frame() {
 	return true;
 }
 
-void SurfaceRendererVulkan::end_frame() {
+void SurfaceRendererVulkan::end_frame(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_end);
 	auto f = wait_for_frame_fences[image_index];
 	device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);

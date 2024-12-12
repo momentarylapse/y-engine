@@ -73,7 +73,7 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	auto cb = params.command_buffer;
 
 	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(cb, ch_draw);
+	gpu_timestamp_begin(params, ch_draw);
 
 	rvd.begin_scene(&scene_view);
 
@@ -89,7 +89,7 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT, rvd);
 	geo_renderer->draw(params);
 
-	gpu_timestamp_end(cb, ch_draw);
+	gpu_timestamp_end(params, ch_draw);
 	PerformanceMonitor::end(ch_draw);
 }
 

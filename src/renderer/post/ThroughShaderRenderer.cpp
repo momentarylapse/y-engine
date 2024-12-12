@@ -101,7 +101,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	auto cb = params.command_buffer;
 
 	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(cb, ch_draw);
+	gpu_timestamp_begin(params, ch_draw);
 
 	if (!pipeline) {
 		pipeline = new vulkan::GraphicsPipeline(shader.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
@@ -116,13 +116,13 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	cb->draw(vb_2d.get());
 
 
-	gpu_timestamp_end(cb, ch_draw);
+	gpu_timestamp_end(params, ch_draw);
 	PerformanceMonitor::end(ch_draw);
 #else
 	bool flip_y = params.target_is_window;
 
 	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(ch_draw);
+	gpu_timestamp_begin(params, ch_draw);
 
 	nix::bind_textures(weak(textures));
 	nix::set_shader(shader.get());
@@ -138,7 +138,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 
 	nix::set_cull(nix::CullMode::BACK);
 
-	gpu_timestamp_end(ch_draw);
+	gpu_timestamp_end(params, ch_draw);
 	PerformanceMonitor::end(ch_draw);
 #endif
 }

@@ -56,7 +56,7 @@ void ShadowRenderer::set_scene(SceneView &parent_scene_view) {
 void ShadowRenderer::render(const RenderParams& params) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_prepare);
-	gpu_timestamp_begin(cb, ch_prepare);
+	gpu_timestamp_begin(params, ch_prepare);
 
 	auto sub_params = RenderParams::WHATEVER;
 	sub_params.command_buffer = cb;
@@ -65,7 +65,7 @@ void ShadowRenderer::render(const RenderParams& params) {
 	sub_params.render_pass = cascades[1].texture_renderer->render_pass.get();
 	render_cascade(sub_params, cascades[1]);
 
-	gpu_timestamp_end(cb, ch_prepare);
+	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
 }
 

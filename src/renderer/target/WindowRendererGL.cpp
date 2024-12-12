@@ -36,12 +36,12 @@ bool WindowRendererGL::start_frame() {
 #endif
 }
 
-void WindowRendererGL::end_frame() {
+void WindowRendererGL::end_frame(const RenderParams& params) {
 #if HAS_LIB_GLFW
 	PerformanceMonitor::begin(ch_end);
-	gpu_timestamp_begin(ch_end);
+	gpu_timestamp_begin(params, ch_end);
 	nix::end_frame_glfw();
-	gpu_timestamp_end(ch_end);
+	gpu_timestamp_end(params, ch_end);
 	PerformanceMonitor::end(ch_end);
 #endif
 }

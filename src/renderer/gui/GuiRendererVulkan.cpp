@@ -37,10 +37,10 @@ GuiRendererVulkan::GuiRendererVulkan() : Renderer("ui") {
 
 void GuiRendererVulkan::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(params.command_buffer, ch_draw);
+	gpu_timestamp_begin(params, ch_draw);
 	prepare_gui(params.frame_buffer, params);
 	draw_gui(params.command_buffer, params.render_pass);
-	gpu_timestamp_end(params.command_buffer, ch_draw);
+	gpu_timestamp_end(params, ch_draw);
 	PerformanceMonitor::end(ch_draw);
 }
 

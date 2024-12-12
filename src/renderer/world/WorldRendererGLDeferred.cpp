@@ -95,7 +95,7 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 
 void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(ch_draw);
+	gpu_timestamp_begin(params, ch_draw);
 
 	auto target = params.frame_buffer;
 
@@ -124,7 +124,7 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	nix::set_view_matrix(mat4::ID);
 	PerformanceMonitor::end(ch_trans);
 
-	gpu_timestamp_end(ch_draw);
+	gpu_timestamp_end(params, ch_draw);
 	PerformanceMonitor::end(ch_draw);
 }
 
@@ -188,7 +188,7 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, 
 
 void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_world);
-	gpu_timestamp_begin(ch_world);
+	gpu_timestamp_begin(params, ch_world);
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
 
@@ -213,7 +213,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	nix::set_front(nix::Orientation::CCW);
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_FX, main_rvd);
 	geo_renderer->draw(params);*/
-	gpu_timestamp_end(ch_world);
+	gpu_timestamp_end(params, ch_world);
 	PerformanceMonitor::end(ch_world);
 }
 

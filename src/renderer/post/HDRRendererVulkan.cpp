@@ -172,7 +172,7 @@ HDRRendererVulkan::~HDRRendererVulkan() = default;
 void HDRRendererVulkan::prepare(const RenderParams& params) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_prepare);
-	gpu_timestamp_begin(cb, ch_prepare);
+	gpu_timestamp_begin(params, ch_prepare);
 
 	if (!cam)
 		cam = cam_main;
@@ -193,7 +193,7 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
-	gpu_timestamp_begin(cb, ch_post_blur);
+	gpu_timestamp_begin(params, ch_post_blur);
 	auto bloom_input = into.fb.get();
 	float threshold = 1.0f;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
@@ -202,14 +202,14 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 		bloom_input = bloom_levels[i].fb_out.get();
 		threshold = 0;
 	}
-	gpu_timestamp_end(cb, ch_post_blur);
+	gpu_timestamp_end(params, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
 
-	light_meter.measure(cb, fb_main);
+	light_meter.measure(params, fb_main);
 	if (cam->auto_exposure)
 		light_meter.adjust_camera(cam);
 
-	gpu_timestamp_end(cb, ch_prepare);
+	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
 
 }
@@ -219,9 +219,9 @@ void HDRRendererVulkan::draw(const RenderParams& params) {
 
 
 	PerformanceMonitor::begin(ch_out);
-	gpu_timestamp_begin(cb, ch_out);
+	gpu_timestamp_begin(params, ch_out);
 	out.render_out(cb, {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y}, cam->exposure, params);
-	gpu_timestamp_end(cb, ch_out);
+	gpu_timestamp_end(params, ch_out);
 	PerformanceMonitor::end(ch_out);
 }
 
@@ -278,9 +278,10 @@ void HDRRendererVulkan::LightMeter::init(ResourceManager* resource_manager, Fram
 	compute->bind_uniform_buffer(2, params);
 }
 
-void HDRRendererVulkan::LightMeter::measure(CommandBuffer* cb, FrameBuffer* frame_buffer) {
+void HDRRendererVulkan::LightMeter::measure(const RenderParams& _params, FrameBuffer* frame_buffer) {
 	PerformanceMonitor::begin(ch_post_brightness);
-	gpu_timestamp_begin(cb, ch_post_brightness);
+	gpu_timestamp_begin(_params, ch_post_brightness);
+	auto cb = _params.command_buffer;
 
 	int pp[2] = {frame_buffer->width, frame_buffer->height};
 	params->update(&pp);
@@ -311,7 +312,7 @@ void HDRRendererVulkan::LightMeter::measure(CommandBuffer* cb, FrameBuffer* fram
 	buf->update(&histogram[0]);
 	compute->dispatch(cb, NSAMPLES, 1, 1);
 
-	gpu_timestamp_end(cb, ch_post_brightness);
+	gpu_timestamp_end(_params, ch_post_brightness);
 	PerformanceMonitor::end(ch_post_brightness);
 }
 

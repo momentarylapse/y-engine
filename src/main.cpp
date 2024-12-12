@@ -230,7 +230,7 @@ public:
 			PerformanceMonitor::next_frame();
 			reset_gpu_timestamp_queries();
 #ifdef USING_OPENGL
-			gpu_timestamp(-1);
+			gpu_timestamp({}, -1);
 #endif
 			engine.elapsed_rt = PerformanceMonitor::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
@@ -346,11 +346,12 @@ public:
 
 		if (!engine.window_renderer->start_frame())
 			return;
+		const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
 		ControllerManager::handle_draw_pre();
 		timer_render.peek();
-		engine.window_renderer->draw(engine.window_renderer->create_params(engine.physical_aspect_ratio));
+		engine.window_renderer->draw(params);
 		render_times.add(timer_render.get());
-		engine.window_renderer->end_frame();
+		engine.window_renderer->end_frame(params);
 	}
 
 

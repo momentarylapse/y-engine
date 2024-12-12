@@ -8,9 +8,15 @@
 #include "ShadowRenderer.h"
 
 #ifdef USING_OPENGL
+
+#ifdef USING_OPENGL
 #include "../geometry/GeometryRendererGL.h"
 #include "../../target/TextureRendererGL.h"
-#include "../WorldRendererGL.h"
+#else
+#include "../geometry/GeometryRendererVulkan.h"
+#include "../../target/TextureRendererVulkan.h"
+#endif
+#include "../WorldRenderer.h"
 #include "../../base.h"
 #include "../../../graphics-impl.h"
 #include "../../../helper/PerformanceMonitor.h"
@@ -36,7 +42,11 @@ ShadowRenderer::ShadowRenderer() :
 		c.geo_renderer->material_shadow = material.get();
 
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
+#ifdef USING_OPENGL
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d24s8");
+#else
+		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
+#endif
 		c.texture_renderer = new TextureRenderer({tex, c.depth_buffer});
 		c.fb = c.texture_renderer->frame_buffer;
 		c.scale = (i == 0) ? 4.0f : 1.0f;
@@ -44,26 +54,31 @@ ShadowRenderer::ShadowRenderer() :
 	}
 }
 
-void ShadowRenderer::render_cascade(Cascade& c) {
-	const auto params = RenderParams::into_texture(c.fb.get(), 1.0f);
+void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
+	auto params = _params.with_target(c.fb.get());
+	params.desired_aspect_ratio = 1.0f;
 	c.geo_renderer->prepare(params);
-
-	nix::bind_frame_buffer(c.fb.get());
 
 	auto m = mat4::scale(c.scale, c.scale, 1);
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
 	c.rvd.set_projection_matrix(m * proj);
 	c.rvd.set_view_matrix(mat4::ID);
 
-	nix::clear_z();
-
-	nix::set_z(true, true);
-
-	//c.texture_renderer->render(params);
-
-    // all opaque meshes
+	// all opaque meshes
 	c.geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS, c.rvd);
-	c.geo_renderer->draw(params);
+	//if (true) {
+		c.texture_renderer->render(params);
+	/*} else {
+		nix::bind_frame_buffer(c.fb.get());
+
+		nix::clear_z();
+
+		nix::set_z(true, true);
+
+		//c.texture_renderer->render(params);
+
+		c.geo_renderer->draw(params);
+	}*/
 
 }
 
@@ -74,14 +89,12 @@ void ShadowRenderer::set_scene(SceneView &parent_scene_view) {
 
 void ShadowRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-	gpu_timestamp_begin(ch_prepare);
+	gpu_timestamp_begin(params, ch_prepare);
 
-	render_cascade(cascades[0]);
-	render_cascade(cascades[1]);
+	render_cascade(params, cascades[0]);
+	render_cascade(params, cascades[1]);
 
-	gpu_timestamp_end(ch_prepare);
+	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
 }
-
-
 #endif

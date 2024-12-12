@@ -127,7 +127,7 @@ void create_color_quad(VertexBuffer *vb, const rect &d, const rect &s, const col
 
 void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_fx);
-	gpu_timestamp_begin(ch_fx);
+	gpu_timestamp_begin(params, ch_fx);
 
 	nix::set_shader(shader_fx.get());
 	nix::set_alpha(nix::Alpha::SOURCE_ALPHA, nix::Alpha::SOURCE_INV_ALPHA);
@@ -240,13 +240,13 @@ void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData
 
 	nix::set_z(true, true);
 	nix::disable_alpha();
-	gpu_timestamp_end(ch_fx);
+	gpu_timestamp_end(params, ch_fx);
 	PerformanceMonitor::end(ch_fx);
 }
 
 void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_bg);
-	gpu_timestamp_begin(ch_bg);
+	gpu_timestamp_begin(params, ch_bg);
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_view_matrix(mat4::rotation(scene_view.cam->owner->ang).transpose());
@@ -261,13 +261,13 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	}
 	nix::set_cull(nix::CullMode::BACK);
 	nix::disable_alpha();
-	gpu_timestamp_end(ch_bg);
+	gpu_timestamp_end(params, ch_bg);
 	PerformanceMonitor::end(ch_bg);
 }
 
 void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_terrains);
-	gpu_timestamp_begin(ch_terrains);
+	gpu_timestamp_begin(params, ch_terrains);
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: terrains) {
 		if (!t->material->cast_shadow and is_shadow_pass())
@@ -287,13 +287,13 @@ void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData 
 		}
 		nix::draw_triangles(t->vertex_buffer.get());
 	}
-	gpu_timestamp_end(ch_terrains);
+	gpu_timestamp_end(params, ch_terrains);
 	PerformanceMonitor::end(ch_terrains);
 }
 
 void GeometryRenderer::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_models);
-	gpu_timestamp_begin(ch_models);
+	gpu_timestamp_begin(params, ch_models);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
 		auto m = mi->model;
@@ -314,13 +314,13 @@ void GeometryRenderer::draw_objects_instanced(const RenderParams& params, Render
 			nix::draw_instanced_triangles(m->mesh[0]->sub[i].vertex_buffer, mi->matrices.num);
 		}
 	}
-	gpu_timestamp_end(ch_models);
+	gpu_timestamp_end(params, ch_models);
 	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_models);
-	gpu_timestamp_begin(ch_models);
+	gpu_timestamp_begin(params, ch_models);
 	auto& list = ComponentManager::get_list_family<Model>();
 	for (auto *m: list) {
 		m->update_matrix();
@@ -346,7 +346,7 @@ void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderVie
 			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
-	gpu_timestamp_end(ch_models);
+	gpu_timestamp_end(params, ch_models);
 	PerformanceMonitor::end(ch_models);
 }
 
@@ -354,7 +354,7 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 	if (is_shadow_pass())
 		return;
 	PerformanceMonitor::begin(ch_models);
-	gpu_timestamp_begin(ch_models);
+	gpu_timestamp_begin(params, ch_models);
 	nix::set_z(false, true);
 	auto cam = scene_view.cam;
 
@@ -409,13 +409,13 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 	nix::disable_alpha();
 	nix::set_z(true, true);
 	nix::set_cull(nix::CullMode::BACK);
-	gpu_timestamp_end(ch_models);
+	gpu_timestamp_end(params, ch_models);
 	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRenderer::draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent) {
 	PerformanceMonitor::begin(ch_user);
-	gpu_timestamp_begin(ch_user);
+	gpu_timestamp_begin(params, ch_user);
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 	for (auto *m: meshes) {
 		auto material = m->material.get();
@@ -442,7 +442,7 @@ void GeometryRenderer::draw_user_meshes(const RenderParams& params, RenderViewDa
 		else if (m->topology == PrimitiveTopology::LINESTRIP)
 			nix::draw_lines(m->vertex_buffer.get(), true);
 	}
-	gpu_timestamp_end(ch_user);
+	gpu_timestamp_end(params, ch_user);
 	PerformanceMonitor::end(ch_user);
 }
 

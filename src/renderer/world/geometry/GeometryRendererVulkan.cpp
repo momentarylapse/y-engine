@@ -75,7 +75,7 @@ GraphicsPipeline* GeometryRenderer::get_pipeline(Shader *s, RenderPass *rp, cons
 void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_fx);
-	gpu_timestamp_begin(cb, ch_fx);
+	gpu_timestamp_begin(params, ch_fx);
 	auto cam = scene_view.cam;
 
 	auto shader = get_shader(&fx_material, 0, "fx", "");
@@ -215,14 +215,14 @@ void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData
 		cb->draw(vb);
 	}
 
-	gpu_timestamp_end(cb, ch_fx);
+	gpu_timestamp_end(params, ch_fx);
 	PerformanceMonitor::end(ch_fx);
 }
 
 void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_bg);
-	gpu_timestamp_begin(cb, ch_bg);
+	gpu_timestamp_begin(params, ch_bg);
 	auto cam = scene_view.cam;
 
 	float max_depth = cam->max_depth;
@@ -257,14 +257,14 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	rvd.ubo.num_lights = nlights;
 	cam->max_depth = max_depth;
 	cam->update_matrices(params.desired_aspect_ratio);
-	gpu_timestamp_end(cb, ch_bg);
+	gpu_timestamp_end(params, ch_bg);
 	PerformanceMonitor::end(ch_bg);
 }
 
 void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_terrains);
-	gpu_timestamp_begin(cb, ch_terrains);
+	gpu_timestamp_begin(params, ch_terrains);
 
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: terrains) {
@@ -286,14 +286,14 @@ void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData 
 		rd.apply(params);
 		cb->draw(t->vertex_buffer.get());
 	}
-	gpu_timestamp_end(cb, ch_terrains);
+	gpu_timestamp_end(params, ch_terrains);
 	PerformanceMonitor::end(ch_terrains);
 }
 
 void GeometryRenderer::draw_objects_instanced(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_models);
-	gpu_timestamp_begin(cb, ch_models);
+	gpu_timestamp_begin(params, ch_models);
 
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 
@@ -318,7 +318,7 @@ void GeometryRenderer::draw_objects_instanced(const RenderParams& params, Render
 			cb->draw_instanced(vb, min(mi->matrices.num, MAX_INSTANCES));
 		}
 	}
-	gpu_timestamp_end(cb, ch_models);
+	gpu_timestamp_end(params, ch_models);
 	PerformanceMonitor::end(ch_models);
 }
 
@@ -327,7 +327,7 @@ void GeometryRenderer::draw_objects_instanced(const RenderParams& params, Render
 void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_models);
-	gpu_timestamp_begin(cb, ch_models);
+	gpu_timestamp_begin(params, ch_models);
 
 	auto& list = ComponentManager::get_list_family<Model>();
 
@@ -357,7 +357,7 @@ void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderVie
 			cb->draw(vb);
 		}
 	}
-	gpu_timestamp_end(cb, ch_models);
+	gpu_timestamp_end(params, ch_models);
 	PerformanceMonitor::end(ch_models);
 }
 
@@ -365,7 +365,7 @@ void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderVie
 void GeometryRenderer::draw_objects_transparent(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_models);
-	gpu_timestamp_begin(cb, ch_models);
+	gpu_timestamp_begin(params, ch_models);
 	auto cam = scene_view.cam;
 
 	struct DrawCallData {
@@ -415,14 +415,14 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 			cb->draw(vb);
 		}
 	}
-	gpu_timestamp_end(cb, ch_models);
+	gpu_timestamp_end(params, ch_models);
 	PerformanceMonitor::end(ch_models);
 }
 
 void GeometryRenderer::draw_user_meshes(const RenderParams& params, bool transparent, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_user);
-	gpu_timestamp_begin(cb, ch_user);
+	gpu_timestamp_begin(params, ch_user);
 
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 
@@ -443,7 +443,7 @@ void GeometryRenderer::draw_user_meshes(const RenderParams& params, bool transpa
 		rd.apply(params);
 		cb->draw(m->vertex_buffer.get());
 	}
-	gpu_timestamp_end(cb, ch_user);
+	gpu_timestamp_end(params, ch_user);
 	PerformanceMonitor::end(ch_user);
 }
 

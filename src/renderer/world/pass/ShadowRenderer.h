@@ -47,10 +47,6 @@ public:
 	} cascades[NUM_CASCADES];
 
 
-#ifdef USING_VULKAN
     void render_cascade(const RenderParams& params, Cascade& c);
-#else
-    void render_cascade(Cascade& c);
-#endif
 };
 

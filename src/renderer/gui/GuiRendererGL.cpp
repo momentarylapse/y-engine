@@ -27,12 +27,12 @@ GuiRendererGL::GuiRendererGL() : Renderer("gui") {
 }
 
 void GuiRendererGL::draw(const RenderParams& params) {
-	draw_gui(nullptr);
+	draw_gui(params, nullptr);
 }
 
-void GuiRendererGL::draw_gui(FrameBuffer *source) {
+void GuiRendererGL::draw_gui(const RenderParams& params, FrameBuffer *source) {
 	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(ch_draw);
+	gpu_timestamp_begin(params, ch_draw);
 	gui::update();
 
 	nix::set_projection_ortho_relative();
@@ -70,7 +70,7 @@ void GuiRendererGL::draw_gui(FrameBuffer *source) {
 
 	nix::disable_alpha();
 
-	gpu_timestamp_end(ch_draw);
+	gpu_timestamp_end(params, ch_draw);
 	PerformanceMonitor::end(ch_draw);
 }
 
