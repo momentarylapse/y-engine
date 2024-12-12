@@ -42,11 +42,7 @@ ShadowRenderer::ShadowRenderer() :
 		c.geo_renderer->material_shadow = material.get();
 
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-#ifdef USING_OPENGL
-		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d24s8");
-#else
-		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32", true);
-#endif
+		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer({tex, c.depth_buffer}, {"autoclear"});
 		c.texture_renderer->use_params_area = false;
 		c.fb = c.texture_renderer->frame_buffer;
