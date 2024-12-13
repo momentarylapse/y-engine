@@ -26,20 +26,6 @@ public:
 
 	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
 
-	struct RenderIntoData {
-		RenderIntoData() = default;
-		RenderIntoData(const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
-		void render_into(Renderer *r, const RenderParams& params);
-
-		shared<Texture> tex;
-		shared<DepthBuffer> depth_buffer;
-		shared<FrameBuffer> fb;
-		shared<DepthBuffer> _depth_buffer;
-
-		//shared<RenderPass> render_pass;
-		RenderPass *_render_pass = nullptr;
-	} into;
-
 
 	struct RenderOutData {
 		RenderOutData() = default;
@@ -57,6 +43,7 @@ public:
 
 
 	FrameBuffer *fb_main;
+	shared<Texture> tex_main;
 
 	static const int MAX_BLOOM_LEVELS = 4;
 
@@ -74,14 +61,14 @@ public:
 	int ch_post_blur = -1, ch_out = -1;
 
 	struct LightMeter {
-		void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
+		void init(ResourceManager* resource_manager, Texture* tex, int channel);
 		ComputeTask* compute;
 		UniformBuffer* params;
 		ShaderStorageBuffer* buf;
 		Array<int> histogram;
 		float brightness;
 		int ch_post_brightness = -1;
-		void measure(const RenderParams& params, FrameBuffer* frame_buffer);
+		void measure(const RenderParams& params, Texture* tex);
 		void adjust_camera(Camera* cam);
 	} light_meter;
 };
