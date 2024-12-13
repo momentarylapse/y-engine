@@ -37,10 +37,10 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const sha
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	cam = _cam;
+	tex_main = tex;
+	_depth_buffer = depth_buffer;
 	int width = tex->width;
 	int height = tex->height;
-
-	_depth_buffer = depth_buffer;
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
@@ -54,13 +54,13 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const sha
 	} else {
 		msg_error("no msaa");
 
-		texture_renderer = new TextureRenderer({tex.get(), _depth_buffer.get()});
-		fb_main = texture_renderer->frame_buffer;
+		//texture_renderer = new TextureRenderer({tex.get(), _depth_buffer.get()});
+		//fb_main = texture_renderer->frame_buffer;
 	}
 
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
-	auto bloom_input = fb_main->color_attachments[0];
+	auto bloom_input = tex;
 	Any axis_x, axis_y;
 	axis_x.list_set(0, 1.0f);
 	axis_x.list_set(1, 0.0f);
@@ -87,14 +87,11 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const sha
 		bloom_input = bl.tex_out;
 	}
 
-	fb_main->color_attachments[0]->set_options("wrap=clamp,minfilter=nearest");
-	fb_main->color_attachments[0]->set_options("magfilter=" + config.resolution_scale_filter);
-
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	out_renderer = new ThroughShaderRenderer({fb_main->color_attachments[0], bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
+	out_renderer = new ThroughShaderRenderer({tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 
-	light_meter.init(resource_manager, fb_main.get(), channel);
+	light_meter.init(resource_manager, tex.get(), channel);
 }
 
 HDRRendererGL::~HDRRendererGL() = default;
@@ -142,7 +139,7 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	gpu_timestamp_end(params, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
 
-	light_meter.measure(params, fb_main.get());
+	light_meter.measure(params, tex_main.get());
 	if (cam->auto_exposure)
 		light_meter.adjust_camera(cam);
 
@@ -161,17 +158,17 @@ void HDRRendererGL::draw(const RenderParams& params) {
 }
 
 
-void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel) {
+void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, Texture* tex, int channel) {
 	ch_post_brightness = PerformanceMonitor::create_channel("expo", channel);
 	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
 	params = new UniformBuffer();
 	buf = new ShaderStorageBuffer();
-	compute->bind_texture(0, frame_buffer->color_attachments[0].get());
+	compute->bind_texture(0, tex);
 	compute->bind_storage_buffer(1, buf);
 	compute->bind_uniform_buffer(2, params);
 }
 
-void HDRRendererGL::LightMeter::measure(const RenderParams& _params, FrameBuffer* frame_buffer) {
+void HDRRendererGL::LightMeter::measure(const RenderParams& _params, Texture* tex) {
 	PerformanceMonitor::begin(ch_post_brightness);
 	gpu_timestamp_begin(_params, ch_post_brightness);
 
@@ -180,7 +177,7 @@ void HDRRendererGL::LightMeter::measure(const RenderParams& _params, FrameBuffer
 	memset(&histogram[0], 0, NBINS * sizeof(int));
 	buf->update(&histogram[0], NBINS * sizeof(int));
 
-	int pp[2] = {frame_buffer->width, frame_buffer->height};
+	int pp[2] = {tex->width, tex->height};
 	params->update(&pp, sizeof(pp));
 	const int NSAMPLES = 256;
 	compute->dispatch(NSAMPLES, 1, 1);

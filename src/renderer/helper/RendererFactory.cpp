@@ -90,9 +90,7 @@ RegionRenderer *create_region_renderer() {
 	return new RegionRenderer();
 }
 
-HDRRenderer *create_hdr_renderer(Camera *cam) {
-	auto tex = new Texture(engine.width, engine.height, "rgba:f16");
-	auto depth = new DepthBuffer(engine.width, engine.height, "d:f32");
+HDRRenderer *create_hdr_renderer(Camera *cam, Texture* tex, DepthBuffer* depth) {
 #ifdef USING_VULKAN
 	return new HDRRendererVulkan(cam, tex, depth);
 #else
@@ -108,14 +106,14 @@ PostProcessor *create_post_processor() {
 #endif
 }
 
-WorldRenderer *create_world_renderer(Camera *cam) {
+WorldRenderer *create_world_renderer(Camera *cam, const string& type) {
 #ifdef USING_VULKAN
-	if (config.get_str("renderer.path", "forward") == "raytracing")
+	if (type == "raytracing")
 		return new WorldRendererVulkanRayTracing(device, cam, engine.width, engine.height);
 	else
 		return new WorldRendererVulkanForward(device, cam);
 #else
-	if (config.get_str("renderer.path", "forward") == "deferred")
+	if (type == "deferred")
 		return new WorldRendererGLDeferred(cam, engine.width, engine.height);
 	else
 		return new WorldRendererGLForward(cam);
@@ -123,18 +121,28 @@ WorldRenderer *create_world_renderer(Camera *cam) {
 }
 
 Renderer *create_render_path(Camera *cam) {
-	if (config.get_str("renderer.path", "forward") == "direct") {
-		engine.world_renderer = create_world_renderer(cam);
+	string type = config.get_str("renderer.path", "forward");
+
+	if (type == "direct") {
+		engine.world_renderer = create_world_renderer(cam, "forward");
 		return engine.world_renderer;
-	} else {
-	//	engine.post_processor = create_post_processor(parent);
-	//	engine.hdr_renderer = create_hdr_renderer(engine.post_processor, cam);
-		engine.hdr_renderer = create_hdr_renderer(cam);
-		engine.world_renderer = create_world_renderer(cam);
-		engine.hdr_renderer->add_child(engine.world_renderer);
-		//post_processor->set_hdr(hdr_renderer);
-		return engine.hdr_renderer;
 	}
+
+	//	engine.post_processor = create_post_processor(parent);
+
+	auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
+	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
+	hdr_tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
+	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
+
+	auto texture_renderer = new TextureRenderer({hdr_tex, hdr_depth});
+
+	engine.hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
+	engine.hdr_renderer->texture_renderer = texture_renderer;
+
+	engine.world_renderer = create_world_renderer(cam, type);
+	engine.hdr_renderer->add_child(engine.world_renderer);
+	return engine.hdr_renderer;
 }
 
 /*class TextureWriter : public Renderer {

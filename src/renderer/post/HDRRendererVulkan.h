@@ -14,6 +14,7 @@
 
 class Camera;
 class ComputeTask;
+class TextureRenderer;
 
 class HDRRendererVulkan : public PostProcessorStage {
 public:
@@ -52,6 +53,7 @@ public:
 	} out;
 
 	Camera *cam;
+	TextureRenderer* texture_renderer;
 
 
 	FrameBuffer *fb_main;

@@ -31,6 +31,7 @@ public:
 
 	owned<TextureRenderer> texture_renderer;
 	shared<FrameBuffer> fb_main;
+	shared<Texture> tex_main;
 
 	owned<ThroughShaderRenderer> out_renderer;
 
@@ -50,14 +51,14 @@ public:
 	int ch_post_blur = -1, ch_out = -1;
 
 	struct LightMeter {
-		void init(ResourceManager* resource_manager, FrameBuffer* frame_buffer, int channel);
+		void init(ResourceManager* resource_manager, Texture* tex, int channel);
 		ComputeTask* compute;
 		UniformBuffer* params;
 		ShaderStorageBuffer* buf;
 		Array<int> histogram;
 		float brightness;
 		int ch_post_brightness = -1;
-		void measure(const RenderParams& params, FrameBuffer* frame_buffer);
+		void measure(const RenderParams& params, Texture* tex);
 		void adjust_camera(Camera* cam);
 	} light_meter;
 };

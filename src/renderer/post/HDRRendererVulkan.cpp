@@ -8,6 +8,7 @@
 #include "HDRRendererVulkan.h"
 #ifdef USING_VULKAN
 #include "../base.h"
+#include "../target/TextureRendererVulkan.h"
 #include "../helper/ComputeTask.h"
 #include <graphics-impl.h>
 #include <Config.h>
@@ -83,7 +84,6 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 
 
 HDRRendererVulkan::RenderIntoData::RenderIntoData(const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) {
-	tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
 	_depth_buffer = depth_buffer;
 	_render_pass = new vulkan::RenderPass({tex.get(), _depth_buffer.get()});
 
