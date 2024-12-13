@@ -10,6 +10,7 @@
 #include <graphics-impl.h>
 #include "../world/WorldRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
+#include "../regions/RegionRenderer.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkan.h"
 	#include "../world/WorldRendererVulkanForward.h"
@@ -17,7 +18,6 @@
 	#include "../gui/GuiRendererVulkan.h"
 	#include "../post/HDRRendererVulkan.h"
 	#include "../post/PostProcessorVulkan.h"
-	#include "../regions/RegionRendererVulkan.h"
 	#include "../target/WindowRendererVulkan.h"
 #else
 	#include "../world/WorldRendererGL.h"
@@ -26,7 +26,6 @@
 	#include "../gui/GuiRendererGL.h"
 	#include "../post/HDRRendererGL.h"
 	#include "../post/PostProcessorGL.h"
-	#include "../regions/RegionRendererGL.h"
 	#include "../target/WindowRendererGL.h"
 #endif
 #include <y/EngineData.h>

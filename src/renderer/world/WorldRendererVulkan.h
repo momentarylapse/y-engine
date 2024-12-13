@@ -50,9 +50,6 @@ public:
 	owned<ShadowRenderer> shadow_renderer;
 	owned<GeometryRenderer> geo_renderer;
 
-
-	VertexBuffer *vb_2d;
-
 	void create_more();
 
 

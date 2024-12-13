@@ -41,7 +41,6 @@
 #include "../renderer/world/WorldRendererGLForward.h"
 #include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
-#include "../renderer/regions/RegionRendererGL.h"
 #include "../renderer/post/HDRRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
@@ -50,12 +49,11 @@
 #include "../renderer/world/WorldRendererVulkan.h"
 #include "../renderer/world/WorldRendererVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
-#include "../renderer/regions/RegionRendererVulkan.h"
 #include "../renderer/post/HDRRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
-
+#include "../renderer/regions/RegionRenderer.h"
 #include "../renderer/world/geometry/SceneView.h"
 #include "../y/EngineData.h"
 #include "../y/Component.h"

@@ -16,8 +16,6 @@
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
 #include "../../helper/PerformanceMonitor.h"
-#include "../../helper/ResourceManager.h"
-#include "../../fx/Particle.h"
 #include "../../world/Camera.h"
 #include "../../world/Light.h"
 #include "../../y/Entity.h"
@@ -26,8 +24,6 @@
 
 WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, RenderPathType _type) : WorldRenderer(name, cam) {
 	type = _type;
-
-	vb_2d = nullptr;
 
 	// not sure this is a good idea...
 	auto e = new Entity;
@@ -46,10 +42,6 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, Render
 		im.create(cube_map_source->resolution, cube_map_source->resolution, color(1, 1,0,1));
 		scene_view.cube_map->write_side(2, im);
 	}
-
-	vb_2d = new VertexBuffer("3f,3f,2f");
-	vb_2d->create_quad(rect::ID_SYM);
-
 }
 
 void WorldRendererVulkan::create_more() {

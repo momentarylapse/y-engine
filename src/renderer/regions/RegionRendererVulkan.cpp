@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "RegionRendererVulkan.h"
+#include "RegionRenderer.h"
 
 #ifdef USING_VULKAN
 #include "../base.h"

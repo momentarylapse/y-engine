@@ -431,7 +431,7 @@ add_executable(y
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
 	src/renderer/post/ThroughShaderRenderer.cpp
-	src/renderer/regions/RegionRendererCommon.cpp
+	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
 	src/renderer/target/HuiWindowRendererGL.cpp

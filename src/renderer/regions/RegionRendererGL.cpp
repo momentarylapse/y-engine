@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "../regions/RegionRendererGL.h"
+#include "../regions/RegionRenderer.h"
 
 #ifdef USING_OPENGL
 #include "../base.h"
