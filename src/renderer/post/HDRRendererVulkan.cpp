@@ -82,13 +82,12 @@ void HDRRendererVulkan::RenderOutData::render_out(CommandBuffer *cb, const Array
 }
 
 
-HDRRendererVulkan::RenderIntoData::RenderIntoData(int width, int height) {
-	auto tex = new vulkan::Texture(width, height, "rgba:f16");
+HDRRendererVulkan::RenderIntoData::RenderIntoData(const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) {
 	tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
-	_depth_buffer = new DepthBuffer(width, height, "d:f32", true);
-	_render_pass = new vulkan::RenderPass({tex, _depth_buffer});
+	_depth_buffer = depth_buffer;
+	_render_pass = new vulkan::RenderPass({tex.get(), _depth_buffer.get()});
 
-	fb = new vulkan::FrameBuffer(_render_pass, {tex, _depth_buffer});
+	fb = new vulkan::FrameBuffer(_render_pass, {tex.get(), _depth_buffer.get()});
 }
 
 void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderParams& params) {
@@ -107,13 +106,16 @@ void HDRRendererVulkan::RenderIntoData::render_into(Renderer *r, const RenderPar
 }
 
 
-HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
+HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : PostProcessorStage("hdr") {
 	cam = _cam;
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
-	into = RenderIntoData(width, height);
+	into = RenderIntoData(tex, depth_buffer);
 	fb_main = into.fb.get();
+
+	int width = tex->width;
+	int height = tex->height;
 
 	Array<vulkan::Texture*> blur_tex;
 	Array<DepthBuffer*> blur_depth;
@@ -125,10 +127,10 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 
 		// 1. horizontal
 		blur_tex.add(new vulkan::Texture(bloom_w, bloom_input_h, "rgba:f16"));
-		blur_depth.add(new DepthBuffer(bloom_w, bloom_input_h, "d:f32", true));
+		blur_depth.add(new DepthBuffer(bloom_w, bloom_input_h, "d:f32"));
 		// 2. vertical
 		blur_tex.add(new vulkan::Texture(bloom_w, bloom_h, "rgba:f16"));
-		blur_depth.add(new DepthBuffer(bloom_w, bloom_h, "d:f32", true));
+		blur_depth.add(new DepthBuffer(bloom_w, bloom_h, "d:f32"));
 
 		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i*2]});
 		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i*2+1]});
@@ -156,8 +158,8 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, int width, int height) : Post
 	}
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	Array<Texture*> tex = {into.fb->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
-	out = RenderOutData(shader_out.get(), tex);
+	Array<Texture*> _tex = {into.fb->attachments[0].get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
+	out = RenderOutData(shader_out.get(), _tex);
 
 
 

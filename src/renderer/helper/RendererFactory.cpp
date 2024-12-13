@@ -91,10 +91,12 @@ RegionRenderer *create_region_renderer() {
 }
 
 HDRRenderer *create_hdr_renderer(Camera *cam) {
+	auto tex = new Texture(engine.width, engine.height, "rgba:f16");
+	auto depth = new DepthBuffer(engine.width, engine.height, "d:f32");
 #ifdef USING_VULKAN
-	return new HDRRendererVulkan(cam, engine.width, engine.height);
+	return new HDRRendererVulkan(cam, tex, depth);
 #else
-	return new HDRRendererGL(cam, engine.width, engine.height);
+	return new HDRRendererGL(cam, tex, depth);
 #endif
 }
 

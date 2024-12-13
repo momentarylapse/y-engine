@@ -17,7 +17,7 @@ class ComputeTask;
 
 class HDRRendererVulkan : public PostProcessorStage {
 public:
-	HDRRendererVulkan(Camera* cam, int width, int height);
+	HDRRendererVulkan(Camera* cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
 	~HDRRendererVulkan() override;
 
 	void prepare(const RenderParams& params) override;
@@ -27,11 +27,13 @@ public:
 
 	struct RenderIntoData {
 		RenderIntoData() = default;
-		RenderIntoData(int width, int height);
+		RenderIntoData(const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
 		void render_into(Renderer *r, const RenderParams& params);
 
+		shared<Texture> tex;
+		shared<DepthBuffer> depth_buffer;
 		shared<FrameBuffer> fb;
-		DepthBuffer *_depth_buffer = nullptr;
+		shared<DepthBuffer> _depth_buffer;
 
 		//shared<RenderPass> render_pass;
 		RenderPass *_render_pass = nullptr;

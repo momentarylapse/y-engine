@@ -32,14 +32,15 @@ static int BLOOM_LEVEL_SCALE = 4;
 
 
 
-HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcessorStage("hdr") {
+HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : PostProcessorStage("hdr") {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	cam = _cam;
+	int width = tex->width;
+	int height = tex->height;
 
-	_depth_buffer = new DepthBuffer(width, height, "d24s8");
-	auto tex = new Texture(width, height, "rgba:f16");
+	_depth_buffer = depth_buffer;
 
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
@@ -48,12 +49,12 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, int width, int height) : PostProcesso
 		auto depth_ms = new nix::RenderBuffer(width, height, 4, "d24s8");
 		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
 
-		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex, _depth_buffer);
+		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex.get(), _depth_buffer.get());
 		fb_main = ms_resolver->into_texture->frame_buffer;
 	} else {
 		msg_error("no msaa");
 
-		texture_renderer = new TextureRenderer({tex, _depth_buffer});
+		texture_renderer = new TextureRenderer({tex.get(), _depth_buffer.get()});
 		fb_main = texture_renderer->frame_buffer;
 	}
 

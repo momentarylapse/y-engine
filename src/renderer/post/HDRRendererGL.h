@@ -19,7 +19,7 @@ class MultisampleResolver;
 
 class HDRRendererGL : public PostProcessorStage {
 public:
-	HDRRendererGL(Camera *cam, int width, int height);
+	HDRRendererGL(Camera *cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
 	~HDRRendererGL() override;
 
 	void prepare(const RenderParams& params) override;
@@ -43,7 +43,7 @@ public:
 		owned<ThroughShaderRenderer> tsr[2];
 	} bloom_levels[MAX_BLOOM_LEVELS];
 
-	DepthBuffer *_depth_buffer = nullptr;
+	shared<DepthBuffer> _depth_buffer;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
 
