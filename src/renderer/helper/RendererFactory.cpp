@@ -130,18 +130,32 @@ Renderer *create_render_path(Camera *cam) {
 
 	//	engine.post_processor = create_post_processor(parent);
 
+	engine.world_renderer = create_world_renderer(cam, type);
+
 	auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
 	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
-	hdr_tex->set_options("wrap=clamp,magfilter=" + config.resolution_scale_filter);
+	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
 
+	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
+		msg_error("yes msaa");
+
+		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
+	//	auto depth_ms = new RenderBuffer(width, height, 4, "d24s8");
+		/*texture_renderer = new TextureRenderer({tex_ms, depth_ms});
+
+		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex.get(), _depth_buffer.get());
+		fb_main = ms_resolver->into_texture->frame_buffer;*/
+	} else {
+		msg_error("no msaa");
+	}
+
 	auto texture_renderer = new TextureRenderer({hdr_tex, hdr_depth});
+	texture_renderer->add_child(engine.world_renderer);
 
 	engine.hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
+	// so far, we need someone to call .render()
 	engine.hdr_renderer->texture_renderer = texture_renderer;
-
-	engine.world_renderer = create_world_renderer(cam, type);
-	engine.hdr_renderer->add_child(engine.world_renderer);
 	return engine.hdr_renderer;
 }
 

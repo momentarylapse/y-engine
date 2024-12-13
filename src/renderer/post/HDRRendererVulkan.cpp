@@ -184,6 +184,7 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 
 	for (auto c: children)
 		c->prepare(sub_params);
+	texture_renderer->prepare(sub_params);
 
 	auto source = dynamicly_scaled_source();
 	if (vb_2d_current_source != source) {
@@ -191,7 +192,7 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 		vb_2d_current_source = source;
 	}
 
-	into.render_into(children[0], sub_params);
+	into.render_into(texture_renderer, sub_params);
 
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);

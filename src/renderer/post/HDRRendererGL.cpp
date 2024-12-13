@@ -104,8 +104,9 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 
 	for (auto c: children)
 		c->prepare(params);
+	// FIXME
+	texture_renderer->prepare(params);
 
-	texture_renderer->children = children;
 	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 	texture_renderer->render(scaled_params);
 
