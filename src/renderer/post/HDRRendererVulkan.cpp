@@ -117,8 +117,8 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, const shared<Texture>& tex, c
 		bl.tex_out->set_options("wrap=clamp");
 		bl.tsr[0] = new ThroughShaderRenderer({bloom_input}, shader_blur);
 		bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
-		bl.tsr[0]->data.dict_set("axis", axis_x);
-		bl.tsr[1]->data.dict_set("axis", axis_y);
+		bl.tsr[0]->data.dict_set("axis:0", axis_x);
+		bl.tsr[1]->data.dict_set("axis:0", axis_y);
 		bl.renderer[0] = new TextureRenderer({bl.tex_temp, depth0});
 		bl.renderer[1] = new TextureRenderer({bl.tex_out, depth1});
 		bl.renderer[0]->use_params_area = true;
@@ -132,8 +132,6 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, const shared<Texture>& tex, c
 	//	blur_pipeline[i] = bl.tsr[0]->pipeline;
 		blur_dset[i*2] = bl.tsr[0]->dset;
 		blur_dset[i*2+1] = bl.tsr[1]->dset;
-		bl.fb_temp = bl.renderer[0]->frame_buffer;
-		bl.fb_out = bl.renderer[1]->frame_buffer;
 		blur_pipeline[i] = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass[i*2], 0, "triangles", "3f,3f,2f");
 		blur_pipeline[i]->set_z(false, false);
 		blur_pipeline[i]->rebuild();
@@ -179,12 +177,32 @@ void HDRRendererVulkan::prepare(const RenderParams& params) {
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
 	gpu_timestamp_begin(params, ch_post_blur);
-	auto bloom_input = texture_renderer->frame_buffer.get();
+	/*auto bloom_input = texture_renderer->frame_buffer.get();
 	float threshold = 1.0f;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		process_blur(cb, bloom_input, bloom_levels[i].fb_temp.get(), threshold, i*2);
 		process_blur(cb, bloom_levels[i].fb_temp.get(), bloom_levels[i].fb_out.get(), 0.0f, i*2+1);
 		bloom_input = bloom_levels[i].fb_out.get();
+		threshold = 0;
+	}*/
+
+	//float r = cam->bloom_radius * engine.resolution_scale_x;
+	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
+	float threshold = 1.0f;
+	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		auto& bl = bloom_levels[i];
+
+		bl.tsr[0]->data.dict_set("radius:8", r * BLOOM_LEVEL_SCALE);
+		bl.tsr[0]->data.dict_set("threshold:12", threshold);
+		bl.tsr[0]->set_source(dynamicly_scaled_source());
+		bl.renderer[0]->render(params.with_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get())));
+
+		bl.tsr[1]->data.dict_set("radius:8", r);
+		bl.tsr[1]->data.dict_set("threshold:12", 0.0f);
+		bl.tsr[1]->set_source(dynamicly_scaled_source());
+		bl.renderer[1]->render(params.with_area(dynamicly_scaled_area(bl.renderer[1]->frame_buffer.get())));
+
+		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
 		threshold = 0;
 	}
 	gpu_timestamp_end(params, ch_post_blur);

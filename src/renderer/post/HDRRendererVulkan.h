@@ -52,9 +52,6 @@ public:
 	static const int MAX_BLOOM_LEVELS = 4;
 
 	struct BloomLevel {
-		shared<FrameBuffer> fb_temp;
-		shared<FrameBuffer> fb_out;
-
 		shared<Texture> tex_temp;
 		shared<Texture> tex_out;
 		owned<TextureRenderer> renderer[2];

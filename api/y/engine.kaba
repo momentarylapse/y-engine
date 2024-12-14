@@ -51,14 +51,15 @@ class RenderPath
 	
 	# debugging
 	func extern get_gbuffer() -> FrameBuffer*
-	func extern get_fb_shadow() -> FrameBuffer&[]
+	func extern get_shadow_map() -> shared![DepthBuffer][]
 	func extern get_cubemap() -> CubeMap*
 
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
 class HDRRenderer
-	var fb_main: FrameBuffer&
+	var texture: shared![Texture]
+	var depth_buffer: shared![DepthBuffer]
 	#func extern tex_bloom() -> Texture&[]
 	func extern tex_bloom() -> shared![Texture][]
 	

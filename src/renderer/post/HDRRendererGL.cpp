@@ -60,8 +60,8 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const sha
 		bl.tex_out->set_options("wrap=clamp");
 		bl.tsr[0] = new ThroughShaderRenderer({bloom_input}, shader_blur);
 		bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
-		bl.tsr[0]->data.dict_set("axis", axis_x);
-		bl.tsr[1]->data.dict_set("axis", axis_y);
+		bl.tsr[0]->data.dict_set("axis:0", axis_x);
+		bl.tsr[1]->data.dict_set("axis:0", axis_y);
 		bl.renderer[0] = new TextureRenderer({bl.tex_temp});
 		bl.renderer[1] = new TextureRenderer({bl.tex_out});
 		bl.renderer[0]->use_params_area = true;

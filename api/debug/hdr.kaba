@@ -6,7 +6,7 @@ class X extends Controller
 	
 	func override on_init()
 		for hdr in engine.hdr_renderer
-			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.fb_main.color_attachments()[0]))
+			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.texture))
 			var y0 = 1.0
 			var h = 0.2
 			for i=>tex in hdr.tex_bloom()

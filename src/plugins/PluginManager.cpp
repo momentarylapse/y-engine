@@ -250,8 +250,8 @@ CubeMap* world_renderer_get_cubemap(WorldRenderer &r) {
 	return r.scene_view.cube_map.get();
 }
 
-Array<FrameBuffer*> world_renderer_get_fb_shadow(WorldRenderer &r) {
-	return {r.scene_view.fb_shadow1.get(), r.scene_view.fb_shadow2.get()};
+Array<Texture*> world_renderer_get_shadow_map(WorldRenderer &r) {
+	return {framebuffer_depthbuffer(r.scene_view.fb_shadow1.get()).get(), framebuffer_depthbuffer(r.scene_view.fb_shadow2.get()).get()};
 }
 
 FrameBuffer* world_renderer_get_gbuffer(WorldRenderer &r) {
@@ -263,11 +263,7 @@ FrameBuffer* world_renderer_get_gbuffer(WorldRenderer &r) {
 }
 
 Array<Texture*> hdr_renderer_get_tex_bloom(HDRRenderer &r) {
-#ifdef USING_OPENGL
 	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
-#else
-	return {r.bloom_levels[0].fb_out->attachments[0].get(), r.bloom_levels[1].fb_out->attachments[0].get(), r.bloom_levels[2].fb_out->attachments[0].get(), r.bloom_levels[3].fb_out->attachments[0].get()};
-#endif
 }
 
 audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float sample_rate) {
@@ -843,7 +839,7 @@ void PluginManager::export_kaba() {
 //	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
 	ext->link_class_func("RenderPath.get_cubemap", &world_renderer_get_cubemap);
-	ext->link_class_func("RenderPath.get_fb_shadow", &world_renderer_get_fb_shadow);
+	ext->link_class_func("RenderPath.get_shadow_map", &world_renderer_get_shadow_map);
 	ext->link_class_func("RenderPath.get_gbuffer", &world_renderer_get_gbuffer);
 
 
@@ -867,7 +863,8 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("RenderPath.type", &RP::type);
 
 	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
-	ext->declare_class_element("HDRRenderer.fb_main", &HDRRenderer::fb_main);
+	ext->declare_class_element("HDRRenderer.texture", &HDRRenderer::tex_main);
+	ext->declare_class_element("HDRRenderer.depth_buffer", &HDRRenderer::_depth_buffer);
 	ext->declare_class_element("HDRRenderer.light_meter", &HDRRenderer::light_meter);
 	ext->link_class_func("HDRRenderer.tex_bloom", &hdr_renderer_get_tex_bloom);
 
