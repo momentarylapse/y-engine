@@ -42,22 +42,6 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const sha
 	int width = tex->width;
 	int height = tex->height;
 
-	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		msg_error("yes msaa");
-
-		auto tex_ms = new nix::TextureMultiSample(width, height, 4, "rgba:f16");
-		auto depth_ms = new nix::RenderBuffer(width, height, 4, "d24s8");
-		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
-
-		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex.get(), _depth_buffer.get());
-		fb_main = ms_resolver->into_texture->frame_buffer;
-	} else {
-		msg_error("no msaa");
-
-		//texture_renderer = new TextureRenderer({tex.get(), _depth_buffer.get()});
-		//fb_main = texture_renderer->frame_buffer;
-	}
-
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
 	auto bloom_input = tex;
@@ -109,6 +93,8 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 
 	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 	texture_renderer->render(scaled_params);
+	if (ms_resolver)
+		ms_resolver->render(scaled_params);
 
 	out_renderer->set_source(dynamicly_scaled_source());
 

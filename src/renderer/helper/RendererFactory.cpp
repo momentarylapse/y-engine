@@ -10,6 +10,7 @@
 #include <graphics-impl.h>
 #include "../world/WorldRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
+#include "../post/MultisampleResolver.h"
 #include "../regions/RegionRenderer.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkan.h"
@@ -137,23 +138,26 @@ Renderer *create_render_path(Camera *cam) {
 	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
 
+	TextureRenderer* texture_renderer;
+
+	engine.hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
+
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 
 		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
-	//	auto depth_ms = new RenderBuffer(width, height, 4, "d24s8");
-		/*texture_renderer = new TextureRenderer({tex_ms, depth_ms});
+		auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
+		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
 
-		ms_resolver = new MultisampleResolver(tex_ms, depth_ms, tex.get(), _depth_buffer.get());
-		fb_main = ms_resolver->into_texture->frame_buffer;*/
+		auto ms_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
+		engine.hdr_renderer->ms_resolver = ms_resolver;
 	} else {
 		msg_error("no msaa");
+		texture_renderer = new TextureRenderer({hdr_tex, hdr_depth});
 	}
 
-	auto texture_renderer = new TextureRenderer({hdr_tex, hdr_depth});
 	texture_renderer->add_child(engine.world_renderer);
 
-	engine.hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
 	// so far, we need someone to call .render()
 	engine.hdr_renderer->texture_renderer = texture_renderer;
 	return engine.hdr_renderer;
