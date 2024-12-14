@@ -1,5 +1,5 @@
 /*
- * HDRRendererGL.h
+ * HDRRenderer.h
  *
  *  Created on: 23 Nov 2021
  *      Author: michi
@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "PostProcessor.h"
-#ifdef USING_OPENGL
+#include "../Renderer.h"
 
 class vec2;
 class Camera;
@@ -17,10 +16,10 @@ class TextureRenderer;
 class ThroughShaderRenderer;
 class MultisampleResolver;
 
-class HDRRendererGL : public PostProcessorStage {
+class HDRRenderer : public Renderer {
 public:
-	HDRRendererGL(Camera *cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
-	~HDRRendererGL() override;
+	HDRRenderer(Camera *cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
+	~HDRRenderer() override;
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
@@ -35,7 +34,7 @@ public:
 
 	owned<ThroughShaderRenderer> out_renderer;
 
-	static const int MAX_BLOOM_LEVELS = 4;
+	static constexpr int MAX_BLOOM_LEVELS = 4;
 
 	struct BloomLevel {
 		shared<Texture> tex_temp;
@@ -50,6 +49,32 @@ public:
 
 	int ch_post_blur = -1, ch_out = -1;
 
+
+
+
+#ifdef USING_VULKAN
+
+	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
+
+
+	struct RenderOutData {
+		RenderOutData() = default;
+		RenderOutData(Shader *s, const Array<Texture*> &tex);
+		void render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params);
+		shared<Shader> shader_out;
+		GraphicsPipeline* pipeline_out = nullptr;
+		DescriptorSet *dset_out;
+		VertexBuffer *vb_2d;
+		rect vb_2d_current_source = rect::EMPTY;
+	} out;
+
+	owned<VertexBuffer> vb_2d;
+	rect vb_2d_current_source = rect::EMPTY;
+
+#endif
+
+
+
 	struct LightMeter {
 		void init(ResourceManager* resource_manager, Texture* tex, int channel);
 		ComputeTask* compute;
@@ -63,4 +88,3 @@ public:
 	} light_meter;
 };
 
-#endif

@@ -28,15 +28,12 @@ class ModelManager;
 #ifdef USING_VULKAN
 class SurfaceRendererVulkan;
 using WindowRenderer = SurfaceRendererVulkan;
-class HDRRendererVulkan;
-using HDRRenderer = HDRRendererVulkan;
 #else
 class WindowRendererGL;
 using WindowRenderer = WindowRendererGL;
-class HDRRendererGL;
-using HDRRenderer = HDRRendererGL;
 #endif
 class RegionRenderer;
+class HDRRenderer;
 
 class EngineData {
 public:

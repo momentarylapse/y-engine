@@ -36,12 +36,12 @@
 #include "../renderer/Renderer.h"
 #include "../renderer/helper/RendererFactory.h"
 #include "../renderer/helper/CubeMapSource.h"
+#include "../renderer/post/HDRRenderer.h"
 #ifdef USING_OPENGL
 #include "../renderer/world/WorldRendererGL.h"
 #include "../renderer/world/WorldRendererGLForward.h"
 #include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
-#include "../renderer/post/HDRRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
 #endif
@@ -49,7 +49,6 @@
 #include "../renderer/world/WorldRendererVulkan.h"
 #include "../renderer/world/WorldRendererVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
-#include "../renderer/post/HDRRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif

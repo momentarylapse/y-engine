@@ -5,16 +5,18 @@
  *      Author: michi
  */
 
-#include "HDRRendererGL.h"
+#include "HDRRenderer.h"
 
-#include <lib/image/image.h>
-#include <renderer/target/TextureRendererGL.h>
-#ifdef USING_OPENGL
 #include "ThroughShaderRenderer.h"
 #include "MultisampleResolver.h"
+#ifdef USING_OPENGL
+#include <renderer/target/TextureRendererGL.h>
+#else
+#include <renderer/target/TextureRendererVulkan.h>
+#endif
 #include "../base.h"
 #include "../helper/ComputeTask.h"
-#include <lib/nix/nix.h>
+#include "../../graphics-impl.h"
 #include <lib/math/vec2.h>
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
@@ -25,6 +27,8 @@
 #include "../../y/EngineData.h"
 #include "../../world/Camera.h"
 
+#ifdef USING_OPENGL
+
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
@@ -32,7 +36,7 @@ static int BLOOM_LEVEL_SCALE = 4;
 
 
 
-HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : PostProcessorStage("hdr") {
+HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
 	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
@@ -78,9 +82,9 @@ HDRRendererGL::HDRRendererGL(Camera *_cam, const shared<Texture>& tex, const sha
 	light_meter.init(resource_manager, tex.get(), channel);
 }
 
-HDRRendererGL::~HDRRendererGL() = default;
+HDRRenderer::~HDRRenderer() = default;
 
-void HDRRendererGL::prepare(const RenderParams& params) {
+void HDRRenderer::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
 	if (!cam)
@@ -133,40 +137,76 @@ void HDRRendererGL::prepare(const RenderParams& params) {
 	PerformanceMonitor::end(ch_prepare);
 }
 
-void HDRRendererGL::draw(const RenderParams& params) {
+void HDRRenderer::draw(const RenderParams& params) {
 	Any data;
-	data.dict_set("exposure", cam->exposure);
-	data.dict_set("bloom_factor", cam->bloom_factor);
-	data.dict_set("scale_x", resolution_scale_x);
-	data.dict_set("scale_y", resolution_scale_y);
+	data.dict_set("exposure:0", cam->exposure);
+	data.dict_set("bloom_factor:4", cam->bloom_factor);
+	data.dict_set("scale_x:8", resolution_scale_x);
+	data.dict_set("scale_y:12", resolution_scale_y);
 
 	out_renderer->data = data;
 	out_renderer->draw(params);
 }
 
+#endif
 
-void HDRRendererGL::LightMeter::init(ResourceManager* resource_manager, Texture* tex, int channel) {
+void HDRRenderer::LightMeter::init(ResourceManager* resource_manager, Texture* tex, int channel) {
 	ch_post_brightness = PerformanceMonitor::create_channel("expo", channel);
 	compute = new ComputeTask(resource_manager->load_shader("compute/brightness.shader"));
+#ifdef USING_VULKAN
+	params = new UniformBuffer(8);
+	buf = new ShaderStorageBuffer(256*4);
+#else
 	params = new UniformBuffer();
 	buf = new ShaderStorageBuffer();
+#endif
 	compute->bind_texture(0, tex);
 	compute->bind_storage_buffer(1, buf);
 	compute->bind_uniform_buffer(2, params);
 }
 
-void HDRRendererGL::LightMeter::measure(const RenderParams& _params, Texture* tex) {
+void HDRRenderer::LightMeter::measure(const RenderParams& _params, Texture* tex) {
 	PerformanceMonitor::begin(ch_post_brightness);
 	gpu_timestamp_begin(_params, ch_post_brightness);
 
 	int NBINS = 256;
+	const int NSAMPLES = 256;
+#ifdef USING_VULKAN
+	auto cb = _params.command_buffer;
+
+	int pp[2] = {tex->width, tex->height};
+	params->update(&pp);
+
+	if (histogram.num == NBINS) {
+		void* p = buf->map();
+		memcpy(&histogram[0], p, NBINS*sizeof(int));
+		buf->unmap();
+		//msg_write(str(histogram));
+
+		int thresh = (NSAMPLES * 16 * 16) / 200 * 199;
+		int n = 0;
+		int ii = 0;
+		for (int i=0; i<NBINS; i++) {
+			n += histogram[i];
+			if (n > thresh) {
+				ii = i;
+				break;
+			}
+		}
+		brightness = pow(2.0f, ((float)ii / (float)NBINS) * 20.0f - 10.0f);
+	}
+
+	histogram.resize(NBINS);
+	memset(&histogram[0], 0, NBINS * sizeof(int));
+	buf->update(&histogram[0]);
+	compute->dispatch(cb, NSAMPLES, 1, 1);
+#else
 	histogram.resize(NBINS);
 	memset(&histogram[0], 0, NBINS * sizeof(int));
 	buf->update(&histogram[0], NBINS * sizeof(int));
 
 	int pp[2] = {tex->width, tex->height};
 	params->update(&pp, sizeof(pp));
-	const int NSAMPLES = 256;
 	compute->dispatch(NSAMPLES, 1, 1);
 
 	buf->read(&histogram[0], NBINS*sizeof(int));
@@ -190,11 +230,12 @@ void HDRRendererGL::LightMeter::measure(const RenderParams& _params, Texture* te
 		}
 	}
 	brightness = pow(2.0f, ((float)ii / (float)NBINS) * 20.0f - 10.0f);
+#endif
 	PerformanceMonitor::end(ch_post_brightness);
 }
 
-void HDRRendererGL::LightMeter::adjust_camera(Camera *cam) {
-	float exposure = clamp(pow(1.0f / brightness, 0.8f), cam->auto_exposure_min, cam->auto_exposure_max);
+void HDRRenderer::LightMeter::adjust_camera(Camera *cam) {
+	float exposure = clamp((float)pow(1.0f / brightness, 0.8f), cam->auto_exposure_min, cam->auto_exposure_max);
 	if (exposure > cam->exposure)
 		cam->exposure *= 1.05f;
 	if (exposure < cam->exposure)
@@ -202,5 +243,3 @@ void HDRRendererGL::LightMeter::adjust_camera(Camera *cam) {
 }
 
 
-
-#endif

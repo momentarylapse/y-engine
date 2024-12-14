@@ -12,12 +12,12 @@
 #include "../post/ThroughShaderRenderer.h"
 #include "../post/MultisampleResolver.h"
 #include "../regions/RegionRenderer.h"
+#include "../post/HDRRenderer.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkan.h"
 	#include "../world/WorldRendererVulkanForward.h"
 	#include "../world/WorldRendererVulkanRayTracing.h"
 	#include "../gui/GuiRendererVulkan.h"
-	#include "../post/HDRRendererVulkan.h"
 	#include "../post/PostProcessorVulkan.h"
 	#include "../target/WindowRendererVulkan.h"
 #else
@@ -25,7 +25,6 @@
 	#include "../world/WorldRendererGLForward.h"
 	#include "../world/WorldRendererGLDeferred.h"
 	#include "../gui/GuiRendererGL.h"
-	#include "../post/HDRRendererGL.h"
 	#include "../post/PostProcessorGL.h"
 	#include "../target/WindowRendererGL.h"
 #endif
@@ -92,11 +91,7 @@ RegionRenderer *create_region_renderer() {
 }
 
 HDRRenderer *create_hdr_renderer(Camera *cam, Texture* tex, DepthBuffer* depth) {
-#ifdef USING_VULKAN
-	return new HDRRendererVulkan(cam, tex, depth);
-#else
-	return new HDRRendererGL(cam, tex, depth);
-#endif
+	return new HDRRenderer(cam, tex, depth);
 }
 
 PostProcessor *create_post_processor() {
