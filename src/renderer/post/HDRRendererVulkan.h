@@ -15,6 +15,7 @@
 class Camera;
 class ComputeTask;
 class TextureRenderer;
+class ThroughShaderRenderer;
 class MultisampleResolver;
 
 class HDRRendererVulkan : public PostProcessorStage {
@@ -53,6 +54,11 @@ public:
 	struct BloomLevel {
 		shared<FrameBuffer> fb_temp;
 		shared<FrameBuffer> fb_out;
+
+		shared<Texture> tex_temp;
+		shared<Texture> tex_out;
+		owned<TextureRenderer> renderer[2];
+		owned<ThroughShaderRenderer> tsr[2];
 	} bloom_levels[MAX_BLOOM_LEVELS];
 
 	shared<Shader> shader_blur;

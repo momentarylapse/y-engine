@@ -7,6 +7,7 @@
 
 #include "HDRRendererVulkan.h"
 #ifdef USING_VULKAN
+#include "ThroughShaderRenderer.h"
 #include "../base.h"
 #include "../target/TextureRendererVulkan.h"
 #include "../helper/ComputeTask.h"
@@ -41,6 +42,7 @@ static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 static int BLUR_SCALE = 4;
+static int BLOOM_LEVEL_SCALE = 4;
 static int BLOOM_HEIGHT0 = 256;
 
 HDRRendererVulkan::RenderOutData::RenderOutData(Shader *s, const Array<Texture*> &tex) {
@@ -94,48 +96,52 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, const shared<Texture>& tex, c
 	int width = tex->width;
 	int height = tex->height;
 
-	Array<vulkan::Texture*> blur_tex;
-	Array<DepthBuffer*> blur_depth;
-	int bloom_input_w = width/2;
-	int bloom_input_h = height;
-	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
-		int bloom_w = (i == 0) ? (BLOOM_HEIGHT0 * width) / height : bloom_input_w / BLUR_SCALE;
-		int bloom_h = (i == 0) ? BLOOM_HEIGHT0 : bloom_input_h / BLUR_SCALE;
-
-		// 1. horizontal
-		blur_tex.add(new vulkan::Texture(bloom_w, bloom_input_h, "rgba:f16"));
-		blur_depth.add(new DepthBuffer(bloom_w, bloom_input_h, "d:f32"));
-		// 2. vertical
-		blur_tex.add(new vulkan::Texture(bloom_w, bloom_h, "rgba:f16"));
-		blur_depth.add(new DepthBuffer(bloom_w, bloom_h, "d:f32"));
-
-		blur_render_pass[i*2] = new vulkan::RenderPass({blur_tex[i*2], blur_depth[i*2]});
-		blur_render_pass[i*2+1] = new vulkan::RenderPass({blur_tex[i*2+1], blur_depth[i*2+1]});
-		// without clear, we get artifacts from dynamic resolution scaling
-		bloom_input_w = bloom_w;
-		bloom_input_h = bloom_h;
-	}
-	for (auto t: blur_tex)
-		t->set_options("wrap=clamp");
 
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
-
+	int bloomw = width, bloomh = height;
+	auto bloom_input = tex;
+	Any axis_x, axis_y;
+	axis_x.list_set(0, 1.0f);
+	axis_x.list_set(1, 0.0f);
+	axis_y.list_set(0, 0.0f);
+	axis_y.list_set(1, 1.0f);
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+		auto& bl = bloom_levels[i];
+		bloomw /= BLOOM_LEVEL_SCALE;
+		bloomh /= BLOOM_LEVEL_SCALE;
+		bl.tex_temp = new Texture(bloomw, bloomh, "rgba:f16");
+		auto depth0 = new DepthBuffer(bloomw, bloomh, "d:f32");
+		bl.tex_out = new Texture(bloomw, bloomh, "rgba:f16");
+		auto depth1 = new DepthBuffer(bloomw, bloomh, "d:f32");
+		bl.tex_temp->set_options("wrap=clamp");
+		bl.tex_out->set_options("wrap=clamp");
+		bl.tsr[0] = new ThroughShaderRenderer({bloom_input}, shader_blur);
+		bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
+		bl.tsr[0]->data.dict_set("axis", axis_x);
+		bl.tsr[1]->data.dict_set("axis", axis_y);
+		bl.renderer[0] = new TextureRenderer({bl.tex_temp, depth0});
+		bl.renderer[1] = new TextureRenderer({bl.tex_out, depth1});
+		bl.renderer[0]->use_params_area = true;
+		bl.renderer[1]->use_params_area = true;
+		bl.renderer[0]->add_child(bl.tsr[0].get());
+		bl.renderer[1]->add_child(bl.tsr[1].get());
+		bloom_input = bl.tex_out;
+
+		blur_render_pass[i*2] = bl.renderer[0]->render_pass.get();
+		blur_render_pass[i*2+1] = bl.renderer[1]->render_pass.get();
+	//	blur_pipeline[i] = bl.tsr[0]->pipeline;
+		blur_dset[i*2] = bl.tsr[0]->dset;
+		blur_dset[i*2+1] = bl.tsr[1]->dset;
+		bl.fb_temp = bl.renderer[0]->frame_buffer;
+		bl.fb_out = bl.renderer[1]->frame_buffer;
 		blur_pipeline[i] = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass[i*2], 0, "triangles", "3f,3f,2f");
 		blur_pipeline[i]->set_z(false, false);
 		blur_pipeline[i]->rebuild();
 	}
-	for (int i=0; i<MAX_BLOOM_LEVELS*2; i++) {
-//		blur_ubo[i] = new UniformBuffer(sizeof(UBOBlur));
-		blur_dset[i] = pool->create_set(shader_blur.get());
-	}
-	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
-		bloom_levels[i].fb_temp = new vulkan::FrameBuffer(blur_render_pass[i*2], {blur_tex[i*2], blur_depth[i]});
-		bloom_levels[i].fb_out = new vulkan::FrameBuffer(blur_render_pass[i*2+1], {blur_tex[i*2+1], blur_depth[i]});
-	}
+
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	Array<Texture*> _tex = {tex.get(), bloom_levels[0].fb_out->attachments[0].get(), bloom_levels[1].fb_out->attachments[0].get(), bloom_levels[2].fb_out->attachments[0].get(), bloom_levels[3].fb_out->attachments[0].get()};
+	Array<Texture*> _tex = {tex.get(), bloom_levels[0].tex_out.get(), bloom_levels[1].tex_out.get(), bloom_levels[2].tex_out.get(), bloom_levels[3].tex_out.get()};
 	out = RenderOutData(shader_out.get(), _tex);
 
 
