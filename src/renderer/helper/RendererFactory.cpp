@@ -146,7 +146,8 @@ Renderer *create_render_path(Camera *cam) {
 		msg_error("yes msaa");
 
 		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
-		auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
+		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
+		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
 		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
 
 		auto ms_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);

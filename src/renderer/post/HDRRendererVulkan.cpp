@@ -89,6 +89,7 @@ HDRRendererVulkan::HDRRendererVulkan(Camera *_cam, const shared<Texture>& tex, c
 	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	tex_main = tex;
+	_depth_buffer = depth_buffer;
 
 	int width = tex->width;
 	int height = tex->height;

@@ -15,6 +15,7 @@
 class Camera;
 class ComputeTask;
 class TextureRenderer;
+class MultisampleResolver;
 
 class HDRRendererVulkan : public PostProcessorStage {
 public:
@@ -40,10 +41,12 @@ public:
 
 	Camera *cam;
 	TextureRenderer* texture_renderer;
+	MultisampleResolver* ms_resolver;
 
 
 	FrameBuffer *fb_main;
 	shared<Texture> tex_main;
+	shared<DepthBuffer> _depth_buffer;
 
 	static const int MAX_BLOOM_LEVELS = 4;
 
