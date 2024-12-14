@@ -56,18 +56,6 @@ public:
 
 	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
 
-
-	struct RenderOutData {
-		RenderOutData() = default;
-		RenderOutData(Shader *s, const Array<Texture*> &tex);
-		void render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params);
-		shared<Shader> shader_out;
-		GraphicsPipeline* pipeline_out = nullptr;
-		DescriptorSet *dset_out;
-		VertexBuffer *vb_2d;
-		rect vb_2d_current_source = rect::EMPTY;
-	} out;
-
 	owned<VertexBuffer> vb_2d;
 	rect vb_2d_current_source = rect::EMPTY;
 

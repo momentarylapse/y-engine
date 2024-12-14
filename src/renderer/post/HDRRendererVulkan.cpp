@@ -38,45 +38,6 @@ static int BLUR_SCALE = 4;
 static int BLOOM_LEVEL_SCALE = 4;
 static int BLOOM_HEIGHT0 = 256;
 
-HDRRenderer::RenderOutData::RenderOutData(Shader *s, const Array<Texture*> &tex) {
-	shader_out = s;
-	dset_out = pool->create_set("buffer,sampler,sampler,sampler,sampler,sampler");
-
-	for (auto&& [i, t]: enumerate(tex))
-		dset_out->set_texture(1 + i, t);
-	dset_out->update();
-
-	vb_2d = new VertexBuffer("3f,3f,2f");
-	vb_2d->create_quad(rect::ID_SYM);
-	vb_2d_current_source = rect::ID_SYM;
-}
-
-void HDRRenderer::RenderOutData::render_out(CommandBuffer *cb, const Array<float> &data, float exposure, const RenderParams& params) {
-	auto source = dynamicly_scaled_source();
-	if (source != vb_2d_current_source) {
-		vb_2d->create_quad(rect::ID_SYM, source);
-		vb_2d_current_source = source;
-	}
-
-	if (!pipeline_out) {
-		pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
-		pipeline_out->set_culling(CullMode::NONE);
-		pipeline_out->set_z(false, false);
-		pipeline_out->rebuild();
-	}
-
-	cb->bind_pipeline(pipeline_out);
-	cb->bind_descriptor_set(0, dset_out);
-	struct PCOut {
-		mat4 p, m, v;
-		float x[32];
-	};
-	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, exposure};
-	memcpy(&pco.x, &data[0], sizeof(float) * data.num);
-	cb->push_constant(0, sizeof(mat4) * 3 + sizeof(float) * data.num, &pco);
-	cb->draw(vb_2d);
-}
-
 
 HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
 	cam = _cam;
@@ -132,9 +93,7 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	Array<Texture*> _tex = {tex.get(), bloom_levels[0].tex_out.get(), bloom_levels[1].tex_out.get(), bloom_levels[2].tex_out.get(), bloom_levels[3].tex_out.get()};
-	out = RenderOutData(shader_out.get(), _tex);
-
+	out_renderer = new ThroughShaderRenderer({tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 
 
 	vb_2d = new VertexBuffer("3f,3f,2f");
@@ -166,6 +125,8 @@ void HDRRenderer::prepare(const RenderParams& params) {
 
 	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 	texture_renderer->render(scaled_params);
+
+	out_renderer->set_source(dynamicly_scaled_source());
 
 	// render blur into fb_small2!
 	PerformanceMonitor::begin(ch_post_blur);
@@ -211,14 +172,20 @@ void HDRRenderer::prepare(const RenderParams& params) {
 }
 
 void HDRRenderer::draw(const RenderParams& params) {
-	auto cb = params.command_buffer;
+	Any data;
+	Any a;
+	auto m = mat4::ID;
+	for (int i=0; i<16; i++)
+		a.list_set(i, ((float*)&m)[i]);
+	data.dict_set("project:128", a);
+	data.dict_set("exposure:192", cam->exposure);
+	data.dict_set("bloom_factor:196", cam->bloom_factor);
+	data.dict_set("gamma:200", 2.2f);
+	data.dict_set("scale_x:204", resolution_scale_x);
+	data.dict_set("scale_y:208", resolution_scale_y);
 
-
-	PerformanceMonitor::begin(ch_out);
-	gpu_timestamp_begin(params, ch_out);
-	out.render_out(cb, {cam->exposure, cam->bloom_factor, 2.2f, resolution_scale_x, resolution_scale_y}, cam->exposure, params);
-	gpu_timestamp_end(params, ch_out);
-	PerformanceMonitor::end(ch_out);
+	out_renderer->data = data;
+	out_renderer->draw(params);
 }
 
 void HDRRenderer::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
