@@ -140,10 +140,13 @@ Renderer *create_render_path(Camera *cam) {
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 
+		msg_write("ms tex:");
 		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
+		msg_write("ms depth:");
 		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
+		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
-		texture_renderer = new TextureRenderer({tex_ms, depth_ms});
+		texture_renderer = new TextureRenderer({tex_ms, depth_ms}, {"samples=4"});
 
 		auto ms_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
 		engine.hdr_renderer->ms_resolver = ms_resolver;

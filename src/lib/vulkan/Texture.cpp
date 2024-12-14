@@ -91,9 +91,15 @@ int format_size(VkFormat f) {
 		return 4;
 	if (f == VK_FORMAT_D16_UNORM)
 		return 2;
+	if (f == VK_FORMAT_D24_UNORM_S8_UINT)
+		return 4;
 	if (f == VK_FORMAT_D32_SFLOAT_S8_UINT)
 		return 5; // ?
 	return 4;
+}
+
+bool format_is_depth(VkFormat f) {
+	return (f == VK_FORMAT_D32_SFLOAT) or (f == VK_FORMAT_D24_UNORM_S8_UINT) or (f == VK_FORMAT_D16_UNORM) or (f == VK_FORMAT_D32_SFLOAT_S8_UINT);
 }
 
 Texture::Texture() {
@@ -248,7 +254,11 @@ void Texture::_create_image(const void *image_data, VkImageType type, VkFormat f
 	//	layout = VK_IMAGE_LAYOUT_GENERAL;
 
 
-	auto usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	auto usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	if (format_is_depth(format))
+		usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	else
+		usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	if (allow_storage)
 		usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 	image.create(type, width, height, depth, mip_levels, num_layers, samples, format, usage, cube);

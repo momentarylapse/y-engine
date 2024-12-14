@@ -125,6 +125,8 @@ void HDRRenderer::prepare(const RenderParams& params) {
 
 	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 	texture_renderer->render(scaled_params);
+	if (ms_resolver)
+		ms_resolver->render(scaled_params);
 
 	out_renderer->set_source(dynamicly_scaled_source());
 

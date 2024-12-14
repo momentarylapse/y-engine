@@ -102,9 +102,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 
 	out_renderer->set_source(dynamicly_scaled_source());
 
-	if (config.antialiasing_method == AntialiasingMethod::MSAA)
-		ms_resolver->render(scaled_params);
-
 	PerformanceMonitor::begin(ch_post_blur);
 	gpu_timestamp_begin(params, ch_post_blur);
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
