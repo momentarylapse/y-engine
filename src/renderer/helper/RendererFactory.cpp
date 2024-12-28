@@ -137,6 +137,10 @@ Renderer *create_render_path(Camera *cam) {
 
 	engine.hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
 
+#ifdef USING_VULKAN
+	config.antialiasing_method = AntialiasingMethod::NONE;
+#endif
+
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 
