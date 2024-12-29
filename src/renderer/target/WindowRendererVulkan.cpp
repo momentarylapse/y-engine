@@ -55,6 +55,7 @@ void SurfaceRendererVulkan::rebuild_default_stuff() {
 
 	device->wait_idle();
 
+	delete swap_chain;
 	//_delete_swap_chain_and_stuff();
 	_create_swap_chain_and_stuff();
 }
