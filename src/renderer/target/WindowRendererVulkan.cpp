@@ -71,11 +71,14 @@ bool SurfaceRendererVulkan::start_frame() {
 	f->wait();
 	f->reset();
 
+	command_buffers[image_index]->begin();
+
 	return true;
 }
 
 void SurfaceRendererVulkan::end_frame(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_end);
+	params.command_buffer->end();
 	auto f = wait_for_frame_fences[image_index];
 	device->present_queue.submit(command_buffers[image_index], {image_available_semaphore}, {render_finished_semaphore}, f);
 
@@ -102,7 +105,7 @@ void SurfaceRendererVulkan::draw(const RenderParams& params) {
 	auto rp = params.render_pass;
 	auto fb = params.frame_buffer;
 
-	cb->begin();
+	//cb->begin();
 	for (auto c: children)
 		c->prepare(params);
 
@@ -113,7 +116,7 @@ void SurfaceRendererVulkan::draw(const RenderParams& params) {
 		c->draw(params);
 
 	cb->end_render_pass();
-	cb->end();
+	//cb->end();
 	PerformanceMonitor::end(ch_draw);
 }
 

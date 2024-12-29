@@ -2,15 +2,15 @@
 #define COMPUTETASK_H
 
 
+#include "../Renderer.h"
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 #include <lib/image/image.h>
-
 #include "../../graphics-fwd.h"
 
-class ComputeTask {
+class ComputeTask : public RenderTask {
 public:
-    explicit ComputeTask(const shared<Shader>& shader);
+    explicit ComputeTask(const string& name, const shared<Shader>& shader, int nx, int ny, int nz);
     shared<Shader> shader = nullptr;
 
     struct Binding {
@@ -25,6 +25,7 @@ public:
         void* p;
     };
     Array<Binding> bindings;
+    int nx, ny, nz;
 
     void bind_texture(int index, Texture* texture);
     void bind_image(int index, ImageTexture* image);
@@ -35,11 +36,9 @@ public:
     owned<vulkan::ComputePipeline> pipeline;
     owned<vulkan::DescriptorPool> pool;
     owned<vulkan::DescriptorSet> dset;
-    void dispatch(CommandBuffer* cb, int nx, int ny, int nz);
 #endif
-#ifdef USING_OPENGL
-    void dispatch(int nx, int ny, int nz);
-#endif
+
+    void render(const RenderParams &params) override;
 };
 
 

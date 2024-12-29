@@ -79,7 +79,7 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer({tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 
-	light_meter = new LightMeter(resource_manager, tex.get(), channel);
+	light_meter = new LightMeter(resource_manager, tex.get());
 }
 
 HDRRenderer::~HDRRenderer() = default;
@@ -126,10 +126,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 	gpu_timestamp_end(params, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
-
-	light_meter->measure(params, tex_main.get());
-	if (cam->auto_exposure)
-		light_meter->adjust_camera(cam);
 
 	PerformanceMonitor::end(ch_prepare);
 }

@@ -99,7 +99,7 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 
-	light_meter = new LightMeter(resource_manager, tex.get(), channel);
+	light_meter = new LightMeter(resource_manager, tex.get());
 }
 
 HDRRenderer::~HDRRenderer() = default;
@@ -163,10 +163,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 	}
 	gpu_timestamp_end(params, ch_post_blur);
 	PerformanceMonitor::end(ch_post_blur);
-
-	light_meter->measure(params, tex_main.get());
-	if (cam->auto_exposure)
-		light_meter->adjust_camera(cam);
 
 	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);

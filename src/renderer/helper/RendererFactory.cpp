@@ -45,6 +45,8 @@
 #include <renderer/target/TextureRendererGL.h>
 #include <renderer/target/TextureRendererVulkan.h>
 
+#include "LightMeter.h"
+
 
 string render_graph_str(Renderer *r) {
 	string s = PerformanceMonitor::get_name(r->channel);
@@ -181,6 +183,22 @@ public:
 	}
 };*/
 
+class RendererSupervisor : public RenderTask {
+public:
+	RendererSupervisor() : RenderTask("super") {}
+	void render(const RenderParams& params) override {
+		if (auto hdr = engine.hdr_renderer) {
+			if (auto lm = hdr->light_meter) {
+				gpu_flush();
+				lm->read();
+				lm->setup();
+				if (hdr->cam and hdr->cam->auto_exposure)
+					lm->adjust_camera(hdr->cam);
+			}
+		}
+	}
+};
+
 void create_full_renderer(GLFWwindow* window, Camera *cam) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
@@ -190,6 +208,9 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		engine.window_renderer->add_child(engine.region_renderer);
 		engine.region_renderer->add_region(p, rect::ID, 0);
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
+
+		engine.add_render_task(new RendererSupervisor, 0);
+		engine.add_render_task(engine.hdr_renderer->light_meter, 2000);
 
 		if (false) {
 			int N = 256;

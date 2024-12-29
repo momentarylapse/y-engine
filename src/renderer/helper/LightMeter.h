@@ -6,20 +6,21 @@
 #define LIGHTMETER_H
 
 #include "../Renderer.h"
+#include "../helper/ComputeTask.h"
 
 class ComputeTask;
 class Camera;
 
-class LightMeter {
+class LightMeter : public ComputeTask {
 public:
-	LightMeter(ResourceManager* resource_manager, Texture* tex, int channel);
-	ComputeTask* compute;
+	LightMeter(ResourceManager* resource_manager, Texture* tex);
 	UniformBuffer* params;
 	ShaderStorageBuffer* buf;
 	Array<int> histogram;
 	float brightness;
-	int ch_post_brightness = -1;
-	void measure(const RenderParams& params, Texture* tex);
+	Texture* texture;
+	void read();
+	void setup();
 	void adjust_camera(Camera* cam);
 };
 

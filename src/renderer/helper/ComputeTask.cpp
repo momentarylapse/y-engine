@@ -1,12 +1,16 @@
 #include "ComputeTask.h"
-
 #include <renderer/base.h>
-
 #include "../../graphics-impl.h"
+#include "../../helper/PerformanceMonitor.h"
 
 
-ComputeTask::ComputeTask(const shared<Shader>& _shader) {
+ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int _nx, int _ny, int _nz) :
+    RenderTask(name)
+{
     shader = _shader;
+    nx = _nx;
+    ny = _ny;
+    nz = _nz;
 #ifdef USING_VULKAN
     pool = new vulkan::DescriptorPool("sampler:8,buffer:8,storage-buffer:8,image:8", 1);
     dset = pool->create_set_from_layout(shader->descr_layouts[0]);
@@ -14,8 +18,10 @@ ComputeTask::ComputeTask(const shared<Shader>& _shader) {
 #endif
 }
 
+void ComputeTask::render(const RenderParams &params) {
+	PerformanceMonitor::begin(ch_draw);
+    gpu_timestamp_begin(params, ch_draw);
 #ifdef USING_OPENGL
-void ComputeTask::dispatch(int nx, int ny, int nz) {
     for (auto& b: bindings) {
         if (b.type == Binding::Type::Texture)
             nix::bind_texture(b.index, static_cast<Texture*>(b.p));
@@ -28,18 +34,19 @@ void ComputeTask::dispatch(int nx, int ny, int nz) {
     }
     shader->dispatch(nx, ny, nz);
     nix::image_barrier();
-}
 #endif
 #ifdef USING_VULKAN
-void ComputeTask::dispatch(CommandBuffer* cb, int nx, int ny, int nz) {
+    auto cb = params.command_buffer;
     cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
     cb->bind_pipeline(pipeline.get());
     cb->bind_descriptor_set(0, dset.get());
     cb->dispatch(nx, ny, nz);
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
-    gpu_flush();
-}
+    // TODO barriers
 #endif
+    gpu_timestamp_end(params, ch_draw);
+	PerformanceMonitor::end(ch_draw);
+}
 
 void ComputeTask::bind_texture(int index, Texture *texture) {
 #ifdef USING_OPENGL
