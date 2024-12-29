@@ -36,6 +36,12 @@ VkFormat parse_format(const string &s) {
 		return VK_FORMAT_R16G16B16_SFLOAT;
 	if (s == "r:f32")
 		return VK_FORMAT_R32_SFLOAT;
+	if (s == "r:i32")
+		return VK_FORMAT_R32_SINT;
+	if (s == "rg:f32")
+		return VK_FORMAT_R32G32_SFLOAT;
+	if (s == "rg:i32")
+		return VK_FORMAT_R32G32_SINT;
 	if (s == "d:f32")
 		return VK_FORMAT_D32_SFLOAT;
 	if (s == "d:i16")

@@ -33,6 +33,8 @@ LightMeter::LightMeter(ResourceManager* resource_manager, Texture* tex)
 void LightMeter::read() {
 	PerformanceMonitor::begin(ch_prepare);
 
+	// TODO barriers...
+	gpu_flush();
 	if (histogram.num == NBINS) {
 #ifdef USING_VULKAN
 		void* p = buf->map();

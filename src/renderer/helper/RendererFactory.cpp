@@ -189,11 +189,12 @@ public:
 	void render(const RenderParams& params) override {
 		if (auto hdr = engine.hdr_renderer) {
 			if (auto lm = hdr->light_meter) {
-				gpu_flush();
-				lm->read();
-				lm->setup();
-				if (hdr->cam and hdr->cam->auto_exposure)
+				lm->active = hdr->cam and hdr->cam->auto_exposure;
+				if (lm->active) {
+					lm->read();
+					lm->setup();
 					lm->adjust_camera(hdr->cam);
+				}
 			}
 		}
 	}

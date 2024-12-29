@@ -69,5 +69,6 @@ public:
 
 	virtual void render(const RenderParams& params) = 0;
 
+	bool active = true;
 	int _priority = 0;
 };

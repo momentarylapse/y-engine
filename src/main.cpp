@@ -350,11 +350,11 @@ public:
 		ControllerManager::handle_draw_pre();
 		timer_render.peek();
 		for (auto t: engine.render_tasks)
-			if (t->_priority < 1000)
+			if (t->_priority < 1000 and t->active)
 				t->render(params);
 		engine.window_renderer->draw(params);
 		for (auto t: engine.render_tasks)
-			if (t->_priority >= 1000)
+			if (t->_priority >= 1000 and t->active)
 				t->render(params);
 		render_times.add(timer_render.get());
 		engine.window_renderer->end_frame(params);
