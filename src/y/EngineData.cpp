@@ -8,8 +8,11 @@
 
 #include "EngineData.h"
 #include <lib/config.h>
+#include <lib/base/sort.h>
 #include <lib/nix/nix.h>
 #include <lib/kaba/kaba.h>
+#include <renderer/Renderer.h>
+
 #include "../world/Model.h"
 #include "../world/Material.h"
 #include "../helper/ResourceManager.h"
@@ -92,5 +95,14 @@ void EngineData::set_dirs(const Path &_texture_dir, const Path &_map_dir, const 
 void EngineData::exit() {
 	end_requested = true;
 }
+
+void EngineData::add_render_task(RenderTask* task, int priority) {
+	task->_priority = priority;
+	render_tasks.add(task);
+	base::inplace_sort(render_tasks, [](RenderTask *a, RenderTask *b) {
+		return a->_priority <= b->_priority;
+	});
+}
+
 
 

@@ -36,6 +36,7 @@
 #include "../renderer/Renderer.h"
 #include "../renderer/helper/RendererFactory.h"
 #include "../renderer/helper/CubeMapSource.h"
+#include "../renderer/helper/LightMeter.h"
 #include "../renderer/post/HDRRenderer.h"
 #ifdef USING_OPENGL
 #include "../renderer/world/WorldRendererGL.h"
@@ -867,9 +868,9 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("HDRRenderer.light_meter", &HDRRenderer::light_meter);
 	ext->link_class_func("HDRRenderer.tex_bloom", &hdr_renderer_get_tex_bloom);
 
-	ext->declare_class_size("HDRRenderer.LightMeter", sizeof(HDRRenderer::LightMeter));
-	ext->declare_class_element("HDRRenderer.LightMeter.histogram", &HDRRenderer::LightMeter::histogram);
-	ext->declare_class_element("HDRRenderer.LightMeter.brightness", &HDRRenderer::LightMeter::brightness);
+	ext->declare_class_size("LightMeter", sizeof(LightMeter));
+	ext->declare_class_element("LightMeter.histogram", &LightMeter::histogram);
+	ext->declare_class_element("LightMeter.brightness", &LightMeter::brightness);
 
 
 	ext->declare_class_size("FrameBuffer", sizeof(FrameBuffer));

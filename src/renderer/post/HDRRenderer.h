@@ -15,6 +15,7 @@ class ComputeTask;
 class TextureRenderer;
 class ThroughShaderRenderer;
 class MultisampleResolver;
+class LightMeter;
 
 class HDRRenderer : public Renderer {
 public:
@@ -63,16 +64,6 @@ public:
 
 
 
-	struct LightMeter {
-		void init(ResourceManager* resource_manager, Texture* tex, int channel);
-		ComputeTask* compute;
-		UniformBuffer* params;
-		ShaderStorageBuffer* buf;
-		Array<int> histogram;
-		float brightness;
-		int ch_post_brightness = -1;
-		void measure(const RenderParams& params, Texture* tex);
-		void adjust_camera(Camera* cam);
-	} light_meter;
+	LightMeter* light_meter;
 };
 

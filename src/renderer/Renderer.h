@@ -68,4 +68,6 @@ public:
 	explicit RenderTask(const string &name);
 
 	virtual void render(const RenderParams& params) = 0;
+
+	int _priority = 0;
 };

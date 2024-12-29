@@ -41,6 +41,7 @@ class RegionRenderer
 	var regions: Region[]
 	func extern add_region(r: Renderer&, dest: rect, z: int)
 
+
 class RenderPath
 	enum Type
 		NONE
@@ -57,16 +58,20 @@ class RenderPath
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
+
+class LightMeter
+	var histogram: i32[]
+	var brightness: f32
+
+
 class HDRRenderer
 	var texture: shared![Texture]
 	var depth_buffer: shared![DepthBuffer]
 	#func extern tex_bloom() -> Texture&[]
 	func extern tex_bloom() -> shared![Texture][]
 	
-	class LightMeter
-		var histogram: i32[]
-		var brightness: f32
-	var light_meter: LightMeter
+	var light_meter: LightMeter&
+
 
 class PostProcessor
 	var fb1, fb2: FrameBuffer&

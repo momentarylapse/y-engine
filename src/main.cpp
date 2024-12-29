@@ -349,6 +349,8 @@ public:
 		const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
 		ControllerManager::handle_draw_pre();
 		timer_render.peek();
+		for (auto t: engine.render_tasks)
+			t->render(params);
 		engine.window_renderer->draw(params);
 		render_times.add(timer_render.get());
 		engine.window_renderer->end_frame(params);

@@ -34,6 +34,7 @@ using WindowRenderer = WindowRendererGL;
 #endif
 class RegionRenderer;
 class HDRRenderer;
+class RenderTask;
 
 class EngineData {
 public:
@@ -95,6 +96,9 @@ public:
 	HDRRenderer *hdr_renderer;
 	PostProcessor *post_processor;
 	WorldRenderer *world_renderer;
+
+	Array<RenderTask*> render_tasks;
+	void add_render_task(RenderTask* task, int priority);
 };
 extern EngineData engine;
 
