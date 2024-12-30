@@ -36,6 +36,7 @@
 #include "../renderer/Renderer.h"
 #include "../renderer/helper/RendererFactory.h"
 #include "../renderer/helper/CubeMapSource.h"
+#include "../renderer/helper/ComputeTask.h"
 #include "../renderer/helper/LightMeter.h"
 #include "../renderer/post/HDRRenderer.h"
 #ifdef USING_OPENGL
@@ -150,12 +151,62 @@ shared_array<Texture> framebuffer_color_attachments(FrameBuffer *fb) {
 }
 
 
+void buffer_update_array(Buffer *buf, const DynamicArray &data) {
+#ifdef USING_VULKAN
+	buf->update_array(data);
+#else
+	buf->update_array(data);
+#endif
+}
+
+void buffer_update_chunk(Buffer *buf, const void* data, int size) {
+#ifdef USING_VULKAN
+	buf->update_part(data, 0, size);
+#else
+	buf->update(data, size);
+#endif
+}
+
+void buffer_read_chunk(Buffer *buf, void* data, int size) {
+#ifdef USING_VULKAN
+	auto p = buf->map();
+	memcpy(data, p, size);
+	buf->unmap();
+#else
+	buf->read(data, size);
+#endif
+}
+
+void buffer_read_array(Buffer *buf, DynamicArray &data) {
+#ifdef USING_VULKAN
+	buffer_read_chunk(buf, data.data, data.num * data.element_size);
+#else
+	buf->read_array(data);
+#endif
+}
+
 void vertexbuffer_init(VertexBuffer *vb, const string &format) {
 	new(vb) VertexBuffer(format);
 }
 
-void vertexbuffer_update(VertexBuffer *vb, const DynamicArray &vertices) {
-	vb->update(vertices);
+void uniformbuffer_init(UniformBuffer* buf, int size) {
+#ifdef USING_VULKAN
+	new(buf) UniformBuffer(size);
+#else
+	new(buf) UniformBuffer();
+#endif
+}
+
+void storagebuffer_init(ShaderStorageBuffer* buf, int size) {
+#ifdef USING_VULKAN
+	new(buf) ShaderStorageBuffer(size);
+#else
+	new(buf) ShaderStorageBuffer();
+#endif
+}
+
+void computetask_init(ComputeTask* task, const string& name, const shared<Shader>& shader, int nx, int ny, int nz) {
+	new(task) ComputeTask(name, shader, nx, ny, nz);
 }
 
 void texture_init(Texture *t, int w, int h, const string &format) {
@@ -813,9 +864,30 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("EngineData.post_processor", &EngineData::post_processor);
 	ext->declare_class_element("EngineData.render_path", &EngineData::world_renderer);
 	ext->link_class_func("EngineData.exit", &EngineData::exit);
+	ext->link_class_func("EngineData.add_render_task", &EngineData::add_render_task);
 
 
 	ext->declare_class_size("Renderer", sizeof(Renderer));
+
+	{
+		ComputeTask ct("", nullptr, 0, 0, 0);
+		ext->declare_class_size("RenderTask", sizeof(RenderTask));
+		ext->declare_class_element("RenderTask.active", &RenderTask::active);
+		ext->link_virtual("RenderTask.prepare", &RenderTask::prepare, &ct);
+		ext->link_virtual("RenderTask.draw", &RenderTask::draw, &ct);
+		ext->link_virtual("RenderTask.render", &RenderTask::render, &ct);
+
+		ext->declare_class_size("ComputeTask", sizeof(ComputeTask));
+		ext->declare_class_element("ComputeTask.nx", &ComputeTask::nx);
+		ext->declare_class_element("ComputeTask.ny", &ComputeTask::ny);
+		ext->declare_class_element("ComputeTask.nz", &ComputeTask::nz);
+		ext->link_class_func("ComputeTask.__init__", &computetask_init);
+		ext->link_class_func("ComputeTask.bind_texture", &ComputeTask::bind_texture);
+		ext->link_class_func("ComputeTask.bind_image", &ComputeTask::bind_image);
+		ext->link_class_func("ComputeTask.bind_uniform_buffer", &ComputeTask::bind_uniform_buffer);
+		ext->link_class_func("ComputeTask.bind_storage_buffer", &ComputeTask::bind_storage_buffer);
+		ext->link_virtual("ComputeTask.render", &ComputeTask::render, &ct);
+	}
 
 #ifdef USING_VULKAN
 //	using WR = WindowRendererVulkan;
@@ -880,9 +952,19 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("FrameBuffer.depth_buffer", &framebuffer_depthbuffer);
 	ext->link_class_func("FrameBuffer.color_attachments", &framebuffer_color_attachments);
 
+	ext->link_class_func("Buffer.update", &buffer_update_array);
+	ext->link_class_func("Buffer.update_chunk", &buffer_update_chunk);
+	ext->link_class_func("Buffer.read", &buffer_read_array);
+	ext->link_class_func("Buffer.read_chunk", &buffer_read_chunk);
+
 	ext->declare_class_size("VertexBuffer", sizeof(VertexBuffer));
 	ext->link_class_func("VertexBuffer.__init__", &vertexbuffer_init);
-	ext->link_class_func("VertexBuffer.update", &vertexbuffer_update);
+
+	ext->declare_class_size("UniformBuffer", sizeof(UniformBuffer));
+	ext->link_class_func("UniformBuffer.__init__", &uniformbuffer_init);
+
+	ext->declare_class_size("ShaderStorageBuffer", sizeof(ShaderStorageBuffer));
+	ext->link_class_func("ShaderStorageBuffer.__init__", &storagebuffer_init);
 
 	ext->declare_class_size("Texture", sizeof(Texture));
 	ext->declare_class_element("Texture.width", &Texture::width);

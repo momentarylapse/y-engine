@@ -12,9 +12,11 @@ ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int 
     ny = _ny;
     nz = _nz;
 #ifdef USING_VULKAN
-    pool = new vulkan::DescriptorPool("sampler:8,buffer:8,storage-buffer:8,image:8", 1);
-    dset = pool->create_set_from_layout(shader->descr_layouts[0]);
-    pipeline = new vulkan::ComputePipeline(shader.get());
+    if (name != "") {
+        pool = new vulkan::DescriptorPool("sampler:8,buffer:8,storage-buffer:8,image:8", 1);
+        dset = pool->create_set_from_layout(shader->descr_layouts[0]);
+        pipeline = new vulkan::ComputePipeline(shader.get());
+    }
 #endif
 }
 

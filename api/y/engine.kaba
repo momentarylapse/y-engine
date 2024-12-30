@@ -9,16 +9,16 @@ class EngineData
 	var console_enabled: bool
 	#bool wire_mode
 	var resetting_game, game_running, first_frame: bool
-	var physical_aspect_ratio: float
+	var physical_aspect_ratio: f32
 	
 	var physics_enabled, collisions_enabled: bool
-	var detail_level: float
+	var detail_level: f32
 	
-	var elapsed: float
-	var elapsed_rt: float
-	var time_scale: float
+	var elapsed: f32
+	var elapsed_rt: f32
+	var time_scale: f32
 	
-	var fps_min, fps_max: float
+	var fps_min, fps_max: f32
 	var resolution_scale: vec2
 	
 	var initial_world_file, second_world_file: os.Path
@@ -28,10 +28,28 @@ class EngineData
 	var render_path: RenderPath&
 	var hdr_renderer: HDRRenderer*
 	var post_processor: PostProcessor*
+	
+	func extern add_render_task(task: xfer[RenderTask], priority: i32)
 
 	func extern exit()
 
+struct RenderParams
+
 class Renderer
+	func virtual prepare(params: RenderParams)
+	func virtual draw(params: RenderParams)
+
+class RenderTask extends Renderer
+	var active: bool
+	func virtual render(params: RenderParams)
+
+class ComputeTask extends RenderTask
+	func extern __init__(name: string, shader: shared![Shader], nx: i32, ny: i32, nz: i32)
+	func override extern render(params: RenderParams)
+	func extern bind_texture(index: i32, tex: Texture&)
+	func extern bind_image(index: i32, tex: Texture&)
+	func extern bind_uniform_buffer(index: i32, buf: UniformBuffer&)
+	func extern bind_storage_buffer(index: i32, buf: ShaderStorageBuffer&)
 
 class RegionRenderer
 	struct Region
@@ -83,20 +101,20 @@ class PostProcessor
 class PerformanceMonitor
 	struct Channel
 		var name: string
-		var parent: int
-		var average: float
+		var parent: i32
+		var average: f32
 	struct TimingData
-		var channel: int
-		var offset: float
+		var channel: i32
+		var offset: f32
 	struct FrameTimingData
 		var cpu0: TimingData[]
 		var gpu: TimingData[]
-		var total_time: float
-	func extern static get_name(channel: int)
+		var total_time: f32
+	func extern static get_name(channel: i32)
 	var extern static channels: Channel[]
 	var extern static previous_frame_timing: FrameTimingData
-	var extern static avg_frame_time: float
-	var extern static frames: int
+	var extern static avg_frame_time: f32
+	var extern static frames: i32
 	#class Average
 	#	var frame_time: float
 	#	var location: float[16]

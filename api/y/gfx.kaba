@@ -10,46 +10,61 @@ enum PrimitiveTopology
 
 struct Vertex
 	var p, n: vec3
-	var u, v: float
+	var u, v: f32
 
 struct VertexFx
 	pos: vec3
 	col: color
-	u, v: float
+	u, v: f32
 
 struct PointVertex
 	pos: vec3
-	radius: float
+	radius: f32
 	col: color
 
 class FrameBuffer
-	var width, height: int
+	var width, height: i32
 	func extern __init__(att: shared![Texture][])
 	func extern selfref depth_buffer() -> shared[DepthBuffer]
 	func extern selfref color_attachments() -> shared![Texture][]
 
 class Shader as shared
-	func extern set_float(name: string, f: float)
-	func extern set_floats(name: string, f: float&, num: int)
+	func extern set_float(name: string, f: f32)
+	func extern set_floats(name: string, f: f32&, num: i32)
 
 class Texture as shared
-	var width, height: int
-	func extern __init__(w: int, h: int, format: string = "rgba:i8")
+	var width, height: i32
+	func extern __init__(w: i32, h: i32, format: string = "rgba:i8")
 	func extern __delete__()
 	func extern mut write(im: Image)
 	func extern mut write_float(data: @DynamicArray)
 	func extern mut set_options(op: string)
 
 class CubeMap extends Texture
-	func extern __init__(size: int, format: string)
+	func extern __init__(size: i32, format: string)
 class DepthBuffer extends Texture
-	func extern override __init__(w: int, h: int, format: string)
+	func extern override __init__(w: i32, h: i32, format: string)
 class VolumeTexture extends Texture
-	func extern __init__(nx: int, ny: int, nz: int, format: string)
+	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
 
-class VertexBuffer
+
+
+class Buffer
+	func extern mut update(data: @DynamicArray)
+	func extern mut update_chunk(data: void*, size: i32)
+	func extern mut read(mut data: @DynamicArray)
+	func extern mut read_chunk(data: void*, size: i32)
+
+class VertexBuffer extends Buffer
 	func extern __init__(format: string = "3f,3f,2f")
-	func extern mut update(vertices: @DynamicArray)
+
+class UniformBuffer extends Buffer
+	func extern __init__(size: i32)
+
+class ShaderStorageBuffer extends Buffer
+	func extern __init__(size: i32)
+
+
 
 var extern tex_white: shared![Texture]
 
