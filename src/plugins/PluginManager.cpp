@@ -152,11 +152,7 @@ shared_array<Texture> framebuffer_color_attachments(FrameBuffer *fb) {
 
 
 void buffer_update_array(Buffer *buf, const DynamicArray &data) {
-#ifdef USING_VULKAN
 	buf->update_array(data);
-#else
-	buf->update_array(data);
-#endif
 }
 
 void buffer_update_chunk(Buffer *buf, const void* data, int size) {
@@ -190,19 +186,11 @@ void vertexbuffer_init(VertexBuffer *vb, const string &format) {
 }
 
 void uniformbuffer_init(UniformBuffer* buf, int size) {
-#ifdef USING_VULKAN
 	new(buf) UniformBuffer(size);
-#else
-	new(buf) UniformBuffer();
-#endif
 }
 
 void storagebuffer_init(ShaderStorageBuffer* buf, int size) {
-#ifdef USING_VULKAN
 	new(buf) ShaderStorageBuffer(size);
-#else
-	new(buf) ShaderStorageBuffer();
-#endif
 }
 
 void computetask_init(ComputeTask* task, const string& name, const shared<Shader>& shader, int nx, int ny, int nz) {

@@ -49,13 +49,13 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, int width, int hei
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
 
-	ssao_sample_buffer = new nix::UniformBuffer();
 	Array<vec4> ssao_samples;
 	Random r;
 	for (int i=0; i<64; i++) {
 		auto v = r.dir() * pow(r.uniform01(), 1);
 		ssao_samples.add(vec4(v.x, v.y, abs(v.z), 0));
 	}
+	ssao_sample_buffer = new nix::UniformBuffer(ssao_samples.num * sizeof(vec4));
 	ssao_sample_buffer->update_array(ssao_samples);
 
 	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", channel);

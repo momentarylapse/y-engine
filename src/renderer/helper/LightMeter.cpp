@@ -16,13 +16,8 @@ constexpr int NSAMPLES = 2560;
 LightMeter::LightMeter(ResourceManager* resource_manager, Texture* tex)
 	: ComputeTask("expo", resource_manager->load_shader("compute/brightness.shader"), NSAMPLES, 1, 1)
 {
-#ifdef USING_VULKAN
 	params = new UniformBuffer(8);
 	buf = new ShaderStorageBuffer(NBINS*4);
-#else
-	params = new UniformBuffer();
-	buf = new ShaderStorageBuffer();
-#endif
 	texture = tex;
 	bind_texture(0, tex);
 	bind_storage_buffer(1, buf);

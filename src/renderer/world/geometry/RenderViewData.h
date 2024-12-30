@@ -18,6 +18,7 @@ class ShaderCache;
 class Material;
 enum class RenderPathType;
 
+static constexpr int MAX_INSTANCES = 1<<11;
 
 #ifdef USING_VULKAN
 
@@ -29,8 +30,6 @@ static constexpr int BINDING_PARAMS = 8;
 static constexpr int BINDING_LIGHT = 9;
 static constexpr int BINDING_INSTANCE_MATRICES = 10;
 static constexpr int BINDING_BONE_MATRICES = 11;
-
-static constexpr int MAX_INSTANCES = 1<<11;
 
 struct UBO {
 	// matrix

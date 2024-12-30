@@ -11,7 +11,7 @@ void RenderData::apply(const RenderParams &params) {
 }
 
 RenderViewData::RenderViewData() {
-	ubo_light = new UniformBuffer();
+	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
 }
 
 void RenderViewData::begin_scene(SceneView *_scene_view) {

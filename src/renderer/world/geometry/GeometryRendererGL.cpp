@@ -452,7 +452,7 @@ void GeometryRenderer::prepare_instanced_matrices() {
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
 		if (!mi->ubo_matrices)
-			mi->ubo_matrices = new nix::UniformBuffer();
+			mi->ubo_matrices = new nix::UniformBuffer(MAX_INSTANCES * sizeof(mat4));
 		mi->ubo_matrices->update_array(mi->matrices);
 	}
 	PerformanceMonitor::end(ch_pre);
