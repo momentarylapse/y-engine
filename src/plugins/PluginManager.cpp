@@ -193,7 +193,16 @@ void storagebuffer_init(ShaderStorageBuffer* buf, int size) {
 	new(buf) ShaderStorageBuffer(size);
 }
 
-void computetask_init(ComputeTask* task, const string& name, const shared<Shader>& shader, int nx, int ny, int nz) {
+void computetask_init(ComputeTask* task, const string& name, const shared<Shader>& shader, const Array<int>& n) {
+	int nx = 1;
+	int ny = 1;
+	int nz = 1;
+	if (n.num >= 1)
+		nx = n[0];
+	if (n.num >= 2)
+		ny = n[1];
+	if (n.num >= 3)
+		nz = n[2];
 	new(task) ComputeTask(name, shader, nx, ny, nz);
 }
 
@@ -869,6 +878,7 @@ void PluginManager::export_kaba() {
 		ext->declare_class_element("ComputeTask.nx", &ComputeTask::nx);
 		ext->declare_class_element("ComputeTask.ny", &ComputeTask::ny);
 		ext->declare_class_element("ComputeTask.nz", &ComputeTask::nz);
+		ext->declare_class_element("ComputeTask.shader_data", &ComputeTask::shader_data);
 		ext->link_class_func("ComputeTask.__init__", &computetask_init);
 		ext->link_class_func("ComputeTask.bind_texture", &ComputeTask::bind_texture);
 		ext->link_class_func("ComputeTask.bind_image", &ComputeTask::bind_image);

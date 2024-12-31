@@ -32,7 +32,7 @@ void apply_shader_data(CommandBuffer* cb, const Any &shader_data) {
 				*(int*)&temp[offset] = val.as_int();
 				max_used = max(max_used, offset + 4);
 			} else if (val.is_bool()) {
-				*(int*)&temp[offset] = val.as_bool();
+				*(bool*)&temp[offset] = val.as_bool();
 				max_used = max(max_used, offset + 1);
 			} else if (val.is_list()) {
 				for (int i=0; i<val.as_list().num; i++)
@@ -59,7 +59,7 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 			if (val.is_float()) {
 				s->set_float(name, val.as_float());
 			} else if (val.is_int()) {
-				s->set_float(name, val.as_int());
+				s->set_int(name, val.as_int());
 			} else if (val.is_bool()) {
 				s->set_int(name, (int)val.as_bool());
 			} else if (val.is_list()) {

@@ -4,6 +4,12 @@
 #include "../../helper/PerformanceMonitor.h"
 
 
+#ifdef USING_VULKAN
+void apply_shader_data(CommandBuffer* cb, const Any &shader_data);
+#else
+void apply_shader_data(Shader *s, const Any &shader_data);
+#endif
+
 ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int _nx, int _ny, int _nz) :
     RenderTask(name)
 {
@@ -34,6 +40,7 @@ void ComputeTask::render(const RenderParams &params) {
         else if (b.type == Binding::Type::StorageBuffer)
             nix::bind_storage_buffer(b.index, static_cast<nix::ShaderStorageBuffer*>(b.p));
     }
+    apply_shader_data(shader.get(), shader_data);
     shader->dispatch(nx, ny, nz);
     nix::image_barrier();
 #endif
@@ -42,6 +49,7 @@ void ComputeTask::render(const RenderParams &params) {
     cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
     cb->bind_pipeline(pipeline.get());
     cb->bind_descriptor_set(0, dset.get());
+    apply_shader_data(cb, shader_data);
     cb->dispatch(nx, ny, nz);
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
     // TODO barriers

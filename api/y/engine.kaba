@@ -44,7 +44,11 @@ class RenderTask extends Renderer
 	func virtual render(params: RenderParams)
 
 class ComputeTask extends RenderTask
-	func extern __init__(name: string, shader: shared![Shader], nx: i32, ny: i32, nz: i32)
+	nx: i32
+	ny: i32
+	nz: i32
+	shader_data: any
+	func extern __init__(name: string, shader: shared![Shader], n: i32[])
 	func override extern render(params: RenderParams)
 	func extern bind_texture(index: i32, tex: Texture&)
 	func extern bind_image(index: i32, tex: Texture&)

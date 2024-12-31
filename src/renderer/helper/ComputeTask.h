@@ -5,13 +5,13 @@
 #include "../Renderer.h"
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
-#include <lib/image/image.h>
+#include <lib/any/any.h>
 #include "../../graphics-fwd.h"
 
 class ComputeTask : public RenderTask {
 public:
     explicit ComputeTask(const string& name, const shared<Shader>& shader, int nx, int ny, int nz);
-    shared<Shader> shader = nullptr;
+    shared<Shader> shader;
 
     struct Binding {
         enum class Type {
@@ -26,6 +26,7 @@ public:
     };
     Array<Binding> bindings;
     int nx, ny, nz;
+	Any shader_data;
 
     void bind_texture(int index, Texture* texture);
     void bind_image(int index, ImageTexture* image);
