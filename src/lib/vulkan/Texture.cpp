@@ -152,55 +152,13 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	width = nx;
 	height = ny;
 	depth = nz;
-	image.format = parse_format(_format);
-	//int ps = format_size(image.format);
-	//VkDeviceSize image_size = width * height * depth * ps;
 	mip_levels = 1;
 
-	VkExtent3D extent = {(unsigned)nx, (unsigned)ny, (unsigned)nz};
-
-
-
-	VkImageCreateInfo imageCreateInfo = {};
-	imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	imageCreateInfo.pNext = nullptr;
-	imageCreateInfo.flags = 0;
-	imageCreateInfo.imageType = depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
-	imageCreateInfo.format = image.format;
-	imageCreateInfo.extent = extent;
-	imageCreateInfo.mipLevels = 1;
-	imageCreateInfo.arrayLayers = 1;
-	imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-	imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-	imageCreateInfo.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-	imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	imageCreateInfo.queueFamilyIndexCount = 0;
-	imageCreateInfo.pQueueFamilyIndices = nullptr;
-	imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-	auto result = vkCreateImage(default_device->device, &imageCreateInfo, nullptr, &image.image);
-	if (VK_SUCCESS != result)
-		throw Exception("vkCreateImage failed");
-	VkMemoryRequirements memoryRequirements;
-	vkGetImageMemoryRequirements(default_device->device, image.image, &memoryRequirements);
-
-	VkMemoryAllocateInfo memoryAllocateInfo;
-	memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	memoryAllocateInfo.pNext = nullptr;
-	memoryAllocateInfo.allocationSize = memoryRequirements.size;
-	memoryAllocateInfo.memoryTypeIndex = default_device->find_memory_type(memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-	result = vkAllocateMemory(default_device->device, &memoryAllocateInfo, nullptr, &image.memory);
-	if (VK_SUCCESS != result)
-		throw Exception("vkAllocateMemory failed");
-	result = vkBindImageMemory(default_device->device, image.image, image.memory, 0);
-	if (VK_SUCCESS != result)
-		throw Exception("vkBindImageMemory failed");
-	if (verbosity >= 2)
-		msg_write("  storage image ok");
+	VkImageType _type = depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
+	image.create(_type, width, height, depth, mip_levels, 1, VK_SAMPLE_COUNT_1_BIT, parse_format(_format), VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, false);
 
 	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D, mip_levels, 0, 1);
-	//_create_sampler();
+	_create_sampler();
 }
 
 void Texture::_destroy() {
