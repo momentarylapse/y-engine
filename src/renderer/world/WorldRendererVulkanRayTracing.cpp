@@ -36,9 +36,6 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	width = w;
 	height = h;
 
-	//create_more();
-	geo_renderer = new GeometryRenderer(type, scene_view);
-
 	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;
 	else if (device->has_compute())
@@ -47,7 +44,6 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 		throw Exception("neither RTX nor compute shader support");
 
 	offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:f16");
-	offscreen_image2 = new vulkan::Texture(width, height, "rgba:f16");
 
 	buffer_meshes = new vulkan::UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
 
@@ -71,6 +67,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 
 
 	} else if (mode == Mode::COMPUTE) {
+		msg_error("COMPUTE!!!");
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
@@ -84,15 +81,8 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	}
 
 
-
-	shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
-	dset_out = pool->create_set("sampler");
-
-	dset_out->set_texture(0, offscreen_image2);
-	dset_out->update();
-
-	vb_2d = new VertexBuffer("3f,3f,2f");
-	vb_2d->create_quad(rect::ID_SYM);
+	auto shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
+	out_renderer = new ThroughShaderRenderer({offscreen_image}, shader_out);
 
 
 	dummy_cam_entity = new Entity;
@@ -100,8 +90,6 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	dummy_cam_entity->components.add(dummy_cam);
 	dummy_cam->owner = dummy_cam_entity;
 }
-
-static int cur_query_offset;
 
 void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	if (!scene_view.cam)
@@ -242,40 +230,19 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	/*cb->image_barrier(offscreen_image,
 		vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
 		vulkan::ImageLayout::GENERAL, vulkan::ImageLayout::SHADER_READ_ONLY_OPTIMAL);*/
-	cb->copy_image(offscreen_image, offscreen_image2, {0,0,w,h,0,0});
+	//cb->copy_image(offscreen_image, offscreen_image2, {0,0,w,h,0,0});
 
 	cb->image_barrier(offscreen_image,
 		vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT,
 		vulkan::ImageLayout::GENERAL, vulkan::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 
+
+	out_renderer->set_source(dynamicly_scaled_source());
+
 }
 
 void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
-
-	auto cb = params.command_buffer;
-
-    //vb_2d->create_quad(rect::ID_SYM, rect::ID);//dynamicly_scaled_source());
-	vb_2d->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-
-
-	if (!pipeline_out) {
-		pipeline_out = new vulkan::GraphicsPipeline(shader_out.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
-		pipeline_out->set_culling(CullMode::NONE);
-		pipeline_out->set_z(false, false);
-		pipeline_out->rebuild();
-	}
-
-	cb->bind_pipeline(pipeline_out);
-	cb->bind_descriptor_set(0, dset_out);
-	struct PCOut {
-		mat4 p, m, v;
-		float x[32];
-	};
-	PCOut pco = {mat4::ID, mat4::ID, mat4::ID, scene_view.cam->exposure};
-    pco.x[3] = 1; // scale_x
-    pco.x[4] = 1;
-	cb->push_constant(0, sizeof(mat4) * 3 + 5 * sizeof(float), &pco);
-	cb->draw(vb_2d.get());
+	out_renderer->draw(params);
 }
 
 void WorldRendererVulkanRayTracing::render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) {

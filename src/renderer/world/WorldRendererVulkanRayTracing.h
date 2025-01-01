@@ -9,6 +9,7 @@
 
 #include "WorldRendererVulkan.h"
 #ifdef USING_VULKAN
+#include "../post/ThroughShaderRenderer.h"
 
 class Camera;
 
@@ -31,7 +32,7 @@ public:
 	RenderViewData rvd;
 
 	vulkan::StorageTexture *offscreen_image;
-	vulkan::Texture *offscreen_image2;
+	//vulkan::Texture *offscreen_image2;
 	int width, height;
 
 	struct MeshDescription {
@@ -73,11 +74,7 @@ public:
 		vulkan::UniformBuffer *buffer_cam;
 	} rtx;
 
-
-	shared<Shader> shader_out;
-	GraphicsPipeline* pipeline_out = nullptr;
-	DescriptorSet *dset_out;
-	owned<VertexBuffer> vb_2d;
+	owned<ThroughShaderRenderer> out_renderer;
 
 	Entity *dummy_cam_entity;
 	Camera *dummy_cam;
