@@ -74,7 +74,12 @@ xfer<Shader> ResourceManager::__load_shader(const Path& path, const string &over
 	vulkan::overwrite_bindings = overwrite_bindings;
 	return Shader::load(path);
 #else
-	return ctx->load_shader(path);
+	try {
+		return ctx->load_shader(path);
+	} catch (Exception &e) {
+		msg_error(e.message());
+	}
+	return nullptr;
 #endif
 }
 
