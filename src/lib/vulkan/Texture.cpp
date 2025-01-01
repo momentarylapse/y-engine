@@ -155,7 +155,8 @@ StorageTexture::StorageTexture(int nx, int ny, int nz, const string &_format) {
 	mip_levels = 1;
 
 	VkImageType _type = depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
-	image.create(_type, width, height, depth, mip_levels, 1, VK_SAMPLE_COUNT_1_BIT, parse_format(_format), VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, false);
+	auto usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	image.create(_type, width, height, depth, mip_levels, 1, VK_SAMPLE_COUNT_1_BIT, parse_format(_format), usage, false);
 
 	view = image.create_view(VK_IMAGE_ASPECT_COLOR_BIT, depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D, mip_levels, 0, 1);
 	_create_sampler();
