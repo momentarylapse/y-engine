@@ -76,6 +76,7 @@
 #include "../graphics-impl.h"
 #include "../lib/kaba/dynamic/exception.h"
 #include "../lib/os/msg.h"
+#include "../lib/image/image.h"
 
 
 /*void global_delete(BaseClass *e) {
@@ -226,6 +227,14 @@ void texture_write_float(Texture *t, const DynamicArray& data) {
 #endif
 }
 
+void texture_read(Texture* t, Image& im) {
+#ifdef USING_VULKAN
+	t->read(im.data.data);
+#else
+	t->read(im);
+#endif
+}
+
 void cubemap_init(CubeMap *t, int size, const string &format) {
 	new(t) CubeMap(size, format);
 }
@@ -235,6 +244,14 @@ void depthbuffer_init(DepthBuffer *t, int w, int h, const string &format) {
 	new(t) DepthBuffer(w, h, format, true);
 #else
 	new(t) DepthBuffer(w, h, format);
+#endif
+}
+
+void imagetexture_init(DepthBuffer *t, int w, int h, const string &format) {
+#ifdef USING_VULKAN
+	new(t) ImageTexture(w, h, 1, format);
+#else
+	new(t) ImageTexture(w, h, format);
 #endif
 }
 
@@ -971,11 +988,14 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Texture.__delete__", &texture_delete);
 	ext->link_class_func("Texture.write", &texture_write);
 	ext->link_class_func("Texture.write_float", &texture_write_float);
+	ext->link_class_func("Texture.read", &texture_read);
 	ext->link_class_func("Texture.set_options", &Texture::set_options);
 
 	ext->link_class_func("CubeMap.__init__", &cubemap_init);
 
 	ext->link_class_func("DepthBuffer.__init__", &depthbuffer_init);
+
+	ext->link_class_func("ImageTexture.__init__", &imagetexture_init);
 
 	ext->link_class_func("VolumeTexture.__init__", &volumetexture_init);
 

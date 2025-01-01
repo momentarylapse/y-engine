@@ -38,11 +38,14 @@ class Texture as shared
 	func extern __delete__()
 	func extern mut write(im: Image)
 	func extern mut write_float(data: @DynamicArray)
+	func extern mut read(out im: Image)
 	func extern mut set_options(op: string)
 
 class CubeMap extends Texture
 	func extern __init__(size: i32, format: string)
 class DepthBuffer extends Texture
+	func extern override __init__(w: i32, h: i32, format: string)
+class ImageTexture extends Texture
 	func extern override __init__(w: i32, h: i32, format: string)
 class VolumeTexture extends Texture
 	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
