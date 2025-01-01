@@ -151,7 +151,6 @@ shared_array<Texture> framebuffer_color_attachments(FrameBuffer *fb) {
 #endif
 }
 
-
 void buffer_update_array(Buffer *buf, const DynamicArray &data) {
 	buf->update_array(data);
 }
@@ -184,6 +183,10 @@ void buffer_read_array(Buffer *buf, DynamicArray &data) {
 
 void vertexbuffer_init(VertexBuffer *vb, const string &format) {
 	new(vb) VertexBuffer(format);
+}
+
+void vertexbuffer_update_array(VertexBuffer *buf, const DynamicArray &data) {
+	buf->update(data);
 }
 
 void uniformbuffer_init(UniformBuffer* buf, int size) {
@@ -974,6 +977,7 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_size("VertexBuffer", sizeof(VertexBuffer));
 	ext->link_class_func("VertexBuffer.__init__", &vertexbuffer_init);
+	ext->link_class_func("VertexBuffer.update", &vertexbuffer_update_array);
 
 	ext->declare_class_size("UniformBuffer", sizeof(UniformBuffer));
 	ext->link_class_func("UniformBuffer.__init__", &uniformbuffer_init);

@@ -58,8 +58,9 @@ class Buffer
 	func extern mut read(mut data: @DynamicArray)
 	func extern mut read_chunk(data: void*, size: i32)
 
-class VertexBuffer extends Buffer
+class VertexBuffer
 	func extern __init__(format: string = "3f,3f,2f")
+	func extern mut update(data: @DynamicArray)
 
 class UniformBuffer extends Buffer
 	func extern __init__(size: i32)
