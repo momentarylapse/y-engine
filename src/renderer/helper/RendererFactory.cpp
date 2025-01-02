@@ -152,13 +152,13 @@ Renderer *create_render_path(Camera *cam) {
 		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
 		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
-		texture_renderer = new TextureRenderer({tex_ms, depth_ms}, {"samples=4"});
+		texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
 
 		auto ms_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
 		engine.hdr_renderer->ms_resolver = ms_resolver;
 	} else {
 		msg_error("no msaa");
-		texture_renderer = new TextureRenderer({hdr_tex, hdr_depth});
+		texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
 	}
 
 	texture_renderer->add_child(engine.world_renderer);
@@ -224,7 +224,7 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 			shared tex = new Texture();
 			tex->write(im);
 			auto shader = engine.resource_manager->load_shader("forward/blur.shader");
-			auto tsr = new ThroughShaderRenderer({tex}, shader);
+			auto tsr = new ThroughShaderRenderer("blur", {tex}, shader);
 			Any axis_x, axis_y;
 			axis_x.list_set(0, 1.0f);
 			axis_x.list_set(1, 0.0f);
@@ -243,12 +243,12 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 #else
 			shared<Texture> depth2 = new DepthBuffer(N, N, "d24s8");
 #endif
-			auto tr = new TextureRenderer({tex2, depth2});
+			auto tr = new TextureRenderer("tex", {tex2, depth2});
 			tr->use_params_area = false;
 			tr->add_child(tsr);
 			// tr:  ... -> tex2
 
-			auto tsr2 = new ThroughShaderRenderer({tex2}, shader);
+			auto tsr2 = new ThroughShaderRenderer("text", {tex2}, shader);
 			data.dict_set("radius:8", 5.0f);
 			data.dict_set("threshold:12", 0.0f);
 			data.dict_set("axis:0", axis_y);

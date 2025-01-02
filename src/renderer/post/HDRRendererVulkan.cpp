@@ -62,12 +62,12 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 		auto depth1 = new DepthBuffer(bloomw, bloomh, "d:f32");
 		bl.tex_temp->set_options("wrap=clamp");
 		bl.tex_out->set_options("wrap=clamp");
-		bl.tsr[0] = new ThroughShaderRenderer({bloom_input}, shader_blur);
-		bl.tsr[1] = new ThroughShaderRenderer({bl.tex_temp}, shader_blur);
+		bl.tsr[0] = new ThroughShaderRenderer("blur", {bloom_input}, shader_blur);
+		bl.tsr[1] = new ThroughShaderRenderer("blur", {bl.tex_temp}, shader_blur);
 		bl.tsr[0]->data.dict_set("axis:0", axis_x);
 		bl.tsr[1]->data.dict_set("axis:0", axis_y);
-		bl.renderer[0] = new TextureRenderer({bl.tex_temp, depth0});
-		bl.renderer[1] = new TextureRenderer({bl.tex_out, depth1});
+		bl.renderer[0] = new TextureRenderer("blur", {bl.tex_temp, depth0});
+		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
 		bl.renderer[0]->use_params_area = true;
 		bl.renderer[1]->use_params_area = true;
 		bl.renderer[0]->add_child(bl.tsr[0].get());
@@ -86,7 +86,7 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
-	out_renderer = new ThroughShaderRenderer({tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
+	out_renderer = new ThroughShaderRenderer("out", {tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 
 
 	light_meter = new LightMeter(resource_manager, tex.get());
@@ -142,6 +142,8 @@ void HDRRenderer::prepare(const RenderParams& params) {
 }
 
 void HDRRenderer::draw(const RenderParams& params) {
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 	Any data;
 	Any a;
 	auto m = mat4::ID;
@@ -156,6 +158,8 @@ void HDRRenderer::draw(const RenderParams& params) {
 
 	out_renderer->data = data;
 	out_renderer->draw(params);
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 #if 0

@@ -5,7 +5,7 @@
 #include <renderer/base.h>
 #include "../../graphics-impl.h"
 
-TextureRenderer::TextureRenderer(const shared_array<Texture>& tex, const Array<string>& options) : RenderTask("tex") {
+TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& tex, const Array<string>& options) : RenderTask(name) {
 	textures = tex;
 	render_pass = new RenderPass(weak(textures), options);
 	frame_buffer = new FrameBuffer(render_pass.get(), textures);
@@ -20,8 +20,8 @@ void TextureRenderer::prepare(const RenderParams &params) {
 
 
 void TextureRenderer::render(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(params, ch_draw);
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 	auto area = frame_buffer->area();
 	if (use_params_area)
 		area = params.area;
@@ -36,8 +36,8 @@ void TextureRenderer::render(const RenderParams& params) {
 	cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
 	draw(p);
 	cb->end_render_pass();
-	gpu_timestamp_end(params, ch_draw);
-	PerformanceMonitor::end(ch_draw);
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 
@@ -47,7 +47,7 @@ HeadlessRenderer::HeadlessRenderer(vulkan::Device* d, const shared_array<Texture
 	command_buffer = new CommandBuffer(device->command_pool);
 	fence = new vulkan::Fence(device);
 
-	texture_renderer = new TextureRenderer(tex);
+	texture_renderer = new TextureRenderer("tex", tex);
 }
 
 HeadlessRenderer::~HeadlessRenderer() = default;

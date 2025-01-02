@@ -11,7 +11,7 @@
 
 class ThroughShaderRenderer : public Renderer {
 public:
-	ThroughShaderRenderer(const shared_array<Texture>& _textures, shared<Shader> _shader);
+	ThroughShaderRenderer(const string& name, const shared_array<Texture>& _textures, shared<Shader> _shader);
 	void draw(const RenderParams &params) override;
 
 	void set_source(const rect& area);

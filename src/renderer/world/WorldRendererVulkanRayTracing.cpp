@@ -82,7 +82,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 
 
 	auto shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
-	out_renderer = new ThroughShaderRenderer({offscreen_image}, shader_out);
+	out_renderer = new ThroughShaderRenderer("out", {offscreen_image}, shader_out);
 
 
 	dummy_cam_entity = new Entity;

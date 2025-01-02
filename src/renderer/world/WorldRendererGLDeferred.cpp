@@ -94,8 +94,8 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 }
 
 void WorldRendererGLDeferred::draw(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(params, ch_draw);
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 
 	auto target = params.frame_buffer;
 
@@ -124,8 +124,8 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	nix::set_view_matrix(mat4::ID);
 	PerformanceMonitor::end(ch_trans);
 
-	gpu_timestamp_end(params, ch_draw);
-	PerformanceMonitor::end(ch_draw);
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const RenderParams& params) {

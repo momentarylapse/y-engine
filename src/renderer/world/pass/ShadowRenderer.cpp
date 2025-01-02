@@ -43,7 +43,7 @@ ShadowRenderer::ShadowRenderer() :
 
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
-		c.texture_renderer = new TextureRenderer({tex, c.depth_buffer}, {"autoclear"});
+		c.texture_renderer = new TextureRenderer("cascd", {tex, c.depth_buffer}, {"autoclear"});
 		c.texture_renderer->use_params_area = false;
 		c.fb = c.texture_renderer->frame_buffer;
 		c.scale = (i == 0) ? 4.0f : 1.0f;

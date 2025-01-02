@@ -27,8 +27,8 @@ ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int 
 }
 
 void ComputeTask::render(const RenderParams &params) {
-	PerformanceMonitor::begin(ch_draw);
-    gpu_timestamp_begin(params, ch_draw);
+	PerformanceMonitor::begin(channel);
+    gpu_timestamp_begin(params, channel);
 #ifdef USING_OPENGL
     for (auto& b: bindings) {
         if (b.type == Binding::Type::Texture)
@@ -54,8 +54,8 @@ void ComputeTask::render(const RenderParams &params) {
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
     // TODO barriers
 #endif
-    gpu_timestamp_end(params, ch_draw);
-	PerformanceMonitor::end(ch_draw);
+    gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 void ComputeTask::bind_texture(int index, Texture *texture) {

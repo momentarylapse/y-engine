@@ -13,7 +13,7 @@
 
 class TextureRenderer : public RenderTask {
 public:
-	explicit TextureRenderer(const shared_array<Texture>& textures, const Array<string>& options = {});
+	explicit TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options = {});
 
 	// TODO move to explicit/dependency graph
 	void prepare(const RenderParams& params) override;

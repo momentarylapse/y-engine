@@ -14,7 +14,7 @@
 
 
 void RegionRenderer::draw(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_draw);
+	PerformanceMonitor::begin(channel);
 
 	const rect area = params.frame_buffer->area();
 
@@ -30,7 +30,7 @@ void RegionRenderer::draw(const RenderParams& params) {
 	}
 	nix::set_scissor(rect::EMPTY);
 	nix::set_viewport(area);
-	PerformanceMonitor::end(ch_draw);
+	PerformanceMonitor::end(channel);
 }
 
 #endif

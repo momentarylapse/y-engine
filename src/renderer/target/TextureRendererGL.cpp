@@ -10,7 +10,7 @@
 #include <graphics-impl.h>
 //#include "../../helper/PerformanceMonitor.h"
 
-TextureRenderer::TextureRenderer(const shared_array<Texture>& textures, const Array<string>& options) : RenderTask("tex") {
+TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
 	frame_buffer = new FrameBuffer(textures);
 }
 

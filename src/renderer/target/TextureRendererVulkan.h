@@ -12,7 +12,7 @@ public:
 	bool use_params_area = true;
 	bool clear_z = true;
 
-	explicit TextureRenderer(const shared_array<Texture>& tex, const Array<string>& options = {});
+	explicit TextureRenderer(const string& name, const shared_array<Texture>& tex, const Array<string>& options = {});
 	~TextureRenderer() override;
 
 	// TODO move to explicit/dependency graph

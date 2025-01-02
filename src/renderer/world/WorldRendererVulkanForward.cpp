@@ -72,8 +72,8 @@ void WorldRendererVulkanForward::draw(const RenderParams& params) {
 void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderViewData& rvd) {
 	auto cb = params.command_buffer;
 
-	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(params, ch_draw);
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 
 	rvd.begin_scene(&scene_view);
 
@@ -89,8 +89,8 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT, rvd);
 	geo_renderer->draw(params);
 
-	gpu_timestamp_end(params, ch_draw);
-	PerformanceMonitor::end(ch_draw);
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 void WorldRendererVulkanForward::render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) {

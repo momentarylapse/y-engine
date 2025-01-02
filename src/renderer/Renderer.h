@@ -57,7 +57,6 @@ public:
 
 
 	int channel;
-	int ch_draw;
 	int ch_prepare;
 	Context *context;
 	ResourceManager *resource_manager;

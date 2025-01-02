@@ -15,9 +15,9 @@ namespace nix {
 
 MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
 	shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
-	tsr = new ThroughShaderRenderer({tex_ms, depth_ms}, shader_resolve_multisample);
+	tsr = new ThroughShaderRenderer("ms", {tex_ms, depth_ms}, shader_resolve_multisample);
 
-	into_texture = new TextureRenderer({tex_out, depth_out});
+	into_texture = new TextureRenderer("tex", {tex_out, depth_out});
 	into_texture->add_child(tsr.get());
 	into_texture->use_params_area = true;
 }

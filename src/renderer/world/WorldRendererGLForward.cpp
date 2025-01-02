@@ -75,8 +75,8 @@ void WorldRendererGLForward::draw(const RenderParams& params) {
 }
 void WorldRendererGLForward::draw_with(const RenderParams& params, RenderViewData& rvd) {
 
-	PerformanceMonitor::begin(ch_draw);
-	gpu_timestamp_begin(params, ch_draw);
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 
 	auto fb = params.frame_buffer;
 	bool flip_y = params.target_is_window;
@@ -130,8 +130,8 @@ void WorldRendererGLForward::draw_with(const RenderParams& params, RenderViewDat
 	nix::set_front(nix::Orientation::CW);
 	rvd.set_wire(false);
 
-	gpu_timestamp_end(params, ch_draw);
-	PerformanceMonitor::end(ch_draw);
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {
