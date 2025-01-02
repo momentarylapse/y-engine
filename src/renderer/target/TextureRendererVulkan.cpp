@@ -15,7 +15,6 @@ TextureRenderer::~TextureRenderer() = default;
 
 void TextureRenderer::prepare(const RenderParams &params) {
 	Renderer::prepare(params);
-	render(params);
 }
 
 

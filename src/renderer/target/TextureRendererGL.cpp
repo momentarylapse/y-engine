@@ -7,14 +7,17 @@
 
 #include "TextureRendererGL.h"
 #ifdef USING_OPENGL
+#include <helper/PerformanceMonitor.h>
+#include <renderer/base.h>
 #include <graphics-impl.h>
-//#include "../../helper/PerformanceMonitor.h"
 
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
 	frame_buffer = new FrameBuffer(textures);
 }
 
 void TextureRenderer::render(const RenderParams& params) {
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 	nix::bind_frame_buffer(frame_buffer.get());
 
 	auto area = frame_buffer->area();
@@ -25,12 +28,12 @@ void TextureRenderer::render(const RenderParams& params) {
 	if (clear_z)
 		nix::clear_z();
 	draw(RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio).with_area(area));
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 void TextureRenderer::prepare(const RenderParams& params) {
 	Renderer::prepare(params);
-
-	render(params);
 }
 
 #endif
