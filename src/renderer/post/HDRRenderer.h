@@ -48,20 +48,6 @@ public:
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
 
-	int ch_post_blur = -1, ch_out = -1;
-
-
-
-
-#ifdef USING_VULKAN
-
-	void process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int axis);
-
-	owned<VertexBuffer> vb_2d;
-	rect vb_2d_current_source = rect::EMPTY;
-
-#endif
-
 
 
 	LightMeter* light_meter;

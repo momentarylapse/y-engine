@@ -211,7 +211,8 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
 
 		engine.add_render_task(new RendererSupervisor, 0);
-		engine.add_render_task(engine.hdr_renderer->light_meter, 2000);
+		if (engine.hdr_renderer and engine.hdr_renderer->light_meter)
+			engine.add_render_task(engine.hdr_renderer->light_meter, 2000);
 
 		if (false) {
 			int N = 256;

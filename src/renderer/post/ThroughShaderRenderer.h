@@ -7,6 +7,7 @@
 
 #include "../Renderer.h"
 #include <lib/any/any.h>
+#include <lib/math/rect.h>
 
 class ThroughShaderRenderer : public Renderer {
 public:
@@ -19,6 +20,7 @@ public:
 	shared_array<Texture> textures;
 	shared<Shader> shader;
 	owned<VertexBuffer> vb_2d;
+	rect current_area;
 
 #ifdef USING_VULKAN
 	GraphicsPipeline* pipeline = nullptr;

@@ -16,12 +16,7 @@
 #include <Config.h>
 #include <helper/PerformanceMonitor.h>
 #include <helper/ResourceManager.h>
-#include <lib/base/iter.h>
-#include <lib/math/rect.h>
-#include <lib/math/vec2.h>
-#include <lib/os/msg.h>
 #include <world/Camera.h>
-#include <world/World.h>
 
 void apply_shader_data(CommandBuffer* cb, const Any &shader_data);
 
@@ -41,8 +36,6 @@ static int BLOOM_HEIGHT0 = 256;
 
 HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
 	cam = _cam;
-	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
-	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	tex_main = tex;
 	_depth_buffer = depth_buffer;
@@ -96,9 +89,6 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 	out_renderer = new ThroughShaderRenderer({tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 
 
-	vb_2d = new VertexBuffer("3f,3f,2f");
-	vb_2d->create_quad(rect::ID_SYM);
-
 	light_meter = new LightMeter(resource_manager, tex.get());
 }
 
@@ -117,12 +107,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 		c->prepare(params);
 	texture_renderer->prepare(params);
 
-	auto source = dynamicly_scaled_source();
-	if (vb_2d_current_source != source) {
-		vb_2d->create_quad(rect::ID_SYM, source);
-		vb_2d_current_source = source;
-	}
-
 	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 	texture_renderer->render(scaled_params);
 	if (ms_resolver)
@@ -130,21 +114,11 @@ void HDRRenderer::prepare(const RenderParams& params) {
 
 	out_renderer->set_source(dynamicly_scaled_source());
 
-	// render blur into fb_small2!
-	PerformanceMonitor::begin(ch_post_blur);
-	gpu_timestamp_begin(params, ch_post_blur);
-	/*auto bloom_input = texture_renderer->frame_buffer.get();
-	float threshold = 1.0f;
-	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
-		process_blur(cb, bloom_input, bloom_levels[i].fb_temp.get(), threshold, i*2);
-		process_blur(cb, bloom_levels[i].fb_temp.get(), bloom_levels[i].fb_out.get(), 0.0f, i*2+1);
-		bloom_input = bloom_levels[i].fb_out.get();
-		threshold = 0;
-	}*/
 
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	float threshold = 1.0f;
+
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 
@@ -161,8 +135,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
 		threshold = 0;
 	}
-	gpu_timestamp_end(params, ch_post_blur);
-	PerformanceMonitor::end(ch_post_blur);
 
 	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
@@ -185,6 +157,17 @@ void HDRRenderer::draw(const RenderParams& params) {
 	out_renderer->data = data;
 	out_renderer->draw(params);
 }
+
+#if 0
+
+/*auto bloom_input = texture_renderer->frame_buffer.get();
+float threshold = 1.0f;
+for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
+	process_blur(cb, bloom_input, bloom_levels[i].fb_temp.get(), threshold, i*2);
+	process_blur(cb, bloom_levels[i].fb_temp.get(), bloom_levels[i].fb_out.get(), 0.0f, i*2+1);
+	bloom_input = bloom_levels[i].fb_out.get();
+	threshold = 0;
+}*/
 
 void HDRRenderer::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
 	const vec2 AXIS[2] = {{1,0}, {0,1}};
@@ -228,5 +211,6 @@ void HDRRenderer::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuff
 
 	//process(cb, {source->attachments[0].get()}, target, shader_blur.get());
 }
+#endif
 
 #endif

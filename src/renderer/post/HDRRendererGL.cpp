@@ -37,8 +37,6 @@ static int BLOOM_LEVEL_SCALE = 4;
 
 
 HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
-	ch_post_blur = PerformanceMonitor::create_channel("blur", channel);
-	ch_out = PerformanceMonitor::create_channel("out", channel);
 
 	cam = _cam;
 	tex_main = tex;
@@ -102,8 +100,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 
 	out_renderer->set_source(dynamicly_scaled_source());
 
-	PerformanceMonitor::begin(ch_post_blur);
-	gpu_timestamp_begin(params, ch_post_blur);
 	//float r = cam->bloom_radius * engine.resolution_scale_x;
 	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
 	float threshold = 1.0f;
@@ -124,8 +120,6 @@ void HDRRenderer::prepare(const RenderParams& params) {
 		threshold = 0;
 	}
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
-	gpu_timestamp_end(params, ch_post_blur);
-	PerformanceMonitor::end(ch_post_blur);
 
 	PerformanceMonitor::end(ch_prepare);
 }

@@ -82,6 +82,7 @@ ThroughShaderRenderer::ThroughShaderRenderer(const shared_array<Texture>& _textu
 	shader = _shader;
 	vb_2d = new VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
+	current_area = rect::ID;
 
 #ifdef USING_VULKAN
 	dset = pool->create_set("buffer,sampler,sampler,sampler,sampler,sampler");
@@ -93,6 +94,9 @@ ThroughShaderRenderer::ThroughShaderRenderer(const shared_array<Texture>& _textu
 }
 
 void ThroughShaderRenderer::set_source(const rect& area) {
+	if (area == current_area)
+		return;
+	current_area = area;;
 	vb_2d->create_quad(rect::ID_SYM, area);
 }
 
