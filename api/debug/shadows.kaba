@@ -4,8 +4,8 @@ class X extends Controller
 	var pic: shared![Picture][]
 	
 	func override on_init()
-		if engine.render_path
-			for i=>db in engine.render_path.get_shadow_map()
+		for wr in engine.render_paths[0].world_renderer
+			for i=>db in wr.get_shadow_map()
 				pic.add(new Picture([1.2,1.4, 0.6 + i*0.2, 0.8+i*0.2], db))
 		
 		for p in pic

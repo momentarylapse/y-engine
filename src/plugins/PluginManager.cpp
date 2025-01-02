@@ -877,9 +877,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("EngineData.window_renderer", &EngineData::window_renderer);
 	ext->declare_class_element("EngineData.gui_renderer", &EngineData::gui_renderer);
 	ext->declare_class_element("EngineData.region_renderer", &EngineData::region_renderer);
-	ext->declare_class_element("EngineData.hdr_renderer", &EngineData::hdr_renderer);
-	ext->declare_class_element("EngineData.post_processor", &EngineData::post_processor);
-	ext->declare_class_element("EngineData.render_path", &EngineData::world_renderer);
+	ext->declare_class_element("EngineData.render_paths", &EngineData::render_paths);
 	ext->link_class_func("EngineData.exit", &EngineData::exit);
 	ext->link_class_func("EngineData.add_render_task", &EngineData::add_render_task);
 
@@ -910,27 +908,27 @@ void PluginManager::export_kaba() {
 #ifdef USING_VULKAN
 //	using WR = WindowRendererVulkan;
 //	using GR = GuiRendererVulkan;
-	using RP = WorldRendererVulkan;
-	using RPF = WorldRendererVulkanForward;
+	using WoR = WorldRendererVulkan;
+	using WoRF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
 //	using WR = WindowRendererGL;
 //	using GR = GuiRendererGL;
-	using RP = WorldRendererGL;
-	using RPF = WorldRendererGLForward;
-	using RPD = WorldRendererGLDeferred;
+	using WoR = WorldRendererGL;
+	using WoRF = WorldRendererGLForward;
+	using WoRD = WorldRendererGLDeferred;
 	using PP = PostProcessorGL;
 #endif
-	ext->declare_class_size("RenderPath", sizeof(RP));
-	ext->declare_class_element("RenderPath.type", &WorldRenderer::type);
-	ext->declare_class_element("RenderPath.shader_fx", &WorldRenderer::shader_fx);
-	ext->declare_class_element("RenderPath.wireframe", &WorldRenderer::wireframe);
+	ext->declare_class_size("WorldRenderer", sizeof(WoR));
+	ext->declare_class_element("WorldRenderer.type", &WorldRenderer::type);
+	ext->declare_class_element("WorldRenderer.shader_fx", &WorldRenderer::shader_fx);
+	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
 //	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
-	ext->link_class_func("RenderPath.render_into_cubemap", &RPF::render_into_cubemap);
-	ext->link_class_func("RenderPath.get_cubemap", &world_renderer_get_cubemap);
-	ext->link_class_func("RenderPath.get_shadow_map", &world_renderer_get_shadow_map);
-	ext->link_class_func("RenderPath.get_gbuffer", &world_renderer_get_gbuffer);
+	ext->link_class_func("WorldRenderer.render_into_cubemap", &WoRF::render_into_cubemap);
+	ext->link_class_func("WorldRenderer.get_cubemap", &world_renderer_get_cubemap);
+	ext->link_class_func("WorldRenderer.get_shadow_map", &world_renderer_get_shadow_map);
+	ext->link_class_func("WorldRenderer.get_gbuffer", &world_renderer_get_gbuffer);
 
 
 	ext->declare_class_size("RegionsRenderer", sizeof(RegionRenderer));
@@ -949,13 +947,15 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("PostProcessor.process", &PP::process);
 	ext->link_class_func("PostProcessor.add_stage", &PP::add_stage);
 
-	ext->declare_class_size("WindowRenderer", sizeof(RP));
-	ext->declare_class_element("RenderPath.type", &RP::type);
+	ext->declare_class_size("RenderPath", sizeof(RenderPath));
+	ext->declare_class_element("RenderPath.hdr_renderer", &RenderPath::hdr_renderer);
+	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
+	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
+	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
 
 	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
 	ext->declare_class_element("HDRRenderer.texture", &HDRRenderer::tex_main);
 	ext->declare_class_element("HDRRenderer.depth_buffer", &HDRRenderer::_depth_buffer);
-	ext->declare_class_element("HDRRenderer.light_meter", &HDRRenderer::light_meter);
 	ext->link_class_func("HDRRenderer.tex_bloom", &hdr_renderer_get_tex_bloom);
 
 	ext->declare_class_size("LightMeter", sizeof(LightMeter));

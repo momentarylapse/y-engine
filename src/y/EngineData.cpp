@@ -44,9 +44,6 @@ EngineData::EngineData() {
 	window_renderer = nullptr;
 	gui_renderer = nullptr;
 	region_renderer = nullptr;
-	post_processor = nullptr;
-	hdr_renderer = nullptr;
-	world_renderer = nullptr;
 
 	detail_level = 100;
 	detail_factor_inv = 1.0f;

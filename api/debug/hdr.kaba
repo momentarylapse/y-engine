@@ -5,7 +5,7 @@ class X extends Controller
 	var t: shared[Text]
 	
 	func override on_init()
-		for hdr in engine.hdr_renderer
+		for hdr in engine.render_paths[0].hdr_renderer
 			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.texture))
 			var y0 = 1.0
 			var h = 0.2
@@ -25,7 +25,7 @@ class X extends Controller
 	func override on_draw_pre()
 		for mut p in pic
 			p.source = [0,engine.resolution_scale.x, 0,engine.resolution_scale.y]
-		for hdr in engine.hdr_renderer
-			t!.set_text("max brightness: {{hdr.light_meter.brightness|.3}}")
+		for lm in engine.render_paths[0].light_meter
+			t!.set_text("max brightness: {{lm.brightness|.3}}")
 		
 

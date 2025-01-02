@@ -3,5 +3,6 @@ use y.*
 class WireframeController extends Controller
 	func override on_key_down(k: Key)
 		if k == Key.W + Key.CONTROL #and key_state(KEY_CONTROL)
-			engine.render_path.wireframe = not engine.render_path.wireframe
+			for wr in engine.render_paths[0].world_renderer
+				wr.wireframe = not wr.wireframe
 			

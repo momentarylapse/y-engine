@@ -118,26 +118,66 @@ WorldRenderer *create_world_renderer(Camera *cam, const string& type) {
 #endif
 }
 
-Renderer *create_render_path(Camera *cam) {
+RenderPath::RenderPath() : Renderer("path") {
+}
+
+RenderPath::~RenderPath() = default;
+
+
+void RenderPath::prepare(const RenderParams& params) {
+	if (hdr_renderer) {
+		texture_renderer->prepare(params);
+
+		auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
+		texture_renderer->render(scaled_params);
+
+		if (multisample_resolver)
+			multisample_resolver->render(scaled_params);
+
+		hdr_renderer->prepare(params);
+
+
+		if (light_meter) {
+			light_meter->active = hdr_renderer->cam and hdr_renderer->cam->auto_exposure;
+			if (light_meter->active) {
+				light_meter->read();
+				light_meter->setup();
+				light_meter->adjust_camera(hdr_renderer->cam);
+			}
+		}
+	} else {
+		world_renderer->prepare(params);
+	}
+}
+
+void RenderPath::draw(const RenderParams &params) {
+	if (hdr_renderer) {
+		hdr_renderer->draw(params);
+	} else {
+		world_renderer->draw(params);
+	}
+}
+
+
+RenderPath* create_render_path(Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
+	auto rp = new RenderPath();
 
 	if (type == "direct") {
-		engine.world_renderer = create_world_renderer(cam, "forward");
-		return engine.world_renderer;
+		rp->world_renderer = create_world_renderer(cam, "forward");
+		return rp;
 	}
 
 	//	engine.post_processor = create_post_processor(parent);
 
-	engine.world_renderer = create_world_renderer(cam, type);
+	rp->world_renderer = create_world_renderer(cam, type);
 
 	auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
 	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
 	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
 
-	TextureRenderer* texture_renderer;
-
-	engine.hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
+	rp->hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
 
 #ifdef USING_VULKAN
 	config.antialiasing_method = AntialiasingMethod::NONE;
@@ -152,20 +192,19 @@ Renderer *create_render_path(Camera *cam) {
 		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
 		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
-		texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
+		rp->texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
 
-		auto ms_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
-		engine.hdr_renderer->ms_resolver = ms_resolver;
+		rp->multisample_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
 	} else {
 		msg_error("no msaa");
-		texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
+		rp->texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
 	}
 
-	texture_renderer->add_child(engine.world_renderer);
+	rp->texture_renderer->add_child(rp->world_renderer);
 
-	// so far, we need someone to call .render()
-	engine.hdr_renderer->texture_renderer = texture_renderer;
-	return engine.hdr_renderer;
+	rp->light_meter = new LightMeter(engine.resource_manager, hdr_tex);
+
+	return rp;
 }
 
 /*class TextureWriter : public Renderer {
@@ -183,36 +222,16 @@ public:
 	}
 };*/
 
-class RendererSupervisor : public RenderTask {
-public:
-	RendererSupervisor() : RenderTask("super") {}
-	void render(const RenderParams& params) override {
-		if (auto hdr = engine.hdr_renderer) {
-			if (auto lm = hdr->light_meter) {
-				lm->active = hdr->cam and hdr->cam->auto_exposure;
-				if (lm->active) {
-					lm->read();
-					lm->setup();
-					lm->adjust_camera(hdr->cam);
-				}
-			}
-		}
-	}
-};
-
 void create_full_renderer(GLFWwindow* window, Camera *cam) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
 		engine.region_renderer = create_region_renderer();
-		auto p = create_render_path(cam);
+		auto rp = create_render_path(cam);
+		engine.render_paths.add(rp);
 		engine.gui_renderer = create_gui_renderer();
 		engine.window_renderer->add_child(engine.region_renderer);
-		engine.region_renderer->add_region(p, rect::ID, 0);
+		engine.region_renderer->add_region(rp, rect::ID, 0);
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
-
-		engine.add_render_task(new RendererSupervisor, 0);
-		if (engine.hdr_renderer and engine.hdr_renderer->light_meter)
-			engine.add_render_task(engine.hdr_renderer->light_meter, 2000);
 
 		if (false) {
 			int N = 256;

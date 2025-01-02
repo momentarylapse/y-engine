@@ -25,9 +25,7 @@ class EngineData
 	#Font* default_font
 	var renderer: Renderer&
 	var region_renderer: RegionRenderer&
-	var render_path: RenderPath&
-	var hdr_renderer: HDRRenderer*
-	var post_processor: PostProcessor*
+	var render_paths: RenderPath&[]
 	
 	func extern add_render_task(task: xfer[RenderTask], priority: i32)
 
@@ -64,7 +62,7 @@ class RegionRenderer
 	func extern add_region(r: Renderer&, dest: rect, z: int)
 
 
-class RenderPath
+class WorldRenderer
 	enum Type
 		NONE
 		FORWARD
@@ -80,6 +78,10 @@ class RenderPath
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
+class RenderPath
+	world_renderer: WorldRenderer*
+	hdr_renderer: HDRRenderer*
+	light_meter: LightMeter*
 
 class LightMeter
 	var histogram: i32[]

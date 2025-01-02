@@ -87,9 +87,6 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer("out", {tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
-
-
-	light_meter = new LightMeter(resource_manager, tex.get());
 }
 
 HDRRenderer::~HDRRenderer() = default;
@@ -102,15 +99,8 @@ void HDRRenderer::prepare(const RenderParams& params) {
 	if (!cam)
 		cam = cam_main;
 
-
 	for (auto c: children)
 		c->prepare(params);
-	texture_renderer->prepare(params);
-
-	auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
-	texture_renderer->render(scaled_params);
-	if (ms_resolver)
-		ms_resolver->render(scaled_params);
 
 	out_renderer->set_source(dynamicly_scaled_source());
 

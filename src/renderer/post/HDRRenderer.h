@@ -14,8 +14,6 @@ class Camera;
 class ComputeTask;
 class TextureRenderer;
 class ThroughShaderRenderer;
-class MultisampleResolver;
-class LightMeter;
 
 class HDRRenderer : public Renderer {
 public:
@@ -27,10 +25,6 @@ public:
 
 	Camera *cam;
 
-	owned<MultisampleResolver> ms_resolver;
-
-	owned<TextureRenderer> texture_renderer;
-	shared<FrameBuffer> fb_main;
 	shared<Texture> tex_main;
 
 	owned<ThroughShaderRenderer> out_renderer;
@@ -47,9 +41,5 @@ public:
 	shared<DepthBuffer> _depth_buffer;
 	shared<Shader> shader_blur;
 	shared<Shader> shader_out;
-
-
-
-	LightMeter* light_meter;
 };
 

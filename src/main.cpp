@@ -258,7 +258,8 @@ public:
 	}
 
 	void reset_game() {
-		engine.world_renderer->reset();
+		for (auto rp: engine.render_paths)
+			rp->world_renderer->reset();
 		ControllerManager::reset();
 		SchedulerManager::reset();
 		CameraReset();
@@ -275,7 +276,8 @@ public:
 		// sometimes there is a weird crash in another thread (I don't know in which library) otherwise
 		os::sleep(0.25f);
 
-		delete engine.world_renderer;
+		// TODO
+		//delete engine.world_renderer;
 		delete engine.window_renderer;
 		api_end();
 		glfwDestroyWindow(window);
