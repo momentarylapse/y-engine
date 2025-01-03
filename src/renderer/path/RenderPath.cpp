@@ -11,7 +11,7 @@
 #include "../post/ThroughShaderRenderer.h"
 #include "../post/MultisampleResolver.h"
 #include "../regions/RegionRenderer.h"
-#include "../post/HDRRenderer.h"
+#include "../post/HDRResolver.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkan.h"
 	#include "../world/WorldRendererVulkanForward.h"
@@ -37,8 +37,8 @@
 #include <lib/os/msg.h>
 
 
-HDRRenderer *create_hdr_renderer(Camera *cam, Texture* tex, DepthBuffer* depth) {
-	return new HDRRenderer(cam, tex, depth);
+HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {
+	return new HDRResolver(cam, tex, depth);
 }
 
 WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd, RenderPathType type) {
@@ -239,7 +239,7 @@ public:
 		hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 		auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
 
-		hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
+		hdr_resolver = create_hdr_resolver(cam, hdr_tex, hdr_depth);
 
 #ifdef USING_VULKAN
 		config.antialiasing_method = AntialiasingMethod::NONE;
@@ -298,20 +298,20 @@ public:
 		if (multisample_resolver)
 			multisample_resolver->render(scaled_params);
 
-		hdr_renderer->prepare(params);
+		hdr_resolver->prepare(params);
 
 
 		if (light_meter) {
-			light_meter->active = hdr_renderer->cam and hdr_renderer->cam->auto_exposure;
+			light_meter->active = hdr_resolver->cam and hdr_resolver->cam->auto_exposure;
 			if (light_meter->active) {
 				light_meter->read();
 				light_meter->setup();
-				light_meter->adjust_camera(hdr_renderer->cam);
+				light_meter->adjust_camera(hdr_resolver->cam);
 			}
 		}
 	}
 	void draw(const RenderParams &params) override {
-		hdr_renderer->draw(params);
+		hdr_resolver->draw(params);
 	}
 	void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) override {
 

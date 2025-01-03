@@ -1,11 +1,11 @@
 /*
- * HDRRenderer.cpp
+ * HDRResolver.cpp
  *
  *  Created on: 23 Nov 2021
  *      Author: michi
  */
 
-#include "HDRRenderer.h"
+#include "HDRResolver.h"
 #include "ThroughShaderRenderer.h"
 #include "../base.h"
 #ifdef USING_VULKAN
@@ -30,7 +30,7 @@ static int BLUR_SCALE = 4;
 static int BLOOM_LEVEL_SCALE = 4;
 
 
-HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
+HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
 	cam = _cam;
 	tex_main = tex;
 	_depth_buffer = depth_buffer;
@@ -70,9 +70,9 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 }
 
 
-HDRRenderer::~HDRRenderer() = default;
+HDRResolver::~HDRResolver() = default;
 
-void HDRRenderer::prepare(const RenderParams& params) {
+void HDRResolver::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	gpu_timestamp_begin(params, ch_prepare);
 
@@ -113,7 +113,7 @@ void HDRRenderer::prepare(const RenderParams& params) {
 
 }
 
-void HDRRenderer::draw(const RenderParams& params) {
+void HDRResolver::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 	auto& data = out_renderer->data;
@@ -142,7 +142,7 @@ for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 	threshold = 0;
 }*/
 
-void HDRRenderer::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
+void HDRResolver::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuffer *target, float threshold, int iaxis) {
 	const vec2 AXIS[2] = {{1,0}, {0,1}};
 	//const float SCALE[2] = {(float)BLUR_SCALE, 1};
 	//UBOBlur u;

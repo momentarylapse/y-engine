@@ -1,5 +1,5 @@
 /*
- * HDRRenderer.h
+ * HDRResolver.h
  *
  *  Created on: 23 Nov 2021
  *      Author: michi
@@ -15,10 +15,10 @@ class ComputeTask;
 class TextureRenderer;
 class ThroughShaderRenderer;
 
-class HDRRenderer : public Renderer {
+class HDRResolver : public Renderer {
 public:
-	HDRRenderer(Camera *cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
-	~HDRRenderer() override;
+	HDRResolver(Camera *cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer);
+	~HDRResolver() override;
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

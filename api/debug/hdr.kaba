@@ -5,7 +5,7 @@ class X extends Controller
 	var t: shared[Text]
 	
 	func override on_init()
-		for hdr in engine.render_paths[0].hdr_renderer
+		for hdr in engine.render_paths[0].hdr_resolver
 			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.texture))
 			var y0 = 1.0
 			var h = 0.2

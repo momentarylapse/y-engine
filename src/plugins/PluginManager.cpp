@@ -39,7 +39,7 @@
 #include "../renderer/helper/ComputeTask.h"
 #include "../renderer/helper/LightMeter.h"
 #include "../renderer/path/RenderPath.h"
-#include "../renderer/post/HDRRenderer.h"
+#include "../renderer/post/HDRResolver.h"
 #ifdef USING_OPENGL
 #include "../renderer/world/WorldRendererGL.h"
 #include "../renderer/world/WorldRendererGLForward.h"
@@ -331,7 +331,7 @@ FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
 	return nullptr;
 }
 
-Array<Texture*> hdr_renderer_get_tex_bloom(HDRRenderer &r) {
+Array<Texture*> hdr_resolver_get_tex_bloom(HDRResolver &r) {
 	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
 }
 
@@ -943,7 +943,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("PostProcessor.add_stage", &PP::add_stage);
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
-	ext->declare_class_element("RenderPath.hdr_renderer", &RenderPath::hdr_renderer);
+	ext->declare_class_element("RenderPath.hdr_renderer", &RenderPath::hdr_resolver);
 	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
 	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
 	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
@@ -954,10 +954,10 @@ void PluginManager::export_kaba() {
 	//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.get_cubemap", &render_path_get_cubemap);
 
-	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
-	ext->declare_class_element("HDRRenderer.texture", &HDRRenderer::tex_main);
-	ext->declare_class_element("HDRRenderer.depth_buffer", &HDRRenderer::_depth_buffer);
-	ext->link_class_func("HDRRenderer.tex_bloom", &hdr_renderer_get_tex_bloom);
+	ext->declare_class_size("HDRResolver", sizeof(HDRResolver));
+	ext->declare_class_element("HDRResolver.texture", &HDRResolver::tex_main);
+	ext->declare_class_element("HDRResolver.depth_buffer", &HDRResolver::_depth_buffer);
+	ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
 
 	ext->declare_class_size("LightMeter", sizeof(LightMeter));
 	ext->declare_class_element("LightMeter.histogram", &LightMeter::histogram);

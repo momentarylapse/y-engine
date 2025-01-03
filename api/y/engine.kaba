@@ -77,7 +77,7 @@ class RenderPath
 		PATHTRACING
 	var type: Type
 	world_renderer: WorldRenderer*
-	hdr_renderer: HDRRenderer*
+	hdr_resolver: HDRResolver*
 	light_meter: LightMeter*
 	# debugging
 	func extern get_gbuffer() -> FrameBuffer*
@@ -89,7 +89,7 @@ class LightMeter
 	var brightness: f32
 
 
-class HDRRenderer
+class HDRResolver
 	var texture: shared![Texture]
 	var depth_buffer: shared![DepthBuffer]
 	#func extern tex_bloom() -> Texture&[]

@@ -11,7 +11,7 @@
 #include "../world/geometry/RenderViewData.h"
 
 class Camera;
-class HDRRenderer;
+class HDRResolver;
 class PostProcessor;
 class WorldRenderer;
 class TextureRenderer;
@@ -40,7 +40,7 @@ public:
 	int shadow_resolution;
 	SceneView scene_view;
 
-	HDRRenderer* hdr_renderer = nullptr;
+	HDRResolver* hdr_resolver = nullptr;
 	PostProcessor* post_processor = nullptr;
 	WorldRenderer* world_renderer = nullptr;
 	TextureRenderer* texture_renderer = nullptr;
