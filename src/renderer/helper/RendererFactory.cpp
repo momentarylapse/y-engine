@@ -123,9 +123,58 @@ RenderPath::RenderPath() : Renderer("path") {
 
 RenderPath::~RenderPath() = default;
 
+class RenderPathDirect : public RenderPath {
+public:
+	explicit RenderPathDirect(Camera* cam) {
+		world_renderer = create_world_renderer(cam, "forward");
+	}
+	void prepare(const RenderParams &params) override {
+		world_renderer->prepare(params);
+	}
+	void draw(const RenderParams &params) override {
+		world_renderer->draw(params);
+	}
+};
 
-void RenderPath::prepare(const RenderParams& params) {
-	if (hdr_renderer) {
+class RenderPathHdr : public RenderPath {
+public:
+	explicit RenderPathHdr(Camera* cam, const string& type) {
+
+		world_renderer = create_world_renderer(cam, type);
+
+		auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
+		hdr_tex->set_options("wrap=clamp,minfilter=nearest");
+		hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
+		auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
+
+		hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
+
+#ifdef USING_VULKAN
+		config.antialiasing_method = AntialiasingMethod::NONE;
+#endif
+
+		if (config.antialiasing_method == AntialiasingMethod::MSAA) {
+			msg_error("yes msaa");
+
+			msg_write("ms tex:");
+			auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
+			msg_write("ms depth:");
+			auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
+			msg_write("ms renderer:");
+			//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
+			texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
+
+			multisample_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
+		} else {
+			msg_error("no msaa");
+			texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
+		}
+
+		texture_renderer->add_child(world_renderer);
+
+		light_meter = new LightMeter(engine.resource_manager, hdr_tex);
+	}
+	void prepare(const RenderParams &params) override {
 		texture_renderer->prepare(params);
 
 		auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
@@ -145,66 +194,19 @@ void RenderPath::prepare(const RenderParams& params) {
 				light_meter->adjust_camera(hdr_renderer->cam);
 			}
 		}
-	} else {
-		world_renderer->prepare(params);
 	}
-}
-
-void RenderPath::draw(const RenderParams &params) {
-	if (hdr_renderer) {
+	void draw(const RenderParams &params) override {
 		hdr_renderer->draw(params);
-	} else {
-		world_renderer->draw(params);
 	}
-}
+};
 
 
 RenderPath* create_render_path(Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
-	auto rp = new RenderPath();
 
-	if (type == "direct") {
-		rp->world_renderer = create_world_renderer(cam, "forward");
-		return rp;
-	}
-
-	//	engine.post_processor = create_post_processor(parent);
-
-	rp->world_renderer = create_world_renderer(cam, type);
-
-	auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
-	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
-	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
-	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
-
-	rp->hdr_renderer = create_hdr_renderer(cam, hdr_tex, hdr_depth);
-
-#ifdef USING_VULKAN
-	config.antialiasing_method = AntialiasingMethod::NONE;
-#endif
-
-	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-		msg_error("yes msaa");
-
-		msg_write("ms tex:");
-		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
-		msg_write("ms depth:");
-		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
-		msg_write("ms renderer:");
-		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "d24s8");
-		rp->texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
-
-		rp->multisample_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
-	} else {
-		msg_error("no msaa");
-		rp->texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
-	}
-
-	rp->texture_renderer->add_child(rp->world_renderer);
-
-	rp->light_meter = new LightMeter(engine.resource_manager, hdr_tex);
-
-	return rp;
+	if (type == "direct")
+		return new RenderPathDirect(cam);
+	return new RenderPathHdr(cam, type);
 }
 
 /*class TextureWriter : public Renderer {

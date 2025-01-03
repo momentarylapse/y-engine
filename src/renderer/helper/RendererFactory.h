@@ -27,9 +27,6 @@ public:
 	RenderPath();
 	~RenderPath() override;
 
-	void prepare(const RenderParams &params) override;
-	void draw(const RenderParams &params) override;
-
 	HDRRenderer* hdr_renderer = nullptr;
 	PostProcessor* post_processor = nullptr;
 	WorldRenderer* world_renderer = nullptr;
