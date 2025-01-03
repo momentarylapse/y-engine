@@ -7,6 +7,7 @@
 #include "../../helper/PerformanceMonitor.h"
 #include <lib/base/iter.h>
 #include <lib/math/mat4.h>
+#include <lib/math/vec2.h>
 #include <lib/os/msg.h>
 
 #ifdef USING_VULKAN
@@ -76,6 +77,19 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 	}
 }
 #endif
+
+Any mat4_to_any(const mat4& m) {
+	Any a = Any::EmptyList;
+	for (int i=0; i<16; i++)
+		a.list_set(i, ((float*)&m)[i]);
+	return a;
+}
+Any vec2_to_any(const vec2& v) {
+	Any a = Any::EmptyList;
+	a.list_set(0, v.x);
+	a.list_set(1, v.y);
+	return a;
+}
 
 ThroughShaderRenderer::ThroughShaderRenderer(const string& name, const shared_array<Texture>& _textures, shared<Shader> _shader) : Renderer(name) {
 	textures = _textures;

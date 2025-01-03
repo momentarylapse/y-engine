@@ -1,23 +1,27 @@
 /*
- * HDRRendererVulkan.cpp
+ * HDRRenderer.cpp
  *
  *  Created on: 23 Nov 2021
  *      Author: michi
  */
 
 #include "HDRRenderer.h"
-#ifdef USING_VULKAN
 #include "ThroughShaderRenderer.h"
 #include "../base.h"
+#ifdef USING_VULKAN
 #include "../target/TextureRendererVulkan.h"
+#else
+#include "../target/TextureRendererGL.h"
+#endif
 #include <graphics-impl.h>
 #include <Config.h>
 #include <helper/PerformanceMonitor.h>
 #include <helper/ResourceManager.h>
+#include <lib/math/vec2.h>
 #include <world/Camera.h>
 
-void apply_shader_data(CommandBuffer* cb, const Any &shader_data);
-
+Any mat4_to_any(const mat4& m);
+Any vec2_to_any(const vec2& v);
 
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
@@ -28,7 +32,6 @@ static int BLOOM_LEVEL_SCALE = 4;
 
 HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
 	cam = _cam;
-
 	tex_main = tex;
 	_depth_buffer = depth_buffer;
 
@@ -39,11 +42,6 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 	shader_blur = resource_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
 	auto bloom_input = tex;
-	Any axis_x, axis_y;
-	axis_x.list_set(0, 1.0f);
-	axis_x.list_set(1, 0.0f);
-	axis_y.list_set(0, 0.0f);
-	axis_y.list_set(1, 1.0f);
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 		bloomw /= BLOOM_LEVEL_SCALE;
@@ -56,8 +54,8 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 		bl.tex_out->set_options("wrap=clamp");
 		bl.tsr[0] = new ThroughShaderRenderer("blur", {bloom_input}, shader_blur);
 		bl.tsr[1] = new ThroughShaderRenderer("blur", {bl.tex_temp}, shader_blur);
-		bl.tsr[0]->data.dict_set("axis:0", axis_x);
-		bl.tsr[1]->data.dict_set("axis:0", axis_y);
+		bl.tsr[0]->data.dict_set("axis:0", vec2_to_any(vec2::EX));
+		bl.tsr[1]->data.dict_set("axis:0", vec2_to_any(vec2::EY));
 		bl.renderer[0] = new TextureRenderer("blur", {bl.tex_temp, depth0});
 		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
 		bl.renderer[0]->use_params_area = true;
@@ -67,15 +65,14 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 		bloom_input = bl.tex_out;
 	}
 
-
 	shader_out = resource_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer("out", {tex.get(), bloom_levels[0].tex_out, bloom_levels[1].tex_out, bloom_levels[2].tex_out, bloom_levels[3].tex_out}, shader_out);
 }
 
+
 HDRRenderer::~HDRRenderer() = default;
 
 void HDRRenderer::prepare(const RenderParams& params) {
-	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_prepare);
 	gpu_timestamp_begin(params, ch_prepare);
 
@@ -95,7 +92,7 @@ void HDRRenderer::prepare(const RenderParams& params) {
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 
-		bl.tsr[0]->data.dict_set("radius:8", r * BLOOM_LEVEL_SCALE);
+		bl.tsr[0]->data.dict_set("radius:8", r * (float)BLOOM_LEVEL_SCALE);
 		bl.tsr[0]->data.dict_set("threshold:12", threshold);
 		bl.tsr[0]->set_source(dynamicly_scaled_source());
 		bl.renderer[0]->render(params.with_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get())));
@@ -109,6 +106,8 @@ void HDRRenderer::prepare(const RenderParams& params) {
 		threshold = 0;
 	}
 
+	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
+
 	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);
 
@@ -117,19 +116,16 @@ void HDRRenderer::prepare(const RenderParams& params) {
 void HDRRenderer::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
-	Any data;
-	Any a;
-	auto m = mat4::ID;
-	for (int i=0; i<16; i++)
-		a.list_set(i, ((float*)&m)[i]);
-	data.dict_set("project:128", a);
+	auto& data = out_renderer->data;
+	data.dict_set("project:128", mat4_to_any(mat4::ID));
 	data.dict_set("exposure:192", cam->exposure);
 	data.dict_set("bloom_factor:196", cam->bloom_factor);
+#ifdef USING_VULKAN
 	data.dict_set("gamma:200", 2.2f);
+#endif
 	data.dict_set("scale_x:204", resolution_scale_x);
 	data.dict_set("scale_y:208", resolution_scale_y);
 
-	out_renderer->data = data;
 	out_renderer->draw(params);
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
@@ -190,4 +186,3 @@ void HDRRenderer::process_blur(CommandBuffer *cb, FrameBuffer *source, FrameBuff
 }
 #endif
 
-#endif
