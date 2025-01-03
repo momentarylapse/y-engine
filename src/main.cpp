@@ -48,6 +48,7 @@
 #else
 	#include "renderer/target/WindowRendererGL.h"
 #endif
+#include "renderer/path/RenderPath.h"
 
 #include "Config.h"
 #include "world/Camera.h"

@@ -424,6 +424,7 @@ add_executable(y
 	src/renderer/helper/Pipeline.cpp
 	src/renderer/helper/PipelineManager.cpp
 	src/renderer/helper/RendererFactory.cpp
+	src/renderer/path/RenderPath.cpp
 	src/renderer/post/HDRRenderer.cpp
 	src/renderer/post/MultisampleResolver.cpp
 	src/renderer/post/PostProcessor.cpp

@@ -38,6 +38,7 @@
 #include "../renderer/helper/CubeMapSource.h"
 #include "../renderer/helper/ComputeTask.h"
 #include "../renderer/helper/LightMeter.h"
+#include "../renderer/path/RenderPath.h"
 #include "../renderer/post/HDRRenderer.h"
 #ifdef USING_OPENGL
 #include "../renderer/world/WorldRendererGL.h"
