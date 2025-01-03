@@ -25,16 +25,7 @@ class RenderViewData;
 
 class WorldRendererGL : public WorldRenderer {
 public:
-	WorldRendererGL(const string &name, Camera *cam, RenderPathType type);
-	void create_more();
-
-	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {};
-	void render_into_cubemap(CubeMapSource& source);
-
-	owned<GeometryRenderer> geo_renderer;
-	owned<ShadowRenderer> shadow_renderer;
-
-	void prepare_lights(Camera *cam, RenderViewData &rvd);
+	WorldRendererGL(const string &name, Camera *cam, SceneView& scene_view);
 };
 
 #endif

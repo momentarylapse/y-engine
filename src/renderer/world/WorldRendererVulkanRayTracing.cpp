@@ -30,8 +30,8 @@
 static const int MAX_RT_TRIAS = 65536;
 static const int MAX_RT_MESHES = 1024;
 
-WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_device, Camera *cam, int w, int h) :
-		WorldRendererVulkan("rt", cam, RenderPathType::FORWARD) {
+WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_device, Camera *cam, SceneView& scene_view, int w, int h) :
+		WorldRendererVulkan("rt", cam, scene_view) {
 	device = _device;
 	width = w;
 	height = h;
@@ -92,11 +92,6 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 }
 
 void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
-	if (!scene_view.cam)
-		scene_view.cam = cam_main;
-
-	scene_view.check_terrains(cam_main->owner->pos);
-	prepare_lights(dummy_cam, rvd);
 
 	int w = width * engine.resolution_scale_x;
 	int h = height * engine.resolution_scale_y;
@@ -245,8 +240,6 @@ void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {
 	out_renderer->draw(params);
 }
 
-void WorldRendererVulkanRayTracing::render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) {
-}
 
 #endif
 

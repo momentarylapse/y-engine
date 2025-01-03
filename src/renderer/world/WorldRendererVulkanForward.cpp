@@ -22,45 +22,18 @@
 #include "../../world/World.h"
 
 
-WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam) : WorldRendererVulkan("fw", cam, RenderPathType::FORWARD) {
+WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam, SceneView& scene_view, RenderViewData& main_rvd) : WorldRendererVulkan("fw", cam, scene_view), main_rvd(main_rvd) {
 	device = _device;
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
-	create_more();
 }
 
 void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
 	auto cb = params.command_buffer;
-	scene_view.check_terrains(cam_main->owner->pos);
-
-	suggest_cube_map_pos();
-	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
-	cube_map_sources.add(cube_map_source);
-	for (auto& source: cube_map_sources) {
-		if (source->update_rate <= 0)
-			continue;
-		source->counter ++;
-		if (source->counter >= source->update_rate) {
-			render_into_cubemap(*source, params);
-			source->counter = 0;
-		}
-	}
-
-	//if (!scene_view.cam)
-		scene_view.cam = cam_main;
 
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
-
-	prepare_lights(scene_view.cam, main_rvd);
-	
-	geo_renderer->prepare(params);
-
-	if (scene_view.shadow_index >= 0) {
-		shadow_renderer->set_scene(scene_view);
-		shadow_renderer->render(params);
-	}
 
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -93,6 +66,8 @@ void WorldRendererVulkanForward::draw_with(const RenderParams& params, RenderVie
 	PerformanceMonitor::end(channel);
 }
 
+#warning "TODO"
+#if 0
 void WorldRendererVulkanForward::render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) {
 	auto cb = params.command_buffer;
 	auto rp = params.render_pass;
@@ -111,6 +86,7 @@ void WorldRendererVulkanForward::render_into_texture(Camera *cam, RenderViewData
 
 	cb->end_render_pass();
 }
+#endif
 
 #endif
 

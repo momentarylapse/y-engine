@@ -32,40 +32,13 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-WorldRendererGLForward::WorldRendererGLForward(Camera *cam) : WorldRendererGL("world", cam, RenderPathType::FORWARD) {
-
+WorldRendererGLForward::WorldRendererGLForward(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd) : WorldRendererGL("world", cam, scene_view), main_rvd(main_rvd) {
+	msg_error("WORLD FORWARD");
 	resource_manager->load_shader_module("forward/module-surface.shader");
-
-	create_more();
 }
 
 void WorldRendererGLForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-
-	if (!scene_view.cam)
-		scene_view.cam = cam_main;
-
-	scene_view.check_terrains(cam_main->owner->pos);
-	geo_renderer->prepare(params);
-
-	suggest_cube_map_pos();
-	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
-	cube_map_sources.add(cube_map_source);
-	for (auto& source: cube_map_sources) {
-		if (source->update_rate <= 0)
-			continue;
-		source->counter ++;
-		if (source->counter >= source->update_rate) {
-			render_into_cubemap(*source);
-			source->counter = 0;
-		}
-	}
-	prepare_lights(cam_main, main_rvd);
-
-	if (scene_view.shadow_index >= 0) {
-		shadow_renderer->set_scene(scene_view);
-		shadow_renderer->render(params);
-	}
 
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -134,6 +107,8 @@ void WorldRendererGLForward::draw_with(const RenderParams& params, RenderViewDat
 	PerformanceMonitor::end(channel);
 }
 
+#warning "TODO"
+#if 0
 void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {
 	nix::bind_frame_buffer(fb);
 
@@ -142,5 +117,6 @@ void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, R
 	draw(RenderParams::into_texture(fb, 1.0f));
 	std::swap(scene_view.cam, cam);
 }
+#endif
 
 #endif

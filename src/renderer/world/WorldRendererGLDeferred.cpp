@@ -11,6 +11,7 @@
 #include "geometry/GeometryRendererGL.h"
 #include "pass/ShadowRenderer.h"
 #include "../base.h"
+#include "../path/RenderPath.h"
 #include <lib/nix/nix.h>
 #include <lib/os/msg.h>
 #include <lib/math/random.h>
@@ -29,7 +30,7 @@
 #include "../../graphics-impl.h"
 
 
-WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, int width, int height) : WorldRendererGL("world/def", cam, RenderPathType::DEFERRED) {
+WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRendererGL("world/def", cam, scene_view) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse
@@ -61,30 +62,20 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, int width, int hei
 	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", channel);
 	ch_trans = PerformanceMonitor::create_channel("trans", channel);
 
-	create_more();
-
-	geo_renderer_trans = new GeometryRenderer(RenderPathType::FORWARD, scene_view);
+	geo_renderer_trans = new GeometryRenderer(RenderPathType::Forward, scene_view);
 	add_child(geo_renderer_trans.get());
 }
 
 void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
-	if (!scene_view.cam)
-		scene_view.cam = cam_main;
 
 	auto sub_params = params.with_target(gbuffer.get());
 
-	scene_view.check_terrains(cam_main->owner->pos);
-	prepare_lights(cam_main, main_rvd);
 
 	geo_renderer->prepare(sub_params);
 	geo_renderer_trans->prepare(params); // keep drawing into direct target
 
-	if (scene_view.shadow_index >= 0) {
-		shadow_renderer->set_scene(scene_view);
-		shadow_renderer->render(params);
-	}
 
 	render_into_gbuffer(gbuffer.get(), sub_params);
 

@@ -22,9 +22,8 @@
 
 
 
-WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, RenderPathType _type) : WorldRenderer(name, cam) {
-	type = _type;
-
+WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, SceneView& scene_view) : WorldRenderer(name, cam, scene_view) {
+/*
 	// not sure this is a good idea...
 	auto e = new Entity;
 	cube_map_source = new CubeMapSource;
@@ -41,9 +40,9 @@ WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, Render
 		scene_view.cube_map->write_side(1, im);
 		im.create(cube_map_source->resolution, cube_map_source->resolution, color(1, 1,0,1));
 		scene_view.cube_map->write_side(2, im);
-	}
+	}*/
 }
-
+/*
 void WorldRendererVulkan::create_more() {
 	shadow_renderer = new ShadowRenderer();
 	scene_view.fb_shadow1 = shadow_renderer->cascades[0].fb;
@@ -53,11 +52,11 @@ void WorldRendererVulkan::create_more() {
 	geo_renderer = new GeometryRenderer(type, scene_view);
 	add_child(geo_renderer.get());
 
-}
+}*/
 
 WorldRendererVulkan::~WorldRendererVulkan() = default;
 
-
+#if 0
 void WorldRendererVulkan::render_into_cubemap(CubeMapSource& source, const RenderParams& params) {
 	if (!source.depth_buffer)
 		source.depth_buffer = new DepthBuffer(source.resolution, source.resolution, "d:f32", true);
@@ -111,6 +110,7 @@ void WorldRendererVulkan::prepare_lights(Camera *cam, RenderViewData &rvd) {
 	rvd.ubo_light->update_part(&scene_view.lights[0], 0, scene_view.lights.num * sizeof(scene_view.lights[0]));
 	PerformanceMonitor::end(ch_prepare_lights);
 }
+#endif
 
 #endif
 

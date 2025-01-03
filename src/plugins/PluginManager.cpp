@@ -315,19 +315,19 @@ xfer<Material> __load_material(const Path& filename) {
 }
 
 
-CubeMap* world_renderer_get_cubemap(WorldRenderer &r) {
+CubeMap* render_path_get_cubemap(RenderPath &r) {
 	return r.scene_view.cube_map.get();
 }
 
-Array<Texture*> world_renderer_get_shadow_map(WorldRenderer &r) {
-	return {framebuffer_depthbuffer(r.scene_view.fb_shadow1.get()).get(), framebuffer_depthbuffer(r.scene_view.fb_shadow2.get()).get()};
+Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
+	return {};//return {framebuffer_depthbuffer(r.scene_view.fb_shadow1.get()).get(), framebuffer_depthbuffer(r.scene_view.fb_shadow2.get()).get()};
 }
 
-FrameBuffer* world_renderer_get_gbuffer(WorldRenderer &r) {
-#ifdef USING_OPENGL
-	if (r.type == RenderPathType::DEFERRED)
+FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
+/*#ifdef USING_OPENGL
+	if (r.type == RenderPathType::Deferred)
 		return reinterpret_cast<WorldRendererGLDeferred&>(r).gbuffer.get();
-#endif
+#endif*/
 	return nullptr;
 }
 
@@ -922,14 +922,8 @@ void PluginManager::export_kaba() {
 	using PP = PostProcessorGL;
 #endif
 	ext->declare_class_size("WorldRenderer", sizeof(WoR));
-	ext->declare_class_element("WorldRenderer.type", &WorldRenderer::type);
 	ext->declare_class_element("WorldRenderer.shader_fx", &WorldRenderer::shader_fx);
 	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
-//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
-	ext->link_class_func("WorldRenderer.render_into_cubemap", &WoRF::render_into_cubemap);
-	ext->link_class_func("WorldRenderer.get_cubemap", &world_renderer_get_cubemap);
-	ext->link_class_func("WorldRenderer.get_shadow_map", &world_renderer_get_shadow_map);
-	ext->link_class_func("WorldRenderer.get_gbuffer", &world_renderer_get_gbuffer);
 
 
 	ext->declare_class_size("RegionsRenderer", sizeof(RegionRenderer));
@@ -953,6 +947,12 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
 	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
 	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
+	ext->declare_class_element("RenderPath.type", &RenderPath::type);
+	ext->link_class_func("RenderPath.render_into_cubemap", &RenderPath::render_into_cubemap);
+	ext->link_class_func("RenderPath.get_shadow_map", &render_path_get_shadow_map);
+	ext->link_class_func("RenderPath.get_gbuffer", &render_path_get_gbuffer);
+	//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
+	ext->link_class_func("RenderPath.get_cubemap", &render_path_get_cubemap);
 
 	ext->declare_class_size("HDRRenderer", sizeof(HDRRenderer));
 	ext->declare_class_element("HDRRenderer.texture", &HDRRenderer::tex_main);

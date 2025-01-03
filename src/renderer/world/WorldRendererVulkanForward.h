@@ -17,17 +17,17 @@ class ShadowRendererVulkan;
 
 class WorldRendererVulkanForward : public WorldRendererVulkan {
 public:
-	WorldRendererVulkanForward(vulkan::Device *device, Camera *cam);
+	WorldRendererVulkanForward(vulkan::Device *device, Camera *cam, SceneView& scene_view, RenderViewData& main_rvd);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
 	void draw_with(const RenderParams& params, RenderViewData& rvd);
 
-	void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
+	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
 
 	vulkan::Device *device;
-	RenderViewData main_rvd;
+	RenderViewData& main_rvd;
 };
 
 #endif

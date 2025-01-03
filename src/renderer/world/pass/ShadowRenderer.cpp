@@ -14,6 +14,8 @@
 #include "../geometry/GeometryRendererVulkan.h"
 #include "../../target/TextureRendererVulkan.h"
 #endif
+#include <renderer/path/RenderPath.h>
+
 #include "../WorldRenderer.h"
 #include "../../base.h"
 #include "../../../graphics-impl.h"
@@ -37,7 +39,7 @@ ShadowRenderer::ShadowRenderer() :
 
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
-		c.geo_renderer = new GeometryRenderer(RenderPathType::FORWARD, scene_view);
+		c.geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
 		c.geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
 		c.geo_renderer->material_shadow = material.get();
 

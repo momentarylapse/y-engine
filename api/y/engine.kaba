@@ -63,25 +63,26 @@ class RegionRenderer
 
 
 class WorldRenderer
-	enum Type
-		NONE
-		FORWARD
-		DEFERRED
-	var type: Type
 	var wireframe: bool
 	
-	# debugging
-	func extern get_gbuffer() -> FrameBuffer*
-	func extern get_shadow_map() -> shared![DepthBuffer][]
-	func extern get_cubemap() -> CubeMap*
 
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
 class RenderPath
+	enum Type
+		DIRECT
+		FORWARD
+		DEFERRED
+		PATHTRACING
+	var type: Type
 	world_renderer: WorldRenderer*
 	hdr_renderer: HDRRenderer*
 	light_meter: LightMeter*
+	# debugging
+	func extern get_gbuffer() -> FrameBuffer*
+	func extern get_shadow_map() -> shared![DepthBuffer][]
+	func extern get_cubemap() -> CubeMap*
 
 class LightMeter
 	var histogram: i32[]

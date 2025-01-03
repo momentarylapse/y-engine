@@ -30,9 +30,9 @@
 #include <helper/PerformanceMonitor.h>
 #include <Config.h>
 #include <helper/ResourceManager.h>
-#include <graphics-impl.h>
 
 // for debugging
+#include <graphics-impl.h>
 #include <lib/image/image.h>
 #include <renderer/target/TextureRendererGL.h>
 #include <renderer/target/TextureRendererVulkan.h>
