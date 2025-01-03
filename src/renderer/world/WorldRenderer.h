@@ -44,6 +44,7 @@ public:
 
 	shared<Shader> shader_fx;
 	GeometryRenderer* geo_renderer = nullptr;
+//	virtual void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) = 0;
 
 	void reset();
 };

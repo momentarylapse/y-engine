@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include "WorldRendererGL.h"
+#include "WorldRenderer.h"
 #ifdef USING_OPENGL
 #include "geometry/RenderViewData.h"
 
-class WorldRendererGLDeferred : public WorldRendererGL {
+class WorldRendererGLDeferred : public WorldRenderer {
 public:
 
 	shared<FrameBuffer> gbuffer;
@@ -28,7 +28,7 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	//void render_into_texture(FrameBuffer *fb, Camera *cam) override;
+	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
 	void render_into_gbuffer(FrameBuffer *fb, const RenderParams& params);
 	void draw_background(FrameBuffer *fb, const RenderParams& params);
 

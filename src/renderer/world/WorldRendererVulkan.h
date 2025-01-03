@@ -53,6 +53,7 @@ public:
 	WorldRendererVulkan(const string &name, Camera *cam, SceneView& scene_view);
 	~WorldRendererVulkan() override;
 
+
 	/*virtual void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) = 0;
 	void render_into_cubemap(CubeMapSource& source, const RenderParams& params);
 

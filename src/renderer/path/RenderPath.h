@@ -46,6 +46,7 @@ public:
 	TextureRenderer* texture_renderer = nullptr;
 	MultisampleResolver* multisample_resolver = nullptr;
 	LightMeter* light_meter = nullptr;
+	Renderer* main_renderer = nullptr;
 
 	owned<GeometryRenderer> geo_renderer;
 	owned<ShadowRenderer> shadow_renderer;
@@ -59,9 +60,12 @@ public:
 
 	void prepare_basics();
 	void prepare_lights(Camera *cam, RenderViewData &rvd);
+	void render_cubemaps(const RenderParams& params);
 
 	CubeMapSource* cube_map_source = nullptr;
 	void suggest_cube_map_pos();
 };
+
+WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd, RenderPathType type);
 
 #endif //RENDERPATH_H

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "WorldRendererVulkan.h"
+#include "WorldRenderer.h"
 #ifdef USING_VULKAN
 
 class Camera;
@@ -15,7 +15,7 @@ class PerformanceMonitor;
 struct UBO;
 class ShadowRendererVulkan;
 
-class WorldRendererVulkanForward : public WorldRendererVulkan {
+class WorldRendererVulkanForward : public WorldRenderer {
 public:
 	WorldRendererVulkanForward(vulkan::Device *device, Camera *cam, SceneView& scene_view, RenderViewData& main_rvd);
 
@@ -23,6 +23,7 @@ public:
 	void draw(const RenderParams& params) override;
 
 	void draw_with(const RenderParams& params, RenderViewData& rvd);
+
 
 	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
 

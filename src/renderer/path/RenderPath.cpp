@@ -3,6 +3,7 @@
 //
 
 #include "RenderPath.h"
+#include "RenderPathDirect.h"
 #include "../base.h"
 #include "../world/WorldRenderer.h"
 #include "../world/geometry/GeometryRendererGL.h"
@@ -90,6 +91,8 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	scene_view.cube_map = cube_map_source->cube_map;
 }
 
+RenderPath::~RenderPath() = default;
+
 void RenderPath::prepare_basics() {
 	if (!scene_view.cam)
 		scene_view.cam = cam_main;
@@ -117,8 +120,6 @@ void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
 #endif
 	//PerformanceMonitor::end(ch_prepare_lights);
 }
-
-RenderPath::~RenderPath() = default;
 
 
 
@@ -203,27 +204,22 @@ void RenderPath::suggest_cube_map_pos() {
 		}
 }
 
-class RenderPathDirect : public RenderPath {
-public:
-	explicit RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Direct, cam) {
-		world_renderer = create_world_renderer(cam, scene_view, main_rvd, RenderPathType::Forward);
-		create_shadow_renderer();
-		create_geometry_renderer();
-		world_renderer->geo_renderer = geo_renderer.get();
-	}
-	void prepare(const RenderParams &params) override {
-		prepare_basics();
-		prepare_lights(scene_view.cam, main_rvd);
-		if (scene_view.shadow_index >= 0) {
-			shadow_renderer->set_scene(scene_view);
-			shadow_renderer->render(params);
+void RenderPath::render_cubemaps(const RenderParams &params) {
+	suggest_cube_map_pos();
+	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
+	cube_map_sources.add(cube_map_source);
+	for (auto& source: cube_map_sources) {
+		if (source->update_rate <= 0)
+			continue;
+		source->counter ++;
+		if (source->counter >= source->update_rate) {
+			render_into_cubemap(*source);
+			source->counter = 0;
 		}
-		world_renderer->prepare(params);
 	}
-	void draw(const RenderParams &params) override {
-		world_renderer->draw(params);
-	}
-};
+}
+
+
 
 class RenderPathComplex : public RenderPath {
 public:
@@ -271,18 +267,7 @@ public:
 
 		geo_renderer->prepare(params);
 
-		suggest_cube_map_pos();
-		auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
-		cube_map_sources.add(cube_map_source);
-		for (auto& source: cube_map_sources) {
-			if (source->update_rate <= 0)
-				continue;
-			source->counter ++;
-			if (source->counter >= source->update_rate) {
-				render_into_cubemap(*source);
-				source->counter = 0;
-			}
-		}
+		render_cubemaps(params);
 		prepare_lights(cam_main, main_rvd);
 
 		if (scene_view.shadow_index >= 0) {
@@ -298,10 +283,11 @@ public:
 		if (multisample_resolver)
 			multisample_resolver->render(scaled_params);
 
-		hdr_resolver->prepare(params);
+		if (hdr_resolver)
+			hdr_resolver->prepare(params);
 
 
-		if (light_meter) {
+		if (light_meter and hdr_resolver) {
 			light_meter->active = hdr_resolver->cam and hdr_resolver->cam->auto_exposure;
 			if (light_meter->active) {
 				light_meter->read();

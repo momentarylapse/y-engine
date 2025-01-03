@@ -23,36 +23,8 @@
 
 
 WorldRendererVulkan::WorldRendererVulkan(const string &name, Camera *cam, SceneView& scene_view) : WorldRenderer(name, cam, scene_view) {
-/*
-	// not sure this is a good idea...
-	auto e = new Entity;
-	cube_map_source = new CubeMapSource;
-	cube_map_source->owner = e;
-	cube_map_source->cube_map = new CubeMap(cube_map_source->resolution, "rgba:i8");
 
-	scene_view.cube_map = cube_map_source->cube_map;
-
-	if (false) {
-		Image im;
-		im.create(cube_map_source->resolution, cube_map_source->resolution, Red);
-		scene_view.cube_map->write_side(0, im);
-		im.create(cube_map_source->resolution, cube_map_source->resolution, color(1, 1,0.5f,0));
-		scene_view.cube_map->write_side(1, im);
-		im.create(cube_map_source->resolution, cube_map_source->resolution, color(1, 1,0,1));
-		scene_view.cube_map->write_side(2, im);
-	}*/
 }
-/*
-void WorldRendererVulkan::create_more() {
-	shadow_renderer = new ShadowRenderer();
-	scene_view.fb_shadow1 = shadow_renderer->cascades[0].fb;
-	scene_view.fb_shadow2 = shadow_renderer->cascades[1].fb;
-	add_child(shadow_renderer.get());
-
-	geo_renderer = new GeometryRenderer(type, scene_view);
-	add_child(geo_renderer.get());
-
-}*/
 
 WorldRendererVulkan::~WorldRendererVulkan() = default;
 

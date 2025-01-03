@@ -30,7 +30,7 @@
 #include "../../graphics-impl.h"
 
 
-WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRendererGL("world/def", cam, scene_view) {
+WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRenderer("world/def", cam, scene_view) {
 
 	gbuffer = new nix::FrameBuffer({
 		new nix::Texture(width, height, "rgba:f16"), // diffuse

@@ -8,6 +8,7 @@
 #include "WorldRendererVulkanForward.h"
 #ifdef USING_VULKAN
 #include "pass/ShadowRenderer.h"
+#include "geometry/GeometryRendererVulkan.h"
 #include "../../graphics-impl.h"
 #include "../helper/CubeMapSource.h"
 #include "../base.h"
@@ -22,7 +23,7 @@
 #include "../../world/World.h"
 
 
-WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam, SceneView& scene_view, RenderViewData& main_rvd) : WorldRendererVulkan("fw", cam, scene_view), main_rvd(main_rvd) {
+WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, Camera *cam, SceneView& scene_view, RenderViewData& main_rvd) : WorldRenderer("fw", cam, scene_view), main_rvd(main_rvd) {
 	device = _device;
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
@@ -30,8 +31,6 @@ WorldRendererVulkanForward::WorldRendererVulkanForward(vulkan::Device *_device, 
 
 void WorldRendererVulkanForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-
-	auto cb = params.command_buffer;
 
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
