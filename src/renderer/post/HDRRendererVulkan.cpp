@@ -8,10 +8,8 @@
 #include "HDRRenderer.h"
 #ifdef USING_VULKAN
 #include "ThroughShaderRenderer.h"
-#include "MultisampleResolver.h"
 #include "../base.h"
 #include "../target/TextureRendererVulkan.h"
-#include "../helper/LightMeter.h"
 #include <graphics-impl.h>
 #include <Config.h>
 #include <helper/PerformanceMonitor.h>
@@ -21,17 +19,11 @@
 void apply_shader_data(CommandBuffer* cb, const Any &shader_data);
 
 
-//UniformBuffer *blur_ubo[HDRRenderer::MAX_BLOOM_LEVELS*2];
-DescriptorSet *blur_dset[HDRRenderer::MAX_BLOOM_LEVELS*2];
-GraphicsPipeline *blur_pipeline[HDRRenderer::MAX_BLOOM_LEVELS];
-RenderPass *blur_render_pass[HDRRenderer::MAX_BLOOM_LEVELS*2];
-
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
 static int BLUR_SCALE = 4;
 static int BLOOM_LEVEL_SCALE = 4;
-static int BLOOM_HEIGHT0 = 256;
 
 
 HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
@@ -73,15 +65,6 @@ HDRRenderer::HDRRenderer(Camera *_cam, const shared<Texture>& tex, const shared<
 		bl.renderer[0]->add_child(bl.tsr[0].get());
 		bl.renderer[1]->add_child(bl.tsr[1].get());
 		bloom_input = bl.tex_out;
-
-		blur_render_pass[i*2] = bl.renderer[0]->render_pass.get();
-		blur_render_pass[i*2+1] = bl.renderer[1]->render_pass.get();
-	//	blur_pipeline[i] = bl.tsr[0]->pipeline;
-		blur_dset[i*2] = bl.tsr[0]->dset;
-		blur_dset[i*2+1] = bl.tsr[1]->dset;
-		blur_pipeline[i] = new vulkan::GraphicsPipeline(shader_blur.get(), blur_render_pass[i*2], 0, "triangles", "3f,3f,2f");
-		blur_pipeline[i]->set_z(false, false);
-		blur_pipeline[i]->rebuild();
 	}
 
 

@@ -8,14 +8,12 @@
 #include "HDRRenderer.h"
 
 #include "ThroughShaderRenderer.h"
-#include "MultisampleResolver.h"
 #ifdef USING_OPENGL
 #include <renderer/target/TextureRendererGL.h>
 #else
 #include <renderer/target/TextureRendererVulkan.h>
 #endif
 #include "../base.h"
-#include "../helper/LightMeter.h"
 #include "../../graphics-impl.h"
 #include <lib/math/vec2.h>
 #include <lib/math/rect.h>
