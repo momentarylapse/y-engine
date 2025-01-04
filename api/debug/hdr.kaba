@@ -5,11 +5,15 @@ class X extends Controller
 	var t: shared[Text]
 	
 	func override on_init()
+		return
 		for hdr in engine.render_paths[0].hdr_resolver
+			print(p2s(weak(hdr.texture)))
 			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.texture))
 			var y0 = 1.0
 			var h = 0.2
+			print("x")
 			for i=>tex in hdr.tex_bloom()
+				print(p2s(weak(tex)))
 				pic.add(new Picture([1.0,1.0+h, y0-h, y0], tex))
 				y0 -= h
 				h *= 0.5
@@ -23,6 +27,7 @@ class X extends Controller
 		
 			
 	func override on_draw_pre()
+		return
 		for mut p in pic
 			p.source = [0,engine.resolution_scale.x, 0,engine.resolution_scale.y]
 		for lm in engine.render_paths[0].light_meter

@@ -24,7 +24,6 @@ void SceneView::choose_lights() {
 
 		if (l->allow_shadow) {
 			shadow_index = lights.num;
-	//		shadow_proj = l->shadow_projection;
 		}
 		lights.add(l);
 	}

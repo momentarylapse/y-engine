@@ -52,6 +52,8 @@
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
+#include <renderer/world/pass/ShadowRenderer.h>
+
 #include "../renderer/regions/RegionRenderer.h"
 #include "../renderer/world/geometry/SceneView.h"
 #include "../y/EngineData.h"
@@ -317,7 +319,9 @@ CubeMap* render_path_get_cubemap(RenderPath &r) {
 }
 
 Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
-	return {};//return {framebuffer_depthbuffer(r.scene_view.fb_shadow1.get()).get(), framebuffer_depthbuffer(r.scene_view.fb_shadow2.get()).get()};
+	if (r.shadow_renderer)
+		return {r.shadow_renderer->cascades[0].depth_buffer, r.shadow_renderer->cascades[1].depth_buffer};
+	return {};
 }
 
 FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
@@ -328,8 +332,8 @@ FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
 	return nullptr;
 }
 
-Array<Texture*> hdr_resolver_get_tex_bloom(HDRResolver &r) {
-	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
+shared_array<Texture> hdr_resolver_get_tex_bloom(HDRResolver &r) {
+	return {r.bloom_levels[0].tex_out, r.bloom_levels[1].tex_out, r.bloom_levels[2].tex_out, r.bloom_levels[3].tex_out};
 }
 
 audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float sample_rate) {

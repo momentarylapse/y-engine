@@ -15,7 +15,6 @@
 #include "../../target/TextureRendererVulkan.h"
 #endif
 #include <renderer/path/RenderPath.h>
-
 #include "../WorldRenderer.h"
 #include "../../base.h"
 #include "../../../graphics-impl.h"
@@ -55,8 +54,8 @@ ShadowRenderer::ShadowRenderer() :
 
 void ShadowRenderer::set_scene(SceneView &parent_scene_view) {
 	scene_view.cam = parent_scene_view.cam;
-#warning "TODO"
-	//proj = parent_scene_view.shadow_proj;
+	scene_view.lights = parent_scene_view.lights;
+	scene_view.shadow_index = parent_scene_view.shadow_index;
 }
 
 void ShadowRenderer::render(const RenderParams& params) {
@@ -73,9 +72,11 @@ void ShadowRenderer::render(const RenderParams& params) {
 void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
 	auto params = _params.with_target(c.fb.get());
 	params.desired_aspect_ratio = 1.0f;
+	auto& rvd = c.geo_renderer->cur_rvd;
 	c.geo_renderer->prepare(params);
 
-	auto& rvd = c.geo_renderer->cur_rvd;
+	rvd.begin_scene(&scene_view);
+	proj = rvd.shadow_proj;
 
 #ifdef USING_OPENGL
 	auto m = mat4::scale(c.scale, c.scale, 1);

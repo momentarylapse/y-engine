@@ -16,9 +16,7 @@ extern float global_shadow_box_size; // :(
 
 void RenderViewData::update_lights() {
 	Array<UBOLight> lights;
-	mat4 shadow_proj;
 	for (auto l: scene_view->lights) {
-
 		l->update(scene_view->cam, global_shadow_box_size, true);
 		if (l->allow_shadow) {
 			shadow_proj = l->shadow_projection;

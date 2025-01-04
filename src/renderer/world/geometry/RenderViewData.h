@@ -75,6 +75,7 @@ struct RenderViewData {
 	void set_cull(CullMode mode);
 
 	owned<UniformBuffer> ubo_light;
+	mat4 shadow_proj;
 	void update_lights();
 
 	//Array<UBOLight> lights;
