@@ -57,7 +57,12 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 
 	PerformanceMonitor::begin(ch_bg);
 
+
+#ifdef USING_OPENGL
 	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
+#else
+	auto m = mat4::ID;
+#endif
 //	if (config.antialiasing_method == AntialiasingMethod::TAA)
 //		 m *= jitter(fb->width, fb->height, 0);
 
@@ -66,7 +71,7 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	rvd.begin_scene(&scene_view);
 
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
-	rvd.set_projection_matrix(scene_view.cam->m_projection);
+	rvd.set_projection_matrix(scene_view.cam->m_projection * m);
 	rvd.set_view_matrix(scene_view.cam->m_view);
 	rvd.ubo.num_lights = scene_view.lights.num;
 	rvd.ubo.shadow_index = scene_view.shadow_index;
@@ -91,7 +96,7 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_world);
 #ifdef USING_VULKAN
 #else
-	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
+//	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 #endif
 
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT);
