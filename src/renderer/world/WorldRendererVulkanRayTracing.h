@@ -7,13 +7,14 @@
 
 #pragma once
 
-#include "WorldRendererVulkan.h"
+#include "WorldRenderer.h"
 #ifdef USING_VULKAN
 #include "../post/ThroughShaderRenderer.h"
+#include "geometry/RenderViewData.h"
 
 class Camera;
 
-class WorldRendererVulkanRayTracing : public WorldRendererVulkan {
+class WorldRendererVulkanRayTracing : public WorldRenderer {
 public:
 	WorldRendererVulkanRayTracing(vulkan::Device *device, Camera *cam, SceneView& scene_view, int width, int height);
 

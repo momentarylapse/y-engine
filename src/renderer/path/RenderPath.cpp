@@ -13,12 +13,11 @@
 #include "../post/MultisampleResolver.h"
 #include "../regions/RegionRenderer.h"
 #include "../post/HDRResolver.h"
+#include "../world/WorldRenderer.h"
 #ifdef USING_VULKAN
-	#include "../world/WorldRendererVulkan.h"
 	#include "../world/WorldRendererVulkanForward.h"
 	#include "../world/WorldRendererVulkanRayTracing.h"
 #else
-	#include "../world/WorldRendererGL.h"
 	#include "../world/WorldRendererGLForward.h"
 	#include "../world/WorldRendererGLDeferred.h"
 #endif

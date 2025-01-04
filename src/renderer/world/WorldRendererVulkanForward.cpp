@@ -14,11 +14,8 @@
 #include "../base.h"
 #include <lib/os/msg.h>
 
-#include <y/ComponentManager.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../gui/gui.h"
-#include "../../gui/Node.h"
 #include "../../world/Camera.h"
 #include "../../world/World.h"
 

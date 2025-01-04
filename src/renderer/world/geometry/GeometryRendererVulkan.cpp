@@ -8,7 +8,8 @@
 #include "GeometryRendererVulkan.h"
 
 #ifdef USING_VULKAN
-#include "../WorldRendererVulkan.h"
+#include "RenderViewData.h"
+#include "SceneView.h"
 #include "../../helper/PipelineManager.h"
 #include "../../base.h"
 #include "../../../helper/PerformanceMonitor.h"

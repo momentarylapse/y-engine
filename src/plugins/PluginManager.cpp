@@ -41,7 +41,6 @@
 #include "../renderer/path/RenderPath.h"
 #include "../renderer/post/HDRResolver.h"
 #ifdef USING_OPENGL
-#include "../renderer/world/WorldRendererGL.h"
 #include "../renderer/world/WorldRendererGLForward.h"
 #include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
@@ -49,7 +48,6 @@
 #include "../renderer/target/WindowRendererGL.h"
 #endif
 #ifdef USING_VULKAN
-#include "../renderer/world/WorldRendererVulkan.h"
 #include "../renderer/world/WorldRendererVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
@@ -906,17 +904,16 @@ void PluginManager::export_kaba() {
 		ext->link_virtual("ComputeTask.render", &ComputeTask::render, &ct);
 	}
 
+	using WoR = WorldRenderer;
 #ifdef USING_VULKAN
 //	using WR = WindowRendererVulkan;
 //	using GR = GuiRendererVulkan;
-	using WoR = WorldRendererVulkan;
 	using WoRF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
 //	using WR = WindowRendererGL;
 //	using GR = GuiRendererGL;
-	using WoR = WorldRendererGL;
 	using WoRF = WorldRendererGLForward;
 	using WoRD = WorldRendererGLDeferred;
 	using PP = PostProcessorGL;

@@ -8,7 +8,8 @@
 #include "GeometryRendererGL.h"
 
 #ifdef USING_OPENGL
-#include "../WorldRendererGL.h"
+#include "RenderViewData.h"
+#include "SceneView.h"
 #include "../../base.h"
 #include "../../../helper/PerformanceMonitor.h"
 #include "../../../world/Material.h"
