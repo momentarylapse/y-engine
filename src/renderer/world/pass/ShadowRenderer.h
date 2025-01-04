@@ -9,7 +9,6 @@
 
 #include "../../Renderer.h"
 #include "../../../graphics-fwd.h"
-#include "../geometry/RenderViewData.h"
 #include <lib/math/mat4.h>
 #include "../geometry/SceneView.h"
 
@@ -40,7 +39,6 @@ public:
 		~Cascade();
 		DepthBuffer* depth_buffer = nullptr;
 		shared<FrameBuffer> fb;
-		RenderViewData rvd;
 		owned<TextureRenderer> texture_renderer;
 		float scale = 1.0f;
 	    owned<GeometryRenderer> geo_renderer;

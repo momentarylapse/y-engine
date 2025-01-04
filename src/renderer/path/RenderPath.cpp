@@ -40,7 +40,7 @@ HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) 
 	return new HDRResolver(cam, tex, depth);
 }
 
-WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd, RenderPathType type) {
+WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderPathType type) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
 		return new WorldRendererVulkanRayTracing(device, cam, scene_view, engine.width, engine.height);
@@ -48,14 +48,16 @@ WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderV
 	if (type == RenderPathType::Deferred)
 		return new WorldRendererGLDeferred(cam, scene_view, engine.width, engine.height);
 #endif
-	return new WorldRendererForward(cam, scene_view, main_rvd);
+	return new WorldRendererForward(cam, scene_view);
 }
 
+float global_shadow_box_size;
 
 RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	type = _type;
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
+	global_shadow_box_size = shadow_box_size;
 
 	scene_view.cam = _cam;
 
@@ -107,14 +109,14 @@ void RenderPath::create_geometry_renderer() {
 	add_child(geo_renderer.get());
 }
 
-void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
+/*void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
 	//PerformanceMonitor::begin(ch_prepare_lights);
 	scene_view.prepare_lights(shadow_box_size, rvd.ubo_light.get());
 #ifdef USING_VULKAN
 	rvd.ubo_light->update_part(&scene_view.lights[0], 0, scene_view.lights.num * sizeof(scene_view.lights[0]));
 #endif
 	//PerformanceMonitor::end(ch_prepare_lights);
-}
+}*/
 
 
 
@@ -220,7 +222,7 @@ class RenderPathComplex : public RenderPath {
 public:
 	explicit RenderPathComplex(Camera* cam, RenderPathType type) : RenderPath(type, cam) {
 
-		world_renderer = create_world_renderer(cam, scene_view, main_rvd, type);
+		world_renderer = create_world_renderer(cam, scene_view, type);
 		create_shadow_renderer();
 		create_geometry_renderer();
 		world_renderer->geo_renderer = geo_renderer.get();
@@ -263,7 +265,8 @@ public:
 		geo_renderer->prepare(params);
 
 		render_cubemaps(params);
-		prepare_lights(cam_main, main_rvd);
+		scene_view.choose_lights();
+		//prepare_lights(cam_main, main_rvd); shadow_box_size
 
 		if (scene_view.shadow_index >= 0) {
 			shadow_renderer->set_scene(scene_view);

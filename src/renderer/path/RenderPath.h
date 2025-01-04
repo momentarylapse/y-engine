@@ -8,7 +8,6 @@
 
 #include <renderer/Renderer.h>
 #include "../world/geometry/SceneView.h"
-#include "../world/geometry/RenderViewData.h"
 
 class Camera;
 class HDRResolver;
@@ -50,7 +49,6 @@ public:
 
 	owned<GeometryRenderer> geo_renderer;
 	owned<ShadowRenderer> shadow_renderer;
-	RenderViewData main_rvd;
 
 	void create_shadow_renderer();
 	void create_geometry_renderer();
@@ -59,13 +57,12 @@ public:
 	void render_into_cubemap(CubeMapSource& source);
 
 	void prepare_basics();
-	void prepare_lights(Camera *cam, RenderViewData &rvd);
 	void render_cubemaps(const RenderParams& params);
 
 	CubeMapSource* cube_map_source = nullptr;
 	void suggest_cube_map_pos();
 };
 
-WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd, RenderPathType type);
+WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderPathType type);
 
 #endif //RENDERPATH_H

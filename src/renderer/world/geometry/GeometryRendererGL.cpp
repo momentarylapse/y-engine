@@ -274,19 +274,22 @@ void GeometryRenderer::draw_terrains(const RenderParams& params, RenderViewData 
 		if (!t->material->cast_shadow and is_shadow_pass())
 			continue;
 		auto o = t->owner;
-		nix::set_model_matrix(mat4::translation(o->pos));
 		auto material = t->material.get();
-
-		auto shader = get_shader(material, 0, t->vertex_shader_module, "");
 		if (is_shadow_pass())
 			material = material_shadow;
+
+		auto shader = get_shader(material, 0, t->vertex_shader_module, "");
 
 		set_material_x(scene_view, *t->material.get(), shader);
 		if (!is_shadow_pass()) {
 			shader->set_floats("pattern0", &t->texture_scale[0].x, 3);
 			shader->set_floats("pattern1", &t->texture_scale[1].x, 3);
 		}
-		nix::draw_triangles(t->vertex_buffer.get());
+
+		auto vb = t->vertex_buffer.get();
+		auto& rd = rvd.start(params, mat4::translation(o->pos), shader, *material, 0, PrimitiveTopology::TRIANGLES, vb);
+		rd.apply(params);
+		nix::draw_triangles(vb);
 	}
 	gpu_timestamp_end(params, ch_terrains);
 	PerformanceMonitor::end(ch_terrains);
@@ -338,13 +341,16 @@ void GeometryRenderer::draw_objects_opaque(const RenderParams& params, RenderVie
 				continue;
 			if (!m->material[i]->cast_shadow and is_shadow_pass())
 				continue;
+			auto vb = m->mesh[0]->sub[i].vertex_buffer;
 
-			auto shader = get_shader(material, 0, m->_template->vertex_shader_module, "");
 			if (is_shadow_pass())
 				material = material_shadow;
 
-			set_material_x(scene_view, *material, shader);
-			nix::draw_triangles(m->mesh[0]->sub[i].vertex_buffer);
+			auto shader = get_shader(material, 0, m->_template->vertex_shader_module, "");
+			auto& rd = rvd.start(params, m->_matrix, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb);
+
+			rd.apply(params);
+			nix::draw_triangles(vb);
 		}
 	}
 	gpu_timestamp_end(params, ch_models);
@@ -494,12 +500,12 @@ void GeometryRenderer::draw_transparent(const RenderParams& params, RenderViewDa
 
 void GeometryRenderer::draw(const RenderParams& params) {
 	if ((int)(flags & Flags::ALLOW_SKYBOXES))
-		draw_skyboxes(params, *cur_rvd);
+		draw_skyboxes(params, cur_rvd);
 
 	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass())
-		draw_opaque(params, *cur_rvd);
+		draw_opaque(params, cur_rvd);
 	if ((int)(flags & Flags::ALLOW_TRANSPARENT))
-		draw_transparent(params, *cur_rvd);
+		draw_transparent(params, cur_rvd);
 }
 
 

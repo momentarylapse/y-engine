@@ -93,6 +93,7 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	draw_background(target, params);
 
 	render_out_from_gbuffer(gbuffer.get(), params);
+	auto& rvd = geo_renderer_trans->cur_rvd;
 
 	PerformanceMonitor::begin(ch_trans);
 	bool flip_y = params.target_is_window;
@@ -100,12 +101,12 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	auto cam = scene_view.cam;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->m_projection);
-	nix::bind_uniform_buffer(1, main_rvd.ubo_light.get());
+	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
 	nix::set_view_matrix(cam->view_matrix());
 	nix::set_z(true, true);
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
-	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT, main_rvd);
+	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 	geo_renderer_trans->draw(params);
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CW);
@@ -124,6 +125,8 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const Render
 
 	//nix::clear_color(Green);
 	nix::clear_color(world.background);
+
+	auto& rvd = geo_renderer->cur_rvd;
 	
 	auto cam = scene_view.cam;
 //	float max_depth = cam->max_depth;
@@ -131,9 +134,9 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const Render
 	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	cam->update_matrices(params.desired_aspect_ratio);
-	main_rvd.set_projection_matrix(m * cam->m_projection);
+	rvd.set_projection_matrix(m * cam->m_projection);
 
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES, main_rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES);
 	geo_renderer->draw(params);
 	PerformanceMonitor::end(ch_bg);
 
@@ -151,7 +154,8 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, 
 	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
 	nix::bind_uniform_buffer(13, ssao_sample_buffer);
 
-	nix::bind_uniform_buffer(1, main_rvd.ubo_light.get());
+	auto& rvd = geo_renderer->cur_rvd;
+	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
 	auto tex = weak(source->color_attachments);
 	tex.add(source->depth_buffer.get());
 	tex.add(scene_view.fb_shadow1->depth_buffer.get());
@@ -189,6 +193,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	fb->clear_color(0, color(-1, 0,1,0));
 
 
+	auto& rvd = geo_renderer->cur_rvd;
 	auto cam = scene_view.cam;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
@@ -196,13 +201,13 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CCW);
 
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE, main_rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE);
 	geo_renderer->draw(params);
 	ControllerManager::handle_render_inject();
 
 	/*nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CCW);
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_FX, main_rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_FX);
 	geo_renderer->draw(params);*/
 	gpu_timestamp_end(params, ch_world);
 	PerformanceMonitor::end(ch_world);

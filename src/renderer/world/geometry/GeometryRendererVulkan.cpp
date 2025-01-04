@@ -462,19 +462,19 @@ void GeometryRenderer::prepare_instanced_matrices() {
 
 void GeometryRenderer::draw(const RenderParams& params) {
 	if ((int)(flags & Flags::ALLOW_SKYBOXES))
-		draw_skyboxes(params, *cur_rvd);
+		draw_skyboxes(params, cur_rvd);
 
 	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass()) {
-		draw_terrains(params, *cur_rvd);
-		draw_objects_opaque(params, *cur_rvd);
-		draw_objects_instanced(params, *cur_rvd);
-		draw_user_meshes(params, false, *cur_rvd);
+		draw_terrains(params, cur_rvd);
+		draw_objects_opaque(params, cur_rvd);
+		draw_objects_instanced(params, cur_rvd);
+		draw_user_meshes(params, false, cur_rvd);
 	}
 
 	if ((int)(flags & Flags::ALLOW_TRANSPARENT)) {
-		draw_objects_transparent(params, *cur_rvd);
-		draw_particles(params, *cur_rvd);
-		draw_user_meshes(params, true, *cur_rvd);
+		draw_objects_transparent(params, cur_rvd);
+		draw_particles(params, cur_rvd);
+		draw_user_meshes(params, true, cur_rvd);
 	}
 }
 

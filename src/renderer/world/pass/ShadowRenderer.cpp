@@ -55,7 +55,8 @@ ShadowRenderer::ShadowRenderer() :
 
 void ShadowRenderer::set_scene(SceneView &parent_scene_view) {
 	scene_view.cam = parent_scene_view.cam;
-	proj = parent_scene_view.shadow_proj;
+#warning "TODO"
+	//proj = parent_scene_view.shadow_proj;
 }
 
 void ShadowRenderer::render(const RenderParams& params) {
@@ -74,21 +75,23 @@ void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
 	params.desired_aspect_ratio = 1.0f;
 	c.geo_renderer->prepare(params);
 
+	auto& rvd = c.geo_renderer->cur_rvd;
+
 #ifdef USING_OPENGL
 	auto m = mat4::scale(c.scale, c.scale, 1);
 #else
 	auto m = mat4::scale(c.scale, -c.scale, 1);
-	c.rvd.index = 0;
+	rvd.index = 0;
 #endif
-	c.rvd.scene_view = &scene_view;
-	c.rvd.ubo.num_lights = 0;
-	c.rvd.ubo.shadow_index = -1;
+	rvd.scene_view = &scene_view;
+	rvd.ubo.num_lights = 0;
+	rvd.ubo.shadow_index = -1;
 	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
-	c.rvd.set_projection_matrix(m * proj);
-	c.rvd.set_view_matrix(mat4::ID);
+	rvd.set_projection_matrix(m * proj);
+	rvd.set_view_matrix(mat4::ID);
 
 
 	// all opaque meshes
-	c.geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS, c.rvd);
+	c.geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS);
 	c.texture_renderer->render(params);
 }

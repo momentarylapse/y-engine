@@ -20,8 +20,6 @@ public:
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
-	RenderViewData main_rvd;
-
 	owned<GeometryRenderer> geo_renderer_trans;
 
 	WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height);

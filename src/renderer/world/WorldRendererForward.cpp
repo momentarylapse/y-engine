@@ -32,7 +32,7 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-WorldRendererForward::WorldRendererForward(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd) : WorldRenderer("world", cam, scene_view), main_rvd(main_rvd) {
+WorldRendererForward::WorldRendererForward(Camera *cam, SceneView& scene_view) : WorldRenderer("world", cam, scene_view) {
 	msg_error("WORLD FORWARD");
 	resource_manager->load_shader_module("forward/module-surface.shader");
 }
@@ -45,9 +45,9 @@ void WorldRendererForward::prepare(const RenderParams& params) {
 }
 
 void WorldRendererForward::draw(const RenderParams& params) {
-	draw_with(params, main_rvd);
+	draw_with(params);
 }
-void WorldRendererForward::draw_with(const RenderParams& params, RenderViewData& rvd) {
+void WorldRendererForward::draw_with(const RenderParams& params) {
 
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
@@ -60,6 +60,8 @@ void WorldRendererForward::draw_with(const RenderParams& params, RenderViewData&
 	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 //	if (config.antialiasing_method == AntialiasingMethod::TAA)
 //		 m *= jitter(fb->width, fb->height, 0);
+
+	auto& rvd = geo_renderer->cur_rvd;
 
 	rvd.begin_scene(&scene_view);
 
@@ -80,7 +82,7 @@ void WorldRendererForward::draw_with(const RenderParams& params, RenderViewData&
 #endif
 
 	// skyboxes
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES, rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES);
 	geo_renderer->draw(params);
 	PerformanceMonitor::end(ch_bg);
 
@@ -92,7 +94,7 @@ void WorldRendererForward::draw_with(const RenderParams& params, RenderViewData&
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 #endif
 
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT, rvd);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 	geo_renderer->draw(params);
 	PerformanceMonitor::end(ch_world);
 

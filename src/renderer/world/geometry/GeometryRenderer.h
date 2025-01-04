@@ -8,6 +8,7 @@
 #pragma once
 
 #include "../../Renderer.h"
+#include "RenderViewData.h"
 #include "../../../graphics-fwd.h"
 #include <lib/math/vec3.h>
 #include <lib/image/color.h>
@@ -63,10 +64,10 @@ public:
 
 	GeometryRendererCommon(RenderPathType type, SceneView &scene_view);
 
-	void set(Flags flags, RenderViewData& rvd);
+	void set(Flags flags);
 	bool is_shadow_pass() const;
 
-	RenderViewData* cur_rvd = nullptr;
+	RenderViewData cur_rvd;
 
 	int ch_pre, ch_bg, ch_fx, ch_terrains, ch_models, ch_user, ch_prepare_lights;
 

@@ -15,13 +15,11 @@ class PerformanceMonitor;
 
 class WorldRendererForward : public WorldRenderer {
 public:
-	WorldRendererForward(Camera *cam, SceneView& scene_view, RenderViewData& main_rvd);
+	WorldRendererForward(Camera *cam, SceneView& scene_view);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	void draw_with(const RenderParams& params, RenderViewData& rvd);
+	void draw_with(const RenderParams& params);
 	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
-
-	RenderViewData& main_rvd;
 };

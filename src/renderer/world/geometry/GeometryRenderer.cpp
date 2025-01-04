@@ -46,9 +46,8 @@ Shader* GeometryRendererCommon::get_shader(Material* material, int pass_no, cons
 	return cache.get_shader(type);
 }
 
-void GeometryRendererCommon::set(Flags _flags, RenderViewData &rvd) {
+void GeometryRendererCommon::set(Flags _flags) {
 	flags = _flags;
-	cur_rvd = &rvd;
 }
 
 bool GeometryRendererCommon::is_shadow_pass() const {

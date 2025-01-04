@@ -8,7 +8,7 @@
 
 
 RenderPathDirect::RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Direct, cam) {
-	world_renderer = create_world_renderer(cam, scene_view, main_rvd, RenderPathType::Forward);
+	world_renderer = create_world_renderer(cam, scene_view, RenderPathType::Forward);
 	create_shadow_renderer();
 	create_geometry_renderer();
 	world_renderer->geo_renderer = geo_renderer.get();
@@ -16,7 +16,7 @@ RenderPathDirect::RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Dir
 
 void RenderPathDirect::prepare(const RenderParams &params) {
 	prepare_basics();
-	prepare_lights(scene_view.cam, main_rvd);
+	scene_view.choose_lights();
 	if (scene_view.shadow_index >= 0) {
 		shadow_renderer->set_scene(scene_view);
 		shadow_renderer->render(params);

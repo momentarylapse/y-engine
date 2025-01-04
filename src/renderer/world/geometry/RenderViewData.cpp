@@ -5,7 +5,32 @@
 #include "SceneView.h"
 #include <world/Camera.h>
 #include <y/Entity.h>
+#endif
+#ifdef USING_VULKAN
+#include "GeometryRendererVulkan.h"
+#include "SceneView.h"
+#include "../../base.h"
+#endif
 
+extern float global_shadow_box_size; // :(
+
+void RenderViewData::update_lights() {
+	Array<UBOLight> lights;
+	mat4 shadow_proj;
+	for (auto l: scene_view->lights) {
+
+		l->update(scene_view->cam, global_shadow_box_size, true);
+		if (l->allow_shadow) {
+			shadow_proj = l->shadow_projection;
+		}
+		lights.add(l->light);
+	}
+	ubo_light->update_array(lights);
+	//ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
+}
+
+
+#ifdef USING_OPENGL
 
 void RenderData::apply(const RenderParams &params) {
 }
@@ -16,6 +41,7 @@ RenderViewData::RenderViewData() {
 
 void RenderViewData::begin_scene(SceneView *_scene_view) {
 	scene_view = _scene_view;
+	update_lights();
 	nix::bind_uniform_buffer(1, ubo_light.get());
 }
 
@@ -71,9 +97,6 @@ RenderData& RenderViewData::start(const RenderParams& params, const mat4& matrix
 #endif
 
 #ifdef USING_VULKAN
-#include "GeometryRendererVulkan.h"
-#include "SceneView.h"
-#include "../../base.h"
 
 RenderViewData::RenderViewData() {
 	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
@@ -81,6 +104,7 @@ RenderViewData::RenderViewData() {
 
 void RenderViewData::begin_scene(SceneView *_scene_view) {
 	scene_view = _scene_view;
+	update_lights();
 	index = 0;
 }
 

@@ -10,6 +10,7 @@
 #include <lib/math/mat4.h>
 #include <graphics-fwd.h>
 
+class Light;
 class Camera;
 struct UBOLight;
 struct XTerrainVBUpdater;
@@ -17,15 +18,16 @@ struct XTerrainVBUpdater;
 class TerrainUpdateThread;
 
 struct SceneView {
-	Camera *cam;
-	Array<UBOLight> lights;
+	Camera *cam; // the "owning" camera - might use a different perspective for rendering (e.g. cubemap)
 	shared<FrameBuffer> fb_shadow1;
 	shared<FrameBuffer> fb_shadow2;
 	shared<CubeMap> cube_map;
 	int shadow_index = -1;
-	mat4 shadow_proj;
+	Array<Light*> lights;
 
-	void prepare_lights(float shadow_box_size, UniformBuffer* ubo_light);
+	void choose_lights();
+
+	//void prepare_lights(float shadow_box_size, UniformBuffer* ubo_light);
 
 
 	void check_terrains(const vec3& cam_pos);
