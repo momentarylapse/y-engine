@@ -40,15 +40,14 @@
 #include "../renderer/helper/LightMeter.h"
 #include "../renderer/path/RenderPath.h"
 #include "../renderer/post/HDRResolver.h"
+#include "../renderer/world/WorldRendererForward.h"
 #ifdef USING_OPENGL
-#include "../renderer/world/WorldRendererGLForward.h"
 #include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
 #endif
 #ifdef USING_VULKAN
-#include "../renderer/world/WorldRendererVulkanForward.h"
 #include "../renderer/gui/GuiRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
@@ -905,16 +904,15 @@ void PluginManager::export_kaba() {
 	}
 
 	using WoR = WorldRenderer;
+	using WoRF = WorldRendererForward;
 #ifdef USING_VULKAN
 //	using WR = WindowRendererVulkan;
 //	using GR = GuiRendererVulkan;
-	using WoRF = WorldRendererVulkanForward;
 	using PP = PostProcessorVulkan;
 #endif
 #ifdef USING_OPENGL
 //	using WR = WindowRendererGL;
 //	using GR = GuiRendererGL;
-	using WoRF = WorldRendererGLForward;
 	using WoRD = WorldRendererGLDeferred;
 	using PP = PostProcessorGL;
 #endif

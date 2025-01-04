@@ -14,11 +14,10 @@
 #include "../regions/RegionRenderer.h"
 #include "../post/HDRResolver.h"
 #include "../world/WorldRenderer.h"
+#include "../world/WorldRendererForward.h"
 #ifdef USING_VULKAN
-	#include "../world/WorldRendererVulkanForward.h"
 	#include "../world/WorldRendererVulkanRayTracing.h"
 #else
-	#include "../world/WorldRendererGLForward.h"
 	#include "../world/WorldRendererGLDeferred.h"
 #endif
 #include "../helper/LightMeter.h"
@@ -45,14 +44,11 @@ WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderV
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
 		return new WorldRendererVulkanRayTracing(device, cam, scene_view, engine.width, engine.height);
-	else
-		return new WorldRendererVulkanForward(device, cam, scene_view, main_rvd);
 #else
 	if (type == RenderPathType::Deferred)
 		return new WorldRendererGLDeferred(cam, scene_view, engine.width, engine.height);
-	else
-		return new WorldRendererGLForward(cam, scene_view, main_rvd);
 #endif
+	return new WorldRendererForward(cam, scene_view, main_rvd);
 }
 
 
