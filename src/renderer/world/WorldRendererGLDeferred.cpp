@@ -194,6 +194,7 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 
 
 	auto& rvd = geo_renderer->cur_rvd;
+	rvd.begin_scene(&scene_view);
 	auto cam = scene_view.cam;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);

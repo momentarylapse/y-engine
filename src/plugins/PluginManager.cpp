@@ -325,10 +325,10 @@ Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
 }
 
 FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
-/*#ifdef USING_OPENGL
+#ifdef USING_OPENGL
 	if (r.type == RenderPathType::Deferred)
-		return reinterpret_cast<WorldRendererGLDeferred&>(r).gbuffer.get();
-#endif*/
+		return reinterpret_cast<WorldRendererGLDeferred*>(r.world_renderer)->gbuffer.get();
+#endif
 	return nullptr;
 }
 

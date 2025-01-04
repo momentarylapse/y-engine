@@ -33,7 +33,6 @@
 
 
 WorldRendererForward::WorldRendererForward(Camera *cam, SceneView& scene_view) : WorldRenderer("world", cam, scene_view) {
-	msg_error("WORLD FORWARD");
 	resource_manager->load_shader_module("forward/module-surface.shader");
 }
 
