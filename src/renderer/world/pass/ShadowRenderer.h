@@ -38,7 +38,6 @@ public:
 		Cascade();
 		~Cascade();
 		DepthBuffer* depth_buffer = nullptr;
-		shared<FrameBuffer> fb;
 		owned<TextureRenderer> texture_renderer;
 		float scale = 1.0f;
 	    owned<GeometryRenderer> geo_renderer;

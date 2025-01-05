@@ -33,6 +33,7 @@ public:
 	static void set_material_x(const SceneView& scene_view, const Material& m, Shader* shader);
 
 private:
+	void clear(const RenderParams& params, RenderViewData &rvd);
 	void draw_skyboxes(const RenderParams& params, RenderViewData &rvd);
 	void draw_particles(const RenderParams& params, RenderViewData &rvd);
 	void draw_terrains(const RenderParams& params, RenderViewData &rvd);

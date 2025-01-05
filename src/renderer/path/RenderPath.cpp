@@ -97,13 +97,8 @@ void RenderPath::prepare_basics() {
 
 void RenderPath::create_shadow_renderer() {
 	shadow_renderer = new ShadowRenderer();
-#ifdef USING_VULKAN
-	scene_view.shadow_maps.add(shadow_renderer->cascades[0].fb->attachments.back().to<DepthBuffer>());
-	scene_view.shadow_maps.add(shadow_renderer->cascades[1].fb->attachments.back().to<DepthBuffer>());
-#else
-	scene_view.shadow_maps.add(shadow_renderer->cascades[0].fb->depth_buffer);
-	scene_view.shadow_maps.add(shadow_renderer->cascades[1].fb->depth_buffer);
-#endif
+	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
+	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_child(shadow_renderer.get());
 }
 

@@ -54,8 +54,6 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	auto fb = params.frame_buffer;
 	bool flip_y = params.target_is_window;
 
-	PerformanceMonitor::begin(ch_bg);
-
 
 #ifdef USING_OPENGL
 	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
@@ -75,32 +73,23 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	rvd.ubo.num_lights = scene_view.lights.num;
 	rvd.ubo.shadow_index = scene_view.shadow_index;
 
-#ifdef USING_VULKAN
-	auto cb = params.command_buffer;
-	cb->clear(params.frame_buffer->area(), {world.background}, 1.0f);
-#else
-	nix::clear_color(world.background);
-	nix::clear_z();
+#ifdef USING_OPENGL
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 	rvd.set_wire(wireframe);
 #endif
 
 	// skyboxes
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES);
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR);
 	geo_renderer->draw(params);
-	PerformanceMonitor::end(ch_bg);
 
 
 	// world
-	PerformanceMonitor::begin(ch_world);
-#ifdef USING_VULKAN
-#else
+#ifdef USING_OPENGL
 //	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 #endif
 
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 	geo_renderer->draw(params);
-	PerformanceMonitor::end(ch_world);
 
 #ifdef USING_VULKAN
 #else

@@ -324,10 +324,10 @@ Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
 	return {};
 }
 
-FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
+shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {
 	if (r.type == RenderPathType::Deferred)
-		return reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer.get();
-	return nullptr;
+		return reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures;
+	return {};
 }
 
 shared_array<Texture> hdr_resolver_get_tex_bloom(HDRResolver &r) {

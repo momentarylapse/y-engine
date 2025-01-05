@@ -245,6 +245,11 @@ void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData
 	PerformanceMonitor::end(ch_fx);
 }
 
+void GeometryRenderer::clear(const RenderParams& params, RenderViewData &rvd) {
+	nix::clear_color(world.background);
+	nix::clear_z();
+}
+
 void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	PerformanceMonitor::begin(ch_bg);
 	gpu_timestamp_begin(params, ch_bg);
@@ -472,8 +477,8 @@ void GeometryRenderer::draw_opaque(const RenderParams& params, RenderViewData &r
 		nix::set_z(true, true);
 		nix::set_view_matrix(scene_view.cam->view_matrix());
 		nix::bind_uniform_buffer(1, rvd.ubo_light.get());
-		nix::bind_texture(3, scene_view.shadow_maps[0].get());
-		nix::bind_texture(4, scene_view.shadow_maps[1].get());
+		nix::bind_texture(3, scene_view.shadow_maps[0]);
+		nix::bind_texture(4, scene_view.shadow_maps[1]);
 		nix::bind_texture(5, scene_view.cube_map.get());
 	}
 
@@ -489,8 +494,8 @@ void GeometryRenderer::draw_transparent(const RenderParams& params, RenderViewDa
 	//nix::set_z(true, true);
 
 	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
-	nix::bind_texture(3, scene_view.shadow_maps[0].get());
-	nix::bind_texture(4, scene_view.shadow_maps[1].get());
+	nix::bind_texture(3, scene_view.shadow_maps[0]);
+	nix::bind_texture(4, scene_view.shadow_maps[1]);
 	nix::bind_texture(5, scene_view.cube_map.get());
 
 	draw_objects_transparent(params, rvd);
@@ -499,6 +504,8 @@ void GeometryRenderer::draw_transparent(const RenderParams& params, RenderViewDa
 }
 
 void GeometryRenderer::draw(const RenderParams& params) {
+	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
+		clear(params, cur_rvd);
 	if ((int)(flags & Flags::ALLOW_SKYBOXES))
 		draw_skyboxes(params, cur_rvd);
 

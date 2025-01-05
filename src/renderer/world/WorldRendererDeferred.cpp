@@ -10,6 +10,8 @@
 //#ifdef USING_OPENGL
 #include "geometry/GeometryRendererGL.h"
 #include "geometry/GeometryRendererVulkan.h"
+#include "../target/TextureRendererVulkan.h"
+#include "../target/TextureRendererGL.h"
 #include "pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../base.h"
@@ -41,17 +43,18 @@ WorldRendererDeferred::WorldRendererDeferred(Camera *cam, SceneView& scene_view,
 	auto tex4 = new Texture(width, height, "rgba:f16"); // normal,reflectivity
 	auto depth = new DepthBuffer(width, height, "d24s8");
 	gbuffer_textures = {tex1, tex2, tex3, tex4, depth};
+	for (auto a: weak(gbuffer_textures))
+		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
-#ifdef USING_VULKAN
+
+	gbuffer_renderer = new TextureRenderer("gbuf", gbuffer_textures);
+/*#ifdef USING_VULKAN
 	render_pass = new RenderPass(weak(gbuffer_textures), {});
 	gbuffer = new FrameBuffer(render_pass.get(), gbuffer_textures);
 #else
 	gbuffer = new FrameBuffer(gbuffer_textures);
-#endif
+#endif*/
 
-
-	for (auto a: weak(gbuffer_textures))
-		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
@@ -85,14 +88,16 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
 
-	auto sub_params = params.with_target(gbuffer.get());
+	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());
+
+	gbuffer_renderer->prepare(params);
 
 
 	geo_renderer->prepare(sub_params);
 	geo_renderer_trans->prepare(params); // keep drawing into direct target
 
 
-	render_into_gbuffer(gbuffer.get(), sub_params);
+	render_into_gbuffer(gbuffer_renderer->frame_buffer.get(), sub_params);
 
 	//auto source = do_post_processing(fb_main.get());
 
@@ -105,7 +110,7 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 
 	draw_background(params);
 
-	render_out_from_gbuffer(gbuffer.get(), params);
+	render_out_from_gbuffer(gbuffer_renderer->frame_buffer.get(), params);
 
 #ifdef USING_OPENGL
 	auto& rvd = geo_renderer_trans->cur_rvd;
@@ -179,8 +184,8 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 	auto& rvd = geo_renderer->cur_rvd;
 	out_renderer->bind_uniform_buffer(1, rvd.ubo_light.get());
 	auto tex = weak(gbuffer_textures);
-	tex.add(scene_view.shadow_maps[0].get());
-	tex.add(scene_view.shadow_maps[1].get());
+	tex.add(scene_view.shadow_maps[0]);
+	tex.add(scene_view.shadow_maps[1]);
 	for (int i=0; i<tex.num; i++)
 		out_renderer->bind_texture(i, tex[i]);
 
@@ -201,6 +206,14 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 void WorldRendererDeferred::render_into_gbuffer(FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_world);
 	gpu_timestamp_begin(params, ch_world);
+
+
+//	gbuffer_renderer->add_child(geo_renderer);
+//	gbuffer_renderer->render(params);
+
+
+#ifdef USING_OPENGL
+
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));
 
@@ -221,12 +234,14 @@ void WorldRendererDeferred::render_into_gbuffer(FrameBuffer *fb, const RenderPar
 
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE);
 	geo_renderer->draw(params);
-	ControllerManager::handle_render_inject();
 
 	/*nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CCW);
 	geo_renderer->set(GeometryRenderer::Flags::ALLOW_FX);
 	geo_renderer->draw(params);*/
+
+#endif
+
 	gpu_timestamp_end(params, ch_world);
 	PerformanceMonitor::end(ch_world);
 }

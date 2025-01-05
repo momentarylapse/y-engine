@@ -46,7 +46,6 @@ ShadowRenderer::ShadowRenderer() :
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer("cascd", {tex, c.depth_buffer}, {"autoclear"});
 		c.texture_renderer->use_params_area = false;
-		c.fb = c.texture_renderer->frame_buffer;
 		c.scale = (i == 0) ? 4.0f : 1.0f;
 		c.texture_renderer->add_child(c.geo_renderer.get());
 	}
@@ -70,7 +69,7 @@ void ShadowRenderer::render(const RenderParams& params) {
 }
 
 void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
-	auto params = _params.with_target(c.fb.get());
+	auto params = _params.with_target(c.texture_renderer->frame_buffer.get());
 	params.desired_aspect_ratio = 1.0f;
 	auto& rvd = c.geo_renderer->cur_rvd;
 	c.geo_renderer->prepare(params);

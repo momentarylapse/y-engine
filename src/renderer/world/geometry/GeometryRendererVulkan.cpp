@@ -220,6 +220,11 @@ void GeometryRenderer::draw_particles(const RenderParams& params, RenderViewData
 	PerformanceMonitor::end(ch_fx);
 }
 
+void GeometryRenderer::clear(const RenderParams& params, RenderViewData &rvd) {
+	auto cb = params.command_buffer;
+	cb->clear(params.frame_buffer->area(), {world.background}, 1.0f);
+}
+
 void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData &rvd) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_bg);
@@ -461,6 +466,9 @@ void GeometryRenderer::prepare_instanced_matrices() {
 }
 
 void GeometryRenderer::draw(const RenderParams& params) {
+	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
+		clear(params, cur_rvd);
+		
 	if ((int)(flags & Flags::ALLOW_SKYBOXES))
 		draw_skyboxes(params, cur_rvd);
 

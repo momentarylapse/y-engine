@@ -19,7 +19,7 @@ class TerrainUpdateThread;
 
 struct SceneView {
 	Camera *cam; // the "owning" camera - might use a different perspective for rendering (e.g. cubemap)
-	shared_array<DepthBuffer> shadow_maps;
+	Array<DepthBuffer*> shadow_maps;
 	shared<CubeMap> cube_map;
 	int shadow_index = -1;
 	Array<Light*> lights;

@@ -11,18 +11,21 @@
 #include "geometry/RenderViewData.h"
 
 class ThroughShaderRenderer;
+class TextureRenderer;
 
 class WorldRendererDeferred : public WorldRenderer {
 public:
 
 	shared_array<Texture> gbuffer_textures;
-	shared<FrameBuffer> gbuffer;
+	//shared<FrameBuffer> gbuffer;
 	UniformBuffer *ssao_sample_buffer;
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
+	owned<TextureRenderer> gbuffer_renderer;
+
 	owned<GeometryRenderer> geo_renderer_trans;
-	ThroughShaderRenderer* out_renderer;
+	owned<ThroughShaderRenderer> out_renderer;
 
 	WorldRendererDeferred(Camera *cam, SceneView& scene_view, int width, int height);
 	void prepare(const RenderParams& params) override;

@@ -59,7 +59,8 @@ public:
 		ALLOW_OPAQUE = 1,
 		ALLOW_TRANSPARENT = 2,
 		ALLOW_SKYBOXES = 4,
-		SHADOW_PASS = 8,
+		ALLOW_CLEAR_COLOR = 8,
+		SHADOW_PASS = 1024,
 	} flags;
 
 	GeometryRendererCommon(RenderPathType type, SceneView &scene_view);
