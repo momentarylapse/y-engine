@@ -1,14 +1,15 @@
 /*
- * WorldRendererGL.cpp
+ * WorldRenderer.cpp
  *
  *  Created on: 07.08.2020
  *      Author: michi
  */
 
-#include "WorldRendererGLDeferred.h"
+#include "WorldRendererDeferred.h"
 
-#ifdef USING_OPENGL
+//#ifdef USING_OPENGL
 #include "geometry/GeometryRendererGL.h"
+#include "geometry/GeometryRendererVulkan.h"
 #include "pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../base.h"
@@ -32,14 +33,14 @@
 #include "../../graphics-impl.h"
 
 
-WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRenderer("world/def", cam, scene_view) {
+WorldRendererDeferred::WorldRendererDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRenderer("world/def", cam, scene_view) {
 
-	auto tex1 = new nix::Texture(width, height, "rgba:f16"); // diffuse
-	auto tex2 = new nix::Texture(width, height, "rgba:f16"); // emission
-	auto tex3 = new nix::Texture(width, height, "rgba:f16"); // pos
-	auto tex4 = new nix::Texture(width, height, "rgba:f16"); // normal,reflectivity
-	auto depth = new nix::DepthBuffer(width, height, "d24s8");
-	gbuffer = new nix::FrameBuffer({tex1, tex2, tex3, tex4, depth});
+	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
+	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
+	auto tex3 = new Texture(width, height, "rgba:f16"); // pos
+	auto tex4 = new Texture(width, height, "rgba:f16"); // normal,reflectivity
+	auto depth = new DepthBuffer(width, height, "d24s8");
+	gbuffer = new FrameBuffer({tex1, tex2, tex3, tex4, depth});
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
@@ -49,8 +50,8 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_v
 	resource_manager->load_shader_module("deferred/module-surface.shader");
 
 	auto shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
-	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
-		msg_error("SSAO");
+//	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
+//		msg_error("SSAO");
 
 	out_renderer = new ThroughShaderRenderer("out", shader_gbuffer_out);
 	out_renderer->bind_textures(0, {tex1, tex2, tex3, tex4, depth});
@@ -62,7 +63,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_v
 		auto v = r.dir() * pow(r.uniform01(), 1);
 		ssao_samples.add(vec4(v.x, v.y, abs(v.z), 0));
 	}
-	ssao_sample_buffer = new nix::UniformBuffer(ssao_samples.num * sizeof(vec4));
+	ssao_sample_buffer = new UniformBuffer(ssao_samples.num * sizeof(vec4));
 	ssao_sample_buffer->update_array(ssao_samples);
 
 	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", channel);
@@ -72,7 +73,7 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_v
 	add_child(geo_renderer_trans.get());
 }
 
-void WorldRendererGLDeferred::prepare(const RenderParams& params) {
+void WorldRendererDeferred::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
 
@@ -90,7 +91,7 @@ void WorldRendererGLDeferred::prepare(const RenderParams& params) {
 	PerformanceMonitor::end(ch_prepare);
 }
 
-void WorldRendererGLDeferred::draw(const RenderParams& params) {
+void WorldRendererDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
@@ -126,7 +127,7 @@ void WorldRendererGLDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const RenderParams& params) {
+void WorldRendererDeferred::draw_background(FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_bg);
 
 	//nix::clear_color(Green);
@@ -148,7 +149,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const Render
 
 }
 
-void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, const RenderParams& params) {
+void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_gbuf_out);
 
 	auto& data = out_renderer->bindings.shader_data;
@@ -183,9 +184,9 @@ void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, 
 	PerformanceMonitor::end(ch_gbuf_out);
 }
 
-//void WorldRendererGLDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
+//void WorldRendererDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 
-void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const RenderParams& params) {
+void WorldRendererDeferred::render_into_gbuffer(FrameBuffer *fb, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_world);
 	gpu_timestamp_begin(params, ch_world);
 	nix::bind_frame_buffer(fb);
@@ -218,5 +219,3 @@ void WorldRendererGLDeferred::render_into_gbuffer(nix::FrameBuffer *fb, const Re
 	PerformanceMonitor::end(ch_world);
 }
 
-
-#endif

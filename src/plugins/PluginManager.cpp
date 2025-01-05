@@ -41,8 +41,8 @@
 #include "../renderer/path/RenderPath.h"
 #include "../renderer/post/HDRResolver.h"
 #include "../renderer/world/WorldRendererForward.h"
+#include "../renderer/world/WorldRendererDeferred.h"
 #ifdef USING_OPENGL
-#include "../renderer/world/WorldRendererGLDeferred.h"
 #include "../renderer/gui/GuiRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
 #include "../renderer/target/WindowRendererGL.h"
@@ -325,10 +325,8 @@ Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
 }
 
 FrameBuffer* render_path_get_gbuffer(RenderPath &r) {
-#ifdef USING_OPENGL
 	if (r.type == RenderPathType::Deferred)
-		return reinterpret_cast<WorldRendererGLDeferred*>(r.world_renderer)->gbuffer.get();
-#endif
+		return reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer.get();
 	return nullptr;
 }
 
@@ -909,6 +907,7 @@ void PluginManager::export_kaba() {
 
 	using WoR = WorldRenderer;
 	using WoRF = WorldRendererForward;
+	using WoRD = WorldRendererDeferred;
 #ifdef USING_VULKAN
 //	using WR = WindowRendererVulkan;
 //	using GR = GuiRendererVulkan;
@@ -917,7 +916,6 @@ void PluginManager::export_kaba() {
 #ifdef USING_OPENGL
 //	using WR = WindowRendererGL;
 //	using GR = GuiRendererGL;
-	using WoRD = WorldRendererGLDeferred;
 	using PP = PostProcessorGL;
 #endif
 	ext->declare_class_size("WorldRenderer", sizeof(WoR));

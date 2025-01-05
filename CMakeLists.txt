@@ -450,8 +450,8 @@ add_executable(y
 	src/renderer/world/geometry/SceneView.cpp
 	src/renderer/world/pass/ShadowRenderer.cpp
 	src/renderer/world/WorldRenderer.cpp
+	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
-	src/renderer/world/WorldRendererGLDeferred.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/base.cpp
 	src/renderer/Renderer.cpp

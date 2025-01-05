@@ -79,7 +79,7 @@ uniform vec2 resolution_scale;
 
 const int NSSAO = 16;
 //uniform vec3 ssao_samples[NSSAO];
-uniform SSAO {
+layout(binding=13) uniform SSAO {
 	vec3 ssao_samples[NSSAO];
 };
 uniform float ambient_occlusion_bias = 0.02;

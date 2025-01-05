@@ -15,10 +15,9 @@
 #include "../post/HDRResolver.h"
 #include "../world/WorldRenderer.h"
 #include "../world/WorldRendererForward.h"
+#include "../world/WorldRendererDeferred.h"
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkanRayTracing.h"
-#else
-	#include "../world/WorldRendererGLDeferred.h"
 #endif
 #include "../helper/LightMeter.h"
 #include <renderer/target/TextureRendererGL.h>
@@ -44,10 +43,9 @@ WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderP
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
 		return new WorldRendererVulkanRayTracing(device, cam, scene_view, engine.width, engine.height);
-#else
-	if (type == RenderPathType::Deferred)
-		return new WorldRendererGLDeferred(cam, scene_view, engine.width, engine.height);
 #endif
+	if (type == RenderPathType::Deferred)
+		return new WorldRendererDeferred(cam, scene_view, engine.width, engine.height);
 	return new WorldRendererForward(cam, scene_view);
 }
 

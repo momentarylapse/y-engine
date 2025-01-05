@@ -1,5 +1,5 @@
 /*
- * WorldRendererGLDeferred.h
+ * WorldRendererDeferred.h
  *
  *  Created on: 07.08.2020
  *      Author: michi
@@ -8,12 +8,11 @@
 #pragma once
 
 #include "WorldRenderer.h"
-#ifdef USING_OPENGL
 #include "geometry/RenderViewData.h"
 
 class ThroughShaderRenderer;
 
-class WorldRendererGLDeferred : public WorldRenderer {
+class WorldRendererDeferred : public WorldRenderer {
 public:
 
 	shared<FrameBuffer> gbuffer;
@@ -24,7 +23,7 @@ public:
 	owned<GeometryRenderer> geo_renderer_trans;
 	ThroughShaderRenderer* out_renderer;
 
-	WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height);
+	WorldRendererDeferred(Camera *cam, SceneView& scene_view, int width, int height);
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
@@ -35,5 +34,3 @@ public:
 
 	void render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params);
 };
-
-#endif
