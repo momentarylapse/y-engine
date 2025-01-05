@@ -40,9 +40,17 @@ WorldRendererDeferred::WorldRendererDeferred(Camera *cam, SceneView& scene_view,
 	auto tex3 = new Texture(width, height, "rgba:f16"); // pos
 	auto tex4 = new Texture(width, height, "rgba:f16"); // normal,reflectivity
 	auto depth = new DepthBuffer(width, height, "d24s8");
-	gbuffer = new FrameBuffer({tex1, tex2, tex3, tex4, depth});
+	gbuffer_textures = {tex1, tex2, tex3, tex4, depth};
 
-	for (auto a: gbuffer->color_attachments)
+#ifdef USING_VULKAN
+	render_pass = new RenderPass(weak(gbuffer_textures), {});
+	gbuffer = new FrameBuffer(render_pass.get(), gbuffer_textures);
+#else
+	gbuffer = new FrameBuffer(gbuffer_textures);
+#endif
+
+
+	for (auto a: weak(gbuffer_textures))
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
 
@@ -95,11 +103,11 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
-	auto target = params.frame_buffer;
-
-	draw_background(target, params);
+	draw_background(params);
 
 	render_out_from_gbuffer(gbuffer.get(), params);
+
+#ifdef USING_OPENGL
 	auto& rvd = geo_renderer_trans->cur_rvd;
 
 	PerformanceMonitor::begin(ch_trans);
@@ -122,16 +130,21 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 	nix::set_projection_matrix(mat4::ID);
 	nix::set_view_matrix(mat4::ID);
 	PerformanceMonitor::end(ch_trans);
+#endif
 
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
 }
 
-void WorldRendererDeferred::draw_background(FrameBuffer *fb, const RenderParams& params) {
+void WorldRendererDeferred::draw_background(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_bg);
 
 	//nix::clear_color(Green);
+	auto fb = params.frame_buffer;
+#ifdef USING_VULKAN
+#else
 	nix::clear_color(world.background);
+#endif
 
 	auto& rvd = geo_renderer->cur_rvd;
 	
@@ -165,8 +178,7 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 
 	auto& rvd = geo_renderer->cur_rvd;
 	out_renderer->bind_uniform_buffer(1, rvd.ubo_light.get());
-	auto tex = weak(source->color_attachments);
-	tex.add(source->depth_buffer.get());
+	auto tex = weak(gbuffer_textures);
 	tex.add(scene_view.fb_shadow1->depth_buffer.get());
 	tex.add(scene_view.fb_shadow2->depth_buffer.get());
 	for (int i=0; i<tex.num; i++)
