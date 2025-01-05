@@ -145,10 +145,10 @@ void RenderData::set_textures(const SceneView& scene_view, const Array<Texture*>
 	foreachi (auto t, tex, i)
 						if (t)
 							dset->set_texture(BINDING_TEX0 + i, t);
-	if (scene_view.fb_shadow1)
-		dset->set_texture(BINDING_SHADOW0, scene_view.fb_shadow1->attachments[1].get());
-	if (scene_view.fb_shadow1)
-		dset->set_texture(BINDING_SHADOW1, scene_view.fb_shadow2->attachments[1].get());
+	if (scene_view.shadow_maps.num >= 1)
+		dset->set_texture(BINDING_SHADOW0, scene_view.shadow_maps[0].get());
+	if (scene_view.shadow_maps.num >= 2)
+		dset->set_texture(BINDING_SHADOW1, scene_view.shadow_maps[1].get());
 	if (scene_view.cube_map)
 		dset->set_texture(BINDING_CUBE, scene_view.cube_map.get());
 }

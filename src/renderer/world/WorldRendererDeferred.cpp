@@ -179,8 +179,8 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 	auto& rvd = geo_renderer->cur_rvd;
 	out_renderer->bind_uniform_buffer(1, rvd.ubo_light.get());
 	auto tex = weak(gbuffer_textures);
-	tex.add(scene_view.fb_shadow1->depth_buffer.get());
-	tex.add(scene_view.fb_shadow2->depth_buffer.get());
+	tex.add(scene_view.shadow_maps[0].get());
+	tex.add(scene_view.shadow_maps[1].get());
 	for (int i=0; i<tex.num; i++)
 		out_renderer->bind_texture(i, tex[i]);
 

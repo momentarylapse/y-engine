@@ -472,8 +472,8 @@ void GeometryRenderer::draw_opaque(const RenderParams& params, RenderViewData &r
 		nix::set_z(true, true);
 		nix::set_view_matrix(scene_view.cam->view_matrix());
 		nix::bind_uniform_buffer(1, rvd.ubo_light.get());
-		nix::bind_texture(3, scene_view.fb_shadow1->depth_buffer.get());
-		nix::bind_texture(4, scene_view.fb_shadow2->depth_buffer.get());
+		nix::bind_texture(3, scene_view.shadow_maps[0].get());
+		nix::bind_texture(4, scene_view.shadow_maps[1].get());
 		nix::bind_texture(5, scene_view.cube_map.get());
 	}
 
@@ -489,8 +489,8 @@ void GeometryRenderer::draw_transparent(const RenderParams& params, RenderViewDa
 	//nix::set_z(true, true);
 
 	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
-	nix::bind_texture(3, scene_view.fb_shadow1->depth_buffer.get());
-	nix::bind_texture(4, scene_view.fb_shadow2->depth_buffer.get());
+	nix::bind_texture(3, scene_view.shadow_maps[0].get());
+	nix::bind_texture(4, scene_view.shadow_maps[1].get());
 	nix::bind_texture(5, scene_view.cube_map.get());
 
 	draw_objects_transparent(params, rvd);
