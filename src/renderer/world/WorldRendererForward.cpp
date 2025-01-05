@@ -31,13 +31,15 @@
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 
 
-WorldRendererForward::WorldRendererForward(Camera *cam, SceneView& scene_view) : WorldRenderer("world", cam, scene_view) {
+WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRenderer("world", scene_view) {
 	resource_manager->load_shader_module("forward/module-surface.shader");
 }
 
 void WorldRendererForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
+
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR | GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -50,53 +52,9 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
-	auto fb = params.frame_buffer;
-	bool flip_y = params.target_is_window;
-
-
-#ifdef USING_OPENGL
-	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-#else
-	auto m = mat4::ID;
-#endif
-//	if (config.antialiasing_method == AntialiasingMethod::TAA)
-//		 m *= jitter(fb->width, fb->height, 0);
-
-	auto& rvd = geo_renderer->cur_rvd;
-
-	rvd.begin_scene(&scene_view);
-
-	scene_view.cam->update_matrices(params.desired_aspect_ratio);
-	rvd.set_projection_matrix(scene_view.cam->m_projection * m);
-	rvd.set_view_matrix(scene_view.cam->m_view);
-	rvd.ubo.num_lights = scene_view.lights.num;
-	rvd.ubo.shadow_index = scene_view.shadow_index;
-
-#ifdef USING_OPENGL
-	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
-	rvd.set_wire(wireframe);
-#endif
-
-	// skyboxes
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR);
+	geo_renderer->cur_rvd.prepare_scene(&scene_view);
 	geo_renderer->draw(params);
 
-
-	// world
-#ifdef USING_OPENGL
-//	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
-#endif
-
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT);
-	geo_renderer->draw(params);
-
-#ifdef USING_VULKAN
-#else
-	rvd.set_cull(CullMode::BACK);
-	nix::set_front(nix::Orientation::CW);
-	//nix::set_scissor(rect::EMPTY);
-	rvd.set_wire(false);
-#endif
 
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);

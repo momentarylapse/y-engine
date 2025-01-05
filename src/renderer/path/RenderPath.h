@@ -63,6 +63,6 @@ public:
 	void suggest_cube_map_pos();
 };
 
-WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderPathType type);
+WorldRenderer *create_world_renderer(SceneView& scene_view, RenderPathType type);
 
 #endif //RENDERPATH_H

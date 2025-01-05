@@ -16,7 +16,7 @@ class Camera;
 
 class WorldRendererVulkanRayTracing : public WorldRenderer {
 public:
-	WorldRendererVulkanRayTracing(vulkan::Device *device, Camera *cam, SceneView& scene_view, int width, int height);
+	WorldRendererVulkanRayTracing(vulkan::Device *device, SceneView& scene_view, int width, int height);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

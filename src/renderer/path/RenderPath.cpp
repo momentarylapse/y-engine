@@ -38,14 +38,14 @@ HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) 
 	return new HDRResolver(cam, tex, depth);
 }
 
-WorldRenderer *create_world_renderer(Camera *cam, SceneView& scene_view, RenderPathType type) {
+WorldRenderer *create_world_renderer(SceneView& scene_view, RenderPathType type) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
-		return new WorldRendererVulkanRayTracing(device, cam, scene_view, engine.width, engine.height);
+		return new WorldRendererVulkanRayTracing(device, scene_view, engine.width, engine.height);
 #endif
 	if (type == RenderPathType::Deferred)
-		return new WorldRendererDeferred(cam, scene_view, engine.width, engine.height);
-	return new WorldRendererForward(cam, scene_view);
+		return new WorldRendererDeferred(scene_view, engine.width, engine.height);
+	return new WorldRendererForward(scene_view);
 }
 
 float global_shadow_box_size;
@@ -88,14 +88,11 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 RenderPath::~RenderPath() = default;
 
 void RenderPath::prepare_basics() {
-	if (!scene_view.cam)
-		scene_view.cam = cam_main;
-
 	scene_view.check_terrains(cam_main->owner->pos);
 }
 
 void RenderPath::create_shadow_renderer() {
-	shadow_renderer = new ShadowRenderer();
+	shadow_renderer = new ShadowRenderer(scene_view.cam);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_child(shadow_renderer.get());
@@ -181,8 +178,6 @@ void RenderPath::suggest_cube_map_pos() {
 			cube_map_source->min_depth = m->prop.radius * 1.1f;
 		return;
 	}
-	if (!scene_view.cam)
-		return;
 	auto& list = ComponentManager::get_list_family<Model>();
 	float max_score = 0;
 	cube_map_source->owner->pos = scene_view.cam->m_view * vec3(0,0,1000);
@@ -218,8 +213,7 @@ void RenderPath::render_cubemaps(const RenderParams &params) {
 class RenderPathComplex : public RenderPath {
 public:
 	explicit RenderPathComplex(Camera* cam, RenderPathType type) : RenderPath(type, cam) {
-
-		world_renderer = create_world_renderer(cam, scene_view, type);
+		world_renderer = create_world_renderer(scene_view, type);
 		create_shadow_renderer();
 		create_geometry_renderer();
 		world_renderer->geo_renderer = geo_renderer.get();
@@ -265,8 +259,8 @@ public:
 		scene_view.choose_lights();
 		//prepare_lights(cam_main, main_rvd); shadow_box_size
 
-		if (scene_view.shadow_index >= 0) {
-			shadow_renderer->set_scene(scene_view);
+		if (int i = scene_view.shadow_index >= 0) {
+			shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
 			shadow_renderer->render(params);
 		}
 

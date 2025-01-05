@@ -80,7 +80,7 @@ class RenderPath
 	hdr_resolver: HDRResolver*
 	light_meter: LightMeter*
 	# debugging
-	func extern get_gbuffer() -> FrameBuffer*
+	func extern get_gbuffer() -> shared![Texture][]
 	func extern get_shadow_map() -> shared![DepthBuffer][]
 	func extern get_cubemap() -> CubeMap*
 

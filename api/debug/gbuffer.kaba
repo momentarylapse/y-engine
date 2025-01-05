@@ -4,9 +4,9 @@ class X extends Controller
 	var pic: shared![Picture][]
 	
 	func override on_init()
-		for gbuf in engine.render_paths[0].get_gbuffer()
-			for i in 0:4
-				pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], gbuf.color_attachments()[i]))
+		return
+		for i=>tex in engine.render_paths[0].get_gbuffer()
+			pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], tex))
 			#	for d in gbuf.depth_buffer()
 			#		pic.add(new Picture([0.0,0.2, 0.8, 1.0], d))
 		

@@ -31,6 +31,8 @@ static constexpr int BINDING_LIGHT = 9;
 static constexpr int BINDING_INSTANCE_MATRICES = 10;
 static constexpr int BINDING_BONE_MATRICES = 11;
 
+#endif
+
 struct UBO {
 	// matrix
 	mat4 m,v,p;
@@ -42,7 +44,6 @@ struct UBO {
 	int shadow_index;
 	int dummy2[2];
 };
-#endif
 
 struct RenderData {
 #ifdef USING_VULKAN
@@ -55,17 +56,13 @@ struct RenderData {
 
 struct RenderViewData {
 	RenderViewData();
-	void begin_scene(SceneView* scene_view);
+	void prepare_scene(SceneView* scene_view);
+	void begin_draw();
 
-#ifdef USING_OPENGL
-	struct UBO {
-		int num_lights, shadow_index;
-	} ubo;
-#endif
+	UBO ubo;
 #ifdef USING_VULKAN
 	Array<RenderData> rda;
 	int index = 0;
-	UBO ubo;
 #endif
 
 	void set_projection_matrix(const mat4& projection);

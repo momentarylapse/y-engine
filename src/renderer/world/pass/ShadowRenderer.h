@@ -21,18 +21,17 @@ struct SceneView;
 
 class ShadowRenderer : public RenderTask {
 public:
-	ShadowRenderer();
+	ShadowRenderer(Camera* cam);
 
 	static constexpr int NUM_CASCADES = 2;
 
 	void prepare(const RenderParams& params) override {};
 	void draw(const RenderParams& params) override {}
 
-	void set_scene(SceneView &parent_scene_view);
+	void set_projection(const mat4& proj);
     void render(const RenderParams& params) override;
 
     owned<Material> material;
-	mat4 proj;
 	SceneView scene_view;
 	struct Cascade {
 		Cascade();

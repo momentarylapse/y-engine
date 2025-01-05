@@ -33,7 +33,7 @@ class CubeMapSource;
 
 class WorldRenderer : public Renderer {
 public:
-	WorldRenderer(const string &name, Camera *cam, SceneView& scene_view);
+	WorldRenderer(const string &name, SceneView& scene_view);
 
 	int ch_post = -1, ch_post_focus = -1;
 	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;

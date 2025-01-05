@@ -36,7 +36,7 @@ mat4 mtr(const vec3 &t, const quaternion &a) {
 	return mt * mr;
 }
 
-WorldRenderer::WorldRenderer(const string &name, Camera *_cam, SceneView& _scene_view) :
+WorldRenderer::WorldRenderer(const string &name, SceneView& _scene_view) :
 		Renderer(name),
 		scene_view(_scene_view)
 {

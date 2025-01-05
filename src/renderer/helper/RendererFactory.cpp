@@ -105,15 +105,19 @@ public:
 	}
 };*/
 
-void create_full_renderer(GLFWwindow* window, Camera *cam) {
+void create_and_attach_render_path(Camera *cam) {
+	auto rp = create_render_path(cam);
+	engine.render_paths.add(rp);
+	engine.region_renderer->add_region(rp, rect::ID, 0);
+}
+
+
+void create_base_renderer(GLFWwindow* window) {
 	try {
 		engine.window_renderer = create_window_renderer(window);
 		engine.region_renderer = create_region_renderer();
-		auto rp = create_render_path(cam);
-		engine.render_paths.add(rp);
 		engine.gui_renderer = create_gui_renderer();
 		engine.window_renderer->add_child(engine.region_renderer);
-		engine.region_renderer->add_region(rp, rect::ID, 0);
 		engine.region_renderer->add_region(engine.gui_renderer, rect::ID, 999);
 
 		if (false) {

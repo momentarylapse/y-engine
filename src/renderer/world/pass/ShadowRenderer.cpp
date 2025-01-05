@@ -26,7 +26,7 @@
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
 
-ShadowRenderer::ShadowRenderer() :
+ShadowRenderer::ShadowRenderer(Camera* cam) :
 		RenderTask("shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -34,6 +34,9 @@ ShadowRenderer::ShadowRenderer() :
 
 	material = new Material(resource_manager);
 	material->pass0.shader_path = "shadow.shader";
+
+	scene_view.cam = cam;
+	scene_view.shadow_index = -1;
 
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
@@ -50,10 +53,17 @@ ShadowRenderer::ShadowRenderer() :
 	}
 }
 
-void ShadowRenderer::set_scene(SceneView &parent_scene_view) {
-	scene_view.cam = parent_scene_view.cam;
-	scene_view.lights = parent_scene_view.lights;
-	scene_view.shadow_index = parent_scene_view.shadow_index;
+void ShadowRenderer::set_projection(const mat4& proj) {
+	for (int i=0; i<NUM_CASCADES; i++) {
+		auto& c = cascades[i];
+
+#ifdef USING_OPENGL
+		auto m = mat4::scale(c.scale, c.scale, 1);
+#else
+		auto m = mat4::scale(c.scale, -c.scale, 1);
+#endif
+		c.geo_renderer->cur_rvd.set_projection_matrix(m * proj);
+	}
 }
 
 void ShadowRenderer::render(const RenderParams& params) {
@@ -70,27 +80,10 @@ void ShadowRenderer::render(const RenderParams& params) {
 void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
 	auto params = _params.with_target(c.texture_renderer->frame_buffer.get());
 	params.desired_aspect_ratio = 1.0f;
-	auto& rvd = c.geo_renderer->cur_rvd;
-	c.geo_renderer->prepare(params);
-
-	rvd.begin_scene(&scene_view);
-	proj = rvd.shadow_proj;
-
-#ifdef USING_OPENGL
-	auto m = mat4::scale(c.scale, c.scale, 1);
-#else
-	auto m = mat4::scale(c.scale, -c.scale, 1);
-	rvd.index = 0;
-#endif
-	rvd.scene_view = &scene_view;
-	rvd.ubo.num_lights = 0;
-	rvd.ubo.shadow_index = -1;
-	//m = m * jitter(sfb->width*8, sfb->height*8, 1);
-	rvd.set_projection_matrix(m * proj);
-	rvd.set_view_matrix(mat4::ID);
 
 
 	// all opaque meshes
+	c.geo_renderer->prepare(params);
 	c.geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS);
 	c.texture_renderer->render(params);
 }

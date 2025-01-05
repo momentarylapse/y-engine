@@ -30,8 +30,8 @@
 static const int MAX_RT_TRIAS = 65536;
 static const int MAX_RT_MESHES = 1024;
 
-WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_device, Camera *cam, SceneView& scene_view, int w, int h) :
-		WorldRenderer("rt", cam, scene_view) {
+WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_device, SceneView& scene_view, int w, int h) :
+		WorldRenderer("rt", scene_view) {
 	device = _device;
 	width = w;
 	height = h;

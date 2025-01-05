@@ -21,6 +21,8 @@ GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view)
 	type = _type;
 	flags = Flags::ALLOW_OPAQUE | Flags::ALLOW_TRANSPARENT;
 
+	cur_rvd.scene_view = &scene_view;
+
 	ch_pre = PerformanceMonitor::create_channel("pre", channel);
 	ch_bg = PerformanceMonitor::create_channel("bg", channel);
 	ch_fx = PerformanceMonitor::create_channel("fx", channel);
@@ -79,6 +81,31 @@ bool GeometryRenderer::is_shadow_pass() const {
 }
 
 void GeometryRenderer::draw(const RenderParams& params) {
+	bool flip_y = params.target_is_window;
+
+#ifdef USING_OPENGL
+	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
+#else
+	auto m = mat4::ID;
+#endif
+	//	if (config.antialiasing_method == AntialiasingMethod::TAA)
+	//		 m *= jitter(fb->width, fb->height, 0);
+
+	scene_view.cam->update_matrices(params.desired_aspect_ratio);
+	cur_rvd.set_projection_matrix(scene_view.cam->m_projection * m);
+	cur_rvd.set_view_matrix(scene_view.cam->m_view);
+	cur_rvd.ubo.num_lights = scene_view.lights.num;
+	cur_rvd.ubo.shadow_index = scene_view.shadow_index;
+
+#ifdef USING_OPENGL
+	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
+	//cur_rvd.set_wire(wireframe);
+#endif
+
+
+	cur_rvd.begin_draw();
+
+
 	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
 		clear(params, cur_rvd);
 
@@ -116,4 +143,12 @@ void GeometryRenderer::draw(const RenderParams& params) {
 		draw_particles(params, cur_rvd);
 		draw_user_meshes(params, cur_rvd, true);
 	}
+
+#ifdef USING_VULKAN
+#else
+	cur_rvd.set_cull(CullMode::BACK);
+	nix::set_front(nix::Orientation::CW);
+	//nix::set_scissor(rect::EMPTY);
+	cur_rvd.set_wire(false);
+#endif
 }

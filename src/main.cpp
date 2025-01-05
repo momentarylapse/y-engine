@@ -131,7 +131,7 @@ public:
 		auto resource_manager = new ResourceManager(context);
 		engine.set_context(context, resource_manager);
 
-		create_full_renderer(window, nullptr); // cam_main does not exist yet
+		create_base_renderer(window);
 
 		audio::init();
 
@@ -167,6 +167,8 @@ public:
 			ControllerManager::add_controller(s.filename, s.variables);
 		for (auto &s: config.additional_scripts)
 			ControllerManager::add_controller(s, {});
+		for (auto& cam: ComponentManager::get_list_family<Camera>())
+			create_and_attach_render_path(cam);
 
 		msg_left();
 		msg_write("|                                                      |");

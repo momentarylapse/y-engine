@@ -10,6 +10,18 @@
 
 extern float global_shadow_box_size; // :(
 
+
+RenderViewData::RenderViewData() {
+	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
+}
+
+void RenderViewData::set_projection_matrix(const mat4& projection) {
+	ubo.p = projection;
+}
+void RenderViewData::set_view_matrix(const mat4& view) {
+	ubo.v = view;
+}
+
 void RenderViewData::update_lights() {
 	Array<UBOLight> lights;
 	for (auto l: scene_view->lights) {
@@ -23,28 +35,23 @@ void RenderViewData::update_lights() {
 	//ubo_light->update_part(&lights[0], 0, lights.num * sizeof(lights[0]));
 }
 
+void RenderViewData::prepare_scene(SceneView *_scene_view) {
+	scene_view = _scene_view;
+	update_lights();
+}
+
 
 #ifdef USING_OPENGL
 
 void RenderData::apply(const RenderParams &params) {
 }
 
-RenderViewData::RenderViewData() {
-	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
-}
-
-void RenderViewData::begin_scene(SceneView *_scene_view) {
-	scene_view = _scene_view;
-	update_lights();
+void RenderViewData::begin_draw() {
+	nix::set_projection_matrix(ubo.p);
+	nix::set_view_matrix(ubo.v);
 	nix::bind_uniform_buffer(1, ubo_light.get());
 }
 
-void RenderViewData::set_projection_matrix(const mat4& projection) {
-	nix::set_projection_matrix(projection);
-}
-void RenderViewData::set_view_matrix(const mat4& view) {
-	nix::set_view_matrix(view);
-}
 void RenderViewData::set_z(bool write, bool test) {
 	nix::set_z(write, test);
 }
@@ -92,21 +99,8 @@ RenderData& RenderViewData::start(const RenderParams& params, const mat4& matrix
 
 #ifdef USING_VULKAN
 
-RenderViewData::RenderViewData() {
-	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
-}
-
-void RenderViewData::begin_scene(SceneView *_scene_view) {
-	scene_view = _scene_view;
-	update_lights();
+void RenderViewData::begin_draw() {
 	index = 0;
-}
-
-void RenderViewData::set_projection_matrix(const mat4& projection) {
-	ubo.p = projection;
-}
-void RenderViewData::set_view_matrix(const mat4& view) {
-	ubo.v = view;
 }
 
 RenderData& RenderViewData::start(

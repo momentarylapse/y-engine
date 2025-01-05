@@ -34,7 +34,7 @@
 #include "../../graphics-impl.h"
 
 
-WorldRendererDeferred::WorldRendererDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRenderer("world/def", cam, scene_view) {
+WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, int height) : WorldRenderer("world/def", scene_view) {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
@@ -223,7 +223,7 @@ void WorldRendererDeferred::render_into_gbuffer(FrameBuffer *fb, const RenderPar
 
 
 	auto& rvd = geo_renderer->cur_rvd;
-	rvd.begin_scene(&scene_view);
+//	rvd.begin_scene(&scene_view);
 	auto cam = scene_view.cam;
 	cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);

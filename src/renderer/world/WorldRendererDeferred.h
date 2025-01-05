@@ -27,7 +27,7 @@ public:
 	owned<GeometryRenderer> geo_renderer_trans;
 	owned<ThroughShaderRenderer> out_renderer;
 
-	WorldRendererDeferred(Camera *cam, SceneView& scene_view, int width, int height);
+	WorldRendererDeferred(SceneView& scene_view, int width, int height);
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
