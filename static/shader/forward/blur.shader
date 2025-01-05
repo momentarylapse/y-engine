@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler]]
+	bindings = [[sampler]]
 	pushsize = 64
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -33,7 +33,7 @@ uniform float threshold = 0.0;
 uniform float kernel[20];
 #endif
 
-layout(binding = 1) uniform sampler2D tex0;
+layout(binding = 0) uniform sampler2D tex0;
 layout(location = 0) in vec2 in_tex_coord;
 layout(location = 0) out vec4 out_color;
 

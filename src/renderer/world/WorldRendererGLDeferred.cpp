@@ -10,12 +10,14 @@
 #ifdef USING_OPENGL
 #include "geometry/GeometryRendererGL.h"
 #include "pass/ShadowRenderer.h"
+#include "../post/ThroughShaderRenderer.h"
 #include "../base.h"
 #include "../path/RenderPath.h"
 #include <lib/nix/nix.h>
 #include <lib/os/msg.h>
 #include <lib/math/random.h>
 #include <lib/math/vec4.h>
+#include <lib/math/vec2.h>
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
@@ -32,12 +34,12 @@
 
 WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height) : WorldRenderer("world/def", cam, scene_view) {
 
-	gbuffer = new nix::FrameBuffer({
-		new nix::Texture(width, height, "rgba:f16"), // diffuse
-		new nix::Texture(width, height, "rgba:f16"), // emission
-		new nix::Texture(width, height, "rgba:f16"), // pos
-		new nix::Texture(width, height, "rgba:f16"), // normal,reflection
-		new nix::DepthBuffer(width, height, "d24s8")});
+	auto tex1 = new nix::Texture(width, height, "rgba:f16"); // diffuse
+	auto tex2 = new nix::Texture(width, height, "rgba:f16"); // emission
+	auto tex3 = new nix::Texture(width, height, "rgba:f16"); // pos
+	auto tex4 = new nix::Texture(width, height, "rgba:f16"); // normal,reflectivity
+	auto depth = new nix::DepthBuffer(width, height, "d24s8");
+	gbuffer = new nix::FrameBuffer({tex1, tex2, tex3, tex4, depth});
 
 	for (auto a: gbuffer->color_attachments)
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
@@ -46,9 +48,13 @@ WorldRendererGLDeferred::WorldRendererGLDeferred(Camera *cam, SceneView& scene_v
 	resource_manager->load_shader_module("forward/module-surface.shader");
 	resource_manager->load_shader_module("deferred/module-surface.shader");
 
-	shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
+	auto shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
 	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 		msg_error("SSAO");
+
+	out_renderer = new ThroughShaderRenderer("out", shader_gbuffer_out);
+	out_renderer->bind_textures(0, {tex1, tex2, tex3, tex4, depth});
+
 
 	Array<vec4> ssao_samples;
 	Random r;
@@ -144,34 +150,32 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const Render
 
 void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_gbuf_out);
-	auto s = shader_gbuffer_out.get();
+
+	auto& data = out_renderer->shader_data;
+
 	if (geo_renderer->using_view_space)
-		s->set_floats("eye_pos", &vec3::ZERO.x, 3);
+		data.dict_set("eye_pos", vec3_to_any(vec3::ZERO));
 	else
-		s->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH
-	s->set_int("num_lights", scene_view.lights.num);
-	s->set_int("shadow_index", scene_view.shadow_index);
-	s->set_float("ambient_occlusion_radius", config.ambient_occlusion_radius);
-	nix::bind_uniform_buffer(13, ssao_sample_buffer);
+		data.dict_set("eye_pos", vec3_to_any(scene_view.cam->owner->pos)); // NAH
+	data.dict_set("num_lights", scene_view.lights.num);
+	data.dict_set("shadow_index", scene_view.shadow_index);
+	data.dict_set("ambient_occlusion_radius", config.ambient_occlusion_radius);
+	out_renderer->bind_uniform_buffer(13, ssao_sample_buffer);
 
 	auto& rvd = geo_renderer->cur_rvd;
-	nix::bind_uniform_buffer(1, rvd.ubo_light.get());
+	out_renderer->bind_uniform_buffer(1, rvd.ubo_light.get());
 	auto tex = weak(source->color_attachments);
 	tex.add(source->depth_buffer.get());
 	tex.add(scene_view.fb_shadow1->depth_buffer.get());
 	tex.add(scene_view.fb_shadow2->depth_buffer.get());
-	nix::bind_textures(tex);
+	for (int i=0; i<tex.num; i++)
+		out_renderer->bind_texture(i, tex[i]);
 
-
-	nix::set_z(false, false);
-	nix::set_front(nix::Orientation::CW);
-	nix::set_cull(nix::CullMode::NONE);
 	float resolution_scale_x = 1.0f;
-	s->set_floats("resolution_scale", &resolution_scale_x, 2);
-	nix::set_shader(s);
+	data.dict_set("resolution_scale", vec2_to_any(vec2(resolution_scale_x, resolution_scale_x)));
 
-	context->vb_temp->create_quad(rect::ID_SYM, dynamicly_scaled_source());
-	nix::draw_triangles(context->vb_temp);
+	out_renderer->set_source(dynamicly_scaled_source());
+	out_renderer->draw(params);
 
 	// ...
 	//geo_renderer->draw_transparent();

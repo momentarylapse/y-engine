@@ -417,6 +417,7 @@ add_executable(y
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
+	src/renderer/helper/Bindable.cpp
 	src/renderer/helper/ComputeTask.cpp
 	src/renderer/helper/CubeMapSource.cpp
 	src/renderer/helper/jitter.cpp

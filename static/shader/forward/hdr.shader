@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler,sampler,sampler,sampler,sampler]]
+	bindings = [[sampler,sampler,sampler,sampler,sampler]]
 	pushsize = 212
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -59,11 +59,11 @@ uniform float scale_x = 1.0;
 uniform float scale_y = 1.0;
 #endif
 
-layout(binding = 1) uniform sampler2D tex0;
-layout(binding = 2) uniform sampler2D tex1;
-layout(binding = 3) uniform sampler2D tex2;
-layout(binding = 4) uniform sampler2D tex3;
-layout(binding = 5) uniform sampler2D tex4;
+layout(binding = 0) uniform sampler2D tex0;
+layout(binding = 1) uniform sampler2D tex1;
+layout(binding = 2) uniform sampler2D tex2;
+layout(binding = 3) uniform sampler2D tex3;
+layout(binding = 4) uniform sampler2D tex4;
 
 layout(location = 0) in vec2 in_uv;
 layout(location = 0) out vec4 out_color;

@@ -11,16 +11,18 @@
 #ifdef USING_OPENGL
 #include "geometry/RenderViewData.h"
 
+class ThroughShaderRenderer;
+
 class WorldRendererGLDeferred : public WorldRenderer {
 public:
 
 	shared<FrameBuffer> gbuffer;
-	shared<Shader> shader_gbuffer_out;
 	UniformBuffer *ssao_sample_buffer;
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
 	owned<GeometryRenderer> geo_renderer_trans;
+	ThroughShaderRenderer* out_renderer;
 
 	WorldRendererGLDeferred(Camera *cam, SceneView& scene_view, int width, int height);
 	void prepare(const RenderParams& params) override;

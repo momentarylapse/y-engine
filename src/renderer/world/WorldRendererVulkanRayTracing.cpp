@@ -82,7 +82,8 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 
 
 	auto shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
-	out_renderer = new ThroughShaderRenderer("out", {offscreen_image}, shader_out);
+	out_renderer = new ThroughShaderRenderer("out", shader_out);
+	out_renderer->bind_texture(0, offscreen_image);
 
 
 	dummy_cam_entity = new Entity;
@@ -92,6 +93,8 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 }
 
 void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_prepare);
+	gpu_timestamp_begin(params, ch_prepare);
 
 	int w = width * engine.resolution_scale_x;
 	int h = height * engine.resolution_scale_y;
@@ -234,6 +237,8 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 
 	out_renderer->set_source(dynamicly_scaled_source());
 
+	gpu_timestamp_end(params, ch_prepare);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 void WorldRendererVulkanRayTracing::draw(const RenderParams& params) {

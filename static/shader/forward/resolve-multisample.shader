@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler]]
+	bindings = [[sampler]]
 	pushsize = 8
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -32,7 +32,7 @@ uniform float width = 1920.0;
 uniform float height = 1080.0;
 #endif
 
-layout(binding = 1) uniform sampler2DMS tex0;
+layout(binding = 0) uniform sampler2DMS tex0;
 
 layout(location = 0) in vec2 in_tex_coord;
 

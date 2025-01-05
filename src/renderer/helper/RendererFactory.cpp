@@ -126,7 +126,8 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 			shared tex = new Texture();
 			tex->write(im);
 			auto shader = engine.resource_manager->load_shader("forward/blur.shader");
-			auto tsr = new ThroughShaderRenderer("blur", {tex}, shader);
+			auto tsr = new ThroughShaderRenderer("blur", shader);
+			tsr->bind_texture(0, tex.get());
 			Any axis_x, axis_y;
 			axis_x.list_set(0, 1.0f);
 			axis_x.list_set(1, 0.0f);
@@ -136,7 +137,7 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 			data.dict_set("radius:8", 5.0f);
 			data.dict_set("threshold:12", 0.0f);
 			data.dict_set("axis:0", axis_x);
-			tsr->data = data;
+			tsr->shader_data = data;
 			// tsr:  tex -> shader -> ...
 
 			shared tex2 = new Texture(N, N, "rgba:i8");
@@ -150,11 +151,12 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 			tr->add_child(tsr);
 			// tr:  ... -> tex2
 
-			auto tsr2 = new ThroughShaderRenderer("text", {tex2}, shader);
+			auto tsr2 = new ThroughShaderRenderer("text", shader);
+			tsr2->bind_texture(0, tex2.get());
 			data.dict_set("radius:8", 5.0f);
 			data.dict_set("threshold:12", 0.0f);
 			data.dict_set("axis:0", axis_y);
-			tsr2->data = data;
+			tsr2->shader_data = data;
 			tsr2->add_child(tr);
 			// tsr2:  tex2 -> shader -> ...
 

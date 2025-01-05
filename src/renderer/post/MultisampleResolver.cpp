@@ -15,7 +15,8 @@ namespace nix {
 
 MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
 	shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
-	tsr = new ThroughShaderRenderer("ms", {tex_ms, depth_ms}, shader_resolve_multisample);
+	tsr = new ThroughShaderRenderer("ms", shader_resolve_multisample);
+	tsr->bind_textures(0, {tex_ms, depth_ms});
 
 	into_texture = new TextureRenderer("tex", {tex_out, depth_out});
 	into_texture->add_child(tsr.get());
@@ -25,8 +26,8 @@ MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Tex
 void MultisampleResolver::render(const RenderParams& params) {
 	// resolve
 	if (true) {
-		tsr->data.dict_set("width:0", into_texture->frame_buffer->width);
-		tsr->data.dict_set("height:4", into_texture->frame_buffer->height);
+		tsr->shader_data.dict_set("width:0", into_texture->frame_buffer->width);
+		tsr->shader_data.dict_set("height:4", into_texture->frame_buffer->height);
 		tsr->set_source(dynamicly_scaled_source());
 		into_texture->render(params.with_area(dynamicly_scaled_area(into_texture->frame_buffer.get())));
 	} else {
