@@ -898,7 +898,7 @@ void PluginManager::export_kaba() {
 		ext->declare_class_element("ComputeTask.nx", &ComputeTask::nx);
 		ext->declare_class_element("ComputeTask.ny", &ComputeTask::ny);
 		ext->declare_class_element("ComputeTask.nz", &ComputeTask::nz);
-		ext->declare_class_element("ComputeTask.shader_data", &ComputeTask::shader_data);
+		ext->declare_class_element("ComputeTask.shader_data", &ComputeTask::bindings); // eh, close enough
 		ext->link_class_func("ComputeTask.__init__", &computetask_init);
 		ext->link_class_func("ComputeTask.bind_texture", &ComputeTask::bind_texture);
 		ext->link_class_func("ComputeTask.bind_image", &ComputeTask::bind_image);

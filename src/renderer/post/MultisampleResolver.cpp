@@ -26,8 +26,8 @@ MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Tex
 void MultisampleResolver::render(const RenderParams& params) {
 	// resolve
 	if (true) {
-		tsr->shader_data.dict_set("width:0", into_texture->frame_buffer->width);
-		tsr->shader_data.dict_set("height:4", into_texture->frame_buffer->height);
+		tsr->bindings.shader_data.dict_set("width:0", into_texture->frame_buffer->width);
+		tsr->bindings.shader_data.dict_set("height:4", into_texture->frame_buffer->height);
 		tsr->set_source(dynamicly_scaled_source());
 		into_texture->render(params.with_area(dynamicly_scaled_area(into_texture->frame_buffer.get())));
 	} else {

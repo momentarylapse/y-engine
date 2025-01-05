@@ -151,7 +151,7 @@ void WorldRendererGLDeferred::draw_background(nix::FrameBuffer *fb, const Render
 void WorldRendererGLDeferred::render_out_from_gbuffer(nix::FrameBuffer *source, const RenderParams& params) {
 	PerformanceMonitor::begin(ch_gbuf_out);
 
-	auto& data = out_renderer->shader_data;
+	auto& data = out_renderer->bindings.shader_data;
 
 	if (geo_renderer->using_view_space)
 		data.dict_set("eye_pos", vec3_to_any(vec3::ZERO));

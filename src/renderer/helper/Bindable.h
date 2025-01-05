@@ -24,11 +24,10 @@ struct Binding {
 	void* p;
 };
 
-class Bindable {
-public:
-	explicit Bindable(Shader* shader);
+struct BindingData {
+	explicit BindingData(Shader* shader);
+	Any shader_data; // must be offset=0 for kaba interface...
 	Array<Binding> bindings;
-	Any shader_data;
 
 	void bind_texture(int index, Texture* texture);
 	void bind_textures(int index0, const Array<Texture*>& textures);
@@ -36,13 +35,35 @@ public:
 	void bind_uniform_buffer(int index, Buffer* buffer);
 	void bind_storage_buffer(int index, Buffer* buffer);
 
-	void apply_bindings(Shader* shader, const RenderParams& params);
+	void apply(Shader* shader, const RenderParams& params);
 
 #ifdef USING_VULKAN
 	owned<vulkan::DescriptorPool> pool;
 	owned<vulkan::DescriptorSet> dset;
 #endif
 };
+
+
+// sorry, but template<T> class Bindable : T... still sucks. Especially the constructor
+// (and multi-inheritance clashes with kaba)
+#define IMPLEMENT_BINDABLE_INTERFACE \
+	BindingData bindings; \
+	void bind_texture(int index, Texture* texture) { \
+		bindings.bind_texture(index, texture); \
+	} \
+	void bind_textures(int index0, const Array<Texture*>& textures) { \
+		bindings.bind_textures(index0, textures); \
+	} \
+	void bind_image(int index, ImageTexture* image) { \
+		bindings.bind_image(index, image); \
+	} \
+	void bind_uniform_buffer(int index, Buffer* buffer) { \
+		bindings.bind_uniform_buffer(index, buffer); \
+	} \
+	void bind_storage_buffer(int index, Buffer* buffer) { \
+		bindings.bind_storage_buffer(index, buffer); \
+	} \
+
 
 class mat4;
 class vec2;

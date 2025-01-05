@@ -107,7 +107,7 @@ Any vec3_to_any(const vec3& v) {
 }
 
 
-Bindable::Bindable(Shader* shader) {
+BindingData::BindingData(Shader* shader) {
 #ifdef USING_VULKAN
 	if (shader) {
 		pool = new vulkan::DescriptorPool("sampler:8,buffer:8,storage-buffer:8,image:8", 1);
@@ -118,7 +118,7 @@ Bindable::Bindable(Shader* shader) {
 
 
 
-void Bindable::bind_texture(int index, Texture *texture) {
+void BindingData::bind_texture(int index, Texture *texture) {
 #ifdef USING_OPENGL
 	bindings.add({index, Binding::Type::Texture, texture});
 #endif
@@ -128,12 +128,12 @@ void Bindable::bind_texture(int index, Texture *texture) {
 #endif
 }
 
-void Bindable::bind_textures(int index0, const Array<Texture*>& textures) {
+void BindingData::bind_textures(int index0, const Array<Texture*>& textures) {
 	for (auto&& [i, t]: enumerate(textures))
 		bind_texture(index0 + i, t);
 }
 
-void Bindable::bind_image(int index, ImageTexture *texture) {
+void BindingData::bind_image(int index, ImageTexture *texture) {
 #ifdef USING_OPENGL
 	bindings.add({index, Binding::Type::Image, texture});
 #endif
@@ -143,7 +143,7 @@ void Bindable::bind_image(int index, ImageTexture *texture) {
 #endif
 }
 
-void Bindable::bind_uniform_buffer(int index, Buffer *buffer) {
+void BindingData::bind_uniform_buffer(int index, Buffer *buffer) {
 #ifdef USING_OPENGL
 	bindings.add({index, Binding::Type::UniformBuffer, buffer});
 #endif
@@ -153,7 +153,7 @@ void Bindable::bind_uniform_buffer(int index, Buffer *buffer) {
 #endif
 }
 
-void Bindable::bind_storage_buffer(int index, Buffer *buffer) {
+void BindingData::bind_storage_buffer(int index, Buffer *buffer) {
 #ifdef USING_OPENGL
 	bindings.add({index, Binding::Type::StorageBuffer, buffer});
 #endif
@@ -163,7 +163,7 @@ void Bindable::bind_storage_buffer(int index, Buffer *buffer) {
 #endif
 }
 
-void Bindable::apply_bindings(Shader* shader, const RenderParams& params) {
+void BindingData::apply(Shader* shader, const RenderParams& params) {
 #ifdef USING_OPENGL
 	for (auto& b: bindings) {
 		if (b.type == Binding::Type::Texture)

@@ -9,10 +9,12 @@
 #include <lib/any/any.h>
 #include "../../graphics-fwd.h"
 
-class ComputeTask : public RenderTask, public Bindable {
+class ComputeTask : public RenderTask {
 public:
     explicit ComputeTask(const string& name, const shared<Shader>& shader, int nx, int ny, int nz);
     shared<Shader> shader;
+
+    IMPLEMENT_BINDABLE_INTERFACE
 
     int nx, ny, nz;
 

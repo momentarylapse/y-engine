@@ -7,7 +7,7 @@
 
 ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int _nx, int _ny, int _nz) :
     RenderTask(name),
-    Bindable(_shader.get())
+    bindings(_shader.get())
 {
     shader = _shader;
     nx = _nx;
@@ -24,7 +24,7 @@ void ComputeTask::render(const RenderParams &params) {
 	PerformanceMonitor::begin(channel);
     gpu_timestamp_begin(params, channel);
 #ifdef USING_OPENGL
-    apply_bindings(shader.get(), params);
+    bindings.apply(shader.get(), params);
     shader->dispatch(nx, ny, nz);
     nix::image_barrier();
 #endif
@@ -32,7 +32,7 @@ void ComputeTask::render(const RenderParams &params) {
     auto cb = params.command_buffer;
     cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
     cb->bind_pipeline(pipeline.get());
-    apply_bindings(shader.get(), params);
+    bindings.apply(shader.get(), params);
     cb->dispatch(nx, ny, nz);
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
     // TODO barriers

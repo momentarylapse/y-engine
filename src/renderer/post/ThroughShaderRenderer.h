@@ -10,12 +10,14 @@
 #include <lib/any/any.h>
 #include <lib/math/rect.h>
 
-class ThroughShaderRenderer : public Renderer, public Bindable {
+class ThroughShaderRenderer : public Renderer {
 public:
 	ThroughShaderRenderer(const string& name, shared<Shader> _shader);
 	void draw(const RenderParams &params) override;
 
 	void set_source(const rect& area);
+
+	IMPLEMENT_BINDABLE_INTERFACE
 
 	shared<Shader> shader;
 	owned<VertexBuffer> vb_2d;

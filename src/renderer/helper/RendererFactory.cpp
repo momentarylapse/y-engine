@@ -137,7 +137,7 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 			data.dict_set("radius:8", 5.0f);
 			data.dict_set("threshold:12", 0.0f);
 			data.dict_set("axis:0", axis_x);
-			tsr->shader_data = data;
+			tsr->bindings.shader_data = data;
 			// tsr:  tex -> shader -> ...
 
 			shared tex2 = new Texture(N, N, "rgba:i8");
@@ -156,7 +156,7 @@ void create_full_renderer(GLFWwindow* window, Camera *cam) {
 			data.dict_set("radius:8", 5.0f);
 			data.dict_set("threshold:12", 0.0f);
 			data.dict_set("axis:0", axis_y);
-			tsr2->shader_data = data;
+			tsr2->bindings.shader_data = data;
 			tsr2->add_child(tr);
 			// tsr2:  tex2 -> shader -> ...
 

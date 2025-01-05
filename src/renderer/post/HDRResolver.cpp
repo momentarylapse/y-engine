@@ -57,8 +57,8 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 		bl.tsr[1] = new ThroughShaderRenderer("blur", shader_blur);
 		bl.tsr[0]->bind_texture(0, bloom_input.get());
 		bl.tsr[1]->bind_texture(0, bl.tex_temp.get());
-		bl.tsr[0]->shader_data.dict_set("axis:0", vec2_to_any(vec2::EX));
-		bl.tsr[1]->shader_data.dict_set("axis:0", vec2_to_any(vec2::EY));
+		bl.tsr[0]->bindings.shader_data.dict_set("axis:0", vec2_to_any(vec2::EX));
+		bl.tsr[1]->bindings.shader_data.dict_set("axis:0", vec2_to_any(vec2::EY));
 		bl.renderer[0] = new TextureRenderer("blur", {bl.tex_temp, depth0});
 		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
 		bl.renderer[0]->use_params_area = true;
@@ -96,13 +96,13 @@ void HDRResolver::prepare(const RenderParams& params) {
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 
-		bl.tsr[0]->shader_data.dict_set("radius:8", r * (float)BLOOM_LEVEL_SCALE);
-		bl.tsr[0]->shader_data.dict_set("threshold:12", threshold);
+		bl.tsr[0]->bindings.shader_data.dict_set("radius:8", r * (float)BLOOM_LEVEL_SCALE);
+		bl.tsr[0]->bindings.shader_data.dict_set("threshold:12", threshold);
 		bl.tsr[0]->set_source(dynamicly_scaled_source());
 		bl.renderer[0]->render(params.with_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get())));
 
-		bl.tsr[1]->shader_data.dict_set("radius:8", r);
-		bl.tsr[1]->shader_data.dict_set("threshold:12", 0.0f);
+		bl.tsr[1]->bindings.shader_data.dict_set("radius:8", r);
+		bl.tsr[1]->bindings.shader_data.dict_set("threshold:12", 0.0f);
 		bl.tsr[1]->set_source(dynamicly_scaled_source());
 		bl.renderer[1]->render(params.with_area(dynamicly_scaled_area(bl.renderer[1]->frame_buffer.get())));
 
@@ -120,7 +120,7 @@ void HDRResolver::prepare(const RenderParams& params) {
 void HDRResolver::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
-	auto& data = out_renderer->shader_data;
+	auto& data = out_renderer->bindings.shader_data;
 	data.dict_set("project:128", mat4_to_any(mat4::ID));
 	data.dict_set("exposure:192", cam->exposure);
 	data.dict_set("bloom_factor:196", cam->bloom_factor);

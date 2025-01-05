@@ -10,7 +10,7 @@
 
 ThroughShaderRenderer::ThroughShaderRenderer(const string& name, shared<Shader> _shader) :
 	Renderer(name),
-	Bindable(_shader.get())
+	bindings(_shader.get())
 {
 	shader = _shader;
 	vb_2d = new VertexBuffer("3f,3f,2f");
@@ -40,7 +40,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	}
 
 	cb->bind_pipeline(pipeline);
-	apply_bindings(shader.get(), params);
+	bindings.apply(shader.get(), params);
 	cb->draw(vb_2d.get());
 
 
@@ -53,7 +53,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	gpu_timestamp_begin(params, channel);
 
 	nix::set_shader(shader.get());
-	apply_bindings(shader.get(), params);
+	bindings.apply(shader.get(), params);
 	nix::set_projection_matrix(flip_y ? mat4::scale(1,-1,1) : mat4::ID);
 	nix::set_view_matrix(mat4::ID);
 	nix::set_model_matrix(mat4::ID);
