@@ -1,15 +1,11 @@
 #include "RenderViewData.h"
 #include "../../../graphics-impl.h"
-#ifdef USING_OPENGL
-#include "GeometryRendererGL.h"
-#include "SceneView.h"
-#include <world/Camera.h>
-#include <y/Entity.h>
-#endif
-#ifdef USING_VULKAN
-#include "GeometryRendererVulkan.h"
+#include "GeometryRenderer.h"
 #include "SceneView.h"
 #include "../../base.h"
+#ifdef USING_OPENGL
+#include <world/Camera.h>
+#include <y/Entity.h>
 #endif
 
 extern float global_shadow_box_size; // :(

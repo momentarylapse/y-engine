@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "GeometryRendererGL.h"
+#include "GeometryRenderer.h"
 
 #ifdef USING_OPENGL
 #include "RenderViewData.h"
@@ -43,28 +43,6 @@
 #include <lib/math/complex.h>
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
-
-
-GeometryRenderer::GeometryRenderer(RenderPathType type, SceneView &scene_view) : GeometryRendererCommon(type, scene_view) {
-
-	vb_fx = new nix::VertexBuffer("3f,4f,2f");
-	vb_fx_points = new nix::VertexBuffer("3f,f,4f");
-
-	//shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
-
-	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
-	const string &rpt = RENDER_PATH_NAME[(int)type];
-	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
-	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
-}
-
-void GeometryRenderer::prepare(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_prepare);
-
-	prepare_instanced_matrices();
-
-	PerformanceMonitor::end(ch_prepare);
-}
 
 void GeometryRenderer::set_material(const SceneView& scene_view, ShaderCache& cache, const Material& m, RenderPathType t, const string& vertex_module, const string& geometry_module) {
 	cache._prepare_shader(t, m, vertex_module, geometry_module);
@@ -501,18 +479,6 @@ void GeometryRenderer::draw_transparent(const RenderParams& params, RenderViewDa
 	draw_objects_transparent(params, rvd);
 	draw_user_meshes(params, rvd, true);
 	draw_particles(params, rvd);
-}
-
-void GeometryRenderer::draw(const RenderParams& params) {
-	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
-		clear(params, cur_rvd);
-	if ((int)(flags & Flags::ALLOW_SKYBOXES))
-		draw_skyboxes(params, cur_rvd);
-
-	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass())
-		draw_opaque(params, cur_rvd);
-	if ((int)(flags & Flags::ALLOW_TRANSPARENT))
-		draw_transparent(params, cur_rvd);
 }
 
 

@@ -53,7 +53,7 @@ struct VertexPoint {
 	color col;
 };
 
-class GeometryRendererCommon : public Renderer {
+class GeometryRenderer : public Renderer {
 public:
 	enum class Flags {
 		ALLOW_OPAQUE = 1,
@@ -63,7 +63,7 @@ public:
 		SHADOW_PASS = 1024,
 	} flags;
 
-	GeometryRendererCommon(RenderPathType type, SceneView &scene_view);
+	GeometryRenderer(RenderPathType type, SceneView &scene_view);
 
 	void set(Flags flags);
 	bool is_shadow_pass() const;
@@ -90,12 +90,39 @@ public:
 	Material fx_material;
 
 	owned_array<VertexBuffer> fx_vertex_buffers;
+
+
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
+
+	static void set_material(const SceneView& scene_view, ShaderCache& cache, const Material& m, RenderPathType type, const string& vertex_module, const string& geometry_module);
+	static void set_material_x(const SceneView& scene_view, const Material& m, Shader* shader);
+
+#ifdef USING_VULKAN
+	static GraphicsPipeline *get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
+#endif
+
+
+private:
+	void clear(const RenderParams& params, RenderViewData &rvd);
+	void draw_skyboxes(const RenderParams& params, RenderViewData &rvd);
+	void draw_particles(const RenderParams& params, RenderViewData &rvd);
+	void draw_terrains(const RenderParams& params, RenderViewData &rvd);
+	void draw_objects_opaque(const RenderParams& params, RenderViewData &rvd);
+	void draw_objects_transparent(const RenderParams& params, RenderViewData &rvd);
+	void draw_objects_instanced(const RenderParams& params, RenderViewData &rvd);
+	void draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent);
+	void prepare_instanced_matrices();
+	void prepare_lights(Camera *cam, RenderViewData &rvd);
+
+	void draw_opaque(const RenderParams& params, RenderViewData &rvd);
+	void draw_transparent(const RenderParams& params, RenderViewData &rvd);
 };
 
-inline GeometryRendererCommon::Flags operator|(GeometryRendererCommon::Flags a, GeometryRendererCommon::Flags b) {
-	return (GeometryRendererCommon::Flags)((int)a | (int)b);
+inline GeometryRenderer::Flags operator|(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {
+	return (GeometryRenderer::Flags)((int)a | (int)b);
 }
 
-inline GeometryRendererCommon::Flags operator&(GeometryRendererCommon::Flags a, GeometryRendererCommon::Flags b) {
-	return (GeometryRendererCommon::Flags)((int)a & (int)b);
+inline GeometryRenderer::Flags operator&(GeometryRenderer::Flags a, GeometryRenderer::Flags b) {
+	return (GeometryRenderer::Flags)((int)a & (int)b);
 }

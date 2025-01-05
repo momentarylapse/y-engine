@@ -6,11 +6,14 @@
  */
 
 #include "GeometryRenderer.h"
+#include "SceneView.h"
 #include "../../base.h"
 #include "../../../graphics-impl.h"
 #include "../../../helper/PerformanceMonitor.h"
+#include "../../../helper/ResourceManager.h"
+#include "../../../world/Camera.h"
 
-GeometryRendererCommon::GeometryRendererCommon(RenderPathType _type, SceneView &_scene_view) :
+GeometryRenderer::GeometryRenderer(RenderPathType _type, SceneView &_scene_view) :
 		Renderer("geo"),
 		scene_view(_scene_view),
 		fx_material(resource_manager)
@@ -33,9 +36,30 @@ GeometryRendererCommon::GeometryRendererCommon(RenderPathType _type, SceneView &
 	fx_material.pass0.shader_path = "fx.shader";
 
 	fx_vertex_buffers.add(new VertexBuffer("3f,4f,2f"));
+
+#ifdef USING_OPENGL
+	vb_fx = new nix::VertexBuffer("3f,4f,2f");
+	vb_fx_points = new nix::VertexBuffer("3f,f,4f");
+
+	//shader_fx = ResourceManager::load_shader("forward/3d-fx.shader");
+
+	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
+	const string &rpt = RENDER_PATH_NAME[(int)type];
+	shader_fx = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "fx", "");
+	shader_fx_points = resource_manager->load_surface_shader("forward/3d-fx-uni.shader", rpt, "points", "points");
+#endif
 }
 
-Shader* GeometryRendererCommon::get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module) {
+void GeometryRenderer::prepare(const RenderParams& params) {
+	PerformanceMonitor::begin(ch_prepare);
+
+	prepare_instanced_matrices();
+
+	PerformanceMonitor::end(ch_prepare);
+}
+
+
+Shader* GeometryRenderer::get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module) {
 	if (!multi_pass_shader_cache[pass_no].contains(material))
 		multi_pass_shader_cache[pass_no].set(material, {});
 	auto& cache = multi_pass_shader_cache[pass_no][material];
@@ -46,10 +70,50 @@ Shader* GeometryRendererCommon::get_shader(Material* material, int pass_no, cons
 	return cache.get_shader(type);
 }
 
-void GeometryRendererCommon::set(Flags _flags) {
+void GeometryRenderer::set(Flags _flags) {
 	flags = _flags;
 }
 
-bool GeometryRendererCommon::is_shadow_pass() const {
+bool GeometryRenderer::is_shadow_pass() const {
 	return (int)(flags & Flags::SHADOW_PASS);
+}
+
+void GeometryRenderer::draw(const RenderParams& params) {
+	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
+		clear(params, cur_rvd);
+
+	if ((int)(flags & Flags::ALLOW_SKYBOXES))
+		draw_skyboxes(params, cur_rvd);
+
+	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass()) {
+#ifdef USING_OPENGL
+		if (!is_shadow_pass()) {
+			nix::set_z(true, true);
+			nix::set_view_matrix(scene_view.cam->view_matrix());
+			nix::bind_uniform_buffer(1, cur_rvd.ubo_light.get());
+			nix::bind_texture(3, scene_view.shadow_maps[0]);
+			nix::bind_texture(4, scene_view.shadow_maps[1]);
+			nix::bind_texture(5, scene_view.cube_map.get());
+		}
+#endif
+		draw_terrains(params, cur_rvd);
+		draw_objects_opaque(params, cur_rvd);
+		draw_objects_instanced(params, cur_rvd);
+		draw_user_meshes(params, cur_rvd, false);
+	}
+
+	if ((int)(flags & Flags::ALLOW_TRANSPARENT)) {
+#ifdef USING_OPENGL
+		nix::set_view_matrix(scene_view.cam->view_matrix());
+		//nix::set_z(true, true);
+
+		nix::bind_uniform_buffer(1, cur_rvd.ubo_light.get());
+		nix::bind_texture(3, scene_view.shadow_maps[0]);
+		nix::bind_texture(4, scene_view.shadow_maps[1]);
+		nix::bind_texture(5, scene_view.cube_map.get());
+#endif
+		draw_objects_transparent(params, cur_rvd);
+		draw_particles(params, cur_rvd);
+		draw_user_meshes(params, cur_rvd, true);
+	}
 }

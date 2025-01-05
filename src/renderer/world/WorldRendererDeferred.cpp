@@ -8,8 +8,7 @@
 #include "WorldRendererDeferred.h"
 
 //#ifdef USING_OPENGL
-#include "geometry/GeometryRendererGL.h"
-#include "geometry/GeometryRendererVulkan.h"
+#include "geometry/GeometryRenderer.h"
 #include "../target/TextureRendererVulkan.h"
 #include "../target/TextureRendererGL.h"
 #include "pass/ShadowRenderer.h"

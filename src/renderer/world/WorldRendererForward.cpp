@@ -7,8 +7,7 @@
 
 #include "WorldRendererForward.h"
 #include "pass/ShadowRenderer.h"
-#include "geometry/GeometryRendererGL.h"
-#include "geometry/GeometryRendererVulkan.h"
+#include "geometry/GeometryRenderer.h"
 #include "../base.h"
 #include "../helper/jitter.h"
 #include "../helper/CubeMapSource.h"

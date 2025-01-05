@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "GeometryRendererVulkan.h"
+#include "GeometryRenderer.h"
 
 #ifdef USING_VULKAN
 #include "RenderViewData.h"
@@ -37,18 +37,6 @@
 
 
 
-
-
-GeometryRenderer::GeometryRenderer(RenderPathType type, SceneView &scene_view) : GeometryRendererCommon(type, scene_view) {
-}
-
-void GeometryRenderer::prepare(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
-
-	prepare_instanced_matrices();
-
-	PerformanceMonitor::end(channel);
-}
 
 
 vulkan::CullMode vk_cull(int culling) {
@@ -425,7 +413,7 @@ void GeometryRenderer::draw_objects_transparent(const RenderParams& params, Rend
 	PerformanceMonitor::end(ch_models);
 }
 
-void GeometryRenderer::draw_user_meshes(const RenderParams& params, bool transparent, RenderViewData &rvd) {
+void GeometryRenderer::draw_user_meshes(const RenderParams& params, RenderViewData &rvd, bool transparent) {
 	auto cb = params.command_buffer;
 	PerformanceMonitor::begin(ch_user);
 	gpu_timestamp_begin(params, ch_user);
@@ -463,27 +451,6 @@ void GeometryRenderer::prepare_instanced_matrices() {
 		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, MAX_INSTANCES) * sizeof(mat4));
 	}
 	PerformanceMonitor::end(ch_pre);
-}
-
-void GeometryRenderer::draw(const RenderParams& params) {
-	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
-		clear(params, cur_rvd);
-		
-	if ((int)(flags & Flags::ALLOW_SKYBOXES))
-		draw_skyboxes(params, cur_rvd);
-
-	if ((int)(flags & Flags::ALLOW_OPAQUE) or is_shadow_pass()) {
-		draw_terrains(params, cur_rvd);
-		draw_objects_opaque(params, cur_rvd);
-		draw_objects_instanced(params, cur_rvd);
-		draw_user_meshes(params, false, cur_rvd);
-	}
-
-	if ((int)(flags & Flags::ALLOW_TRANSPARENT)) {
-		draw_objects_transparent(params, cur_rvd);
-		draw_particles(params, cur_rvd);
-		draw_user_meshes(params, true, cur_rvd);
-	}
 }
 
 
