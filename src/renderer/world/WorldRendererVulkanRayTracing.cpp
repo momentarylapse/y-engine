@@ -44,6 +44,7 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 		throw Exception("neither RTX nor compute shader support");
 
 	offscreen_image = new vulkan::StorageTexture(width, height, 1, "rgba:f16");
+	offscreen_image->set_options("magfilter=nearest,minfilter=nearest");
 
 	buffer_meshes = new vulkan::UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
 

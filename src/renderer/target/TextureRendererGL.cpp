@@ -14,6 +14,10 @@
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
 	frame_buffer = new FrameBuffer(textures);
 }
+void TextureRenderer::set_area(const rect& _area) {
+	user_area = _area;
+	override_area = true;
+}
 
 void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
@@ -21,8 +25,8 @@ void TextureRenderer::render(const RenderParams& params) {
 	nix::bind_frame_buffer(frame_buffer.get());
 
 	auto area = frame_buffer->area();
-	if (use_params_area)
-		area = params.area;
+	if (override_area)
+		area = user_area;
 
 	nix::set_viewport(area);
 	if (clear_z)

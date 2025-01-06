@@ -21,7 +21,7 @@ ThroughShaderRenderer::ThroughShaderRenderer(const string& name, shared<Shader> 
 void ThroughShaderRenderer::set_source(const rect& area) {
 	if (area == current_area)
 		return;
-	current_area = area;;
+	current_area = area;
 	vb_2d->create_quad(rect::ID_SYM, area);
 }
 

@@ -20,8 +20,11 @@ public:
 
 	void render(const RenderParams& params) override;
 
+	void set_area(const rect& area);
+	bool override_area = false;
+	rect user_area;
+
 	shared<FrameBuffer> frame_buffer;
-	bool use_params_area = true;
 	bool clear_z = true;
 };
 

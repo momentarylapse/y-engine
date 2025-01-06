@@ -48,7 +48,6 @@ ShadowRenderer::ShadowRenderer(Camera* cam) :
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer(format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
-		c.texture_renderer->use_params_area = false;
 		c.scale = (i == 0) ? 4.0f : 1.0f;
 		c.texture_renderer->add_child(c.geo_renderer.get());
 	}
@@ -85,6 +84,5 @@ void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
 
 	// all opaque meshes
 	c.geo_renderer->prepare(params);
-	c.geo_renderer->set(GeometryRenderer::Flags::SHADOW_PASS);
 	c.texture_renderer->render(params);
 }

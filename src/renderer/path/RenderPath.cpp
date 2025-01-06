@@ -271,11 +271,11 @@ public:
 
 		texture_renderer->prepare(params);
 
-		auto scaled_params = params.with_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
-		texture_renderer->render(scaled_params);
+		texture_renderer->set_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
+		texture_renderer->render(params);
 
 		if (multisample_resolver)
-			multisample_resolver->render(scaled_params);
+			multisample_resolver->render(params);
 
 		if (hdr_resolver)
 			hdr_resolver->prepare(params);

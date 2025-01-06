@@ -66,10 +66,8 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 		bl.tsr[1]->bindings.shader_data.dict_set("radius:8", r);
 		bl.tsr[1]->bindings.shader_data.dict_set("threshold:12", 0.0f);
 		bl.renderer[0] = new TextureRenderer("blur", {bl.tex_temp, depth0});
-		bl.renderer[0]->use_params_area = true;
 		bl.renderer[0]->add_child(bl.tsr[0].get());
 		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
-		bl.renderer[1]->use_params_area = true;
 		bl.renderer[1]->add_child(bl.tsr[1].get());
 		bloom_input = bl.tex_out;
 		threshold = 0;
@@ -98,10 +96,12 @@ void HDRResolver::prepare(const RenderParams& params) {
 		auto& bl = bloom_levels[i];
 
 		bl.tsr[0]->set_source(dynamicly_scaled_source());
-		bl.renderer[0]->render(params.with_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get())));
+		bl.renderer[0]->set_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get()));
+		bl.renderer[0]->render(params);
 
 		bl.tsr[1]->set_source(dynamicly_scaled_source());
-		bl.renderer[1]->render(params.with_area(dynamicly_scaled_area(bl.renderer[1]->frame_buffer.get())));
+		bl.renderer[1]->set_area(dynamicly_scaled_area(bl.renderer[1]->frame_buffer.get()));
+		bl.renderer[1]->render(params);
 	}
 
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);

@@ -9,11 +9,14 @@ public:
 	owned<RenderPass> render_pass;
 	shared<FrameBuffer> frame_buffer;
 	shared_array<Texture> textures;
-	bool use_params_area = true;
 	bool clear_z = true;
 
 	explicit TextureRenderer(const string& name, const shared_array<Texture>& tex, const Array<string>& options = {});
 	~TextureRenderer() override;
+
+	void set_area(const rect& area);
+	bool override_area = false;
+	rect user_area;
 
 	// TODO move to explicit/dependency graph
 	void prepare(const RenderParams& params) override;

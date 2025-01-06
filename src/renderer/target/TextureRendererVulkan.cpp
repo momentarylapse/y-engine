@@ -13,6 +13,12 @@ TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>
 
 TextureRenderer::~TextureRenderer() = default;
 
+void TextureRenderer::set_area(const rect& _area) {
+	user_area = _area;
+	override_area = true;
+}
+
+
 void TextureRenderer::prepare(const RenderParams &params) {
 	Renderer::prepare(params);
 }
@@ -22,8 +28,8 @@ void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 	auto area = frame_buffer->area();
-	if (use_params_area)
-		area = params.area;
+	if (override_area)
+		area = user_area;
 
 	auto p = params.with_target(frame_buffer.get()).with_area(area);
 	p.render_pass = render_pass.get();

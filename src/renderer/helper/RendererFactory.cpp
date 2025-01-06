@@ -151,7 +151,7 @@ void create_base_renderer(GLFWwindow* window) {
 			shared<Texture> depth2 = new DepthBuffer(N, N, "d24s8");
 #endif
 			auto tr = new TextureRenderer("tex", {tex2, depth2});
-			tr->use_params_area = false;
+			//tr->use_params_area = false;
 			tr->add_child(tsr);
 			// tr:  ... -> tex2
 
