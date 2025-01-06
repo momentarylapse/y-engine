@@ -324,14 +324,18 @@ Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
 	return {};
 }
 
-shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {
+//shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {
+Array<Texture*> render_path_get_gbuffer(RenderPath &r) {
 	if (r.type == RenderPathType::Deferred)
-		return reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures;
+		return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
 	return {};
 }
 
 shared_array<Texture> hdr_resolver_get_tex_bloom(HDRResolver &r) {
-	return {r.bloom_levels[0].tex_out, r.bloom_levels[1].tex_out, r.bloom_levels[2].tex_out, r.bloom_levels[3].tex_out};
+//Array<Texture*> hdr_resolver_get_tex_bloom(HDRResolver &r) {
+	msg_write("get bloom...");
+	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
+	//return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
 }
 
 audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float sample_rate) {
@@ -940,7 +944,7 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("PostProcessor.add_stage", &PP::add_stage);
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
-	ext->declare_class_element("RenderPath.hdr_renderer", &RenderPath::hdr_resolver);
+	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);
 	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
 	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
 	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
@@ -951,10 +955,15 @@ void PluginManager::export_kaba() {
 	//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.get_cubemap", &render_path_get_cubemap);
 
+
+	ext->declare_class_size("HDRResolver.BloomLevel", sizeof(HDRResolver::BloomLevel));
+	ext->declare_class_element("HDRResolver.BloomLevel.tex_out", &HDRResolver::BloomLevel::tex_out);
+
 	ext->declare_class_size("HDRResolver", sizeof(HDRResolver));
 	ext->declare_class_element("HDRResolver.texture", &HDRResolver::tex_main);
 	ext->declare_class_element("HDRResolver.depth_buffer", &HDRResolver::_depth_buffer);
-	ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
+	ext->declare_class_element("HDRResolver.bloom_levels", &HDRResolver::bloom_levels);
+	//ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
 
 	ext->declare_class_size("LightMeter", sizeof(LightMeter));
 	ext->declare_class_element("LightMeter.histogram", &LightMeter::histogram);

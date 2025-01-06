@@ -62,6 +62,11 @@ class RegionRenderer
 	func extern add_region(r: Renderer&, dest: rect, z: int)
 
 
+#class ShadowRenderer
+#	struct Cascade
+#		depth_buffer: DepthBuffer&
+#	cascades: Cascade[2]
+
 class WorldRenderer
 	var wireframe: bool
 	
@@ -92,8 +97,10 @@ class LightMeter
 class HDRResolver
 	var texture: shared![Texture]
 	var depth_buffer: shared![DepthBuffer]
-	#func extern tex_bloom() -> Texture&[]
-	func extern tex_bloom() -> shared![Texture][]
+	
+	class BloomLevel
+		tex_out: shared![Texture]
+	var bloom_levels: BloomLevel[4]
 	
 	var light_meter: LightMeter&
 
