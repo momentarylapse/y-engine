@@ -21,7 +21,6 @@ public:
 	~HDRResolver() override;
 
 	void prepare(const RenderParams& params) override;
-	void draw(const RenderParams& params) override;
 
 	Camera *cam;
 
@@ -39,7 +38,5 @@ public:
 	} bloom_levels[MAX_BLOOM_LEVELS];
 
 	shared<DepthBuffer> _depth_buffer;
-	shared<Shader> shader_blur;
-	shared<Shader> shader_out;
 };
 

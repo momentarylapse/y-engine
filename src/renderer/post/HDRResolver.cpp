@@ -40,9 +40,11 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 	int height = tex->height;
 
 
-	shader_blur = resource_manager->load_shader("forward/blur.shader");
+	auto shader_blur = resource_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
 	auto bloom_input = tex;
+	float r = 3;
+	float threshold = 1.0f;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 		bloomw /= BLOOM_LEVEL_SCALE;
@@ -54,23 +56,29 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 		bl.tex_temp->set_options("wrap=clamp");
 		bl.tex_out->set_options("wrap=clamp");
 		bl.tsr[0] = new ThroughShaderRenderer("blur", shader_blur);
-		bl.tsr[1] = new ThroughShaderRenderer("blur", shader_blur);
 		bl.tsr[0]->bind_texture(0, bloom_input.get());
-		bl.tsr[1]->bind_texture(0, bl.tex_temp.get());
 		bl.tsr[0]->bindings.shader_data.dict_set("axis:0", vec2_to_any(vec2::EX));
+		bl.tsr[0]->bindings.shader_data.dict_set("radius:8", r * (float)BLOOM_LEVEL_SCALE);
+		bl.tsr[0]->bindings.shader_data.dict_set("threshold:12", threshold);
+		bl.tsr[1] = new ThroughShaderRenderer("blur", shader_blur);
+		bl.tsr[1]->bind_texture(0, bl.tex_temp.get());
 		bl.tsr[1]->bindings.shader_data.dict_set("axis:0", vec2_to_any(vec2::EY));
+		bl.tsr[1]->bindings.shader_data.dict_set("radius:8", r);
+		bl.tsr[1]->bindings.shader_data.dict_set("threshold:12", 0.0f);
 		bl.renderer[0] = new TextureRenderer("blur", {bl.tex_temp, depth0});
-		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
 		bl.renderer[0]->use_params_area = true;
-		bl.renderer[1]->use_params_area = true;
 		bl.renderer[0]->add_child(bl.tsr[0].get());
+		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
+		bl.renderer[1]->use_params_area = true;
 		bl.renderer[1]->add_child(bl.tsr[1].get());
 		bloom_input = bl.tex_out;
+		threshold = 0;
 	}
 
-	shader_out = resource_manager->load_shader("forward/hdr.shader");
+	auto shader_out = resource_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer("out", shader_out);
 	out_renderer->bind_textures(0, {tex.get(), bloom_levels[0].tex_out.get(), bloom_levels[1].tex_out.get(), bloom_levels[2].tex_out.get(), bloom_levels[3].tex_out.get()});
+	children.add(out_renderer.get());
 }
 
 
@@ -80,46 +88,24 @@ void HDRResolver::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	gpu_timestamp_begin(params, ch_prepare);
 
-	if (!cam)
-		cam = cam_main;
-
 	for (auto c: children)
 		c->prepare(params);
 
 	out_renderer->set_source(dynamicly_scaled_source());
 
 
-	//float r = cam->bloom_radius * engine.resolution_scale_x;
-	float r = 3;//max(5 * engine.resolution_scale_x, 2.0f);
-	float threshold = 1.0f;
-
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
 
-		bl.tsr[0]->bindings.shader_data.dict_set("radius:8", r * (float)BLOOM_LEVEL_SCALE);
-		bl.tsr[0]->bindings.shader_data.dict_set("threshold:12", threshold);
 		bl.tsr[0]->set_source(dynamicly_scaled_source());
 		bl.renderer[0]->render(params.with_area(dynamicly_scaled_area(bl.renderer[0]->frame_buffer.get())));
 
-		bl.tsr[1]->bindings.shader_data.dict_set("radius:8", r);
-		bl.tsr[1]->bindings.shader_data.dict_set("threshold:12", 0.0f);
 		bl.tsr[1]->set_source(dynamicly_scaled_source());
 		bl.renderer[1]->render(params.with_area(dynamicly_scaled_area(bl.renderer[1]->frame_buffer.get())));
-
-		r = 3;//max(5 * engine.resolution_scale_x, 3.0f);
-		threshold = 0;
 	}
 
 	//glGenerateTextureMipmap(fb_small2->color_attachments[0]->texture);
 
-	gpu_timestamp_end(params, ch_prepare);
-	PerformanceMonitor::end(ch_prepare);
-
-}
-
-void HDRResolver::draw(const RenderParams& params) {
-	PerformanceMonitor::begin(channel);
-	gpu_timestamp_begin(params, channel);
 	auto& data = out_renderer->bindings.shader_data;
 	data.dict_set("project:128", mat4_to_any(mat4::ID));
 	data.dict_set("exposure:192", cam->exposure);
@@ -130,9 +116,8 @@ void HDRResolver::draw(const RenderParams& params) {
 	data.dict_set("scale_x:204", resolution_scale_x);
 	data.dict_set("scale_y:208", resolution_scale_y);
 
-	out_renderer->draw(params);
-	gpu_timestamp_end(params, channel);
-	PerformanceMonitor::end(channel);
+	gpu_timestamp_end(params, ch_prepare);
+	PerformanceMonitor::end(ch_prepare);
 }
 
 #if 0
