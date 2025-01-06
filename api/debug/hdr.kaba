@@ -6,6 +6,7 @@ class X extends Controller
 	
 	func override on_init()
 		return
+		print(len(engine.render_paths))
 		for hdr in engine.render_paths[0].hdr_resolver
 			print(p2s(weak(hdr.texture)))
 			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.texture))

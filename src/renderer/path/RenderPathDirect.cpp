@@ -5,6 +5,8 @@
 #include "RenderPathDirect.h"
 #include "../world/WorldRenderer.h"
 #include "../world/pass/ShadowRenderer.h"
+#include "../world/geometry/SceneView.h"
+#include "../../world/Camera.h"
 
 
 RenderPathDirect::RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Direct, cam) {
@@ -17,9 +19,13 @@ RenderPathDirect::RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Dir
 void RenderPathDirect::prepare(const RenderParams &params) {
 	prepare_basics();
 	scene_view.choose_lights();
+
+	world_renderer->scene_view.cam->update_matrices(params.desired_aspect_ratio);
+	geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
+	geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
 	geo_renderer->cur_rvd.update_lights();
 
-	if (int i = scene_view.shadow_index >= 0) {
+	if (int i = scene_view.shadow_index; i >= 0) {
 		shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
 		shadow_renderer->render(params);
 	}

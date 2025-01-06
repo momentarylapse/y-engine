@@ -163,12 +163,12 @@ public:
 		GodLoadWorld(filename);
 		audio::attach_listener(cam_main->owner);
 
+		for (auto& cam: ComponentManager::get_list_family<Camera>())
+			create_and_attach_render_path(cam);
 		for (auto &s: world.scripts)
 			ControllerManager::add_controller(s.filename, s.variables);
 		for (auto &s: config.additional_scripts)
 			ControllerManager::add_controller(s, {});
-		for (auto& cam: ComponentManager::get_list_family<Camera>())
-			create_and_attach_render_path(cam);
 
 		msg_left();
 		msg_write("|                                                      |");

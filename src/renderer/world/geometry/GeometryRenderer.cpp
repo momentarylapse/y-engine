@@ -91,9 +91,10 @@ void GeometryRenderer::draw(const RenderParams& params) {
 	//	if (config.antialiasing_method == AntialiasingMethod::TAA)
 	//		 m *= jitter(fb->width, fb->height, 0);
 
-	scene_view.cam->update_matrices(params.desired_aspect_ratio);
-	cur_rvd.set_projection_matrix(scene_view.cam->m_projection * m);
-	cur_rvd.set_view_matrix(scene_view.cam->m_view);
+	//scene_view.cam->update_matrices(params.desired_aspect_ratio);
+	//cur_rvd.set_projection_matrix(scene_view.cam->m_projection * m);
+	cur_rvd.ubo.p = cur_rvd.ubo.p * m;
+	//cur_rvd.set_view_matrix(scene_view.cam->m_view);
 	cur_rvd.ubo.num_lights = scene_view.lights.num;
 	cur_rvd.ubo.shadow_index = scene_view.shadow_index;
 

@@ -252,17 +252,22 @@ public:
 	}
 	void prepare(const RenderParams &params) override {
 		prepare_basics();
+		scene_view.choose_lights();
+
+		world_renderer->scene_view.cam->update_matrices(params.desired_aspect_ratio);
+		geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
+		geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
+		geo_renderer->cur_rvd.update_lights();
+
+		if (int i = scene_view.shadow_index; i >= 0) {
+			shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
+			shadow_renderer->render(params);
+		}
+
 
 		geo_renderer->prepare(params);
 
 		render_cubemaps(params);
-		scene_view.choose_lights();
-		//prepare_lights(cam_main, main_rvd); shadow_box_size
-
-		if (int i = scene_view.shadow_index >= 0) {
-			shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
-			shadow_renderer->render(params);
-		}
 
 		texture_renderer->prepare(params);
 

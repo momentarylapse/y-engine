@@ -13,6 +13,8 @@ extern float global_shadow_box_size; // :(
 
 RenderViewData::RenderViewData() {
 	ubo_light = new UniformBuffer(MAX_LIGHTS * sizeof(UBOLight));
+	set_projection_matrix(mat4::ID);
+	set_view_matrix(mat4::ID);
 }
 
 void RenderViewData::set_projection_matrix(const mat4& projection) {
