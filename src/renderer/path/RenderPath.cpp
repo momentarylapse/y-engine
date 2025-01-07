@@ -214,7 +214,8 @@ class RenderPathComplex : public RenderPath {
 public:
 	explicit RenderPathComplex(Camera* cam, RenderPathType type) : RenderPath(type, cam) {
 		world_renderer = create_world_renderer(scene_view, type);
-		create_shadow_renderer();
+		if (type != RenderPathType::PathTracing)
+			create_shadow_renderer();
 		create_geometry_renderer();
 		world_renderer->geo_renderer = geo_renderer.get();
 
@@ -259,10 +260,11 @@ public:
 		geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
 		geo_renderer->cur_rvd.update_lights();
 
-		if (int i = scene_view.shadow_index; i >= 0) {
-			shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
-			shadow_renderer->render(params);
-		}
+		if (shadow_renderer)
+			if (int i = scene_view.shadow_index; i >= 0) {
+				shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
+				shadow_renderer->render(params);
+			}
 
 
 		geo_renderer->prepare(params);

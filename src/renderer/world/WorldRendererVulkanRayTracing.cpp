@@ -85,12 +85,6 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	auto shader_out = resource_manager->load_shader("vulkan/passthrough.shader");
 	out_renderer = new ThroughShaderRenderer("out", shader_out);
 	out_renderer->bind_texture(0, offscreen_image);
-
-
-	dummy_cam_entity = new Entity;
-	dummy_cam = new Camera;
-	dummy_cam_entity->components.add(dummy_cam);
-	dummy_cam->owner = dummy_cam_entity;
 }
 
 void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
@@ -211,6 +205,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 
 		pc.num_trias = 0;
 		pc.num_meshes = meshes.num;
+		pc.num_lights = scene_view.lights.num;
 		pc.out_width = w;
 		pc.out_height = h;
 		pc.out_ratio = engine.physical_aspect_ratio;
@@ -237,6 +232,11 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 
 
 	out_renderer->set_source(dynamicly_scaled_source());
+	//out_renderer->bindings.shader_data.dict_set("model:0", mat4_to_any(mat4::ID));
+	//out_renderer->bindings.shader_data.dict_set("view:64", mat4_to_any(mat4::ID));
+	out_renderer->bindings.shader_data.dict_set("project:128", mat4_to_any(mat4::ID));
+	out_renderer->bindings.shader_data.dict_set("scale_x:204", 1.0f);
+	out_renderer->bindings.shader_data.dict_set("scale_y:208", 1.0f);
 
 	gpu_timestamp_end(params, ch_prepare);
 	PerformanceMonitor::end(ch_prepare);

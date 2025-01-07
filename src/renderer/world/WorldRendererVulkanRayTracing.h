@@ -76,9 +76,6 @@ public:
 	} rtx;
 
 	owned<ThroughShaderRenderer> out_renderer;
-
-	Entity *dummy_cam_entity;
-	Camera *dummy_cam;
 };
 
 #endif
