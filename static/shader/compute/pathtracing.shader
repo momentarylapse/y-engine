@@ -42,12 +42,12 @@ struct Light {
 	vec4 pos;
 	vec4 dir;
 	vec4 color;
-	float radius, theta, harshness;
+	float radius, theta, harshness, _dummy;
 };
 
 layout(binding=0, rgba16f) uniform writeonly image2D image;
 layout(binding=1, std430) uniform MeshData { Mesh mesh[256>>3]; };
-layout(binding=2) uniform LightData { Light light[32]; };
+layout(binding=2, std430) uniform LightData { Light light[32]; };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
@@ -178,7 +178,7 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 	for (int i=0; i<N; i++) {
 		vec3 dir = mix(refl, normalize(n + 0.7 * rand3d(p + vec3(i,2*i,3*i))), roughness);
 		if (trace(p, dir, hd)) {
-			color += albedo * calc_direct_light(get_albedo(hd.mesh), hd.thd.p, hd.thd.n, 1) / N;
+			color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 1) / N;
 			color += get_emission(hd.mesh) / N;
 		}
 	}
