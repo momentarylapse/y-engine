@@ -58,8 +58,6 @@ public:
 		int _b;
 	} pc;
 
-	vulkan::UniformBuffer *buffer_meshes;
-
 	struct ComputeModeData {
 		vulkan::DescriptorPool *pool;
 		vulkan::DescriptorSet *dset;

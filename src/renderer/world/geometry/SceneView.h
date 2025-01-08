@@ -14,8 +14,8 @@ class Light;
 class Camera;
 struct UBOLight;
 struct XTerrainVBUpdater;
-
 class TerrainUpdateThread;
+struct RayTracingData;
 
 struct SceneView {
 	Camera *cam; // the "owning" camera - might use a different perspective for rendering (e.g. cubemap)
@@ -25,6 +25,7 @@ struct SceneView {
 	Array<Light*> lights;
 	owned<UniformBuffer> surfel_buffer;
 	int num_surfels = 0;
+	RayTracingData* ray_tracing_data = nullptr;
 
 	void choose_lights();
 

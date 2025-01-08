@@ -424,6 +424,7 @@ add_executable(y
 	src/renderer/helper/LightMeter.cpp
 	src/renderer/helper/Pipeline.cpp
 	src/renderer/helper/PipelineManager.cpp
+	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
 	src/renderer/path/RenderPathDirect.cpp
