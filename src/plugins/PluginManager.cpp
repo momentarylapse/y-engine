@@ -52,6 +52,7 @@
 #include "../renderer/post/PostProcessorVulkan.h"
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
+#include <renderer/helper/Raytracing.h>
 #include <renderer/world/pass/ShadowRenderer.h>
 
 #include "../renderer/regions/RegionRenderer.h"
@@ -1027,6 +1028,19 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Scheduler.clear", &Scheduler::clear);
 
 
+	ext->declare_class_size("RayRequest", sizeof(RayRequest));
+	ext->declare_class_element("RayRequest.p0", &RayRequest::p0);
+	ext->declare_class_element("RayRequest.p1", &RayRequest::p1);
+
+	ext->declare_class_size("RayReply", sizeof(RayReply));
+	ext->declare_class_element("RayReply.p", &RayReply::p);
+	ext->declare_class_element("RayReply.n", &RayReply::n);
+	ext->declare_class_element("RayReply.f", &RayReply::f);
+	ext->declare_class_element("RayReply.g", &RayReply::g);
+	ext->declare_class_element("RayReply.t", &RayReply::t);
+	ext->declare_class_element("RayReply.index", &RayReply::index);
+	ext->declare_class_element("RayReply.mesh", &RayReply::mesh);
+
 	ext->link("tex_white", &tex_white);
 	ext->link("world", &world);
 	ext->link("cam", &cam_main);
@@ -1040,6 +1054,9 @@ void PluginManager::export_kaba() {
 	ext->link("load_material", (void*)&__load_material);
 	ext->link("screenshot", (void*)&screenshot);
 	ext->link("create_render_path", (void*)&create_render_path);
+	ext->link("rt_setup", (void*)&rt_setup);
+	ext->link("rt_update_frame", (void*)&rt_update_frame);
+	ext->link("rt_vtrace", (void*)&vtrace);
 
 	ext->link("attach_light_parallel", (void*)&attach_light_parallel);
 	ext->link("attach_light_point", (void*)&attach_light_point);

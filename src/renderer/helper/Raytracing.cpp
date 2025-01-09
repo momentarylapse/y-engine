@@ -30,6 +30,7 @@
 
 static const int MAX_RT_TRIAS = 65536;
 static const int MAX_RT_MESHES = 1024;
+static const int MAX_RT_REQUESTS = 4096*16;
 
 void rt_setup(SceneView& scene_view) {
 	scene_view.ray_tracing_data = new RayTracingData(engine.window_renderer->device);
@@ -51,6 +52,8 @@ RayTracingData::RayTracingData(vulkan::Device *device) {
 		throw Exception("no compute shader support");
 
 	buffer_meshes = new UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
+	buffer_requests = new UniformBuffer(sizeof(RayRequest) * MAX_RT_REQUESTS);
+	buffer_reply = new vulkan::StorageBuffer(sizeof(RayReply) * MAX_RT_REQUESTS);
 
 	if (mode == Mode::RTX) {
 		msg_error("RTX!!!");
@@ -69,15 +72,20 @@ RayTracingData::RayTracingData(vulkan::Device *device) {
 
 
 	} else if (mode == Mode::COMPUTE) {
-		msg_error("COMPUTE!!!");
+		//msg_error("COMPUTE!!!");
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
 
 		auto shader = resource_manager->load_shader("compute/raytracing.shader");
 		compute.pipeline = new vulkan::ComputePipeline(shader.get());
-		compute.dset = compute.pool->create_set("image,buffer,buffer");
+		compute.dset = compute.pool->create_set("buffer,buffer,storage-buffer");
+		compute.dset->set_uniform_buffer(0, buffer_requests.get());
 		compute.dset->set_uniform_buffer(1, buffer_meshes.get());
+		compute.dset->set_storage_buffer(2, buffer_reply.get());
 		compute.dset->update();
+
+		compute.command_buffer = device->command_pool->create_command_buffer();
+		compute.fence = new Fence(device);
 	}
 }
 
@@ -177,8 +185,39 @@ void RayTracingData::update_frame() {
 	}
 }
 
-Array<base::optional<RayHitInfo>> vtrace(const Array<RayRequest>& requests) {
-	return {};
+//Array<base::optional<RayHitInfo>>
+Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests) {
+	if (requests.num > MAX_RT_REQUESTS) {
+		msg_error("too many rt requests");
+		return {};
+	}
+	//msg_write("upd " + str(requests.num));
+	scene_view.ray_tracing_data->buffer_requests->update_array(requests);
+	auto cb = scene_view.ray_tracing_data->compute.command_buffer;
+	auto fence = scene_view.ray_tracing_data->compute.fence;
+	auto device = engine.window_renderer->device;
+	//msg_write("cb");
+	cb->begin();
+	cb->set_bind_point(vulkan::PipelineBindPoint::COMPUTE);
+	cb->bind_pipeline(scene_view.ray_tracing_data->compute.pipeline);
+	cb->bind_descriptor_set(0, scene_view.ray_tracing_data->compute.dset);
+	int n = 1 + (requests.num - 1) / 256;
+	cb->dispatch(n,1,1);
+	cb->end();
+	//msg_write("submit");
+	device->compute_queue.submit(cb, {}, {}, fence);
+	//msg_write("wait");
+
+	fence->wait();
+
+	Array<RayReply> replies;
+	replies.resize(requests.num);
+	auto p = scene_view.ray_tracing_data->buffer_reply->map_part(0, sizeof(RayReply) * requests.num);
+	memcpy(replies.data, p, sizeof(RayReply) * requests.num);
+	scene_view.ray_tracing_data->buffer_reply->unmap();
+	//msg_write(bytes(replies.data, 100).hex());
+
+	return replies;
 }
 #else
 
@@ -190,8 +229,8 @@ void rt_update_frame(SceneView& scene_view) {
 	scene_view.ray_tracing_data->update_frame();
 }
 
-Array<base::optional<RayHitInfo>> vtrace(const Array<RayRequest>& requests) {
+/*Array<base::optional<RayHitInfo>> vtrace(const Array<RayRequest>& requests) {
 	return {};
-}
+}*/
 #endif
 

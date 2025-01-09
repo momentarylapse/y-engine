@@ -144,3 +144,17 @@ class PerformanceMonitor
 var extern engine: EngineData
 
 func extern screenshot(out im: Image)
+
+struct RayRequest
+	p0: vec3
+	p1: vec3
+
+struct RayReply
+	p, n: vec3
+	f, g, t: f32
+	index, mesh: i32
+
+func extern rt_setup(sv: SceneView)
+func extern rt_update_frame(sv: SceneView)
+func extern rt_vtrace(sv: SceneView, requests: RayRequest[]) -> RayReply[]
+

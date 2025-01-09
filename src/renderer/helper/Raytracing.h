@@ -17,9 +17,13 @@
 class Model;
 struct SceneView;
 
+
 struct RayTracingData {
 	owned<UniformBuffer> buffer_meshes;
 	int num_meshes = 0;
+
+	owned<UniformBuffer> buffer_requests;
+	owned<vulkan::StorageBuffer> buffer_reply;
 
 	enum class Mode {
 		NONE,
@@ -48,6 +52,8 @@ struct RayTracingData {
 		vulkan::DescriptorPool *pool;
 		DescriptorSet *dset;
 		ComputePipeline *pipeline;
+		CommandBuffer* command_buffer;
+		vulkan::Fence* fence;
 	} compute;
 
 	struct RtxModeData {
@@ -69,13 +75,26 @@ struct RayHitInfo {
 };
 
 struct RayRequest {
-	vec3 p0, p1;
+	vec3 p0;
+	float _x;
+	vec3 p1;
+	float _y;
+};
+
+struct RayReply {
+	vec3 p;
+	float _x;
+	vec3 n;
+	float _y;
+	float f, g, t, _z;
+	int index, mesh, _a, _b;
 };
 
 void rt_setup(SceneView& scene_view);
 void rt_update_frame(SceneView& scene_view);
 
-Array<base::optional<RayHitInfo>> vtrace(SceneView& scene_view, const Array<RayRequest>& requests);
+//Array<base::optional<RayHitInfo>>
+Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests);
 
 
 #endif //RAYTRACING_H
