@@ -23,6 +23,8 @@ struct SceneView {
 	shared<CubeMap> cube_map;
 	int shadow_index = -1;
 	Array<Light*> lights;
+	owned<UniformBuffer> surfel_buffer;
+	int num_surfels = 0;
 
 	void choose_lights();
 

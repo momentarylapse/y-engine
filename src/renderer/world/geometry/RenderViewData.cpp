@@ -103,6 +103,9 @@ RenderData& RenderViewData::start(const RenderParams& params, const mat4& matrix
 
 void RenderViewData::begin_draw() {
 	index = 0;
+	ubo.num_surfels = 0;
+	if (scene_view)
+		ubo.num_surfels = scene_view->num_surfels;
 }
 
 RenderData& RenderViewData::start(
@@ -127,8 +130,11 @@ RenderData& RenderViewData::start(
 
 	params.command_buffer->bind_pipeline(p);
 
-	if (scene_view)
+	if (scene_view) {
 		rda[index].set_textures(*scene_view, weak(material.textures));
+		if (scene_view->surfel_buffer)
+			rda[index].dset->set_uniform_buffer(12, scene_view->surfel_buffer.get());
+	}
 
 	return rda[index ++];
 }

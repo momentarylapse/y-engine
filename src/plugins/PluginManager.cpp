@@ -943,12 +943,17 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("PostProcessor.process", &PP::process);
 	ext->link_class_func("PostProcessor.add_stage", &PP::add_stage);
 
+	ext->declare_class_size("SceneView", sizeof(SceneView));
+	ext->declare_class_element("SceneView.surfel_buffer", &SceneView::surfel_buffer);
+	ext->declare_class_element("SceneView.num_surfels", &SceneView::num_surfels);
+
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
 	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);
 	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
 	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
 	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
 	ext->declare_class_element("RenderPath.type", &RenderPath::type);
+	ext->declare_class_element("RenderPath.scene_view", &RenderPath::scene_view);
 	ext->link_class_func("RenderPath.render_into_cubemap", &RenderPath::render_into_cubemap);
 	ext->link_class_func("RenderPath.get_shadow_map", &render_path_get_shadow_map);
 	ext->link_class_func("RenderPath.get_gbuffer", &render_path_get_gbuffer);

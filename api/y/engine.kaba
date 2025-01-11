@@ -67,6 +67,10 @@ class RegionRenderer
 #		depth_buffer: DepthBuffer&
 #	cascades: Cascade[2]
 
+class SceneView
+	var surfel_buffer: UniformBuffer* #owned[UniformBuffer]
+	var num_surfels: i32
+
 class WorldRenderer
 	var wireframe: bool
 	
@@ -81,9 +85,10 @@ class RenderPath
 		DEFERRED
 		PATHTRACING
 	var type: Type
-	world_renderer: WorldRenderer*
-	hdr_resolver: HDRResolver*
-	light_meter: LightMeter*
+	var world_renderer: WorldRenderer*
+	var hdr_resolver: HDRResolver*
+	var light_meter: LightMeter*
+	var scene_view: SceneView
 	# debugging
 	func extern get_gbuffer() -> shared![Texture][]
 	func extern get_shadow_map() -> shared![DepthBuffer][]

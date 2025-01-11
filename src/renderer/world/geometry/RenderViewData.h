@@ -42,6 +42,7 @@ struct UBO {
 	int dummy[2];
 	int num_lights;
 	int shadow_index;
+	int num_surfels;
 	int dummy2[2];
 };
 
