@@ -61,11 +61,8 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	resource_manager->default_shader = "default.shader";
 	resource_manager->load_shader_module("module-basic-interface.shader");
 	resource_manager->load_shader_module("module-basic-data.shader");
-	if (config.get_str("renderer.shader-quality", "pbr") == "pbr") {
-		resource_manager->load_shader_module("module-lighting-pbr.shader");
-	} else {
-		resource_manager->load_shader_module("module-lighting-simple.shader");
-	}
+	const string lighting_method = config.get_str("renderer.lighting", "pbr");
+	resource_manager->load_shader_module(format("module-lighting-%s.shader", lighting_method));
 	resource_manager->load_shader_module("module-vertex-default.shader");
 	resource_manager->load_shader_module("module-vertex-animated.shader");
 	resource_manager->load_shader_module("module-vertex-instanced.shader");
