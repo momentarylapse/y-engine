@@ -437,6 +437,7 @@ add_executable(y
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
+	src/renderer/target/HeadlessRendererVulkan.cpp
 	src/renderer/target/HuiWindowRendererGL.cpp
 	src/renderer/target/HuiWindowRendererVulkan.cpp
 	src/renderer/target/TargetRenderer.cpp

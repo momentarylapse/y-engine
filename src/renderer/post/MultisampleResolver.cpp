@@ -1,10 +1,6 @@
 #include "MultisampleResolver.h"
 #include "ThroughShaderRenderer.h"
-#ifdef USING_OPENGL
-#include "../target/TextureRendererGL.h"
-#else
-#include "../target/TextureRendererVulkan.h"
-#endif
+#include "../target/TextureRenderer.h"
 #include "../../helper/ResourceManager.h"
 #include "../../graphics-impl.h"
 

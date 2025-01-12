@@ -34,8 +34,7 @@
 // for debugging
 #include <graphics-impl.h>
 #include <lib/image/image.h>
-#include <renderer/target/TextureRendererGL.h>
-#include <renderer/target/TextureRendererVulkan.h>
+#include <renderer/target/TextureRenderer.h>
 
 
 string render_graph_str(Renderer *r) {

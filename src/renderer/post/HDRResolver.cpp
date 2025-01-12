@@ -8,11 +8,7 @@
 #include "HDRResolver.h"
 #include "ThroughShaderRenderer.h"
 #include "../base.h"
-#ifdef USING_VULKAN
-#include "../target/TextureRendererVulkan.h"
-#else
-#include "../target/TextureRendererGL.h"
-#endif
+#include "../target/TextureRenderer.h"
 #include <graphics-impl.h>
 #include <Config.h>
 #include <helper/PerformanceMonitor.h>

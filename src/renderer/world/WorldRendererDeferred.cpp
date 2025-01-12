@@ -9,8 +9,7 @@
 
 //#ifdef USING_OPENGL
 #include "geometry/GeometryRenderer.h"
-#include "../target/TextureRendererVulkan.h"
-#include "../target/TextureRendererGL.h"
+#include "../target/TextureRenderer.h"
 #include "pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../base.h"

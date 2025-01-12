@@ -19,8 +19,7 @@
 	#include "../world/WorldRendererVulkanRayTracing.h"
 #endif
 #include "../helper/LightMeter.h"
-#include <renderer/target/TextureRendererGL.h>
-#include <renderer/target/TextureRendererVulkan.h>
+#include <renderer/target/TextureRenderer.h>
 #include <renderer/helper/CubeMapSource.h>
 #include "../../helper/ResourceManager.h"
 #include <graphics-impl.h>

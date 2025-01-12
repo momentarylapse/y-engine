@@ -8,11 +8,7 @@
 #include "ShadowRenderer.h"
 
 #include "../geometry/GeometryRenderer.h"
-#ifdef USING_OPENGL
-#include "../../target/TextureRendererGL.h"
-#else
-#include "../../target/TextureRendererVulkan.h"
-#endif
+#include "../../target/TextureRenderer.h"
 #include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
 #include "../WorldRenderer.h"

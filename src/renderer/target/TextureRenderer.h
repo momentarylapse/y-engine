@@ -1,5 +1,5 @@
 /*
- * TextureRendererGL.h
+ * TextureRenderer.h
  *
  *  Created on: Nov 10, 2023
  *      Author: michi
@@ -9,13 +9,13 @@
 
 
 #include "../Renderer.h"
-#ifdef USING_OPENGL
 #include <lib/base/optional.h>
 #include <lib/image/color.h>
 
 class TextureRenderer : public RenderTask {
 public:
 	explicit TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options = {});
+	~TextureRenderer() override;
 
 	// TODO move to explicit/dependency graph
 	void prepare(const RenderParams& params) override;
@@ -27,8 +27,12 @@ public:
 	rect user_area;
 
 	shared<FrameBuffer> frame_buffer;
+#ifdef USING_VULKAN
+	owned<RenderPass> render_pass;
+#endif
+	shared_array<Texture> textures;
+
+
 	bool clear_z = true;
 	base::optional<color> clear_color;
 };
-
-#endif

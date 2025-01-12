@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "TextureRendererGL.h"
+#include "TextureRenderer.h"
 #ifdef USING_OPENGL
 #include <helper/PerformanceMonitor.h>
 #include <renderer/base.h>
@@ -14,6 +14,9 @@
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
 	frame_buffer = new FrameBuffer(textures);
 }
+
+TextureRenderer::~TextureRenderer() = default;
+
 void TextureRenderer::set_area(const rect& _area) {
 	user_area = _area;
 	override_area = true;
