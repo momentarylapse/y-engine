@@ -47,13 +47,6 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 
 
 	gbuffer_renderer = new TextureRenderer("gbuf", gbuffer_textures);
-/*#ifdef USING_VULKAN
-	render_pass = new RenderPass(weak(gbuffer_textures), {});
-	gbuffer = new FrameBuffer(render_pass.get(), gbuffer_textures);
-#else
-	gbuffer = new FrameBuffer(gbuffer_textures);
-#endif*/
-
 
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
@@ -79,7 +72,12 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	ch_gbuf_out = PerformanceMonitor::create_channel("gbuf-out", channel);
 	ch_trans = PerformanceMonitor::create_channel("trans", channel);
 
+	geo_renderer_background = new GeometryRenderer(RenderPathType::Forward, scene_view);
+	geo_renderer_background->set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR);
+	add_child(geo_renderer_background.get());
+
 	geo_renderer_trans = new GeometryRenderer(RenderPathType::Forward, scene_view);
+	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 	add_child(geo_renderer_trans.get());
 }
 
@@ -92,6 +90,13 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 	gbuffer_renderer->prepare(params);
 
 
+	scene_view.cam->update_matrices(params.desired_aspect_ratio);
+
+	//geo_renderer_background->cur_rvd.set_view_matrix()
+	geo_renderer_background->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
+	geo_renderer_background->cur_rvd.set_view_matrix(scene_view.cam->m_view);
+	geo_renderer_background->cur_rvd.prepare_scene(&scene_view);
+	geo_renderer_background->prepare(params); // keep drawing into direct target
 	geo_renderer->prepare(sub_params);
 	geo_renderer_trans->prepare(params); // keep drawing into direct target
 
@@ -107,7 +112,7 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
-	draw_background(params);
+	geo_renderer_background->draw(params);
 
 	render_out_from_gbuffer(gbuffer_renderer->frame_buffer.get(), params);
 
@@ -125,7 +130,6 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 	nix::set_z(true, true);
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
-	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 	geo_renderer_trans->draw(params);
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CW);
@@ -138,32 +142,6 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
-}
-
-void WorldRendererDeferred::draw_background(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_bg);
-
-	//nix::clear_color(Green);
-	auto fb = params.frame_buffer;
-#ifdef USING_VULKAN
-#else
-	nix::clear_color(world.background);
-#endif
-
-	auto& rvd = geo_renderer->cur_rvd;
-	
-	auto cam = scene_view.cam;
-//	float max_depth = cam->max_depth;
-	cam->max_depth = 2000000;
-	bool flip_y = params.target_is_window;
-	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-	cam->update_matrices(params.desired_aspect_ratio);
-	rvd.set_projection_matrix(m * cam->m_projection);
-
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES);
-	geo_renderer->draw(params);
-	PerformanceMonitor::end(ch_bg);
-
 }
 
 void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params) {

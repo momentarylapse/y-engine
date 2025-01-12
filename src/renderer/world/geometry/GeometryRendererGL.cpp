@@ -234,6 +234,7 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	nix::set_z(false, false);
 	nix::set_cull(nix::CullMode::NONE);
 	nix::set_view_matrix(mat4::rotation(scene_view.cam->owner->ang).transpose());
+	nix::set_projection_matrix(mat4::scale(1,1,0.001f) * cur_rvd.ubo.p); // :P
 	for (auto *sb: world.skybox) {
 		sb->_matrix = mat4::rotation(sb->owner->ang);
 		nix::set_model_matrix(sb->_matrix * mat4::scale(10,10,10));
@@ -243,6 +244,7 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 			nix::draw_triangles(sb->mesh[0]->sub[i].vertex_buffer);
 		}
 	}
+	nix::set_projection_matrix(cur_rvd.ubo.p);
 	nix::set_cull(nix::CullMode::BACK);
 	nix::disable_alpha();
 	gpu_timestamp_end(params, ch_bg);

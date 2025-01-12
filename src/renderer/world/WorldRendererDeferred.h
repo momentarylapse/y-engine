@@ -24,6 +24,7 @@ public:
 
 	owned<TextureRenderer> gbuffer_renderer;
 
+	owned<GeometryRenderer> geo_renderer_background;
 	owned<GeometryRenderer> geo_renderer_trans;
 	owned<ThroughShaderRenderer> out_renderer;
 
@@ -33,7 +34,6 @@ public:
 
 	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
 	void render_into_gbuffer(FrameBuffer *fb, const RenderParams& params);
-	void draw_background(const RenderParams& params);
 
 
 	void render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params);
