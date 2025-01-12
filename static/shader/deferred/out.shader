@@ -1,9 +1,9 @@
 <Layout>
-	bindings = [[buffer,buffer,buffer,sampler,sampler,sampler,sampler,sampler]]
+	bindings = [[sampler,sampler,sampler,sampler,sampler,sampler,sampler,sampler,buffer,buffer,buffer,buffer,buffer,buffer]]
 	pushsize = 76
 	input = [vec3,vec3,vec2]
 	topology = triangles
-	version = 420
+	version = 430
 </Layout>
 <VertexShader>
 #extension GL_ARB_separate_shader_objects : enable
@@ -74,7 +74,6 @@ const float PI = 3.141592954;*/
 #define tex_z        tex4
 
 
-uniform vec2 resolution_scale;
 
 
 const int NSSAO = 16;
@@ -82,8 +81,18 @@ const int NSSAO = 16;
 layout(binding=13) uniform SSAO {
 	vec3 ssao_samples[NSSAO];
 };
+
+#if vulkan
+layout(push_constant, std430) uniform PushConstants {
+	vec2 resolution_scale;
+	float ambient_occlusion_bias;
+	float ambient_occlusion_radius;
+};
+#else
+uniform vec2 resolution_scale;
 uniform float ambient_occlusion_bias = 0.02;
 uniform float ambient_occlusion_radius = 10;
+#endif
 
 vec2 project_onto_texture(vec3 pv) {
 	vec4 pp = matrix.project * vec4(pv,1);

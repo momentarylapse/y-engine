@@ -40,7 +40,7 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
 	auto tex3 = new Texture(width, height, "rgba:f16"); // pos
 	auto tex4 = new Texture(width, height, "rgba:f16"); // normal,reflectivity
-	auto depth = new DepthBuffer(width, height, "d24s8");
+	auto depth = new DepthBuffer(width, height, "ds:u24i8");
 	gbuffer_textures = {tex1, tex2, tex3, tex4, depth};
 	for (auto a: weak(gbuffer_textures))
 		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
@@ -189,7 +189,7 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 		out_renderer->bind_texture(i, tex[i]);
 
 	float resolution_scale_x = 1.0f;
-	data.dict_set("resolution_scale", vec2_to_any(vec2(resolution_scale_x, resolution_scale_x)));
+	data.dict_set("resolution_scale:0", vec2_to_any(vec2(resolution_scale_x, resolution_scale_x)));
 
 	out_renderer->set_source(dynamicly_scaled_source());
 	out_renderer->draw(params);
