@@ -10,6 +10,8 @@
 
 #include "../Renderer.h"
 #ifdef USING_OPENGL
+#include <lib/base/optional.h>
+#include <lib/image/color.h>
 
 class TextureRenderer : public RenderTask {
 public:
@@ -26,6 +28,7 @@ public:
 
 	shared<FrameBuffer> frame_buffer;
 	bool clear_z = true;
+	base::optional<color> clear_color;
 };
 
 #endif

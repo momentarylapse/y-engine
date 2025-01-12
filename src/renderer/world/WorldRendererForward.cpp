@@ -29,8 +29,6 @@
 #include "../../Config.h"
 #include "../../meta.h"
 
-// https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
-
 
 WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRenderer("world", scene_view) {
 	resource_manager->load_shader_module("forward/module-surface.shader");
@@ -43,6 +41,10 @@ WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRendere
 void WorldRendererForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
+
+	geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
+	geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
+	geo_renderer->cur_rvd.update_lights();
 
 	geo_renderer->prepare(params);
 

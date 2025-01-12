@@ -47,6 +47,8 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 
 
 	gbuffer_renderer = new TextureRenderer("gbuf", gbuffer_textures);
+	gbuffer_renderer->clear_z = true;
+	gbuffer_renderer->clear_color = color(-1, 0,1,0);
 
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
@@ -77,7 +79,8 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	add_child(geo_renderer_background.get());
 
 	geo_renderer = new GeometryRenderer(RenderPathType::Deferred, scene_view);
-	add_child(geo_renderer.get());
+	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE);
+	gbuffer_renderer->add_child(geo_renderer.get());
 
 	geo_renderer_trans = new GeometryRenderer(RenderPathType::Forward, scene_view);
 	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT);
@@ -90,6 +93,7 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());
 
+	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
 	gbuffer_renderer->prepare(params);
 
 
@@ -187,12 +191,10 @@ void WorldRendererDeferred::render_into_gbuffer(FrameBuffer *fb, const RenderPar
 	PerformanceMonitor::begin(ch_world);
 	gpu_timestamp_begin(params, ch_world);
 
-
-//	gbuffer_renderer->add_child(geo_renderer);
-//	gbuffer_renderer->render(params);
+	gbuffer_renderer->render(params);
 
 
-#ifdef USING_OPENGL
+#ifdef USING_OPENGL___XXXXXX
 
 	nix::bind_frame_buffer(fb);
 	nix::set_viewport(dynamicly_scaled_area(fb));

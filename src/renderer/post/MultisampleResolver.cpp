@@ -8,6 +8,8 @@
 #include "../../helper/ResourceManager.h"
 #include "../../graphics-impl.h"
 
+// https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
+
 
 namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);

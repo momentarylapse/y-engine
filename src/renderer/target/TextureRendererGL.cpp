@@ -31,6 +31,8 @@ void TextureRenderer::render(const RenderParams& params) {
 	nix::set_viewport(area);
 	if (clear_z)
 		nix::clear_z();
+	if (clear_color.has_value())
+		frame_buffer->clear_color(0, *clear_color);
 	draw(RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio).with_area(area));
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
