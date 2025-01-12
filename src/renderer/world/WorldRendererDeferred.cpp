@@ -47,7 +47,7 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 
 	gbuffer_renderer = new TextureRenderer("gbuf", gbuffer_textures);
 	gbuffer_renderer->clear_z = true;
-	gbuffer_renderer->clear_color = color(-1, 0,1,0);
+	gbuffer_renderer->clear_colors = {color(-1, 0,1,0)};
 
 
 	resource_manager->load_shader_module("forward/module-surface.shader");
@@ -107,9 +107,7 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 	geo_renderer_trans->prepare(params); // keep drawing into direct target
 
 
-	render_into_gbuffer(gbuffer_renderer->frame_buffer.get(), sub_params);
-
-	//auto source = do_post_processing(fb_main.get());
+	gbuffer_renderer->render(params);
 
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -185,45 +183,4 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 }
 
 //void WorldRendererDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
-
-void WorldRendererDeferred::render_into_gbuffer(FrameBuffer *fb, const RenderParams& params) {
-	PerformanceMonitor::begin(ch_world);
-	gpu_timestamp_begin(params, ch_world);
-
-	gbuffer_renderer->render(params);
-
-
-#ifdef USING_OPENGL___XXXXXX
-
-	nix::bind_frame_buffer(fb);
-	nix::set_viewport(dynamicly_scaled_area(fb));
-
-	//nix::clear_color(Green);//world.background);
-	nix::clear_z();
-	//fb->clear_color(2, color(0, 0,0,max_depth * 0.99f));
-	fb->clear_color(0, color(-1, 0,1,0));
-
-
-	auto& rvd = geo_renderer->cur_rvd;
-//	rvd.begin_scene(&scene_view);
-	auto cam = scene_view.cam;
-	cam->update_matrices(params.desired_aspect_ratio);
-	nix::set_projection_matrix(mat4::scale(1,1,1) * cam->m_projection);
-
-	nix::set_cull(nix::CullMode::BACK);
-	nix::set_front(nix::Orientation::CCW);
-
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_OPAQUE);
-	geo_renderer->draw(params);
-
-	/*nix::set_cull(nix::CullMode::BACK);
-	nix::set_front(nix::Orientation::CCW);
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_FX);
-	geo_renderer->draw(params);*/
-
-#endif
-
-	gpu_timestamp_end(params, ch_world);
-	PerformanceMonitor::end(ch_world);
-}
 

@@ -33,7 +33,6 @@ public:
 	void draw(const RenderParams& params) override;
 
 	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
-	void render_into_gbuffer(FrameBuffer *fb, const RenderParams& params);
 
 
 	void render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params);

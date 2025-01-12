@@ -34,8 +34,8 @@ void TextureRenderer::render(const RenderParams& params) {
 	nix::set_viewport(area);
 	if (clear_z)
 		nix::clear_z();
-	if (clear_color.has_value())
-		frame_buffer->clear_color(0, *clear_color);
+	for (int i=0; i<clear_colors.num; i++)
+		frame_buffer->clear_color(i, clear_colors[i]);
 	draw(RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio).with_area(area));
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
@@ -44,5 +44,7 @@ void TextureRenderer::render(const RenderParams& params) {
 void TextureRenderer::prepare(const RenderParams& params) {
 	Renderer::prepare(params);
 }
+
+
 
 #endif

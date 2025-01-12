@@ -32,7 +32,7 @@ public:
 #endif
 	shared_array<Texture> textures;
 
-
 	bool clear_z = true;
-	base::optional<color> clear_color;
+	Array<color> clear_colors;
 };
+
