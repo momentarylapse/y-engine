@@ -68,8 +68,10 @@ class RegionRenderer
 #	cascades: Cascade[2]
 
 class SceneView
-	var surfel_buffer: UniformBuffer* #owned[UniformBuffer]
+	var surfel_buffer: owned[UniformBuffer]
 	var num_surfels: i32
+	func __delete__()
+		pass
 
 class WorldRenderer
 	var wireframe: bool
