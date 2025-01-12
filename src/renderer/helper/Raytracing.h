@@ -23,7 +23,7 @@ struct RayTracingData {
 	int num_meshes = 0;
 
 	owned<UniformBuffer> buffer_requests;
-	owned<vulkan::StorageBuffer> buffer_reply;
+	owned<ShaderStorageBuffer> buffer_reply;
 
 	enum class Mode {
 		NONE,

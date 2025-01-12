@@ -222,15 +222,14 @@ Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests)
 #else
 
 void rt_setup(SceneView& scene_view) {
-	msg_error("raytracing only supported on vulkan!")
+	msg_error("raytracing only supported on vulkan!");
 }
 
 void rt_update_frame(SceneView& scene_view) {
-	scene_view.ray_tracing_data->update_frame();
 }
 
-/*Array<base::optional<RayHitInfo>> vtrace(const Array<RayRequest>& requests) {
+Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests) {
 	return {};
-}*/
+}
 #endif
 
