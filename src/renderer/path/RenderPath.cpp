@@ -95,11 +95,6 @@ void RenderPath::create_shadow_renderer() {
 	add_child(shadow_renderer.get());
 }
 
-void RenderPath::create_geometry_renderer() {
-	geo_renderer = new GeometryRenderer(type == RenderPathType::Deferred ? RenderPathType::Deferred : RenderPathType::Forward, scene_view);
-	add_child(geo_renderer.get());
-}
-
 /*void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
 	//PerformanceMonitor::begin(ch_prepare_lights);
 	scene_view.prepare_lights(shadow_box_size, rvd.ubo_light.get());
@@ -211,10 +206,10 @@ class RenderPathComplex : public RenderPath {
 public:
 	explicit RenderPathComplex(Camera* cam, RenderPathType type) : RenderPath(type, cam) {
 		world_renderer = create_world_renderer(scene_view, type);
+		if (world_renderer->geo_renderer)
+			geo_renderer = world_renderer->geo_renderer.get();
 		if (type != RenderPathType::PathTracing)
 			create_shadow_renderer();
-		create_geometry_renderer();
-		world_renderer->geo_renderer = geo_renderer.get();
 
 		auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
 		hdr_tex->set_options("wrap=clamp,minfilter=nearest");
@@ -252,7 +247,7 @@ public:
 		prepare_basics();
 		scene_view.choose_lights();
 
-		world_renderer->scene_view.cam->update_matrices(params.desired_aspect_ratio);
+		scene_view.cam->update_matrices(params.desired_aspect_ratio);
 		geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
 		geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
 		geo_renderer->cur_rvd.update_lights();
@@ -264,7 +259,7 @@ public:
 			}
 
 
-		geo_renderer->prepare(params);
+		world_renderer->prepare(params);
 
 		render_cubemaps(params);
 

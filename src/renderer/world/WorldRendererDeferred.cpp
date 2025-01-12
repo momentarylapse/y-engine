@@ -76,6 +76,9 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	geo_renderer_background->set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR);
 	add_child(geo_renderer_background.get());
 
+	geo_renderer = new GeometryRenderer(RenderPathType::Deferred, scene_view);
+	add_child(geo_renderer.get());
+
 	geo_renderer_trans = new GeometryRenderer(RenderPathType::Forward, scene_view);
 	geo_renderer_trans->set(GeometryRenderer::Flags::ALLOW_TRANSPARENT);
 	add_child(geo_renderer_trans.get());

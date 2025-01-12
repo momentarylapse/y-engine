@@ -43,7 +43,7 @@ public:
 	SceneView& scene_view;
 
 	shared<Shader> shader_fx;
-	GeometryRenderer* geo_renderer = nullptr;
+	owned<GeometryRenderer> geo_renderer;
 //	virtual void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) = 0;
 
 	void reset();

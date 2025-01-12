@@ -9,6 +9,7 @@
 #ifdef USING_VULKAN
 #include "../helper/Raytracing.h"
 #include "../world/geometry/SceneView.h"
+#include "../path/RenderPath.h"
 #include "../../graphics-impl.h"
 #include "../base.h"
 #include "../../lib/os/msg.h"
@@ -25,6 +26,9 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	device = _device;
 	width = w;
 	height = h;
+
+	geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
+	add_child(geo_renderer.get());
 
 	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;

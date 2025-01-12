@@ -47,11 +47,10 @@ public:
 	LightMeter* light_meter = nullptr;
 	Renderer* main_renderer = nullptr;
 
-	owned<GeometryRenderer> geo_renderer;
+	GeometryRenderer* geo_renderer = nullptr;
 	owned<ShadowRenderer> shadow_renderer;
 
 	void create_shadow_renderer();
-	void create_geometry_renderer();
 
 	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {};
 	void render_into_cubemap(CubeMapSource& source);
