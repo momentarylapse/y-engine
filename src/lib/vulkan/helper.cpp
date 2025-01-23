@@ -1,4 +1,3 @@
-#include <lib/os/msg.h>
 #if HAS_LIB_VULKAN
 
 #include <vulkan/vulkan.h>
