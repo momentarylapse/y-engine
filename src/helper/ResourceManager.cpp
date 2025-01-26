@@ -4,11 +4,16 @@
 #include <lib/os/msg.h>
 #include <lib/nix/nix.h>
 #include <lib/image/image.h>
-#if __has_include(<lib/hui/hui.h>)
+#if __has_include(<lib/xhui/xhui.h>)
+	#include <lib/xhui/xhui.h>
+	using namespace xhui;
+#elif __has_include(<lib/hui/hui.h>)
 	#include <lib/hui/hui.h>
+	using namespace hui;
 #else
 	#include <lib/hui_minimal/Application.h>
 	#include <lib/hui_minimal/error.h>
+	using namespace hui;
 #endif
 #include <y/EngineData.h>
 #include <graphics-impl.h>
@@ -74,12 +79,7 @@ xfer<Shader> ResourceManager::__load_shader(const Path& path, const string &over
 	vulkan::overwrite_bindings = overwrite_bindings;
 	return Shader::load(path);
 #else
-	try {
-		return ctx->load_shader(path);
-	} catch (Exception &e) {
-		msg_error(e.message());
-	}
-	return nullptr;
+	return ctx->load_shader(path);
 #endif
 }
 
@@ -97,7 +97,7 @@ shared<Shader> ResourceManager::load_shader(const Path& filename) {
 	//	TODO default shader?
 	//	return __load_shader("");
 
-	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
+	Path fn = guess_absolute_path(filename, {shader_dir, Application::directory_static | "shader"});
 	if (!fn) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + str(filename));
@@ -162,7 +162,7 @@ shared<Shader> ResourceManager::load_surface_shader(const Path& _filename, const
 	if (!filename)
 		return __load_shader("", "");
 
-	Path fn = guess_absolute_path(filename, {shader_dir, hui::Application::directory_static | "shader"});
+	Path fn = guess_absolute_path(filename, {shader_dir, Application::directory_static | "shader"});
 	if (fn.is_empty()) {
 		if (engine.ignore_missing_files) {
 			msg_error("missing shader: " + str(filename));
@@ -190,7 +190,7 @@ shared<Shader> ResourceManager::load_surface_shader(const Path& _filename, const
 		source = expand_geometry_shader_source(source, geometry_module);
 	source = expand_fragment_shader_source(source, render_path);
 
-	auto shader = __create_shader(source, "[[sampler,sampler,sampler,sampler,sampler,sampler,sampler,sampler,buffer,buffer,buffer,buffer,buffer]]");
+	auto shader = __create_shader(source, "[[sampler,sampler,sampler,sampler,sampler,sampler,sampler,sampler,buffer,buffer,buffer,buffer]]");
 
 	//auto s = Shader::load(fn);
 #ifdef USING_VULKAN
@@ -216,7 +216,7 @@ Shader* ResourceManager::create_shader(const string &source) {
 }
 
 void ResourceManager::load_shader_module(const Path& path) {
-	Path fn = guess_absolute_path(path, {shader_dir, hui::Application::directory_static | "shader"});
+	Path fn = guess_absolute_path(path, {shader_dir, Application::directory_static | "shader"});
 	if (fn) {
 		if (shader_modules.find(fn) >= 0)
 			return;
