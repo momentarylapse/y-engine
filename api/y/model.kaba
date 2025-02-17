@@ -10,6 +10,15 @@ class Material
 	var textures: shared![Texture][]
 #	var shader: shared![Shader][6]
 	var cast_shadow: bool
+		shader_path: os.Path
+	struct Pass
+	var pass0: Pass
+	struct Friction
+		sliding: f32
+		_static: f32
+		rolling: f32
+		jump: f32
+	var friction: Friction
 	func extern mut add_uniform(name: string, p: float*, size: int)
 	
 func extern load_material(filename: os.Path) -> xfer[Material]
