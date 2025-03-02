@@ -29,7 +29,7 @@ namespace vulkan {
 #endif
 
 
-ResourceManager::ResourceManager(Context *_ctx) {
+ResourceManager::ResourceManager(::Context *_ctx) {
 	ctx = _ctx;
 	material_manager = new MaterialManager(this);
 	model_manager = new ModelManager(this, material_manager);
@@ -223,6 +223,14 @@ void ResourceManager::load_shader_module(const Path& path) {
 		shader_modules.add(fn);
 	}
 	load_shader(path);
+}
+
+
+Path ResourceManager::texture_file(Texture* t) const {
+	for (auto&& [key, _t]: texture_map)
+		if (_t == t)
+			return key;
+	return "";
 }
 
 shared<Texture> ResourceManager::load_texture(const Path& filename) {
