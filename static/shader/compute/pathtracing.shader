@@ -32,7 +32,7 @@ layout(push_constant, std140) uniform PushConstants {
 	int out_width;
 	int out_height;
 	float out_ratio;
-	int _b;
+	float t_rand;
 } push;
 
 
@@ -51,7 +51,7 @@ layout(binding=2, std430) uniform LightData { Light light[32]; };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
-	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234))) * 43758.5453);
+	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234)) + push.t_rand) * 43758.5453);
 }
 
 vec3 rand3d(vec3 p) {
@@ -169,7 +169,7 @@ vec3 calc_direct_light(vec3 albedo, vec3 p, vec3 n, int N) {
 }
 
 vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughness) {
-	int N = 50;
+	int N = 15;
 	
 	vec3 refl = reflect(eye_dir, n);
 	
@@ -190,6 +190,8 @@ void main() {
 		
 	vec2 r = vec2(gl_GlobalInvocationID.xy) / vec2(push.out_width, push.out_height);
 	vec3 dir = normalize(vec3((r.x - 0.5) * push.out_ratio, 0.5 - r.y, 1));
+	dir.x += rand(dir) / push.out_width;
+	dir.y += rand(dir.yxz) / push.out_height;
 	dir = (push.iview * vec4(dir,0)).xyz;
 	vec3 cam_pos = (push.iview * vec4(0,0,0,1)).xyz;
 
@@ -200,7 +202,7 @@ void main() {
 		vec3 color = get_emission(hd.mesh);
 		
 		// direct sunlight
-		color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 20);
+		color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 5);
 		
 		color += calc_bounced_light(hd.thd.p + hd.thd.n * 0.1, hd.thd.n, dir, albedo, get_roughness(hd.mesh));
 		
