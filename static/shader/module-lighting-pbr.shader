@@ -81,16 +81,15 @@ float _surf_brightness(Light l, vec3 p) {
 }
 
 // amount of shadow
-float _surf_shadow_pcf_step(vec3 p, vec2 dd, ivec2 ts) {
+float _surf_shadow_sample_z(vec3 p, vec2 dd, ivec2 ts) {
 	vec2 d = dd / ts * 0.8;
 	vec2 tp = p.xy + d;
 	float epsilon = 0.004;
-	float shadow_z = texture(tex_shadow1, p.xy + d).r + epsilon;
-	if (tp.x > 0.38 && tp.y > 0.38 && tp.x < 0.62 && tp.y < 0.62)
-		shadow_z = texture(tex_shadow0, (p.xy - vec2(0.5,0.5))*4 + vec2(0.5,0.5) + d).r + epsilon;
-	if (p.z > shadow_z)
-		return 1.0;
-	return 0.0;
+	if (tp.x > 0.39 && tp.y > 0.39 && tp.x < 0.61 && tp.y < 0.61)
+		return texture(tex_shadow0, (p.xy - vec2(0.5,0.5))*4 + vec2(0.5,0.5) + d).r + epsilon;
+	if (tp.x > 0.05 && tp.y > 0.05 && tp.x < 0.95 && tp.y < 0.95)
+		return texture(tex_shadow1, p.xy + d / 2).r + epsilon;
+	return 1.0;
 }
 
 vec2 VogelDiskSample(int sampleIndex, int samplesCount, float phi) {
@@ -101,20 +100,46 @@ vec2 VogelDiskSample(int sampleIndex, int samplesCount, float phi) {
 	return vec2(r * cos(theta), r * sin(theta));
 }
 
+float _surf_shadow_penumbra(vec3 p) {
+	ivec2 ts = textureSize(tex_shadow0, 0);
+	const float R = 28.8;
+	const int N = 4;
+	float phi0 = _surf_rand3d(p) * 2 * 3.1415;
+	float sum_blocked_z = 0;
+	float num_blocked = 0;
+	for (int i=0; i<N; i++) {
+		vec2 dd = VogelDiskSample(i, N, phi0) * R;
+		float z = _surf_shadow_sample_z(p, dd, ts);
+		if (z < p.z) {
+			sum_blocked_z += z;
+			num_blocked += 1;
+		}
+	}
+	if (num_blocked > 0) {
+		float avg = sum_blocked_z / num_blocked;
+		float x = (p.z - avg) / avg;
+		return clamp(pow(x, 1.2)*3, 0.02, 1.0);
+		//return clamp(x * 4, 0.02, 1.0);
+	}
+	return 0;
+}
+
 float _surf_shadow_pcf(vec3 p) {
 	ivec2 ts = textureSize(tex_shadow0, 0);
-	float value = 0;//shadow_pcf_step(p, vec2(0,0), ts);
-	const float R = 1.8;
-	const int N = 16;
+	//float value = 0;//shadow_pcf_step(p, vec2(0,0), ts);
+	const float R = _surf_shadow_penumbra(p) * 20;
+	const int N = 6;
 	float phi0 = _surf_rand3d(p) * 2 * 3.1415;
+	//float phi0 = fract(p.x * 43327.32141) * 2 * 3.1415;
+	float num_blocked = 0;
 	for (int i=0; i<N; i++) {
-		//float phi = _surf_rand3d(p + p*i) * 2 * 3.1415;
-		//float r = R * sqrt(fract(phi * 235.3545));
-		//vec2 dd = r * vec2(cos(phi), sin(phi));
 		vec2 dd = VogelDiskSample(i, N, phi0) * R;
-		value += _surf_shadow_pcf_step(p, dd, ts);
+		float z = _surf_shadow_sample_z(p, dd, ts);
+		if (z < p.z)
+			num_blocked += 1;
 	}
-	return value / N;
+	float fN = N;
+	return num_blocked / fN;
 }
 
 vec3 _surf_light_proj(Light l, vec3 p) {
