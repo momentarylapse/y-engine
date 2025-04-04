@@ -65,6 +65,13 @@ Context* api_init(GLFWwindow* window) {
 
 	if (!device) {
 		try {
+			device = vulkan::Device::create_simple(instance, surface, {"graphics", "present", "swapchain", "anisotropy", "validation", "compute", "tesselationshader"});
+			msg_write("device found: COMPUTE + TESSELATION");
+		} catch (...) {}
+	}
+
+	if (!device) {
+		try {
 			device = vulkan::Device::create_simple(instance, surface, {"graphics", "present", "swapchain", "anisotropy", "validation", "compute"});
 			msg_write("device found: COMPUTE");
 		} catch (...) {}

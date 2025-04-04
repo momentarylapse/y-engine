@@ -7,6 +7,7 @@ enum PrimitiveTopology
 	LINES
 	LINESTRIP
 	POINTS
+	PATCHES
 
 struct Vertex
 	var p, n: vec3

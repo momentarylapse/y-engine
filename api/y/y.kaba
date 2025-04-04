@@ -19,7 +19,7 @@ class UserMesh extends Component
 	vertex_buffer: owned[VertexBuffer]
 	topology: PrimitiveTopology
 	material: owned[Material]
-	vertex_shader_module: string
+	vertex_shader_module: string = "default"
 	geometry_shader_module: string
 
 
