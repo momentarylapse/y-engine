@@ -446,6 +446,7 @@ add_executable(y
 	src/renderer/target/TextureRendererVulkan.cpp
 	src/renderer/target/WindowRendererGL.cpp
 	src/renderer/target/WindowRendererVulkan.cpp
+	src/renderer/target/XhuiRenderer.cpp
 	src/renderer/world/geometry/GeometryRenderer.cpp
 	src/renderer/world/geometry/GeometryRendererGL.cpp
 	src/renderer/world/geometry/GeometryRendererVulkan.cpp
@@ -456,6 +457,8 @@ add_executable(y
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
+	src/renderer/base-gl.cpp
+	src/renderer/base-vulkan.cpp
 	src/renderer/base.cpp
 	src/renderer/Renderer.cpp
 	src/world/components/Animator.cpp
@@ -483,7 +486,7 @@ add_executable(y
 target_include_directories(y PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_directories(y PUBLIC ${LINK_DIRECTORIES})
 target_compile_options(y PUBLIC ${COMPILE_OPTIONS})
-target_compile_definitions(y PUBLIC ${COMPILE_DEFINITIONS} INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+target_compile_definitions(y PUBLIC ${COMPILE_DEFINITIONS}  INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 target_link_libraries(y PUBLIC ${DEPS})
 target_include_directories(y PUBLIC src/)
 
