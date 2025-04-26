@@ -262,8 +262,13 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 #endif
 	
 
-	for (int i=0; i<num_lights; i++)
+	for (int i=0; i<num_lights; i++) {
+		if (i > 3 && light[i].radius > 0) {
+			if (length(p - light[i].pos.xyz) > light[i].radius*1.0)
+				continue;
+		}
 		color.rgb += _surf_light_add(light[i], p, n, albedo.rgb, metal, roughness, ambient_occlusion, view_dir, i == shadow_index).rgb;
+	}
 	
 /*	float distance = length(p - eye_pos.xyz);
 	float f = exp(-distance / fog.distance);
