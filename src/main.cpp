@@ -166,9 +166,9 @@ public:
 		for (auto& cam: ComponentManager::get_list_family<Camera>())
 			create_and_attach_render_path(cam);
 		for (auto &s: world.scripts)
-			ControllerManager::add_controller(s.filename, s.variables);
+			ControllerManager::add_controller(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
-			ControllerManager::add_controller(s, {});
+			ControllerManager::add_controller(s, "", {});
 
 		msg_left();
 		msg_write("|                                                      |");
