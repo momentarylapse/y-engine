@@ -89,16 +89,16 @@ uniform Matrices matrix;
 uniform int num_lights;
 uniform int shadow_index = -1;
 uniform int num_surfels = 0;
-layout(std140) uniform LightData {
+layout(binding=1, std140) uniform LightData {
 	Light light[32];
 };
 uniform Multi {
 	mat4 multi[1024];
 };
 
-uniform BoneData { mat4 bone_matrix[128]; };
+layout(binding=7) uniform BoneData { mat4 bone_matrix[128]; };
 
-layout(binding = 12) uniform SurfelData {
+layout(binding=12) uniform SurfelData {
 	Surfel surfels[1024];
 };
 

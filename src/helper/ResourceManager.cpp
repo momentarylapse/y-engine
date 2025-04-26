@@ -119,10 +119,6 @@ shared<Shader> ResourceManager::load_shader(const Path& filename) {
 	auto s = __load_shader(fn, "");
 	if (!s)
 		return nullptr;
-#ifdef USING_VULKAN
-#else
-	s->link_uniform_block("BoneData", 7);
-#endif
 
 	shaders.add(s);
 	shader_map.add({fn, s});
