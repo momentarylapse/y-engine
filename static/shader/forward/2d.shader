@@ -1,5 +1,5 @@
 <Layout>
-	bindings = [[buffer,sampler]]
+	bindings = [[sampler,sampler,buffer]]
 	pushsize = 4
 	input = [vec3,vec3,vec2]
 	topology = triangles
@@ -13,7 +13,7 @@ struct Matrix {
 	mat4 view;
 	mat4 project;
 };
-/*layout(binding = 0)*/ uniform Matrix matrix;
+/*layout(binding = 1)*/ uniform Matrix matrix;
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
@@ -31,8 +31,8 @@ void main() {
 #version 420
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(binding = 1) uniform sampler2D tex0;
-layout(binding = 2) uniform sampler2D tex1;
+layout(binding = 0) uniform sampler2D tex0;
+layout(binding = 1) uniform sampler2D tex1;
 
 layout(location = 0) in vec2 in_tex_coord;
 

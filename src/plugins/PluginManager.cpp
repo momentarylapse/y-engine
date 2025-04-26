@@ -157,11 +157,7 @@ void buffer_update_array(Buffer *buf, const DynamicArray &data) {
 }
 
 void buffer_update_chunk(Buffer *buf, const void* data, int size) {
-#ifdef USING_VULKAN
 	buf->update_part(data, 0, size);
-#else
-	buf->update(data, size);
-#endif
 }
 
 void buffer_read_chunk(Buffer *buf, void* data, int size) {

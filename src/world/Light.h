@@ -22,6 +22,7 @@ struct UBOLight {
 	alignas(16) color col;
 	alignas(16) float radius;
 	float theta, harshness;
+	int shadow_index;
 };
 
 enum class LightType {

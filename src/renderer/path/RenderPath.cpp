@@ -252,7 +252,7 @@ public:
 		geo_renderer->cur_rvd.update_lights();
 
 		if (shadow_renderer)
-			if (int i = scene_view.shadow_index; i >= 0) {
+			for (int i: scene_view.shadow_indices) {
 				shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
 				shadow_renderer->render(params);
 			}

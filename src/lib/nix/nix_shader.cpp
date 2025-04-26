@@ -255,12 +255,12 @@ void Shader::find_locations() {
 	location[LOCATION_MATERIAL_METAL] = get_location("material.metal");
 	location[LOCATION_MATERIAL_EMISSION] = get_location("material.emission");
 
-	//if (default_shader_bindings) {
+	if (default_shader_bindings) {
 		link_uniform_block("Matrix", 0);
-	//	link_uniform_block("LightData", 1);
+		link_uniform_block("LightData", 1);
 		link_uniform_block("Material", 2);
-	//	link_uniform_block("Fog", 3);
-	//}
+		link_uniform_block("Fog", 3);
+	}
 }
 
 xfer<Shader> Shader::load(Context *ctx, const Path &filename) {
@@ -389,10 +389,11 @@ void Shader::set_default_data() {
 	set_matrix_l(location[LOCATION_MATRIX_M], model_matrix);
 	set_matrix_l(location[LOCATION_MATRIX_V], view_matrix);
 	set_matrix_l(location[LOCATION_MATRIX_P], projection_matrix);
-	for (int i=0; i<NIX_MAX_TEXTURELEVELS; i++)
+	/*for (int i=0; i<NIX_MAX_TEXTURELEVELS; i++)
 		set_int_l(location[LOCATION_TEX + i], i);
 	if (tex_cube_level >= 0)
-		set_int_l(location[LOCATION_TEX_CUBE], tex_cube_level);
+		set_int_l(location[LOCATION_TEX_CUBE], tex_cube_level);*/
+
 	set_color_l(location[LOCATION_MATERIAL_ALBEDO], material.albedo);
 	set_float_l(location[LOCATION_MATERIAL_ROUGHNESS], material.roughness);
 	set_float_l(location[LOCATION_MATERIAL_METAL], material.metal);
