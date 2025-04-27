@@ -30,7 +30,7 @@ float _light_source_brightness(Light l, vec3 p) {
 	// cone
 	float t = acos(dot(l.dir.xyz, normalize(p - l.pos.xyz)));
 	float tmax = l.theta;
-	return b * (1 - smoothstep(tmax*0.8, tmax, t));
+	return b * (1 - smoothstep(tmax*0.8, tmax, t)) * mix(1.0, pow(cos(pow(t/tmax, 3.7) * PI * 4), 2), 0.7*pow(cos(t/tmax * PI * 1), 2));
 }
 
 bool _light_source_reachable(Light l, vec3 p) {

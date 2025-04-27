@@ -45,7 +45,7 @@ float _shadow_penumbra(vec3 p) {
 	if (num_blocked > 0) {
 		float avg = sum_blocked_z / num_blocked;
 		float x = (p.z - avg) / avg;
-		return clamp(pow(x, 1.2)*3, 0.02, 1.0);
+		return clamp(pow(x, 1.2)*3, 0.10, 1.0);
 		//return clamp(x * 4, 0.02, 1.0);
 	}
 	return 0;
