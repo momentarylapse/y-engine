@@ -60,6 +60,7 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	resource_manager->default_shader = "default.shader";
 	resource_manager->load_shader_module("module-basic-interface.shader");
 	resource_manager->load_shader_module("module-basic-data.shader");
+	resource_manager->load_shader_module("module-light-sources-default.shader");
 	const string lighting_method = config.get_str("renderer.lighting", "pbr");
 	resource_manager->load_shader_module(format("module-lighting-%s.shader", lighting_method));
 	resource_manager->load_shader_module("module-vertex-default.shader");
