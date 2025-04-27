@@ -7,6 +7,7 @@
 // import basic-data first!
 
 #import light-sources
+#import shadows
 
 // https://learnopengl.com/PBR/Theory
 // https://learnopengl.com/PBR/Lighting
@@ -48,95 +49,6 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     return ggx1 * ggx2;
 }
 
-
-
-float _surf_rand3d(vec3 p) {
-	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234))) * 43758.5453);
-}
-
-// amount of shadow
-float _surf_shadow_sample_z(vec3 p, vec2 dd, ivec2 ts) {
-	vec2 d = dd / ts * 0.8;
-	vec2 tp = p.xy + d;
-	float epsilon = 0.004;
-	if (tp.x > 0.39 && tp.y > 0.39 && tp.x < 0.61 && tp.y < 0.61)
-		return texture(tex_shadow0, (p.xy - vec2(0.5,0.5))*4 + vec2(0.5,0.5) + d).r + epsilon;
-	if (tp.x > 0.05 && tp.y > 0.05 && tp.x < 0.95 && tp.y < 0.95)
-		return texture(tex_shadow1, p.xy + d / 2).r + epsilon;
-	return 1.0;
-}
-
-vec2 VogelDiskSample(int sampleIndex, int samplesCount, float phi) {
-	float GoldenAngle = 2.4;
-
-	float r = sqrt(sampleIndex + 0.5) / sqrt(samplesCount);
-	float theta = sampleIndex * GoldenAngle + phi;
-	return vec2(r * cos(theta), r * sin(theta));
-}
-
-float _surf_shadow_penumbra(vec3 p) {
-	ivec2 ts = textureSize(tex_shadow0, 0);
-	const float R = 28.8;
-	const int N = 4;
-	float phi0 = _surf_rand3d(p) * 2 * 3.1415;
-	float sum_blocked_z = 0;
-	float num_blocked = 0;
-	for (int i=0; i<N; i++) {
-		vec2 dd = VogelDiskSample(i, N, phi0) * R;
-		float z = _surf_shadow_sample_z(p, dd, ts);
-		if (z < p.z) {
-			sum_blocked_z += z;
-			num_blocked += 1;
-		}
-	}
-	if (num_blocked > 0) {
-		float avg = sum_blocked_z / num_blocked;
-		float x = (p.z - avg) / avg;
-		return clamp(pow(x, 1.2)*3, 0.02, 1.0);
-		//return clamp(x * 4, 0.02, 1.0);
-	}
-	return 0;
-}
-
-float _surf_shadow_pcf(vec3 p) {
-	ivec2 ts = textureSize(tex_shadow0, 0);
-	//float value = 0;//shadow_pcf_step(p, vec2(0,0), ts);
-	const float R = _surf_shadow_penumbra(p) * 20;
-	const int N = 6;
-	float phi0 = _surf_rand3d(p) * 2 * 3.1415;
-	//float phi0 = fract(p.x * 43327.32141) * 2 * 3.1415;
-	float num_blocked = 0;
-	for (int i=0; i<N; i++) {
-		vec2 dd = VogelDiskSample(i, N, phi0) * R;
-		float z = _surf_shadow_sample_z(p, dd, ts);
-		if (z < p.z)
-			num_blocked += 1;
-	}
-	float fN = N;
-	return num_blocked / fN;
-}
-
-vec3 _surf_light_proj(Light l, vec3 p) {
-	vec4 proj = l.proj * vec4(p,1);
-	proj.xyz /= proj.w;
-	proj.x = (proj.x +1)/2;
-	proj.y = (proj.y +1)/2;
-#ifdef vulkan
-	proj.y = 1 - proj.y;
-#endif
-	//proj.z = (proj.z +1)/2;
-	return proj.xyz;
-}
-
-float _surf_shadow_factor(Light l, vec3 p) {
-	vec3 proj = _surf_light_proj(l, p);
-	
-	if (proj.x > 0.01 && proj.x < 0.99 && proj.y > 0.01 && proj.y < 0.99 && proj.z < 1.0)
-		return 1.0 - _surf_shadow_pcf(proj) * l.harshness;
-	
-	return 1.0;
-}
-
 vec3 _surf_specular(vec3 albedo, float metal, float roughness, vec3 V, vec3 L, vec3 n, out vec3 F) {
 
 	vec3 F0 = vec3(0.04);
@@ -161,7 +73,7 @@ vec3 _surf_specular(vec3 albedo, float metal, float roughness, vec3 V, vec3 L, v
 vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float roughness, float ambient_occlusion, vec3 view_dir, bool with_shadow) {
 	float shadow_factor = 1.0;
 	if (with_shadow)
-		shadow_factor = _surf_shadow_factor(l, p);
+		shadow_factor = _shadow_factor(l, p);
 		
 	// TODO only affect "diffuse"
 	shadow_factor *= (1-ambient_occlusion);

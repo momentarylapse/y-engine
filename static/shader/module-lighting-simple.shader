@@ -6,10 +6,6 @@
 
 #import light-sources
 
-float _surf_rand3d(vec3 p) {
-	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234))) * 43758.5453);
-}
-
 vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float roughness, float ambient_occlusion, vec3 view_dir) {
 	// calculate per-light radiance
 	vec3 radiance = l.color.rgb * _light_source_brightness(l, p);

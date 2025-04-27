@@ -85,4 +85,11 @@ const float PI = 3.141592654;
 
 
 
+
+float _surf_rand3d(vec3 p) {
+	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234))) * 43758.5453);
+}
+
+
+
 </Module>
