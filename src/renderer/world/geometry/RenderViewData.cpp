@@ -99,7 +99,7 @@ void RenderData::draw(const RenderParams& params, VertexBuffer* vb, PrimitiveTop
 		nix::draw_points(vb);
 	else if (topology == PrimitiveTopology::LINES)
 		nix::draw_lines(vb, false);
-	else if (topology == PrimitiveTopology::LINESTRIP)
+	else if (topology == PrimitiveTopology::LINE_STRIP)
 		nix::draw_lines(vb, true);
 }
 
