@@ -90,6 +90,16 @@ float _surf_rand3d(vec3 p) {
 	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234))) * 43758.5453);
 }
 
+vec4 texture_blurred(sampler2D tex, vec2 uv, float r) {
+	const int N = 12;
+	vec4 c = texture(tex, uv);
+	for (int i=1; i<N; i++) {
+		float fi = i;
+		c += texture(tex, uv + vec2(sin(i), cos(i)) * r * fi / N);
+	}
+	return c / N;
+}
+
 
 
 </Module>

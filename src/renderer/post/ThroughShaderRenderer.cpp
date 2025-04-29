@@ -33,7 +33,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	gpu_timestamp_begin(params, channel);
 
 	if (!pipeline) {
-		pipeline = new vulkan::GraphicsPipeline(shader.get(), params.render_pass, 0, "triangles", "3f,3f,2f");
+		pipeline = new vulkan::GraphicsPipeline(shader.get(), params.render_pass, 0, PrimitiveTopology::TRIANGLES, "3f,3f,2f");
 		pipeline->set_culling(CullMode::NONE);
 		pipeline->set_z(false, false);
 		pipeline->rebuild();

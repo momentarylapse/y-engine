@@ -10,8 +10,8 @@
 namespace base {
 
 template<class A, class B>
-class tuple {
-public:
+struct tuple {
+	tuple() = default;
 	tuple(const A &_a, const B &_b) {
 		a = _a;
 		b = _b;
