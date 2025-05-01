@@ -157,12 +157,51 @@ func extern static get_pad(index: i32 = -1) -> shared![Gamepad]
 
 var extern static vr_active: bool
 
+
+# FIXME kaba link sub classes (VRDevice.Role) (-_-)
+enum VRDeviceRole
+	NONE
+	CONTROLLER_RIGHT
+	CONTROLLER_LEFT
+	HEADSET
+	LIGHTHOUSE0
+	LIGHTHOUSE1
+		
 struct VRDevice
+
+	enum Button
+		TRIGGER = 0
+		TRACKPAD = 1
+		JOYSTICK = 2
+		SYSTEM = 3
+		A = 4
+		B = 5
+		MENU = 6
+		GRIP = 7
+
+	enum Axis
+		TRIGGER = 1
+		TRACKPAD_H = 2
+		TRACKPAD_V = 3
+		MIDDLE_FINGER_PROXIMITY = 4
+		RING_FINGER_PROXIMITY = 5
+		PINKY_FINGER_PROXIMITY = 6
+		TRIGGER_FINGER_PROXIMITY = 7
+		GRIP_FORCE = 8
+		TRACKPAD_FORCE = 9
+		JOYSTICK_H = 10
+		JOYSTICK_V = 11
+
+
 	var name: string
+	var role: VRDeviceRole
 	var pos: vec3
 	var ang: quaternion
+	func extern button(b: Button) -> bool
+	func extern clicked(b: Button) -> bool
+	func extern axis(a: Axis) -> f32
 
-func extern static get_vr_device(index: i32) -> VRDevice*
+func extern static get_vr_device(role: VRDeviceRole) -> VRDevice*
 
 
 class Controller extends BaseClass

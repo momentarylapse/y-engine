@@ -44,6 +44,21 @@ void init_vr() {
 	}
 }
 
+bool VRDevice::button(int index) const {
+	return (button_mask & (1 << index)) != 0;
+}
+
+bool VRDevice::clicked(int index) const {
+	return ((button_mask & (1 << index)) != 0) and !(button_mask_prev & (1 << index));
+}
+
+
+float VRDevice::axis(int index) const {
+	auto o = reinterpret_cast<SurviveSimpleObject*>(object);
+	return (float)survive_simple_object_get_input_axis(o, (SurviveAxis)index);
+}
+
+
 void iterate_vr() {
 	if (!survive_ctx)
 		return;
@@ -53,12 +68,17 @@ void iterate_vr() {
 		SurvivePose pose;
 		auto o = reinterpret_cast<SurviveSimpleObject*>(d.object);
 		survive_simple_object_get_latest_pose(o, &pose);
-		d.pos = {(float)pose.Pos[0], (float)pose.Pos[1], (float)pose.Pos[2]};
-		d.ang.x = (float)pose.Rot[0];
-		d.ang.y = (float)pose.Rot[1];
-		d.ang.z = (float)pose.Rot[2];
-		d.ang.w = (float)pose.Rot[3];
-		msg_write(format("%s   %s    %s", d.name, str(d.pos), str(d.ang)));
+		d.pos = {(float)pose.Pos[0], (float)pose.Pos[2], (float)pose.Pos[1]};
+		quaternion q;
+		q.x = -(float)pose.Rot[1];
+		q.y = -(float)pose.Rot[2];
+		q.z = (float)pose.Rot[3];
+		q.w = (float)pose.Rot[0];
+		d.ang = quaternion::rotation_a(vec3::EX, pi/2) * q;
+		//msg_write(format("%s   %s    %s", d.name, str(d.pos), str(d.ang)));
+
+		d.button_mask_prev = d.button_mask;
+		d.button_mask = survive_simple_object_get_button_mask(o);
 	}
 
 
@@ -100,19 +120,34 @@ void iterate_vr() {
 		break;
 	}*/
 	case SurviveSimpleEventType_ConfigEvent: {
-		const struct SurviveSimpleConfigEvent *cfg_event = survive_simple_get_config_event(&event);
-		/*printf("(%f) %s received configuration of length %u type %d-%d\n", cfg_event->time,
-			   survive_simple_object_name(cfg_event->object), (unsigned)strlen(cfg_event->cfg),
-			   survive_simple_object_get_type(cfg_event->object),
-			   survive_simple_object_get_subtype(cfg_event->object));*/
+		// we don't have correct type/subtype before this event!
+		const auto cfg_event = survive_simple_get_config_event(&event);
+		auto o = cfg_event->object;
+		VRDeviceRole role = VRDeviceRole::None;
+		auto type = survive_simple_object_get_type(o);
+		auto subtype = survive_simple_object_get_subtype(o);
+		if (type == SurviveSimpleObject_OBJECT) {
+			if (subtype == SURVIVE_OBJECT_SUBTYPE_KNUCKLES_R)
+				role = VRDeviceRole::ControllerRight;
+			else if (subtype == SURVIVE_OBJECT_SUBTYPE_KNUCKLES_L)
+				role = VRDeviceRole::ControllerLeft;
+		} else if (type == SurviveSimpleObject_HMD) {
+			role = VRDeviceRole::Headset;
+		} else if (type == SurviveSimpleObject_LIGHTHOUSE) {
+			role = VRDeviceRole::Lighthouse0;
+		}
+		for (auto& d: vr_devices)
+			if (d.object == o) {
+				d.role = role;
+				d.name = survive_simple_object_name(o);
+			}
 		break;
 	}
 	case SurviveSimpleEventType_DeviceAdded: {
 		const struct SurviveSimpleObjectEvent *obj_event = survive_simple_get_object_event(&event);
-		//printf("(%f) Found '%s'\n", obj_event->time, survive_simple_object_name(obj_event->object));
 		auto o = obj_event->object;
-		msg_error(format("(%f) Found '%s'\n", obj_event->time, survive_simple_object_name(obj_event->object)));
-		vr_devices.add({(void*)o, (int)survive_simple_object_get_type(o), survive_simple_object_name(o)});
+		msg_write(format("VR Device Found: '%s'\n", survive_simple_object_name(obj_event->object)));
+		vr_devices.add({(void*)o, VRDeviceRole::None, survive_simple_object_name(o)});
 		break;
 	}
 	case SurviveSimpleEventType_None:
@@ -121,18 +156,10 @@ void iterate_vr() {
 	}
 }
 
-VRDevice* get_vr_device(int index) {
-	for (auto& d: vr_devices) {
-		// TODO come up with a better mapping...
-		if (index == 0 and d.name == "KN0")
+VRDevice* get_vr_device(VRDeviceRole role) {
+	for (auto& d: vr_devices)
+		if (d.role == role)
 			return &d;
-		if (index == 1 and d.name == "KN1")
-			return &d;
-		if (index == 2 and d.type == SurviveSimpleObject_HMD)
-			return &d;
-		if (index == 3 and d.type == SurviveSimpleObject_LIGHTHOUSE)
-			return &d;
-	}
 	return nullptr;
 }
 

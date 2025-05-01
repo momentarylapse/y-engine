@@ -364,6 +364,13 @@ void PluginManager::export_kaba() {
 	ext->declare_enum("PhysicsMode.FULL_EXTERNAL", PhysicsMode::FULL_EXTERNAL);
 	ext->declare_enum("PhysicsMode.FULL_INTERNAL", PhysicsMode::FULL_INTERNAL);
 
+	ext->declare_enum("VRDeviceRole.NONE", input::VRDeviceRole::None);
+	ext->declare_enum("VRDeviceRole.CONTROLLER_RIGHT", input::VRDeviceRole::ControllerRight);
+	ext->declare_enum("VRDeviceRole.CONTROLLER_LEFT", input::VRDeviceRole::ControllerLeft);
+	ext->declare_enum("VRDeviceRole.HEADSET", input::VRDeviceRole::Headset);
+	ext->declare_enum("VRDeviceRole.LIGHTHOUSE0", input::VRDeviceRole::Lighthouse0);
+	ext->declare_enum("VRDeviceRole.LIGHTHOUSE1", input::VRDeviceRole::Lighthouse1);
+
 	//ext->declare_enum("TraceMode.PHYSICAL", TraceMode::PHYSICAL);
 
 	BaseClass entity(BaseClass::Type::NONE);
@@ -808,8 +815,13 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Gamepad.clicked", &input::Gamepad::clicked);
 
 	ext->declare_class_size("VRDevice", sizeof(input::VRDevice));
+	ext->declare_class_element("VRDevice.role", &input::VRDevice::role);
+	ext->declare_class_element("VRDevice.name", &input::VRDevice::name);
 	ext->declare_class_element("VRDevice.pos", &input::VRDevice::pos);
 	ext->declare_class_element("VRDevice.ang", &input::VRDevice::ang);
+	ext->link_class_func("VRDevice.button", &input::VRDevice::button);
+	ext->link_class_func("VRDevice.clicked", &input::VRDevice::clicked);
+	ext->link_class_func("VRDevice.axis", &input::VRDevice::axis);
 #else
 	int dummy;
 	ext->link("key_state", &dummy);
