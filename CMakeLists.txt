@@ -231,6 +231,42 @@ else()
 	list(APPEND COMPILE_DEFINITIONS HAS_LIB_FFTW3=0)
 endif()
 
+
+# lib: survive (optional)
+set(LIB_SURVIVE_ENABLED true CACHE BOOL "Use survive library?")
+pkg_check_modules(SURVIVE survive)
+if(SURVIVE_FOUND)
+else()
+	set(LIB_SURVIVE_ENABLED false CACHE BOOL "survive library not found" FORCE)
+endif()
+if(${LIB_SURVIVE_ENABLED})
+	list(APPEND INCLUDE_DIRECTORIES ${SURVIVE_INCLUDE_DIRS})
+	list(APPEND LINK_DIRECTORIES ${SURVIVE_LIBRARY_DIRS})
+	list(APPEND DEPS ${SURVIVE_LIBRARIES})
+	list(APPEND COMPILE_OPTIONS ${SURVIVE_CFLAGS_OTHER})
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_SURVIVE=1)
+else()
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_SURVIVE=0)
+endif()
+
+
+# lib: cnmatrix (optional)
+set(LIB_CNMATRIX_ENABLED true CACHE BOOL "Use cnmatrix library?")
+pkg_check_modules(CNMATRIX cnmatrix)
+if(CNMATRIX_FOUND)
+else()
+	set(LIB_CNMATRIX_ENABLED false CACHE BOOL "cnmatrix library not found" FORCE)
+endif()
+if(${LIB_CNMATRIX_ENABLED})
+	list(APPEND INCLUDE_DIRECTORIES ${CNMATRIX_INCLUDE_DIRS})
+	list(APPEND LINK_DIRECTORIES ${CNMATRIX_LIBRARY_DIRS})
+	list(APPEND DEPS ${CNMATRIX_LIBRARIES})
+	list(APPEND COMPILE_OPTIONS ${CNMATRIX_CFLAGS_OTHER})
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_CNMATRIX=1)
+else()
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_CNMATRIX=0)
+endif()
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 list(APPEND DEPS Threads::Threads)
@@ -265,6 +301,7 @@ add_executable(y
 	src/input/InputManager.cpp
 	src/input/Keyboard.cpp
 	src/input/Mouse.cpp
+	src/input/VR.cpp
 	src/lib/any/any.cpp
 	src/lib/base/array.cpp
 	src/lib/base/pointer.cpp

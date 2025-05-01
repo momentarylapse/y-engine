@@ -155,7 +155,14 @@ class Gamepad as shared
 
 func extern static get_pad(index: i32 = -1) -> shared![Gamepad]
 
+var extern static vr_active: bool
 
+struct VRDevice
+	var name: string
+	var pos: vec3
+	var ang: quaternion
+
+func extern static get_vr_device(index: i32) -> VRDevice*
 
 
 class Controller extends BaseClass

@@ -29,6 +29,7 @@
 #include "../input/Gamepad.h"
 #include "../input/Keyboard.h"
 #include "../input/Mouse.h"
+#include "../input/VR.h"
 #define HAS_INPUT
 #endif
 #include "../net/NetworkManager.h"
@@ -792,8 +793,10 @@ void PluginManager::export_kaba() {
 	ext->link("mouse", &input::mouse);
 	ext->link("dmouse", &input::dmouse);
 	ext->link("scroll", &input::scroll);
+	ext->link("vr_active", &input::vr_active);
 	ext->link("link_mouse_and_keyboard_into_pad", &input::link_mouse_and_keyboard_into_pad);
 	ext->link("get_pad", (void*)&input::get_pad);
+	ext->link("get_vr_device", (void*)&input::get_vr_device);
 
 	ext->declare_class_size("Gamepad", sizeof(input::Gamepad));
 	ext->declare_class_element("Gamepad.deadzone", &input::Gamepad::deadzone);
@@ -803,6 +806,10 @@ void PluginManager::export_kaba() {
 	ext->link_class_func("Gamepad.axis", &input::Gamepad::axis);
 	ext->link_class_func("Gamepad.button", &input::Gamepad::button);
 	ext->link_class_func("Gamepad.clicked", &input::Gamepad::clicked);
+
+	ext->declare_class_size("VRDevice", sizeof(input::VRDevice));
+	ext->declare_class_element("VRDevice.pos", &input::VRDevice::pos);
+	ext->declare_class_element("VRDevice.ang", &input::VRDevice::ang);
 #else
 	int dummy;
 	ext->link("key_state", &dummy);
