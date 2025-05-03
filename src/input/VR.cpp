@@ -60,7 +60,7 @@ float VRDevice::axis(int index) const {
 
 
 void iterate_vr() {
-	if (!survive_ctx)
+	if (!vr_active)
 		return;
 
 
@@ -83,8 +83,8 @@ void iterate_vr() {
 
 
 	SurviveSimpleEvent event = {SurviveSimpleEventType_None};
-	//survive_simple_next_event(svctx, &event);
-	survive_simple_wait_for_event(survive_ctx, &event);
+	//survive_simple_wait_for_event(survive_ctx, &event);
+	survive_simple_next_event(survive_ctx, &event);
 	switch (event.event_type) {
 	/*case SurviveSimpleEventType_PoseUpdateEvent: {
 		const struct SurviveSimplePoseUpdatedEvent *pose_event = survive_simple_get_pose_updated_event(&event);
