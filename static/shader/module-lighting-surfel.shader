@@ -176,7 +176,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 	
 	*/
 	
-	return _surf_surfel_color(p);
+	color.rgb += _surf_surfel_color(p).rgb;
 	
 	
 	if (roughness0 < 0.2 && metal > 0.8) {
