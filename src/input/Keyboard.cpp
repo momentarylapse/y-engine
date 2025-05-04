@@ -8,8 +8,8 @@
 #include "Keyboard.h"
 #include "InputManager.h"
 #include "../lib/hui_minimal/hui.h"
-#include "../plugins/ControllerManager.h"
-#include "../plugins/Controller.h"
+#include "../y/System.h"
+#include "../y/SystemManager.h"
 #include <GLFW/glfw3.h>
 
 namespace input {

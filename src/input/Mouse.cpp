@@ -7,13 +7,13 @@
 
 #include "Mouse.h"
 #include "InputManager.h"
-#include "../plugins/ControllerManager.h"
-#include "../plugins/Controller.h"
 #include "../gui/Node.h"
 #include "../gui/gui.h"
 #include "../lib/hui_minimal/hui.h"
 #include "../lib/math/vec2.h"
 #include "../y/EngineData.h"
+#include "../y/System.h"
+#include "../y/SystemManager.h"
 
 #include <GLFW/glfw3.h>
 

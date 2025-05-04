@@ -6,8 +6,6 @@
  */
 
 #include "PluginManager.h"
-#include "Controller.h"
-#include "ControllerManager.h"
 #include "../lib/kaba/kaba.h"
 #include "../audio/SoundSource.h"
 #include "../audio/AudioBuffer.h"
@@ -61,6 +59,8 @@
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
+#include "../y/System.h"
+#include "../y/SystemManager.h"
 #include "../world/Camera.h"
 #include "../world/Link.h"
 #include "../world/Model.h"
@@ -599,26 +599,26 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Fog.distance", &Fog::distance);
 
 
-	Controller con;
-	ext->declare_class_size("Controller", sizeof(Controller));
-	ext->link_class_func("Controller.__init__", &Controller::__init__);
-	ext->link_virtual("Controller.__delete__", &Controller::__delete__, &con);
-	ext->link_virtual("Controller.on_init", &Controller::on_init, &con);
-	ext->link_virtual("Controller.on_delete", &Controller::on_delete, &con);
-	ext->link_virtual("Controller.on_iterate", &Controller::on_iterate, &con);
-	ext->link_virtual("Controller.on_iterate_pre", &Controller::on_iterate_pre, &con);
-	ext->link_virtual("Controller.on_draw_pre", &Controller::on_draw_pre, &con);
-	ext->link_virtual("Controller.on_input", &Controller::on_input, &con);
-	ext->link_virtual("Controller.on_key", &Controller::on_key, &con);
-	ext->link_virtual("Controller.on_key_down", &Controller::on_key_down, &con);
-	ext->link_virtual("Controller.on_key_up", &Controller::on_key_up, &con);
-	ext->link_virtual("Controller.on_left_button_down", &Controller::on_left_button_down, &con);
-	ext->link_virtual("Controller.on_left_button_up", &Controller::on_left_button_up, &con);
-	ext->link_virtual("Controller.on_middle_button_down", &Controller::on_middle_button_down, &con);
-	ext->link_virtual("Controller.on_middle_button_up", &Controller::on_middle_button_up, &con);
-	ext->link_virtual("Controller.on_right_button_down", &Controller::on_right_button_down, &con);
-	ext->link_virtual("Controller.on_right_button_up", &Controller::on_right_button_up, &con);
-	ext->link_virtual("Controller.on_render_inject", &Controller::on_render_inject, &con);
+	System con;
+	ext->declare_class_size("Controller", sizeof(System));
+	ext->link_class_func("Controller.__init__", &System::__init__);
+	ext->link_virtual("Controller.__delete__", &System::__delete__, &con);
+	ext->link_virtual("Controller.on_init", &System::on_init, &con);
+	ext->link_virtual("Controller.on_delete", &System::on_delete, &con);
+	ext->link_virtual("Controller.on_iterate", &System::on_iterate, &con);
+	ext->link_virtual("Controller.on_iterate_pre", &System::on_iterate_pre, &con);
+	ext->link_virtual("Controller.on_draw_pre", &System::on_draw_pre, &con);
+	ext->link_virtual("Controller.on_input", &System::on_input, &con);
+	ext->link_virtual("Controller.on_key", &System::on_key, &con);
+	ext->link_virtual("Controller.on_key_down", &System::on_key_down, &con);
+	ext->link_virtual("Controller.on_key_up", &System::on_key_up, &con);
+	ext->link_virtual("Controller.on_left_button_down", &System::on_left_button_down, &con);
+	ext->link_virtual("Controller.on_left_button_up", &System::on_left_button_up, &con);
+	ext->link_virtual("Controller.on_middle_button_down", &System::on_middle_button_down, &con);
+	ext->link_virtual("Controller.on_middle_button_up", &System::on_middle_button_up, &con);
+	ext->link_virtual("Controller.on_right_button_down", &System::on_right_button_down, &con);
+	ext->link_virtual("Controller.on_right_button_up", &System::on_right_button_up, &con);
+	ext->link_virtual("Controller.on_render_inject", &System::on_render_inject, &con);
 	ext->link_class_func("Controller.__del_override__", &DeletionQueue::add);
 
 #define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
@@ -1087,7 +1087,7 @@ void PluginManager::export_kaba() {
 	ext->link("world", &world);
 	ext->link("cam", &cam_main);
 	ext->link("engine", &engine);
-	ext->link("__get_controller", (void*)&ControllerManager::get_controller);
+	ext->link("__get_controller", (void*)&SystemManager::get);
 
 	ext->link("load_model", (void*)&__load_model);
 	ext->link("load_shader", (void*)&__load_shader);

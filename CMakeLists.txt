@@ -450,8 +450,6 @@ add_executable(y
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
 	src/net/NetworkManager.cpp
-	src/plugins/Controller.cpp
-	src/plugins/ControllerManager.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
@@ -519,6 +517,8 @@ add_executable(y
 	src/y/ComponentManager.cpp
 	src/y/EngineData.cpp
 	src/y/Entity.cpp
+	src/y/System.cpp
+	src/y/SystemManager.cpp
 	src/Config.cpp
 	src/main.cpp)
 target_include_directories(y PUBLIC ${INCLUDE_DIRECTORIES})

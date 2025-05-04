@@ -7,7 +7,6 @@
 
 #include "WorldRendererDeferred.h"
 
-//#ifdef USING_OPENGL
 #include "geometry/GeometryRenderer.h"
 #include "../target/TextureRenderer.h"
 #include "pass/ShadowRenderer.h"
@@ -22,14 +21,9 @@
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../plugins/ControllerManager.h"
-#include "../../plugins/PluginManager.h"
-#include "../../world/Camera.h"
-#include "../../world/Light.h"
-#include "../../world/World.h"
 #include "../../y/Entity.h"
+#include "../../world/Camera.h"
 #include "../../Config.h"
-#include "../../meta.h"
 #include "../../graphics-impl.h"
 
 

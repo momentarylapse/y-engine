@@ -34,11 +34,11 @@
 
 #include "y/EngineData.h"
 #include "y/ComponentManager.h"
+#include "y/SystemManager.h"
 #include "meta.h"
 
 
 #include "plugins/PluginManager.h"
-#include "plugins/ControllerManager.h"
 
 #include "renderer/base.h"
 #include "renderer/helper/RendererFactory.h"
@@ -137,7 +137,7 @@ public:
 
 		GodInit(ch_iter);
 		PluginManager::init();
-		ControllerManager::init(ch_iter);
+		SystemManager::init(ch_iter);
 
 		ErrorHandler::init();
 
@@ -165,10 +165,10 @@ public:
 
 		for (auto& cam: ComponentManager::get_list_family<Camera>())
 			create_and_attach_render_path(cam);
-		for (auto &s: world.scripts)
-			ControllerManager::add_controller(s.filename, s.class_name, s.variables);
+		for (auto &s: world.systems)
+			SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
-			ControllerManager::add_controller(s, "", {});
+			SystemManager::create(s, "", {});
 
 		msg_left();
 		msg_write("|                                                      |");
@@ -239,7 +239,7 @@ public:
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
 			input::iterate();
-			ControllerManager::handle_input();
+			SystemManager::handle_input();
 
 			iterate();
 			draw_frame();
@@ -263,7 +263,7 @@ public:
 	void reset_game() {
 		for (auto rp: engine.render_paths)
 			rp->world_renderer->reset();
-		ControllerManager::reset();
+		SystemManager::reset();
 		SchedulerManager::reset();
 		CameraReset();
 		world.reset();
@@ -290,7 +290,7 @@ public:
 
 	void iterate() {
 		PerformanceMonitor::begin(ch_iter);
-		ControllerManager::handle_iterate_pre(engine.elapsed);
+		SystemManager::handle_iterate_pre(engine.elapsed);
 
 		network_manager.iterate();
 
@@ -298,7 +298,7 @@ public:
 		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
 
-		ControllerManager::handle_iterate(engine.elapsed);
+		SystemManager::handle_iterate(engine.elapsed);
 		SchedulerManager::iterate(engine.elapsed);
 		ComponentManager::iterate(engine.elapsed);
 
@@ -352,7 +352,7 @@ public:
 		if (!engine.window_renderer->start_frame())
 			return;
 		const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
-		ControllerManager::handle_draw_pre();
+		SystemManager::handle_draw_pre();
 		timer_render.peek();
 		for (auto t: engine.render_tasks)
 			if (t->_priority < 1000 and t->active)
