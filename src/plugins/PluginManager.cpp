@@ -364,12 +364,14 @@ void PluginManager::export_kaba() {
 	ext->declare_enum("PhysicsMode.FULL_EXTERNAL", PhysicsMode::FULL_EXTERNAL);
 	ext->declare_enum("PhysicsMode.FULL_INTERNAL", PhysicsMode::FULL_INTERNAL);
 
+#ifdef HAS_INPUT
 	ext->declare_enum("VRDeviceRole.NONE", input::VRDeviceRole::None);
 	ext->declare_enum("VRDeviceRole.CONTROLLER_RIGHT", input::VRDeviceRole::ControllerRight);
 	ext->declare_enum("VRDeviceRole.CONTROLLER_LEFT", input::VRDeviceRole::ControllerLeft);
 	ext->declare_enum("VRDeviceRole.HEADSET", input::VRDeviceRole::Headset);
 	ext->declare_enum("VRDeviceRole.LIGHTHOUSE0", input::VRDeviceRole::Lighthouse0);
 	ext->declare_enum("VRDeviceRole.LIGHTHOUSE1", input::VRDeviceRole::Lighthouse1);
+#endif
 
 	//ext->declare_enum("TraceMode.PHYSICAL", TraceMode::PHYSICAL);
 
