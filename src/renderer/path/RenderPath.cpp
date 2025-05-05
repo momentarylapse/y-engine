@@ -32,6 +32,9 @@
 #include <Config.h>
 #include <lib/math/Box.h>
 #include <lib/os/msg.h>
+#include <renderer/world/pass/ShadowRendererX.h>
+#include <renderer/x/WorldModelsEmitter.h>
+#include <renderer/x/WorldTerrainsEmitter.h>
 
 #include "../x/MeshEmitter.h"
 #include "../x/SceneRenderer.h"
@@ -304,7 +307,7 @@ class CubeEmitter : public MeshEmitter {
 public:
 	owned<VertexBuffer> vb;
 	owned<Material> material;
-	explicit CubeEmitter(const Box& box) {
+	explicit CubeEmitter(const Box& box) : MeshEmitter("cube") {
 		vb = new VertexBuffer("3f,3f,2f");
 		Array<Vertex1> vertices = {
 			{{box.min.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
@@ -337,7 +340,7 @@ public:
 		material = new Material(engine.resource_manager);
 		material->textures.add(tex_white);
 	}
-	void emit(const RenderParams& params, RenderViewData& rvd) override {
+	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override {
 		auto shader = rvd.get_shader(material.get(), 0, "default", "");
 		auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb.get());
 		rd.draw_triangles(params, vb.get());
@@ -347,14 +350,31 @@ public:
 class RenderPathX : public RenderPath {
 public:
 	SceneRenderer scene_renderer;
-	explicit RenderPathX(Camera* cam) : RenderPath(RenderPathType::Forward, cam), scene_renderer(scene_view) {
+	ShadowRendererX* shadow_renderer;
+	explicit RenderPathX(Camera* cam) :
+			RenderPath(RenderPathType::Forward, cam),
+			scene_renderer(scene_view){
 		resource_manager->load_shader_module("forward/module-surface.shader");
-		scene_renderer.background_color = color(1, 0.2f, 0.2f, 0.5f);
-		scene_renderer.add_emitter(new CubeEmitter({{-10,-10,-10}, {10,10,10}}));
-		scene_renderer.add_emitter(new CubeEmitter({{-100,-30,-100}, {100,-20,100}}));
+		scene_renderer.background_color = world.background;
+		//scene_renderer.add_emitter(new CubeEmitter({{-10,-10,-10}, {10,10,10}}));
+		//scene_renderer.add_emitter(new CubeEmitter({{-100,-30,-100}, {100,-20,100}}));
+
+		scene_renderer.add_emitter(new WorldModelsEmitter);
+		scene_renderer.add_emitter(new WorldTerrainsEmitter);
+
+		shadow_renderer = new ShadowRendererX(cam, {new WorldModelsEmitter});
+		scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
+		scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	}
 	void prepare(const RenderParams& params) override {
+		prepare_basics();
 		scene_view.choose_lights();
+
+		if (shadow_renderer)
+			for (int i: scene_view.shadow_indices) {
+				shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
+				shadow_renderer->render(params);
+			}
 
 		scene_renderer.prepare(params);
 	}

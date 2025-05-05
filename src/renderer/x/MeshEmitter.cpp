@@ -3,6 +3,8 @@
 //
 
 #include "MeshEmitter.h"
+#include <helper/PerformanceMonitor.h>
 
-MeshEmitter::MeshEmitter() {
+MeshEmitter::MeshEmitter(const string &name) {
+	channel = PerformanceMonitor::create_channel(name, -1);
 }

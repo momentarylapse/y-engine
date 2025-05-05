@@ -12,8 +12,10 @@
 #include "../../Renderer.h"
 #include "../../../graphics-fwd.h"
 #include <lib/math/mat4.h>
+#include <renderer/x/SceneRenderer.h>
 #include "../geometry/SceneView.h"
 
+class MeshEmitter;
 class Camera;
 class PerformanceMonitor;
 class Material;
@@ -23,7 +25,7 @@ struct SceneView;
 
 class ShadowRendererX : public RenderTask {
 public:
-	explicit ShadowRendererX(Camera* cam, std::function<GeometryEmitter*(SceneView&)> factory);
+	explicit ShadowRendererX(Camera* cam, shared_array<MeshEmitter> emitters);
 
 	static constexpr int NUM_CASCADES = 2;
 
@@ -41,7 +43,7 @@ public:
 		DepthBuffer* depth_buffer = nullptr;
 		owned<TextureRenderer> texture_renderer;
 		float scale = 1.0f;
-	    owned<GeometryEmitter> geo_renderer;
+	    owned<SceneRenderer> scene_renderer;
 	} cascades[NUM_CASCADES];
 
 

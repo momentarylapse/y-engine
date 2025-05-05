@@ -13,9 +13,11 @@ struct RenderParams;
 
 class MeshEmitter : public Sharable<VirtualBase> {
 public:
-	MeshEmitter();
+	explicit MeshEmitter(const string& name);
 
-	virtual void emit(const RenderParams& params, RenderViewData& rvd) {}
+	virtual void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {}
 	virtual void emit_transparent(const RenderParams& params, RenderViewData& rvd) {}
+
+	int channel;
 };
 

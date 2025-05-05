@@ -317,9 +317,10 @@ CubeMap* render_path_get_cubemap(RenderPath &r) {
 }
 
 Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
-	if (r.shadow_renderer)
-		return {r.shadow_renderer->cascades[0].depth_buffer, r.shadow_renderer->cascades[1].depth_buffer};
-	return {};
+	Array<Texture*> shadow_maps;
+	for (auto s: r.scene_view.shadow_maps)
+		shadow_maps.add(s);
+	return shadow_maps;
 }
 
 //shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {

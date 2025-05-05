@@ -25,6 +25,12 @@ public:
 	RenderViewData rvd;
 
 	base::optional<color> background_color;
+	bool is_shadow_pass = false;
+	bool allow_opaque = true;
+	bool allow_transparent = true;
+
+	base::optional<mat4> override_view;
+	base::optional<mat4> override_projection;
 };
 
 

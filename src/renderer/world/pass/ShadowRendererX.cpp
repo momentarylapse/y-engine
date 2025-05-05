@@ -22,7 +22,7 @@
 ShadowRendererX::Cascade::Cascade() = default;
 ShadowRendererX::Cascade::~Cascade() = default;
 
-ShadowRendererX::ShadowRendererX(Camera* cam, std::function<GeometryEmitter*(SceneView&)> factory) :
+ShadowRendererX::ShadowRendererX(Camera* cam, shared_array<MeshEmitter> emitters) :
 		RenderTask("shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -36,15 +36,17 @@ ShadowRendererX::ShadowRendererX(Camera* cam, std::function<GeometryEmitter*(Sce
 
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
-		c.geo_renderer = factory(scene_view);
-		c.geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
-		c.geo_renderer->cur_rvd.material_shadow = material.get();
+		c.scene_renderer = new SceneRenderer(scene_view);
+		c.scene_renderer->is_shadow_pass = true;
+		c.scene_renderer->rvd.material_shadow = material.get();
+		for (auto e: weak(emitters))
+			c.scene_renderer->add_emitter(e);
 
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer(format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
 		c.scale = (i == 0) ? 4.0f : 1.0f;
-		c.texture_renderer->add_child(c.geo_renderer.get());
+		c.texture_renderer->add_child(c.scene_renderer.get());
 	}
 }
 
@@ -57,8 +59,8 @@ void ShadowRendererX::set_projection(const mat4& proj) {
 #else
 		auto m = mat4::scale(c.scale, -c.scale, 1);
 #endif
-		c.geo_renderer->override_view = mat4::ID;
-		c.geo_renderer->override_projection = m * proj;
+		c.scene_renderer->override_view = mat4::ID;
+		c.scene_renderer->override_projection = m * proj;
 	}
 }
 
@@ -79,6 +81,6 @@ void ShadowRendererX::render_cascade(const RenderParams& _params, Cascade& c) {
 
 
 	// all opaque meshes
-	c.geo_renderer->prepare(params);
+	c.scene_renderer->prepare(params);
 	c.texture_renderer->render(params);
 }
