@@ -493,6 +493,8 @@ add_executable(y
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
+	src/renderer/x/MeshEmitter.cpp
+	src/renderer/x/SceneRenderer.cpp
 	src/renderer/base-gl.cpp
 	src/renderer/base-vulkan.cpp
 	src/renderer/base.cpp

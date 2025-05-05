@@ -30,7 +30,11 @@
 #include <y/Entity.h>
 #include <y/ComponentManager.h>
 #include <Config.h>
+#include <lib/math/Box.h>
 #include <lib/os/msg.h>
+
+#include "../x/MeshEmitter.h"
+#include "../x/SceneRenderer.h"
 
 
 HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {
@@ -296,10 +300,76 @@ public:
 	}
 };
 
+class CubeEmitter : public MeshEmitter {
+public:
+	owned<VertexBuffer> vb;
+	owned<Material> material;
+	explicit CubeEmitter(const Box& box) {
+		vb = new VertexBuffer("3f,3f,2f");
+		Array<Vertex1> vertices = {
+			{{box.min.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
+			{{box.max.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
+			{{box.min.x, box.max.y, box.min.z}, {0,0,-1}, 0, 0},
+			{{box.max.x, box.max.y, box.min.z}, {0,0,-1}, 0, 0},
+			{{box.max.x, box.min.y, box.max.z}, {0,0,1}, 0, 0},
+			{{box.min.x, box.min.y, box.max.z}, {0,0,1}, 0, 0},
+			{{box.max.x, box.max.y, box.max.z}, {0,0,1}, 0, 0},
+			{{box.min.x, box.max.y, box.max.z}, {0,0,1}, 0, 0},
+			{{box.min.x, box.max.y, box.min.z}, {-1,0,0}, 0, 0},
+			{{box.min.x, box.max.y, box.max.z}, {-1,0,0}, 0, 0},
+			{{box.min.x, box.min.y, box.min.z}, {-1,0,0}, 0, 0},
+			{{box.min.x, box.min.y, box.max.z}, {-1,0,0}, 0, 0},
+			{{box.max.x, box.min.y, box.min.z}, {1,0,0}, 0, 0},
+			{{box.max.x, box.min.y, box.max.z}, {1,0,0}, 0, 0},
+			{{box.max.x, box.max.y, box.min.z}, {1,0,0}, 0, 0},
+			{{box.max.x, box.max.y, box.max.z}, {1,0,0}, 0, 0},
+			{{box.min.x, box.min.y, box.min.z}, {0,-1,0}, 0, 0},
+			{{box.min.x, box.min.y, box.max.z}, {0,-1,0}, 0, 0},
+			{{box.max.x, box.min.y, box.min.z}, {0,-1,0}, 0, 0},
+			{{box.max.x, box.min.y, box.max.z}, {0,-1,0}, 0, 0},
+			{{box.max.x, box.max.y, box.min.z}, {0,1,0}, 0, 0},
+			{{box.max.x, box.max.y, box.max.z}, {0,1,0}, 0, 0},
+			{{box.min.x, box.max.y, box.min.z}, {0,1,0}, 0, 0},
+			{{box.min.x, box.max.y, box.max.z}, {0,1,0}, 0, 0},
+		};
+		vb->update(vertices);
+		vb->update_index({0,2,1,1,2,3, 4,6,5,5,6,7, 8,10,9,9,10,11, 12,14,13,13,14,15, 16,18,17,17,18,19, 20,22,21,21,22,23});
+		material = new Material(engine.resource_manager);
+		material->textures.add(tex_white);
+	}
+	void emit(const RenderParams& params, RenderViewData& rvd) override {
+		auto shader = rvd.get_shader(material.get(), 0, "default", "");
+		auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb.get());
+		rd.draw_triangles(params, vb.get());
+	}
+};
+
+class RenderPathX : public RenderPath {
+public:
+	SceneRenderer scene_renderer;
+	explicit RenderPathX(Camera* cam) : RenderPath(RenderPathType::Forward, cam), scene_renderer(scene_view) {
+		resource_manager->load_shader_module("forward/module-surface.shader");
+		scene_renderer.background_color = color(1, 0.2f, 0.2f, 0.5f);
+		scene_renderer.add_emitter(new CubeEmitter({{-10,-10,-10}, {10,10,10}}));
+		scene_renderer.add_emitter(new CubeEmitter({{-100,-30,-100}, {100,-20,100}}));
+	}
+	void prepare(const RenderParams& params) override {
+		scene_view.choose_lights();
+
+		scene_renderer.prepare(params);
+	}
+	void draw(const RenderParams& params) override {
+		gpu_timestamp_begin(params, channel);
+		scene_renderer.draw(params);
+		gpu_timestamp_end(params, channel);
+	}
+};
 
 RenderPath* create_render_path(Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
 
+	if (type == "x")
+		return new RenderPathX(cam);
 	if (type == "direct")
 		return new RenderPathDirect(cam);
 	if (type == "deferred")
