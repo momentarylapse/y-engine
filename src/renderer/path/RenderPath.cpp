@@ -3,7 +3,6 @@
 //
 
 #include "RenderPath.h"
-#include "RenderPathDirect.h"
 #include "../base.h"
 #include "../world/WorldRenderer.h"
 #include "../world/geometry/GeometryRenderer.h"
@@ -92,6 +91,24 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	cube_map_source->cube_map = new CubeMap(cube_map_source->resolution, "rgba:i8");
 
 	scene_view.cube_map = cube_map_source->cube_map;
+
+
+	/*world_renderer = create_world_renderer(scene_view, type);
+	if (world_renderer->geo_renderer)
+		geo_renderer = world_renderer->geo_renderer.get();*/
+	resource_manager->load_shader_module("forward/module-surface.shader");
+
+	scene_renderer = new SceneRenderer(scene_view);
+	scene_renderer->add_emitter(new WorldSkyboxEmitter);
+	scene_renderer->add_emitter(new WorldModelsEmitter);
+	scene_renderer->add_emitter(new WorldTerrainsEmitter);
+	scene_renderer->add_emitter(new WorldParticlesEmitter);
+
+	if (type != RenderPathType::PathTracing)
+		create_shadow_renderer();
+
+	if (type != RenderPathType::Direct)
+		create_post_processing(scene_renderer);
 }
 
 RenderPath::~RenderPath() = default;
@@ -106,6 +123,42 @@ void RenderPath::create_shadow_renderer() {
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
 }
+
+void RenderPath::create_post_processing(Renderer* source) {
+
+	auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
+	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
+	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
+	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
+
+	hdr_resolver = create_hdr_resolver(cam, hdr_tex, hdr_depth);
+
+#ifdef USING_VULKAN
+	config.antialiasing_method = AntialiasingMethod::NONE;
+#endif
+
+	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
+		msg_error("yes msaa");
+
+		msg_write("ms tex:");
+		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
+		msg_write("ms depth:");
+		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
+		msg_write("ms renderer:");
+		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
+		texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
+
+		multisample_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
+	} else {
+		msg_error("no msaa");
+		texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
+	}
+
+	texture_renderer->add_child(source);
+
+	light_meter = new LightMeter(engine.resource_manager, hdr_tex);
+}
+
 
 /*void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
 	//PerformanceMonitor::begin(ch_prepare_lights);
@@ -212,100 +265,51 @@ void RenderPath::render_cubemaps(const RenderParams &params) {
 	}
 }
 
+void RenderPath::prepare(const RenderParams& params) {
+	prepare_basics();
+	scene_view.choose_lights();
+	scene_view.choose_shadows();
+	scene_renderer->background_color = world.background;
+	scene_renderer->set_view_from_camera(params, cam);
+	scene_renderer->prepare(params);
 
-
-class RenderPathComplex : public RenderPath {
-public:
-	explicit RenderPathComplex(Camera* cam, RenderPathType type) : RenderPath(type, cam) {
-		/*world_renderer = create_world_renderer(scene_view, type);
-		if (world_renderer->geo_renderer)
-			geo_renderer = world_renderer->geo_renderer.get();*/
-		resource_manager->load_shader_module("forward/module-surface.shader");
-
-		scene_renderer = new SceneRenderer(scene_view);
-		scene_renderer->add_emitter(new WorldSkyboxEmitter);
-		scene_renderer->add_emitter(new WorldModelsEmitter);
-		scene_renderer->add_emitter(new WorldTerrainsEmitter);
-		scene_renderer->add_emitter(new WorldParticlesEmitter);
-
-		if (type != RenderPathType::PathTracing)
-			create_shadow_renderer();
-
-		auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
-		hdr_tex->set_options("wrap=clamp,minfilter=nearest");
-		hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
-		auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
-
-		hdr_resolver = create_hdr_resolver(cam, hdr_tex, hdr_depth);
-
-#ifdef USING_VULKAN
-		config.antialiasing_method = AntialiasingMethod::NONE;
-#endif
-
-		if (config.antialiasing_method == AntialiasingMethod::MSAA) {
-			msg_error("yes msaa");
-
-			msg_write("ms tex:");
-			auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
-			msg_write("ms depth:");
-			auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
-			msg_write("ms renderer:");
-			//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
-			texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
-
-			multisample_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
-		} else {
-			msg_error("no msaa");
-			texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
-		}
-
-		texture_renderer->add_child(scene_renderer);
-
-		light_meter = new LightMeter(engine.resource_manager, hdr_tex);
-	}
-	void prepare(const RenderParams &params) override {
-		prepare_basics();
-		scene_view.choose_lights();
-		scene_view.choose_shadows();
-		scene_renderer->background_color = world.background;
-		scene_renderer->set_view_from_camera(params, cam);
-		scene_renderer->prepare(params);
-
-		if (shadow_renderer)
-			shadow_renderer->render(params);
+	if (shadow_renderer)
+		shadow_renderer->render(params);
 
 
 
-		//cam->update_matrix_cache(params.desired_aspect_ratio);
+	//cam->update_matrix_cache(params.desired_aspect_ratio);
 
-		render_cubemaps(params);
+	render_cubemaps(params);
 
+	if (texture_renderer) {
 		texture_renderer->set_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 		texture_renderer->render(params);
+	}
 
-		if (multisample_resolver)
-			multisample_resolver->render(params);
+	if (multisample_resolver)
+		multisample_resolver->render(params);
 
-		if (hdr_resolver)
-			hdr_resolver->prepare(params);
+	if (hdr_resolver)
+		hdr_resolver->prepare(params);
 
 
-		if (light_meter and hdr_resolver) {
-			light_meter->active = hdr_resolver->cam and hdr_resolver->cam->auto_exposure;
-			if (light_meter->active) {
-				light_meter->read();
-				light_meter->setup();
-				light_meter->adjust_camera(hdr_resolver->cam);
-			}
+	if (light_meter and hdr_resolver) {
+		light_meter->active = hdr_resolver->cam and hdr_resolver->cam->auto_exposure;
+		if (light_meter->active) {
+			light_meter->read();
+			light_meter->setup();
+			light_meter->adjust_camera(hdr_resolver->cam);
 		}
 	}
-	void draw(const RenderParams &params) override {
-		hdr_resolver->draw(params);
-	}
-	void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) override {
+}
 
-	}
-};
+void RenderPath::draw(const RenderParams& params) {
+	if (hdr_resolver)
+		hdr_resolver->draw(params);
+	else
+		scene_renderer->draw(params);
+}
 
 class CubeEmitter : public MeshEmitter {
 public:
@@ -355,11 +359,11 @@ RenderPath* create_render_path(Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
 
 	if (type == "direct")
-		return new RenderPathDirect(cam);
+		return new RenderPath(RenderPathType::Direct, cam);
 	if (type == "deferred")
-		return new RenderPathComplex(cam, RenderPathType::Deferred);
+		return new RenderPath(RenderPathType::Deferred, cam);
 	if (type == "pathtracing" or type == "raytracing")
-		return new RenderPathComplex(cam, RenderPathType::PathTracing);
-	return new RenderPathComplex(cam, RenderPathType::Forward);
+		return new RenderPath(RenderPathType::PathTracing, cam);
+	return new RenderPath(RenderPathType::Forward, cam);
 }
 

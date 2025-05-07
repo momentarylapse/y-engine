@@ -463,7 +463,6 @@ add_executable(y
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
-	src/renderer/path/RenderPathDirect.cpp
 	src/renderer/post/HDRResolver.cpp
 	src/renderer/post/MultisampleResolver.cpp
 	src/renderer/post/PostProcessor.cpp
