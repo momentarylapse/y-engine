@@ -261,8 +261,8 @@ public:
 	}
 
 	void reset_game() {
-		for (auto rp: engine.render_paths)
-			rp->world_renderer->reset();
+		//for (auto rp: engine.render_paths)
+		//	rp->world_renderer->reset();
 		SystemManager::reset();
 		SchedulerManager::reset();
 		CameraReset();

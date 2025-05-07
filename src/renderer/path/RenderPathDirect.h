@@ -6,15 +6,12 @@
 #define RENDERPATHDIRECT_H
 
 #include "RenderPath.h"
-#include "../x/SceneRenderer.h"
 
 class RenderPathDirect : public RenderPath {
 public:
 	explicit RenderPathDirect(Camera* cam);
 	void prepare(const RenderParams &params) override;
 	void draw(const RenderParams &params) override;
-
-	SceneRenderer scene_renderer;
 };
 
 

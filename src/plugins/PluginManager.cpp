@@ -325,8 +325,8 @@ Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
 
 //shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {
 Array<Texture*> render_path_get_gbuffer(RenderPath &r) {
-	if (r.type == RenderPathType::Deferred)
-		return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
+	//if (r.type == RenderPathType::Deferred)
+	//	return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
 	return {};
 }
 
@@ -992,7 +992,7 @@ void PluginManager::export_kaba() {
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
 	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);
-	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
+	ext->declare_class_element("RenderPath.scene_renderer", &RenderPath::scene_renderer);
 	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
 	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
 	ext->declare_class_element("RenderPath.type", &RenderPath::type);

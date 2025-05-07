@@ -217,9 +217,17 @@ void RenderPath::render_cubemaps(const RenderParams &params) {
 class RenderPathComplex : public RenderPath {
 public:
 	explicit RenderPathComplex(Camera* cam, RenderPathType type) : RenderPath(type, cam) {
-		world_renderer = create_world_renderer(scene_view, type);
+		/*world_renderer = create_world_renderer(scene_view, type);
 		if (world_renderer->geo_renderer)
-			geo_renderer = world_renderer->geo_renderer.get();
+			geo_renderer = world_renderer->geo_renderer.get();*/
+		resource_manager->load_shader_module("forward/module-surface.shader");
+
+		scene_renderer = new SceneRenderer(scene_view);
+		scene_renderer->add_emitter(new WorldSkyboxEmitter);
+		scene_renderer->add_emitter(new WorldModelsEmitter);
+		scene_renderer->add_emitter(new WorldTerrainsEmitter);
+		scene_renderer->add_emitter(new WorldParticlesEmitter);
+
 		if (type != RenderPathType::PathTracing)
 			create_shadow_renderer();
 
@@ -251,7 +259,7 @@ public:
 			texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
 		}
 
-		texture_renderer->add_child(world_renderer);
+		texture_renderer->add_child(scene_renderer);
 
 		light_meter = new LightMeter(engine.resource_manager, hdr_tex);
 	}
@@ -259,10 +267,9 @@ public:
 		prepare_basics();
 		scene_view.choose_lights();
 		scene_view.choose_shadows();
-		cam->update_matrix_cache(params.desired_aspect_ratio);
-
-		geo_renderer->cur_rvd.set_view(params, cam);
-		geo_renderer->cur_rvd.update_light_ubo();
+		scene_renderer->background_color = world.background;
+		scene_renderer->set_view_from_camera(params, cam);
+		scene_renderer->prepare(params);
 
 		if (shadow_renderer)
 			for (int i: scene_view.shadow_indices) {
@@ -271,7 +278,8 @@ public:
 			}
 
 
-		world_renderer->prepare(params);
+
+		//cam->update_matrix_cache(params.desired_aspect_ratio);
 
 		render_cubemaps(params);
 

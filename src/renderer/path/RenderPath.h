@@ -9,6 +9,7 @@
 #include <renderer/Renderer.h>
 #include "../world/geometry/SceneView.h"
 
+class SceneRenderer;
 class Camera;
 class HDRResolver;
 class PostProcessor;
@@ -42,13 +43,14 @@ public:
 
 	HDRResolver* hdr_resolver = nullptr;
 	PostProcessor* post_processor = nullptr;
-	WorldRenderer* world_renderer = nullptr;
+	//WorldRenderer* world_renderer = nullptr;
 	TextureRenderer* texture_renderer = nullptr;
 	MultisampleResolver* multisample_resolver = nullptr;
 	LightMeter* light_meter = nullptr;
 	Renderer* main_renderer = nullptr;
 
-	GeometryRenderer* geo_renderer = nullptr;
+	SceneRenderer* scene_renderer = nullptr;
+	//GeometryRenderer* geo_renderer = nullptr;
 	owned<ShadowRenderer> shadow_renderer;
 
 	void create_shadow_renderer();
