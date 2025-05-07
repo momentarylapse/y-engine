@@ -58,11 +58,12 @@ float global_shadow_box_size;
 
 RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	type = _type;
+	cam = _cam;
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	global_shadow_box_size = shadow_box_size;
 
-	scene_view.cam = _cam;
+	scene_view.cam = cam;
 
 	resource_manager->default_shader = "default.shader";
 	resource_manager->load_shader_module("module-basic-interface.shader");
@@ -258,9 +259,9 @@ public:
 		scene_view.choose_lights();
 		scene_view.choose_shadows();
 
-		scene_view.cam->update_matrices(params.desired_aspect_ratio);
-		geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
-		geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
+		cam->update_matrices(params.desired_aspect_ratio);
+		geo_renderer->cur_rvd.set_projection_matrix(cam->m_projection);
+		geo_renderer->cur_rvd.set_view_matrix(cam->m_view);
 		geo_renderer->cur_rvd.update_lights();
 
 		if (shadow_renderer)
@@ -369,6 +370,7 @@ public:
 	void prepare(const RenderParams& params) override {
 		prepare_basics();
 		scene_view.choose_lights();
+		scene_view.choose_shadows();
 
 		if (shadow_renderer)
 			for (int i: scene_view.shadow_indices) {
@@ -376,6 +378,7 @@ public:
 				shadow_renderer->render(params);
 			}
 
+		scene_renderer.set_matrices_from_camera(params, cam);
 		scene_renderer.prepare(params);
 	}
 	void draw(const RenderParams& params) override {

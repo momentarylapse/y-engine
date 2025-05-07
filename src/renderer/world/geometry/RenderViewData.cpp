@@ -32,6 +32,7 @@ void RenderViewData::set_view_matrix(const mat4& view) {
 }
 
 void RenderViewData::update_lights() {
+	// FIXME use local view/proj matrices!!!!
 	Array<UBOLight> lights;
 	light_meta_data.shadow_index = -1;
 	for (auto l: scene_view->lights) {

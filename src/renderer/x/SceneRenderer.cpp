@@ -23,23 +23,21 @@ void SceneRenderer::add_emitter(shared<MeshEmitter> emitter) {
 	emitters.add(emitter);
 }
 
+void SceneRenderer::set_matrices(const mat4& v, const mat4& p) {
+	rvd.set_view_matrix(v);
+	rvd.set_projection_matrix(p);
+}
+
+void SceneRenderer::set_matrices_from_camera(const RenderParams& params, Camera* cam) {
+	cam->update_matrices(params.desired_aspect_ratio);
+	rvd.set_projection_matrix(cam->m_projection);
+	rvd.set_view_matrix(cam->m_view);
+}
+
 void SceneRenderer::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-	if (!is_shadow_pass)
-		scene_view.choose_shadows();
 
 	rvd.prepare_scene(&scene_view);
-
-	scene_view.cam->update_matrices(params.desired_aspect_ratio);
-
-	if (override_projection)
-		rvd.set_projection_matrix(*override_projection);
-	else
-		rvd.set_projection_matrix(scene_view.cam->m_projection);
-	if (override_view)
-		rvd.set_view_matrix(*override_view);
-	else
-		rvd.set_view_matrix(scene_view.cam->m_view);
 
 	if (!is_shadow_pass)
 		rvd.update_lights();
@@ -49,14 +47,6 @@ void SceneRenderer::prepare(const RenderParams& params) {
 void SceneRenderer::draw(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
-	if (override_projection)
-		rvd.set_projection_matrix(*override_projection);
-	else
-		rvd.set_projection_matrix(scene_view.cam->m_projection);
-	if (override_view)
-		rvd.set_view_matrix(*override_view);
-	else
-		rvd.set_view_matrix(scene_view.cam->m_view);
 	rvd.begin_draw();
 
 	if (background_color) {

@@ -8,6 +8,7 @@
 #include "MeshEmitter.h"
 #include "../world/geometry/RenderViewData.h"
 
+class Camera;
 class MeshEmitter;
 
 class SceneRenderer : public Renderer {
@@ -17,6 +18,9 @@ public:
 
 	shared_array<MeshEmitter> emitters;
 	void add_emitter(shared<MeshEmitter> emitter);
+
+	void set_matrices(const mat4& v, const mat4& p);
+	void set_matrices_from_camera(const RenderParams& params, Camera* cam);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
@@ -28,9 +32,6 @@ public:
 	bool is_shadow_pass = false;
 	bool allow_opaque = true;
 	bool allow_transparent = true;
-
-	base::optional<mat4> override_view;
-	base::optional<mat4> override_projection;
 };
 
 

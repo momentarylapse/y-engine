@@ -59,8 +59,7 @@ void ShadowRendererX::set_projection(const mat4& proj) {
 #else
 		auto m = mat4::scale(c.scale, -c.scale, 1);
 #endif
-		c.scene_renderer->override_view = mat4::ID;
-		c.scene_renderer->override_projection = m * proj;
+		c.scene_renderer->set_matrices(mat4::ID, m * proj);
 	}
 }
 

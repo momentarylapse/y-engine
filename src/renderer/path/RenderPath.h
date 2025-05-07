@@ -37,6 +37,7 @@ public:
 
 	float shadow_box_size;
 	int shadow_resolution;
+	Camera* cam;
 	SceneView scene_view;
 
 	HDRResolver* hdr_resolver = nullptr;
