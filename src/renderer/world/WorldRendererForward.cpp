@@ -40,10 +40,9 @@ WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRendere
 
 void WorldRendererForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
-	scene_view.cam->update_matrices(params.desired_aspect_ratio);
+	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 
-	geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
-	geo_renderer->cur_rvd.set_view(scene_view.cam);
+	geo_renderer->cur_rvd.set_view(params, scene_view.cam);
 	geo_renderer->cur_rvd.update_light_ubo();
 
 	geo_renderer->prepare(params);

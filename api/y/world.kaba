@@ -76,7 +76,6 @@ func extern ref attach_light_cone(e: Entity, c: color, radius: f32, theta: f32) 
 
 
 class Camera extends Component
-	var m_view: mat4
 	var exposure: f32
 	var bloom_radius: f32
 	var bloom_factor: f32
@@ -97,7 +96,7 @@ class Camera extends Component
 
 	func extern project(p: vec3) -> vec3
 	func extern unproject(p: vec3) -> vec3
-	func extern mut update_matrices(aspect_ratio: f32)
+	func extern mut update_matrix_cache(aspect_ratio: f32)
 
 
 class CubeMapSource extends Component

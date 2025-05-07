@@ -88,12 +88,10 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 
 	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
 
-
-	scene_view.cam->update_matrices(params.desired_aspect_ratio);
+	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 
 	geo_renderer_background->cur_rvd.set_scene_view(&scene_view);
-	geo_renderer_background->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
-	geo_renderer_background->cur_rvd.set_view(scene_view.cam);
+	geo_renderer_background->cur_rvd.set_view(params, scene_view.cam);
 	geo_renderer_background->cur_rvd.update_light_ubo();
 	geo_renderer_background->prepare(params); // keep drawing into direct target
 	geo_renderer->prepare(sub_params);

@@ -30,6 +30,8 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
 	add_child(geo_renderer.get());
 
+	rvd.set_scene_view(&scene_view);
+
 	if (device->has_rtx() and config.allow_rtx)
 		mode = Mode::RTX;
 	else if (device->has_compute())
@@ -87,7 +89,6 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	gpu_timestamp_begin(params, ch_prepare);
 
-	rvd.set_scene_view(&scene_view);
 	rvd.update_light_ubo();
 
 	int w = width * engine.resolution_scale_x;

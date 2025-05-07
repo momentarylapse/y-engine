@@ -70,11 +70,12 @@ struct RenderData {
 // "draw call" manager (single scene/pass)
 struct RenderViewData {
 	RenderViewData();
-	void set_scene_view(SceneView* scene_view);
 	void begin_draw();
 
+	SceneView* scene_view = nullptr;
+	void set_scene_view(SceneView* scene_view);
 	RenderPathType type;
-	Material *material_shadow = nullptr; // ref to ShadowRenderer
+	Material* material_shadow = nullptr; // ref to ShadowRenderer
 	bool is_shadow_pass() const;
 
 	vec3 view_pos;
@@ -83,11 +84,12 @@ struct RenderViewData {
 #ifdef USING_VULKAN
 	Array<RenderData> rda;
 	int index = 0;
+#else
+	RenderData rd;
 #endif
 
-	void set_projection_matrix(const mat4& projection);
-	void set_view(const vec3& pos, const quaternion& ang);
-	void set_view(Camera* cam);
+	void set_view(const vec3& pos, const quaternion& ang, const mat4& projection);
+	void set_view(const RenderParams& params, Camera* cam);
 	void set_z(bool write, bool test);
 	void set_wire(bool enabled);
 	void set_cull(CullMode mode);
@@ -96,11 +98,8 @@ struct RenderViewData {
 	LightMetaData light_meta_data;
 	void update_light_ubo();
 
-	//Array<UBOLight> lights;
-	//mat4 shadow_proj;
+	void clear(const RenderParams& params, const Array<color>& colors, float z=-1);
 
-	SceneView* scene_view = nullptr;
-	RenderData rd;
 	RenderData& start(const RenderParams& params, const mat4& matrix,
 	                  Shader* shader, const Material& material, int pass_no,
 	                  PrimitiveTopology top, VertexBuffer *vb);

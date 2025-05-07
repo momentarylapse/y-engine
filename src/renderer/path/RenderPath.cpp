@@ -183,7 +183,7 @@ void RenderPath::suggest_cube_map_pos() {
 	}
 	auto& list = ComponentManager::get_list_family<Model>();
 	float max_score = 0;
-	cube_map_source->owner->pos = scene_view.cam->m_view * vec3(0,0,1000);
+	cube_map_source->owner->pos = scene_view.cam->view_matrix() * vec3(0,0,1000);
 	cube_map_source->min_depth = 1000;
 	for (auto m: list)
 		for (auto mat: m->material) {
@@ -258,10 +258,9 @@ public:
 		prepare_basics();
 		scene_view.choose_lights();
 		scene_view.choose_shadows();
+		cam->update_matrix_cache(params.desired_aspect_ratio);
 
-		cam->update_matrices(params.desired_aspect_ratio);
-		geo_renderer->cur_rvd.set_projection_matrix(cam->m_projection);
-		geo_renderer->cur_rvd.set_view(cam);
+		geo_renderer->cur_rvd.set_view(params, cam);
 		geo_renderer->cur_rvd.update_light_ubo();
 
 		if (shadow_renderer)

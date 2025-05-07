@@ -423,8 +423,7 @@ void PluginManager::export_kaba() {
 	ext->declare_class_element("Camera.show", &Camera::show);
 	ext->declare_class_element("Camera.min_depth", &Camera::min_depth);
 	ext->declare_class_element("Camera.max_depth", &Camera::max_depth);
-	ext->declare_class_element("Camera.m_view", &Camera::m_view);
-	ext->link_class_func("Camera.update_matrices", &Camera::update_matrices);
+	ext->link_class_func("Camera.update_matrix_cache", &Camera::update_matrix_cache);
 	ext->link_class_func("Camera.project", &Camera::project);
 	ext->link_class_func("Camera.unproject", &Camera::unproject);
 

@@ -22,22 +22,22 @@ RenderViewData::RenderViewData() {
 	type = RenderPathType::Forward;
 	ubo_light = new UniformBuffer(sizeof(LightMetaData) + MAX_LIGHTS * sizeof(UBOLight));
 	light_meta_data = {};
-	set_projection_matrix(mat4::ID);
-	set_view(vec3::ZERO, quaternion::ID);
+	set_view(vec3::ZERO, quaternion::ID, mat4::ID);
 }
 
-void RenderViewData::set_projection_matrix(const mat4& projection) {
-	ubo.p = projection;
+void RenderViewData::set_scene_view(SceneView* _scene_view) {
+	scene_view = _scene_view;
 }
 
-void RenderViewData::set_view(const vec3& pos, const quaternion& ang) {
+void RenderViewData::set_view(const vec3& pos, const quaternion& ang, const mat4& projection) {
 	view_pos = pos;
 	view_ang = ang;
 	ubo.v = mat4::rotation(ang.bar()) * mat4::translation(-pos);
+	ubo.p = projection;
 }
 
-void RenderViewData::set_view(Camera* cam) {
-	set_view(cam->owner->pos, cam->owner->ang);
+void RenderViewData::set_view(const RenderParams& params, Camera* cam) {
+	set_view(cam->owner->pos, cam->owner->ang, cam->projection_matrix(params.desired_aspect_ratio));
 }
 
 
@@ -60,10 +60,6 @@ void RenderViewData::update_light_ubo() {
 	light_meta_data.num_lights = scene_view->lights.num;
 	ubo_light->update_part(&light_meta_data, 0, sizeof(LightMetaData));
 	ubo_light->update_array(lights, sizeof(LightMetaData));
-}
-
-void RenderViewData::set_scene_view(SceneView *_scene_view) {
-	scene_view = _scene_view;
 }
 
 
@@ -132,6 +128,13 @@ void RenderViewData::set_cull(CullMode mode) {
 	nix::set_cull(mode);
 }
 
+void RenderViewData::clear(const RenderParams& params, const Array<color>& colors, float z) {
+	if (colors.num > 0)
+		nix::clear_color(colors[0]);
+	if (z >= 0)
+		nix::clear_z();
+}
+
 RenderData& RenderViewData::start(const RenderParams& params, const mat4& matrix,
                                   Shader* shader, const Material& material, int pass_no,
                                   PrimitiveTopology top, VertexBuffer *vb) {
@@ -156,6 +159,15 @@ void RenderViewData::begin_draw() {
 	if (scene_view)
 		light_meta_data.num_surfels = scene_view->num_surfels;
 }
+
+void RenderViewData::clear(const RenderParams& params, const Array<color>& colors, float z) {
+	auto cb = params.command_buffer;
+	if (z >= 0)
+		cb->clear(params.frame_buffer->area(), colors, z);
+	else
+		cb->clear(params.frame_buffer->area(), colors, base::None);
+}
+
 
 RenderData& RenderViewData::start(
 		const RenderParams& params, const mat4& matrix,

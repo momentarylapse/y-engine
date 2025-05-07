@@ -107,11 +107,9 @@ void GeometryRenderer::draw(const RenderParams& params) {
 
 	cur_rvd.begin_draw();
 	if (override_view_pos)
-		cur_rvd.set_view(*override_view_pos, *override_view_ang);
+		cur_rvd.set_view(*override_view_pos, *override_view_ang, *override_projection);
 	else
-		cur_rvd.set_view(scene_view.cam);
-	if (override_projection)
-		cur_rvd.set_projection_matrix(*override_projection);
+		cur_rvd.set_view(params, scene_view.cam);
 
 
 	if ((int)(flags & Flags::ALLOW_CLEAR_COLOR))
@@ -168,13 +166,12 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	float min_depth = cam->min_depth;
 	cam->min_depth = 0.1f;
 	cam->max_depth = 2000000;
-	cam->update_matrices(params.desired_aspect_ratio);
+	auto pp = cam->projection_matrix(params.desired_aspect_ratio);
 
 	// overwrite rendering parameters
 	auto mv = rvd.ubo.v;
 	auto mp = rvd.ubo.p;
-	rvd.set_view({0,0,0}, cam->owner->ang);
-	rvd.set_projection_matrix(mat4::scale(1,1,0.1f) * cam->m_projection); // :P
+	rvd.set_view({0,0,0}, cam->owner->ang, mat4::scale(1,1,0.1f) * pp); // :P
 
 	// not working anymore... should have 2nd light data ubo
 	int nlights = rvd.light_meta_data.num_lights;
@@ -197,7 +194,6 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	rvd.light_meta_data.num_lights = nlights;
 	cam->min_depth = min_depth;
 	cam->max_depth = max_depth;
-	cam->update_matrices(params.desired_aspect_ratio);
 #ifdef USING_OPENGL
 	nix::set_cull(nix::CullMode::BACK);
 #endif

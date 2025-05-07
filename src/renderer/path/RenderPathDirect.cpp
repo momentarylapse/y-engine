@@ -19,10 +19,9 @@ void RenderPathDirect::prepare(const RenderParams &params) {
 	prepare_basics();
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
+	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 
-	scene_view.cam->update_matrices(params.desired_aspect_ratio);
-	geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
-	geo_renderer->cur_rvd.set_view(scene_view.cam);
+	geo_renderer->cur_rvd.set_view(params, scene_view.cam);
 	geo_renderer->cur_rvd.update_light_ubo();
 
 	for (int i: scene_view.shadow_indices) {
