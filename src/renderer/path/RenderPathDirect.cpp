@@ -6,12 +6,25 @@
 #include "../world/WorldRenderer.h"
 #include "../world/pass/ShadowRenderer.h"
 #include "../world/geometry/SceneView.h"
+#include "../x/WorldModelsEmitter.h"
+#include "../x/WorldTerrainsEmitter.h"
+#include "../x/WorldSkyboxEmitter.h"
+#include "../x/WorldParticlesEmitter.h"
+#include <helper/ResourceManager.h>
+#include <world/World.h>
 #include "../../world/Camera.h"
 
 
-RenderPathDirect::RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Direct, cam) {
-	world_renderer = create_world_renderer(scene_view, RenderPathType::Forward);
-	geo_renderer = world_renderer->geo_renderer.get();
+RenderPathDirect::RenderPathDirect(Camera* cam) : RenderPath(RenderPathType::Direct, cam),
+	scene_renderer(scene_view)
+{
+	resource_manager->load_shader_module("forward/module-surface.shader");
+
+	scene_renderer.add_emitter(new WorldSkyboxEmitter);
+	scene_renderer.add_emitter(new WorldModelsEmitter);
+	scene_renderer.add_emitter(new WorldTerrainsEmitter);
+	scene_renderer.add_emitter(new WorldParticlesEmitter);
+
 	create_shadow_renderer();
 }
 
@@ -19,19 +32,18 @@ void RenderPathDirect::prepare(const RenderParams &params) {
 	prepare_basics();
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
-	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
+	scene_renderer.background_color = world.background;
+	scene_renderer.set_view_from_camera(params, cam);
+	scene_renderer.prepare(params);
 
-	geo_renderer->cur_rvd.set_view(params, scene_view.cam);
-	geo_renderer->cur_rvd.update_light_ubo();
-
-	for (int i: scene_view.shadow_indices) {
-		shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
-		shadow_renderer->render(params);
-	}
-	world_renderer->prepare(params);
+	if (shadow_renderer)
+		for (int i: scene_view.shadow_indices) {
+			shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
+			shadow_renderer->render(params);
+		}
 }
 
 void RenderPathDirect::draw(const RenderParams &params) {
-	world_renderer->draw(params);
+	scene_renderer.draw(params);
 }
 
