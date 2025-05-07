@@ -101,7 +101,7 @@ void RenderPath::prepare_basics() {
 }
 
 void RenderPath::create_shadow_renderer() {
-	shadow_renderer = new ShadowRenderer(cam, {new WorldModelsEmitter, new WorldTerrainsEmitter});
+	shadow_renderer = new ShadowRenderer(&scene_view, {new WorldModelsEmitter, new WorldTerrainsEmitter});
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
@@ -272,10 +272,7 @@ public:
 		scene_renderer->prepare(params);
 
 		if (shadow_renderer)
-			for (int i: scene_view.shadow_indices) {
-				shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
-				shadow_renderer->render(params);
-			}
+			shadow_renderer->render(params);
 
 
 

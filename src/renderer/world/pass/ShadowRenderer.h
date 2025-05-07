@@ -25,15 +25,15 @@ struct SceneView;
 
 class ShadowRenderer : public RenderTask {
 public:
-	explicit ShadowRenderer(Camera* cam, shared_array<MeshEmitter> emitters);
+	explicit ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emitters);
 
 	static constexpr int NUM_CASCADES = 2;
 
-	void set_projection(const mat4& proj);
     void render(const RenderParams& params) override;
 
     owned<Material> material;
 	SceneView scene_view;
+	SceneView* parent_scene;
 	struct Cascade {
 		Cascade();
 		~Cascade();
@@ -43,7 +43,8 @@ public:
 	    owned<SceneRenderer> scene_renderer;
 	} cascades[NUM_CASCADES];
 
-
+private:
     void render_cascade(const RenderParams& params, Cascade& c);
+	void set_projection(const mat4& proj);
 };
 

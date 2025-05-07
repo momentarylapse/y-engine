@@ -22,7 +22,7 @@
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
 
-ShadowRenderer::ShadowRenderer(Camera* cam, shared_array<MeshEmitter> emitters) :
+ShadowRenderer::ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emitters) :
 		RenderTask("shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -31,7 +31,8 @@ ShadowRenderer::ShadowRenderer(Camera* cam, shared_array<MeshEmitter> emitters) 
 	material = new Material(resource_manager);
 	material->pass0.shader_path = "shadow.shader";
 
-	scene_view.cam = cam;
+	parent_scene = parent;
+	scene_view.cam = parent->cam;
 	scene_view.shadow_indices.clear();
 
 	for (int i=0; i<NUM_CASCADES; i++) {
@@ -67,8 +68,12 @@ void ShadowRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
-	render_cascade(params, cascades[0]);
-	render_cascade(params, cascades[1]);
+	for (int index: parent_scene->shadow_indices) {
+		set_projection(parent_scene->lights[index]->shadow_projection);
+
+		for (int i=0; i<NUM_CASCADES; i++)
+			render_cascade(params, cascades[i]);
+	}
 
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);

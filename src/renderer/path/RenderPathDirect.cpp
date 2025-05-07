@@ -35,11 +35,7 @@ void RenderPathDirect::prepare(const RenderParams &params) {
 	scene_renderer->set_view_from_camera(params, cam);
 	scene_renderer->prepare(params);
 
-	if (shadow_renderer)
-		for (int i: scene_view.shadow_indices) {
-			shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
-			shadow_renderer->render(params);
-		}
+	shadow_renderer->render(params);
 }
 
 void RenderPathDirect::draw(const RenderParams &params) {
