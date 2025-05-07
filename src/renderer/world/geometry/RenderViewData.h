@@ -45,9 +45,8 @@ struct UBO {
 
 struct LightMetaData {
 	int num_lights;
-	int shadow_index;
 	int num_surfels;
-	int dummy;
+	int dummy[2];
 	mat4 shadow_proj[2];
 };
 

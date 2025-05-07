@@ -16,7 +16,6 @@
 class Camera;
 
 struct UBOLight {
-	alignas(16) mat4 proj; // view -> texture
 	alignas(16) vec3 pos;
 	float dummy;
 	alignas(16) vec3 dir;

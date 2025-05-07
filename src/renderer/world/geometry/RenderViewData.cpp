@@ -35,14 +35,12 @@ void RenderViewData::set_view_matrix(const mat4& view) {
 void RenderViewData::update_lights() {
 	// FIXME use local view/proj matrices!!!!
 	Array<UBOLight> lights;
-	light_meta_data.shadow_index = -1;
 	for (auto l: scene_view->lights) {
 		l->update(scene_view->cam, global_shadow_box_size, true);
 		lights.add(l->light);
 	}
 	for (const auto& [i,l]: enumerate(scene_view->shadow_indices)) {
 		auto ll = scene_view->lights[i];
-		light_meta_data.shadow_index = l; // TODO deprecate!
 		light_meta_data.shadow_proj[ll->light.shadow_index] = ll->proj_view;
 	}
 	light_meta_data.num_lights = scene_view->lights.num;
