@@ -87,7 +87,6 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());
 
 	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
-	gbuffer_renderer->prepare(params);
 
 
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);

@@ -18,12 +18,6 @@ void TextureRenderer::set_area(const rect& _area) {
 	override_area = true;
 }
 
-
-void TextureRenderer::prepare(const RenderParams &params) {
-	Renderer::prepare(params);
-}
-
-
 void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
@@ -34,6 +28,8 @@ void TextureRenderer::render(const RenderParams& params) {
 	auto p = params.with_target(frame_buffer.get()).with_area(area);
 	p.render_pass = render_pass.get();
 
+	prepare_children(p);
+
 	auto cb = params.command_buffer;
 
 	cb->begin_render_pass(render_pass.get(), frame_buffer.get());
@@ -43,7 +39,9 @@ void TextureRenderer::render(const RenderParams& params) {
 	if (clear_z)
 		cb->clear(area, clear_colors, clear_z);
 
-	draw(p);
+	for (auto c: children)
+		c->draw(p);
+
 	cb->end_render_pass();
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);

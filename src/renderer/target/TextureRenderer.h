@@ -17,9 +17,6 @@ public:
 	explicit TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options = {});
 	~TextureRenderer() override;
 
-	// TODO move to explicit/dependency graph
-	void prepare(const RenderParams& params) override;
-
 	void render(const RenderParams& params) override;
 
 	void set_area(const rect& area);

@@ -936,8 +936,8 @@ void PluginManager::export_kaba() {
 		ComputeTask ct("", nullptr, 0, 0, 0);
 		ext->declare_class_size("RenderTask", sizeof(RenderTask));
 		ext->declare_class_element("RenderTask.active", &RenderTask::active);
-		ext->link_virtual("RenderTask.prepare", &RenderTask::prepare, &ct);
-		ext->link_virtual("RenderTask.draw", &RenderTask::draw, &ct);
+		//ext->link_virtual("RenderTask.prepare", &RenderTask::prepare, &ct);
+		//ext->link_virtual("RenderTask.draw", &RenderTask::draw, &ct);
 		ext->link_virtual("RenderTask.render", &RenderTask::render, &ct);
 
 		ext->declare_class_size("ComputeTask", sizeof(ComputeTask));

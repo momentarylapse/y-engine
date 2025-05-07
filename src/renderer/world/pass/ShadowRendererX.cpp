@@ -64,14 +64,14 @@ void ShadowRendererX::set_projection(const mat4& proj) {
 }
 
 void ShadowRendererX::render(const RenderParams& params) {
-	PerformanceMonitor::begin(ch_prepare);
-	gpu_timestamp_begin(params, ch_prepare);
+	PerformanceMonitor::begin(channel);
+	gpu_timestamp_begin(params, channel);
 
 	render_cascade(params, cascades[0]);
 	render_cascade(params, cascades[1]);
 
-	gpu_timestamp_end(params, ch_prepare);
-	PerformanceMonitor::end(ch_prepare);
+	gpu_timestamp_end(params, channel);
+	PerformanceMonitor::end(channel);
 }
 
 void ShadowRendererX::render_cascade(const RenderParams& _params, Cascade& c) {

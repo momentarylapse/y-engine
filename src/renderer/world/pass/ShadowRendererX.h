@@ -29,9 +29,6 @@ public:
 
 	static constexpr int NUM_CASCADES = 2;
 
-	void prepare(const RenderParams& params) override {};
-	void draw(const RenderParams& params) override {}
-
 	void set_projection(const mat4& proj);
     void render(const RenderParams& params) override;
 

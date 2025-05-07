@@ -103,7 +103,7 @@ void RenderPath::create_shadow_renderer() {
 	shadow_renderer = new ShadowRenderer(scene_view.cam);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
-	add_child(shadow_renderer.get());
+	add_sub_task(shadow_renderer.get());
 }
 
 /*void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
@@ -274,8 +274,6 @@ public:
 		world_renderer->prepare(params);
 
 		render_cubemaps(params);
-
-		texture_renderer->prepare(params);
 
 		texture_renderer->set_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 		texture_renderer->render(params);
