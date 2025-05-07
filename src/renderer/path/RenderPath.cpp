@@ -35,6 +35,7 @@
 #include <renderer/world/pass/ShadowRendererX.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
+#include <renderer/x/WorldSkyboxEmitter.h>
 
 #include "../x/MeshEmitter.h"
 #include "../x/SceneRenderer.h"
@@ -357,6 +358,7 @@ public:
 		//scene_renderer.add_emitter(new CubeEmitter({{-10,-10,-10}, {10,10,10}}));
 		//scene_renderer.add_emitter(new CubeEmitter({{-100,-30,-100}, {100,-20,100}}));
 
+		scene_renderer.add_emitter(new WorldSkyboxEmitter);
 		scene_renderer.add_emitter(new WorldModelsEmitter);
 		scene_renderer.add_emitter(new WorldTerrainsEmitter);
 
