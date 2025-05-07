@@ -17,6 +17,10 @@
 #include <lib/os/msg.h>
 #include <y/ComponentManager.h>
 #include <graphics-impl.h>
+#include <renderer/x/WorldModelsEmitter.h>
+#include <renderer/x/WorldParticlesEmitter.h>
+#include <renderer/x/WorldSkyboxEmitter.h>
+#include <renderer/x/WorldTerrainsEmitter.h>
 
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
@@ -33,19 +37,21 @@
 WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRenderer("world", scene_view) {
 	resource_manager->load_shader_module("forward/module-surface.shader");
 
-	geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
-	geo_renderer->set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR | GeometryRenderer::Flags::ALLOW_OPAQUE | GeometryRenderer::Flags::ALLOW_TRANSPARENT);
-	add_child(geo_renderer.get());
+	scene_renderer = new SceneRenderer(RenderPathType::Forward, scene_view);
+	scene_renderer->add_emitter(new WorldSkyboxEmitter);
+	scene_renderer->add_emitter(new WorldModelsEmitter);
+	scene_renderer->add_emitter(new WorldTerrainsEmitter);
+	scene_renderer->add_emitter(new WorldParticlesEmitter);
 }
 
 void WorldRendererForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 
-	geo_renderer->cur_rvd.set_view(params, scene_view.cam);
-	geo_renderer->cur_rvd.update_light_ubo();
 
-	geo_renderer->prepare(params);
+	scene_renderer->background_color = world.background;
+	scene_renderer->set_view_from_camera(params, scene_view.cam);
+	scene_renderer->prepare(params);
 
 	PerformanceMonitor::end(ch_prepare);
 }
@@ -54,13 +60,10 @@ void WorldRendererForward::draw(const RenderParams& params) {
 	draw_with(params);
 }
 void WorldRendererForward::draw_with(const RenderParams& params) {
-
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
-	geo_renderer->cur_rvd.set_scene_view(&scene_view);
-	geo_renderer->draw(params);
-
+	scene_renderer->draw(params);
 
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);

@@ -12,8 +12,9 @@
 #include "../world/geometry/SceneView.h"
 #include "../../graphics-impl.h"
 
-SceneRenderer::SceneRenderer(SceneView& _scene_view) : Renderer("scene"), scene_view(_scene_view) {
+SceneRenderer::SceneRenderer(RenderPathType type, SceneView& _scene_view) : Renderer("scene"), scene_view(_scene_view) {
 	rvd.set_scene_view(&scene_view);
+	rvd.type = type;
 }
 
 SceneRenderer::~SceneRenderer() = default;

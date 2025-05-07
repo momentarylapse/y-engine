@@ -10,10 +10,11 @@
 
 class Camera;
 class MeshEmitter;
+enum class RenderPathType;
 
 class SceneRenderer : public Renderer {
 public:
-	explicit SceneRenderer(SceneView& scene_view);
+	explicit SceneRenderer(RenderPathType type, SceneView& scene_view);
 	~SceneRenderer() override;
 
 	shared_array<MeshEmitter> emitters;

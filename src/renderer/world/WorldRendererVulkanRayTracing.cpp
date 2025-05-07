@@ -27,8 +27,9 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 	width = w;
 	height = h;
 
-	geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
-	add_child(geo_renderer.get());
+
+	_geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
+	add_child(_geo_renderer.get());
 
 	rvd.set_scene_view(&scene_view);
 

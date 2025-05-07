@@ -37,7 +37,7 @@ ShadowRenderer::ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emit
 
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
-		c.scene_renderer = new SceneRenderer(scene_view);
+		c.scene_renderer = new SceneRenderer(RenderPathType::Forward, scene_view);
 		c.scene_renderer->is_shadow_pass = true;
 		c.scene_renderer->rvd.material_shadow = material.get();
 		for (auto e: weak(emitters))

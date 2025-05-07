@@ -10,6 +10,7 @@
 #include "WorldRenderer.h"
 #include "geometry/RenderViewData.h"
 
+class SceneRenderer;
 class ThroughShaderRenderer;
 class TextureRenderer;
 
@@ -24,8 +25,9 @@ public:
 
 	owned<TextureRenderer> gbuffer_renderer;
 
-	owned<GeometryRenderer> geo_renderer_background;
-	owned<GeometryRenderer> geo_renderer_trans;
+	owned<SceneRenderer> scene_renderer;
+	owned<SceneRenderer> scene_renderer_background;
+	owned<SceneRenderer> scene_renderer_trans;
 	owned<ThroughShaderRenderer> out_renderer;
 
 	WorldRendererDeferred(SceneView& scene_view, int width, int height);

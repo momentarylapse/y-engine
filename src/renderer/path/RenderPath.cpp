@@ -93,22 +93,15 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	scene_view.cube_map = cube_map_source->cube_map;
 
 
-	/*world_renderer = create_world_renderer(scene_view, type);
-	if (world_renderer->geo_renderer)
+	world_renderer = create_world_renderer(scene_view, type);
+	/*if (world_renderer->geo_renderer)
 		geo_renderer = world_renderer->geo_renderer.get();*/
-	resource_manager->load_shader_module("forward/module-surface.shader");
-
-	scene_renderer = new SceneRenderer(scene_view);
-	scene_renderer->add_emitter(new WorldSkyboxEmitter);
-	scene_renderer->add_emitter(new WorldModelsEmitter);
-	scene_renderer->add_emitter(new WorldTerrainsEmitter);
-	scene_renderer->add_emitter(new WorldParticlesEmitter);
 
 	if (type != RenderPathType::PathTracing)
 		create_shadow_renderer();
 
 	if (type != RenderPathType::Direct)
-		create_post_processing(scene_renderer);
+		create_post_processing(world_renderer);
 }
 
 RenderPath::~RenderPath() = default;
@@ -158,16 +151,6 @@ void RenderPath::create_post_processing(Renderer* source) {
 
 	light_meter = new LightMeter(engine.resource_manager, hdr_tex);
 }
-
-
-/*void RenderPath::prepare_lights(Camera *cam, RenderViewData &rvd) {
-	//PerformanceMonitor::begin(ch_prepare_lights);
-	scene_view.prepare_lights(shadow_box_size, rvd.ubo_light.get());
-#ifdef USING_VULKAN
-	rvd.ubo_light->update_part(&scene_view.lights[0], 0, scene_view.lights.num * sizeof(scene_view.lights[0]));
-#endif
-	//PerformanceMonitor::end(ch_prepare_lights);
-}*/
 
 
 
@@ -269,9 +252,7 @@ void RenderPath::prepare(const RenderParams& params) {
 	prepare_basics();
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
-	scene_renderer->background_color = world.background;
-	scene_renderer->set_view_from_camera(params, cam);
-	scene_renderer->prepare(params);
+	world_renderer->prepare(params);
 
 	if (shadow_renderer)
 		shadow_renderer->render(params);
@@ -308,7 +289,7 @@ void RenderPath::draw(const RenderParams& params) {
 	if (hdr_resolver)
 		hdr_resolver->draw(params);
 	else
-		scene_renderer->draw(params);
+		world_renderer->draw(params);
 }
 
 class CubeEmitter : public MeshEmitter {
