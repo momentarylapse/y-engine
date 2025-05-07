@@ -42,7 +42,8 @@ public:
 
 	void set_direction(const vec3 &dir);
 
-	void update(Camera *cam, float shadow_box_size, bool using_view_space);
+	UBOLight to_ubo(Camera *cam, bool using_view_space) const;
+	mat4 suggest_shadow_projection(Camera *cam, float shadow_box_size) const;
 
 	UBOLight light;
 	bool enabled;
@@ -50,7 +51,6 @@ public:
 	bool user_shadow_control;
 	float user_shadow_theta;
 	mat4 shadow_projection; // world -> texture
-	mat4 proj_view;
 	float shadow_dist_min, shadow_dist_max;
 
 	LightType type() const;

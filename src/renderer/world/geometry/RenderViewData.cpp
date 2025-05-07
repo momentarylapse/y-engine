@@ -9,8 +9,8 @@
 #include "GeometryRenderer.h"
 #include "SceneView.h"
 #include "../../base.h"
-#ifdef USING_OPENGL
 #include <world/Camera.h>
+#ifdef USING_OPENGL
 #include <y/Entity.h>
 #endif
 
@@ -35,13 +35,17 @@ void RenderViewData::set_view_matrix(const mat4& view) {
 void RenderViewData::update_lights() {
 	// FIXME use local view/proj matrices!!!!
 	Array<UBOLight> lights;
-	for (auto l: scene_view->lights) {
-		l->update(scene_view->cam, global_shadow_box_size, true);
-		lights.add(l->light);
-	}
+	lights.resize(scene_view->lights.num);
+	for (auto&& [i, l]: enumerate(scene_view->lights))
+		lights[i] = l->to_ubo(scene_view->cam, true);
+	
 	for (const auto& [i,l]: enumerate(scene_view->shadow_indices)) {
 		auto ll = scene_view->lights[i];
-		light_meta_data.shadow_proj[ll->light.shadow_index] = ll->proj_view;
+		ll->shadow_projection = ll->suggest_shadow_projection(scene_view->cam, global_shadow_box_size);
+		if constexpr (true)
+			light_meta_data.shadow_proj[ll->light.shadow_index] = ll->shadow_projection * scene_view->cam->view_matrix().inverse();
+		else
+			light_meta_data.shadow_proj[ll->light.shadow_index] = ll->shadow_projection;
 	}
 	light_meta_data.num_lights = scene_view->lights.num;
 	ubo_light->update_part(&light_meta_data, 0, sizeof(LightMetaData));
