@@ -71,6 +71,9 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 		light.dir = o->ang * vec3::EZ;
 	}
 
+	// TODO split light/shadow update
+	// TODO shader shadow data...
+
 	if (allow_shadow) {
 		if (type() == LightType::DIRECTIONAL) {
 			//msg_write(format("shadow dir: %s  %s", light.pos.str(), light.dir.str()));
@@ -106,8 +109,8 @@ void Light::update(Camera *cam, float shadow_box_size, bool using_view_space) {
 			shadow_projection = p * r * t;
 		}
 		if (using_view_space)
-			light.proj = shadow_projection * cam->view_matrix().inverse();
+			proj_view = shadow_projection * cam->view_matrix().inverse();
 		else
-			light.proj = shadow_projection;
+			proj_view = shadow_projection;
 	}
 }

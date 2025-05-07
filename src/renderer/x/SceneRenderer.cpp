@@ -49,6 +49,14 @@ void SceneRenderer::draw(const RenderParams& params) {
 	gpu_timestamp_begin(params, channel);
 	rvd.begin_draw();
 
+	msg_write("Scene draw");
+
+	// FIXME
+	/*if (!is_shadow_pass) {
+		scene_view.cam->update_matrices(1.3f);
+		rvd.update_lights();
+	}*/
+
 	if (background_color) {
 #ifdef USING_VULKAN
 		auto cb = params.command_buffer;

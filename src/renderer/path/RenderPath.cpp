@@ -361,7 +361,7 @@ public:
 		scene_renderer.add_emitter(new WorldModelsEmitter);
 		scene_renderer.add_emitter(new WorldTerrainsEmitter);
 
-		shadow_renderer = new ShadowRendererX(cam, {new WorldModelsEmitter});
+		shadow_renderer = new ShadowRendererX(cam, {new WorldModelsEmitter, new WorldTerrainsEmitter});
 		scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 		scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	}

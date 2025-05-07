@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <lib/base/iter.h>
+#include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
 
 #include "../../../graphics-impl.h"
@@ -40,8 +41,9 @@ void RenderViewData::update_lights() {
 		lights.add(l->light);
 	}
 	for (const auto& [i,l]: enumerate(scene_view->shadow_indices)) {
-		light_meta_data.shadow_index = l;
-		light_meta_data.shadow_proj[i] = scene_view->lights[i]->shadow_projection;
+		auto ll = scene_view->lights[i];
+		light_meta_data.shadow_index = l; // TODO deprecate!
+		light_meta_data.shadow_proj[ll->light.shadow_index] = ll->proj_view;
 	}
 	light_meta_data.num_lights = scene_view->lights.num;
 	ubo_light->update_part(&light_meta_data, 0, sizeof(LightMetaData));

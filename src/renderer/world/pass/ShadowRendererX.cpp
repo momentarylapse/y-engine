@@ -78,8 +78,6 @@ void ShadowRendererX::render_cascade(const RenderParams& _params, Cascade& c) {
 	auto params = _params.with_target(c.texture_renderer->frame_buffer.get());
 	params.desired_aspect_ratio = 1.0f;
 
-
 	// all opaque meshes
-	c.scene_renderer->prepare(params);
 	c.texture_renderer->render(params);
 }

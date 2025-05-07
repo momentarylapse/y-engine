@@ -17,7 +17,7 @@ struct Material {
 };
 
 struct Light {
-	mat4 proj;
+	mat4 __proj;
 	vec4 pos;
 	vec4 dir;
 	vec4 color;

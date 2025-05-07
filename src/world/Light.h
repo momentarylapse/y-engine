@@ -51,6 +51,7 @@ public:
 	bool user_shadow_control;
 	float user_shadow_theta;
 	mat4 shadow_projection; // world -> texture
+	mat4 proj_view;
 	float shadow_dist_min, shadow_dist_max;
 
 	LightType type() const;
