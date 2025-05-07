@@ -21,7 +21,7 @@
 #include <renderer/x/WorldParticlesEmitter.h>
 #include <renderer/x/WorldSkyboxEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
-
+#include <renderer/x/WorldUserMeshesEmitter.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../helper/Scheduler.h"
@@ -41,6 +41,7 @@ WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRendere
 	scene_renderer->add_emitter(new WorldSkyboxEmitter);
 	scene_renderer->add_emitter(new WorldModelsEmitter);
 	scene_renderer->add_emitter(new WorldTerrainsEmitter);
+	scene_renderer->add_emitter(new WorldUserMeshesEmitter);
 	scene_renderer->add_emitter(new WorldParticlesEmitter);
 }
 

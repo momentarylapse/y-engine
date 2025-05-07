@@ -3,7 +3,6 @@
 //
 
 #include "WorldTerrainsEmitter.h"
-
 #include <helper/PerformanceMonitor.h>
 #include <renderer/base.h>
 #include <renderer/world/geometry/RenderViewData.h>

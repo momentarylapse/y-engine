@@ -21,8 +21,9 @@
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldSkyboxEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
+#include <renderer/x/WorldUserMeshesEmitter.h>
+#include <renderer/x/WorldParticlesEmitter.h>
 #include <world/World.h>
-
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../y/Entity.h"
@@ -79,11 +80,14 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	scene_renderer = new SceneRenderer(RenderPathType::Deferred, scene_view);
 	scene_renderer->add_emitter(new WorldModelsEmitter);
 	scene_renderer->add_emitter(new WorldTerrainsEmitter);
+	scene_renderer->add_emitter(new WorldUserMeshesEmitter);
 	scene_renderer->allow_transparent = false;
 	gbuffer_renderer->add_child(scene_renderer.get());
 
 	scene_renderer_trans = new SceneRenderer(RenderPathType::Forward, scene_view);
 	scene_renderer_trans->add_emitter(new WorldModelsEmitter);
+	scene_renderer_trans->add_emitter(new WorldUserMeshesEmitter);
+	scene_renderer_trans->add_emitter(new WorldParticlesEmitter);
 	scene_renderer_trans->allow_opaque = false;
 	add_child(scene_renderer_trans.get());
 }

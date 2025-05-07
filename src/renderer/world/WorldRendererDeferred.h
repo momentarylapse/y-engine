@@ -16,9 +16,7 @@ class TextureRenderer;
 
 class WorldRendererDeferred : public WorldRenderer {
 public:
-
 	shared_array<Texture> gbuffer_textures;
-	//shared<FrameBuffer> gbuffer;
 	UniformBuffer *ssao_sample_buffer;
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;

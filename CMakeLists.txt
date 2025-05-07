@@ -497,6 +497,7 @@ add_executable(y
 	src/renderer/x/WorldParticlesEmitter.cpp
 	src/renderer/x/WorldSkyboxEmitter.cpp
 	src/renderer/x/WorldTerrainsEmitter.cpp
+	src/renderer/x/WorldUserMeshesEmitter.cpp
 	src/renderer/base-gl.cpp
 	src/renderer/base-vulkan.cpp
 	src/renderer/base.cpp

@@ -35,14 +35,10 @@ class WorldRenderer : public Renderer {
 public:
 	WorldRenderer(const string &name, SceneView& scene_view);
 
-	int ch_post = -1, ch_post_focus = -1;
-	int ch_pre = -1, ch_bg = -1, ch_fx = -1, ch_world = -1, ch_prepare_lights = -1;
-
 	bool wireframe = false;
 
 	SceneView& scene_view;
 
-	shared<Shader> _shader_fx;
 	owned<GeometryRenderer> _geo_renderer;
 //	virtual void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) = 0;
 

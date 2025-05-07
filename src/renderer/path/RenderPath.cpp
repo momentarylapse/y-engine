@@ -30,6 +30,7 @@
 #include <lib/os/msg.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
+#include <renderer/x/WorldUserMeshesEmitter.h>
 #include "../x/MeshEmitter.h"
 
 
@@ -87,8 +88,6 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 
 
 	world_renderer = create_world_renderer(scene_view, type);
-	/*if (world_renderer->geo_renderer)
-		geo_renderer = world_renderer->geo_renderer.get();*/
 
 	if (type != RenderPathType::PathTracing)
 		create_shadow_renderer();
@@ -104,7 +103,7 @@ void RenderPath::prepare_basics() {
 }
 
 void RenderPath::create_shadow_renderer() {
-	shadow_renderer = new ShadowRenderer(&scene_view, {new WorldModelsEmitter, new WorldTerrainsEmitter});
+	shadow_renderer = new ShadowRenderer(&scene_view, {new WorldModelsEmitter, new WorldTerrainsEmitter, new WorldUserMeshesEmitter});
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
@@ -249,7 +248,6 @@ void RenderPath::prepare(const RenderParams& params) {
 
 	if (shadow_renderer)
 		shadow_renderer->render(params);
-
 
 
 	//cam->update_matrix_cache(params.desired_aspect_ratio);
