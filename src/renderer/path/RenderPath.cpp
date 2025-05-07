@@ -5,13 +5,10 @@
 #include "RenderPath.h"
 #include "../base.h"
 #include "../world/WorldRenderer.h"
-#include "../world/geometry/GeometryRenderer.h"
 #include "../world/pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../post/MultisampleResolver.h"
-#include "../regions/RegionRenderer.h"
 #include "../post/HDRResolver.h"
-#include "../world/WorldRenderer.h"
 #include "../world/WorldRendererForward.h"
 #include "../world/WorldRendererDeferred.h"
 #ifdef USING_VULKAN
@@ -33,11 +30,7 @@
 #include <lib/os/msg.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
-#include <renderer/x/WorldSkyboxEmitter.h>
-#include <renderer/x/WorldParticlesEmitter.h>
-
 #include "../x/MeshEmitter.h"
-#include "../x/SceneRenderer.h"
 
 
 HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {

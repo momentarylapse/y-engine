@@ -41,7 +41,6 @@ public:
 	Camera* cam;
 	SceneView scene_view;
 
-	//SceneRenderer* scene_renderer = nullptr;
 	WorldRenderer* world_renderer = nullptr;
 	owned<ShadowRenderer> shadow_renderer;
 

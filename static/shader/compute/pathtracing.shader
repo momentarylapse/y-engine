@@ -38,7 +38,6 @@ layout(push_constant, std140) uniform PushConstants {
 
 
 struct Light {
-	mat4 proj;
 	vec4 pos;
 	vec4 dir;
 	vec4 color;
@@ -47,7 +46,13 @@ struct Light {
 
 layout(binding=0, rgba16f) uniform writeonly image2D image;
 layout(binding=1, std430) uniform MeshData { Mesh mesh[256>>3]; };
-layout(binding=2, std430) uniform LightData { Light light[32]; };
+layout(binding=2, std430) uniform LightData {
+	int num_lights;
+	int num_surfels;
+	int _dummy0, _dummy1;
+	mat4 shadow_proj[2];
+	Light light[32];
+};
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
