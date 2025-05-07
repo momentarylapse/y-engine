@@ -65,6 +65,7 @@ public:
 
 	void prepare_basics();
 	void render_cubemaps(const RenderParams& params);
+	void prepare_instanced_matrices();
 
 	CubeMapSource* cube_map_source = nullptr;
 	void suggest_cube_map_pos();

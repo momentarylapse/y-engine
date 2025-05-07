@@ -6,18 +6,16 @@
  */
 
 #include "WorldRendererDeferred.h"
-
-#include "geometry/GeometryRenderer.h"
 #include "../target/TextureRenderer.h"
 #include "pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../base.h"
 #include "../path/RenderPath.h"
-#include <lib/nix/nix.h>
 #include <lib/os/msg.h>
 #include <lib/math/random.h>
 #include <lib/math/vec4.h>
 #include <lib/math/vec2.h>
+#include <renderer/x/WorldInstancedEmitter.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldSkyboxEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
@@ -26,7 +24,6 @@
 #include <world/World.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../y/Entity.h"
 #include "../../world/Camera.h"
 #include "../../Config.h"
 #include "../../graphics-impl.h"
@@ -74,13 +71,13 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 
 	scene_renderer_background = new SceneRenderer(RenderPathType::Forward, scene_view);
 	scene_renderer_background->add_emitter(new WorldSkyboxEmitter);
-	//set(GeometryRenderer::Flags::ALLOW_SKYBOXES | GeometryRenderer::Flags::ALLOW_CLEAR_COLOR);
 	add_child(scene_renderer_background.get());
 
 	scene_renderer = new SceneRenderer(RenderPathType::Deferred, scene_view);
 	scene_renderer->add_emitter(new WorldModelsEmitter);
 	scene_renderer->add_emitter(new WorldTerrainsEmitter);
 	scene_renderer->add_emitter(new WorldUserMeshesEmitter);
+	scene_renderer->add_emitter(new WorldInstancedEmitter);
 	scene_renderer->allow_transparent = false;
 	gbuffer_renderer->add_child(scene_renderer.get());
 

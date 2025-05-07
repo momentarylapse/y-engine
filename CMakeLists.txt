@@ -493,6 +493,7 @@ add_executable(y
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/x/MeshEmitter.cpp
 	src/renderer/x/SceneRenderer.cpp
+	src/renderer/x/WorldInstancedEmitter.cpp
 	src/renderer/x/WorldModelsEmitter.cpp
 	src/renderer/x/WorldParticlesEmitter.cpp
 	src/renderer/x/WorldSkyboxEmitter.cpp

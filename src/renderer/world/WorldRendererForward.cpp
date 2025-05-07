@@ -7,16 +7,11 @@
 
 #include "WorldRendererForward.h"
 #include "pass/ShadowRenderer.h"
-#include "geometry/GeometryRenderer.h"
 #include "../base.h"
-#include "../helper/jitter.h"
 #include "../helper/CubeMapSource.h"
 #include "../path/RenderPath.h"
-#include <lib/nix/nix.h>
 #include <lib/image/image.h>
-#include <lib/os/msg.h>
-#include <y/ComponentManager.h>
-#include <graphics-impl.h>
+#include <renderer/x/WorldInstancedEmitter.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldParticlesEmitter.h>
 #include <renderer/x/WorldSkyboxEmitter.h>
@@ -24,14 +19,9 @@
 #include <renderer/x/WorldUserMeshesEmitter.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
-#include "../../helper/Scheduler.h"
-#include "../../plugins/PluginManager.h"
 #include "../../world/Camera.h"
-#include "../../world/Light.h"
 #include "../../world/World.h"
-#include "../../y/Entity.h"
-#include "../../Config.h"
-#include "../../meta.h"
+#include <graphics-impl.h>
 
 
 WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRenderer("world", scene_view) {
@@ -42,6 +32,7 @@ WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRendere
 	scene_renderer->add_emitter(new WorldModelsEmitter);
 	scene_renderer->add_emitter(new WorldTerrainsEmitter);
 	scene_renderer->add_emitter(new WorldUserMeshesEmitter);
+	scene_renderer->add_emitter(new WorldInstancedEmitter);
 	scene_renderer->add_emitter(new WorldParticlesEmitter);
 }
 

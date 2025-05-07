@@ -26,11 +26,15 @@
 #include <y/Entity.h>
 #include <y/ComponentManager.h>
 #include <Config.h>
+#include <helper/PerformanceMonitor.h>
 #include <lib/math/Box.h>
 #include <lib/os/msg.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
 #include <renderer/x/WorldUserMeshesEmitter.h>
+#include <renderer/x/WorldInstancedEmitter.h>
+#include <world/components/MultiInstance.h>
+
 #include "../x/MeshEmitter.h"
 
 
@@ -103,7 +107,11 @@ void RenderPath::prepare_basics() {
 }
 
 void RenderPath::create_shadow_renderer() {
-	shadow_renderer = new ShadowRenderer(&scene_view, {new WorldModelsEmitter, new WorldTerrainsEmitter, new WorldUserMeshesEmitter});
+	shadow_renderer = new ShadowRenderer(&scene_view, {
+		new WorldModelsEmitter,
+		new WorldTerrainsEmitter,
+		new WorldUserMeshesEmitter,
+		new WorldInstancedEmitter});
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
@@ -240,8 +248,22 @@ void RenderPath::render_cubemaps(const RenderParams &params) {
 	}
 }
 
+// keep this outside the drawing function, making sure it only gets called once per frame!
+void RenderPath::prepare_instanced_matrices() {
+	//PerformanceMonitor::begin(ch_pre);
+	auto& list = ComponentManager::get_list_family<MultiInstance>();
+	for (auto *mi: list) {
+		if (!mi->ubo_matrices)
+			mi->ubo_matrices = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
+		//mi->ubo_matrices->update_array(mi->matrices);
+		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, MAX_INSTANCES) * sizeof(mat4));
+	}
+	//PerformanceMonitor::end(ch_pre);
+}
+
 void RenderPath::prepare(const RenderParams& params) {
 	prepare_basics();
+	prepare_instanced_matrices();
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
 	world_renderer->prepare(params);
