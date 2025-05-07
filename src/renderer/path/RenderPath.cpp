@@ -32,7 +32,6 @@
 #include <Config.h>
 #include <lib/math/Box.h>
 #include <lib/os/msg.h>
-#include <renderer/world/pass/ShadowRendererX.h>
 #include <renderer/x/WorldModelsEmitter.h>
 #include <renderer/x/WorldTerrainsEmitter.h>
 #include <renderer/x/WorldSkyboxEmitter.h>
@@ -102,7 +101,7 @@ void RenderPath::prepare_basics() {
 }
 
 void RenderPath::create_shadow_renderer() {
-	shadow_renderer = new ShadowRenderer(scene_view.cam);
+	shadow_renderer = new ShadowRenderer(scene_view.cam, {new WorldModelsEmitter, new WorldTerrainsEmitter});
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
@@ -350,21 +349,17 @@ public:
 class RenderPathX : public RenderPath {
 public:
 	SceneRenderer scene_renderer;
-	ShadowRendererX* shadow_renderer;
 	explicit RenderPathX(Camera* cam) :
 			RenderPath(RenderPathType::Forward, cam),
 			scene_renderer(scene_view){
 		resource_manager->load_shader_module("forward/module-surface.shader");
-		scene_renderer.background_color = world.background;
-		//scene_renderer.add_emitter(new CubeEmitter({{-10,-10,-10}, {10,10,10}}));
-		//scene_renderer.add_emitter(new CubeEmitter({{-100,-30,-100}, {100,-20,100}}));
 
 		scene_renderer.add_emitter(new WorldSkyboxEmitter);
 		scene_renderer.add_emitter(new WorldModelsEmitter);
 		scene_renderer.add_emitter(new WorldTerrainsEmitter);
 		scene_renderer.add_emitter(new WorldParticlesEmitter);
 
-		shadow_renderer = new ShadowRendererX(cam, {new WorldModelsEmitter, new WorldTerrainsEmitter});
+		shadow_renderer = new ShadowRenderer(cam, {new WorldModelsEmitter, new WorldTerrainsEmitter});
 		scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 		scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	}
@@ -372,6 +367,7 @@ public:
 		prepare_basics();
 		scene_view.choose_lights();
 		scene_view.choose_shadows();
+		scene_renderer.background_color = world.background;
 		scene_renderer.set_view_from_camera(params, cam);
 		scene_renderer.prepare(params);
 

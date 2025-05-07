@@ -488,7 +488,6 @@ add_executable(y
 	src/renderer/world/geometry/RenderViewData.cpp
 	src/renderer/world/geometry/SceneView.cpp
 	src/renderer/world/pass/ShadowRenderer.cpp
-	src/renderer/world/pass/ShadowRendererX.cpp
 	src/renderer/world/WorldRenderer.cpp
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp

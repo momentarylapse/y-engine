@@ -6,7 +6,6 @@
  */
 
 #include "ShadowRenderer.h"
-
 #include "../geometry/GeometryRenderer.h"
 #include "../../target/TextureRenderer.h"
 #include <lib/os/msg.h>
@@ -23,7 +22,7 @@
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
 
-ShadowRenderer::ShadowRenderer(Camera* cam) :
+ShadowRenderer::ShadowRenderer(Camera* cam, shared_array<MeshEmitter> emitters) :
 		RenderTask("shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -37,15 +36,17 @@ ShadowRenderer::ShadowRenderer(Camera* cam) :
 
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
-		c.geo_renderer = new GeometryRenderer(RenderPathType::Forward, scene_view);
-		c.geo_renderer->flags = GeometryRenderer::Flags::SHADOW_PASS;
-		c.geo_renderer->cur_rvd.material_shadow = material.get();
+		c.scene_renderer = new SceneRenderer(scene_view);
+		c.scene_renderer->is_shadow_pass = true;
+		c.scene_renderer->rvd.material_shadow = material.get();
+		for (auto e: weak(emitters))
+			c.scene_renderer->add_emitter(e);
 
 		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer(format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
 		c.scale = (i == 0) ? 4.0f : 1.0f;
-		c.texture_renderer->add_child(c.geo_renderer.get());
+		c.texture_renderer->add_child(c.scene_renderer.get());
 	}
 }
 
@@ -58,9 +59,7 @@ void ShadowRenderer::set_projection(const mat4& proj) {
 #else
 		auto m = mat4::scale(c.scale, -c.scale, 1);
 #endif
-		c.geo_renderer->override_view_pos = vec3::ZERO;
-		c.geo_renderer->override_view_ang = quaternion::ID;
-		c.geo_renderer->override_projection = m * proj;
+		c.scene_renderer->set_view(vec3::ZERO, quaternion::ID, m * proj);
 	}
 }
 
