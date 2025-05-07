@@ -10,6 +10,7 @@
 #include "SceneView.h"
 #include "../../base.h"
 #include <world/Camera.h>
+#include <y/Entity.h>
 #ifdef USING_OPENGL
 #include <y/Entity.h>
 #endif
@@ -22,28 +23,37 @@ RenderViewData::RenderViewData() {
 	ubo_light = new UniformBuffer(sizeof(LightMetaData) + MAX_LIGHTS * sizeof(UBOLight));
 	light_meta_data = {};
 	set_projection_matrix(mat4::ID);
-	set_view_matrix(mat4::ID);
+	set_view(vec3::ZERO, quaternion::ID);
 }
 
 void RenderViewData::set_projection_matrix(const mat4& projection) {
 	ubo.p = projection;
 }
-void RenderViewData::set_view_matrix(const mat4& view) {
-	ubo.v = view;
+
+void RenderViewData::set_view(const vec3& pos, const quaternion& ang) {
+	view_pos = pos;
+	view_ang = ang;
+	ubo.v = mat4::rotation(ang.bar()) * mat4::translation(-pos);
 }
 
-void RenderViewData::update_lights() {
-	// FIXME use local view/proj matrices!!!!
+void RenderViewData::set_view(Camera* cam) {
+	set_view(cam->owner->pos, cam->owner->ang);
+}
+
+
+void RenderViewData::update_light_ubo() {
 	Array<UBOLight> lights;
 	lights.resize(scene_view->lights.num);
 	for (auto&& [i, l]: enumerate(scene_view->lights))
-		lights[i] = l->to_ubo(scene_view->cam, true);
-	
+		// using current view
+		lights[i] = l->to_ubo(view_pos, view_ang, true);
+
 	for (const auto& [i,l]: enumerate(scene_view->shadow_indices)) {
 		auto ll = scene_view->lights[i];
+		// from reference cam
 		ll->shadow_projection = ll->suggest_shadow_projection(scene_view->cam, global_shadow_box_size);
 		if constexpr (true)
-			light_meta_data.shadow_proj[ll->light.shadow_index] = ll->shadow_projection * scene_view->cam->view_matrix().inverse();
+			light_meta_data.shadow_proj[ll->light.shadow_index] = ll->shadow_projection * ubo.v.inverse();
 		else
 			light_meta_data.shadow_proj[ll->light.shadow_index] = ll->shadow_projection;
 	}
@@ -52,9 +62,8 @@ void RenderViewData::update_lights() {
 	ubo_light->update_array(lights, sizeof(LightMetaData));
 }
 
-void RenderViewData::prepare_scene(SceneView *_scene_view) {
+void RenderViewData::set_scene_view(SceneView *_scene_view) {
 	scene_view = _scene_view;
-	update_lights();
 }
 
 

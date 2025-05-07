@@ -43,8 +43,8 @@ void WorldRendererForward::prepare(const RenderParams& params) {
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
 	geo_renderer->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
-	geo_renderer->cur_rvd.set_view_matrix(scene_view.cam->m_view);
-	geo_renderer->cur_rvd.update_lights();
+	geo_renderer->cur_rvd.set_view(scene_view.cam);
+	geo_renderer->cur_rvd.update_light_ubo();
 
 	geo_renderer->prepare(params);
 
@@ -59,7 +59,7 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
-	geo_renderer->cur_rvd.prepare_scene(&scene_view);
+	geo_renderer->cur_rvd.set_scene_view(&scene_view);
 	geo_renderer->draw(params);
 
 

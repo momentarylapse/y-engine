@@ -91,10 +91,10 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 
 	scene_view.cam->update_matrices(params.desired_aspect_ratio);
 
-	//geo_renderer_background->cur_rvd.set_view_matrix()
+	geo_renderer_background->cur_rvd.set_scene_view(&scene_view);
 	geo_renderer_background->cur_rvd.set_projection_matrix(scene_view.cam->m_projection);
-	geo_renderer_background->cur_rvd.set_view_matrix(scene_view.cam->m_view);
-	geo_renderer_background->cur_rvd.prepare_scene(&scene_view);
+	geo_renderer_background->cur_rvd.set_view(scene_view.cam);
+	geo_renderer_background->cur_rvd.update_light_ubo();
 	geo_renderer_background->prepare(params); // keep drawing into direct target
 	geo_renderer->prepare(sub_params);
 	geo_renderer_trans->prepare(params); // keep drawing into direct target

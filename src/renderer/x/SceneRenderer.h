@@ -19,8 +19,8 @@ public:
 	shared_array<MeshEmitter> emitters;
 	void add_emitter(shared<MeshEmitter> emitter);
 
-	void set_matrices(const mat4& v, const mat4& p);
-	void set_matrices_from_camera(const RenderParams& params, Camera* cam);
+	void set_view(const vec3& pos, const quaternion& ang, const mat4& proj);
+	void set_view_from_camera(const RenderParams& params, Camera* cam);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

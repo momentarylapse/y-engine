@@ -261,8 +261,8 @@ public:
 
 		cam->update_matrices(params.desired_aspect_ratio);
 		geo_renderer->cur_rvd.set_projection_matrix(cam->m_projection);
-		geo_renderer->cur_rvd.set_view_matrix(cam->m_view);
-		geo_renderer->cur_rvd.update_lights();
+		geo_renderer->cur_rvd.set_view(cam);
+		geo_renderer->cur_rvd.update_light_ubo();
 
 		if (shadow_renderer)
 			for (int i: scene_view.shadow_indices) {
@@ -369,15 +369,14 @@ public:
 		prepare_basics();
 		scene_view.choose_lights();
 		scene_view.choose_shadows();
+		scene_renderer.set_view_from_camera(params, cam);
+		scene_renderer.prepare(params);
 
 		if (shadow_renderer)
 			for (int i: scene_view.shadow_indices) {
 				shadow_renderer->set_projection(scene_view.lights[i]->shadow_projection);
 				shadow_renderer->render(params);
 			}
-
-		scene_renderer.set_matrices_from_camera(params, cam);
-		scene_renderer.prepare(params);
 	}
 	void draw(const RenderParams& params) override {
 		gpu_timestamp_begin(params, channel);

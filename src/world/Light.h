@@ -42,7 +42,7 @@ public:
 
 	void set_direction(const vec3 &dir);
 
-	UBOLight to_ubo(Camera *cam, bool using_view_space) const;
+	UBOLight to_ubo(const vec3& view_pos, const quaternion& view_ang, bool using_view_space) const;
 	mat4 suggest_shadow_projection(Camera *cam, float shadow_box_size) const;
 
 	UBOLight light;

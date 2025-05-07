@@ -106,10 +106,10 @@ void GeometryRenderer::draw(const RenderParams& params) {
 
 
 	cur_rvd.begin_draw();
-	if (override_view)
-		cur_rvd.set_view_matrix(*override_view);
+	if (override_view_pos)
+		cur_rvd.set_view(*override_view_pos, *override_view_ang);
 	else
-		cur_rvd.set_view_matrix(scene_view.cam->view_matrix());
+		cur_rvd.set_view(scene_view.cam);
 	if (override_projection)
 		cur_rvd.set_projection_matrix(*override_projection);
 
@@ -173,7 +173,7 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	// overwrite rendering parameters
 	auto mv = rvd.ubo.v;
 	auto mp = rvd.ubo.p;
-	rvd.set_view_matrix(mat4::rotation(cam->owner->ang).transpose());
+	rvd.set_view({0,0,0}, cam->owner->ang);
 	rvd.set_projection_matrix(mat4::scale(1,1,0.1f) * cam->m_projection); // :P
 
 	// not working anymore... should have 2nd light data ubo

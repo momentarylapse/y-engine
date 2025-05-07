@@ -9,10 +9,13 @@
 #include <lib/base/map.h>
 #include <lib/base/pointer.h>
 #include <lib/math/mat4.h>
+#include <lib/math/quaternion.h>
+#include <lib/math/vec3.h>
 #include <lib/image/color.h>
 #include "../../../graphics-fwd.h"
 #include "../../../world/Material.h"
 
+class Camera;
 struct SceneView;
 class RenderParams;
 class mat4;
@@ -67,13 +70,15 @@ struct RenderData {
 // "draw call" manager (single scene/pass)
 struct RenderViewData {
 	RenderViewData();
-	void prepare_scene(SceneView* scene_view);
+	void set_scene_view(SceneView* scene_view);
 	void begin_draw();
 
 	RenderPathType type;
 	Material *material_shadow = nullptr; // ref to ShadowRenderer
 	bool is_shadow_pass() const;
 
+	vec3 view_pos;
+	quaternion view_ang;
 	UBO ubo;
 #ifdef USING_VULKAN
 	Array<RenderData> rda;
@@ -81,14 +86,15 @@ struct RenderViewData {
 #endif
 
 	void set_projection_matrix(const mat4& projection);
-	void set_view_matrix(const mat4& view);
+	void set_view(const vec3& pos, const quaternion& ang);
+	void set_view(Camera* cam);
 	void set_z(bool write, bool test);
 	void set_wire(bool enabled);
 	void set_cull(CullMode mode);
 
 	owned<UniformBuffer> ubo_light;
 	LightMetaData light_meta_data;
-	void update_lights();
+	void update_light_ubo();
 
 	//Array<UBOLight> lights;
 	//mat4 shadow_proj;

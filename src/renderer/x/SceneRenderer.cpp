@@ -23,24 +23,24 @@ void SceneRenderer::add_emitter(shared<MeshEmitter> emitter) {
 	emitters.add(emitter);
 }
 
-void SceneRenderer::set_matrices(const mat4& v, const mat4& p) {
-	rvd.set_view_matrix(v);
-	rvd.set_projection_matrix(p);
+void SceneRenderer::set_view(const vec3& pos, const quaternion& ang, const mat4& proj) {
+	rvd.set_view(pos, ang);
+	rvd.set_projection_matrix(proj);
 }
 
-void SceneRenderer::set_matrices_from_camera(const RenderParams& params, Camera* cam) {
+void SceneRenderer::set_view_from_camera(const RenderParams& params, Camera* cam) {
 	cam->update_matrices(params.desired_aspect_ratio);
 	rvd.set_projection_matrix(cam->m_projection);
-	rvd.set_view_matrix(cam->m_view);
+	rvd.set_view(cam);
 }
 
 void SceneRenderer::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 
-	rvd.prepare_scene(&scene_view);
+	rvd.set_scene_view(&scene_view);
 
 	if (!is_shadow_pass)
-		rvd.update_lights();
+		rvd.update_light_ubo();
 	PerformanceMonitor::end(ch_prepare);
 }
 

@@ -60,7 +60,7 @@ void Light::set_direction(const vec3 &dir) {
 	owner->ang = quaternion::rotation(dir.dir2ang());
 }
 
-UBOLight Light::to_ubo(Camera *cam, bool using_view_space) const {
+UBOLight Light::to_ubo(const vec3& view_pos, const quaternion& view_ang, bool using_view_space) const {
 	UBOLight l;
 	l.col = light.col;
 	l.harshness = light.harshness;
@@ -68,9 +68,8 @@ UBOLight Light::to_ubo(Camera *cam, bool using_view_space) const {
 	l.theta = light.theta;
 	auto o = owner;
 	if (using_view_space) {
-		//light.pos = cam->m_view * o->pos;
-		l.pos = cam->view_matrix() * o->pos;
-		l.dir = cam->owner->ang.bar() * o->ang * vec3::EZ;
+		l.pos = view_ang.bar() * (o->pos - view_pos);
+		l.dir = view_ang.bar() * o->ang * vec3::EZ;
 	} else {
 		l.pos = o->pos;
 		l.dir = o->ang * vec3::EZ;

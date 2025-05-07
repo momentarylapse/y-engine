@@ -72,7 +72,8 @@ public:
 	RenderPathType type;
 
 	SceneView &scene_view;
-	base::optional<mat4> override_view;
+	base::optional<vec3> override_view_pos;
+	base::optional<quaternion> override_view_ang;
 	base::optional<mat4> override_projection;
 
 #ifdef USING_VULKAN

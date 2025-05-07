@@ -58,7 +58,8 @@ void ShadowRenderer::set_projection(const mat4& proj) {
 #else
 		auto m = mat4::scale(c.scale, -c.scale, 1);
 #endif
-		c.geo_renderer->override_view = mat4::ID;
+		c.geo_renderer->override_view_pos = vec3::ZERO;
+		c.geo_renderer->override_view_ang = quaternion::ID;
 		c.geo_renderer->override_projection = m * proj;
 	}
 }
