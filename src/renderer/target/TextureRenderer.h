@@ -23,6 +23,8 @@ public:
 	bool override_area = false;
 	rect user_area;
 
+	void set_layer(int layer);
+
 	shared<FrameBuffer> frame_buffer;
 #ifdef USING_VULKAN
 	owned<RenderPass> render_pass;

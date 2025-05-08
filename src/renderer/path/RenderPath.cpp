@@ -33,6 +33,7 @@
 #include <renderer/world/emitter/WorldTerrainsEmitter.h>
 #include <renderer/world/emitter/WorldUserMeshesEmitter.h>
 #include <renderer/world/emitter/WorldInstancedEmitter.h>
+#include <renderer/world/emitter/WorldSkyboxEmitter.h>
 #include <world/components/MultiInstance.h>
 #include "../scene/MeshEmitter.h"
 
@@ -95,6 +96,8 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	if (type != RenderPathType::PathTracing)
 		create_shadow_renderer();
 
+	create_cube_renderer();
+
 	if (type != RenderPathType::Direct)
 		create_post_processing(world_renderer);
 }
@@ -115,6 +118,16 @@ void RenderPath::create_shadow_renderer() {
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
 }
+
+void RenderPath::create_cube_renderer() {
+	cube_map_renderer = new CubeMapRenderer(scene_view, {
+		new WorldSkyboxEmitter,
+		new WorldModelsEmitter,
+		new WorldTerrainsEmitter,
+		new WorldUserMeshesEmitter,
+		new WorldInstancedEmitter});
+}
+
 
 void RenderPath::create_post_processing(Renderer* source) {
 
@@ -154,56 +167,8 @@ void RenderPath::create_post_processing(Renderer* source) {
 
 
 void RenderPath::render_into_cubemap(CubeMapSource& source) {
-	if (!source.depth_buffer)
-		source.depth_buffer = new DepthBuffer(source.resolution, source.resolution, "ds:u24i8");
-	if (!source.cube_map)
-		source.cube_map = new CubeMap(source.resolution, "rgba:i8");
-#ifdef USING_VULKAN
-	if (!source.render_pass)
-		source.render_pass = new vulkan::RenderPass({source.cube_map.get(), source.depth_buffer.get()}, {"autoclear"});
-#endif
-	if (!source.frame_buffer[0])
-		for (int i=0; i<6; i++) {
-#ifdef USING_VULKAN
-			source.frame_buffer[i] = new FrameBuffer(source.render_pass.get(), {source.cube_map.get(), source.depth_buffer.get()});
-			try {
-				source.frame_buffer[i]->update_x(source.render_pass.get(), {source.cube_map.get(), source.depth_buffer.get()}, i);
-			} catch(Exception &e) {
-				msg_error(e.message());
-				return;
-			}
-#else
-			source.frame_buffer[i] = new FrameBuffer();
-			try {
-				source.frame_buffer[i]->update_x({source.cube_map.get(), source.depth_buffer.get()}, i);
-			} catch(Exception &e) {
-				msg_error(e.message());
-				return;
-			}
-#endif
-		}
-	Entity o(source.owner->pos, quaternion::ID);
-	Camera cam;
-	cam.min_depth = source.min_depth;
-	cam.owner = &o;
-	cam.fov = pi/2;
-	for (int i=0; i<6; i++) {
-		if (i == 0)
-			o.ang = quaternion::rotation(vec3(0,pi/2,0));
-		if (i == 1)
-			o.ang = quaternion::rotation(vec3(0,-pi/2,0));
-		if (i == 2)
-			o.ang = quaternion::rotation(vec3(-pi/2,pi,pi));
-		if (i == 3)
-			o.ang = quaternion::rotation(vec3(pi/2,pi,pi));
-		if (i == 4)
-			o.ang = quaternion::rotation(vec3(0,0,0));
-		if (i == 5)
-			o.ang = quaternion::rotation(vec3(0,pi,0));
-		//prepare_lights(&cam);
-		render_into_texture(source.frame_buffer[i].get(), &cam, source.rvd[i]);
-	}
-	cam.owner = nullptr;
+	cube_map_renderer->set_source(&source);
+	//cube_map_renderer->render(RenderParams::WHATEVER);
 }
 
 
@@ -241,7 +206,9 @@ void RenderPath::render_cubemaps(const RenderParams &params) {
 			continue;
 		source->counter ++;
 		if (source->counter >= source->update_rate) {
-			render_into_cubemap(*source);
+			//render_into_cubemap(*source);
+			cube_map_renderer->set_source(source);
+			cube_map_renderer->render(params);
 			source->counter = 0;
 		}
 	}
@@ -266,6 +233,9 @@ void RenderPath::prepare(const RenderParams& params) {
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
 	world_renderer->prepare(params);
+
+	if (cube_map_source)
+		scene_view.cube_map = cube_map_source->cube_map;
 
 	if (shadow_renderer)
 		shadow_renderer->render(params);

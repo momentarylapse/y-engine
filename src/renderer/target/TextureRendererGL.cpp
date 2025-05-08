@@ -22,6 +22,15 @@ void TextureRenderer::set_area(const rect& _area) {
 	override_area = true;
 }
 
+void TextureRenderer::set_layer(int layer) {
+	try {
+		frame_buffer->update_x({source->cube_map.get(), source->depth_buffer.get()}, i);
+	} catch(Exception &e) {
+		msg_error(e.message());
+		return;
+	}
+}
+
 void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);

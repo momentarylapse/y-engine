@@ -9,6 +9,7 @@
 #include <renderer/Renderer.h>
 #include "../scene/SceneView.h"
 
+class CubeMapRenderer;
 class SceneRenderer;
 class Camera;
 class HDRResolver;
@@ -55,6 +56,7 @@ public:
 
 
 	void create_shadow_renderer();
+	void create_cube_renderer();
 	void create_post_processing(Renderer* source);
 
 	void prepare(const RenderParams& params) override;
@@ -68,6 +70,7 @@ public:
 	void prepare_instanced_matrices();
 
 	CubeMapSource* cube_map_source = nullptr;
+	owned<CubeMapRenderer> cube_map_renderer;
 	void suggest_cube_map_pos();
 };
 

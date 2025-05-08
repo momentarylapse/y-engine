@@ -1,3 +1,5 @@
+#include <lib/os/msg.h>
+
 #include "TextureRenderer.h"
 
 #ifdef USING_VULKAN
@@ -17,6 +19,15 @@ void TextureRenderer::set_area(const rect& _area) {
 	user_area = _area;
 	override_area = true;
 }
+
+void TextureRenderer::set_layer(int layer) {
+	try {
+		frame_buffer->update_x(render_pass.get(), {frame_buffer->attachments[0].get(), frame_buffer->attachments[1].get()}, layer);
+	} catch(Exception &e) {
+		msg_error(e.message());
+	}
+}
+
 
 void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
