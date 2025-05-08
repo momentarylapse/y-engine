@@ -61,6 +61,7 @@ struct RenderData {
 #else
 	void set_material_x(const SceneView& scene_view, const Material& m, Shader* s, int pass_no);
 #endif
+	void set_texture(int binding, Texture* tex);
 	void set_textures(const SceneView& scene_view, const Array<Texture*>& tex);
 	void draw_triangles(const RenderParams& params, VertexBuffer* vb);
 	void draw_instanced(const RenderParams& params, VertexBuffer* vb, int count);
@@ -88,7 +89,7 @@ struct RenderViewData {
 	RenderData rd;
 #endif
 
-	void set_view(const vec3& pos, const quaternion& ang, const mat4& projection);
+	void set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& projection);
 	void set_view(const RenderParams& params, Camera* cam);
 	void set_z(bool write, bool test);
 	void set_wire(bool enabled);

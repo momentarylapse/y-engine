@@ -25,26 +25,27 @@ void TextureRenderer::set_area(const rect& _area) {
 void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
-	nix::bind_frame_buffer(frame_buffer.get());
 
 	auto area = frame_buffer->area();
 	if (override_area)
 		area = user_area;
+	auto p = RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio).with_area(area);
 
+	nix::bind_frame_buffer(frame_buffer.get());
 	nix::set_viewport(area);
 	if (clear_z)
 		nix::clear_z();
 	for (int i=0; i<clear_colors.num; i++)
 		frame_buffer->clear_color(i, clear_colors[i]);
-	draw(RenderParams::into_texture(frame_buffer.get(), params.desired_aspect_ratio).with_area(area));
+
+	prepare_children(p);
+
+	for (auto c: children)
+		c->draw(p);
+
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
 }
-
-void TextureRenderer::prepare(const RenderParams& params) {
-	Renderer::prepare(params);
-}
-
 
 
 #endif

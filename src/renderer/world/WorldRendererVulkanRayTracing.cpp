@@ -90,6 +90,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	gpu_timestamp_begin(params, ch_prepare);
 
+	rvd.set_view(params, scene_view.cam);
 	rvd.update_light_ubo();
 
 	int w = width * engine.resolution_scale_x;

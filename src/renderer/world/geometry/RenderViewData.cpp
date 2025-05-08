@@ -22,22 +22,30 @@ RenderViewData::RenderViewData() {
 	type = RenderPathType::Forward;
 	ubo_light = new UniformBuffer(sizeof(LightMetaData) + MAX_LIGHTS * sizeof(UBOLight));
 	light_meta_data = {};
-	set_view(vec3::ZERO, quaternion::ID, mat4::ID);
+	set_view(RenderParams::WHATEVER, vec3::ZERO, quaternion::ID, mat4::ID);
 }
 
 void RenderViewData::set_scene_view(SceneView* _scene_view) {
 	scene_view = _scene_view;
 }
 
-void RenderViewData::set_view(const vec3& pos, const quaternion& ang, const mat4& projection) {
+void RenderViewData::set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& projection) {
+	bool flip_y = params.target_is_window;
+
+#ifdef USING_OPENGL
+	auto m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
+#else
+	auto m = mat4::ID;
+#endif
+
 	view_pos = pos;
 	view_ang = ang;
 	ubo.v = mat4::rotation(ang.bar()) * mat4::translation(-pos);
-	ubo.p = projection;
+	ubo.p = projection * m;
 }
 
 void RenderViewData::set_view(const RenderParams& params, Camera* cam) {
-	set_view(cam->owner->pos, cam->owner->ang, cam->projection_matrix(params.desired_aspect_ratio));
+	set_view(params, cam->owner->pos, cam->owner->ang, cam->projection_matrix(params.desired_aspect_ratio));
 }
 
 
@@ -92,6 +100,10 @@ void RenderData::set_material_x(const SceneView& scene_view, const Material& mat
 	shader->set_float_l(shader->location[Shader::LOCATION_MATERIAL_ROUGHNESS], material.roughness);
 	shader->set_float_l(shader->location[Shader::LOCATION_MATERIAL_METAL], material.metal);
 	shader->set_color_l(shader->location[Shader::LOCATION_MATERIAL_EMISSION], material.emission);
+}
+
+void RenderData::set_texture(int binding, Texture *tex) {
+	nix::bind_texture(binding, tex);
 }
 
 void RenderData::draw_triangles(const RenderParams&, VertexBuffer* vb) {
@@ -210,6 +222,10 @@ void RenderData::set_textures(const SceneView& scene_view, const Array<Texture*>
 		dset->set_texture(BINDING_SHADOW1, scene_view.shadow_maps[1]);
 	if (scene_view.cube_map)
 		dset->set_texture(BINDING_CUBE, scene_view.cube_map.get());
+}
+
+void RenderData::set_texture(int binding, Texture *tex) {
+	dset->set_texture(binding, tex);
 }
 
 void RenderData::draw_triangles(const RenderParams& params, VertexBuffer* vb) {

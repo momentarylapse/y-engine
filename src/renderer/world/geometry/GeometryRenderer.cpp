@@ -107,7 +107,7 @@ void GeometryRenderer::draw(const RenderParams& params) {
 
 	cur_rvd.begin_draw();
 	if (override_view_pos)
-		cur_rvd.set_view(*override_view_pos, *override_view_ang, *override_projection);
+		cur_rvd.set_view(params, *override_view_pos, *override_view_ang, *override_projection);
 	else
 		cur_rvd.set_view(params, scene_view.cam);
 
@@ -171,7 +171,7 @@ void GeometryRenderer::draw_skyboxes(const RenderParams& params, RenderViewData 
 	// overwrite rendering parameters
 	auto mv = rvd.ubo.v;
 	auto mp = rvd.ubo.p;
-	rvd.set_view({0,0,0}, cam->owner->ang, mat4::scale(1,1,0.1f) * pp); // :P
+	rvd.set_view(params, {0,0,0}, cam->owner->ang, mat4::scale(1,1,0.1f) * pp); // :P
 
 	// not working anymore... should have 2nd light data ubo
 	int nlights = rvd.light_meta_data.num_lights;

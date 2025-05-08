@@ -123,20 +123,21 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 
 	// transparency
 #ifdef USING_OPENGL
-	auto& rvd = geo_renderer_trans->cur_rvd;
+	msg_todo("deferred rendering in OpenGL is broken");
+	auto& rvd = scene_renderer_trans->rvd;
 
 	PerformanceMonitor::begin(ch_trans);
 	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
 	auto cam = scene_view.cam;
-	cam->update_matrices(params.desired_aspect_ratio);
-	nix::set_projection_matrix(m * cam->m_projection); // TODO
+	//cam->update_matrices(params.desired_aspect_ratio);
+	nix::set_projection_matrix(m * cam->projection_matrix(params.desired_aspect_ratio)); // TODO
 	nix::bind_uniform_buffer(BINDING_LIGHT, rvd.ubo_light.get());
 	nix::set_view_matrix(cam->view_matrix()); // TODO
 	nix::set_z(true, true);
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
-	geo_renderer_trans->draw(params);
+	scene_renderer_trans->draw(params);
 	nix::set_cull(nix::CullMode::BACK);
 	nix::set_front(nix::Orientation::CW);
 

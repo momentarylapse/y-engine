@@ -23,9 +23,9 @@ rect dynamicly_scaled_area(FrameBuffer *fb);
 rect dynamicly_scaled_source();
 
 struct RenderParams {
-	float desired_aspect_ratio;
-	bool target_is_window;
-	FrameBuffer *frame_buffer;
+	float desired_aspect_ratio = 1;
+	bool target_is_window = false;
+	FrameBuffer* frame_buffer = nullptr;
 	rect area;
 #ifdef USING_VULKAN
 	RenderPass *render_pass;

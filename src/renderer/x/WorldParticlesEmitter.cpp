@@ -104,7 +104,7 @@ void WorldParticlesEmitter::emit_transparent(const RenderParams& params, RenderV
 		auto vb = get_vb();
 		vb->update(v);
 
-		rd.dset->set_texture(BINDING_TEX0, texture);
+		rd.set_texture(BINDING_TEX0, texture);
 		rd.draw_triangles(params, vb);
 	}
 
@@ -127,7 +127,7 @@ void WorldParticlesEmitter::emit_transparent(const RenderParams& params, RenderV
 		auto vb = get_vb();
 		vb->update(v);
 
-		rd.dset->set_texture(BINDING_TEX0, g->texture);
+		rd.set_texture(BINDING_TEX0, g->texture);
 		rd.draw_triangles(params, vb);
 	}
 
@@ -165,9 +165,8 @@ void WorldParticlesEmitter::emit_transparent(const RenderParams& params, RenderV
 		}
 		auto vb = get_vb();
 		vb->update(v);
-		rd.dset->set_texture(BINDING_TEX0, g->texture);
-		auto cb = params.command_buffer;
-		cb->draw(vb);
+		rd.set_texture(BINDING_TEX0, g->texture);
+		rd.draw_triangles(params, vb);
 	}
 
 	gpu_timestamp_end(params, channel);

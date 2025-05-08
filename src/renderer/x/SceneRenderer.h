@@ -20,7 +20,7 @@ public:
 	shared_array<MeshEmitter> emitters;
 	void add_emitter(shared<MeshEmitter> emitter);
 
-	void set_view(const vec3& pos, const quaternion& ang, const mat4& proj);
+	void set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& proj);
 	void set_view_from_camera(const RenderParams& params, Camera* cam);
 
 	void prepare(const RenderParams& params) override;

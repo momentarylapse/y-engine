@@ -35,7 +35,7 @@ void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, b
 	// overwrite rendering parameters
 	auto mv = rvd.ubo.v;
 	auto mp = rvd.ubo.p;
-	rvd.set_view({0,0,0}, cam->owner->ang, mat4::scale(1,1,0.1f) * pp); // :P
+	rvd.set_view(params, {0,0,0}, cam->owner->ang, mat4::scale(1,1,0.1f) * pp); // :P
 
 	// not working anymore... should have 2nd light data ubo
 	int nlights = rvd.light_meta_data.num_lights;

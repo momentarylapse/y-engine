@@ -305,6 +305,7 @@ void RenderPath::draw(const RenderParams& params) {
 		world_renderer->draw(params);
 }
 
+#if 0
 class CubeEmitter : public MeshEmitter {
 public:
 	owned<VertexBuffer> vb;
@@ -348,6 +349,7 @@ public:
 		rd.draw_triangles(params, vb.get());
 	}
 };
+#endif
 
 RenderPath* create_render_path(Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");

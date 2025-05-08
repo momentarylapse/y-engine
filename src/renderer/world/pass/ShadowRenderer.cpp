@@ -55,12 +55,13 @@ void ShadowRenderer::set_projection(const mat4& proj) {
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
 
-#ifdef USING_OPENGL
+		// shader for vulkan is currently flipping y!
+/*#ifdef USING_OPENGL
 		auto m = mat4::scale(c.scale, c.scale, 1);
-#else
+#else*/
 		auto m = mat4::scale(c.scale, -c.scale, 1);
-#endif
-		c.scene_renderer->set_view(vec3::ZERO, quaternion::ID, m * proj);
+//#endif
+		c.scene_renderer->set_view(RenderParams::WHATEVER, vec3::ZERO, quaternion::ID, m * proj);
 	}
 }
 

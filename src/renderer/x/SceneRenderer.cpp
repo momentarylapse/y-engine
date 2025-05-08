@@ -23,8 +23,8 @@ void SceneRenderer::add_emitter(shared<MeshEmitter> emitter) {
 	emitters.add(emitter);
 }
 
-void SceneRenderer::set_view(const vec3& pos, const quaternion& ang, const mat4& proj) {
-	rvd.set_view(pos, ang, proj);
+void SceneRenderer::set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& proj) {
+	rvd.set_view(params, pos, ang, proj);
 }
 
 void SceneRenderer::set_view_from_camera(const RenderParams& params, Camera* cam) {
@@ -47,6 +47,12 @@ void SceneRenderer::draw(const RenderParams& params) {
 	if (background_color)
 		rvd.clear(params, {*background_color}, 1.0f);
 
+#ifdef USING_OPENGL
+	bool flip_y = params.target_is_window;
+	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
+	//cur_rvd.set_wire(wireframe);
+#endif
+
 	if (allow_opaque)
 		for (auto e: weak(emitters))
 			e->emit(params, rvd, is_shadow_pass);
@@ -54,6 +60,10 @@ void SceneRenderer::draw(const RenderParams& params) {
 	if (allow_transparent and !is_shadow_pass)
 		for (auto e: weak(emitters))
 			e->emit_transparent(params, rvd);
+
+#ifdef USING_OPENGL
+	nix::set_front(nix::Orientation::CW);
+#endif
 
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
