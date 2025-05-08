@@ -3,7 +3,7 @@
 //
 
 #include "WorldUserMeshesEmitter.h"
-#include <renderer/world/geometry/RenderViewData.h>
+#include "../../scene/RenderViewData.h"
 #include <helper/PerformanceMonitor.h>
 #include <renderer/base.h>
 #include <world/components/UserMesh.h>

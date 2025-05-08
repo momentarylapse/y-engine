@@ -6,17 +6,17 @@
  */
 
 #include "WorldRendererForward.h"
-#include "pass/ShadowRenderer.h"
+#include "../scene/pass/ShadowRenderer.h"
 #include "../base.h"
 #include "../helper/CubeMapSource.h"
 #include "../path/RenderPath.h"
 #include <lib/image/image.h>
-#include <renderer/x/WorldInstancedEmitter.h>
-#include <renderer/x/WorldModelsEmitter.h>
-#include <renderer/x/WorldParticlesEmitter.h>
-#include <renderer/x/WorldSkyboxEmitter.h>
-#include <renderer/x/WorldTerrainsEmitter.h>
-#include <renderer/x/WorldUserMeshesEmitter.h>
+#include <renderer/world/emitter/WorldInstancedEmitter.h>
+#include <renderer/world/emitter/WorldModelsEmitter.h>
+#include <renderer/world/emitter/WorldParticlesEmitter.h>
+#include <renderer/world/emitter/WorldSkyboxEmitter.h>
+#include <renderer/world/emitter/WorldTerrainsEmitter.h>
+#include <renderer/world/emitter/WorldUserMeshesEmitter.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
 #include "../../world/Camera.h"

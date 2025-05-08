@@ -3,9 +3,9 @@
 //
 
 #include "WorldSkyboxEmitter.h"
-#include "../world/geometry/RenderViewData.h"
-#include "../world/geometry/SceneView.h"
-#include "../base.h"
+#include "../../scene/RenderViewData.h"
+#include "../../scene/SceneView.h"
+#include "../../base.h"
 #include <helper/PerformanceMonitor.h>
 #include <world/World.h>
 #include <world/Model.h>

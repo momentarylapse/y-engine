@@ -3,10 +3,9 @@
 //
 
 #include "WorldParticlesEmitter.h"
-#include "../world/geometry/RenderViewData.h"
-#include "../world/geometry/SceneView.h"
-#include "../world/geometry/GeometryRenderer.h"
-#include "../base.h"
+#include "../../scene/RenderViewData.h"
+#include "../../scene/SceneView.h"
+#include "../../base.h"
 #include <fx/Particle.h>
 #include <fx/Beam.h>
 #include <fx/ParticleEmitter.h>
@@ -17,8 +16,10 @@
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
 
+#include "renderer/world/geometry/GeometryRenderer.h"
+
 WorldParticlesEmitter::WorldParticlesEmitter() : MeshEmitter("fx"),
-	fx_material(engine.resource_manager)
+                                                 fx_material(engine.resource_manager)
 {
 	fx_material.pass0.cull_mode = CullMode::NONE;
 	fx_material.pass0.mode = TransparencyMode::FUNCTIONS;

@@ -7,7 +7,7 @@
 
 
 #include <renderer/Renderer.h>
-#include "../world/geometry/SceneView.h"
+#include "../scene/SceneView.h"
 
 class SceneRenderer;
 class Camera;

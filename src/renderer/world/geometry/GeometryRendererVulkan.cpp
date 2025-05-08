@@ -8,8 +8,8 @@
 #include "GeometryRenderer.h"
 
 #ifdef USING_VULKAN
-#include "RenderViewData.h"
-#include "SceneView.h"
+#include "../../scene/RenderViewData.h"
+#include "../../scene/SceneView.h"
 #include "../../helper/PipelineManager.h"
 #include "../../base.h"
 #include "../../../helper/PerformanceMonitor.h"
@@ -35,15 +35,6 @@
 #include <lib/math/vec3.h>
 
 
-
-
-GraphicsPipeline* GeometryEmitter::get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
-	if (pass.mode == TransparencyMode::FUNCTIONS)
-		return PipelineManager::get_alpha(s, rp, top, vb, pass.source, pass.destination, pass.cull_mode, pass.z_test, pass.z_buffer);
-	if (pass.mode == TransparencyMode::COLOR_KEY_HARD)
-		return PipelineManager::get_alpha(s, rp, top, vb, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, pass.cull_mode, pass.z_test, pass.z_buffer);
-	return PipelineManager::get(s, rp, top, vb, pass.cull_mode, pass.z_test, pass.z_buffer);
-}
 
 
 

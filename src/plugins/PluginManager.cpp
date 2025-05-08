@@ -52,10 +52,9 @@
 #include "../renderer/target/WindowRendererVulkan.h"
 #endif
 #include <renderer/helper/Raytracing.h>
-#include <renderer/world/pass/ShadowRenderer.h>
-
+#include <renderer/scene/pass/ShadowRenderer.h>
 #include "../renderer/regions/RegionRenderer.h"
-#include "../renderer/world/geometry/SceneView.h"
+#include "../renderer/scene/SceneView.h"
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"

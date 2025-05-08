@@ -3,8 +3,8 @@
 //
 
 #include "WorldInstancedEmitter.h"
-#include <renderer/world/geometry/RenderViewData.h>
-#include <renderer/world/geometry/SceneView.h>
+#include "../../scene/RenderViewData.h"
+#include "../../scene/SceneView.h"
 #include <world/components/MultiInstance.h>
 #include <world/Model.h>
 #include <helper/PerformanceMonitor.h>

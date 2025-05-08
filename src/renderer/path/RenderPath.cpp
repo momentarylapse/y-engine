@@ -5,7 +5,7 @@
 #include "RenderPath.h"
 #include "../base.h"
 #include "../world/WorldRenderer.h"
-#include "../world/pass/ShadowRenderer.h"
+#include "../scene/pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../post/MultisampleResolver.h"
 #include "../post/HDRResolver.h"
@@ -29,13 +29,12 @@
 #include <helper/PerformanceMonitor.h>
 #include <lib/math/Box.h>
 #include <lib/os/msg.h>
-#include <renderer/x/WorldModelsEmitter.h>
-#include <renderer/x/WorldTerrainsEmitter.h>
-#include <renderer/x/WorldUserMeshesEmitter.h>
-#include <renderer/x/WorldInstancedEmitter.h>
+#include <renderer/world/emitter/WorldModelsEmitter.h>
+#include <renderer/world/emitter/WorldTerrainsEmitter.h>
+#include <renderer/world/emitter/WorldUserMeshesEmitter.h>
+#include <renderer/world/emitter/WorldInstancedEmitter.h>
 #include <world/components/MultiInstance.h>
-
-#include "../x/MeshEmitter.h"
+#include "../scene/MeshEmitter.h"
 
 
 HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {

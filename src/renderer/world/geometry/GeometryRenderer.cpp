@@ -6,7 +6,7 @@
  */
 
 #include "GeometryRenderer.h"
-#include "SceneView.h"
+#include "../../scene/SceneView.h"
 #include "../../base.h"
 #include "../../../graphics-impl.h"
 #include "../../../helper/PerformanceMonitor.h"

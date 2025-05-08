@@ -7,7 +7,7 @@
 
 #include "WorldRendererDeferred.h"
 #include "../target/TextureRenderer.h"
-#include "pass/ShadowRenderer.h"
+#include "../scene/pass/ShadowRenderer.h"
 #include "../post/ThroughShaderRenderer.h"
 #include "../base.h"
 #include "../path/RenderPath.h"
@@ -15,12 +15,12 @@
 #include <lib/math/random.h>
 #include <lib/math/vec4.h>
 #include <lib/math/vec2.h>
-#include <renderer/x/WorldInstancedEmitter.h>
-#include <renderer/x/WorldModelsEmitter.h>
-#include <renderer/x/WorldSkyboxEmitter.h>
-#include <renderer/x/WorldTerrainsEmitter.h>
-#include <renderer/x/WorldUserMeshesEmitter.h>
-#include <renderer/x/WorldParticlesEmitter.h>
+#include <renderer/world/emitter/WorldInstancedEmitter.h>
+#include <renderer/world/emitter/WorldModelsEmitter.h>
+#include <renderer/world/emitter/WorldSkyboxEmitter.h>
+#include <renderer/world/emitter/WorldTerrainsEmitter.h>
+#include <renderer/world/emitter/WorldUserMeshesEmitter.h>
+#include <renderer/world/emitter/WorldParticlesEmitter.h>
 #include <world/World.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"
@@ -157,7 +157,7 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 	auto& data = out_renderer->bindings.shader_data;
 
 #ifdef USING_OPENGL
-	if constexpr (GeometryRenderer::using_view_space)
+	if constexpr (SceneRenderer::using_view_space)
 		data.dict_set("eye_pos", vec3_to_any(vec3::ZERO));
 	else
 		data.dict_set("eye_pos", vec3_to_any(scene_view.cam->owner->pos)); // NAH

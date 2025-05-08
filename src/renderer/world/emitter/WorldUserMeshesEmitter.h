@@ -1,15 +1,15 @@
 //
-// Created by Michael Ankele on 2025-05-06.
+// Created by Michael Ankele on 2025-05-08.
 //
 
 #pragma once
 
-#include "MeshEmitter.h"
+#include "../../scene/MeshEmitter.h"
 
 
-class WorldModelsEmitter : public MeshEmitter {
+class WorldUserMeshesEmitter : public MeshEmitter {
 public:
-	WorldModelsEmitter();
+	WorldUserMeshesEmitter();
 	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override;
 	void emit_transparent(const RenderParams& params, RenderViewData& rvd) override;
 };

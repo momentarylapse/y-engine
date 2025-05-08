@@ -6,16 +6,15 @@
  */
 
 #include "ShadowRenderer.h"
-#include "../geometry/GeometryRenderer.h"
 #include "../../target/TextureRenderer.h"
 #include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
-#include "../WorldRenderer.h"
 #include "../../base.h"
-#include "../../../graphics-impl.h"
+#include <graphics-impl.h>
 #include "../../../helper/PerformanceMonitor.h"
 #include <world/Material.h>
 #include <world/Camera.h>
+#include <world/Light.h>
 #include "../../../Config.h"
 
 

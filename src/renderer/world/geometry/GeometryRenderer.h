@@ -8,7 +8,7 @@
 #pragma once
 
 #include "../../Renderer.h"
-#include "RenderViewData.h"
+#include "../../scene/RenderViewData.h"
 #include "../../../graphics-fwd.h"
 #include <lib/math/vec3.h>
 #include <lib/image/color.h>
@@ -25,8 +25,6 @@ class RenderViewData;
 enum class RenderPathType;
 
 mat4 mtr(const vec3 &t, const quaternion &a);
-
-static constexpr int MAX_LIGHTS = 1024;
 
 
 struct UBOMatrices {
@@ -75,10 +73,6 @@ public:
 	base::optional<vec3> override_view_pos;
 	base::optional<quaternion> override_view_ang;
 	base::optional<mat4> override_projection;
-
-#ifdef USING_VULKAN
-	static GraphicsPipeline* get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
-#endif
 };
 
 // draw y game scene
@@ -88,8 +82,6 @@ public:
 	GeometryRenderer(RenderPathType type, SceneView &scene_view);
 
 	int ch_pre, ch_bg, ch_fx, ch_terrains, ch_models, ch_user, ch_prepare_lights;
-
-	static constexpr bool using_view_space = true;
 
 	shared<Shader> shader_fx;
 	shared<Shader> shader_fx_points;

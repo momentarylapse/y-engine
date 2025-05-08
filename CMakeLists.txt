@@ -472,6 +472,11 @@ add_executable(y
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
+	src/renderer/scene/pass/ShadowRenderer.cpp
+	src/renderer/scene/MeshEmitter.cpp
+	src/renderer/scene/RenderViewData.cpp
+	src/renderer/scene/SceneRenderer.cpp
+	src/renderer/scene/SceneView.cpp
 	src/renderer/target/HeadlessRendererVulkan.cpp
 	src/renderer/target/HuiWindowRendererGL.cpp
 	src/renderer/target/HuiWindowRendererVulkan.cpp
@@ -481,24 +486,19 @@ add_executable(y
 	src/renderer/target/WindowRendererGL.cpp
 	src/renderer/target/WindowRendererVulkan.cpp
 	src/renderer/target/XhuiRenderer.cpp
+	src/renderer/world/emitter/WorldInstancedEmitter.cpp
+	src/renderer/world/emitter/WorldModelsEmitter.cpp
+	src/renderer/world/emitter/WorldParticlesEmitter.cpp
+	src/renderer/world/emitter/WorldSkyboxEmitter.cpp
+	src/renderer/world/emitter/WorldTerrainsEmitter.cpp
+	src/renderer/world/emitter/WorldUserMeshesEmitter.cpp
 	src/renderer/world/geometry/GeometryRenderer.cpp
 	src/renderer/world/geometry/GeometryRendererGL.cpp
 	src/renderer/world/geometry/GeometryRendererVulkan.cpp
-	src/renderer/world/geometry/RenderViewData.cpp
-	src/renderer/world/geometry/SceneView.cpp
-	src/renderer/world/pass/ShadowRenderer.cpp
 	src/renderer/world/WorldRenderer.cpp
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
-	src/renderer/x/MeshEmitter.cpp
-	src/renderer/x/SceneRenderer.cpp
-	src/renderer/x/WorldInstancedEmitter.cpp
-	src/renderer/x/WorldModelsEmitter.cpp
-	src/renderer/x/WorldParticlesEmitter.cpp
-	src/renderer/x/WorldSkyboxEmitter.cpp
-	src/renderer/x/WorldTerrainsEmitter.cpp
-	src/renderer/x/WorldUserMeshesEmitter.cpp
 	src/renderer/base-gl.cpp
 	src/renderer/base-vulkan.cpp
 	src/renderer/base.cpp

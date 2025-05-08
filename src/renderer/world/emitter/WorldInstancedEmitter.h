@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "MeshEmitter.h"
+#include "../../scene/MeshEmitter.h"
 
 
 class WorldInstancedEmitter : public MeshEmitter {

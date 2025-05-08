@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "MeshEmitter.h"
+#include "../../scene/MeshEmitter.h"
 #include <graphics-fwd.h>
 #include <world/Material.h>
 

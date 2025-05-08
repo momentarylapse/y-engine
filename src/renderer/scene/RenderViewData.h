@@ -12,8 +12,8 @@
 #include <lib/math/quaternion.h>
 #include <lib/math/vec3.h>
 #include <lib/image/color.h>
-#include "../../../graphics-fwd.h"
-#include "../../../world/Material.h"
+#include <graphics-fwd.h>
+#include <world/Material.h>
 
 class Camera;
 struct SceneView;

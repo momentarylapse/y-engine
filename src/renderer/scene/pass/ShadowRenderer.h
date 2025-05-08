@@ -12,8 +12,8 @@
 #include "../../Renderer.h"
 #include "../../../graphics-fwd.h"
 #include <lib/math/mat4.h>
-#include <renderer/x/SceneRenderer.h>
-#include "../geometry/SceneView.h"
+#include <renderer/scene/SceneRenderer.h>
+#include "../../scene/SceneView.h"
 
 class MeshEmitter;
 class Camera;

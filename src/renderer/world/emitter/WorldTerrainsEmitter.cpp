@@ -5,7 +5,7 @@
 #include "WorldTerrainsEmitter.h"
 #include <helper/PerformanceMonitor.h>
 #include <renderer/base.h>
-#include <renderer/world/geometry/RenderViewData.h>
+#include <renderer/scene/RenderViewData.h>
 #include <world/Terrain.h>
 #include <y/ComponentManager.h>
 #include <y/Entity.h>

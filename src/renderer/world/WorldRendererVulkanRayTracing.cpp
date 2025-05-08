@@ -8,10 +8,10 @@
 #include "WorldRendererVulkanRayTracing.h"
 #ifdef USING_VULKAN
 #include "../helper/Raytracing.h"
-#include "../world/geometry/SceneView.h"
+#include "../scene/SceneView.h"
 #include "../path/RenderPath.h"
-#include "../../graphics-impl.h"
 #include "../base.h"
+#include <graphics-impl.h>
 #include <lib/os/msg.h>
 #include "../../helper/PerformanceMonitor.h"
 #include "../../helper/ResourceManager.h"

@@ -1,15 +1,16 @@
 #include "RenderViewData.h"
+#include "SceneRenderer.h"
 
 #include <algorithm>
 #include <lib/base/iter.h>
 #include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
 
-#include "../../../graphics-impl.h"
-#include "GeometryRenderer.h"
+#include <graphics-impl.h>
 #include "SceneView.h"
-#include "../../base.h"
+#include "../base.h"
 #include <world/Camera.h>
+#include <world/Light.h>
 #include <y/Entity.h>
 #ifdef USING_OPENGL
 #include <y/Entity.h>
@@ -75,7 +76,7 @@ void RenderViewData::update_light_ubo() {
 
 void RenderData::set_material_x(const SceneView& scene_view, const Material& material, Shader* shader, int pass_no) {
 	nix::set_shader(shader);
-	if constexpr (GeometryRenderer::using_view_space)
+	if constexpr (SceneRenderer::using_view_space)
 		shader->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH....
 	else
 		shader->set_floats("eye_pos", &vec3::ZERO.x, 3);
@@ -199,7 +200,7 @@ RenderData& RenderViewData::start(
 	ubo.roughness = material.roughness;
 	rda[index].ubo->update_part(&ubo, 0, sizeof(UBO));
 
-	auto p = GeometryRenderer::get_pipeline(shader, params.render_pass, material.pass(pass_no), top, vb);
+	auto p = SceneRenderer::get_pipeline(shader, params.render_pass, material.pass(pass_no), top, vb);
 
 	params.command_buffer->bind_pipeline(p);
 

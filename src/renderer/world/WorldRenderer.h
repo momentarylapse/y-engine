@@ -16,7 +16,7 @@
 #include <lib/base/pointer.h>
 
 #include "geometry/GeometryRenderer.h"
-#include "geometry/SceneView.h"
+#include "../scene/SceneView.h"
 
 class GeometryRenderer;
 class ShadowMapRenderer;

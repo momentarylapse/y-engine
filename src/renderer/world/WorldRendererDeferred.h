@@ -8,7 +8,7 @@
 #pragma once
 
 #include "WorldRenderer.h"
-#include "geometry/RenderViewData.h"
+#include "../scene/RenderViewData.h"
 
 class SceneRenderer;
 class ThroughShaderRenderer;

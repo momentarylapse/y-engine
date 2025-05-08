@@ -3,14 +3,25 @@
 //
 
 #include "SceneRenderer.h"
-
-#include <helper/PerformanceMonitor.h>
+#include "RenderViewData.h"
+#include "SceneView.h"
 #include <renderer/base.h>
+#include <helper/PerformanceMonitor.h>
 #include <world/Light.h>
+#include <graphics-impl.h>
+#include "renderer/helper/PipelineManager.h"
 
-#include "../world/geometry/RenderViewData.h"
-#include "../world/geometry/SceneView.h"
-#include "../../graphics-impl.h"
+
+#ifdef USING_VULKAN
+GraphicsPipeline* SceneRenderer::get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
+	if (pass.mode == TransparencyMode::FUNCTIONS)
+		return PipelineManager::get_alpha(s, rp, top, vb, pass.source, pass.destination, pass.cull_mode, pass.z_test, pass.z_buffer);
+	if (pass.mode == TransparencyMode::COLOR_KEY_HARD)
+		return PipelineManager::get_alpha(s, rp, top, vb, Alpha::SOURCE_ALPHA, Alpha::SOURCE_INV_ALPHA, pass.cull_mode, pass.z_test, pass.z_buffer);
+	return PipelineManager::get(s, rp, top, vb, pass.cull_mode, pass.z_test, pass.z_buffer);
+}
+#endif
+
 
 SceneRenderer::SceneRenderer(RenderPathType type, SceneView& _scene_view) : Renderer("scene"), scene_view(_scene_view) {
 	rvd.set_scene_view(&scene_view);

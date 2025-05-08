@@ -6,7 +6,7 @@
 
 #include "../Renderer.h"
 #include "MeshEmitter.h"
-#include "../world/geometry/RenderViewData.h"
+#include "RenderViewData.h"
 
 class Camera;
 class MeshEmitter;
@@ -33,6 +33,12 @@ public:
 	bool is_shadow_pass = false;
 	bool allow_opaque = true;
 	bool allow_transparent = true;
+
+	static constexpr bool using_view_space = true;
+
+#ifdef USING_VULKAN
+	static GraphicsPipeline* get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
+#endif
 };
 
 

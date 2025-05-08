@@ -4,7 +4,7 @@
 #include <y/Component.h>
 #include <graphics-fwd.h>
 #include <lib/base/pointer.h>
-#include "../world/geometry/RenderViewData.h"
+#include "../scene/RenderViewData.h"
 
 class CubeMapSource : public Component {
 public:

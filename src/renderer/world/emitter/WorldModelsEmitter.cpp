@@ -5,8 +5,8 @@
 #include "WorldModelsEmitter.h"
 #include <helper/PerformanceMonitor.h>
 #include <renderer/base.h>
-#include <renderer/world/geometry/RenderViewData.h>
-#include <renderer/world/geometry/SceneView.h>
+#include <renderer/scene/RenderViewData.h>
+#include <renderer/scene/SceneView.h>
 #include <world/Model.h>
 #include <world/ModelManager.h>
 #include <world/components/Animator.h>
