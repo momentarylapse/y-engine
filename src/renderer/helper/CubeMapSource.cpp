@@ -9,12 +9,15 @@
 #include <renderer/target/TextureRenderer.h>
 #include <y/Entity.h>
 
+#include "world/Camera.h"
+#include "world/World.h"
+
 const kaba::Class* CubeMapSource::_class = nullptr;;
 
 CubeMapSource::CubeMapSource() {
 	min_depth = 1.0f;
 	max_depth = 100000.0f;
-	resolution = config.get_int("cubemap.resolution", 128);
+	resolution = config.get_int("cubemap.resolution", 256);
 	update_rate = config.get_int("cubemap.update_rate", 9);
 	counter = 0;
 }
@@ -48,7 +51,8 @@ void CubeMapRenderer::render(const RenderParams& params) {
 			texture_renderers[i]->add_child(scene_renderers[i].get());
 		}
 
-	mat4 proj = mat4::perspective(pi/2, 1, source->min_depth, source->max_depth, false);
+	//mat4 proj = mat4::perspective(pi/2, 1, source->min_depth, source->max_depth, false) * mat4::scale(1,-1,1);
+	mat4 proj = mat4::perspective(pi/2, 1, cam_main->min_depth, cam_main->max_depth, false) * mat4::scale(1,-1,1);
 
 	for (int i=0; i<6; i++) {
 		quaternion ang;
@@ -64,7 +68,8 @@ void CubeMapRenderer::render(const RenderParams& params) {
 			ang = quaternion::rotation(vec3(0,0,0));
 		if (i == 5)
 			ang = quaternion::rotation(vec3(0,pi,0));
-		scene_renderers[i]->set_view(params, source->owner->pos, ang, proj);
+
+		scene_renderers[i]->set_view(texture_renderers[i]->make_params(params), source->owner->pos, ang, proj);
 		//prepare_lights(&cam);
 		//render_into_texture(source->frame_buffer[i].get(), &cam, rvd[i]);
 

@@ -11,6 +11,8 @@
 #include <renderer/base.h>
 #include <graphics-impl.h>
 
+#include "lib/os/msg.h"
+
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
 	frame_buffer = new FrameBuffer(textures);
 }
@@ -24,10 +26,9 @@ void TextureRenderer::set_area(const rect& _area) {
 
 void TextureRenderer::set_layer(int layer) {
 	try {
-		frame_buffer->update_x({source->cube_map.get(), source->depth_buffer.get()}, i);
+		frame_buffer->update_x(textures, layer);
 	} catch(Exception &e) {
 		msg_error(e.message());
-		return;
 	}
 }
 

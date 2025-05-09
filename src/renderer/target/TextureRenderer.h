@@ -17,6 +17,8 @@ public:
 	explicit TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options = {});
 	~TextureRenderer() override;
 
+	RenderParams make_params(const RenderParams& params) const;
+
 	void render(const RenderParams& params) override;
 
 	void set_area(const rect& area);

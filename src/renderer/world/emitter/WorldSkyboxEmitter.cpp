@@ -21,21 +21,26 @@ void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, b
 
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
+
+	rvd.clear(params, {world.background}, 1.0f);
+
 	auto cam = rvd.scene_view->cam;
 #ifdef USING_OPENGL
 	nix::set_cull(nix::CullMode::NONE);
 #endif
 
-	float max_depth = cam->max_depth;
+	/*float max_depth = cam->max_depth;
 	float min_depth = cam->min_depth;
 	cam->min_depth = 0.1f;
 	cam->max_depth = 2000000;
-	auto pp = cam->projection_matrix(params.desired_aspect_ratio);
+	auto pp = cam->projection_matrix(params.desired_aspect_ratio);*/
 
 	// overwrite rendering parameters
 	auto mv = rvd.ubo.v;
 	auto mp = rvd.ubo.p;
-	rvd.set_view(params, {0,0,0}, cam->owner->ang, mat4::scale(1,1,0.1f) * pp); // :P
+	//rvd.set_view(params, {0,0,0}, rvd.view_ang, mat4::scale(1,1,0.1f) * pp); // :P
+	rvd.ubo.v = mat4::rotation(rvd.view_ang.bar());
+	rvd.ubo.p = mp * mat4::scale(0.01f, 0.01f, 0.01f);
 
 	// not working anymore... should have 2nd light data ubo
 	int nlights = rvd.light_meta_data.num_lights;
@@ -55,9 +60,9 @@ void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, b
 
 	rvd.ubo.v = mv;
 	rvd.ubo.p = mp;
-	rvd.light_meta_data.num_lights = nlights;
+	/*rvd.light_meta_data.num_lights = nlights;
 	cam->min_depth = min_depth;
-	cam->max_depth = max_depth;
+	cam->max_depth = max_depth;*/
 #ifdef USING_OPENGL
 	nix::set_cull(nix::CullMode::BACK);
 #endif

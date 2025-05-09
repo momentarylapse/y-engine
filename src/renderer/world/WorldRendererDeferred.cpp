@@ -96,8 +96,6 @@ void WorldRendererDeferred::prepare(const RenderParams& params) {
 
 	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
 
-
-	scene_renderer_background->background_color = world.background;
 	scene_renderer_background->set_view_from_camera(params, scene_view.cam);
 	scene_renderer_background->prepare(params); // keep drawing into direct target
 

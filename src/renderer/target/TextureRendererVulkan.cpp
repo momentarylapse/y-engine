@@ -15,6 +15,17 @@ TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>
 
 TextureRenderer::~TextureRenderer() = default;
 
+RenderParams TextureRenderer::make_params(const RenderParams &params) const {
+	auto area = frame_buffer->area();
+	if (override_area)
+		area = user_area;
+
+	auto p = params.with_target(frame_buffer.get()).with_area(area);
+	p.render_pass = render_pass.get();
+	return p;
+}
+
+
 void TextureRenderer::set_area(const rect& _area) {
 	user_area = _area;
 	override_area = true;
@@ -22,7 +33,7 @@ void TextureRenderer::set_area(const rect& _area) {
 
 void TextureRenderer::set_layer(int layer) {
 	try {
-		frame_buffer->update_x(render_pass.get(), {frame_buffer->attachments[0].get(), frame_buffer->attachments[1].get()}, layer);
+		frame_buffer->update_x(render_pass.get(), textures, layer);
 	} catch(Exception &e) {
 		msg_error(e.message());
 	}
@@ -32,23 +43,19 @@ void TextureRenderer::set_layer(int layer) {
 void TextureRenderer::render(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
-	auto area = frame_buffer->area();
-	if (override_area)
-		area = user_area;
 
-	auto p = params.with_target(frame_buffer.get()).with_area(area);
-	p.render_pass = render_pass.get();
+	auto p = make_params(params);
 
 	prepare_children(p);
 
 	auto cb = params.command_buffer;
 
 	cb->begin_render_pass(render_pass.get(), frame_buffer.get());
-	cb->set_viewport(area);
+	cb->set_viewport(p.area);
 	cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
 
 	if (clear_z)
-		cb->clear(area, clear_colors, clear_z);
+		cb->clear(p.area, clear_colors, clear_z);
 
 	for (auto c: children)
 		c->draw(p);

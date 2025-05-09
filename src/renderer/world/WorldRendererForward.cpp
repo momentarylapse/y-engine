@@ -39,9 +39,7 @@ WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRendere
 void WorldRendererForward::prepare(const RenderParams& params) {
 	PerformanceMonitor::begin(ch_prepare);
 	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
-
-
-	scene_renderer->background_color = world.background;
+	
 	scene_renderer->set_view_from_camera(params, scene_view.cam);
 	scene_renderer->prepare(params);
 
