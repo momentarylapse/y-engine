@@ -493,9 +493,6 @@ add_executable(y
 	src/renderer/world/emitter/WorldSkyboxEmitter.cpp
 	src/renderer/world/emitter/WorldTerrainsEmitter.cpp
 	src/renderer/world/emitter/WorldUserMeshesEmitter.cpp
-	src/renderer/world/geometry/GeometryRenderer.cpp
-	src/renderer/world/geometry/GeometryRendererGL.cpp
-	src/renderer/world/geometry/GeometryRendererVulkan.cpp
 	src/renderer/world/WorldRenderer.cpp
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp

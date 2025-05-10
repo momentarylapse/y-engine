@@ -7,6 +7,20 @@
 #include "../../scene/MeshEmitter.h"
 #include <graphics-fwd.h>
 #include <world/Material.h>
+#include "lib/math/vec3.h"
+
+
+struct VertexFx {
+	vec3 pos;
+	color col;
+	float u, v;
+};
+
+struct VertexPoint {
+	vec3 pos;
+	float radius;
+	color col;
+};
 
 
 class WorldParticlesEmitter : public MeshEmitter {

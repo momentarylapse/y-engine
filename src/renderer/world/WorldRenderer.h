@@ -15,7 +15,6 @@
 #include <lib/base/callable.h>
 #include <lib/base/pointer.h>
 
-#include "geometry/GeometryRenderer.h"
 #include "../scene/SceneView.h"
 
 class GeometryRenderer;
@@ -39,7 +38,6 @@ public:
 
 	SceneView& scene_view;
 
-	owned<GeometryRenderer> _geo_renderer;
 //	virtual void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) = 0;
 
 	void reset();
