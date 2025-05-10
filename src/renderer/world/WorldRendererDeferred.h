@@ -32,12 +32,6 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
-
 
 	void render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params);
-
-#ifdef USING_VULKAN
-	owned<RenderPass> render_pass;
-#endif
 };

@@ -21,8 +21,5 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	void draw_with(const RenderParams& params);
-	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
-
 	SceneRenderer* scene_renderer;
 };

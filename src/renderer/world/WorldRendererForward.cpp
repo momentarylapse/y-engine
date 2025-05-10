@@ -47,9 +47,6 @@ void WorldRendererForward::prepare(const RenderParams& params) {
 }
 
 void WorldRendererForward::draw(const RenderParams& params) {
-	draw_with(params);
-}
-void WorldRendererForward::draw_with(const RenderParams& params) {
 	PerformanceMonitor::begin(channel);
 	gpu_timestamp_begin(params, channel);
 
@@ -58,16 +55,4 @@ void WorldRendererForward::draw_with(const RenderParams& params) {
 	gpu_timestamp_end(params, channel);
 	PerformanceMonitor::end(channel);
 }
-
-#warning "TODO"
-#if 0
-void WorldRendererGLForward::render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {
-	nix::bind_frame_buffer(fb);
-
-	std::swap(scene_view.cam, cam);
-	prepare_lights(cam, rvd);
-	draw(RenderParams::into_texture(fb, 1.0f));
-	std::swap(scene_view.cam, cam);
-}
-#endif
 

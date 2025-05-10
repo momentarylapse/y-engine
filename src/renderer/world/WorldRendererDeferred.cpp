@@ -182,5 +182,4 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 	PerformanceMonitor::end(ch_gbuf_out);
 }
 
-//void WorldRendererDeferred::render_into_texture(nix::FrameBuffer *fb, Camera *cam) {}
 

@@ -38,8 +38,6 @@ public:
 
 	SceneView& scene_view;
 
-//	virtual void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) = 0;
-
 	void reset();
 };
 

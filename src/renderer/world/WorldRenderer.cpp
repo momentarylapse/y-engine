@@ -42,10 +42,5 @@ WorldRenderer::WorldRenderer(const string &name, SceneView& _scene_view) :
 {
 }
 
-/*void WorldRenderer::update_cube_maps(const RenderParams& params) {
-	render_into_cubemap(depth_cube.get(), scene_view.cube_map.get(), suggest_cube_map_pos());
-}*/
-
-
 void WorldRenderer::reset() {
 }
