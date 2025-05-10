@@ -44,7 +44,8 @@ void CubeEmitter::set_cube(const Box& box) {
 		{{box.min.x, box.max.y, box.max.z}, {0,1,0}, 0, 0},
 	};
 	vb->update(vertices);
-	vb->update_index({0,2,1,1,2,3, 4,6,5,5,6,7, 8,10,9,9,10,11, 12,14,13,13,14,15, 16,18,17,17,18,19, 20,22,21,21,22,23});
+	Array<int> indices = {0,2,1,1,2,3, 4,6,5,5,6,7, 8,10,9,9,10,11, 12,14,13,13,14,15, 16,18,17,17,18,19, 20,22,21,21,22,23};
+	vb->update_index(indices);
 }
 
 void CubeEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {
