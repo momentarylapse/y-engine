@@ -274,52 +274,6 @@ void RenderPath::draw(const RenderParams& params) {
 		world_renderer->draw(params);
 }
 
-#if 0
-class CubeEmitter : public MeshEmitter {
-public:
-	owned<VertexBuffer> vb;
-	owned<Material> material;
-	explicit CubeEmitter(const Box& box) : MeshEmitter("cube") {
-		vb = new VertexBuffer("3f,3f,2f");
-		Array<Vertex1> vertices = {
-			{{box.min.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
-			{{box.max.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
-			{{box.min.x, box.max.y, box.min.z}, {0,0,-1}, 0, 0},
-			{{box.max.x, box.max.y, box.min.z}, {0,0,-1}, 0, 0},
-			{{box.max.x, box.min.y, box.max.z}, {0,0,1}, 0, 0},
-			{{box.min.x, box.min.y, box.max.z}, {0,0,1}, 0, 0},
-			{{box.max.x, box.max.y, box.max.z}, {0,0,1}, 0, 0},
-			{{box.min.x, box.max.y, box.max.z}, {0,0,1}, 0, 0},
-			{{box.min.x, box.max.y, box.min.z}, {-1,0,0}, 0, 0},
-			{{box.min.x, box.max.y, box.max.z}, {-1,0,0}, 0, 0},
-			{{box.min.x, box.min.y, box.min.z}, {-1,0,0}, 0, 0},
-			{{box.min.x, box.min.y, box.max.z}, {-1,0,0}, 0, 0},
-			{{box.max.x, box.min.y, box.min.z}, {1,0,0}, 0, 0},
-			{{box.max.x, box.min.y, box.max.z}, {1,0,0}, 0, 0},
-			{{box.max.x, box.max.y, box.min.z}, {1,0,0}, 0, 0},
-			{{box.max.x, box.max.y, box.max.z}, {1,0,0}, 0, 0},
-			{{box.min.x, box.min.y, box.min.z}, {0,-1,0}, 0, 0},
-			{{box.min.x, box.min.y, box.max.z}, {0,-1,0}, 0, 0},
-			{{box.max.x, box.min.y, box.min.z}, {0,-1,0}, 0, 0},
-			{{box.max.x, box.min.y, box.max.z}, {0,-1,0}, 0, 0},
-			{{box.max.x, box.max.y, box.min.z}, {0,1,0}, 0, 0},
-			{{box.max.x, box.max.y, box.max.z}, {0,1,0}, 0, 0},
-			{{box.min.x, box.max.y, box.min.z}, {0,1,0}, 0, 0},
-			{{box.min.x, box.max.y, box.max.z}, {0,1,0}, 0, 0},
-		};
-		vb->update(vertices);
-		vb->update_index({0,2,1,1,2,3, 4,6,5,5,6,7, 8,10,9,9,10,11, 12,14,13,13,14,15, 16,18,17,17,18,19, 20,22,21,21,22,23});
-		material = new Material(engine.resource_manager);
-		material->textures.add(tex_white);
-	}
-	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override {
-		auto shader = rvd.get_shader(material.get(), 0, "default", "");
-		auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb.get());
-		rd.draw_triangles(params, vb.get());
-	}
-};
-#endif
-
 RenderPath* create_render_path(Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
 

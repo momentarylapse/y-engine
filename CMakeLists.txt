@@ -472,6 +472,7 @@ add_executable(y
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
+	src/renderer/scene/mesh/CubeEmitter.cpp
 	src/renderer/scene/pass/ShadowRenderer.cpp
 	src/renderer/scene/MeshEmitter.cpp
 	src/renderer/scene/RenderViewData.cpp
