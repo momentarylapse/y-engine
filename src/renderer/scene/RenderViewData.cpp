@@ -57,8 +57,8 @@ void RenderViewData::update_light_ubo() {
 		// using current view
 		lights[i] = l->to_ubo(view_pos, view_ang, true);
 
-	for (const auto& [i,l]: enumerate(scene_view->shadow_indices)) {
-		auto ll = scene_view->lights[i];
+	for (const auto [i,l]: enumerate(scene_view->shadow_indices)) {
+		auto ll = scene_view->lights[l];
 		// from reference cam
 		ll->shadow_projection = ll->suggest_shadow_projection(scene_view->cam, global_shadow_box_size);
 		if constexpr (true)

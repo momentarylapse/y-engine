@@ -36,6 +36,7 @@
 #include <renderer/world/emitter/WorldSkyboxEmitter.h>
 #include <world/components/MultiInstance.h>
 #include "../scene/MeshEmitter.h"
+#include "world/Light.h"
 
 
 HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {
