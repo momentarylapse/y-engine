@@ -62,7 +62,7 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	virtual void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {};
+	//virtual void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {};
 	void render_into_cubemap(CubeMapSource& source);
 
 	void prepare_basics();
