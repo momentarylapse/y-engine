@@ -8,14 +8,14 @@
 
 -- vulkan --
 
-* deferred
-~ pipeline/dset management
-* instanced
+J deferred
+J pipeline/dset management
+J instanced
 J shadows
 J particles
 J beams
 J transparent models
-* cube maps
+J cube maps
 
 
 -- general --
