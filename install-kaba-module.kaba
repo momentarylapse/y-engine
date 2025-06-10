@@ -1,0 +1,14 @@
+DEST=~/.kaba/modules/y
+
+if [ ! -d $DEST ]
+then
+	mkdir $DEST
+fi
+
+
+cp build/libmoduley.* $DEST
+
+cp api/y/*.kaba $DEST
+
+
+
