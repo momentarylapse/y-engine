@@ -1108,6 +1108,9 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_size("SceneView", sizeof(SceneView));
 	ext->declare_class_element("SceneView.surfel_buffer", &SceneView::surfel_buffer);
 	ext->declare_class_element("SceneView.num_surfels", &SceneView::num_surfels);
+	ext->declare_class_element("SceneView.probe_cells", &SceneView::probe_cells);
+	ext->declare_class_element("SceneView.probe_min", &SceneView::probe_min);
+	ext->declare_class_element("SceneView.probe_max", &SceneView::probe_max);
 	ext->declare_class_element("SceneView.ray_tracing_data", &SceneView::ray_tracing_data);
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));

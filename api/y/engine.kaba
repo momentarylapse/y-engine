@@ -2,6 +2,9 @@ use os
 use gfx.*
 use image.Image
 
+struct ivec3
+	x, y, z: i32
+
 class EngineData
 	var context: void&
 	var debug: bool
@@ -74,6 +77,9 @@ struct RayTracingData
 class SceneView
 	var surfel_buffer: owned[UniformBuffer]
 	var num_surfels: i32
+	var probe_cells: ivec3
+	var probe_min: vec3
+	var probe_max: vec3
 	var ray_tracing_data: RayTracingData*
 	func __delete__()
 		pass
