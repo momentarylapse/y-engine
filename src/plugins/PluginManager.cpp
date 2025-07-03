@@ -1101,9 +1101,14 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->link_class_func("PostProcessor.process", &PostProcessor::process);
 	ext->link_class_func("PostProcessor.add_stage", &PostProcessor::add_stage);
 
+	ext->declare_class_size("RayTracingData", sizeof(RayTracingData));
+	ext->declare_class_element("RayTracingData.buffer_meshes", &RayTracingData::buffer_meshes);
+	ext->declare_class_element("RayTracingData.num_meshes", &RayTracingData::num_meshes);
+
 	ext->declare_class_size("SceneView", sizeof(SceneView));
 	ext->declare_class_element("SceneView.surfel_buffer", &SceneView::surfel_buffer);
 	ext->declare_class_element("SceneView.num_surfels", &SceneView::num_surfels);
+	ext->declare_class_element("SceneView.ray_tracing_data", &SceneView::ray_tracing_data);
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
 	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);

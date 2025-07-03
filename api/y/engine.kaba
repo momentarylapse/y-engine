@@ -67,9 +67,14 @@ class RegionRenderer
 #		depth_buffer: DepthBuffer&
 #	cascades: Cascade[2]
 
+struct RayTracingData
+	buffer_meshes: UniformBuffer*
+	num_meshes: i32
+
 class SceneView
 	var surfel_buffer: owned[UniformBuffer]
 	var num_surfels: i32
+	var ray_tracing_data: RayTracingData*
 	func __delete__()
 		pass
 
