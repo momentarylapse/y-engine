@@ -48,6 +48,8 @@ class DepthBuffer extends Texture
 	func extern override __init__(w: i32, h: i32, format: string)
 class ImageTexture extends Texture
 	func extern override __init__(w: i32, h: i32, format: string)
+class StorageTexture extends Texture
+	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
 class VolumeTexture extends Texture
 	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
 

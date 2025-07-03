@@ -262,6 +262,14 @@ void imagetexture_init(DepthBuffer *t, int w, int h, const string &format) {
 #endif
 }
 
+void storagetexture_init(DepthBuffer *t, int nx, int ny, int nz, const string &format) {
+#ifdef USING_VULKAN
+	new(t) vulkan::StorageTexture(nx, ny, nz, format);
+#else
+	new(t) VolumeTexture(nx, ny, format);
+#endif
+}
+
 void volumetexture_init(VolumeTexture *t, int nx, int ny, int nz, const string &format) {
 	new(t) VolumeTexture(nx, ny, nz, format);
 }
@@ -699,6 +707,8 @@ void export_gfx(kaba::Exporter* ext) {
 	ext->link_class_func("DepthBuffer.__init__", &depthbuffer_init);
 
 	ext->link_class_func("ImageTexture.__init__", &imagetexture_init);
+
+	ext->link_class_func("StorageTexture.__init__", &storagetexture_init);
 
 	ext->link_class_func("VolumeTexture.__init__", &volumetexture_init);
 
