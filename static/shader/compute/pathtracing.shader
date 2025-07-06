@@ -2,7 +2,7 @@
 	version = 430
 	extensions = GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
 	bindings = [[image,buffer,buffer]]
-	pushsize = 96
+	pushsize = 112
 </Layout>
 <ComputeShader>
 

@@ -1,6 +1,6 @@
 <Layout>
 	version = 460
-	extensions = GL_NV_ray_tracing,GL_EXT_nonuniform_qualifier,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
+	extensions = GL_EXT_ray_tracing,GL_EXT_nonuniform_qualifier,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
 </Layout>
 
 <RayClosestHitShader>
@@ -28,8 +28,8 @@ struct RayPayload {
 	vec4 emission;
 };
 
-layout(location = 0) rayPayloadInNV RayPayload ray;
-                     hitAttributeNV vec2 bary_coord; // automatically filled
+layout(location = 0) rayPayloadInEXT RayPayload ray;
+                     hitAttributeEXT vec2 bary_coord; // automatically filled
 layout(binding=5, std430) uniform MeshData { Mesh mesh[256]; };
 
 struct Triangle {
@@ -47,12 +47,12 @@ Triangle unpack(int mid, int index) {
 	Mesh m = mesh[mid];
 	
 	Triangle t;
-	t.a = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3].p, 1);
-	t.b = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+1].p, 1);
-	t.c = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+2].p, 1);
-	t.na = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3].n, 0);
-	t.nb = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+1].n, 0);
-	t.nc = gl_ObjectToWorldNV * vec4(m.vertices.v[index*3+2].n, 0);
+	t.a = gl_ObjectToWorldEXT * vec4(m.vertices.v[index*3].p, 1);
+	t.b = gl_ObjectToWorldEXT * vec4(m.vertices.v[index*3+1].p, 1);
+	t.c = gl_ObjectToWorldEXT * vec4(m.vertices.v[index*3+2].p, 1);
+	t.na = gl_ObjectToWorldEXT * vec4(m.vertices.v[index*3].n, 0);
+	t.nb = gl_ObjectToWorldEXT * vec4(m.vertices.v[index*3+1].n, 0);
+	t.nc = gl_ObjectToWorldEXT * vec4(m.vertices.v[index*3+2].n, 0);
 	t.albedo = m.albedo;
 	t.emission = m.emission;
 	return t;
@@ -67,12 +67,12 @@ void main() {
 	
 	vec3 p = t.a * (1 - bary_coord.x - bary_coord.y) + t.b * bary_coord.x + t.c * bary_coord.y;
 	vec3 n = t.na * (1 - bary_coord.x - bary_coord.y) + t.nb * bary_coord.x + t.nc * bary_coord.y;
-	const float id = float(gl_InstanceCustomIndexNV);
+	const float id = float(gl_InstanceCustomIndexEXT);
 	
-	if (dot(n, gl_WorldRayDirectionNV) > 0)
+	if (dot(n, gl_WorldRayDirectionEXT) > 0)
 		n = -n;
 
-	ray.pos_and_dist = vec4(p, gl_HitTNV);
+	ray.pos_and_dist = vec4(p, gl_HitTEXT);
 	ray.albedo = t.albedo;
 	ray.emission = t.emission;
 	ray.normal_and_id = vec4(n, id);
@@ -88,7 +88,7 @@ struct RayPayload {
 	vec4 emission;
 };
 
-layout(location = 0) rayPayloadInNV RayPayload ray;
+layout(location = 0) rayPayloadInEXT RayPayload ray;
 
 layout(set=0, binding=2, std140)  uniform MoreData {
 	mat4 iview;

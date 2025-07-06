@@ -28,7 +28,7 @@
 #ifdef USING_VULKAN
 
 static const int MAX_RT_TRIAS = 65536;
-static const int MAX_RT_MESHES = 1024;
+static const int MAX_RT_MESHES = 512;
 static const int MAX_RT_REQUESTS = 4096*16;
 
 void rt_setup(SceneView& scene_view) {
@@ -50,8 +50,8 @@ RayTracingData::RayTracingData(vulkan::Device *device) {
 	else
 		throw Exception("no compute shader support");
 
-	buffer_meshes = new UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES);
-	buffer_requests = new UniformBuffer(sizeof(RayRequest) * MAX_RT_REQUESTS);
+	buffer_meshes = new UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES); // 64k!
+	buffer_requests = new ShaderStorageBuffer(sizeof(RayRequest) * MAX_RT_REQUESTS);
 	buffer_reply = new vulkan::StorageBuffer(sizeof(RayReply) * MAX_RT_REQUESTS);
 
 	if (mode == Mode::RTX) {
@@ -73,12 +73,12 @@ RayTracingData::RayTracingData(vulkan::Device *device) {
 	} else if (mode == Mode::COMPUTE) {
 		//msg_error("COMPUTE!!!");
 
-		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:1,buffer:8,sampler:1", 1);
+		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:2,buffer:8,sampler:1", 1);
 
 		auto shader = resource_manager->load_shader("compute/raytracing.shader");
 		compute.pipeline = new vulkan::ComputePipeline(shader.get());
-		compute.dset = compute.pool->create_set("buffer,buffer,storage-buffer");
-		compute.dset->set_uniform_buffer(0, buffer_requests.get());
+		compute.dset = compute.pool->create_set("storage-buffer,buffer,storage-buffer");
+		compute.dset->set_storage_buffer(0, buffer_requests.get());
 		compute.dset->set_uniform_buffer(1, buffer_meshes.get());
 		compute.dset->set_storage_buffer(2, buffer_reply.get());
 		compute.dset->update();

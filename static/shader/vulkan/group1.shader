@@ -1,6 +1,6 @@
 <Layout>
 	version = 460
-	extensions = GL_NV_ray_tracing,GL_EXT_nonuniform_qualifier
+	extensions = GL_EXT_ray_tracing,GL_EXT_nonuniform_qualifier
 </Layout>
 
 
@@ -13,13 +13,13 @@ struct RayPayload {
 	vec4 emission;
 };
 
-layout(location = 0) rayPayloadInNV RayPayload ray;
-                     hitAttributeNV vec2 hit_attribs;
+layout(location = 0) rayPayloadInEXT RayPayload ray;
+                     hitAttributeEXT vec2 hit_attribs;
 
 void main() {
-	const float id = float(gl_InstanceCustomIndexNV);
+	const float id = float(gl_InstanceCustomIndexEXT);
 
-	ray.pos_and_dist = vec4(0,0,0, gl_HitTNV);
+	ray.pos_and_dist = vec4(0,0,0, gl_HitTEXT);
 	//ray.color = barycentrics;
 	//ray.normal_and_id = vec4(0,0,0, id);
 	ray.emission.rgb = vec3(0,0,0);
@@ -35,7 +35,7 @@ struct RayPayload {
 	vec4 emission;
 };
 
-layout(location = 0) rayPayloadInNV RayPayload ray;
+layout(location = 0) rayPayloadInEXT RayPayload ray;
 
 void main() {
 	//const vec3 bg = vec3(0.312f, 0.596f, 1.0f);

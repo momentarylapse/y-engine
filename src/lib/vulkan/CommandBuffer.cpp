@@ -241,11 +241,20 @@ void CommandBuffer::dispatch(int nx, int ny, int nz) {
 void CommandBuffer::trace_rays(int nx, int ny, int nz) {
 	auto rtp = static_cast<RayPipeline*>(current_pipeline);
 	int hs = default_device->ray_tracing_properties.shaderGroupHandleSize;
-	_vkCmdTraceRaysNV(buffer,
-			rtp->sbt.buffer, 0,
-			rtp->sbt.buffer, rtp->miss_group_offset*hs, hs,
-			rtp->sbt.buffer, hs, hs,
-			VK_NULL_HANDLE, 0, 0,
+	VkBufferDeviceAddressInfo rg_info = {};
+	rg_info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+	rg_info.buffer = rtp->sbt.buffer;
+	auto addr = vkGetBufferDeviceAddress(default_device->device, &rg_info);
+
+	// TODO size...
+	VkStridedDeviceAddressRegionKHR raygen = {addr, 0, 0};
+	VkStridedDeviceAddressRegionKHR miss = {addr + rtp->miss_group_offset*hs, (VkDeviceSize)hs, 9999};
+	VkStridedDeviceAddressRegionKHR hit = {addr + hs, (VkDeviceSize)hs, 9999};
+	_vkCmdTraceRaysKHR(buffer,
+			&raygen,
+			&miss,
+			&hit,
+			nullptr,
 			nx, ny, nz);
 }
 

@@ -22,7 +22,7 @@ struct RayTracingData {
 	owned<UniformBuffer> buffer_meshes;
 	int num_meshes = 0;
 
-	owned<UniformBuffer> buffer_requests;
+	owned<ShaderStorageBuffer> buffer_requests;
 	owned<ShaderStorageBuffer> buffer_reply;
 
 	enum class Mode {

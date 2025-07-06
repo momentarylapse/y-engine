@@ -37,7 +37,7 @@ VkDescriptorType descriptor_type(const string &s) {
 	if (s == "image")
 		return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	if (s == DESCRIPTOR_NAME_ACCELERATION_STRUCTURE)
-		return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV;
+		return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 	throw Exception("unknown type: " + s);
 	return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 }
@@ -146,8 +146,8 @@ VkDescriptorType descriptor_type(const string &s) {
 	}
 
 	void DescriptorSet::set_acceleration_structure(int binding, AccelerationStructure *a) {
-		auto &i = get_for_binding(accelerations, binding, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_NV);
-	    i.info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV;
+		auto &i = get_for_binding(accelerations, binding, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR);
+	    i.info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 	    i.info.accelerationStructureCount = 1;
 	    i.info.pAccelerationStructures = &a->structure;
 	}
@@ -209,9 +209,9 @@ VkDescriptorType descriptor_type(const string &s) {
 			lb.binding = binding_no[i];
 			lb.pImmutableSamplers = nullptr;
 			if (types[i] == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-				lb.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV;
+				lb.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 			else
-				lb.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_RAYGEN_BIT_NV | VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV | VK_SHADER_STAGE_MISS_BIT_NV;
+				lb.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT | VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR;
 			lb.stageFlags = VK_SHADER_STAGE_ALL;
 			bindings.add(lb);
 		}

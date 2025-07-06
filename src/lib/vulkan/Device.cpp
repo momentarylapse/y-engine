@@ -32,8 +32,10 @@ Device *default_device;
 		if (req & Requirements::SWAP_CHAIN)
 			ext.add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 		if (req & Requirements::RTX) {
-			ext.add(VK_NV_RAY_TRACING_EXTENSION_NAME);
+			ext.add(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+			ext.add(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
 			ext.add(VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME);
+			ext.add(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
 		}
 #ifdef OS_MAC
 		ext.add("VK_KHR_portability_subset");
@@ -216,26 +218,41 @@ void Device::create_logical_device(VkSurfaceKHR surface, Requirements req) {
 		queue_create_infos.add(queue_create_info);
 	}
 
-	VkPhysicalDeviceFeatures device_features = {};
-	if (req & Requirements::GEOMETRY_SHADER)
-		device_features.geometryShader = VK_TRUE;
-	if (req & Requirements::TESSELATION_SHADER)
-		device_features.tessellationShader = VK_TRUE;
-	if (req & Requirements::ANISOTROPY)
-		device_features.samplerAnisotropy = VK_TRUE;
-
 	VkPhysicalDeviceVulkan12Features features12 = {};
 	features12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 	features12.hostQueryReset = VK_TRUE;
+	features12.bufferDeviceAddress = VK_TRUE;
+	features12.scalarBlockLayout = VK_TRUE;
+
+	VkPhysicalDeviceFeatures2 device_features = {};
+	device_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+	device_features.pNext = &features12;
+
+	VkPhysicalDeviceRayTracingPipelineFeaturesKHR rt_features = {};
+	VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features = {};
+	if (req & Requirements::GEOMETRY_SHADER)
+		device_features.features.geometryShader = VK_TRUE;
+	if (req & Requirements::TESSELATION_SHADER)
+		device_features.features.tessellationShader = VK_TRUE;
+	if (req & Requirements::ANISOTROPY)
+		device_features.features.samplerAnisotropy = VK_TRUE;
+	if (req & Requirements::RTX) {
+		rt_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+		rt_features.rayTracingPipeline = VK_TRUE;
+
+		as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		as_features.accelerationStructure = VK_TRUE;
+		as_features.pNext = &rt_features;
+
+		features12.pNext = &as_features;
+	}
 
 	VkDeviceCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	create_info.pNext = &features12;
+	create_info.pNext = &device_features;
 
 	create_info.queueCreateInfoCount = queue_create_infos.num;
 	create_info.pQueueCreateInfos = &queue_create_infos[0];
-
-	create_info.pEnabledFeatures = &device_features;
 
 	auto extensions = device_extensions(req);
 	create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.num);

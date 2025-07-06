@@ -1,6 +1,6 @@
 <Layout>
 	version = 460
-	extensions = GL_NV_ray_tracing,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
+	extensions = GL_EXT_ray_tracing,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
 	bindings = [[acceleration-structure,image,buffer,buffer,buffer,buffer]]
 </Layout>
 
@@ -32,7 +32,7 @@ struct Light {
 	float radius, theta, harshness;
 };
 
-layout(set=0, binding=0)          uniform accelerationStructureNV scene;
+layout(set=0, binding=0)          uniform accelerationStructureEXT scene;
 layout(set=0, binding=1, rgba16f) uniform image2D image;
 layout(set=0, binding=2, std140)  uniform MoreData {
 	mat4 iview;
@@ -47,7 +47,7 @@ layout(set=0, binding=4) uniform LightData { Light light[32]; };
     UniformParams Params;
 };*/
 
-layout(location = 0) rayPayloadNV RayPayload ray;
+layout(location = 0) rayPayloadEXT RayPayload ray;
 
 const int NUM_REFLECTIONS = 50;
 const int NUM_SHADOW_SAMPLES = 10;
@@ -84,7 +84,7 @@ float calc_light_visibility_point(vec3 p, vec3 LP, float light_radius, int N) {
 		vec3 lsp = LP + rand_dir(p + vec3(i,2*i,3*i)) * light_radius;
 		vec3 L = normalize(lsp - p);
 		float d = length(lsp - p);
-		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p, 0.0, L, d, 0);
+		traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 0, 1, 0, p, 0.0, L, d, 0);
 		if (ray.pos_and_dist.w < 0)
 			light_visibility += 1.0 / N;
 	}
@@ -95,7 +95,7 @@ float calc_light_visibility_directional(vec3 p, vec3 L, float fuzzyness, int N) 
 	float light_visibility = 0.0;
 	for (int i=0; i<N; i++) {
 		vec3 LL = -normalize(L + fuzzyness * rand3d(p + vec3(i,2*i,3*i)));
-		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 0, 1, 0, p, 0.0, LL, MAX_DEPTH, 0);
+		traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 0, 1, 0, p, 0.0, LL, MAX_DEPTH, 0);
 		if (ray.pos_and_dist.w < 0)
 			light_visibility += 1.0 / N;
 	}
@@ -135,7 +135,7 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 	vec3 color = vec3(0);
 	for (int i=0; i<NUM_REFLECTIONS; i++) {
 		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(cur_pixel,1)*i*0.732538)), roughness);
-		traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, MAX_DEPTH, 0);
+		traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, MAX_DEPTH, 0);
 		color += albedo * ray.emission.rgb;
 		if (ray.pos_and_dist.w > 0) {
 			color += albedo * calc_direct_light(ray.pos_and_dist.xyz, ray.normal_and_id.xyz, ray.albedo.rgb, cur_pixel, 1);
@@ -146,12 +146,12 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 
 
 void main() {
-	const vec2 cur_pixel = vec2(gl_LaunchIDNV.xy);
-	const vec2 bottom_right = vec2(gl_LaunchSizeNV.xy - 1);
+	const vec2 cur_pixel = vec2(gl_LaunchIDEXT.xy);
+	const vec2 bottom_right = vec2(gl_LaunchSizeEXT.xy - 1);
 
 	const vec2 uv = (cur_pixel / bottom_right) * 2.0 - 1.0;
 
-	const float aspect = float(gl_LaunchSizeNV.x) / float(gl_LaunchSizeNV.y);
+	const float aspect = float(gl_LaunchSizeEXT.x) / float(gl_LaunchSizeEXT.y);
 	
 	const float max_depth = 20000.0;
 
@@ -163,7 +163,7 @@ void main() {
 
 	// scene,flags,cull mask, hit, stride, miss, origin, t0, dir, t1, payload location
 	
-	traceNV(scene, gl_RayFlagsOpaqueNV, 0xff, 1, 1, 1, origin, 0.0, direction, max_depth, 0);
+	traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 1, 1, 1, origin, 0.0, direction, max_depth, 0);
 	if (ray.pos_and_dist.w > 0) {
 		out_color = ray.emission.rgb;
 	
@@ -179,9 +179,9 @@ void main() {
 		out_color = push.background.rgb;
 	}
 	
-	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(out_color,1.0));
+	imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(out_color,1.0));
 #else
-	imageStore(image, ivec2(gl_LaunchIDNV.xy), vec4(direction,1.0));
+	imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(direction,1.0));
 #endif
 }
 </RayGenShader>

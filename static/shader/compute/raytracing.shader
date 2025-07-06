@@ -1,7 +1,7 @@
 <Layout>
 	version = 430
 	extensions = GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
-	bindings = [[buffer,buffer,storage-buffer]]
+	bindings = [[storage-buffer,buffer,storage-buffer]]
 	pushsize = 96
 </Layout>
 <ComputeShader>
@@ -49,7 +49,7 @@ layout(push_constant, std140) uniform PushConstants {
 } push;
 
 
-layout(binding=0, std430) uniform RequestData { Request requests[1024][16]; };
+layout(binding=0, std430) buffer RequestData { Request requests[1024][16]; };
 layout(binding=1, std430) uniform MeshData { Mesh mesh[256>>3]; };
 layout(binding=2, std430) buffer ReplyData { Reply replies[1024][16]; };
 layout(local_size_x=16, local_size_y=16) in;
