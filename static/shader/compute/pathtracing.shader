@@ -50,6 +50,8 @@ layout(binding=2, std430) uniform LightData {
 	int num_lights;
 	int num_surfels;
 	int _dummy0, _dummy1;
+	ivec4 probe_cells;
+	vec4 probe_min, probe_max;
 	mat4 shadow_proj[2];
 	Light light[32];
 };
