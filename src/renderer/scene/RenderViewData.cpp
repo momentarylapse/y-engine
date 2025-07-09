@@ -175,7 +175,7 @@ void RenderViewData::begin_draw() {
 		light_meta_data.probe_max = scene_view->probe_max;
 	} else {
 		light_meta_data.num_surfels = 0;
-		light_meta_data.probe_cells = ivec3(0, 0, 0);
+		light_meta_data.probe_cells = ivec3{0, 0, 0};
 	}
 }
 
