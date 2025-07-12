@@ -566,6 +566,7 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("Material.Friction.jump", &Material::Friction::jump);
 
 	ext->declare_class_size("Material", sizeof(Material));
+	ext->link_class_func("Material.__delete__", &kaba::generic_delete<Material>);
 	ext->declare_class_element("Material.textures", &Material::textures);
 	ext->declare_class_element("Material.pass0", &Material::pass0);
 	ext->declare_class_element("Material.albedo", &Material::albedo);

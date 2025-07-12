@@ -19,6 +19,7 @@ class Material
 		rolling: f32
 		jump: f32
 	var friction: Friction
+	func extern __delete__()
 	func extern mut add_uniform(name: string, p: float*, size: int)
 	
 func extern load_material(filename: os.Path) -> xfer[Material]
