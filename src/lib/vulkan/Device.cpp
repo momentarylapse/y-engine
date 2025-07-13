@@ -49,59 +49,74 @@ Device *default_device;
 	//extern Array<const char*> validation_layers;
 
 
-bool is_device_suitable(VkPhysicalDevice device, VkSurfaceKHR surface, Requirements req) {
+int device_suitable_rating(VkPhysicalDevice device, VkSurfaceKHR surface, Requirements req) {
+
 	auto indices = QueueFamilyIndices::query(device, surface, req);
 	if (!indices)
-		return false;
+		return -1;
 
 	if (!check_device_extension_support(device, req))
-		return false;
+		return -1;
 
 	if ((req & Requirements::SWAP_CHAIN) or (req & Requirements::PRESENT)) {
 		if (!surface)
-			return false;
+			return -1;
 		SwapChainSupportDetails swapChainSupport = query_swap_chain_support(device, surface);
 
 		if (req & Requirements::SWAP_CHAIN)
 			if (swapChainSupport.formats.num == 0)
-				return false;
+				return -1;
 
 		if (req & Requirements::PRESENT)
 			if (swapChainSupport.present_modes.num == 0)
-				return false;
+				return -1;
 	}
 
 	VkPhysicalDeviceFeatures supported_features;
 	vkGetPhysicalDeviceFeatures(device, &supported_features);
 	if ((req & Requirements::ANISOTROPY) and !supported_features.samplerAnisotropy)
-		return false;
+		return -1;
 	if ((req & Requirements::GEOMETRY_SHADER) and !supported_features.geometryShader)
-		return false;
+		return -1;
 	if ((req & Requirements::TESSELATION_SHADER) and !supported_features.tessellationShader)
-		return false;
+		return -1;
 
-	return true;
+	VkPhysicalDeviceProperties properties;
+	vkGetPhysicalDeviceProperties(device, &properties);
+	//msg_write(properties.deviceName);
+	if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+		return 1; // simulated gpu :/
+	return 2;
 }
 
-bool check_device_extension_support(VkPhysicalDevice device, Requirements req) {
+Array<VkExtensionProperties> device_get_available_extensions(VkPhysicalDevice device) {
 	uint32_t extension_count;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
 
-	Array<VkExtensionProperties> available_extensions;
-	available_extensions.resize(extension_count);
-	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, &available_extensions[0]);
+	Array<VkExtensionProperties> extensions;
+	extensions.resize((int)extension_count);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, &extensions[0]);
+	return extensions;
+}
+
+bool check_device_extension_support(VkPhysicalDevice device, Requirements req) {
+	const auto available_extensions = device_get_available_extensions(device);
 
 	base::set<string> required_extensions;
 	for (auto e: device_extensions(req))
 		required_extensions.add(e);
 
-	if (verbosity >= 3)
-		msg_write("---- GPU-----");
-	for (const auto& extension : available_extensions) {
-	//	if (verbosity >= 3)
-	//		msg_write("   " + string(extension.extensionName));
+//	if (verbosity >= 3)
+//		msg_write("---- GPU-----");
+//	for (const auto& extension : available_extensions)
+//		msg_write("  available:   " + string(extension.extensionName));
+//	for (const auto& extension : required_extensions)
+//		msg_write("  required:   " + extension);
+	for (const auto& extension : available_extensions)
 		required_extensions.erase(extension.extensionName);
-	}
+
+//	for (const auto& extension : required_extensions)
+//		msg_write("  missing:   " + extension);
 
 	return required_extensions.num == 0;
 }
@@ -162,12 +177,12 @@ void Device::pick_physical_device(Instance *_instance, VkSurfaceKHR _surface, Re
 		show_physical_devices(devices);
 
 	physical_device = VK_NULL_HANDLE;
+	int max_rating = 0;
 	for (const auto& dev: devices) {
-		if (is_device_suitable(dev, surface, req)) {
-			if (verbosity >= 2)
-				msg_write(" ok");
+		int rating = device_suitable_rating(dev, surface, req);
+		if (rating > max_rating) {
 			physical_device = dev;
-			break;
+			max_rating = rating;
 		}
 	}
 
