@@ -17,6 +17,11 @@
 class Model;
 struct SceneView;
 
+enum class RaytracingMode {
+	NONE,
+	COMPUTE,
+	RTX
+};
 
 struct RayTracingData {
 	owned<UniformBuffer> buffer_meshes;
@@ -25,11 +30,7 @@ struct RayTracingData {
 	owned<ShaderStorageBuffer> buffer_requests;
 	owned<ShaderStorageBuffer> buffer_reply;
 
-	enum class Mode {
-		NONE,
-		COMPUTE,
-		RTX
-	} mode = Mode::NONE;
+	RaytracingMode mode = RaytracingMode::NONE;
 
 	struct MeshDescription {
 		mat4 matrix;
@@ -42,7 +43,7 @@ struct RayTracingData {
 	};
 
 #ifdef USING_VULKAN
-	explicit RayTracingData(vulkan::Device *_device);
+	RayTracingData(vulkan::Device* _device, RaytracingMode mode);
 
 	void update_frame();
 
@@ -90,6 +91,7 @@ struct RayReply {
 	int index, mesh, _a, _b;
 };
 
+void rt_setup_explicit(SceneView& scene_view, RaytracingMode mode);
 void rt_setup(SceneView& scene_view);
 void rt_update_frame(SceneView& scene_view);
 

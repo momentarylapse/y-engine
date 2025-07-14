@@ -235,7 +235,11 @@ void RenderPath::prepare(const RenderParams& params) {
 	prepare_instanced_matrices();
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
-	world_renderer->prepare(params);
+
+	if (type != RenderPathType::PathTracing)
+		world_renderer->prepare(params);
+	// FIXME replace by ...
+	//scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 
 	if (cube_map_source)
 		scene_view.cube_map = cube_map_source->cube_map;

@@ -18,6 +18,7 @@
 #include <vulkan/vulkan.h>
 
 #include "helper.h"
+#include "lib/os/msg.h"
 
 namespace vulkan {
 
@@ -122,7 +123,6 @@ VkDescriptorType descriptor_type(const string &s) {
 	}
 
 	void DescriptorSet::set_storage_image(int binding, Texture *t) {
-		//msg_error("storage image");
 		auto &i = get_for_binding(images, binding, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
 		i.info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 		i.info.imageView = t->view;
@@ -146,6 +146,8 @@ VkDescriptorType descriptor_type(const string &s) {
 	}
 
 	void DescriptorSet::set_acceleration_structure(int binding, AccelerationStructure *a) {
+		if (!a)
+			return;
 		auto &i = get_for_binding(accelerations, binding, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR);
 	    i.info.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 	    i.info.accelerationStructureCount = 1;
@@ -157,8 +159,7 @@ VkDescriptorType descriptor_type(const string &s) {
 	}
 
 	void DescriptorSet::update() {
-
-		//std::cout << "update dset with " << buffers.num << " buffers, " << images.num << " images\n";
+		//msg_write(format("update dset with %d buffers, %d images", buffers.num, images.num));
 
 		Array<VkWriteDescriptorSet> wds;
 		for (auto &b: buffers) {
@@ -196,6 +197,7 @@ VkDescriptorType descriptor_type(const string &s) {
 			wds.add(w);
 		}
 
+		//msg_write("dset update  " + p2s(descriptor_set));
 		vkUpdateDescriptorSets(default_device->device, static_cast<uint32_t>(wds.num), &wds[0], 0, nullptr);
 	}
 

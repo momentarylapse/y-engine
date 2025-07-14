@@ -130,9 +130,9 @@ static shaderc_compiler_t shaderc = nullptr;
 			} else if (tag == "RayMissShader") {
 				p.type = VK_SHADER_STAGE_MISS_BIT_KHR;
 			} else if (tag == "TaskShader") {
-				p.type = VK_SHADER_STAGE_TASK_BIT_NV;
+				p.type = VK_SHADER_STAGE_TASK_BIT_EXT;
 			} else if (tag == "MeshShader") {
-				p.type = VK_SHADER_STAGE_MESH_BIT_NV;
+				p.type = VK_SHADER_STAGE_MESH_BIT_EXT;
 			} else if (tag == "Module") {
 				p.type = (VkShaderStageFlagBits)TYPE_MODULE;
 			} else if (tag == "Layout") {
@@ -379,13 +379,13 @@ static shaderc_compiler_t shaderc = nullptr;
 				} else if (tag == "ComputeShader") {
 					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_COMPUTE_BIT});
 				} else if (tag == "RayGenShader") {
-					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_RAYGEN_BIT_NV});
+					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_RAYGEN_BIT_KHR});
 				} else if (tag == "RayMissShader") {
-					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_MISS_BIT_NV});
+					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_MISS_BIT_KHR});
 				} else if (tag == "RayClosestHitShader") {
-					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_CLOSEST_HIT_BIT_NV});
+					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR});
 				} else if (tag == "RayAnyHitShader") {
-					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_ANY_HIT_BIT_NV});
+					s->modules.add({create_shader_module(value), VK_SHADER_STAGE_ANY_HIT_BIT_KHR});
 				} else {
 					msg_write("WARNING: " + value);
 				}

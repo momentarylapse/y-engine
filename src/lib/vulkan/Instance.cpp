@@ -253,19 +253,6 @@ void Instance::_ensure_rtx_extensions() {
 	if (rtx_extensions_loaded)
 		return;
 
-/*	VkPhysicalDeviceRaytracingPropertiesNV mRTProps;
-	mRTProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAYTRACING_PROPERTIES_NV;
-	mRTProps.pNext = nullptr;
-	mRTProps.maxRecursionDepth = 0;
-	mRTProps.shaderHeaderSize = 0;
-
-	VkPhysicalDeviceProperties2 devProps;
-	devProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-	devProps.pNext = &mRTProps;
-	devProps.properties = { };
-
-	vkGetPhysicalDeviceProperties2(device, &devProps);*/
-
 	if (verbosity >= 1)
 		msg_write("loading rtx extensions...");
 	LOAD_EXT(vkCmdTraceRaysKHR);

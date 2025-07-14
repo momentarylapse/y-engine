@@ -96,7 +96,7 @@ void Buffer::update_part(const void *source, int offset, int update_size) {
 }
 
 void Buffer::update(void *source) {
-	update_part(source, 0, size);
+	update_part(source, 0, (int)size);
 }
 
 void Buffer::update_array(const DynamicArray &array, int offset) {
@@ -114,11 +114,11 @@ int64 Buffer::get_device_address() const {
 UniformBuffer::UniformBuffer(int _size) : Buffer(default_device) {
 	count = 0;
 	size = _size;
-	size_single = size;
-	size_single_aligned = size;
+	size_single = _size;
+	size_single_aligned = _size;
 	VkDeviceSize buffer_size = size;
 
-	auto usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_RAY_TRACING_BIT_NV | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+	auto usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 	create(buffer_size, usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
@@ -136,7 +136,7 @@ UniformBuffer::UniformBuffer(int _size, int _count) : Buffer(default_device) {
 		*p = 13;
 	}
 
-	auto usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_RAY_TRACING_BIT_NV | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+	auto usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 	create(buffer_size, usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
@@ -156,7 +156,7 @@ StorageBuffer::StorageBuffer(int _size) : Buffer(default_device) {
 	size = _size;
 	VkDeviceSize buffer_size = size;
 
-	auto usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_RAY_TRACING_BIT_NV | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+	auto usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 	create(buffer_size, usage, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 

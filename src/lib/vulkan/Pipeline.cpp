@@ -436,7 +436,8 @@ void RayPipeline::create_sbt() {
 		msg_write("SBT");
 	const size_t sbt_size = groups.num * default_device->ray_tracing_properties.shaderGroupHandleSize;
 
-	sbt.create(sbt_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+	sbt.create(sbt_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
 	void* mem = sbt.map();
 	if (_vkGetRayTracingShaderGroupHandlesKHR(default_device->device, pipeline, 0, groups.num, sbt_size, mem))

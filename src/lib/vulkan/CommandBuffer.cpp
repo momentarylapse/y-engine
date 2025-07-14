@@ -239,22 +239,20 @@ void CommandBuffer::dispatch(int nx, int ny, int nz) {
 }
 
 void CommandBuffer::trace_rays(int nx, int ny, int nz) {
-	auto rtp = static_cast<RayPipeline*>(current_pipeline);
-	int hs = default_device->ray_tracing_properties.shaderGroupHandleSize;
-	VkBufferDeviceAddressInfo rg_info = {};
-	rg_info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-	rg_info.buffer = rtp->sbt.buffer;
-	auto addr = vkGetBufferDeviceAddress(default_device->device, &rg_info);
+	auto pipeline = static_cast<RayPipeline*>(current_pipeline);
+	auto hs = default_device->ray_tracing_properties.shaderGroupHandleSize;
+	VkDeviceAddress addr = pipeline->sbt.get_device_address();
 
 	// TODO size...
-	VkStridedDeviceAddressRegionKHR raygen = {addr, 0, 0};
-	VkStridedDeviceAddressRegionKHR miss = {addr + rtp->miss_group_offset*hs, (VkDeviceSize)hs, 9999};
-	VkStridedDeviceAddressRegionKHR hit = {addr + hs, (VkDeviceSize)hs, 9999};
+	VkStridedDeviceAddressRegionKHR raygen = {addr, hs, hs};
+	VkStridedDeviceAddressRegionKHR hit = {addr + hs, hs, hs};
+	VkStridedDeviceAddressRegionKHR miss = {addr + pipeline->miss_group_offset*hs, hs, hs};
+	VkStridedDeviceAddressRegionKHR callableShaderSbtEntry = {};
 	_vkCmdTraceRaysKHR(buffer,
 			&raygen,
 			&miss,
 			&hit,
-			nullptr,
+			&callableShaderSbtEntry,
 			nx, ny, nz);
 }
 

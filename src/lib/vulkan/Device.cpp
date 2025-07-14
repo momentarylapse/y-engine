@@ -423,7 +423,7 @@ xfer<Device> Device::create_simple(Instance *instance, VkSurfaceKHR surface, con
 void Device::get_rtx_properties() {
 
 	ray_tracing_properties = {};
-	ray_tracing_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV;
+	ray_tracing_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
 
 	VkPhysicalDeviceProperties2 dev_props = {};
 	dev_props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
@@ -434,9 +434,9 @@ void Device::get_rtx_properties() {
 	_vkGetPhysicalDeviceProperties2(physical_device, &dev_props);
 	if (verbosity >= 3) {
 		msg_write("PROPS");
-		msg_write(ray_tracing_properties.maxShaderGroupStride);
-		msg_write(ray_tracing_properties.shaderGroupBaseAlignment);
-		msg_write(ray_tracing_properties.shaderGroupHandleSize);
+		msg_write(format("shader group stride: ", ray_tracing_properties.maxShaderGroupStride));
+		msg_write(format("shader group base alignment: ", ray_tracing_properties.shaderGroupBaseAlignment));
+		msg_write(format("shader group handle size: ", ray_tracing_properties.shaderGroupHandleSize));
 	}
 }
 
