@@ -336,7 +336,7 @@ void CommandBuffer::copy_image(const Texture *source, const Texture *dest, const
 
 void CommandBuffer::timestamp(int id, bool after) {
 	vkCmdWriteTimestamp(buffer,
-			after ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+			after ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 			//(VkPipelineStageFlagBits)(VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT),
 			default_device->query_pool, id);
 }
