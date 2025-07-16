@@ -25,11 +25,11 @@ struct RayPayload {
 };*/
 
 struct Light {
-	mat4 proj;
 	vec4 pos;
 	vec4 dir;
 	vec4 color;
 	float radius, theta, harshness;
+	int shadow_index;
 };
 
 layout(set=0, binding=0)          uniform accelerationStructureEXT scene;
@@ -38,9 +38,17 @@ layout(set=0, binding=2, std140)  uniform MoreData {
 	mat4 iview;
 	vec4 background;
 	int num_triangles;
-	int num_lights;
+	int _num_lights;
 } push;
-layout(set=0, binding=4) uniform LightData { Light light[32]; };
+layout(set=0, binding=4) uniform LightData {
+	int num_lights;
+	int num_surfels;
+	int _dummy0, _dummy1;
+	ivec4 probe_cells;
+	vec4 probe_min, probe_max;
+	mat4 shadow_proj[2];
+	Light light[500];
+};
 //layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
 
 /*layout(set = 0,      binding = 2)     uniform AppData {
@@ -105,7 +113,7 @@ float calc_light_visibility_directional(vec3 p, vec3 L, float fuzzyness, int N) 
 
 vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel, int N) {
 	vec3 color = vec3(0);
-	for (int i=0; i<push.num_lights; i++) {
+	for (int i=0; i<num_lights; i++) {
 		float f;
 		if (light[i].radius > 0) {
 			// point light
