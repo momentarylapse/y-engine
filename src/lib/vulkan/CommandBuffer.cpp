@@ -132,6 +132,11 @@ void CommandBuffer::push_constant(int offset, int size, const void *data) {
 	vkCmdPushConstants(buffer, current_pipeline->layout, stage_flags, offset, size, data);
 }
 
+void CommandBuffer::update_buffer(Buffer* _buffer, int offset, int size, const void* data) {
+	vkCmdUpdateBuffer(buffer, _buffer->buffer, offset, size, data);
+}
+
+
 void CommandBuffer::draw(VertexBuffer *vb) {
 	draw_instanced(vb, 1);
 }

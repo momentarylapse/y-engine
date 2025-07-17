@@ -12,6 +12,8 @@
 #if HAS_LIB_VULKAN
 
 #include <vulkan/vulkan.h>
+
+#include "graphics-fwd.h"
 #include "../base/base.h"
 #include "../base/optional.h"
 
@@ -28,6 +30,7 @@ namespace vulkan{
 	class Texture;
 	class Device;
 	class CommandBuffer;
+	class Buffer;
 
 
 	enum class AccessFlags {
@@ -85,6 +88,7 @@ namespace vulkan{
 		void bind_descriptor_set(int index, DescriptorSet *dset);
 		void bind_descriptor_set_dynamic(int index, DescriptorSet *dset, const Array<int> &indices);
 		void push_constant(int offset, int size, const void *data);
+		void update_buffer(Buffer* buffer, int offset, int size, const void *data);
 
 		void begin_render_pass(RenderPass *rp, FrameBuffer *fb);
 		void next_subpass();
