@@ -18,7 +18,6 @@
 #include <vulkan/vulkan.h>
 
 #include "helper.h"
-#include "lib/os/msg.h"
 
 namespace vulkan {
 

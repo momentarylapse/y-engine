@@ -11,9 +11,8 @@
 #include "Buffer.h"
 #include "Device.h"
 #include <vulkan/vulkan.h>
-
 #include "helper.h"
-#include "lib/os/msg.h"
+#include "../os/msg.h"
 
 namespace vulkan{
 

@@ -12,8 +12,6 @@
 #if HAS_LIB_VULKAN
 
 #include <vulkan/vulkan.h>
-
-#include "graphics-fwd.h"
 #include "../base/base.h"
 #include "../base/optional.h"
 
