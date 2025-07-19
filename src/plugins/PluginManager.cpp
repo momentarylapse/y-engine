@@ -352,8 +352,7 @@ audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float 
 }
 
 void PluginManager::init() {
-	kaba::Exporter exporter(kaba::default_context, nullptr);
-	export_kaba(&exporter);
+	kaba::default_context->register_package_init("y", engine.script_dir | "y", &export_kaba_package_y);
 	import_kaba();
 }
 
@@ -1142,7 +1141,7 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("LightMeter.brightness", &LightMeter::brightness);
 }
 
-void PluginManager::export_kaba(kaba::Exporter* ext) {
+void PluginManager::export_kaba_package_y(kaba::Exporter* ext) {
 	export_gfx(ext);
 	export_ecs(ext);
 	export_world(ext);

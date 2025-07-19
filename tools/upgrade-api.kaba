@@ -5,7 +5,7 @@ func upgrade(dir: os.Path)
 	if not os.fs.exists(src)
 		raise(new Exception("'api/' not found in current directory. Please run from the engine root directory!"))
 		
-	let files = os.fs.search(src, "*.kaba", "fr")
+	let files = os.fs.search(src, "*.*", "fr")
 	for f in files
 		let dst = dir | "Scripts" | f
 		if os.fs.exists(dst)

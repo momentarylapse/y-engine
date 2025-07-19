@@ -27,36 +27,36 @@ list(APPEND DEPS glfw)
 list(APPEND COMPILE_DEFINITIONS HAS_LIB_GLFW=1)
 
 
-# lib: gl or vulkan (mandatory)
-set(GL_OR_VULKAN "gl" CACHE STRING "Use gl or vulkan?")
-find_package(OpenGL)
-if(OPENGL_FOUND AND NOT APPLE AND NOT WIN32)
-	list(APPEND GL_OR_VULKAN_FOUND "gl")
-endif()
+# lib: vulkan or gl (mandatory)
+set(VULKAN_OR_GL "vulkan" CACHE STRING "Use vulkan or gl?")
 pkg_check_modules(VULKAN vulkan)
 if(VULKAN_FOUND)
-	list(APPEND GL_OR_VULKAN_FOUND "vulkan")
+	list(APPEND VULKAN_OR_GL_FOUND "vulkan")
 endif()
-if(GL_OR_VULKAN_FOUND)
-	if(NOT ${GL_OR_VULKAN} IN_LIST GL_OR_VULKAN_FOUND)
-		list(GET GL_OR_VULKAN_FOUND 0 X)
-		set(GL_OR_VULKAN ${X} CACHE STRING "choose" FORCE)
-		message(WARNING "Choice for GL_OR_VULKAN invalid, using ${GL_OR_VULKAN} instead")
+find_package(OpenGL)
+if(OPENGL_FOUND AND NOT APPLE AND NOT WIN32)
+	list(APPEND VULKAN_OR_GL_FOUND "gl")
+endif()
+if(VULKAN_OR_GL_FOUND)
+	if(NOT ${VULKAN_OR_GL} IN_LIST VULKAN_OR_GL_FOUND)
+		list(GET VULKAN_OR_GL_FOUND 0 X)
+		set(VULKAN_OR_GL ${X} CACHE STRING "choose" FORCE)
+		message(WARNING "Choice for VULKAN_OR_GL invalid, using ${VULKAN_OR_GL} instead")
 	endif()
 else()
-	message(SEND_ERROR "Neither gl or vulkan found") #  or/nor..
-	set(GL_OR_VULKAN "")
+	message(SEND_ERROR "Neither vulkan or gl found") #  or/nor..
+	set(VULKAN_OR_GL "")
 endif()
-if(GL_OR_VULKAN STREQUAL "gl")
-	list(APPEND DEPS OpenGL::OpenGL)
-	list(APPEND COMPILE_DEFINITIONS HAS_LIB_GL=1)
-endif()
-if(GL_OR_VULKAN STREQUAL "vulkan")
+if(VULKAN_OR_GL STREQUAL "vulkan")
 	list(APPEND INCLUDE_DIRECTORIES ${VULKAN_INCLUDE_DIRS})
 	list(APPEND LINK_DIRECTORIES ${VULKAN_LIBRARY_DIRS})
 	list(APPEND DEPS ${VULKAN_LIBRARIES})
 	list(APPEND COMPILE_OPTIONS ${VULKAN_CFLAGS_OTHER})
 	list(APPEND COMPILE_DEFINITIONS HAS_LIB_VULKAN=1)
+endif()
+if(VULKAN_OR_GL STREQUAL "gl")
+	list(APPEND DEPS OpenGL::OpenGL)
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_GL=1)
 endif()
 
 
@@ -280,36 +280,36 @@ list(APPEND DEPS glfw)
 list(APPEND COMPILE_DEFINITIONS HAS_LIB_GLFW=1)
 
 
-# lib: gl or vulkan (mandatory)
-set(GL_OR_VULKAN "gl" CACHE STRING "Use gl or vulkan?")
-find_package(OpenGL)
-if(OPENGL_FOUND AND NOT APPLE AND NOT WIN32)
-	list(APPEND GL_OR_VULKAN_FOUND "gl")
-endif()
+# lib: vulkan or gl (mandatory)
+set(VULKAN_OR_GL "vulkan" CACHE STRING "Use vulkan or gl?")
 pkg_check_modules(VULKAN vulkan)
 if(VULKAN_FOUND)
-	list(APPEND GL_OR_VULKAN_FOUND "vulkan")
+	list(APPEND VULKAN_OR_GL_FOUND "vulkan")
 endif()
-if(GL_OR_VULKAN_FOUND)
-	if(NOT ${GL_OR_VULKAN} IN_LIST GL_OR_VULKAN_FOUND)
-		list(GET GL_OR_VULKAN_FOUND 0 X)
-		set(GL_OR_VULKAN ${X} CACHE STRING "choose" FORCE)
-		message(WARNING "Choice for GL_OR_VULKAN invalid, using ${GL_OR_VULKAN} instead")
+find_package(OpenGL)
+if(OPENGL_FOUND AND NOT APPLE AND NOT WIN32)
+	list(APPEND VULKAN_OR_GL_FOUND "gl")
+endif()
+if(VULKAN_OR_GL_FOUND)
+	if(NOT ${VULKAN_OR_GL} IN_LIST VULKAN_OR_GL_FOUND)
+		list(GET VULKAN_OR_GL_FOUND 0 X)
+		set(VULKAN_OR_GL ${X} CACHE STRING "choose" FORCE)
+		message(WARNING "Choice for VULKAN_OR_GL invalid, using ${VULKAN_OR_GL} instead")
 	endif()
 else()
-	message(SEND_ERROR "Neither gl or vulkan found") #  or/nor..
-	set(GL_OR_VULKAN "")
+	message(SEND_ERROR "Neither vulkan or gl found") #  or/nor..
+	set(VULKAN_OR_GL "")
 endif()
-if(GL_OR_VULKAN STREQUAL "gl")
-	list(APPEND DEPS OpenGL::OpenGL)
-	list(APPEND COMPILE_DEFINITIONS HAS_LIB_GL=1)
-endif()
-if(GL_OR_VULKAN STREQUAL "vulkan")
+if(VULKAN_OR_GL STREQUAL "vulkan")
 	list(APPEND INCLUDE_DIRECTORIES ${VULKAN_INCLUDE_DIRS})
 	list(APPEND LINK_DIRECTORIES ${VULKAN_LIBRARY_DIRS})
 	list(APPEND DEPS ${VULKAN_LIBRARIES})
 	list(APPEND COMPILE_OPTIONS ${VULKAN_CFLAGS_OTHER})
 	list(APPEND COMPILE_DEFINITIONS HAS_LIB_VULKAN=1)
+endif()
+if(VULKAN_OR_GL STREQUAL "gl")
+	list(APPEND DEPS OpenGL::OpenGL)
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_GL=1)
 endif()
 
 
@@ -563,6 +563,7 @@ add_library(moduley SHARED
 	src/lib/doc/pdf.cpp
 	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
+	src/lib/fft/_kaba_export.cpp
 	src/lib/fft/fft.cpp
 	src/lib/hui_minimal/Application.cpp
 	src/lib/hui_minimal/Callback.cpp
@@ -604,7 +605,6 @@ add_library(moduley SHARED
 	src/lib/kaba/lib/lib_math.cpp
 	src/lib/kaba/lib/lib_net.cpp
 	src/lib/kaba/lib/lib_os.cpp
-	src/lib/kaba/lib/lib_pdf.cpp
 	src/lib/kaba/lib/lib_threads.cpp
 	src/lib/kaba/lib/lib_time.cpp
 	src/lib/kaba/lib/lib_vulkan.cpp
@@ -829,6 +829,7 @@ add_executable(y
 	src/lib/doc/pdf.cpp
 	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
+	src/lib/fft/_kaba_export.cpp
 	src/lib/fft/fft.cpp
 	src/lib/hui_minimal/Application.cpp
 	src/lib/hui_minimal/Callback.cpp
@@ -870,7 +871,6 @@ add_executable(y
 	src/lib/kaba/lib/lib_math.cpp
 	src/lib/kaba/lib/lib_net.cpp
 	src/lib/kaba/lib/lib_os.cpp
-	src/lib/kaba/lib/lib_pdf.cpp
 	src/lib/kaba/lib/lib_threads.cpp
 	src/lib/kaba/lib/lib_time.cpp
 	src/lib/kaba/lib/lib_vulkan.cpp
