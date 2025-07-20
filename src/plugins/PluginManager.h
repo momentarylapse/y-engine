@@ -11,7 +11,7 @@
 #include "../lib/base/base.h"
 
 class Path;
-class PerformanceMonitor;
+class Profiler;
 class TemplateDataScriptVariable;
 namespace kaba {
 	class Class;

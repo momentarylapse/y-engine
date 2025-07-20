@@ -12,11 +12,11 @@
 #include <lib/os/time.h>
 #include <lib/math/math.h>
 #include <lib/kaba/kaba.h>
+#include <lib/profiler/Profiler.h>
 
 #include <lib/hui_minimal/hui.h>
 
 #include "helper/DeletionQueue.h"
-#include "helper/PerformanceMonitor.h"
 #include "helper/ErrorHandler.h"
 #include "helper/Scheduler.h"
 #include "helper/ResourceManager.h"
@@ -106,7 +106,7 @@ public:
 
 		kaba::init();
 		NetworkManager::init();
-		ch_iter = PerformanceMonitor::create_channel("iter");
+		ch_iter = profiler::create_channel("iter");
 		ComponentManager::init();
 		SchedulerManager::init(ch_iter);
 
@@ -230,12 +230,12 @@ public:
 	void main_loop() {
 		while (!glfwWindowShouldClose(window) and !engine.end_requested) {
 			gpu_flush();
-			PerformanceMonitor::next_frame();
+			profiler::next_frame();
 			reset_gpu_timestamp_queries();
 #ifdef USING_OPENGL
 			gpu_timestamp({}, -1);
 #endif
-			engine.elapsed_rt = PerformanceMonitor::frame_dt;
+			engine.elapsed_rt = profiler::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
 			input::iterate();
@@ -253,7 +253,7 @@ public:
 			}
 			auto tt = gpu_read_timestamps();
 			for (int i=0; i<tt.num; i++)
-				PerformanceMonitor::current_frame_timing.gpu.add({gpu_timestamp_queries[i], tt[i]});
+				profiler::current_frame_timing.gpu.add({gpu_timestamp_queries[i], tt[i]});
 
 		}
 
@@ -289,7 +289,7 @@ public:
 	}
 
 	void iterate() {
-		PerformanceMonitor::begin(ch_iter);
+		profiler::begin(ch_iter);
 		SystemManager::handle_iterate_pre(engine.elapsed);
 
 		network_manager.iterate();
@@ -306,7 +306,7 @@ public:
 		gui::iterate(engine.elapsed);
 
 		world.iterate_animations(engine.elapsed);
-		PerformanceMonitor::end(ch_iter);
+		profiler::end(ch_iter);
 	}
 
 

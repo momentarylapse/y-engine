@@ -10,7 +10,7 @@
 #include "Keyboard.h"
 #include "Gamepad.h"
 #include "VR.h"
-#include <helper/PerformanceMonitor.h>
+#include <lib/profiler/Profiler.h>
 #include <GLFW/glfw3.h>
 
 
@@ -19,7 +19,7 @@ namespace input {
 static int channel;
 
 void init(GLFWwindow *window) {
-	channel = PerformanceMonitor::create_channel("in");
+	channel = profiler::create_channel("in");
 	init_mouse(window);
 	init_keyboard(window);
 	init_pads();
@@ -33,7 +33,7 @@ void remove(GLFWwindow *window) {
 }
 
 void iterate() {
-	PerformanceMonitor::begin(channel);
+	profiler::begin(channel);
 	iterate_mouse_pre();
 	iterate_keyboard_pre();
 
@@ -44,7 +44,7 @@ void iterate() {
 	iterate_pads();
 	iterate_vr();
 
-	PerformanceMonitor::end(channel);
+	profiler::end(channel);
 }
 
 

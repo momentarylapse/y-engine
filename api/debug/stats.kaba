@@ -5,10 +5,10 @@ class FpsDisplay extends Text
 		super.__init__("", 0.02, [0.01,0.01])
 		dz = 999
 	func mut update()
-		set_text("{{1.0/PerformanceMonitor.avg_frame_time|0.1}}")
+		set_text("{{1.0/Profiler.avg_frame_time|0.1}}")
 
 func channel_level(channel: int) -> int
-	let parent = PerformanceMonitor.channels[channel].parent
+	let parent = Profiler.channels[channel].parent
 	if parent < 0
 		return 0
 	return channel_level(parent) + 1
@@ -26,8 +26,8 @@ class StatDisplay extends Picture
 		
 		visible = false
 	
-	func mut add_graph(data: PerformanceMonitor.TimingData[], scale: float, y0: float)
-		var started: PerformanceMonitor.TimingData[]
+	func mut add_graph(data: Profiler.TimingData[], scale: float, y0: float)
+		var started: Profiler.TimingData[]
 		for t in data
 			if (t.channel & 0x80000000) == 0
 				started.add(t)
@@ -44,7 +44,7 @@ class StatDisplay extends Picture
 						p.color = color.hsb(c * 3.4151, 0.5, 0.5, 0.5)
 						add(give(p))
 						if w > 0.02
-							var ll = PerformanceMonitor.channels[c].name
+							var ll = Profiler.channels[c].name
 							if w > 0.1
 								ll += " {{dt * 1000|0.2}}"
 							let label = new Text(ll, CHANNEL_HEIGHT, [x+0.001, y])
@@ -55,7 +55,7 @@ class StatDisplay extends Picture
 	func mut update()
 		remove_all_children()
 		
-		let frame_t = PerformanceMonitor.previous_frame_timing.total_time
+		let frame_t = Profiler.previous_frame_timing.total_time
 		var scale = 1.5 / frame_t
 		
 		# ms ticks
@@ -68,8 +68,8 @@ class StatDisplay extends Picture
 			p.color = [1,1,1,0.2]
 			add(give(p))
 			
-		add_graph(PerformanceMonitor.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT)
-		add_graph(PerformanceMonitor.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2)
+		add_graph(Profiler.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT)
+		add_graph(Profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2)
 
 
 

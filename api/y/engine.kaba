@@ -130,7 +130,7 @@ class PostProcessor
 	func extern mut add_stage(on_prepare: void->void, on_draw: void->void)
 
 
-class PerformanceMonitor
+class Profiler
 	struct Channel
 		var name: string
 		var parent: i32

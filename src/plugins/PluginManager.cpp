@@ -6,8 +6,9 @@
  */
 
 #include "PluginManager.h"
-#include "../lib/kaba/kaba.h"
-#include "../lib/kaba/lib/extern.h"
+#include <lib/kaba/kaba.h>
+#include <lib/kaba/lib/extern.h>
+#include <lib/profiler/Profiler.h>
 #include "../audio/SoundSource.h"
 #include "../audio/AudioBuffer.h"
 #include "../audio/AudioStream.h"
@@ -20,7 +21,6 @@
 #include "../gui/Picture.h"
 #include "../gui/Text.h"
 #include "../helper/DeletionQueue.h"
-#include "../helper/PerformanceMonitor.h"
 #include "../helper/ResourceManager.h"
 #include "../helper/Scheduler.h"
 #if __has_include("../input/InputManager.h")
@@ -955,26 +955,26 @@ void export_net(kaba::Exporter* ext) {
 
 void export_engine(kaba::Exporter* ext) {
 
-	ext->declare_class_size("PerformanceMonitor.Channel", sizeof(PerformanceChannel));
-	ext->declare_class_element("PerformanceMonitor.Channel.name", &PerformanceChannel::name);
-	ext->declare_class_element("PerformanceMonitor.Channel.parent", &PerformanceChannel::parent);
-	ext->declare_class_element("PerformanceMonitor.Channel.average", &PerformanceChannel::average);
+	ext->declare_class_size("Profiler.Channel", sizeof(profiler::Channel));
+	ext->declare_class_element("Profiler.Channel.name", &profiler::Channel::name);
+	ext->declare_class_element("Profiler.Channel.parent", &profiler::Channel::parent);
+	ext->declare_class_element("Profiler.Channel.average", &profiler::Channel::average);
 
-	ext->declare_class_size("PerformanceMonitor.TimingData", sizeof(TimingData));
-	ext->declare_class_element("PerformanceMonitor.TimingData.channel", &TimingData::channel);
-	ext->declare_class_element("PerformanceMonitor.TimingData.offset", &TimingData::offset);
+	ext->declare_class_size("Profiler.TimingData", sizeof(profiler::TimingData));
+	ext->declare_class_element("Profiler.TimingData.channel", &profiler::TimingData::channel);
+	ext->declare_class_element("Profiler.TimingData.offset", &profiler::TimingData::offset);
 
-	ext->declare_class_size("PerformanceMonitor.FrameTimingData", sizeof(FrameTimingData));
-	ext->declare_class_element("PerformanceMonitor.FrameTimingData.cpu0", &FrameTimingData::cpu0);
-	ext->declare_class_element("PerformanceMonitor.FrameTimingData.gpu", &FrameTimingData::gpu);
-	ext->declare_class_element("PerformanceMonitor.FrameTimingData.total_time", &FrameTimingData::total_time);
+	ext->declare_class_size("Profiler.FrameTimingData", sizeof(profiler::FrameTimingData));
+	ext->declare_class_element("Profiler.FrameTimingData.cpu0", &profiler::FrameTimingData::cpu0);
+	ext->declare_class_element("Profiler.FrameTimingData.gpu", &profiler::FrameTimingData::gpu);
+	ext->declare_class_element("Profiler.FrameTimingData.total_time", &profiler::FrameTimingData::total_time);
 
-	ext->declare_class_size("PerformanceMonitor", sizeof(PerformanceMonitor));
-	ext->link("PerformanceMonitor.get_name", (void*)&PerformanceMonitor::get_name);
-	ext->link("PerformanceMonitor.avg_frame_time", &PerformanceMonitor::avg_frame_time);
-	ext->link("PerformanceMonitor.frames", &PerformanceMonitor::frames);
-	ext->link("PerformanceMonitor.channels", &PerformanceMonitor::channels);
-	ext->link("PerformanceMonitor.previous_frame_timing", &PerformanceMonitor::previous_frame_timing);
+	ext->declare_class_size("Profiler", sizeof(profiler::Profiler));
+	ext->link("Profiler.get_name", (void*)&profiler::get_name);
+	ext->link("Profiler.avg_frame_time", &profiler::avg_frame_time);
+	ext->link("Profiler.frames", &profiler::frames);
+	ext->link("Profiler.channels", &profiler::channels);
+	ext->link("Profiler.previous_frame_timing", &profiler::previous_frame_timing);
 	//ext->link("perf_mon", &global_perf_mon);
 
 

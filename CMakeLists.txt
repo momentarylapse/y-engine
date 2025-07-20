@@ -547,7 +547,6 @@ add_library(moduley SHARED
 	src/gui/Text.cpp
 	src/helper/DeletionQueue.cpp
 	src/helper/ErrorHandler.cpp
-	src/helper/PerformanceMonitor.cpp
 	src/helper/ResourceManager.cpp
 	src/helper/Scheduler.cpp
 	src/input/Gamepad.cpp
@@ -682,6 +681,7 @@ add_library(moduley SHARED
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
+	src/lib/profiler/Profiler.cpp
 	src/lib/threads/Mutex.cpp
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
@@ -813,7 +813,6 @@ add_executable(y
 	src/gui/Text.cpp
 	src/helper/DeletionQueue.cpp
 	src/helper/ErrorHandler.cpp
-	src/helper/PerformanceMonitor.cpp
 	src/helper/ResourceManager.cpp
 	src/helper/Scheduler.cpp
 	src/input/Gamepad.cpp
@@ -948,6 +947,7 @@ add_executable(y
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
+	src/lib/profiler/Profiler.cpp
 	src/lib/threads/Mutex.cpp
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
