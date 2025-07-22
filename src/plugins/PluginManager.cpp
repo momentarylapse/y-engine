@@ -958,7 +958,6 @@ void export_engine(kaba::Exporter* ext) {
 	ext->declare_class_size("Profiler.Channel", sizeof(profiler::Channel));
 	ext->declare_class_element("Profiler.Channel.name", &profiler::Channel::name);
 	ext->declare_class_element("Profiler.Channel.parent", &profiler::Channel::parent);
-	ext->declare_class_element("Profiler.Channel.average", &profiler::Channel::average);
 
 	ext->declare_class_size("Profiler.TimingData", sizeof(profiler::TimingData));
 	ext->declare_class_element("Profiler.TimingData.channel", &profiler::TimingData::channel);

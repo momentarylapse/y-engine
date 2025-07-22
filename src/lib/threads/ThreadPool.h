@@ -13,10 +13,10 @@ class PoolWorkerThread;
 
 class ThreadPool {
 public:
-	ThreadPool(int num_threads = -1);
+	explicit ThreadPool(int num_threads = -1);
 	~ThreadPool();
 
-	void run(int n, std::function<void(int)> f);
+	void run(int n, std::function<void(int)> f, int cluster_size = 1);
 
 	Array<PoolWorkerThread*> threads;
 };

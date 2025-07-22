@@ -13,10 +13,8 @@
 namespace profiler {
 	struct Channel {
 		string name;
+		bool used = false;
 		int parent = -1;
-		std::chrono::high_resolution_clock::time_point prev;
-		float dt = 0, average = 0;
-		int count = 0;
 	};
 
 	struct TimingData {
@@ -30,12 +28,22 @@ namespace profiler {
 		float total_time;
 	};
 
+	struct ChannelStats {
+		int channel = -1;
+		float total = 0, average = 0;
+		int count = 0;
+	};
+	Array<ChannelStats> digest_report(const FrameTimingData& td);
+
 	class Profiler {
 	public:
 		//Profiler();
 	};
 
 	int create_channel(const string &name, int parent = -1);
+	void delete_channel(int channel);
+	void set_parent(int channel, int parent);
+	void set_name(int channel, const string &name);
 	string get_name(int channel);
 
 	void begin(int channel);

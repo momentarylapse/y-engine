@@ -6,6 +6,7 @@
  */
 
 #include "Profiler.h"
+#include "../base/iter.h"
 
 namespace profiler {
 	int frames = -1;
@@ -24,16 +25,31 @@ namespace profiler {
 
 	void _reset() {
 		temp_frame_time = 0;
-		for (auto &c: channels) {
-			c.dt = 0;
-			c.count = 0;
-		}
 		frames = 0;
 	}
 
 	int create_channel(const string &name, int parent) {
-		channels.add({name, parent});
+		for (auto&& [i, c]: enumerate(channels))
+			if (!c.used) {
+				c.used = true;
+				c.name = name;
+				c.parent = parent;
+				return i;
+			}
+		channels.add({name, true, parent});
 		return channels.num - 1;
+	}
+
+	void delete_channel(int channel) {
+		channels[channel].used = false;
+	}
+
+	void set_parent(int channel, int parent) {
+		channels[channel].parent = parent;
+	}
+
+	void set_name(int channel, const string& name) {
+		channels[channel].name = name;
 	}
 
 	string get_name(int channel) {
@@ -42,14 +58,11 @@ namespace profiler {
 
 	void begin(int channel) {
 		auto now = std::chrono::high_resolution_clock::now();
-		channels[channel].prev = now;
 		current_frame_timing.cpu0.add({channel, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
 	}
 
 	void end(int channel) {
 		auto now = std::chrono::high_resolution_clock::now();
-		channels[channel].dt += std::chrono::duration<float, std::chrono::seconds::period>(now - channels[channel].prev).count();
-		channels[channel].count ++;
 		current_frame_timing.cpu0.add({channel | (int)0x80000000, std::chrono::duration<float, std::chrono::seconds::period>(now - frame_start).count()});
 	}
 
@@ -74,9 +87,7 @@ namespace profiler {
 		just_cleared = false;
 
 		if (temp_frame_time > 0.2f) {
-			avg_frame_time = temp_frame_time / frames;
-			for (auto &c: channels)
-				c.average = c.dt / frames;
+			avg_frame_time = temp_frame_time / (float)frames;
 			_reset();
 		}
 
@@ -85,5 +96,36 @@ namespace profiler {
 		current_frame_timing.cpu0.simple_reserve(256);
 		current_frame_timing.gpu.clear();
 		current_frame_timing.gpu.simple_reserve(256);
+	}
+
+	Array<ChannelStats> digest_report(const FrameTimingData& td) {
+		Array<ChannelStats> r;
+		Array<float> prev_begin;
+		prev_begin.resize(channels.num);
+		Array<int> channel_map;
+		channel_map.resize(channels.num);
+
+		for (const auto&& [i, c]: enumerate(channels))
+			if (c.used) {
+				channel_map[i] = r.num;
+				r.add({i});
+			}
+
+		for (const auto& t: td.cpu0) {
+			int id = t.channel & 0x7fffffff;
+			if (t.channel & 0x80000000) {
+				// end
+				r[channel_map[id]].total += (t.offset - prev_begin[id]);
+				r[channel_map[id]].count ++;
+			} else {
+				// begin
+				prev_begin[id] = t.offset;
+			}
+		}
+
+		for (auto& s: r)
+			if (s.count > 0)
+				s.average = s.total / (float)s.count;
+		return r;
 	}
 }
