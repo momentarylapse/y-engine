@@ -51,6 +51,7 @@
 #include "renderer/path/RenderPath.h"
 
 #include "Config.h"
+#include "lib/os/app.h"
 #include "world/Camera.h"
 #include "world/World.h"
 
@@ -372,16 +373,15 @@ public:
 Array<float> YEngineApp::render_times;
 
 
-YEngineApp app;
+YEngineApp y_app;
 
 
-
-int hui_main(const Array<string> &arg) {
-
-	hui::Application::guess_directories(arg, "y");
+namespace os::app {
+int main(const Array<string> &arg) {
+	os::app::detect(arg, "y");
 
 	try {
-		app.run(arg);
+		y_app.run(arg);
 	} catch (const std::exception& e) {
 		hui::ShowError(e.what());
 		return EXIT_FAILURE;
@@ -391,4 +391,5 @@ int hui_main(const Array<string> &arg) {
 	}
 
 	return EXIT_SUCCESS;
+}
 }

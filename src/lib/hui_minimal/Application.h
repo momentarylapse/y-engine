@@ -33,19 +33,11 @@ public:
 	int run();
 	static void do_single_main_loop();
 
-	static void guess_directories(const Array<string> &arg, const string &app_name);
-
 
 	static void _cdecl set_property(const string &name, const string &value);
 	static string get_property(const string &name);
 
 	static base::map<string, string> _properties_;
-
-	static Path filename;
-	static Path directory;			// dir of changeable files (ie. ~/.app/)
-	static Path directory_static;	// dir of static files (ie. /usr/shar/app)
-	static Path initial_working_directory;
-	static bool installed; // installed into system folders?
 
 	static Array<string> _args;
 };
@@ -53,6 +45,7 @@ public:
 }
 
 #define HUI_EXECUTE(APP_CLASS) \
+namespace os::app { \
 int hui_main(const Array<string> &arg) { \
 	APP_CLASS::_args = arg; \
 	APP_CLASS *app = new APP_CLASS; \
@@ -61,6 +54,7 @@ int hui_main(const Array<string> &arg) { \
 		r = app->run(); \
 	delete app; \
 	return r; \
+} \
 }
 
 #endif /* HUIAPPLICATION_H_ */
