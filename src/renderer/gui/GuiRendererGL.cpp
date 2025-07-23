@@ -12,7 +12,7 @@
 #include <lib/os/msg.h>
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"
-#include "../../helper/Profiler.h"
+#include <lib/profiler/Profiler.h>
 #include "../../helper/ResourceManager.h"
 #include <y/EngineData.h>
 

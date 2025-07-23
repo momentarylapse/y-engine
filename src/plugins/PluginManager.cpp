@@ -266,7 +266,7 @@ void storagetexture_init(DepthBuffer *t, int nx, int ny, int nz, const string &f
 #ifdef USING_VULKAN
 	new(t) vulkan::StorageTexture(nx, ny, nz, format);
 #else
-	new(t) VolumeTexture(nx, ny, format);
+	new(t) VolumeTexture(nx, ny, nz, format);
 #endif
 }
 

@@ -10,7 +10,7 @@
 #ifdef USING_OPENGL
 #include "../base.h"
 #include <lib/nix/nix.h>
-#include <helper/Profiler.h>
+#include <lib/profiler/Profiler.h>
 
 
 void RegionRenderer::draw(const RenderParams& params) {

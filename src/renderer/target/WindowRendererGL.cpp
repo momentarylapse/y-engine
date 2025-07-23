@@ -13,7 +13,7 @@
 #endif
 #include "../base.h"
 #include <lib/nix/nix.h>
-#include "../../helper/Profiler.h"
+#include <lib/profiler/Profiler.h>
 
 WindowRendererGL::WindowRendererGL(GLFWwindow* win) : TargetRenderer("win") {
 	window = win;

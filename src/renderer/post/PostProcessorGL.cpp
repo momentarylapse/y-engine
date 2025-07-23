@@ -13,7 +13,7 @@
 #include <lib/math/vec2.h>
 #include <lib/math/rect.h>
 #include <lib/os/msg.h>
-#include "../../helper/Profiler.h"
+#include <lib/profiler/Profiler.h>
 #include "../../helper/ResourceManager.h"
 #include "../../Config.h"
 #include "../../world/Camera.h"

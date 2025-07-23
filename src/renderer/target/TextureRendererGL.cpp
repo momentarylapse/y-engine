@@ -7,7 +7,7 @@
 
 #include "TextureRenderer.h"
 #ifdef USING_OPENGL
-#include <helper/Profiler.h>
+#include <lib/profiler/Profiler.h>
 #include <renderer/base.h>
 #include <graphics-impl.h>
 
