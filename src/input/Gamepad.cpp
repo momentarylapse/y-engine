@@ -9,9 +9,8 @@
 #include "Mouse.h"
 #include "Keyboard.h"
 #include "../lib/math/vec2.h"
-#include "../lib/hui_minimal/hui.h"
 #include "../y/EngineData.h"
-#include <math.h>
+#include <cmath>
 #include <GLFW/glfw3.h>
 
 #include "../lib/os/msg.h"
@@ -83,13 +82,13 @@ void iterate_pads() {
 			main_pad->state->axes[3] = dmouse.y / engine.elapsed_rt;
 		if (get_button(0))
 			main_pad->state->buttons[(int)Gamepad::Button::R1] = true;
-		if (get_key(hui::KEY_UP) or get_key(hui::KEY_W))
+		if (get_key(KEY_UP) or get_key(KEY_W))
 			main_pad->state->axes[1] = -1;
-		if (get_key(hui::KEY_DOWN) or get_key(hui::KEY_S))
+		if (get_key(KEY_DOWN) or get_key(KEY_S))
 			main_pad->state->axes[1] = 1;
-		if (get_key(hui::KEY_RIGHT) or get_key(hui::KEY_D))
+		if (get_key(KEY_RIGHT) or get_key(KEY_D))
 			main_pad->state->axes[0] = 1;
-		if (get_key(hui::KEY_LEFT) or get_key(hui::KEY_A))
+		if (get_key(KEY_LEFT) or get_key(KEY_A))
 			main_pad->state->axes[0] = -1;
 	}
 }

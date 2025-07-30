@@ -565,10 +565,6 @@ add_library(moduley SHARED
 	src/lib/doc/xml.cpp
 	src/lib/fft/_kaba_export.cpp
 	src/lib/fft/fft.cpp
-	src/lib/hui_minimal/Application.cpp
-	src/lib/hui_minimal/Callback.cpp
-	src/lib/hui_minimal/error.cpp
-	src/lib/hui_minimal/hui.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
 	src/lib/image/image_bmp.cpp
@@ -832,10 +828,6 @@ add_executable(y
 	src/lib/doc/xml.cpp
 	src/lib/fft/_kaba_export.cpp
 	src/lib/fft/fft.cpp
-	src/lib/hui_minimal/Application.cpp
-	src/lib/hui_minimal/Callback.cpp
-	src/lib/hui_minimal/error.cpp
-	src/lib/hui_minimal/hui.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
 	src/lib/image/image_bmp.cpp

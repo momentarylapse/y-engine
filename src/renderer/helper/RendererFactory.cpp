@@ -22,9 +22,7 @@
 #endif
 #include <y/EngineData.h>
 #include <lib/os/msg.h>
-#if __has_include(<lib/hui_minimal/hui.h>)
-#include <lib/hui_minimal/hui.h>
-#elif __has_include(<lib/hui/hui.h>)
+#if __has_include(<lib/hui/hui.h>)
 #include <lib/hui/hui.h>
 #endif
 #include <lib/profiler/Profiler.h>
@@ -167,9 +165,7 @@ void create_base_renderer(GLFWwindow* window) {
 		}
 
 	} catch(Exception &e) {
-#if __has_include(<lib/hui_minimal/hui.h>)
-		hui::ShowError(e.message());
-#endif
+		msg_error(e.message());
 		throw e;
 	}
 	print_render_chain();

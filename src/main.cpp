@@ -14,8 +14,6 @@
 #include <lib/kaba/kaba.h>
 #include <lib/profiler/Profiler.h>
 
-#include <lib/hui_minimal/hui.h>
-
 #include "helper/DeletionQueue.h"
 #include "helper/ErrorHandler.h"
 #include "helper/Scheduler.h"
@@ -245,7 +243,7 @@ public:
 			iterate();
 			draw_frame();
 
-			if (input::get_key(hui::KEY_CONTROL) and input::get_key(hui::KEY_Q))
+			if (input::get_key(input::KEY_CONTROL) and input::get_key(input::KEY_Q))
 				break;
 
 			if (world.next_filename) {
@@ -383,10 +381,10 @@ int main(const Array<string> &arg) {
 	try {
 		y_app.run(arg);
 	} catch (const std::exception& e) {
-		hui::ShowError(e.what());
+		msg_error(e.what());
 		return EXIT_FAILURE;
 	} catch (const Exception& e) {
-		hui::ShowError(e.message());
+		msg_error(e.message());
 		return EXIT_FAILURE;
 	}
 
