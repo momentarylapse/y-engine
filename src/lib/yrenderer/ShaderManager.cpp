@@ -18,8 +18,9 @@ namespace vulkan {
 #endif
 
 
-ShaderManager::ShaderManager(::Context *_ctx) {
+ShaderManager::ShaderManager(::Context *_ctx, const Path &_shader_dir) {
 	ctx = _ctx;
+	shader_dir = _shader_dir;
 }
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs);

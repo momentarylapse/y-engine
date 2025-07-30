@@ -11,7 +11,7 @@
 
 class TextureManager {
 public:
-	explicit TextureManager(Context *ctx);
+	explicit TextureManager(Context *ctx, const Path &texture_dir);
 	Context* ctx;
 
 	shared<Texture> load_texture(const Path& path);

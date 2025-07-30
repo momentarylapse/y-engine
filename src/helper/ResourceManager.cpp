@@ -21,13 +21,13 @@ namespace vulkan {
 #endif
 
 
-ResourceManager::ResourceManager(::Context *_ctx) {
+ResourceManager::ResourceManager(::Context *_ctx, const Path &texture_dir, const Path &shader_dir) {
 	ctx = _ctx;
 	material_manager = new MaterialManager(this);
 	model_manager = new ModelManager(this, material_manager);
-	shader_manager = new ShaderManager(ctx);
+	shader_manager = new ShaderManager(ctx, shader_dir);
 	shader_manager->ignore_missing_files = engine.ignore_missing_files;
-	texture_manager = new TextureManager(ctx);
+	texture_manager = new TextureManager(ctx, texture_dir);
 }
 
 xfer<Material> ResourceManager::load_material(const Path &filename) {

@@ -12,7 +12,7 @@
 
 class ShaderManager {
 public:
-	explicit ShaderManager(Context *ctx);
+	explicit ShaderManager(Context *ctx, const Path &_shader_dir);
 	Context *ctx;
 
 	shared<Shader> load_shader(const Path& path);

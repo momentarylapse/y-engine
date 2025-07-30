@@ -12,8 +12,9 @@
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs);
 
-TextureManager::TextureManager(::Context *_ctx) {
+TextureManager::TextureManager(::Context *_ctx, const Path &_texture_dir) {
 	ctx = _ctx;
+	texture_dir = _texture_dir;
 
 	if (ctx) {
 #ifdef USING_VULKAN

@@ -15,7 +15,7 @@ class TextureManager;
 
 class ResourceManager {
 public:
-	explicit ResourceManager(Context *ctx);
+	explicit ResourceManager(Context *ctx, const Path &texture_dir, const Path &shader_dir);
 	Context* ctx;
 	MaterialManager* material_manager;
 	ModelManager* model_manager;

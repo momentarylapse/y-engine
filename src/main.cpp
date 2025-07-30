@@ -127,7 +127,7 @@ public:
 			config.game_dir | "Fonts");
 
 		auto context = api_init(window);
-		auto resource_manager = new ResourceManager(context);
+		auto resource_manager = new ResourceManager(context, config.game_dir | "Textures", config.game_dir | "Materials");
 		engine.set_context(context, resource_manager);
 
 		create_base_renderer(window);
