@@ -3,8 +3,8 @@
 //
 
 #include "WorldInstancedEmitter.h"
-#include "../../scene/RenderViewData.h"
-#include "../../scene/SceneView.h"
+#include <lib/yrenderer/scene/RenderViewData.h>
+#include <lib/yrenderer/scene/SceneView.h>
 #include <world/components/MultiInstance.h>
 #include <world/Model.h>
 #include <lib/profiler/Profiler.h>

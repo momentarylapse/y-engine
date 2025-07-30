@@ -4,7 +4,7 @@
 
 #include "Raytracing.h"
 
-#include "../scene/SceneView.h"
+#include <lib/yrenderer/scene/SceneView.h>
 #include <lib/yrenderer/base.h>
 #include <lib/os/msg.h>
 #include <lib/base/iter.h>

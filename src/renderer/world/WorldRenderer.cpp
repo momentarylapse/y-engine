@@ -16,7 +16,7 @@
 #include "../../world/World.h"
 #include <lib/profiler/Profiler.h>
 #include <lib/base/callable.h>
-#include <renderer/helper/CubeMapSource.h>
+#include <lib/yrenderer/helper/CubeMapSource.h>
 
 #include "../../Config.h"
 #include <y/ComponentManager.h>

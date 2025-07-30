@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../scene/MeshEmitter.h"
+#include <lib/yrenderer/scene/MeshEmitter.h>
 
 class WorldTerrainsEmitter : public MeshEmitter {
 public:

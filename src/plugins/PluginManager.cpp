@@ -36,7 +36,7 @@
 #include <lib/yrenderer/base.h>
 #include <lib/yrenderer/Renderer.h>
 #include "../renderer/helper/RendererFactory.h"
-#include "../renderer/helper/CubeMapSource.h"
+#include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/helper/ComputeTask.h>
 #include "../renderer/helper/LightMeter.h"
 #include "../renderer/path/RenderPath.h"
@@ -54,9 +54,9 @@
 #include <lib/yrenderer/target/WindowRendererVulkan.h>
 #endif
 #include <renderer/helper/Raytracing.h>
-#include <renderer/scene/pass/ShadowRenderer.h>
+#include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include "../renderer/regions/RegionRenderer.h"
-#include "../renderer/scene/SceneView.h"
+#include <lib/yrenderer/scene/SceneView.h>
 #include "../y/EngineData.h"
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"

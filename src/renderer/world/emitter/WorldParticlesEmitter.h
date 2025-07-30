@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../scene/MeshEmitter.h"
+#include <lib/yrenderer/scene/MeshEmitter.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/yrenderer/Material.h>
 #include "lib/math/vec3.h"

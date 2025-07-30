@@ -6,9 +6,9 @@
  */
 
 #include "WorldRendererForward.h"
-#include "../scene/pass/ShadowRenderer.h"
+#include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/base.h>
-#include "../helper/CubeMapSource.h"
+#include <lib/yrenderer/helper/CubeMapSource.h>
 #include "../path/RenderPath.h"
 #include <lib/image/image.h>
 #include <lib/profiler/Profiler.h>

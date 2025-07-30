@@ -8,7 +8,7 @@
 #pragma once
 
 #include "WorldRenderer.h"
-#include "../scene/RenderViewData.h"
+#include <lib/yrenderer/scene/RenderViewData.h>
 
 class SceneRenderer;
 class Camera;

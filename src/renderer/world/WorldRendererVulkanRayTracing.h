@@ -10,7 +10,7 @@
 #include "WorldRenderer.h"
 #ifdef USING_VULKAN
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
-#include "../scene/RenderViewData.h"
+#include <lib/yrenderer/scene/RenderViewData.h>
 
 class Camera;
 enum class RaytracingMode;

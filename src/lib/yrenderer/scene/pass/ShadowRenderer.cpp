@@ -15,7 +15,7 @@
 #include <lib/yrenderer/Material.h>
 #include <world/Camera.h>
 #include <world/Light.h>
-#include "../../../Config.h"
+#include <Config.h>
 
 
 ShadowRenderer::Cascade::Cascade() = default;

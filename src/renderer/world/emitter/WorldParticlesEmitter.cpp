@@ -3,8 +3,8 @@
 //
 
 #include "WorldParticlesEmitter.h"
-#include "../../scene/RenderViewData.h"
-#include "../../scene/SceneView.h"
+#include <lib/yrenderer/scene/RenderViewData.h>
+#include <lib/yrenderer/scene/SceneView.h>
 #include <lib/yrenderer/base.h>
 #include <fx/Particle.h>
 #include <fx/Beam.h>

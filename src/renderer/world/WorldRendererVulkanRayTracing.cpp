@@ -8,7 +8,7 @@
 #include "WorldRendererVulkanRayTracing.h"
 #ifdef USING_VULKAN
 #include "../helper/Raytracing.h"
-#include "../scene/SceneView.h"
+#include <lib/yrenderer/scene/SceneView.h>
 #include "../path/RenderPath.h"
 #include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>

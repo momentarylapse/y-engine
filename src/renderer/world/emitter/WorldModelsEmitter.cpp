@@ -5,8 +5,8 @@
 #include "WorldModelsEmitter.h"
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/base.h>
-#include <renderer/scene/RenderViewData.h>
-#include <renderer/scene/SceneView.h>
+#include <lib/yrenderer/scene/RenderViewData.h>
+#include <lib/yrenderer/scene/SceneView.h>
 #include <world/Model.h>
 #include <world/ModelManager.h>
 #include <world/components/Animator.h>

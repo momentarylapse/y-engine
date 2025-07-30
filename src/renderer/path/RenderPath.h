@@ -7,7 +7,7 @@
 
 
 #include <lib/yrenderer//Renderer.h>
-#include "../scene/SceneView.h"
+#include <lib/yrenderer/scene/SceneView.h>
 
 class CubeMapRenderer;
 class SceneRenderer;

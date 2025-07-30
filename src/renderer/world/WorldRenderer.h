@@ -15,7 +15,7 @@
 #include <lib/base/callable.h>
 #include <lib/base/pointer.h>
 
-#include "../scene/SceneView.h"
+#include <lib/yrenderer/scene/SceneView.h>
 
 class GeometryRenderer;
 class ShadowMapRenderer;

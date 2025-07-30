@@ -4,8 +4,8 @@
 #include <lib/os/msg.h>
 #include <lib/yrenderer/base.h>
 #include <renderer/path/RenderPath.h>
-#include <renderer/scene/SceneView.h>
-#include <renderer/scene/SceneRenderer.h>
+#include <lib/yrenderer/scene/SceneView.h>
+#include <lib/yrenderer/scene/SceneRenderer.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <y/Entity.h>
 

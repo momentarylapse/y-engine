@@ -7,7 +7,7 @@
 
 #include "WorldRendererDeferred.h"
 #include <lib/yrenderer/target/TextureRenderer.h>
-#include "../scene/pass/ShadowRenderer.h"
+#include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/base.h>
 #include "../path/RenderPath.h"

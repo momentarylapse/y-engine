@@ -701,10 +701,18 @@ add_library(moduley SHARED
 	src/lib/vulkan/vulkan.cpp
 	src/lib/yrenderer/helper/Bindable.cpp
 	src/lib/yrenderer/helper/ComputeTask.cpp
+	src/lib/yrenderer/helper/CubeMapSource.cpp
+	src/lib/yrenderer/helper/jitter.cpp
 	src/lib/yrenderer/helper/Pipeline.cpp
 	src/lib/yrenderer/helper/PipelineManager.cpp
 	src/lib/yrenderer/post/MultisampleResolver.cpp
 	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
+	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
+	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
+	src/lib/yrenderer/scene/MeshEmitter.cpp
+	src/lib/yrenderer/scene/RenderViewData.cpp
+	src/lib/yrenderer/scene/SceneRenderer.cpp
+	src/lib/yrenderer/scene/SceneView.cpp
 	src/lib/yrenderer/target/HeadlessRendererVulkan.cpp
 	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
 	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
@@ -725,8 +733,6 @@ add_library(moduley SHARED
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
-	src/renderer/helper/CubeMapSource.cpp
-	src/renderer/helper/jitter.cpp
 	src/renderer/helper/LightMeter.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
@@ -738,12 +744,6 @@ add_library(moduley SHARED
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
-	src/renderer/scene/mesh/CubeEmitter.cpp
-	src/renderer/scene/pass/ShadowRenderer.cpp
-	src/renderer/scene/MeshEmitter.cpp
-	src/renderer/scene/RenderViewData.cpp
-	src/renderer/scene/SceneRenderer.cpp
-	src/renderer/scene/SceneView.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -966,10 +966,18 @@ add_executable(y
 	src/lib/vulkan/vulkan.cpp
 	src/lib/yrenderer/helper/Bindable.cpp
 	src/lib/yrenderer/helper/ComputeTask.cpp
+	src/lib/yrenderer/helper/CubeMapSource.cpp
+	src/lib/yrenderer/helper/jitter.cpp
 	src/lib/yrenderer/helper/Pipeline.cpp
 	src/lib/yrenderer/helper/PipelineManager.cpp
 	src/lib/yrenderer/post/MultisampleResolver.cpp
 	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
+	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
+	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
+	src/lib/yrenderer/scene/MeshEmitter.cpp
+	src/lib/yrenderer/scene/RenderViewData.cpp
+	src/lib/yrenderer/scene/SceneRenderer.cpp
+	src/lib/yrenderer/scene/SceneView.cpp
 	src/lib/yrenderer/target/HeadlessRendererVulkan.cpp
 	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
 	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
@@ -990,8 +998,6 @@ add_executable(y
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
-	src/renderer/helper/CubeMapSource.cpp
-	src/renderer/helper/jitter.cpp
 	src/renderer/helper/LightMeter.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
@@ -1003,12 +1009,6 @@ add_executable(y
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
-	src/renderer/scene/mesh/CubeEmitter.cpp
-	src/renderer/scene/pass/ShadowRenderer.cpp
-	src/renderer/scene/MeshEmitter.cpp
-	src/renderer/scene/RenderViewData.cpp
-	src/renderer/scene/SceneRenderer.cpp
-	src/renderer/scene/SceneView.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp

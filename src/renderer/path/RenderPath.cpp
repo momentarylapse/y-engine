@@ -5,7 +5,7 @@
 #include "RenderPath.h"
 #include <lib/yrenderer/base.h>
 #include "../world/WorldRenderer.h"
-#include "../scene/pass/ShadowRenderer.h"
+#include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/MultisampleResolver.h>
 #include "../post/HDRResolver.h"
 #include "../world/WorldRendererForward.h"
@@ -15,7 +15,7 @@
 #endif
 #include "../helper/LightMeter.h"
 #include <lib/yrenderer/target/TextureRenderer.h>
-#include <renderer/helper/CubeMapSource.h>
+#include <lib/yrenderer/helper/CubeMapSource.h>
 #include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/ygraphics/graphics-impl.h>
@@ -35,7 +35,7 @@
 #include <renderer/world/emitter/WorldInstancedEmitter.h>
 #include <renderer/world/emitter/WorldSkyboxEmitter.h>
 #include <world/components/MultiInstance.h>
-#include "../scene/MeshEmitter.h"
+#include <lib/yrenderer/scene/MeshEmitter.h>
 #include "world/Light.h"
 
 

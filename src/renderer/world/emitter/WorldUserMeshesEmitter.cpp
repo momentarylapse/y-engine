@@ -3,7 +3,7 @@
 //
 
 #include "WorldUserMeshesEmitter.h"
-#include "../../scene/RenderViewData.h"
+#include <lib/yrenderer/scene/RenderViewData.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/base.h>
 #include <world/components/UserMesh.h>

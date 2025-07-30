@@ -5,7 +5,7 @@
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/base/pointer.h>
 #include <lib/yrenderer/Renderer.h>
-#include "../scene/RenderViewData.h"
+#include <lib/yrenderer/scene/RenderViewData.h>
 
 class TextureRenderer;
 class MeshEmitter;
