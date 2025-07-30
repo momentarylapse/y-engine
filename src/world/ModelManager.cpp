@@ -25,7 +25,7 @@
 #include <lib/doc/chunked.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include "../meta.h"
-#include "Material.h"
+#include <lib/yrenderer/Material.h>
 
 
 Alpha parse_alpha_i(int a); // Material.h

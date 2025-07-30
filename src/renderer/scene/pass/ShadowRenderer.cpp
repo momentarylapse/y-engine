@@ -12,7 +12,7 @@
 #include "../../base.h"
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
-#include <world/Material.h>
+#include <lib/yrenderer/Material.h>
 #include <world/Camera.h>
 #include <world/Light.h>
 #include "../../../Config.h"

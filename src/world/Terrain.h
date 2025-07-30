@@ -12,12 +12,10 @@
 #include <lib/os/path.h>
 #include <lib/math/vec3.h>
 #include "../y/Component.h"
-#include "Material.h"
+#include <lib/yrenderer/Material.h>
 #include <lib/ygraphics/graphics-fwd.h>
-#include "../y/BaseClass.h"
 class Material;
 class CollisionData;
-//class DescriptorSet;
 
 enum class TerrainType {
 	CONTINGUOUS,

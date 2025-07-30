@@ -10,7 +10,7 @@
 #include <lib/ygraphics/graphics-impl.h>
 
 #include <world/components/UserMesh.h>
-#include <world/Material.h>
+#include <lib/yrenderer/Material.h>
 #include <world/ModelManager.h>
 
 #ifdef USING_VULKAN
@@ -21,9 +21,9 @@ namespace vulkan {
 #endif
 
 
-ResourceManager::ResourceManager(::Context *_ctx, const Path &texture_dir, const Path &shader_dir) {
+ResourceManager::ResourceManager(::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
 	ctx = _ctx;
-	material_manager = new MaterialManager(this);
+	material_manager = new MaterialManager(this, material_dir);
 	model_manager = new ModelManager(this, material_manager);
 	shader_manager = new ShaderManager(ctx, shader_dir);
 	shader_manager->ignore_missing_files = engine.ignore_missing_files;

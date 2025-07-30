@@ -8,7 +8,7 @@
 \*----------------------------------------------------------------------------*/
 
 #include "Terrain.h"
-#include "Material.h"
+#include <lib/yrenderer/Material.h>
 #include "World.h"
 #include "../y/EngineData.h"
 #include "../helper/ResourceManager.h"

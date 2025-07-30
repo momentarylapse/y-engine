@@ -3,14 +3,14 @@
 #include <lib/os/config.h>
 #include <lib/any/any.h>
 #include <lib/ygraphics/graphics-impl.h>
-#include "../helper/ResourceManager.h"
+#include <helper/ResourceManager.h>
 #include <lib/yrenderer/ShaderManager.h>
-#include "../y/EngineData.h"
 
 
 
-MaterialManager::MaterialManager(ResourceManager *_resource_manager) {
+MaterialManager::MaterialManager(ResourceManager *_resource_manager, const Path& _material_dir) {
 	resource_manager = _resource_manager;
+	material_dir = _material_dir;
 	// create the default material
 	trivial_material = new Material(resource_manager);
 	//trivial_material->shader_path = Shader::default_3d;
@@ -169,7 +169,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	msg_write("loading material " + filename.str());
 
 	Configuration c;
-	if (!c.load(engine.material_dir | filename.with(".material"))) {
+	if (!c.load(material_dir | filename.with(".material"))) {
 		//if (engine.ignore_missing_files) {
 			msg_error("material file missing: " + filename.str());
 			return default_material->copy();

@@ -699,6 +699,7 @@ add_library(moduley SHARED
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
+	src/lib/yrenderer/Material.cpp
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
@@ -763,7 +764,6 @@ add_library(moduley SHARED
 	src/world/LevelData.cpp
 	src/world/Light.cpp
 	src/world/Link.cpp
-	src/world/Material.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
 	src/world/Terrain.cpp
@@ -964,6 +964,7 @@ add_executable(y
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
+	src/lib/yrenderer/Material.cpp
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
@@ -1028,7 +1029,6 @@ add_executable(y
 	src/world/LevelData.cpp
 	src/world/Light.cpp
 	src/world/Link.cpp
-	src/world/Material.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
 	src/world/Terrain.cpp

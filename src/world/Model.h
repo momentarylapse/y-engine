@@ -26,7 +26,7 @@
 
 #include <lib/ygraphics/graphics-fwd.h>
 #include "../y/Component.h"
-#include "Material.h"
+#include <lib/yrenderer/Material.h>
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 #include <lib/os/path.h>

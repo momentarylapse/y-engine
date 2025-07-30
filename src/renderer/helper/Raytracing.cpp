@@ -16,7 +16,7 @@
 #include "../../fx/Particle.h"
 #include "../../world/Camera.h"
 #include "../../world/Light.h"
-#include "../../world/Material.h"
+#include <lib/yrenderer/Material.h>
 #include "../../world/Model.h"
 #include "../../world/Terrain.h"
 #include "../../world/World.h"

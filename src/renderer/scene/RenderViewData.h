@@ -13,7 +13,7 @@
 #include <lib/math/vec3.h>
 #include <lib/image/color.h>
 #include <lib/ygraphics/graphics-fwd.h>
-#include <world/Material.h>
+#include <lib/yrenderer/Material.h>
 
 class Camera;
 struct SceneView;

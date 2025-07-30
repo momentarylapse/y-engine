@@ -113,7 +113,7 @@ struct ShaderCache {
 
 class MaterialManager {
 public:
-	explicit MaterialManager(ResourceManager *resource_manager);
+	explicit MaterialManager(ResourceManager *resource_manager, const Path& material_dir);
 	~MaterialManager();
 
 	void reset();
@@ -123,6 +123,7 @@ public:
 	xfer<Material> load(const Path &filename);
 
 private:
+	Path material_dir;
 	ResourceManager *resource_manager;
 	Material *default_material;
 	Material *trivial_material;

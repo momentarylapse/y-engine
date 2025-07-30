@@ -23,7 +23,7 @@
 
 #include "Model.h"
 #include "ModelManager.h"
-#include "Material.h"
+#include <lib/yrenderer/Material.h>
 #include "World.h"
 #include "../y/Entity.h"
 #include <lib/math/complex.h>

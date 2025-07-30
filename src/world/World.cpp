@@ -22,7 +22,7 @@
 #include "../helper/ResourceManager.h"
 #include "Link.h"
 #include "Light.h"
-#include "Material.h"
+#include <lib/yrenderer/Material.h>
 #include "Model.h"
 #include "Terrain.h"
 #include "World.h"
