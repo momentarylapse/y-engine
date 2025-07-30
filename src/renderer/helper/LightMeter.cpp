@@ -8,13 +8,14 @@
 #include "../base.h"
 #include <lib/profiler/Profiler.h>
 #include "../../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 
 
 constexpr int NBINS = 256;
 constexpr int NSAMPLES = 2560;
 
 LightMeter::LightMeter(ResourceManager* resource_manager, Texture* tex)
-	: ComputeTask("expo", resource_manager->load_shader("compute/brightness.shader"), NSAMPLES, 1, 1)
+	: ComputeTask("expo", resource_manager->shader_manager->load_shader("compute/brightness.shader"), NSAMPLES, 1, 1)
 {
 	ch_prepare = profiler::create_channel("expo.p", channel);
 	params = new UniformBuffer(8);

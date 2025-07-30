@@ -2,6 +2,7 @@
 #include "ThroughShaderRenderer.h"
 #include "../target/TextureRenderer.h"
 #include "../../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
@@ -12,7 +13,7 @@ namespace nix {
 }
 
 MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
-	shader_resolve_multisample = resource_manager->load_shader("forward/resolve-multisample.shader");
+	shader_resolve_multisample = resource_manager->shader_manager->load_shader("forward/resolve-multisample.shader");
 	tsr = new ThroughShaderRenderer("ms", shader_resolve_multisample);
 	tsr->bind_textures(0, {tex_ms, depth_ms});
 

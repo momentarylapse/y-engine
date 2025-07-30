@@ -12,6 +12,7 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <Config.h>
 #include <helper/ResourceManager.h>
+#include <lib/yrenderer/ShaderManager.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/math/vec2.h>
 #include <lib/os/msg.h>
@@ -36,7 +37,7 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 	int height = tex->height;
 
 
-	auto shader_blur = resource_manager->load_shader("forward/blur.shader");
+	auto shader_blur = resource_manager->shader_manager->load_shader("forward/blur.shader");
 	int bloomw = width, bloomh = height;
 	auto bloom_input = tex;
 	float r = 3;
@@ -69,7 +70,7 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 		threshold = 0;
 	}
 
-	auto shader_out = resource_manager->load_shader("forward/hdr.shader");
+	auto shader_out = resource_manager->shader_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer("out", shader_out);
 	out_renderer->bind_textures(0, {tex.get(), bloom_levels[0].tex_out.get(), bloom_levels[1].tex_out.get(), bloom_levels[2].tex_out.get(), bloom_levels[3].tex_out.get()});
 	children.add(out_renderer.get());

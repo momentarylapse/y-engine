@@ -25,6 +25,7 @@
 #include <world/World.h>
 #include "../../helper/ResourceManager.h"
 #include "../../world/Camera.h"
+#include <lib/yrenderer/ShaderManager.h>
 #include "../../Config.h"
 #include <lib/ygraphics/graphics-impl.h>
 
@@ -46,10 +47,10 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	gbuffer_renderer->clear_colors = {color(-1, 0,1,0)};
 
 
-	resource_manager->load_shader_module("forward/module-surface.shader");
-	resource_manager->load_shader_module("deferred/module-surface.shader");
+	resource_manager->shader_manager->load_shader_module("forward/module-surface.shader");
+	resource_manager->shader_manager->load_shader_module("deferred/module-surface.shader");
 
-	auto shader_gbuffer_out = resource_manager->load_shader("deferred/out.shader");
+	auto shader_gbuffer_out = resource_manager->shader_manager->load_shader("deferred/out.shader");
 //	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
 //		msg_error("SSAO");
 

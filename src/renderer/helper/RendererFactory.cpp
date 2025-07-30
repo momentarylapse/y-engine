@@ -22,12 +22,10 @@
 #endif
 #include <y/EngineData.h>
 #include <lib/os/msg.h>
-#if __has_include(<lib/hui/hui.h>)
-#include <lib/hui/hui.h>
-#endif
 #include <lib/profiler/Profiler.h>
 #include <Config.h>
 #include <helper/ResourceManager.h>
+#include <lib/yrenderer/ShaderManager.h>
 
 // for debugging
 #include <lib/ygraphics/graphics-impl.h>
@@ -126,7 +124,7 @@ void create_base_renderer(GLFWwindow* window) {
 					im.set_pixel(i, j, ((i/16+j/16)%2 == 0) ? Black : White);
 			shared tex = new Texture();
 			tex->write(im);
-			auto shader = engine.resource_manager->load_shader("forward/blur.shader");
+			auto shader = engine.resource_manager->shader_manager->load_shader("forward/blur.shader");
 			auto tsr = new ThroughShaderRenderer("blur", shader);
 			tsr->bind_texture(0, tex.get());
 			Any axis_x, axis_y;

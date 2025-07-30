@@ -22,6 +22,7 @@
 #include "../gui/Text.h"
 #include "../helper/DeletionQueue.h"
 #include "../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 #include "../helper/Scheduler.h"
 #if __has_include("../input/InputManager.h")
 #include "../input/InputManager.h"
@@ -306,11 +307,11 @@ xfer<Model> __load_model(const Path& filename) {
 }
 
 shared<Shader> __load_shader(const Path& filename) {
-	return engine.resource_manager->load_shader(filename);
+	return engine.resource_manager->shader_manager->load_shader(filename);
 }
 
 xfer<Shader> __create_shader(const string& source) {
-	return engine.resource_manager->create_shader(source);
+	return engine.resource_manager->shader_manager->create_shader(source);
 }
 
 shared<Texture> __load_texture(const Path& filename) {
@@ -978,12 +979,12 @@ void export_engine(kaba::Exporter* ext) {
 
 
 	// unused
-	ext->declare_class_size("ResourceManager", sizeof(ResourceManager));
+/*	ext->declare_class_size("ResourceManager", sizeof(ResourceManager));
 	ext->link_class_func("ResourceManager.load_shader", &ResourceManager::load_shader);
 	ext->link_class_func("ResourceManager.create_shader", &ResourceManager::create_shader);
 	ext->link_class_func("ResourceManager.load_texture", &ResourceManager::load_texture);
 	ext->link_class_func("ResourceManager.load_material", &ResourceManager::load_material);
-	ext->link_class_func("ResourceManager.load_model", &ResourceManager::load_model);
+	ext->link_class_func("ResourceManager.load_model", &ResourceManager::load_model);*/
 
 
 	ext->declare_class_size("EngineData", sizeof(EngineData));

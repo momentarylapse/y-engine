@@ -13,6 +13,7 @@
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"
 #include "../../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/math/mat4.h>
 #include <lib/math/rect.h>
@@ -29,7 +30,7 @@ struct UBOGUI {
 
 GuiRendererVulkan::GuiRendererVulkan() : Renderer("ui") {
 
-	shader = resource_manager->load_shader("vulkan/2d.shader");
+	shader = resource_manager->shader_manager->load_shader("vulkan/2d.shader");
 
 	vb = new VertexBuffer("3f,3f,2f");
 	vb->create_quad(rect::ID);

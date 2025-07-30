@@ -13,9 +13,8 @@
 #include <lib/kaba/kaba.h>
 #include <renderer/Renderer.h>
 
-#include "../world/Model.h"
-#include "../world/Material.h"
 #include "../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 
 EngineData engine;
 
@@ -69,7 +68,7 @@ void EngineData::set_context(Context *ctx, ResourceManager *rm) {
 	context = ctx;
 	resource_manager = rm;
 	resource_manager->texture_dir = texture_dir;
-	resource_manager->shader_dir = material_dir;
+	resource_manager->shader_manager->shader_dir = material_dir;
 }
 
 void EngineData::set_dirs(const Path &_texture_dir, const Path &_map_dir, const Path &_object_dir, const Path &_sound_dir, const Path &_script_dir, const Path &_material_dir, const Path &_font_dir) {
@@ -84,7 +83,7 @@ void EngineData::set_dirs(const Path &_texture_dir, const Path &_map_dir, const 
 
 	if (resource_manager) {
 		resource_manager->texture_dir = _texture_dir;
-		resource_manager->shader_dir = _material_dir;
+		resource_manager->shader_manager->shader_dir = _material_dir;
 	}
 	kaba::config.directory = _script_dir;
 }

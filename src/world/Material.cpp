@@ -1,11 +1,10 @@
 #include "Material.h"
-#include "Model.h"
-#include <lib/config.h>
 #include <lib/os/msg.h>
 #include <lib/os/config.h>
 #include <lib/any/any.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include "../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 #include "../y/EngineData.h"
 
 
@@ -282,7 +281,7 @@ void ShaderCache::_prepare_shader(RenderPathType render_path_type, const Materia
 		return;
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = material.resource_manager->load_surface_shader(material.pass0.shader_path, rpt, vertex_module, geometry_module);
+	shader[i] = material.resource_manager->shader_manager->load_surface_shader(material.pass0.shader_path, rpt, vertex_module, geometry_module);
 }
 void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, const Material &material, const string& vertex_module, const string& geometry_module, int k) {
 	int i = shader_index(render_path_type);
@@ -290,7 +289,7 @@ void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, co
 		return;
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = material.resource_manager->load_surface_shader(material.pass(k).shader_path, rpt, vertex_module, geometry_module);
+	shader[i] = material.resource_manager->shader_manager->load_surface_shader(material.pass(k).shader_path, rpt, vertex_module, geometry_module);
 }
 
 Shader *ShaderCache::get_shader(RenderPathType render_path_type) {

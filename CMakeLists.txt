@@ -699,6 +699,7 @@ add_library(moduley SHARED
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
+	src/lib/yrenderer/ShaderManager.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
@@ -962,6 +963,7 @@ add_executable(y
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
+	src/lib/yrenderer/ShaderManager.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp

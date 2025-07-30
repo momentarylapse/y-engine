@@ -11,6 +11,7 @@
 #include <lib/profiler/Profiler.h>
 #include <renderer/target/WindowRendererVulkan.h>
 #include "../../helper/ResourceManager.h"
+#include <lib/yrenderer/ShaderManager.h>
 #include "../../gui/Node.h"
 #include "../../fx/Particle.h"
 #include "../../world/Camera.h"
@@ -62,9 +63,9 @@ RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer,buffer");
 		rtx.dset->set_uniform_buffer(5, buffer_meshes.get());
 
-		auto shader_gen = resource_manager->load_shader("vulkan/gen.shader");
-		auto shader1 = resource_manager->load_shader("vulkan/group1.shader");
-		auto shader2 = resource_manager->load_shader("vulkan/group2.shader");
+		auto shader_gen = resource_manager->shader_manager->load_shader("vulkan/gen.shader");
+		auto shader1 = resource_manager->shader_manager->load_shader("vulkan/group1.shader");
+		auto shader2 = resource_manager->shader_manager->load_shader("vulkan/group2.shader");
 		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer,buffer]]", {shader_gen.get(), shader1.get(), shader2.get()}, 2);
 		rtx.pipeline->create_sbt();
 
@@ -74,7 +75,7 @@ RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:2,buffer:8,sampler:1", 1);
 
-		auto shader = resource_manager->load_shader("compute/raytracing.shader");
+		auto shader = resource_manager->shader_manager->load_shader("compute/raytracing.shader");
 		compute.pipeline = new vulkan::ComputePipeline(shader.get());
 		compute.dset = compute.pool->create_set("storage-buffer,buffer,storage-buffer");
 		compute.dset->set_storage_buffer(0, buffer_requests.get());
