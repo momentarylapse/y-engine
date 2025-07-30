@@ -41,7 +41,7 @@ void WorldModelsEmitter::emit(const yrenderer::RenderParams& params, yrenderer::
 
 			m->update_matrix();
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
-			auto& rd = rvd.start(params, m->_matrix, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, m->_matrix, shader, *material, 0, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
 			if (ani) {
 				ani->buf->update_array(ani->dmatrix);
@@ -100,7 +100,7 @@ void WorldModelsEmitter::emit_transparent(const yrenderer::RenderParams& params,
 		for (int k=0; k<material->num_passes; k++) {
 			auto shader = rvd.get_shader(material, k, m->_template->vertex_shader_module, "");
 
-			auto& rd = rvd.start(params, m->_matrix, shader, *material, k, PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, m->_matrix, shader, *material, k, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
 			if (ani) {
 				ani->buf->update_array(ani->dmatrix);

@@ -19,6 +19,7 @@
 extern float global_shadow_box_size; // :(
 
 namespace yrenderer {
+using namespace ygfx;
 
 
 RenderViewData::RenderViewData() {

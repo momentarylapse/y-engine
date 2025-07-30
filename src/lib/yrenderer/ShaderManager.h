@@ -13,28 +13,28 @@ namespace yrenderer {
 
 class ShaderManager {
 public:
-	explicit ShaderManager(Context *ctx, const Path &_shader_dir);
-	Context *ctx;
+	explicit ShaderManager(ygfx::Context *ctx, const Path &_shader_dir);
+	ygfx::Context *ctx;
 
-	shared<Shader> load_shader(const Path& path);
-	xfer<Shader> create_shader(const string &source);
-	shared<Shader> load_surface_shader(const Path& path, const string &render_path, const string &vertex_module, const string &geometry_module);
+	shared<ygfx::Shader> load_shader(const Path& path);
+	xfer<ygfx::Shader> create_shader(const string &source);
+	shared<ygfx::Shader> load_surface_shader(const Path& path, const string &render_path, const string &vertex_module, const string &geometry_module);
 	string expand_vertex_shader_source(const string &source, const string &variant);
 	string expand_fragment_shader_source(const string &source, const string &render_path);
 	string expand_geometry_shader_source(const string &source, const string &variant);
 	void load_shader_module(const Path& path);
 
-	xfer<Shader> __load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size);
-	xfer<Shader> __create_shader(const string& source, const string &overwrite_bindings, int overwrite_push_size);
+	xfer<ygfx::Shader> __load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size);
+	xfer<ygfx::Shader> __create_shader(const string& source, const string &overwrite_bindings, int overwrite_push_size);
 
 	Path shader_dir;
 	Path default_shader;
 	void clear();
 
 
-	shared_array<Shader> shaders;
+	shared_array<ygfx::Shader> shaders;
 	Array<Path> shader_modules;
-	base::map<Path,Shader*> shader_map;
+	base::map<Path,ygfx::Shader*> shader_map;
 	bool ignore_missing_files = false;
 };
 }

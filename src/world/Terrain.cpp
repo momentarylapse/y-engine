@@ -96,11 +96,7 @@ bool Terrain::load(ResourceManager *resource_manager, const Path &_filename_, bo
 					for (int z=0;z<num_z/TERRAIN_CHUNK_SIZE+1;z++)
 						chunk_lod[x][z] = -1;
 
-//#ifdef USING_VULKAN
-				vertex_buffer = new VertexBuffer("3f,3f,2f");
-//#else
-//				vertex_buffer = new VertexBuffer("3f,3f" + string(",2f").repeat(material->textures.num));
-//#endif
+				vertex_buffer = new ygfx::VertexBuffer("3f,3f,2f");
 			}
 		} else {
 			msg_error(format("wrong file format: %d (4 expected)",ffv));
@@ -131,7 +127,7 @@ Terrain::Terrain(int nx, int nz, const vec3& _pattern, yrenderer::Material* _mat
 	num_x = nx;
 	num_z = nz;
 	height.resize((num_x + 1) * (num_z + 1));
-	vertex_buffer = new VertexBuffer("3f,3f,2f");
+	vertex_buffer = new ygfx::VertexBuffer("3f,3f,2f");
 	pattern = _pattern;
 	material = _material;
 	update(-1, -1, -1, -1, TerrainUpdateAll);

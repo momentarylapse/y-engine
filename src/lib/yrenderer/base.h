@@ -19,16 +19,20 @@ class Painter;
 
 namespace yrenderer {
 
-Context* api_init(GLFWwindow* window);
+struct __Context {
+
+};
+
+ygfx::Context* api_init(GLFWwindow* window);
 #ifdef USING_VULKAN
-Context* api_init_external(vulkan::Instance* instance, vulkan::Device* device);
+ygfx::Context* api_init_external(vulkan::Instance* instance, vulkan::Device* device);
 #endif
-Context* api_init_xhui(xhui::Painter* p);
+ygfx::Context* api_init_xhui(xhui::Painter* p);
 void api_end();
 void _create_default_textures();
 
-extern Texture *tex_white;
-extern Texture *tex_black;
+extern ygfx::Texture *tex_white;
+extern ygfx::Texture *tex_black;
 
 void gpu_flush();
 

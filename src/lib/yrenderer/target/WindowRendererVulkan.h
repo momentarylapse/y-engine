@@ -44,14 +44,14 @@ public:
 	Semaphore *image_available_semaphore = nullptr;
 	Semaphore *render_finished_semaphore = nullptr;
 
-	Array<CommandBuffer*> command_buffers;
+	Array<ygfx::CommandBuffer*> command_buffers;
 
 	Device *device;
 	SwapChain *swap_chain = nullptr;
-	Array<Texture*> swap_images;
+	Array<ygfx::Texture*> swap_images;
 	RenderPass* default_render_pass = nullptr;
-	DepthBuffer* depth_buffer = nullptr;
-	Array<FrameBuffer*> frame_buffers;
+	ygfx::DepthBuffer* depth_buffer = nullptr;
+	Array<ygfx::FrameBuffer*> frame_buffers;
 	int image_index = 0;
 	bool framebuffer_resized = false;
 

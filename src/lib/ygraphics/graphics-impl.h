@@ -15,14 +15,18 @@
 // Vulkan
 
 	#include <lib/vulkan/vulkan.h>
+namespace ygfx {
 	using Vertex1 = vulkan::Vertex1;
+}
 
 #else
 
 // OpenGL
 
 	#include <lib/nix/nix.h>
+namespace ygfx {
 	using Vertex1 = nix::Vertex1;
+}
 
 #endif
 

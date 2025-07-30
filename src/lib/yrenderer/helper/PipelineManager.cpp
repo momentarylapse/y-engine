@@ -13,6 +13,8 @@
 
 namespace yrenderer::PipelineManager {
 
+	using namespace ygfx;
+
 struct PipelineKey {
 	Shader* s;
 	int param;

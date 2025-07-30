@@ -30,7 +30,7 @@ static int BLUR_SCALE = 4;
 static int BLOOM_LEVEL_SCALE = 4;
 
 
-HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<DepthBuffer>& depth_buffer) : Renderer("hdr") {
+HDRResolver::HDRResolver(Camera *_cam, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer) : Renderer("hdr") {
 	cam = _cam;
 	tex_main = tex;
 	_depth_buffer = depth_buffer;
@@ -48,10 +48,10 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<Texture>& tex, const shared<
 		auto& bl = bloom_levels[i];
 		bloomw /= BLOOM_LEVEL_SCALE;
 		bloomh /= BLOOM_LEVEL_SCALE;
-		bl.tex_temp = new Texture(bloomw, bloomh, "rgba:f16");
-		auto depth0 = new DepthBuffer(bloomw, bloomh, "d:f32");
-		bl.tex_out = new Texture(bloomw, bloomh, "rgba:f16");
-		auto depth1 = new DepthBuffer(bloomw, bloomh, "d:f32");
+		bl.tex_temp = new ygfx::Texture(bloomw, bloomh, "rgba:f16");
+		auto depth0 = new ygfx::DepthBuffer(bloomw, bloomh, "d:f32");
+		bl.tex_out = new ygfx::Texture(bloomw, bloomh, "rgba:f16");
+		auto depth1 = new ygfx::DepthBuffer(bloomw, bloomh, "d:f32");
 		bl.tex_temp->set_options("wrap=clamp");
 		bl.tex_out->set_options("wrap=clamp");
 		bl.tsr[0] = new ThroughShaderRenderer("blur", shader_blur);

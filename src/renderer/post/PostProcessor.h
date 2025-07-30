@@ -20,7 +20,7 @@ struct PostProcessorStage : public yrenderer::Renderer {
 	PostProcessorStage(const string &name);
 	PostProcessor *post = nullptr;
 
-	VertexBuffer *vb_2d;
+	ygfx::VertexBuffer *vb_2d;
 };
 
 struct PostProcessorStageUser : public PostProcessorStage {

@@ -12,14 +12,14 @@
 namespace yrenderer {
 
 CubeEmitter::CubeEmitter() : MeshEmitter("cube") {
-	vb = new VertexBuffer("3f,3f,2f");
+	vb = new ygfx::VertexBuffer("3f,3f,2f");
 	set_cube(Box::ID_SYM);
 	material = new Material(engine.resource_manager);
 	material->textures.add(tex_white);
 }
 
 void CubeEmitter::set_cube(const Box& box) {
-	Array<Vertex1> vertices = {
+	Array<ygfx::Vertex1> vertices = {
 		{{box.min.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
 		{{box.max.x, box.min.y, box.min.z}, {0,0,-1}, 0, 0},
 		{{box.min.x, box.max.y, box.min.z}, {0,0,-1}, 0, 0},
@@ -52,7 +52,7 @@ void CubeEmitter::set_cube(const Box& box) {
 
 void CubeEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {
 	auto shader = rvd.get_shader(material.get(), 0, "default", "");
-	auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb.get());
+	auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, ygfx::PrimitiveTopology::TRIANGLES, vb.get());
 	rd.draw_triangles(params, vb.get());
 }
 

@@ -6,7 +6,7 @@
 
 namespace yrenderer {
 
-ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int _nx, int _ny, int _nz) :
+ComputeTask::ComputeTask(const string& name, const shared<ygfx::Shader>& _shader, int _nx, int _ny, int _nz) :
     RenderTask(name),
     bindings(_shader.get())
 {

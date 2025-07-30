@@ -16,7 +16,7 @@ namespace yrenderer {
 
 class TextureRenderer : public RenderTask {
 public:
-	explicit TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options = {});
+	explicit TextureRenderer(const string& name, const shared_array<ygfx::Texture>& textures, const Array<string>& options = {});
 	~TextureRenderer() override;
 
 	RenderParams make_params(const RenderParams& params) const;
@@ -29,11 +29,11 @@ public:
 
 	void set_layer(int layer);
 
-	shared<FrameBuffer> frame_buffer;
+	shared<ygfx::FrameBuffer> frame_buffer;
 #ifdef USING_VULKAN
-	owned<RenderPass> render_pass;
+	owned<ygfx::RenderPass> render_pass;
 #endif
-	shared_array<Texture> textures;
+	shared_array<ygfx::Texture> textures;
 
 	bool clear_z = true;
 	Array<color> clear_colors;

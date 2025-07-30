@@ -50,8 +50,8 @@ RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
 	if (mode == RaytracingMode::NONE)
 		throw Exception("no compute shader support");
 
-	buffer_meshes = new UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES); // 64k!
-	buffer_requests = new ShaderStorageBuffer(sizeof(RayRequest) * MAX_RT_REQUESTS);
+	buffer_meshes = new ygfx::UniformBuffer(sizeof(MeshDescription) * MAX_RT_MESHES); // 64k!
+	buffer_requests = new ygfx::ShaderStorageBuffer(sizeof(RayRequest) * MAX_RT_REQUESTS);
 	buffer_reply = new vulkan::StorageBuffer(sizeof(RayReply) * MAX_RT_REQUESTS);
 
 	if (mode == RaytracingMode::RTX) {
@@ -151,7 +151,7 @@ void RayTracingData::update_frame() {
 
 		} else {
 
-			auto make_indexed = [] (VertexBuffer *vb) {
+			auto make_indexed = [] (ygfx::VertexBuffer *vb) {
 				if (!vb->is_indexed()) {
 					Array<int> index;
 					for (int i=0; i<vb->output_count; i++)

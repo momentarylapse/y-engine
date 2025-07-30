@@ -33,6 +33,7 @@
 #include <lib/yrenderer/target/TextureRenderer.h>
 
 using namespace yrenderer;
+using namespace ygfx;
 
 string render_graph_str(Renderer *r) {
 	string s = profiler::get_name(r->channel);

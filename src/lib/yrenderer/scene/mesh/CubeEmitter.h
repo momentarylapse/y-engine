@@ -16,7 +16,7 @@ class Material;
 
 class CubeEmitter : public MeshEmitter {
 public:
-	owned<VertexBuffer> vb;
+	owned<ygfx::VertexBuffer> vb;
 	owned<Material> material;
 
 	explicit CubeEmitter();

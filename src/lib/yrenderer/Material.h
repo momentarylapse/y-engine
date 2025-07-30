@@ -52,7 +52,7 @@ class Material {
 public:
 	ResourceManager *resource_manager;
 
-	shared_array<Texture> textures;
+	shared_array<ygfx::Texture> textures;
 
 	struct ShaderUniform {
 		string name;
@@ -70,11 +70,11 @@ public:
 
 	struct RenderPassData {
 		TransparencyMode mode = TransparencyMode::NONE;
-		Alpha source, destination;
+		ygfx::Alpha source, destination;
 		float factor = 1;
 		bool z_buffer = true;
 		bool z_test = true;
-		CullMode cull_mode = (CullMode)0;
+		ygfx::CullMode cull_mode = (ygfx::CullMode)0;
 		Path shader_path;
 	};
 	int num_passes = 1;
@@ -89,7 +89,7 @@ public:
 		ReflectionMode mode;
 		float density;
 		//CubeMap *cube_map;
-		Texture *cube_map;
+		ygfx::Texture *cube_map;
 		int cube_map_size;
 	} reflection;
 
@@ -106,10 +106,10 @@ public:
 };
 
 struct ShaderCache {
-	shared<Shader> shader[2]; // * #(render paths)
+	shared<ygfx::Shader> shader[2]; // * #(render paths)
 	void _prepare_shader(RenderPathType render_path_type, const Material& material, const string& vertex_module, const string& geometry_module);
 	void _prepare_shader_multi_pass(RenderPathType render_path_type, const Material& material, const string& vertex_module, const string& geometry_module, int k);
-	Shader *get_shader(RenderPathType render_path_type);
+	ygfx::Shader *get_shader(RenderPathType render_path_type);
 };
 
 
@@ -121,7 +121,7 @@ public:
 	void reset();
 
 	void set_default(Material *m);
-	void set_default_shader(Shader *s);
+	void set_default_shader(ygfx::Shader *s);
 	xfer<Material> load(const Path &filename);
 
 private:

@@ -14,7 +14,7 @@
 #include "../lib/os/msg.h"
 
 namespace yrenderer {
-	extern Texture *tex_white;
+	extern ygfx::Texture *tex_white;
 }
 static Random pe_random;
 

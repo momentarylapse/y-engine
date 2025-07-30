@@ -29,8 +29,8 @@ public:
 	string vertex_shader_module = "default";
 	string geometry_shader_module;
 
-	owned<VertexBuffer> vertex_buffer;
-	PrimitiveTopology topology = PrimitiveTopology::TRIANGLES;
+	owned<ygfx::VertexBuffer> vertex_buffer;
+	ygfx::PrimitiveTopology topology = ygfx::PrimitiveTopology::TRIANGLES;
 
 	static const kaba::Class *_class;
 };

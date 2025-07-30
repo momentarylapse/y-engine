@@ -14,6 +14,8 @@
 constexpr int NBINS = 256;
 constexpr int NSAMPLES = 2560;
 
+using namespace ygfx;
+
 LightMeter::LightMeter(ResourceManager* resource_manager, Texture* tex)
 	: ComputeTask("expo", resource_manager->shader_manager->load_shader("compute/brightness.shader"), NSAMPLES, 1, 1)
 {

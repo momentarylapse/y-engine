@@ -13,6 +13,8 @@
 
 namespace yrenderer {
 
+	using namespace ygfx;
+
 #ifdef USING_VULKAN
 GraphicsPipeline* SceneRenderer::get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
 	if (pass.mode == TransparencyMode::FUNCTIONS)

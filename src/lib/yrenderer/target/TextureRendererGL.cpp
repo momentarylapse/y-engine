@@ -15,8 +15,8 @@
 
 namespace yrenderer {
 
-TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
-	frame_buffer = new FrameBuffer(textures);
+TextureRenderer::TextureRenderer(const string& name, const shared_array<ygfx::Texture>& textures, const Array<string>& options) : RenderTask(name) {
+	frame_buffer = new ygfx::FrameBuffer(textures);
 }
 
 TextureRenderer::~TextureRenderer() = default;

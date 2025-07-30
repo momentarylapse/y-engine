@@ -15,12 +15,12 @@ namespace yrenderer {
 class HeadlessRenderer : public RenderTask {
 public:
 	vulkan::Device* device;
-	CommandBuffer* command_buffer;
+	ygfx::CommandBuffer* command_buffer;
 	vulkan::Fence* fence;
 
 	owned<TextureRenderer> texture_renderer;
 
-	HeadlessRenderer(vulkan::Device* d, const shared_array<Texture>& tex);
+	HeadlessRenderer(vulkan::Device* d, const shared_array<ygfx::Texture>& tex);
 	~HeadlessRenderer() override;
 
 	void render(const RenderParams& params) override;

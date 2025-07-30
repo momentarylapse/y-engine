@@ -12,12 +12,12 @@ class Camera;
 
 class LightMeter : public yrenderer::ComputeTask {
 public:
-	LightMeter(ResourceManager* resource_manager, Texture* tex);
-	UniformBuffer* params;
-	ShaderStorageBuffer* buf;
+	LightMeter(ResourceManager* resource_manager, ygfx::Texture* tex);
+	ygfx::UniformBuffer* params;
+	ygfx::ShaderStorageBuffer* buf;
 	Array<int> histogram;
 	float brightness;
-	Texture* texture;
+	ygfx::Texture* texture;
 	void read();
 	void setup();
 	void adjust_camera(Camera* cam);

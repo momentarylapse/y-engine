@@ -18,8 +18,8 @@ namespace yrenderer {
 
 class WorldRendererDeferred : public WorldRenderer {
 public:
-	shared_array<Texture> gbuffer_textures;
-	UniformBuffer *ssao_sample_buffer;
+	shared_array<ygfx::Texture> gbuffer_textures;
+	ygfx::UniformBuffer *ssao_sample_buffer;
 	int ch_gbuf_out = -1;
 	int ch_trans = -1;
 
@@ -35,5 +35,5 @@ public:
 	void draw(const yrenderer::RenderParams& params) override;
 
 
-	void render_out_from_gbuffer(FrameBuffer *source, const yrenderer::RenderParams& params);
+	void render_out_from_gbuffer(ygfx::FrameBuffer *source, const yrenderer::RenderParams& params);
 };

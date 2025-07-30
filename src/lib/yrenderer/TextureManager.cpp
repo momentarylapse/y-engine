@@ -14,7 +14,7 @@ namespace yrenderer {
 
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs);
 
-TextureManager::TextureManager(::Context *_ctx, const Path &_texture_dir) {
+TextureManager::TextureManager(ygfx::Context *_ctx, const Path &_texture_dir) {
 	ctx = _ctx;
 	texture_dir = _texture_dir;
 
@@ -22,7 +22,7 @@ TextureManager::TextureManager(::Context *_ctx, const Path &_texture_dir) {
 #ifdef USING_VULKAN
 		Image im;
 		im.create(8, 8, White);
-		tex_white = new Texture();
+		tex_white = new ygfx::Texture();
 		tex_white->write(im);
 #else
 		tex_white = ctx->tex_white;
@@ -30,7 +30,7 @@ TextureManager::TextureManager(::Context *_ctx, const Path &_texture_dir) {
 	}
 }
 
-Path TextureManager::texture_file(Texture* t) const {
+Path TextureManager::texture_file(ygfx::Texture* t) const {
 	for (auto&& [key, _t]: texture_map)
 		if (_t == t)
 			return key;
@@ -42,7 +42,7 @@ Path TextureManager::find_absolute_texture_path(const Path& filename) const {
 	return guess_absolute_path(filename, {texture_dir});
 }
 
-shared<Texture> TextureManager::load_texture(const Path& filename) {
+shared<ygfx::Texture> TextureManager::load_texture(const Path& filename) {
 	if (filename.is_empty())
 		return tex_white;
 
@@ -68,7 +68,7 @@ shared<Texture> TextureManager::load_texture(const Path& filename) {
 #ifdef USING_VULKAN
 		msg_write("loading texture: " + str(fn));
 #endif
-		auto t = Texture::load(fn);
+		auto t = ygfx::Texture::load(fn);
 		textures.add(t);
 		texture_map.add({fn, t});
 		return t;

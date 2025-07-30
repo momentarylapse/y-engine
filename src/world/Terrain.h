@@ -79,7 +79,7 @@ public:
 	Array<float> height;
 	Array<vec3> vertex, normal;
 	Array<plane> pl; // for collision detection
-	owned<VertexBuffer> vertex_buffer;
+	owned<ygfx::VertexBuffer> vertex_buffer;
 	int chunk_lod[TERRAIN_MAX_CHUNKS][TERRAIN_MAX_CHUNKS];
 	int chunk_lod_old[TERRAIN_MAX_CHUNKS][TERRAIN_MAX_CHUNKS];
 	vec3 pattern, min, max;
@@ -110,7 +110,7 @@ struct XTerrainVBUpdater {
 	int mode = 0;
 	int counter = 0;
 	Terrain* terrain = nullptr;
-	VertexBuffer* vb = nullptr;
+	ygfx::VertexBuffer* vb = nullptr;
 
 	bool build_chunk(int chunk_no);
 	void condense();

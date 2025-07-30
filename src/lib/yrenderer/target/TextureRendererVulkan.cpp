@@ -9,10 +9,10 @@
 
 namespace yrenderer {
 
-TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& tex, const Array<string>& options) : RenderTask(name) {
+TextureRenderer::TextureRenderer(const string& name, const shared_array<ygfx::Texture>& tex, const Array<string>& options) : RenderTask(name) {
 	textures = tex;
-	render_pass = new RenderPass(weak(textures), options);
-	frame_buffer = new FrameBuffer(render_pass.get(), textures);
+	render_pass = new ygfx::RenderPass(weak(textures), options);
+	frame_buffer = new ygfx::FrameBuffer(render_pass.get(), textures);
 }
 
 TextureRenderer::~TextureRenderer() = default;

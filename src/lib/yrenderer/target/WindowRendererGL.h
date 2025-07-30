@@ -30,8 +30,8 @@ public:
 
 	GLFWwindow* window;
 
-	DepthBuffer* _depth_buffer;
-	FrameBuffer* _frame_buffer;
+	ygfx::DepthBuffer* _depth_buffer;
+	ygfx::FrameBuffer* _frame_buffer;
 };
 
 }

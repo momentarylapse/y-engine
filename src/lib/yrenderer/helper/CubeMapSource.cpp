@@ -43,9 +43,9 @@ void CubeMapRenderer::set_source(CubeMapSource* s) {
 void CubeMapRenderer::render(const RenderParams& params) {
 	gpu_timestamp_begin(params, channel);
 	if (!source->depth_buffer)
-		source->depth_buffer = new DepthBuffer(source->resolution, source->resolution, "ds:u24i8");
+		source->depth_buffer = new ygfx::DepthBuffer(source->resolution, source->resolution, "ds:u24i8");
 	if (!source->cube_map)
-		source->cube_map = new CubeMap(source->resolution, "rgba:i8");
+		source->cube_map = new ygfx::CubeMap(source->resolution, "rgba:i8");
 	if (!texture_renderers[0])
 		for (int i=0; i<6; i++) {
 			texture_renderers[i] = new TextureRenderer("tex", {source->cube_map.get(), source->depth_buffer.get()});

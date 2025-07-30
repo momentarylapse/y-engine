@@ -57,7 +57,7 @@ void SceneView::check_terrains(const vec3& cam_pos) {
 	if (updater.num == 0) {
 		auto u = new XTerrainVBUpdater;
 		u->terrain = terrains[0];
-		u->vb = new VertexBuffer("3f,3f,2f");;
+		u->vb = new ygfx::VertexBuffer("3f,3f,2f");;
 		updater.add(u);
 
 		// first time: complete update!

@@ -41,7 +41,7 @@
 using namespace yrenderer;
 
 
-HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {
+HDRResolver *create_hdr_resolver(Camera *cam, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
 	return new HDRResolver(cam, tex, depth);
 }
 
@@ -90,7 +90,7 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 		auto e = new Entity;
 		cube_map_source = new CubeMapSource;
 		cube_map_source->owner = e;
-		cube_map_source->cube_map = new CubeMap(cube_map_source->resolution, "rgba:i8");
+		cube_map_source->cube_map = new ygfx::CubeMap(cube_map_source->resolution, "rgba:i8");
 
 		scene_view.cube_map = cube_map_source->cube_map;
 	}
@@ -136,10 +136,10 @@ void RenderPath::create_cube_renderer() {
 
 void RenderPath::create_post_processing(Renderer* source) {
 
-	auto hdr_tex = new Texture(engine.width, engine.height, "rgba:f16");
+	auto hdr_tex = new ygfx::Texture(engine.width, engine.height, "rgba:f16");
 	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
 	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
-	auto hdr_depth = new DepthBuffer(engine.width, engine.height, "d:f32");
+	auto hdr_depth = new ygfx::DepthBuffer(engine.width, engine.height, "d:f32");
 
 	hdr_resolver = create_hdr_resolver(cam, hdr_tex, hdr_depth);
 
@@ -151,9 +151,9 @@ void RenderPath::create_post_processing(Renderer* source) {
 		msg_error("yes msaa");
 
 		msg_write("ms tex:");
-		auto tex_ms = new TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
+		auto tex_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
 		msg_write("ms depth:");
-		auto depth_ms = new TextureMultiSample(engine.width, engine.height, 4, "d:f32");
+		auto depth_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "d:f32");
 		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
 		texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
@@ -225,7 +225,7 @@ void RenderPath::prepare_instanced_matrices() {
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
 		if (!mi->ubo_matrices)
-			mi->ubo_matrices = new UniformBuffer(MAX_INSTANCES * sizeof(mat4));
+			mi->ubo_matrices = new ygfx::UniformBuffer(MAX_INSTANCES * sizeof(mat4));
 		//mi->ubo_matrices->update_array(mi->matrices);
 		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, MAX_INSTANCES) * sizeof(mat4));
 	}

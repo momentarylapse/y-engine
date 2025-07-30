@@ -20,17 +20,17 @@ vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
 vulkan::Surface surface;
 
-Context* _create_context() {
+ygfx::Context* _create_context() {
 	device->create_query_pool(MAX_TIMESTAMP_QUERIES);
 	pool = new vulkan::DescriptorPool("ubo:65536,sampler:65536", 65536);
 
 	_create_default_textures();
 
-	return new Context;
+	return new ygfx::Context;
 }
 
 #if HAS_LIB_GLFW
-Context* api_init(GLFWwindow* window) {
+ygfx::Context* api_init(GLFWwindow* window) {
 	instance = vulkan::init({"glfw", "validation", "api=1.3", "rtx?", "verbosity=3"});
 	surface = instance->create_glfw_surface(window);
 	try {
@@ -76,13 +76,13 @@ Context* api_init(GLFWwindow* window) {
 #endif
 
 
-Context* api_init_external(vulkan::Instance* _instance, vulkan::Device* _device) {
+ygfx::Context* api_init_external(vulkan::Instance* _instance, vulkan::Device* _device) {
 	instance = _instance;
 	device = _device;
 	return _create_context();
 }
 
-Context* api_init_xhui(xhui::Painter* p) {
+ygfx::Context* api_init_xhui(xhui::Painter* p) {
 #ifdef HAS_XHUI
 	vulkan::default_device = p->context->device;
 	return api_init_external(p->context->instance, p->context->device);

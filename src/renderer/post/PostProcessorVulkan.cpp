@@ -21,6 +21,8 @@
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
+using namespace ygfx;
+
 
 PostProcessorVulkan::PostProcessorVulkan() {
 	ch_post_blur = profiler::create_channel("blur", channel);

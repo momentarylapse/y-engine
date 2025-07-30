@@ -8,6 +8,7 @@
 
 namespace yrenderer {
 
+	using namespace ygfx;
 
 MaterialManager::MaterialManager(ResourceManager *_resource_manager, const Path& _material_dir) {
 	resource_manager = _resource_manager;

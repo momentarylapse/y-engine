@@ -70,7 +70,7 @@ public:
 	// normals
 	Array<vec3> normal;
 
-	VertexBuffer *vertex_buffer;
+	ygfx::VertexBuffer *vertex_buffer;
 
 	// refill the vertex buffer etc...
 	bool force_update;

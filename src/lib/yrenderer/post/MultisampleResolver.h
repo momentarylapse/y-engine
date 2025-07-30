@@ -14,13 +14,13 @@ class TextureRenderer;
 
 class MultisampleResolver : public RenderTask {
 public:
-	MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out);
+	MultisampleResolver(ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out);
 
 	void render(const RenderParams& params) override;
 
 	owned<ThroughShaderRenderer> tsr;
 	owned<TextureRenderer> into_texture;
-	shared<Shader> shader_resolve_multisample;
+	shared<ygfx::Shader> shader_resolve_multisample;
 };
 
 }

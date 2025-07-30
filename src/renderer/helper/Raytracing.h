@@ -27,11 +27,11 @@ enum class RaytracingMode {
 };
 
 struct RayTracingData {
-	owned<UniformBuffer> buffer_meshes;
+	owned<ygfx::UniformBuffer> buffer_meshes;
 	int num_meshes = 0;
 
-	owned<ShaderStorageBuffer> buffer_requests;
-	owned<ShaderStorageBuffer> buffer_reply;
+	owned<ygfx::ShaderStorageBuffer> buffer_requests;
+	owned<ygfx::ShaderStorageBuffer> buffer_reply;
 
 	RaytracingMode mode = RaytracingMode::NONE;
 
@@ -54,9 +54,9 @@ struct RayTracingData {
 
 	struct ComputeModeData {
 		vulkan::DescriptorPool *pool;
-		DescriptorSet *dset;
-		ComputePipeline *pipeline;
-		CommandBuffer* command_buffer;
+		ygfx::DescriptorSet *dset;
+		ygfx::ComputePipeline *pipeline;
+		ygfx::CommandBuffer* command_buffer;
 		vulkan::Fence* fence;
 	} compute;
 

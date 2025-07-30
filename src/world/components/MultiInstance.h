@@ -22,7 +22,7 @@ public:
 
 	Model *model = nullptr;
 	Array<mat4> matrices;
-	UniformBuffer *ubo_matrices = nullptr;
+	ygfx::UniformBuffer *ubo_matrices = nullptr;
 
 	static const kaba::Class *_class;
 };

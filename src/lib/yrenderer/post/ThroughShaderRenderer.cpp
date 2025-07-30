@@ -9,12 +9,12 @@
 
 namespace yrenderer {
 
-ThroughShaderRenderer::ThroughShaderRenderer(const string& name, shared<Shader> _shader) :
+ThroughShaderRenderer::ThroughShaderRenderer(const string& name, shared<ygfx::Shader> _shader) :
 	Renderer(name),
 	bindings(_shader.get())
 {
 	shader = _shader;
-	vb_2d = new VertexBuffer("3f,3f,2f");
+	vb_2d = new ygfx::VertexBuffer("3f,3f,2f");
 	vb_2d->create_quad(rect::ID_SYM);
 	current_area = rect::ID;
 }
@@ -34,8 +34,8 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	gpu_timestamp_begin(params, channel);
 
 	if (!pipeline) {
-		pipeline = new vulkan::GraphicsPipeline(shader.get(), params.render_pass, 0, PrimitiveTopology::TRIANGLES, "3f,3f,2f");
-		pipeline->set_culling(CullMode::NONE);
+		pipeline = new vulkan::GraphicsPipeline(shader.get(), params.render_pass, 0, ygfx::PrimitiveTopology::TRIANGLES, "3f,3f,2f");
+		pipeline->set_culling(ygfx::CullMode::NONE);
 		pipeline->set_z(false, false);
 		pipeline->rebuild();
 	}
@@ -55,9 +55,9 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 
 	nix::set_shader(shader.get());
 	bindings.apply(shader.get(), params);
-	shader->set_matrix_l(shader->location[Shader::LOCATION_MATRIX_P], flip_y ? mat4::scale(1,-1,1) : mat4::ID);
-	shader->set_matrix_l(shader->location[Shader::LOCATION_MATRIX_V], mat4::ID);
-	shader->set_matrix_l(shader->location[Shader::LOCATION_MATRIX_M], mat4::ID);
+	shader->set_matrix_l(shader->location[ygfx::Shader::LOCATION_MATRIX_P], flip_y ? mat4::scale(1,-1,1) : mat4::ID);
+	shader->set_matrix_l(shader->location[ygfx::Shader::LOCATION_MATRIX_V], mat4::ID);
+	shader->set_matrix_l(shader->location[ygfx::Shader::LOCATION_MATRIX_M], mat4::ID);
 	nix::set_cull(nix::CullMode::NONE);
 
 	nix::set_z(false, false);

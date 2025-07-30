@@ -40,7 +40,7 @@ public:
 	struct Cascade {
 		Cascade();
 		~Cascade();
-		DepthBuffer* depth_buffer = nullptr;
+		ygfx::DepthBuffer* depth_buffer = nullptr;
 		owned<TextureRenderer> texture_renderer;
 		float scale = 1.0f;
 	    owned<SceneRenderer> scene_renderer;

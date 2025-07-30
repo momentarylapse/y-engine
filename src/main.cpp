@@ -74,7 +74,7 @@ using namespace std::chrono;
 
 
 namespace yrenderer {
-	rect dynamicly_scaled_area(FrameBuffer *fb) {
+	rect dynamicly_scaled_area(ygfx::FrameBuffer *fb) {
 		//return rect(0, fb->width, 0, fb->height);
 		return rect(0, fb->width * engine.resolution_scale_x, 0, fb->height * engine.resolution_scale_y);
 	}

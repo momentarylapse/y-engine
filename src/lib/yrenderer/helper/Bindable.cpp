@@ -31,6 +31,8 @@ Any vec3_to_any(const vec3& v) {
 	return a;
 }
 
+using namespace ygfx;
+
 namespace yrenderer {
 
 #ifdef USING_VULKAN

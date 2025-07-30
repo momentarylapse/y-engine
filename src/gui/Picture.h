@@ -15,11 +15,11 @@ namespace gui {
 
 class Picture : public Node {
 public:
-	Picture(const rect &r, shared<Texture> tex, const rect &source, shared<Shader> shader);
-	Picture(const rect &r, shared<Texture> tex, const rect &source = rect::ID);
+	Picture(const rect &r, shared<ygfx::Texture> tex, const rect &source, shared<ygfx::Shader> shader);
+	Picture(const rect &r, shared<ygfx::Texture> tex, const rect &source = rect::ID);
 	~Picture() override;
 
-	void __init__(const rect &r, shared<Texture> tex, const rect &source);
+	void __init__(const rect &r, shared<ygfx::Texture> tex, const rect &source);
 	void __delete__() override;
 
 	rect source;
@@ -27,8 +27,8 @@ public:
 	float bg_blur;
 	float angle;
 
-	shared<Shader> shader;
-	shared<Texture> texture;
+	shared<ygfx::Shader> shader;
+	shared<ygfx::Texture> texture;
 	Any shader_data;
 };
 

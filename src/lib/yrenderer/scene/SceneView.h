@@ -28,11 +28,11 @@ static constexpr int MAX_LIGHTS = 1024 - 24; // :P
 //   (might be shared with nearby cameras)
 struct SceneView {
 	Camera *cam; // the "owning" camera - might use a different perspective for rendering (e.g. cubemap)
-	Array<DepthBuffer*> shadow_maps;
-	shared<CubeMap> cube_map;
+	Array<ygfx::DepthBuffer*> shadow_maps;
+	shared<ygfx::CubeMap> cube_map;
 	Array<Light*> lights;
 	Array<int> shadow_indices;
-	owned<UniformBuffer> surfel_buffer;
+	owned<ygfx::UniformBuffer> surfel_buffer;
 	int num_surfels = 0;
 	ivec3 probe_cells;
 	vec3 probe_min, probe_max;

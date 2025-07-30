@@ -62,7 +62,7 @@ void Animator::on_init() {
 		dmatrix[i] = mat4::translation(sk->pos0[i]);
 	}
 
-	buf = new UniformBuffer(sk->bones.num * sizeof(mat4));
+	buf = new ygfx::UniformBuffer(sk->bones.num * sizeof(mat4));
 }
 
 

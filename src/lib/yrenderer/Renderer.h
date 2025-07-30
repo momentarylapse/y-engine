@@ -22,24 +22,24 @@ namespace yrenderer {
 
 class RenderTask;
 
-rect dynamicly_scaled_area(FrameBuffer *fb);
+rect dynamicly_scaled_area(ygfx::FrameBuffer *fb);
 rect dynamicly_scaled_source();
 
 struct RenderParams {
 	float desired_aspect_ratio = 1;
 	bool target_is_window = false;
-	FrameBuffer* frame_buffer = nullptr;
+	ygfx::FrameBuffer* frame_buffer = nullptr;
 	rect area;
 #ifdef USING_VULKAN
-	RenderPass *render_pass;
-	CommandBuffer *command_buffer;
+	ygfx::RenderPass *render_pass;
+	ygfx::CommandBuffer *command_buffer;
 #endif
 
-	RenderParams with_target(FrameBuffer *fb) const;
+	RenderParams with_target(ygfx::FrameBuffer *fb) const;
 	RenderParams with_area(const rect& area) const;
 	static const RenderParams WHATEVER;
-	static RenderParams into_window(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
-	static RenderParams into_texture(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
+	static RenderParams into_window(ygfx::FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
+	static RenderParams into_texture(ygfx::FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio = base::None);
 };
 
 class Renderer : public VirtualBase {
@@ -64,7 +64,7 @@ public:
 
 	int channel;
 	int ch_prepare;
-	Context* context;
+	ygfx::Context* context;
 	ResourceManager* resource_manager;
 };
 
@@ -85,7 +85,7 @@ public:
 	int channel;
 	bool active = true;
 	int _priority = 0;
-	Context* context;
+	ygfx::Context* context;
 	ResourceManager* resource_manager;
 };
 

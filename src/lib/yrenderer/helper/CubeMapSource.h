@@ -19,11 +19,11 @@ public:
 	~CubeMapSource() override;
 
 	float min_depth, max_depth;
-	shared<CubeMap> cube_map;
-	shared<DepthBuffer> depth_buffer;
-	shared<FrameBuffer> frame_buffer[6];
+	shared<ygfx::CubeMap> cube_map;
+	shared<ygfx::DepthBuffer> depth_buffer;
+	shared<ygfx::FrameBuffer> frame_buffer[6];
 #ifdef USING_VULKAN
-	owned<vulkan::RenderPass> render_pass;
+	owned<ygfx::RenderPass> render_pass;
 #endif
 	int resolution;
 	int update_rate;

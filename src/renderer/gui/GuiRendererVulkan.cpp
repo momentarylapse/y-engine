@@ -33,7 +33,7 @@ GuiRendererVulkan::GuiRendererVulkan() : Renderer("ui") {
 
 	shader = resource_manager->shader_manager->load_shader("vulkan/2d.shader");
 
-	vb = new VertexBuffer("3f,3f,2f");
+	vb = new ygfx::VertexBuffer("3f,3f,2f");
 	vb->create_quad(rect::ID);
 }
 
@@ -46,7 +46,7 @@ void GuiRendererVulkan::draw(const RenderParams& params) {
 	profiler::end(channel);
 }
 
-void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& params) {
+void GuiRendererVulkan::prepare_gui(ygfx::FrameBuffer *source, const RenderParams& params) {
 	gui::update();
 
 	UBOGUI u;
@@ -65,7 +65,7 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& par
 
 			if (index >= ubo.num) {
 				dset.add(pool->create_set("sampler,sampler,buffer"));
-				ubo.add(new UniformBuffer(sizeof(UBOGUI)));
+				ubo.add(new ygfx::UniformBuffer(sizeof(UBOGUI)));
 			}
 
 			if (p->angle == 0) {
@@ -89,7 +89,7 @@ void GuiRendererVulkan::prepare_gui(FrameBuffer *source, const RenderParams& par
 	}
 }
 
-void GuiRendererVulkan::draw_gui(CommandBuffer *cb, RenderPass *render_pass) {
+void GuiRendererVulkan::draw_gui(ygfx::CommandBuffer *cb, ygfx::RenderPass *render_pass) {
 	if (!pipeline)
 		pipeline = PipelineManager::get_gui(shader.get(), render_pass, "3f,3f,2f");
 

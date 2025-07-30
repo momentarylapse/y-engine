@@ -65,16 +65,16 @@ struct LightMetaData {
 // single "draw call"
 struct RenderData {
 #ifdef USING_VULKAN
-	UniformBuffer* ubo;
-	DescriptorSet* dset;
+	ygfx::UniformBuffer* ubo;
+	ygfx::DescriptorSet* dset;
 #else
-	void set_material_x(const SceneView& scene_view, const Material& m, Shader* s, int pass_no);
+	void set_material_x(const SceneView& scene_view, const Material& m, ygfx::Shader* s, int pass_no);
 #endif
-	void set_texture(int binding, Texture* tex);
-	void set_textures(const SceneView& scene_view, const Array<Texture*>& tex);
-	void draw_triangles(const RenderParams& params, VertexBuffer* vb);
-	void draw_instanced(const RenderParams& params, VertexBuffer* vb, int count);
-	void draw(const RenderParams& params, VertexBuffer* vb, PrimitiveTopology topology);
+	void set_texture(int binding, ygfx::Texture* tex);
+	void set_textures(const SceneView& scene_view, const Array<ygfx::Texture*>& tex);
+	void draw_triangles(const RenderParams& params, ygfx::VertexBuffer* vb);
+	void draw_instanced(const RenderParams& params, ygfx::VertexBuffer* vb, int count);
+	void draw(const RenderParams& params, ygfx::VertexBuffer* vb, ygfx::PrimitiveTopology topology);
 };
 
 // "draw call" manager (single scene/pass)
@@ -102,22 +102,22 @@ struct RenderViewData {
 	void set_view(const RenderParams& params, Camera* cam);
 	void set_z(bool write, bool test);
 	void set_wire(bool enabled);
-	void set_cull(CullMode mode);
+	void set_cull(ygfx::CullMode mode);
 
-	owned<UniformBuffer> ubo_light;
+	owned<ygfx::UniformBuffer> ubo_light;
 	LightMetaData light_meta_data;
 	void update_light_ubo();
 
 	void clear(const RenderParams& params, const Array<color>& colors, float z=-1);
 
 	RenderData& start(const RenderParams& params, const mat4& matrix,
-	                  Shader* shader, const Material& material, int pass_no,
-	                  PrimitiveTopology top, VertexBuffer *vb);
+	                  ygfx::Shader* shader, const Material& material, int pass_no,
+	                  ygfx::PrimitiveTopology top, ygfx::VertexBuffer *vb);
 
 
 	base::map<Material*, ShaderCache> multi_pass_shader_cache[4];
 	// material as id!
-	Shader* get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module);
+	ygfx::Shader* get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module);
 };
 
 }

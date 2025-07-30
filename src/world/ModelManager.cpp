@@ -29,7 +29,7 @@
 
 
 namespace yrenderer {
-	Alpha parse_alpha_i(int a); // Material.h
+	ygfx::Alpha parse_alpha_i(int a); // Material.h
 }
 
 

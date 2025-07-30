@@ -40,34 +40,34 @@ Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
 }
 
 
-ShaderManager::ShaderManager(::Context *_ctx, const Path &_shader_dir) {
+ShaderManager::ShaderManager(ygfx::Context *_ctx, const Path &_shader_dir) {
 	ctx = _ctx;
 	shader_dir = _shader_dir;
 }
 
 
-xfer<Shader> ShaderManager::__load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size) {
+xfer<ygfx::Shader> ShaderManager::__load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size) {
 #ifdef USING_VULKAN
 	//msg_write("loading shader: " + str(path));
 	vulkan::overwrite_bindings = overwrite_bindings;
 	vulkan::overwrite_push_size = overwrite_push_size;
-	return Shader::load(path);
+	return ygfx::Shader::load(path);
 #else
 	return ctx->load_shader(path);
 #endif
 }
 
-xfer<Shader> ShaderManager::__create_shader(const string& source, const string &overwrite_bindings, int overwrite_push_size) {
+xfer<ygfx::Shader> ShaderManager::__create_shader(const string& source, const string &overwrite_bindings, int overwrite_push_size) {
 #ifdef USING_VULKAN
 	vulkan::overwrite_bindings = overwrite_bindings;
 	vulkan::overwrite_push_size = overwrite_push_size;
-	return Shader::create(source);
+	return ygfx::Shader::create(source);
 #else
 	return ctx->create_shader(source);
 #endif
 }
 
-shared<Shader> ShaderManager::load_shader(const Path& filename) {
+shared<ygfx::Shader> ShaderManager::load_shader(const Path& filename) {
 	//if (!filename)
 	//	TODO default shader?
 	//	return __load_shader("");
@@ -120,7 +120,7 @@ string ShaderManager::expand_geometry_shader_source(const string &source, const 
 	return source + format("\n<GeometryShader>\n#import geometry-%s\n</GeometryShader>", variant);
 }
 
-shared<Shader> ShaderManager::load_surface_shader(const Path& _filename, const string &render_path, const string &vertex_module, const string &geometry_module) {
+shared<ygfx::Shader> ShaderManager::load_surface_shader(const Path& _filename, const string &render_path, const string &vertex_module, const string &geometry_module) {
 	//msg_write("load_surface_shader: " + str(_filename) + "  " + render_path + "  " + vertex_module + "  " + geometry_module);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
@@ -170,7 +170,7 @@ shared<Shader> ShaderManager::load_surface_shader(const Path& _filename, const s
 	return shader;
 }
 
-Shader* ShaderManager::create_shader(const string &source) {
+ygfx::Shader* ShaderManager::create_shader(const string &source) {
 	return __create_shader(source, "", -1);
 }
 

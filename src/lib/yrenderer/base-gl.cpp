@@ -22,7 +22,7 @@ extern owned<nix::Context> _nix_context;
 
 namespace yrenderer {
 
-Context* api_init(GLFWwindow* window) {
+ygfx::Context* api_init(GLFWwindow* window) {
 	nix::allow_separate_vertex_arrays = true;
 	nix::default_shader_bindings = false;
 	auto gl = nix::init();
@@ -38,7 +38,7 @@ Context* api_init(GLFWwindow* window) {
 	return gl;
 }
 
-Context* api_init_xhui(xhui::Painter* p) {
+ygfx::Context* api_init_xhui(xhui::Painter* p) {
 #ifdef HAS_XHUI
 	nix::create_query_pool(MAX_TIMESTAMP_QUERIES);
 	_create_default_textures();

@@ -31,6 +31,7 @@
 
 
 using namespace yrenderer;
+using namespace ygfx;
 
 WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, int height) : WorldRenderer("world/def", scene_view) {
 

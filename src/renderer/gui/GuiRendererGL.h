@@ -16,10 +16,10 @@ public:
 
 	void draw(const yrenderer::RenderParams& params) override;
 
-	void draw_gui(const yrenderer::RenderParams& params, FrameBuffer *source);
+	void draw_gui(const yrenderer::RenderParams& params, ygfx::FrameBuffer *source);
 
-	shared<Shader> shader;
-	owned<VertexBuffer> vb;
+	shared<ygfx::Shader> shader;
+	owned<ygfx::VertexBuffer> vb;
 };
 
 #endif

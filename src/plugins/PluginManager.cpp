@@ -83,6 +83,7 @@
 
 
 using namespace yrenderer;
+using namespace ygfx;
 
 /*void global_delete(BaseClass *e) {
 	//msg_error("global delete... " + p2s(e));

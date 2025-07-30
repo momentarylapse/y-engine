@@ -43,7 +43,7 @@ public:
 	vec3 vel;
 	color col;
 	rect source;
-	shared<Texture> texture;
+	shared<ygfx::Texture> texture;
 	float radius;
 	float time_to_live;
 	bool enabled, is_beam;

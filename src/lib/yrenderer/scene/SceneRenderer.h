@@ -46,7 +46,7 @@ public:
 	static constexpr bool using_view_space = true;
 
 #ifdef USING_VULKAN
-	static GraphicsPipeline* get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
+	static ygfx::GraphicsPipeline* get_pipeline(ygfx::Shader *s, ygfx::RenderPass *rp, const Material::RenderPassData &pass, ygfx::PrimitiveTopology top, ygfx::VertexBuffer *vb);
 #endif
 };
 

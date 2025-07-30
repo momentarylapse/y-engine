@@ -15,7 +15,7 @@ namespace yrenderer {
 
 const RenderParams RenderParams::WHATEVER = {};
 
-RenderParams RenderParams::with_target(FrameBuffer *fb) const {
+RenderParams RenderParams::with_target(ygfx::FrameBuffer *fb) const {
 	RenderParams r = *this;
 	r.frame_buffer = fb;
 	r.area = fb->area();
@@ -29,15 +29,15 @@ RenderParams RenderParams::with_area(const rect& _area) const {
 	return r;
 }
 
-float fb_ratio(FrameBuffer* fb) {
+float fb_ratio(ygfx::FrameBuffer* fb) {
 	return (float)fb->width / (float)fb->height;
 }
 
-RenderParams RenderParams::into_window(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio) {
+RenderParams RenderParams::into_window(ygfx::FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio) {
 	return {aspect_ratio.value_or(fb_ratio(frame_buffer)), true, frame_buffer, frame_buffer->area()};
 
 }
-RenderParams RenderParams::into_texture(FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio) {
+RenderParams RenderParams::into_texture(ygfx::FrameBuffer *frame_buffer, const base::optional<float>& aspect_ratio) {
 	return {aspect_ratio.value_or(fb_ratio(frame_buffer)), false, frame_buffer, frame_buffer->area()};
 }
 

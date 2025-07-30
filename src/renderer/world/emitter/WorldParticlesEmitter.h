@@ -30,11 +30,11 @@ public:
 
 //	shared<Shader> shader_fx;
 //	shared<Shader> shader_fx_points;
-	owned<VertexBuffer> vb_fx;
-	owned<VertexBuffer> vb_fx_points;
+	owned<ygfx::VertexBuffer> vb_fx;
+	owned<ygfx::VertexBuffer> vb_fx_points;
 
 	yrenderer::Material fx_material;
 
-	owned_array<VertexBuffer> fx_vertex_buffers;
+	owned_array<ygfx::VertexBuffer> fx_vertex_buffers;
 };
 

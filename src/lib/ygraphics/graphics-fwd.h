@@ -19,38 +19,39 @@
 
 // Vulkan
 
-	namespace vulkan {
-		class Instance;
-		class Texture;
-		class VolumeTexture;
-		class StorageTexture;
-		class CubeMap;
-		class TextureMultiSample;
-		class Shader;
-		class VertexBuffer;
-		class FrameBuffer;
-		class DepthBuffer;
-		class Buffer;
-		class UniformBuffer;
-		class StorageBuffer;
-		enum class Alpha;
-		enum class AlphaMode;
-		enum class CullMode;
-		enum class PrimitiveTopology;
-		class GraphicsPipeline;
-		class ComputePipeline;
-		class RayPipeline;
-		class DescriptorSet;
-		class RenderPass;
-		class CommandBuffer;
-		class Semaphore;
-		class Fence;
-		class SwapChain;
-		class DescriptorPool;
-		class Device;
-		class AccelerationStructure;
-	}
+namespace vulkan {
+	class Instance;
+	class Texture;
+	class VolumeTexture;
+	class StorageTexture;
+	class CubeMap;
+	class TextureMultiSample;
+	class Shader;
+	class VertexBuffer;
+	class FrameBuffer;
+	class DepthBuffer;
+	class Buffer;
+	class UniformBuffer;
+	class StorageBuffer;
+	enum class Alpha;
+	enum class AlphaMode;
+	enum class CullMode;
+	enum class PrimitiveTopology;
+	class GraphicsPipeline;
+	class ComputePipeline;
+	class RayPipeline;
+	class DescriptorSet;
+	class RenderPass;
+	class CommandBuffer;
+	class Semaphore;
+	class Fence;
+	class SwapChain;
+	class DescriptorPool;
+	class Device;
+	class AccelerationStructure;
+}
 
+namespace ygfx {
 	class Context {
 	public:
 		int dummy = 0;
@@ -84,32 +85,34 @@
 		EXP,
 		EXP2
 	};
+}
 
 #endif
 #ifdef USING_OPENGL
 
 // OpenGL
+namespace nix {
+	class Context;
+	class Texture;
+	class Shader;
+	class VertexBuffer;
+	class FrameBuffer;
+	class DepthBuffer;
+	class CubeMap;
+	class VolumeTexture;
+	class ImageTexture;
+	class TextureMultiSample;
+	class Buffer;
+	class UniformBuffer;
+	class ShaderStorageBuffer;
+	enum class Alpha;
+	enum class AlphaMode;
+	enum class CullMode;
+	enum class FogMode;
+	enum class PrimitiveTopology;
+}
 
-	namespace nix {
-		class Context;
-		class Texture;
-		class Shader;
-		class VertexBuffer;
-		class FrameBuffer;
-		class DepthBuffer;
-		class CubeMap;
-		class VolumeTexture;
-		class ImageTexture;
-		class TextureMultiSample;
-		class Buffer;
-		class UniformBuffer;
-		class ShaderStorageBuffer;
-		enum class Alpha;
-		enum class AlphaMode;
-		enum class CullMode;
-		enum class FogMode;
-		enum class PrimitiveTopology;
-	}
+namespace ygfx {
 
 	using Context = nix::Context;
 	using Texture = nix::Texture;
@@ -131,6 +134,7 @@
 	using FogMode = nix::FogMode;
 	using PrimitiveTopology = nix::PrimitiveTopology;
 	class RenderPass{};
+}
 
 #endif
 

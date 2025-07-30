@@ -21,7 +21,7 @@ namespace vulkan {
 #endif
 
 
-ResourceManager::ResourceManager(::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
+ResourceManager::ResourceManager(ygfx::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
 	ctx = _ctx;
 	material_manager = new yrenderer::MaterialManager(this, material_dir);
 	model_manager = new ModelManager(this, material_manager);
@@ -40,7 +40,7 @@ xfer<Model> ResourceManager::load_model(const Path &filename) {
 
 
 
-shared<Texture> ResourceManager::load_texture(const Path& filename) {
+shared<ygfx::Texture> ResourceManager::load_texture(const Path& filename) {
 	return texture_manager->load_texture(filename);
 }
 

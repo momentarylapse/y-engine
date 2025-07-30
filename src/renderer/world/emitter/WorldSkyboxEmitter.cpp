@@ -56,7 +56,7 @@ void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, b
 		for (int i=0; i<sb->material.num; i++) {
 			auto vb = sb->mesh[0]->sub[i].vertex_buffer;
 			auto shader = rvd.get_shader(sb->material[i], 0, "default", "");
-			auto& rd = rvd.start(params, sb->_matrix * mat4::scale(10,10,10), shader, *sb->material[i], 0, PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, sb->_matrix * mat4::scale(10,10,10), shader, *sb->material[i], 0, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
 			rd.draw_triangles(params, vb);
 		}

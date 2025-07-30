@@ -14,19 +14,19 @@ namespace yrenderer {
 
 class ThroughShaderRenderer : public Renderer {
 public:
-	ThroughShaderRenderer(const string& name, shared<Shader> _shader);
+	ThroughShaderRenderer(const string& name, shared<ygfx::Shader> _shader);
 	void draw(const RenderParams &params) override;
 
 	void set_source(const rect& area);
 
 	IMPLEMENT_BINDABLE_INTERFACE
 
-	shared<Shader> shader;
-	owned<VertexBuffer> vb_2d;
+	shared<ygfx::Shader> shader;
+	owned<ygfx::VertexBuffer> vb_2d;
 	rect current_area;
 
 #ifdef USING_VULKAN
-	GraphicsPipeline* pipeline = nullptr;
+	ygfx::GraphicsPipeline* pipeline = nullptr;
 #endif
 };
 

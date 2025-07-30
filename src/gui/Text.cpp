@@ -45,7 +45,7 @@ void Text::rebuild() {
 		im.create(1,1, color(0,0,0,0));
 
 	if (texture == nullptr)
-		texture = new Texture();
+		texture = new ygfx::Texture();
 
 	texture->write(im);
 	//texture->set_options("magfilter=nearest,wrap=clamp");

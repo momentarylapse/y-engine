@@ -9,12 +9,12 @@
 
 
 namespace nix {
-	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
+	void resolve_multisampling(ygfx::FrameBuffer *target, ygfx::FrameBuffer *source);
 }
 
 namespace yrenderer {
 
-MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
+MultisampleResolver::MultisampleResolver(ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out) : RenderTask("ms") {
 	shader_resolve_multisample = resource_manager->shader_manager->load_shader("forward/resolve-multisample.shader");
 	tsr = new ThroughShaderRenderer("ms", shader_resolve_multisample);
 	tsr->bind_textures(0, {tex_ms, depth_ms});

@@ -19,6 +19,7 @@
 
 
 using namespace yrenderer;
+using namespace ygfx;
 
 namespace yrenderer {
 	void apply_shader_data(Shader *s, const Any &shader_data);

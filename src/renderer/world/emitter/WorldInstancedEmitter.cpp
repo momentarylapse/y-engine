@@ -38,7 +38,7 @@ void WorldInstancedEmitter::emit(const RenderParams& params, RenderViewData& rvd
 
 			m->update_matrix();
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
-			auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb);
+			auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
 #ifdef USING_VULKAN
 			rd.dset->set_uniform_buffer(BINDING_INSTANCE_MATRICES, mi->ubo_matrices);

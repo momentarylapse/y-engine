@@ -43,8 +43,8 @@ ShadowRenderer::ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emit
 		for (auto e: weak(emitters))
 			c.scene_renderer->add_emitter(e);
 
-		shared tex = new Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-		c.depth_buffer = new DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
+		shared tex = new ygfx::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
+		c.depth_buffer = new ygfx::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer(format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
 		c.scale = (i == 0) ? 4.0f : 1.0f;
 		c.texture_renderer->add_child(c.scene_renderer.get());
