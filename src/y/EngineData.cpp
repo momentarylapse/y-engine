@@ -11,7 +11,7 @@
 #include <lib/base/sort.h>
 #include <lib/nix/nix.h>
 #include <lib/kaba/kaba.h>
-#include <renderer/Renderer.h>
+#include <lib/yrenderer/Renderer.h>
 
 #include "../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>

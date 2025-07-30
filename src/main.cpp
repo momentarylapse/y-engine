@@ -38,13 +38,13 @@
 
 #include "plugins/PluginManager.h"
 
-#include "renderer/base.h"
+#include <lib/yrenderer/base.h>
 #include "renderer/helper/RendererFactory.h"
 #include "renderer/world/WorldRenderer.h"
 #ifdef USING_VULKAN
-	#include "renderer/target/WindowRendererVulkan.h"
+	#include <lib/yrenderer/target/WindowRendererVulkan.h>
 #else
-	#include "renderer/target/WindowRendererGL.h"
+	#include <lib/yrenderer/target/WindowRendererGL.h>
 #endif
 #include "renderer/path/RenderPath.h"
 

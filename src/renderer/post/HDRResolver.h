@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 
 struct vec2;
 class Camera;

@@ -4,7 +4,7 @@
 #include <y/Component.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/base/pointer.h>
-#include <renderer/Renderer.h>
+#include <lib/yrenderer/Renderer.h>
 #include "../scene/RenderViewData.h"
 
 class TextureRenderer;

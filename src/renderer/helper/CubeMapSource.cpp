@@ -2,11 +2,11 @@
 #include <Config.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
-#include <renderer/base.h>
+#include <lib/yrenderer/base.h>
 #include <renderer/path/RenderPath.h>
 #include <renderer/scene/SceneView.h>
 #include <renderer/scene/SceneRenderer.h>
-#include <renderer/target/TextureRenderer.h>
+#include <lib/yrenderer/target/TextureRenderer.h>
 #include <y/Entity.h>
 
 #include "world/Camera.h"

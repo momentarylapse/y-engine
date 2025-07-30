@@ -699,29 +699,42 @@ add_library(moduley SHARED
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
+	src/lib/yrenderer/helper/Bindable.cpp
+	src/lib/yrenderer/helper/ComputeTask.cpp
+	src/lib/yrenderer/helper/Pipeline.cpp
+	src/lib/yrenderer/helper/PipelineManager.cpp
+	src/lib/yrenderer/post/MultisampleResolver.cpp
+	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
+	src/lib/yrenderer/target/HeadlessRendererVulkan.cpp
+	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
+	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
+	src/lib/yrenderer/target/TargetRenderer.cpp
+	src/lib/yrenderer/target/TextureRendererGL.cpp
+	src/lib/yrenderer/target/TextureRendererVulkan.cpp
+	src/lib/yrenderer/target/WindowRendererGL.cpp
+	src/lib/yrenderer/target/WindowRendererVulkan.cpp
+	src/lib/yrenderer/target/XhuiRenderer.cpp
+	src/lib/yrenderer/base-gl.cpp
+	src/lib/yrenderer/base-vulkan.cpp
+	src/lib/yrenderer/base.cpp
 	src/lib/yrenderer/Material.cpp
+	src/lib/yrenderer/Renderer.cpp
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
-	src/renderer/helper/Bindable.cpp
-	src/renderer/helper/ComputeTask.cpp
 	src/renderer/helper/CubeMapSource.cpp
 	src/renderer/helper/jitter.cpp
 	src/renderer/helper/LightMeter.cpp
-	src/renderer/helper/Pipeline.cpp
-	src/renderer/helper/PipelineManager.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
 	src/renderer/post/HDRResolver.cpp
-	src/renderer/post/MultisampleResolver.cpp
 	src/renderer/post/PostProcessor.cpp
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
-	src/renderer/post/ThroughShaderRenderer.cpp
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
@@ -731,15 +744,6 @@ add_library(moduley SHARED
 	src/renderer/scene/RenderViewData.cpp
 	src/renderer/scene/SceneRenderer.cpp
 	src/renderer/scene/SceneView.cpp
-	src/renderer/target/HeadlessRendererVulkan.cpp
-	src/renderer/target/HuiWindowRendererGL.cpp
-	src/renderer/target/HuiWindowRendererVulkan.cpp
-	src/renderer/target/TargetRenderer.cpp
-	src/renderer/target/TextureRendererGL.cpp
-	src/renderer/target/TextureRendererVulkan.cpp
-	src/renderer/target/WindowRendererGL.cpp
-	src/renderer/target/WindowRendererVulkan.cpp
-	src/renderer/target/XhuiRenderer.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -750,10 +754,6 @@ add_library(moduley SHARED
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
-	src/renderer/base-gl.cpp
-	src/renderer/base-vulkan.cpp
-	src/renderer/base.cpp
-	src/renderer/Renderer.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
 	src/world/components/MultiInstance.cpp
@@ -964,29 +964,42 @@ add_executable(y
 	src/lib/vulkan/Texture.cpp
 	src/lib/vulkan/VertexBuffer.cpp
 	src/lib/vulkan/vulkan.cpp
+	src/lib/yrenderer/helper/Bindable.cpp
+	src/lib/yrenderer/helper/ComputeTask.cpp
+	src/lib/yrenderer/helper/Pipeline.cpp
+	src/lib/yrenderer/helper/PipelineManager.cpp
+	src/lib/yrenderer/post/MultisampleResolver.cpp
+	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
+	src/lib/yrenderer/target/HeadlessRendererVulkan.cpp
+	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
+	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
+	src/lib/yrenderer/target/TargetRenderer.cpp
+	src/lib/yrenderer/target/TextureRendererGL.cpp
+	src/lib/yrenderer/target/TextureRendererVulkan.cpp
+	src/lib/yrenderer/target/WindowRendererGL.cpp
+	src/lib/yrenderer/target/WindowRendererVulkan.cpp
+	src/lib/yrenderer/target/XhuiRenderer.cpp
+	src/lib/yrenderer/base-gl.cpp
+	src/lib/yrenderer/base-vulkan.cpp
+	src/lib/yrenderer/base.cpp
 	src/lib/yrenderer/Material.cpp
+	src/lib/yrenderer/Renderer.cpp
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
-	src/renderer/helper/Bindable.cpp
-	src/renderer/helper/ComputeTask.cpp
 	src/renderer/helper/CubeMapSource.cpp
 	src/renderer/helper/jitter.cpp
 	src/renderer/helper/LightMeter.cpp
-	src/renderer/helper/Pipeline.cpp
-	src/renderer/helper/PipelineManager.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
 	src/renderer/post/HDRResolver.cpp
-	src/renderer/post/MultisampleResolver.cpp
 	src/renderer/post/PostProcessor.cpp
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
-	src/renderer/post/ThroughShaderRenderer.cpp
 	src/renderer/regions/RegionRenderer.cpp
 	src/renderer/regions/RegionRendererGL.cpp
 	src/renderer/regions/RegionRendererVulkan.cpp
@@ -996,15 +1009,6 @@ add_executable(y
 	src/renderer/scene/RenderViewData.cpp
 	src/renderer/scene/SceneRenderer.cpp
 	src/renderer/scene/SceneView.cpp
-	src/renderer/target/HeadlessRendererVulkan.cpp
-	src/renderer/target/HuiWindowRendererGL.cpp
-	src/renderer/target/HuiWindowRendererVulkan.cpp
-	src/renderer/target/TargetRenderer.cpp
-	src/renderer/target/TextureRendererGL.cpp
-	src/renderer/target/TextureRendererVulkan.cpp
-	src/renderer/target/WindowRendererGL.cpp
-	src/renderer/target/WindowRendererVulkan.cpp
-	src/renderer/target/XhuiRenderer.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -1015,10 +1019,6 @@ add_executable(y
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
-	src/renderer/base-gl.cpp
-	src/renderer/base-vulkan.cpp
-	src/renderer/base.cpp
-	src/renderer/Renderer.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
 	src/world/components/MultiInstance.cpp

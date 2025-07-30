@@ -6,19 +6,19 @@
  */
 
 #include "RendererFactory.h"
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include "../path/RenderPath.h"
 #include "../world/WorldRenderer.h"
-#include "../post/ThroughShaderRenderer.h"
+#include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include "../regions/RegionRenderer.h"
 #ifdef USING_VULKAN
 	#include "../gui/GuiRendererVulkan.h"
 	#include "../post/PostProcessorVulkan.h"
-	#include "../target/WindowRendererVulkan.h"
+	#include <lib/yrenderer/target/WindowRendererVulkan.h>
 #else
 	#include "../gui/GuiRendererGL.h"
 	#include "../post/PostProcessorGL.h"
-	#include "../target/WindowRendererGL.h"
+	#include <lib/yrenderer/target/WindowRendererGL.h>
 #endif
 #include <y/EngineData.h>
 #include <lib/os/msg.h>
@@ -30,7 +30,7 @@
 // for debugging
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/image/image.h>
-#include <renderer/target/TextureRenderer.h>
+#include <lib/yrenderer/target/TextureRenderer.h>
 
 
 string render_graph_str(Renderer *r) {

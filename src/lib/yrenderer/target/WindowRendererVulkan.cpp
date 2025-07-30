@@ -11,7 +11,7 @@
 #include <lib/profiler/Profiler.h>
 #include <lib/os/msg.h>
 #include <lib/math/rect.h>
-#include "../../Config.h" // for timing experiment
+#include <Config.h> // for timing experiment
 
 
 SurfaceRendererVulkan::SurfaceRendererVulkan(const string& name, Device *_device) : TargetRenderer(name) {

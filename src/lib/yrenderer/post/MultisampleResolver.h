@@ -5,7 +5,7 @@
 #ifndef MULTISAMPLERESOLVER_H
 #define MULTISAMPLERESOLVER_H
 
-#include "renderer/Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 
 class ThroughShaderRenderer;
 class TextureRenderer;

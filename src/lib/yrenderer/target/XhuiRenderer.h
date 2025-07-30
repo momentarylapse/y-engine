@@ -5,7 +5,7 @@
 #ifndef XHUIRENDERER_H
 #define XHUIRENDERER_H
 
-#include "../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 
 class Painter;
 

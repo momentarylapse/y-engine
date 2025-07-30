@@ -3,10 +3,10 @@
 //
 
 #include "RenderPath.h"
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include "../world/WorldRenderer.h"
 #include "../scene/pass/ShadowRenderer.h"
-#include "../post/MultisampleResolver.h"
+#include <lib/yrenderer/post/MultisampleResolver.h>
 #include "../post/HDRResolver.h"
 #include "../world/WorldRendererForward.h"
 #include "../world/WorldRendererDeferred.h"
@@ -14,7 +14,7 @@
 	#include "../world/WorldRendererVulkanRayTracing.h"
 #endif
 #include "../helper/LightMeter.h"
-#include <renderer/target/TextureRenderer.h>
+#include <lib/yrenderer/target/TextureRenderer.h>
 #include <renderer/helper/CubeMapSource.h>
 #include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>

@@ -6,7 +6,7 @@
  */
 
 #include "Renderer.h"
-#include "../y/EngineData.h"
+#include <y/EngineData.h>
 #include <lib/math/rect.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/ygraphics/graphics-impl.h>

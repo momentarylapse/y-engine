@@ -5,7 +5,7 @@
 #include "WorldParticlesEmitter.h"
 #include "../../scene/RenderViewData.h"
 #include "../../scene/SceneView.h"
-#include "../../base.h"
+#include <lib/yrenderer/base.h>
 #include <fx/Particle.h>
 #include <fx/Beam.h>
 #include <fx/ParticleEmitter.h>

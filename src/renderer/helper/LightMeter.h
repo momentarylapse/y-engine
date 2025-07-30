@@ -5,8 +5,8 @@
 #ifndef LIGHTMETER_H
 #define LIGHTMETER_H
 
-#include "../Renderer.h"
-#include "../helper/ComputeTask.h"
+#include <lib/yrenderer/Renderer.h>
+#include <lib/yrenderer/helper/ComputeTask.h>
 
 class ComputeTask;
 class Camera;

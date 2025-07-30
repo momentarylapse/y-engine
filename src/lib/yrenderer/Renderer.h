@@ -12,9 +12,9 @@ class RenderTask;
 struct rect;
 
 #include <lib/ygraphics/graphics-fwd.h>
-#include "../lib/base/pointer.h"
-#include "../lib/base/optional.h"
-#include "../lib/math/rect.h"
+#include <lib/base/pointer.h>
+#include <lib/base/optional.h>
+#include <lib/math/rect.h>
 
 struct color;
 class ResourceManager;

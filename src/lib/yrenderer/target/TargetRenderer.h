@@ -8,7 +8,7 @@
 #pragma once
 
 
-#include "../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 
 class TargetRenderer : public Renderer {
 public:

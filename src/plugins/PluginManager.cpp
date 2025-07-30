@@ -33,11 +33,11 @@
 #define HAS_INPUT
 #endif
 #include "../net/NetworkManager.h"
-#include "../renderer/base.h"
-#include "../renderer/Renderer.h"
+#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Renderer.h>
 #include "../renderer/helper/RendererFactory.h"
 #include "../renderer/helper/CubeMapSource.h"
-#include "../renderer/helper/ComputeTask.h"
+#include <lib/yrenderer/helper/ComputeTask.h>
 #include "../renderer/helper/LightMeter.h"
 #include "../renderer/path/RenderPath.h"
 #include "../renderer/post/HDRResolver.h"
@@ -46,12 +46,12 @@
 #ifdef USING_OPENGL
 #include "../renderer/gui/GuiRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
-#include "../renderer/target/WindowRendererGL.h"
+#include <lib/yrenderer/target/WindowRendererGL.h>
 #endif
 #ifdef USING_VULKAN
 #include "../renderer/gui/GuiRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
-#include "../renderer/target/WindowRendererVulkan.h"
+#include <lib/yrenderer/target/WindowRendererVulkan.h>
 #endif
 #include <renderer/helper/Raytracing.h>
 #include <renderer/scene/pass/ShadowRenderer.h>

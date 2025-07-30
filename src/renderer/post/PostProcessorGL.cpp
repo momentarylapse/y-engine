@@ -8,7 +8,7 @@
 #include "PostProcessorGL.h"
 
 #ifdef USING_OPENGL
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/nix/nix.h>
 #include <lib/math/vec2.h>
 #include <lib/math/rect.h>

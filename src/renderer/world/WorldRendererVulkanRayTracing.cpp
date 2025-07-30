@@ -10,7 +10,7 @@
 #include "../helper/Raytracing.h"
 #include "../scene/SceneView.h"
 #include "../path/RenderPath.h"
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #include <lib/profiler/Profiler.h>

@@ -8,7 +8,7 @@
 #include "PostProcessorVulkan.h"
 
 #ifdef USING_VULKAN
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/vec2.h>
 #include <lib/math/rect.h>

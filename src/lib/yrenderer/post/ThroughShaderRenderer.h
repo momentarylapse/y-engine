@@ -5,8 +5,8 @@
 #ifndef THROUGHSHADERRENDERER_H
 #define THROUGHSHADERRENDERER_H
 
-#include "../Renderer.h"
-#include "../helper/Bindable.h"
+#include <lib/yrenderer/Renderer.h>
+#include <lib/yrenderer/helper/Bindable.h>
 #include <lib/any/any.h>
 #include <lib/math/rect.h>
 

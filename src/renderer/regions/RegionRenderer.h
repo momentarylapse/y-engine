@@ -8,7 +8,7 @@
 #ifndef SRC_RENDERER_REGIONS_REGIONRENDERERCOMMON_H_
 #define SRC_RENDERER_REGIONS_REGIONRENDERERCOMMON_H_
 
-#include "../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 
 #include <lib/math/rect.h>
 

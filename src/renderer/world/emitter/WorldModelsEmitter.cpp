@@ -4,7 +4,7 @@
 
 #include "WorldModelsEmitter.h"
 #include <lib/profiler/Profiler.h>
-#include <renderer/base.h>
+#include <lib/yrenderer/base.h>
 #include <renderer/scene/RenderViewData.h>
 #include <renderer/scene/SceneView.h>
 #include <world/Model.h>

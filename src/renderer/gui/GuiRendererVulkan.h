@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 #ifdef USING_VULKAN
 
 class GuiRendererVulkan : public Renderer {

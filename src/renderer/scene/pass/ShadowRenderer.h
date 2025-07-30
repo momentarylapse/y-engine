@@ -9,7 +9,7 @@
 
 #include <functional>
 
-#include "../../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/math/mat4.h>
 #include <renderer/scene/SceneRenderer.h>

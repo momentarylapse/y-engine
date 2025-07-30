@@ -5,7 +5,7 @@
 #include "WorldSkyboxEmitter.h"
 #include "../../scene/RenderViewData.h"
 #include "../../scene/SceneView.h"
-#include "../../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/profiler/Profiler.h>
 #include <world/World.h>
 #include <world/Model.h>

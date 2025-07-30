@@ -6,9 +6,9 @@
  */
 
 #include "HDRResolver.h"
-#include "ThroughShaderRenderer.h"
-#include "../base.h"
-#include "../target/TextureRenderer.h"
+#include <lib/yrenderer/post/ThroughShaderRenderer.h>
+#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <Config.h>
 #include <helper/ResourceManager.h>

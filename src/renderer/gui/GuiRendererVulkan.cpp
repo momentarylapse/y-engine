@@ -7,8 +7,8 @@
 
 #include "GuiRendererVulkan.h"
 #ifdef USING_VULKAN
-#include "../base.h"
-#include "../helper/PipelineManager.h"
+#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/helper/PipelineManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"

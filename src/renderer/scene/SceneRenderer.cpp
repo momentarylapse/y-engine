@@ -5,11 +5,11 @@
 #include "SceneRenderer.h"
 #include "RenderViewData.h"
 #include "SceneView.h"
-#include <renderer/base.h>
+#include <lib/yrenderer/base.h>
 #include <lib/profiler/Profiler.h>
 #include <world/Light.h>
 #include <lib/ygraphics/graphics-impl.h>
-#include "renderer/helper/PipelineManager.h"
+#include <lib/yrenderer/helper/PipelineManager.h>
 
 
 #ifdef USING_VULKAN

@@ -8,7 +8,7 @@
 
 #include <lib/ygraphics/graphics-impl.h>
 #include "SceneView.h"
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include <world/Camera.h>
 #include <world/Light.h>
 #include <y/Entity.h>

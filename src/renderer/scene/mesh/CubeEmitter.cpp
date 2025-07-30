@@ -3,7 +3,7 @@
 //
 
 #include "CubeEmitter.h"
-#include <renderer/base.h>
+#include <lib/yrenderer/base.h>
 #include <renderer/scene/RenderViewData.h>
 #include <y/EngineData.h>
 #include <lib/ygraphics/graphics-impl.h>

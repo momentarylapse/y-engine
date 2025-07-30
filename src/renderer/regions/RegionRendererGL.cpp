@@ -8,7 +8,7 @@
 #include "../regions/RegionRenderer.h"
 
 #ifdef USING_OPENGL
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/nix/nix.h>
 #include <lib/profiler/Profiler.h>
 

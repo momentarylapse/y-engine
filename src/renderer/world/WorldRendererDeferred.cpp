@@ -6,10 +6,10 @@
  */
 
 #include "WorldRendererDeferred.h"
-#include "../target/TextureRenderer.h"
+#include <lib/yrenderer/target/TextureRenderer.h>
 #include "../scene/pass/ShadowRenderer.h"
-#include "../post/ThroughShaderRenderer.h"
-#include "../base.h"
+#include <lib/yrenderer/post/ThroughShaderRenderer.h>
+#include <lib/yrenderer/base.h>
 #include "../path/RenderPath.h"
 #include <lib/os/msg.h>
 #include <lib/math/random.h>

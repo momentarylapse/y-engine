@@ -8,7 +8,7 @@
 #include "TextureRenderer.h"
 #ifdef USING_OPENGL
 #include <lib/profiler/Profiler.h>
-#include <renderer/base.h>
+#include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 
 #include "lib/os/msg.h"

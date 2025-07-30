@@ -4,7 +4,7 @@
 
 #include "WorldTerrainsEmitter.h"
 #include <lib/profiler/Profiler.h>
-#include <renderer/base.h>
+#include <lib/yrenderer/base.h>
 #include <renderer/scene/RenderViewData.h>
 #include <world/Terrain.h>
 #include <y/ComponentManager.h>

@@ -7,7 +7,7 @@
 
 #include "base.h"
 #include <lib/ygraphics/graphics-impl.h>
-#include "../lib/image/image.h"
+#include <lib/image/image.h>
 
 Texture *tex_white = nullptr;
 Texture *tex_black = nullptr;

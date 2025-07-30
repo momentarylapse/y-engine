@@ -1,7 +1,7 @@
 #include "MultisampleResolver.h"
 #include "ThroughShaderRenderer.h"
 #include "../target/TextureRenderer.h"
-#include "../../helper/ResourceManager.h"
+#include <helper/ResourceManager.h>
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 

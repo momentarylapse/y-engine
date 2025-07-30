@@ -5,11 +5,11 @@
 #include "Raytracing.h"
 
 #include "../scene/SceneView.h"
-#include "../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/os/msg.h>
 #include <lib/base/iter.h>
 #include <lib/profiler/Profiler.h>
-#include <renderer/target/WindowRendererVulkan.h>
+#include <lib/yrenderer/target/WindowRendererVulkan.h>
 #include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include "../../gui/Node.h"

@@ -6,10 +6,10 @@
  */
 
 #include "ShadowRenderer.h"
-#include "../../target/TextureRenderer.h"
+#include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
-#include "../../base.h"
+#include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/Material.h>

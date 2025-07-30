@@ -6,7 +6,7 @@
 #define RENDERPATH_H
 
 
-#include <renderer/Renderer.h>
+#include <lib/yrenderer//Renderer.h>
 #include "../scene/SceneView.h"
 
 class CubeMapRenderer;

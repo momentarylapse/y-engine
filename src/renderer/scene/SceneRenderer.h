@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../Renderer.h"
+#include <lib/yrenderer/Renderer.h>
 #include "MeshEmitter.h"
 #include "RenderViewData.h"
 
