@@ -10,7 +10,7 @@
 
 namespace yrenderer {
 
-RegionRenderer::RegionRenderer() : Renderer("rgn") {
+RegionRenderer::RegionRenderer(Context* ctx) : Renderer(ctx, "rgn") {
 }
 
 void RegionRenderer::prepare(const RenderParams& params) {

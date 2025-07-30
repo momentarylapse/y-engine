@@ -65,7 +65,7 @@ EngineData::EngineData() {
 	game_running = false;
 }
 
-void EngineData::set_context(ygfx::Context *ctx, ResourceManager *rm) {
+void EngineData::set_context(yrenderer::Context *ctx, ResourceManager *rm) {
 	context = ctx;
 	resource_manager = rm;
 }

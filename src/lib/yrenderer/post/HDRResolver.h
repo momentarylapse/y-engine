@@ -20,7 +20,7 @@ class ThroughShaderRenderer;
 
 class HDRResolver : public Renderer {
 public:
-	HDRResolver(Camera *cam, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer);
+	HDRResolver(Context* ctx, Camera *cam, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer);
 	~HDRResolver() override;
 
 	void prepare(const RenderParams& params) override;

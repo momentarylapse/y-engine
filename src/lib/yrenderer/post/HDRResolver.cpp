@@ -30,7 +30,7 @@ static int BLUR_SCALE = 4;
 static int BLOOM_LEVEL_SCALE = 4;
 
 
-HDRResolver::HDRResolver(Camera *_cam, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer) : Renderer("hdr") {
+HDRResolver::HDRResolver(Context* ctx, Camera *_cam, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer) : Renderer(ctx, "hdr") {
 	cam = _cam;
 	tex_main = tex;
 	_depth_buffer = depth_buffer;
@@ -54,26 +54,26 @@ HDRResolver::HDRResolver(Camera *_cam, const shared<ygfx::Texture>& tex, const s
 		auto depth1 = new ygfx::DepthBuffer(bloomw, bloomh, "d:f32");
 		bl.tex_temp->set_options("wrap=clamp");
 		bl.tex_out->set_options("wrap=clamp");
-		bl.tsr[0] = new ThroughShaderRenderer("blur", shader_blur);
+		bl.tsr[0] = new ThroughShaderRenderer(ctx, "blur", shader_blur);
 		bl.tsr[0]->bind_texture(0, bloom_input.get());
 		bl.tsr[0]->bindings.shader_data.dict_set("axis:0", vec2_to_any(vec2::EX));
 		bl.tsr[0]->bindings.shader_data.dict_set("radius:8", r * (float)BLOOM_LEVEL_SCALE);
 		bl.tsr[0]->bindings.shader_data.dict_set("threshold:12", threshold);
-		bl.tsr[1] = new ThroughShaderRenderer("blur", shader_blur);
+		bl.tsr[1] = new ThroughShaderRenderer(ctx, "blur", shader_blur);
 		bl.tsr[1]->bind_texture(0, bl.tex_temp.get());
 		bl.tsr[1]->bindings.shader_data.dict_set("axis:0", vec2_to_any(vec2::EY));
 		bl.tsr[1]->bindings.shader_data.dict_set("radius:8", r);
 		bl.tsr[1]->bindings.shader_data.dict_set("threshold:12", 0.0f);
-		bl.renderer[0] = new TextureRenderer("blur", {bl.tex_temp, depth0});
+		bl.renderer[0] = new TextureRenderer(ctx, "blur", {bl.tex_temp, depth0});
 		bl.renderer[0]->add_child(bl.tsr[0].get());
-		bl.renderer[1] = new TextureRenderer("blur", {bl.tex_out, depth1});
+		bl.renderer[1] = new TextureRenderer(ctx, "blur", {bl.tex_out, depth1});
 		bl.renderer[1]->add_child(bl.tsr[1].get());
 		bloom_input = bl.tex_out;
 		threshold = 0;
 	}
 
 	auto shader_out = resource_manager->shader_manager->load_shader("forward/hdr.shader");
-	out_renderer = new ThroughShaderRenderer("out", shader_out);
+	out_renderer = new ThroughShaderRenderer(ctx, "out", shader_out);
 	out_renderer->bind_textures(0, {tex.get(), bloom_levels[0].tex_out.get(), bloom_levels[1].tex_out.get(), bloom_levels[2].tex_out.get(), bloom_levels[3].tex_out.get()});
 	children.add(out_renderer.get());
 }
@@ -83,7 +83,7 @@ HDRResolver::~HDRResolver() = default;
 
 void HDRResolver::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
-	gpu_timestamp_begin(params, ch_prepare);
+	ctx->gpu_timestamp_begin(params, ch_prepare);
 
 	for (auto c: children)
 		c->prepare(params);
@@ -115,7 +115,7 @@ void HDRResolver::prepare(const RenderParams& params) {
 	data.dict_set("scale_x:204", resolution_scale_x);
 	data.dict_set("scale_y:208", resolution_scale_y);
 
-	gpu_timestamp_end(params, ch_prepare);
+	ctx->gpu_timestamp_end(params, ch_prepare);
 	profiler::end(ch_prepare);
 }
 

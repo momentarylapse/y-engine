@@ -25,7 +25,7 @@ struct VertexPoint {
 
 class WorldParticlesEmitter : public yrenderer::MeshEmitter {
 public:
-	WorldParticlesEmitter();
+	explicit WorldParticlesEmitter(yrenderer::Context* ctx);
 	void emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) override;
 
 //	shared<Shader> shader_fx;

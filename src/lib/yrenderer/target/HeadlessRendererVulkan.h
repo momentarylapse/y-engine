@@ -20,7 +20,7 @@ public:
 
 	owned<TextureRenderer> texture_renderer;
 
-	HeadlessRenderer(vulkan::Device* d, const shared_array<ygfx::Texture>& tex);
+	HeadlessRenderer(Context* ctx, const shared_array<ygfx::Texture>& tex);
 	~HeadlessRenderer() override;
 
 	void render(const RenderParams& params) override;

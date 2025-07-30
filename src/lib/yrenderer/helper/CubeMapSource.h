@@ -36,7 +36,7 @@ public:
 
 class CubeMapRenderer : public RenderTask {
 public:
-	explicit CubeMapRenderer(SceneView& scene_view, shared_array<MeshEmitter> emitters);
+	explicit CubeMapRenderer(Context* ctx, SceneView& scene_view, shared_array<MeshEmitter> emitters);
 
 	CubeMapSource* source = nullptr;
 	void set_source(CubeMapSource* s);

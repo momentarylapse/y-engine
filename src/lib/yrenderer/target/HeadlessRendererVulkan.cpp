@@ -7,13 +7,13 @@
 
 namespace yrenderer {
 
-HeadlessRenderer::HeadlessRenderer(vulkan::Device* d, const shared_array<ygfx::Texture>& tex) : RenderTask("headless")
+HeadlessRenderer::HeadlessRenderer(Context* ctx, const shared_array<ygfx::Texture>& tex) : RenderTask(ctx, "headless")
 {
-	device = d;
+	device = ctx->device;
 	command_buffer = new ygfx::CommandBuffer(device->command_pool);
 	fence = new vulkan::Fence(device);
 
-	texture_renderer = new TextureRenderer("tex", tex);
+	texture_renderer = new TextureRenderer(ctx, "tex", tex);
 }
 
 HeadlessRenderer::~HeadlessRenderer() = default;

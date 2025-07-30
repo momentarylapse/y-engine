@@ -18,6 +18,7 @@ namespace gui {
 }
 
 namespace yrenderer {
+	class Context;
 	class TargetRenderer;
 	class Renderer;
 	class MaterialManager;
@@ -40,7 +41,7 @@ struct RenderPath;
 class EngineData {
 public:
 	EngineData();
-	void set_context(ygfx::Context *ctx, ResourceManager *rm);
+	void set_context(yrenderer::Context *ctx, ResourceManager *rm);
 
 	string app_name, version;
 	bool debug, show_timings, console_enabled, wire_mode;
@@ -88,7 +89,7 @@ public:
 
 	Path map_dir, sound_dir, script_dir, object_dir, texture_dir, shader_dir, material_dir, font_dir;
 
-	ygfx::Context *context;
+	yrenderer::Context* context;
 	ResourceManager *resource_manager;
 
 	yrenderer::WindowRenderer *window_renderer;

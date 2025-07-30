@@ -133,9 +133,10 @@ public:
 			config.game_dir | "Textures",
 			config.game_dir | "Materials",
 			config.game_dir | "Materials");
+		context->resource_manager = resource_manager;
 		engine.set_context(context, resource_manager);
 
-		create_base_renderer(window);
+		create_base_renderer(context, window);
 
 		audio::init();
 
@@ -168,7 +169,7 @@ public:
 		audio::attach_listener(cam_main->owner);
 
 		for (auto& cam: ComponentManager::get_list_family<Camera>())
-			create_and_attach_render_path(cam);
+			create_and_attach_render_path(engine.context, cam);
 		for (auto &s: world.systems)
 			SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
@@ -233,11 +234,11 @@ public:
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window) and !engine.end_requested) {
-			yrenderer::gpu_flush();
+			engine.context->gpu_flush();
 			profiler::next_frame();
-			yrenderer::reset_gpu_timestamp_queries();
+			engine.context->reset_gpu_timestamp_queries();
 #ifdef USING_OPENGL
-			yrenderer::gpu_timestamp({}, -1);
+			engine.context->gpu_timestamp({}, -1);
 #endif
 			engine.elapsed_rt = profiler::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
@@ -255,13 +256,13 @@ public:
 				load_world(world.next_filename);
 				world.next_filename = "";
 			}
-			auto tt = yrenderer::gpu_read_timestamps();
+			auto tt = engine.context->gpu_read_timestamps();
 			for (int i=0; i<tt.num; i++)
-				profiler::current_frame_timing.gpu.add({yrenderer::gpu_timestamp_queries[i], tt[i]});
+				profiler::current_frame_timing.gpu.add({engine.context->gpu_timestamp_queries[i], tt[i]});
 
 		}
 
-		yrenderer::gpu_flush();
+		engine.context->gpu_flush();
 	}
 
 	void reset_game() {
@@ -279,14 +280,14 @@ public:
 		GodEnd();
 
 		input::remove(window);
-		yrenderer::gpu_flush();
+		engine.context->gpu_flush();
 		// sometimes there is a weird crash in another thread (I don't know in which library) otherwise
 		os::sleep(0.25f);
 
 		// TODO
 		//delete engine.world_renderer;
 		delete engine.window_renderer;
-		yrenderer::api_end();
+		yrenderer::api_end(engine.context);
 		glfwDestroyWindow(window);
 
 		glfwTerminate();

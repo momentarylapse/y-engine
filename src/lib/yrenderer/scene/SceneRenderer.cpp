@@ -26,7 +26,7 @@ GraphicsPipeline* SceneRenderer::get_pipeline(Shader *s, RenderPass *rp, const M
 #endif
 
 
-SceneRenderer::SceneRenderer(RenderPathType type, SceneView& _scene_view) : Renderer("scene"), scene_view(_scene_view) {
+SceneRenderer::SceneRenderer(Context* ctx, RenderPathType type, SceneView& _scene_view) : Renderer(ctx, "scene"), scene_view(_scene_view), rvd(ctx) {
 	rvd.set_scene_view(&scene_view);
 	rvd.type = type;
 }
@@ -55,7 +55,7 @@ void SceneRenderer::prepare(const RenderParams& params) {
 
 void SceneRenderer::draw(const RenderParams& params) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 	rvd.begin_draw();
 
 	if (background_color)
@@ -79,7 +79,7 @@ void SceneRenderer::draw(const RenderParams& params) {
 	nix::set_front(nix::Orientation::CW);
 #endif
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

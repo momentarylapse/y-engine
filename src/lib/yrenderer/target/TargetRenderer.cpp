@@ -11,7 +11,7 @@
 
 namespace yrenderer {
 
-TargetRenderer::TargetRenderer(const string &name) : Renderer(name) {
+TargetRenderer::TargetRenderer(Context* ctx, const string &name) : Renderer(ctx, name) {
 	ch_end = profiler::create_channel(name + ".end", channel);
 }
 

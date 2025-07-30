@@ -17,39 +17,47 @@ namespace xhui {
 class Painter;
 }
 
+class ResourceManager;
+
 namespace yrenderer {
 
-struct __Context {
+struct Context {
 
+	ygfx::Context* context;
+
+	ResourceManager* resource_manager = nullptr;
+
+	ygfx::Texture* tex_white;
+	ygfx::Texture* tex_black;
+
+	Array<int> gpu_timestamp_queries;
+
+#ifdef USING_VULKAN
+	vulkan::Instance* instance = nullptr;
+	vulkan::DescriptorPool* pool;
+	vulkan::Device* device;
+#endif
+
+	void _create_default_textures();
+
+	void reset_gpu_timestamp_queries();
+
+	void gpu_timestamp(const RenderParams& params, int channel);
+	void gpu_timestamp_begin(const RenderParams& params, int channel);
+	void gpu_timestamp_end(const RenderParams& params, int channel);
+	Array<float> gpu_read_timestamps();
+
+	void gpu_flush();
 };
 
-ygfx::Context* api_init(GLFWwindow* window);
+Context* api_init(GLFWwindow* window);
 #ifdef USING_VULKAN
-ygfx::Context* api_init_external(vulkan::Instance* instance, vulkan::Device* device);
+Context* api_init_external(vulkan::Instance* instance, vulkan::Device* device);
 #endif
-ygfx::Context* api_init_xhui(xhui::Painter* p);
-void api_end();
-void _create_default_textures();
-
-extern ygfx::Texture *tex_white;
-extern ygfx::Texture *tex_black;
-
-void gpu_flush();
+Context* api_init_xhui(xhui::Painter* p);
+void api_end(Context* ctx);
 
 static constexpr int MAX_TIMESTAMP_QUERIES = 4096;
 
-void reset_gpu_timestamp_queries();
-void gpu_timestamp(const RenderParams& params, int channel);
-void gpu_timestamp_begin(const RenderParams& params, int channel);
-void gpu_timestamp_end(const RenderParams& params, int channel);
-Array<float> gpu_read_timestamps();
-extern Array<int> gpu_timestamp_queries;
-
-	// TODO wrap in Context...
-
-#ifdef USING_VULKAN
-	extern vulkan::DescriptorPool *pool;
-	extern vulkan::Device *device;
-#endif
 
 }

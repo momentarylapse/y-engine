@@ -14,8 +14,7 @@ namespace yrenderer {
 class XhuiRenderer : public RenderTask {
 public:
 	rect native_area_window = rect::ID;
-	XhuiRenderer() : RenderTask("xhui") {
-	}
+	XhuiRenderer(Context* ctx) : RenderTask(ctx, "xhui") {}
 	RenderParams extract_params(Painter* p);
 	void render(const RenderParams& params) override;
 

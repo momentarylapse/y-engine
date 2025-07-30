@@ -22,8 +22,8 @@ namespace yrenderer {
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
 
-ShadowRenderer::ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emitters) :
-		RenderTask("shdw")
+ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<MeshEmitter> emitters) :
+		RenderTask(ctx, "shdw")
 {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
@@ -37,7 +37,7 @@ ShadowRenderer::ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emit
 
 	for (int i=0; i<NUM_CASCADES; i++) {
 		auto& c = cascades[i];
-		c.scene_renderer = new SceneRenderer(RenderPathType::Forward, scene_view);
+		c.scene_renderer = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 		c.scene_renderer->is_shadow_pass = true;
 		c.scene_renderer->rvd.material_shadow = material.get();
 		for (auto e: weak(emitters))
@@ -45,7 +45,7 @@ ShadowRenderer::ShadowRenderer(SceneView* parent, shared_array<MeshEmitter> emit
 
 		shared tex = new ygfx::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
 		c.depth_buffer = new ygfx::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
-		c.texture_renderer = new TextureRenderer(format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
+		c.texture_renderer = new TextureRenderer(ctx, format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
 		c.scale = (i == 0) ? 4.0f : 1.0f;
 		c.texture_renderer->add_child(c.scene_renderer.get());
 	}
@@ -67,7 +67,7 @@ void ShadowRenderer::set_projection(const mat4& proj) {
 
 void ShadowRenderer::render(const RenderParams& params) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	for (int index: parent_scene->shadow_indices) {
 		set_projection(parent_scene->lights[index]->shadow_projection);
@@ -76,7 +76,7 @@ void ShadowRenderer::render(const RenderParams& params) {
 			render_cascade(params, cascades[i]);
 	}
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

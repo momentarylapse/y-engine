@@ -25,7 +25,7 @@ namespace yrenderer {
 
 class SurfaceRendererVulkan : public TargetRenderer {
 public:
-	SurfaceRendererVulkan(const string& name, Device *device);
+	SurfaceRendererVulkan(Context* ctx, const string& name);
 	~SurfaceRendererVulkan() override;
 
 
@@ -62,25 +62,25 @@ public:
 #ifdef HAS_LIB_GLFW
 class WindowRendererVulkan : public SurfaceRendererVulkan {
 public:
-	WindowRendererVulkan(GLFWwindow* win, Device *device);
+	WindowRendererVulkan(Context* ctx, GLFWwindow* win);
 
 	void create_swap_chain() override;
 
 	GLFWwindow* window;
 
-	static xfer<WindowRendererVulkan> create(GLFWwindow* win, Device *device);
+	static xfer<WindowRendererVulkan> create(Context* ctx, GLFWwindow* win);
 };
 #endif
 
 class HeadlessSurfaceRendererVulkan : public SurfaceRendererVulkan {
 public:
-	HeadlessSurfaceRendererVulkan(Device *device, int width, int height);
+	HeadlessSurfaceRendererVulkan(Context* ctx, int width, int height);
 
 	void create_swap_chain() override;
 
 	int width, height;
 
-	static xfer<HeadlessSurfaceRendererVulkan> create(Device *device, int width, int height);
+	static xfer<HeadlessSurfaceRendererVulkan> create(Context* ctx, int width, int height);
 };
 
 }

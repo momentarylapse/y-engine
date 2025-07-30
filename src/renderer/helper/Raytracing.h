@@ -17,6 +17,7 @@
 class Model;
 
 namespace yrenderer {
+	class Context;
 	struct SceneView;
 }
 
@@ -27,6 +28,7 @@ enum class RaytracingMode {
 };
 
 struct RayTracingData {
+	yrenderer::Context* ctx;
 	owned<ygfx::UniformBuffer> buffer_meshes;
 	int num_meshes = 0;
 

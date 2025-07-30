@@ -22,24 +22,26 @@ extern owned<nix::Context> _nix_context;
 
 namespace yrenderer {
 
-ygfx::Context* api_init(GLFWwindow* window) {
+Context* api_init(GLFWwindow* window) {
+	auto ctx = new Context();
 	nix::allow_separate_vertex_arrays = true;
 	nix::default_shader_bindings = false;
-	auto gl = nix::init();
+	ctx->context = nix::init();
 
-	if (gl->total_mem() > 0) {
-		msg_write(format("VRAM: %d mb  of  %d mb available", gl->available_mem() / 1024, gl->total_mem() / 1024));
+	if (ctx->context->total_mem() > 0) {
+		msg_write(format("VRAM: %d mb  of  %d mb available", ctx->context->available_mem() / 1024, ctx->context->total_mem() / 1024));
 	}
 
 	nix::create_query_pool(MAX_TIMESTAMP_QUERIES);
 
-	_create_default_textures();
+	ctx->_create_default_textures();
 
-	return gl;
+	return ctx;
 }
 
-ygfx::Context* api_init_xhui(xhui::Painter* p) {
+Context* api_init_xhui(xhui::Painter* p) {
 #ifdef HAS_XHUI
+	msg_error("TODO");
 	nix::create_query_pool(MAX_TIMESTAMP_QUERIES);
 	_create_default_textures();
 	return xhui::_nix_context.get();
@@ -48,27 +50,27 @@ ygfx::Context* api_init_xhui(xhui::Painter* p) {
 #endif
 }
 
-void reset_gpu_timestamp_queries() {
+void Context::reset_gpu_timestamp_queries() {
 	gpu_timestamp_queries.clear();
 	gpu_timestamp_queries.simple_reserve(256);
 }
 
-void gpu_timestamp(const RenderParams&, int channel) {
+void Context::gpu_timestamp(const RenderParams&, int channel) {
 	if (gpu_timestamp_queries.num >= MAX_TIMESTAMP_QUERIES)
 		return;
 	nix::query_timestamp(gpu_timestamp_queries.num);
 	gpu_timestamp_queries.add(channel);
 }
 
-void gpu_timestamp_begin(const RenderParams& params, int channel) {
+void Context::gpu_timestamp_begin(const RenderParams& params, int channel) {
 	gpu_timestamp(params, channel);
 }
 
-void gpu_timestamp_end(const RenderParams& params, int channel) {
+void Context::gpu_timestamp_end(const RenderParams& params, int channel) {
 	gpu_timestamp(params, channel | (int)0x80000000);
 }
 
-Array<float> gpu_read_timestamps() {
+Array<float> Context::gpu_read_timestamps() {
 	auto tt = nix::get_timestamps(0, gpu_timestamp_queries.num);
 	Array<float> result;
 	result.resize(tt.num);
@@ -77,11 +79,11 @@ Array<float> gpu_read_timestamps() {
 	return result;
 }
 
-void gpu_flush() {
+void Context::gpu_flush() {
 	nix::flush();
 }
 
-void api_end() {
+void api_end(Context*) {
 }
 
 }

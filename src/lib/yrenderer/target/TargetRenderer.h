@@ -14,7 +14,7 @@ namespace yrenderer {
 
 class TargetRenderer : public Renderer {
 public:
-	explicit TargetRenderer(const string &name);
+	explicit TargetRenderer(Context* ctx, const string &name);
 
 	void draw(const RenderParams& params) override;
 

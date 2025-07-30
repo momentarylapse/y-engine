@@ -17,7 +17,7 @@ namespace yrenderer {
 
 class WindowRendererGL : public TargetRenderer {
 public:
-	explicit WindowRendererGL(GLFWwindow* win);
+	explicit WindowRendererGL(Context* ctx, GLFWwindow* win);
 
 
 	bool start_frame();

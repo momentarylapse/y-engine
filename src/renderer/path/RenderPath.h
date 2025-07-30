@@ -29,7 +29,7 @@ namespace yrenderer {
 
 class RenderPath : public yrenderer::Renderer {
 public:
-	explicit RenderPath(yrenderer::RenderPathType type, Camera* cam);
+	explicit RenderPath(yrenderer::Context* ctx, yrenderer::RenderPathType type, Camera* cam);
 	~RenderPath() override;
 
 	yrenderer::RenderPathType type;
@@ -71,6 +71,6 @@ public:
 	void suggest_cube_map_pos();
 };
 
-WorldRenderer *create_world_renderer(yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
+WorldRenderer* create_world_renderer(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
 
 #endif //RENDERPATH_H

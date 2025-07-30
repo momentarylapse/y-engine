@@ -20,6 +20,7 @@ class ResourceManager;
 
 namespace yrenderer {
 
+class Context;
 class RenderTask;
 
 rect dynamicly_scaled_area(ygfx::FrameBuffer *fb);
@@ -44,7 +45,7 @@ struct RenderParams {
 
 class Renderer : public VirtualBase {
 public:
-	explicit Renderer(const string& name);
+	explicit Renderer(Context* ctx, const string& name);
 	~Renderer() override;
 
 	Array<Renderer*> children;
@@ -64,13 +65,13 @@ public:
 
 	int channel;
 	int ch_prepare;
-	ygfx::Context* context;
+	Context* ctx;
 	ResourceManager* resource_manager;
 };
 
 class RenderTask : public  VirtualBase {
 public:
-	explicit RenderTask(const string& name);
+	explicit RenderTask(Context* ctx, const string& name);
 	~RenderTask() override;
 
 	Array<Renderer*> children;
@@ -85,7 +86,7 @@ public:
 	int channel;
 	bool active = true;
 	int _priority = 0;
-	ygfx::Context* context;
+	Context* ctx;
 	ResourceManager* resource_manager;
 };
 

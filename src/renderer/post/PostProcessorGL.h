@@ -17,8 +17,8 @@ class Any;
 
 class PostProcessorGL : public PostProcessor {
 public:
-	PostProcessorGL(int width, int height);
-	virtual ~PostProcessorGL();
+	PostProcessorGL(yrenderer::Context* ctx, int width, int height);
+	~PostProcessorGL() override;
 
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;

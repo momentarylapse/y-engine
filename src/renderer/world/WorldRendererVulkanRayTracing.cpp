@@ -24,9 +24,11 @@
 
 using namespace yrenderer;
 
-WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_device, SceneView& scene_view, int w, int h) :
-		WorldRenderer("rt", scene_view) {
-	device = _device;
+WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Context* ctx, SceneView& scene_view, int w, int h) :
+		WorldRenderer(ctx, "rt", scene_view),
+		rvd(ctx)
+{
+	device = ctx->device;
 	width = w;
 	height = h;
 
@@ -82,13 +84,13 @@ WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_de
 
 
 	auto shader_out = resource_manager->shader_manager->load_shader("vulkan/passthrough.shader");
-	out_renderer = new ThroughShaderRenderer("out", shader_out);
+	out_renderer = new ThroughShaderRenderer(ctx, "out", shader_out);
 	out_renderer->bind_texture(0, offscreen_image);
 }
 
 void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
-	gpu_timestamp_begin(params, ch_prepare);
+	ctx->gpu_timestamp_begin(params, ch_prepare);
 
 	rvd.set_view(params, scene_view.cam);
 	rvd.update_light_ubo();
@@ -160,7 +162,7 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	out_renderer->bindings.shader_data.dict_set("scale_x:204", 1.0f);
 	out_renderer->bindings.shader_data.dict_set("scale_y:208", 1.0f);
 
-	gpu_timestamp_end(params, ch_prepare);
+	ctx->gpu_timestamp_end(params, ch_prepare);
 	profiler::end(ch_prepare);
 }
 

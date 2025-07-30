@@ -9,7 +9,7 @@
 
 class WorldModelsEmitter : public yrenderer::MeshEmitter {
 public:
-	WorldModelsEmitter();
+	explicit WorldModelsEmitter(yrenderer::Context* ctx);
 	void emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) override;
 	void emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) override;
 };

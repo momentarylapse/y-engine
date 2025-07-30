@@ -12,11 +12,11 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 
-WorldTerrainsEmitter::WorldTerrainsEmitter() : MeshEmitter("ter") {}
+WorldTerrainsEmitter::WorldTerrainsEmitter(yrenderer::Context* ctx) : MeshEmitter(ctx, "ter") {}
 
 void WorldTerrainsEmitter::emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
 	for (auto *t: terrains) {
@@ -42,7 +42,7 @@ void WorldTerrainsEmitter::emit(const yrenderer::RenderParams& params, yrenderer
 		}
 		rd.draw_triangles(params, t->vertex_buffer.get());
 	}
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

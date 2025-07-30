@@ -18,7 +18,7 @@ class Profiler;
 
 class WorldRendererForward : public WorldRenderer {
 public:
-	explicit WorldRendererForward(yrenderer::SceneView& scene_view);
+	explicit WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view);
 
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;

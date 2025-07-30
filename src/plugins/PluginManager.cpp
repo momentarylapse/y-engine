@@ -199,7 +199,7 @@ void storagebuffer_init(ShaderStorageBuffer* buf, int size) {
 	new(buf) ShaderStorageBuffer(size);
 }
 
-void computetask_init(ComputeTask* task, const string& name, const shared<Shader>& shader, const Array<int>& n) {
+void computetask_init(ComputeTask* task, yrenderer::Context* ctx, const string& name, const shared<Shader>& shader, const Array<int>& n) {
 	int nx = 1;
 	int ny = 1;
 	int nz = 1;
@@ -209,7 +209,7 @@ void computetask_init(ComputeTask* task, const string& name, const shared<Shader
 		ny = n[1];
 	if (n.num >= 3)
 		nz = n[2];
-	new(task) yrenderer::ComputeTask(name, shader, nx, ny, nz);
+	new(task) ComputeTask(ctx, name, shader, nx, ny, nz);
 }
 
 void texture_init(Texture *t, int w, int h, const string &format) {
@@ -300,7 +300,7 @@ void screenshot(Image& im) {
 #ifdef USING_VULKAN
 	msg_error("unimplemented:  screenshot()");
 #else
-	engine.context->default_framebuffer->read(im);
+	engine.context->context->default_framebuffer->read(im);
 #endif
 }
 
@@ -719,11 +719,11 @@ void export_gfx(kaba::Exporter* ext) {
 	ext->link_class_func("Shader.set_float", &shader_set_float);
 	ext->link_class_func("Shader.set_floats", &shader_set_floats);
 
-	ext->link("tex_white", &tex_white);
+	ext->link_func("load_shader", &__load_shader);
+	ext->link_func("create_shader", &__create_shader);
+	ext->link_func("load_texture", &__load_texture);
 
-	ext->link("load_shader", (void*)&__load_shader);
-	ext->link("create_shader", (void*)&__create_shader);
-	ext->link("load_texture", (void*)&__load_texture);
+	ext->link("tex_white", &engine.context->tex_white);
 }
 
 void export_fx(kaba::Exporter* ext) {
@@ -989,6 +989,9 @@ void export_engine(kaba::Exporter* ext) {
 	ext->link_class_func("ResourceManager.load_material", &ResourceManager::load_material);
 	ext->link_class_func("ResourceManager.load_model", &ResourceManager::load_model);*/
 
+	ext->declare_class_size("Context", sizeof(yrenderer::Context));
+	ext->declare_class_element("Context.ctx", &yrenderer::Context::context);
+	ext->declare_class_element("Context.tex_white", &yrenderer::Context::tex_white);
 
 	ext->declare_class_size("EngineData", sizeof(EngineData));
 	ext->declare_class_element("EngineData.app_name", &EngineData::app_name);
@@ -1057,7 +1060,7 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_size("Renderer", sizeof(Renderer));
 
 	{
-		ComputeTask ct("", nullptr, 0, 0, 0);
+		ComputeTask ct(nullptr, "", nullptr, 0, 0, 0);
 		ext->declare_class_size("RenderTask", sizeof(RenderTask));
 		ext->declare_class_element("RenderTask.active", &RenderTask::active);
 		//ext->link_virtual("RenderTask.prepare", &RenderTask::prepare, &ct);

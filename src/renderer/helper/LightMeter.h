@@ -12,7 +12,7 @@ class Camera;
 
 class LightMeter : public yrenderer::ComputeTask {
 public:
-	LightMeter(ResourceManager* resource_manager, ygfx::Texture* tex);
+	LightMeter(yrenderer::Context* ctx, ygfx::Texture* tex);
 	ygfx::UniformBuffer* params;
 	ygfx::ShaderStorageBuffer* buf;
 	Array<int> histogram;

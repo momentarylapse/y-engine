@@ -7,7 +7,8 @@
 
 namespace yrenderer {
 
-MeshEmitter::MeshEmitter(const string &name) {
+MeshEmitter::MeshEmitter(Context* _ctx, const string &name) {
+	ctx = _ctx;
 	channel = profiler::create_channel(name, -1);
 }
 

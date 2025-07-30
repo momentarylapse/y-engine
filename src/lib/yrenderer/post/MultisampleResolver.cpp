@@ -14,12 +14,12 @@ namespace nix {
 
 namespace yrenderer {
 
-MultisampleResolver::MultisampleResolver(ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out) : RenderTask("ms") {
+MultisampleResolver::MultisampleResolver(Context* ctx, ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out) : RenderTask(ctx, "ms") {
 	shader_resolve_multisample = resource_manager->shader_manager->load_shader("forward/resolve-multisample.shader");
-	tsr = new ThroughShaderRenderer("ms", shader_resolve_multisample);
+	tsr = new ThroughShaderRenderer(ctx, "ms", shader_resolve_multisample);
 	tsr->bind_textures(0, {tex_ms, depth_ms});
 
-	into_texture = new TextureRenderer("tex", {tex_out, depth_out});
+	into_texture = new TextureRenderer(ctx, "tex", {tex_out, depth_out});
 	into_texture->add_child(tsr.get());
 }
 

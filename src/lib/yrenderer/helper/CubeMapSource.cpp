@@ -27,9 +27,9 @@ CubeMapSource::CubeMapSource() {
 CubeMapSource::~CubeMapSource() = default;
 
 
-CubeMapRenderer::CubeMapRenderer(SceneView& scene_view, shared_array<MeshEmitter> emitters) : RenderTask("cube") {
+CubeMapRenderer::CubeMapRenderer(Context* ctx, SceneView& scene_view, shared_array<MeshEmitter> emitters) : RenderTask(ctx, "cube") {
 	for (int i=0; i<6; i++) {
-		scene_renderers[i] = new SceneRenderer(RenderPathType::Forward, scene_view);
+		scene_renderers[i] = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 		for (auto e: weak(emitters))
 			scene_renderers[i]->add_emitter(e);
 	}
@@ -41,14 +41,14 @@ void CubeMapRenderer::set_source(CubeMapSource* s) {
 
 
 void CubeMapRenderer::render(const RenderParams& params) {
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 	if (!source->depth_buffer)
 		source->depth_buffer = new ygfx::DepthBuffer(source->resolution, source->resolution, "ds:u24i8");
 	if (!source->cube_map)
 		source->cube_map = new ygfx::CubeMap(source->resolution, "rgba:i8");
 	if (!texture_renderers[0])
 		for (int i=0; i<6; i++) {
-			texture_renderers[i] = new TextureRenderer("tex", {source->cube_map.get(), source->depth_buffer.get()});
+			texture_renderers[i] = new TextureRenderer(ctx, "tex", {source->cube_map.get(), source->depth_buffer.get()});
 			texture_renderers[i]->set_layer(i);
 			texture_renderers[i]->add_child(scene_renderers[i].get());
 		}
@@ -77,7 +77,7 @@ void CubeMapRenderer::render(const RenderParams& params) {
 
 		texture_renderers[i]->render(params);
 	}
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 }
 
 }

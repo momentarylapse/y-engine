@@ -29,7 +29,7 @@ struct UBOGUI {
 };
 
 
-GuiRendererVulkan::GuiRendererVulkan() : Renderer("ui") {
+GuiRendererVulkan::GuiRendererVulkan(Context* ctx) : Renderer(ctx, "ui") {
 
 	shader = resource_manager->shader_manager->load_shader("vulkan/2d.shader");
 
@@ -39,10 +39,10 @@ GuiRendererVulkan::GuiRendererVulkan() : Renderer("ui") {
 
 void GuiRendererVulkan::draw(const RenderParams& params) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 	prepare_gui(params.frame_buffer, params);
 	draw_gui(params.command_buffer, params.render_pass);
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 
@@ -64,7 +64,7 @@ void GuiRendererVulkan::prepare_gui(ygfx::FrameBuffer *source, const RenderParam
 			auto *p = (gui::Picture*)n;
 
 			if (index >= ubo.num) {
-				dset.add(pool->create_set("sampler,sampler,buffer"));
+				dset.add(ctx->pool->create_set("sampler,sampler,buffer"));
 				ubo.add(new ygfx::UniformBuffer(sizeof(UBOGUI)));
 			}
 

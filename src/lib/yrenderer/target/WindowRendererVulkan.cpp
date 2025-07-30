@@ -7,6 +7,7 @@
 
 #include "WindowRendererVulkan.h"
 #ifdef USING_VULKAN
+#include "../base.h"
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/os/msg.h>
@@ -15,8 +16,8 @@
 
 namespace yrenderer {
 
-SurfaceRendererVulkan::SurfaceRendererVulkan(const string& name, Device *_device) : TargetRenderer(name) {
-	device = _device;
+SurfaceRendererVulkan::SurfaceRendererVulkan(Context* ctx, const string& name) : TargetRenderer(ctx, name) {
+	device = ctx->device;
 
 	image_available_semaphore = new vulkan::Semaphore(device);
 	render_finished_semaphore = new vulkan::Semaphore(device);
@@ -124,8 +125,8 @@ void SurfaceRendererVulkan::draw(const RenderParams& params) {
 
 
 #ifdef HAS_LIB_GLFW
-WindowRendererVulkan::WindowRendererVulkan(GLFWwindow* _window, Device *_device) :
-		SurfaceRendererVulkan("win", _device) {
+WindowRendererVulkan::WindowRendererVulkan(Context* ctx, GLFWwindow* _window) :
+		SurfaceRendererVulkan(ctx, "win") {
 	window = _window;
 }
 
@@ -133,16 +134,16 @@ void WindowRendererVulkan::create_swap_chain() {
 	swap_chain = vulkan::SwapChain::create_for_glfw(device, window);
 }
 
-xfer<WindowRendererVulkan> WindowRendererVulkan::create(GLFWwindow* window, Device *device) {
+xfer<WindowRendererVulkan> WindowRendererVulkan::create(Context* ctx, GLFWwindow* window) {
 	//auto surface = device->instance->create_glfw_surface(window);
-	auto r = new WindowRendererVulkan(window, device);
+	auto r = new WindowRendererVulkan(ctx, window);
 	r->_create_swap_chain_and_stuff();
 	return r;
 }
 #endif
 
-HeadlessSurfaceRendererVulkan::HeadlessSurfaceRendererVulkan(Device *_device, int _width, int _height) :
-		SurfaceRendererVulkan("headless", _device) {
+HeadlessSurfaceRendererVulkan::HeadlessSurfaceRendererVulkan(Context* ctx, int _width, int _height) :
+		SurfaceRendererVulkan(ctx, "headless") {
 	width = _width;
 	height = _height;
 }
@@ -151,8 +152,8 @@ void HeadlessSurfaceRendererVulkan::create_swap_chain() {
 	swap_chain = vulkan::SwapChain::create(device, width, height);
 }
 
-xfer<HeadlessSurfaceRendererVulkan> HeadlessSurfaceRendererVulkan::create(Device *device, int width, int height) {
-	auto r = new HeadlessSurfaceRendererVulkan(device, width, height);
+xfer<HeadlessSurfaceRendererVulkan> HeadlessSurfaceRendererVulkan::create(Context* ctx, int width, int height) {
+	auto r = new HeadlessSurfaceRendererVulkan(ctx, width, height);
 	r->_create_swap_chain_and_stuff();
 	return r;
 }

@@ -8,7 +8,7 @@
 
 class WorldSkyboxEmitter : public yrenderer::MeshEmitter {
 public:
-	WorldSkyboxEmitter();
+	WorldSkyboxEmitter(yrenderer::Context* ctx);
 	void emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) override;
 };
 

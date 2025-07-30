@@ -11,12 +11,7 @@
 
 namespace yrenderer {
 
-ygfx::Texture* tex_white = nullptr;
-ygfx::Texture* tex_black = nullptr;
-
-Array<int> gpu_timestamp_queries;
-
-void _create_default_textures() {
+void Context::_create_default_textures() {
 	tex_white = new ygfx::Texture();
 	tex_black = new ygfx::Texture();
 	tex_white->write(Image(16, 16, White));

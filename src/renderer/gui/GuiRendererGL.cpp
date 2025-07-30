@@ -25,7 +25,7 @@ namespace yrenderer {
 	void apply_shader_data(Shader *s, const Any &shader_data);
 }
 
-GuiRendererGL::GuiRendererGL() : Renderer("gui") {
+GuiRendererGL::GuiRendererGL(yrenderer::Context* ctx) : Renderer(ctx, "gui") {
 	shader = resource_manager->shader_manager->load_shader("forward/2d.shader");
 
 	vb = new VertexBuffer("3f,3f,2f");
@@ -38,7 +38,7 @@ void GuiRendererGL::draw(const RenderParams& params) {
 
 void GuiRendererGL::draw_gui(const RenderParams& params, FrameBuffer *source) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 	gui::update();
 
 	//nix::set_projection_ortho_relative();
@@ -79,7 +79,7 @@ void GuiRendererGL::draw_gui(const RenderParams& params, FrameBuffer *source) {
 
 	nix::disable_alpha();
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

@@ -23,16 +23,16 @@
 #include "../../world/Camera.h"
 
 
-WorldRendererForward::WorldRendererForward(yrenderer::SceneView& scene_view) : WorldRenderer("world", scene_view) {
+WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", scene_view) {
 	resource_manager->shader_manager->load_shader_module("forward/module-surface.shader");
 
-	scene_renderer = new yrenderer::SceneRenderer(yrenderer::RenderPathType::Forward, scene_view);
-	scene_renderer->add_emitter(new WorldSkyboxEmitter);
-	scene_renderer->add_emitter(new WorldModelsEmitter);
-	scene_renderer->add_emitter(new WorldTerrainsEmitter);
-	scene_renderer->add_emitter(new WorldUserMeshesEmitter);
-	scene_renderer->add_emitter(new WorldInstancedEmitter);
-	scene_renderer->add_emitter(new WorldParticlesEmitter);
+	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
+	scene_renderer->add_emitter(new WorldSkyboxEmitter(ctx));
+	scene_renderer->add_emitter(new WorldModelsEmitter(ctx));
+	scene_renderer->add_emitter(new WorldTerrainsEmitter(ctx));
+	scene_renderer->add_emitter(new WorldUserMeshesEmitter(ctx));
+	scene_renderer->add_emitter(new WorldInstancedEmitter(ctx));
+	scene_renderer->add_emitter(new WorldParticlesEmitter(ctx));
 }
 
 void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
@@ -47,11 +47,11 @@ void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 
 void WorldRendererForward::draw(const yrenderer::RenderParams& params) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	scene_renderer->draw(params);
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

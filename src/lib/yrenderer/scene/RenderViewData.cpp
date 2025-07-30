@@ -22,7 +22,8 @@ namespace yrenderer {
 using namespace ygfx;
 
 
-RenderViewData::RenderViewData() {
+RenderViewData::RenderViewData(Context* _ctx) {
+	ctx = _ctx;
 	type = RenderPathType::Forward;
 	ubo_light = new UniformBuffer(sizeof(LightMetaData) + MAX_LIGHTS * sizeof(UBOLight));
 	light_meta_data = {};
@@ -197,7 +198,7 @@ RenderData& RenderViewData::start(
 		PrimitiveTopology top, VertexBuffer *vb) {
 	if (index >= rda.num) {
 		rda.add({new UniformBuffer(sizeof(UBO)),
-		         pool->create_set(shader)});
+		         ctx->pool->create_set(shader)});
 		rda[index].dset->set_uniform_buffer(BINDING_PARAMS, rda[index].ubo);
 		rda[index].dset->set_uniform_buffer(BINDING_LIGHT, ubo_light.get());
 	}

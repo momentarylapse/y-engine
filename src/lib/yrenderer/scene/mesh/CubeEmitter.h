@@ -19,7 +19,7 @@ public:
 	owned<ygfx::VertexBuffer> vb;
 	owned<Material> material;
 
-	explicit CubeEmitter();
+	explicit CubeEmitter(Context* ctx);
 	void set_cube(const Box& box);
 	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override;
 };

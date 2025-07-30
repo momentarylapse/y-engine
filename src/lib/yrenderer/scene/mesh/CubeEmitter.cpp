@@ -11,11 +11,11 @@
 
 namespace yrenderer {
 
-CubeEmitter::CubeEmitter() : MeshEmitter("cube") {
+CubeEmitter::CubeEmitter(Context* ctx) : MeshEmitter(ctx, "cube") {
 	vb = new ygfx::VertexBuffer("3f,3f,2f");
 	set_cube(Box::ID_SYM);
 	material = new Material(engine.resource_manager);
-	material->textures.add(tex_white);
+	material->textures.add(ctx->tex_white);
 }
 
 void CubeEmitter::set_cube(const Box& box) {

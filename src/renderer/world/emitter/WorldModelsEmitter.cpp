@@ -16,13 +16,13 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/base/sort.h>
 
-WorldModelsEmitter::WorldModelsEmitter() : MeshEmitter("mod") {
+WorldModelsEmitter::WorldModelsEmitter(yrenderer::Context* ctx) : MeshEmitter(ctx, "mod") {
 }
 
 
 void WorldModelsEmitter::emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) {
 	profiler::begin(channel);
-	yrenderer::gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	auto& list = ComponentManager::get_list_family<Model>();
 
@@ -55,13 +55,13 @@ void WorldModelsEmitter::emit(const yrenderer::RenderParams& params, yrenderer::
 			rd.draw_triangles(params, vb);
 		}
 	}
-	yrenderer::gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 
 void WorldModelsEmitter::emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) {
 	profiler::begin(channel);
-	yrenderer::gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 	auto cam = rvd.scene_view->cam;
 
 	struct DrawCallData {
@@ -114,7 +114,7 @@ void WorldModelsEmitter::emit_transparent(const yrenderer::RenderParams& params,
 			rd.draw_triangles(params, vb);
 		}
 	}
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

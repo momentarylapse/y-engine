@@ -16,7 +16,7 @@ class Any;
 
 class PostProcessorVulkan : public PostProcessor {
 public:
-	PostProcessorVulkan();
+	PostProcessorVulkan(yrenderer::Context* ctx);
 	virtual ~PostProcessorVulkan();
 
 	void prepare(const yrenderer::RenderParams& params) override;

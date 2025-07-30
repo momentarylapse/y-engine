@@ -14,7 +14,7 @@ class TextureRenderer;
 
 class MultisampleResolver : public RenderTask {
 public:
-	MultisampleResolver(ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out);
+	MultisampleResolver(Context* ctx, ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out);
 
 	void render(const RenderParams& params) override;
 

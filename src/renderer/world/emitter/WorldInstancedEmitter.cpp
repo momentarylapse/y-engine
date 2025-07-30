@@ -16,12 +16,12 @@ using namespace yrenderer;
 
 class MultiInstance;
 
-WorldInstancedEmitter::WorldInstancedEmitter() : MeshEmitter("inst") {
+WorldInstancedEmitter::WorldInstancedEmitter(Context* ctx) : MeshEmitter(ctx, "inst") {
 }
 
 void WorldInstancedEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 
@@ -49,7 +49,7 @@ void WorldInstancedEmitter::emit(const RenderParams& params, RenderViewData& rvd
 			rd.draw_instanced(params, vb, min(mi->matrices.num, MAX_INSTANCES));
 		}
 	}
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

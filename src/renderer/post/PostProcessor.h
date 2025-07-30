@@ -17,7 +17,7 @@ class Any;
 class PostProcessor;
 
 struct PostProcessorStage : public yrenderer::Renderer {
-	PostProcessorStage(const string &name);
+	PostProcessorStage(yrenderer::Context* ctx, const string &name);
 	PostProcessor *post = nullptr;
 
 	ygfx::VertexBuffer *vb_2d;
@@ -28,7 +28,7 @@ struct PostProcessorStageUser : public PostProcessorStage {
 	const Callback *func_prepare = nullptr;
 	const Callback *func_draw = nullptr;
 
-	PostProcessorStageUser(const Callback *p, const Callback *d);
+	PostProcessorStageUser(yrenderer::Context* ctx, const Callback *p, const Callback *d);
 
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;
@@ -36,7 +36,7 @@ struct PostProcessorStageUser : public PostProcessorStage {
 
 class PostProcessor : public yrenderer::Renderer {
 public:
-	PostProcessor();
+	explicit PostProcessor(yrenderer::Context* ctx);
 	virtual ~PostProcessor();
 
 	Array<PostProcessorStage*> stages;

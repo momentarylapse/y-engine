@@ -9,7 +9,7 @@
 
 namespace yrenderer {
 
-TextureRenderer::TextureRenderer(const string& name, const shared_array<ygfx::Texture>& tex, const Array<string>& options) : RenderTask(name) {
+TextureRenderer::TextureRenderer(Context* ctx, const string& name, const shared_array<ygfx::Texture>& tex, const Array<string>& options) : RenderTask(ctx, name) {
 	textures = tex;
 	render_pass = new ygfx::RenderPass(weak(textures), options);
 	frame_buffer = new ygfx::FrameBuffer(render_pass.get(), textures);
@@ -44,7 +44,7 @@ void TextureRenderer::set_layer(int layer) {
 
 void TextureRenderer::render(const RenderParams& params) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	auto p = make_params(params);
 
@@ -69,7 +69,7 @@ void TextureRenderer::render(const RenderParams& params) {
 	// (automatically done by vulkan::RenderPass)
 //	cb->image_barrier(weak(textures)[0], vulkan::AccessFlags::SHADER_WRITE_BIT, vulkan::AccessFlags::SHADER_READ_BIT, vulkan::ImageLayout::COLOR_ATTACHMENT, vulkan::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

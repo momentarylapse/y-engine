@@ -13,6 +13,8 @@
 #include <lib/yrenderer/Material.h>
 #include <world/ModelManager.h>
 
+#include "lib/yrenderer/base.h"
+
 #ifdef USING_VULKAN
 namespace vulkan {
 	extern string overwrite_bindings;
@@ -21,13 +23,13 @@ namespace vulkan {
 #endif
 
 
-ResourceManager::ResourceManager(ygfx::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
+ResourceManager::ResourceManager(yrenderer::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
 	ctx = _ctx;
 	material_manager = new yrenderer::MaterialManager(this, material_dir);
 	model_manager = new ModelManager(this, material_manager);
-	shader_manager = new yrenderer::ShaderManager(ctx, shader_dir);
+	shader_manager = new yrenderer::ShaderManager(ctx->context, shader_dir);
 	shader_manager->ignore_missing_files = engine.ignore_missing_files;
-	texture_manager = new yrenderer::TextureManager(ctx, texture_dir);
+	texture_manager = new yrenderer::TextureManager(ctx->context, texture_dir);
 }
 
 xfer<yrenderer::Material> ResourceManager::load_material(const Path &filename) {

@@ -166,7 +166,7 @@ void RayTracingData::update_frame() {
 					m->update_matrix();
 					auto vb = m->mesh[0]->sub[i].vertex_buffer;
 					make_indexed(vb);
-					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(yrenderer::device, vb));
+					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(ctx->device, vb));
 					matrices.add(m->owner->get_matrix().transpose());
 				}
 			}
@@ -174,11 +174,11 @@ void RayTracingData::update_frame() {
 			for (auto *t: terrains) {
 				auto o = t->owner;
 				make_indexed(t->vertex_buffer.get());
-				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(yrenderer::device, t->vertex_buffer.get()));
+				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(ctx->device, t->vertex_buffer.get()));
 				matrices.add(mat4::translation(o->pos).transpose());
 			}
 
-			rtx.tlas = vulkan::AccelerationStructure::create_top(yrenderer::device, rtx.blas, matrices);
+			rtx.tlas = vulkan::AccelerationStructure::create_top(ctx->device, rtx.blas, matrices);
 		}
 
 	} else if (mode == RaytracingMode::COMPUTE) {

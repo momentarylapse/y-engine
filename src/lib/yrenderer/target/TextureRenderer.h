@@ -16,7 +16,7 @@ namespace yrenderer {
 
 class TextureRenderer : public RenderTask {
 public:
-	explicit TextureRenderer(const string& name, const shared_array<ygfx::Texture>& textures, const Array<string>& options = {});
+	explicit TextureRenderer(Context* ctx, const string& name, const shared_array<ygfx::Texture>& textures, const Array<string>& options = {});
 	~TextureRenderer() override;
 
 	RenderParams make_params(const RenderParams& params) const;

@@ -6,8 +6,8 @@
 
 namespace yrenderer {
 
-ComputeTask::ComputeTask(const string& name, const shared<ygfx::Shader>& _shader, int _nx, int _ny, int _nz) :
-    RenderTask(name),
+ComputeTask::ComputeTask(Context* ctx, const string& name, const shared<ygfx::Shader>& _shader, int _nx, int _ny, int _nz) :
+    RenderTask(ctx, name),
     bindings(_shader.get())
 {
     shader = _shader;
@@ -23,7 +23,7 @@ ComputeTask::ComputeTask(const string& name, const shared<ygfx::Shader>& _shader
 
 void ComputeTask::render(const RenderParams &params) {
 	profiler::begin(channel);
-    gpu_timestamp_begin(params, channel);
+    ctx->gpu_timestamp_begin(params, channel);
 #ifdef USING_OPENGL
     bindings.apply(shader.get(), params);
     shader->dispatch(nx, ny, nz);
@@ -38,7 +38,7 @@ void ComputeTask::render(const RenderParams &params) {
     cb->set_bind_point(vulkan::PipelineBindPoint::GRAPHICS);
     // TODO barriers
 #endif
-    gpu_timestamp_end(params, channel);
+    ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

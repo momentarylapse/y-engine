@@ -8,7 +8,7 @@
 
 class WorldTerrainsEmitter : public yrenderer::MeshEmitter {
 public:
-	WorldTerrainsEmitter();
+	explicit WorldTerrainsEmitter(yrenderer::Context* ctx);
 	void emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) override;
 };
 

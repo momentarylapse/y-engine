@@ -10,12 +10,12 @@
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
 
-WorldUserMeshesEmitter::WorldUserMeshesEmitter() : MeshEmitter("user") {
+WorldUserMeshesEmitter::WorldUserMeshesEmitter(yrenderer::Context* ctx) : MeshEmitter(ctx, "user") {
 }
 
 void WorldUserMeshesEmitter::emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) {
 	profiler::begin(channel);
-	yrenderer::gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 
@@ -36,7 +36,7 @@ void WorldUserMeshesEmitter::emit(const yrenderer::RenderParams& params, yrender
 
 		rd.draw(params, m->vertex_buffer.get(), m->topology);
 	}
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

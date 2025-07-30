@@ -42,11 +42,11 @@ RenderParams RenderParams::into_texture(ygfx::FrameBuffer *frame_buffer, const b
 }
 
 
-Renderer::Renderer(const string &name) {
+Renderer::Renderer(Context* _ctx, const string &name) {
 	channel = profiler::create_channel(name, -1);
 	ch_prepare = profiler::create_channel(name + ".p", channel);
 
-	context = engine.context;
+	ctx = _ctx;
 	resource_manager = engine.resource_manager;
 }
 
@@ -74,10 +74,10 @@ void Renderer::draw(const RenderParams& params) {
 }
 
 
-RenderTask::RenderTask(const string& name) {
+RenderTask::RenderTask(Context* _ctx, const string& name) {
 	channel = profiler::create_channel(name, -1);
 
-	context = engine.context;
+	ctx = _ctx;
 	resource_manager = engine.resource_manager;
 }
 

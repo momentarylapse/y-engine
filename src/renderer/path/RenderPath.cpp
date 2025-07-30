@@ -41,23 +41,23 @@
 using namespace yrenderer;
 
 
-HDRResolver *create_hdr_resolver(Camera *cam, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
-	return new HDRResolver(cam, tex, depth);
+HDRResolver* create_hdr_resolver(Context* ctx, Camera *cam, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
+	return new HDRResolver(ctx, cam, tex, depth);
 }
 
-WorldRenderer *create_world_renderer(SceneView& scene_view, RenderPathType type) {
+WorldRenderer* create_world_renderer(Context* ctx, SceneView& scene_view, RenderPathType type) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
-		return new WorldRendererVulkanRayTracing(device, scene_view, engine.width, engine.height);
+		return new WorldRendererVulkanRayTracing(ctx, scene_view, engine.width, engine.height);
 #endif
 	if (type == RenderPathType::Deferred)
-		return new WorldRendererDeferred(scene_view, engine.width, engine.height);
-	return new WorldRendererForward(scene_view);
+		return new WorldRendererDeferred(ctx, scene_view, engine.width, engine.height);
+	return new WorldRendererForward(ctx, scene_view);
 }
 
 float global_shadow_box_size;
 
-RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
+RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Renderer(ctx, "path") {
 	type = _type;
 	cam = _cam;
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -96,7 +96,7 @@ RenderPath::RenderPath(RenderPathType _type, Camera* _cam) : Renderer("path") {
 	}
 
 
-	world_renderer = create_world_renderer(scene_view, type);
+	world_renderer = create_world_renderer(ctx, scene_view, type);
 
 	if (type != RenderPathType::PathTracing)
 		create_shadow_renderer();
@@ -114,23 +114,23 @@ void RenderPath::prepare_basics() {
 }
 
 void RenderPath::create_shadow_renderer() {
-	shadow_renderer = new ShadowRenderer(&scene_view, {
-		new WorldModelsEmitter,
-		new WorldTerrainsEmitter,
-		new WorldUserMeshesEmitter,
-		new WorldInstancedEmitter});
+	shadow_renderer = new ShadowRenderer(ctx, &scene_view, {
+		new WorldModelsEmitter(ctx),
+		new WorldTerrainsEmitter(ctx),
+		new WorldUserMeshesEmitter(ctx),
+		new WorldInstancedEmitter(ctx)});
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
 }
 
 void RenderPath::create_cube_renderer() {
-	cube_map_renderer = new CubeMapRenderer(scene_view, {
-		new WorldSkyboxEmitter,
-		new WorldModelsEmitter,
-		new WorldTerrainsEmitter,
-		new WorldUserMeshesEmitter,
-		new WorldInstancedEmitter});
+	cube_map_renderer = new CubeMapRenderer(ctx, scene_view, {
+		new WorldSkyboxEmitter(ctx),
+		new WorldModelsEmitter(ctx),
+		new WorldTerrainsEmitter(ctx),
+		new WorldUserMeshesEmitter(ctx),
+		new WorldInstancedEmitter(ctx)});
 }
 
 
@@ -141,7 +141,7 @@ void RenderPath::create_post_processing(Renderer* source) {
 	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 	auto hdr_depth = new ygfx::DepthBuffer(engine.width, engine.height, "d:f32");
 
-	hdr_resolver = create_hdr_resolver(cam, hdr_tex, hdr_depth);
+	hdr_resolver = create_hdr_resolver(ctx, cam, hdr_tex, hdr_depth);
 
 #ifdef USING_VULKAN
 	config.antialiasing_method = AntialiasingMethod::NONE;
@@ -156,17 +156,17 @@ void RenderPath::create_post_processing(Renderer* source) {
 		auto depth_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "d:f32");
 		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
-		texture_renderer = new TextureRenderer("world-tex", {tex_ms, depth_ms}, {"samples=4"});
+		texture_renderer = new TextureRenderer(ctx, "world-tex", {tex_ms, depth_ms}, {"samples=4"});
 
-		multisample_resolver = new MultisampleResolver(tex_ms, depth_ms, hdr_tex, hdr_depth);
+		multisample_resolver = new MultisampleResolver(ctx, tex_ms, depth_ms, hdr_tex, hdr_depth);
 	} else {
 		msg_error("no msaa");
-		texture_renderer = new TextureRenderer("world-tex", {hdr_tex, hdr_depth});
+		texture_renderer = new TextureRenderer(ctx, "world-tex", {hdr_tex, hdr_depth});
 	}
 
 	texture_renderer->add_child(source);
 
-	light_meter = new LightMeter(engine.resource_manager, hdr_tex);
+	light_meter = new LightMeter(ctx, hdr_tex);
 }
 
 
@@ -284,15 +284,15 @@ void RenderPath::draw(const RenderParams& params) {
 		world_renderer->draw(params);
 }
 
-RenderPath* create_render_path(Camera *cam) {
+RenderPath* create_render_path(Context* ctx, Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
 
 	if (type == "direct")
-		return new RenderPath(RenderPathType::Direct, cam);
+		return new RenderPath(ctx, RenderPathType::Direct, cam);
 	if (type == "deferred")
-		return new RenderPath(RenderPathType::Deferred, cam);
+		return new RenderPath(ctx, RenderPathType::Deferred, cam);
 	if (type == "pathtracing" or type == "raytracing")
-		return new RenderPath(RenderPathType::PathTracing, cam);
-	return new RenderPath(RenderPathType::Forward, cam);
+		return new RenderPath(ctx, RenderPathType::PathTracing, cam);
+	return new RenderPath(ctx, RenderPathType::Forward, cam);
 }
 

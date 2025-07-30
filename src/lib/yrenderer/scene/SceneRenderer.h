@@ -23,7 +23,7 @@ enum class RenderPathType {
 
 class SceneRenderer : public Renderer {
 public:
-	explicit SceneRenderer(RenderPathType type, SceneView& scene_view);
+	explicit SceneRenderer(Context* ctx, RenderPathType type, SceneView& scene_view);
 	~SceneRenderer() override;
 
 	shared_array<MeshEmitter> emitters;

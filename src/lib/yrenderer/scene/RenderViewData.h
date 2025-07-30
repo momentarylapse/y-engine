@@ -20,6 +20,7 @@ struct mat4;
 
 namespace yrenderer {
 
+class Context;
 class ShaderCache;
 class Material;
 struct SceneView;
@@ -79,7 +80,7 @@ struct RenderData {
 
 // "draw call" manager (single scene/pass)
 struct RenderViewData {
-	RenderViewData();
+	explicit RenderViewData(Context* ctx);
 	void begin_draw();
 
 	SceneView* scene_view = nullptr;
@@ -88,6 +89,7 @@ struct RenderViewData {
 	Material* material_shadow = nullptr; // ref to ShadowRenderer
 	bool is_shadow_pass() const;
 
+	Context* ctx;
 	vec3 view_pos;
 	quaternion view_ang;
 	UBO ubo;

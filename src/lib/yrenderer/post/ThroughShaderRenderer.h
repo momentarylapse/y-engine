@@ -14,7 +14,7 @@ namespace yrenderer {
 
 class ThroughShaderRenderer : public Renderer {
 public:
-	ThroughShaderRenderer(const string& name, shared<ygfx::Shader> _shader);
+	ThroughShaderRenderer(Context* ctx, const string& name, shared<ygfx::Shader> shader);
 	void draw(const RenderParams &params) override;
 
 	void set_source(const rect& area);

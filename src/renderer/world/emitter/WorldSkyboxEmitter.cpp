@@ -14,7 +14,7 @@
 
 using namespace yrenderer;
 
-WorldSkyboxEmitter::WorldSkyboxEmitter() : MeshEmitter("sky") {
+WorldSkyboxEmitter::WorldSkyboxEmitter(Context* ctx) : MeshEmitter(ctx, "sky") {
 }
 
 void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {
@@ -22,7 +22,7 @@ void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, b
 		return;
 
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	rvd.clear(params, {world.background}, 1.0f);
 
@@ -71,7 +71,7 @@ void WorldSkyboxEmitter::emit(const RenderParams& params, RenderViewData& rvd, b
 	nix::set_cull(nix::CullMode::BACK);
 #endif
 #endif
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 }
 

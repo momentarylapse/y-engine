@@ -9,6 +9,6 @@
 
 class WorldInstancedEmitter : public yrenderer::MeshEmitter {
 public:
-	WorldInstancedEmitter();
+	explicit WorldInstancedEmitter(yrenderer::Context* ctx);
 	void emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) override;
 };

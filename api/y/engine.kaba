@@ -5,8 +5,12 @@ use image.Image
 struct ivec3
 	x, y, z: i32
 
-class EngineData
+class Context as @noauto
 	var context: void&
+	var tex_white: shared![Texture]
+
+class EngineData as @noauto
+	var context: Context&
 	var debug: bool
 	var show_timings: bool
 	var console_enabled: bool
@@ -49,7 +53,7 @@ class ComputeTask extends RenderTask
 	ny: i32
 	nz: i32
 	shader_data: any
-	func extern __init__(name: string, shader: shared![Shader], n: i32[])
+	func extern __init__(ctx: Context&, name: string, shader: shared![Shader], n: i32[])
 	func override extern render(params: RenderParams)
 	func extern bind_texture(index: i32, tex: Texture&)
 	func extern bind_image(index: i32, tex: Texture&)
@@ -127,7 +131,7 @@ class PostProcessor
 	var fb1, fb2: FrameBuffer&
 	func extern next_fb(cur: FrameBuffer) -> FrameBuffer&
 	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
-	func extern mut add_stage(on_prepare: void->void, on_draw: void->void)
+	func extern mut add_stage(ctx: Context&, on_prepare: void->void, on_draw: void->void)
 
 
 class Profiler

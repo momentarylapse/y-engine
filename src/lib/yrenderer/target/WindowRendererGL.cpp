@@ -17,20 +17,20 @@
 
 namespace yrenderer {
 
-WindowRendererGL::WindowRendererGL(GLFWwindow* win) : TargetRenderer("win") {
+WindowRendererGL::WindowRendererGL(Context* ctx, GLFWwindow* win) : TargetRenderer(ctx, "win") {
 	window = win;
 #if HAS_LIB_GLFW
 	glfwMakeContextCurrent(window);
 	//glfwGetFramebufferSize(window, &width, &height);
 #endif
 
-	_frame_buffer = context->default_framebuffer;
+	_frame_buffer = ctx->context->default_framebuffer;
 }
 
 
 bool WindowRendererGL::start_frame() {
 #if HAS_LIB_GLFW
-	nix::start_frame_glfw(context, window);
+	nix::start_frame_glfw(ctx->context, window);
 	//jitter_iterate();
 	return true;
 #else
@@ -41,9 +41,9 @@ bool WindowRendererGL::start_frame() {
 void WindowRendererGL::end_frame(const RenderParams& params) {
 #if HAS_LIB_GLFW
 	profiler::begin(ch_end);
-	gpu_timestamp_begin(params, ch_end);
+	ctx->gpu_timestamp_begin(params, ch_end);
 	nix::end_frame_glfw();
-	gpu_timestamp_end(params, ch_end);
+	ctx->gpu_timestamp_end(params, ch_end);
 	profiler::end(ch_end);
 #endif
 }

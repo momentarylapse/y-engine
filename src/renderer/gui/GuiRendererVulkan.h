@@ -12,7 +12,7 @@
 
 class GuiRendererVulkan : public yrenderer::Renderer {
 public:
-	GuiRendererVulkan();
+	explicit GuiRendererVulkan(yrenderer::Context* ctx);
 
 	void draw(const yrenderer::RenderParams& params) override;
 

@@ -25,7 +25,7 @@ using namespace ygfx;
 //static float resolution_scale_y = 1.0f;
 
 
-PostProcessorGL::PostProcessorGL(int width, int height) {
+PostProcessorGL::PostProcessorGL(yrenderer::Context* ctx, int width, int height) : PostProcessor(ctx) {
 	ch_post_blur = profiler::create_channel("blur", channel);
 	ch_out = profiler::create_channel("out", channel);
 

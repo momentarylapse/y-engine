@@ -12,7 +12,7 @@
 
 class GuiRendererGL : public yrenderer::Renderer {
 public:
-	GuiRendererGL();
+	explicit GuiRendererGL(yrenderer::Context* ctx);
 
 	void draw(const yrenderer::RenderParams& params) override;
 

@@ -9,8 +9,8 @@
 
 namespace yrenderer {
 
-ThroughShaderRenderer::ThroughShaderRenderer(const string& name, shared<ygfx::Shader> _shader) :
-	Renderer(name),
+ThroughShaderRenderer::ThroughShaderRenderer(Context* ctx, const string& name, shared<ygfx::Shader> _shader) :
+	Renderer(ctx, name),
 	bindings(_shader.get())
 {
 	shader = _shader;
@@ -31,7 +31,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	auto cb = params.command_buffer;
 
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	if (!pipeline) {
 		pipeline = new vulkan::GraphicsPipeline(shader.get(), params.render_pass, 0, ygfx::PrimitiveTopology::TRIANGLES, "3f,3f,2f");
@@ -45,13 +45,13 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	cb->draw(vb_2d.get());
 
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 #else
 	bool flip_y = params.target_is_window;
 
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	ctx->gpu_timestamp_begin(params, channel);
 
 	nix::set_shader(shader.get());
 	bindings.apply(shader.get(), params);
@@ -66,7 +66,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 
 	nix::set_cull(nix::CullMode::BACK);
 
-	gpu_timestamp_end(params, channel);
+	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 #endif
 }

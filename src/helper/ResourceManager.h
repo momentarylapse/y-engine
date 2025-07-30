@@ -10,6 +10,7 @@ class ModelManager;
 class Model;
 
 namespace yrenderer {
+	class Context;
 	class Material;
 	class MaterialManager;
 	class ShaderManager;
@@ -18,8 +19,8 @@ namespace yrenderer {
 
 class ResourceManager {
 public:
-	explicit ResourceManager(ygfx::Context *ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir);
-	ygfx::Context* ctx;
+	explicit ResourceManager(yrenderer::Context *ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir);
+	yrenderer::Context* ctx;
 	yrenderer::MaterialManager* material_manager;
 	ModelManager* model_manager;
 	yrenderer::ShaderManager* shader_manager;

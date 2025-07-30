@@ -72,8 +72,7 @@ class ShaderStorageBuffer extends Buffer
 	func extern __init__(size: i32)
 
 
-
-var extern tex_white: shared![Texture]
+var extern tex_white: shared![Texture] # TODO use engine.context.tex_white?
 
 func extern load_shader(filename: os.Path) -> shared![Shader]
 func extern create_shader(source: string) -> xfer[Shader]

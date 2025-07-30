@@ -13,7 +13,7 @@ namespace yrenderer {
 
 class ComputeTask : public RenderTask {
 public:
-    explicit ComputeTask(const string& name, const shared<ygfx::Shader>& shader, int nx, int ny, int nz);
+    explicit ComputeTask(Context* ctx, const string& name, const shared<ygfx::Shader>& shader, int nx, int ny, int nz);
     shared<ygfx::Shader> shader;
 
     IMPLEMENT_BINDABLE_INTERFACE

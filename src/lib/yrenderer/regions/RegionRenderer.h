@@ -15,7 +15,7 @@ namespace yrenderer {
 
 class RegionRenderer : public Renderer {
 public:
-	RegionRenderer();
+	explicit RegionRenderer(Context* ctx);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
