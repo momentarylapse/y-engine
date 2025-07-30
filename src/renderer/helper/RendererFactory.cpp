@@ -10,7 +10,7 @@
 #include "../path/RenderPath.h"
 #include "../world/WorldRenderer.h"
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
-#include "../regions/RegionRenderer.h"
+#include <lib/yrenderer/regions/RegionRenderer.h>
 #ifdef USING_VULKAN
 	#include "../gui/GuiRendererVulkan.h"
 	#include "../post/PostProcessorVulkan.h"
@@ -32,6 +32,7 @@
 #include <lib/image/image.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 
+using namespace yrenderer;
 
 string render_graph_str(Renderer *r) {
 	string s = profiler::get_name(r->channel);

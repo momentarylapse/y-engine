@@ -8,8 +8,11 @@
 #include "../MeshEmitter.h"
 #include <lib/ygraphics/graphics-fwd.h>
 
-class Material;
 struct Box;
+
+namespace yrenderer {
+
+class Material;
 
 class CubeEmitter : public MeshEmitter {
 public:
@@ -20,5 +23,7 @@ public:
 	void set_cube(const Box& box);
 	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override;
 };
+
+}
 
 #endif //CUBEEMITTER_H

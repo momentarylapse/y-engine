@@ -22,6 +22,8 @@
 #include <y/ComponentManager.h>
 
 
+using namespace yrenderer;
+
 struct GeoPush {
 	alignas(16) mat4 model;
 	alignas(16) color emission;

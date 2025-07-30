@@ -12,6 +12,8 @@
 #include <y/ComponentManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+using namespace yrenderer;
+
 class MultiInstance;
 
 WorldInstancedEmitter::WorldInstancedEmitter() : MeshEmitter("inst") {

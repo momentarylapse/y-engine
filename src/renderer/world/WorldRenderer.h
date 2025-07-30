@@ -17,26 +17,28 @@
 
 #include <lib/yrenderer/scene/SceneView.h>
 
-class GeometryRenderer;
-class ShadowMapRenderer;
 class Profiler;
 class World;
 class Camera;
 struct mat4;
 struct vec3;
 struct quaternion;
-class Material;
-class CubeMapSource;
+namespace yrenderer {
+	class CubeMapSource;
+	class GeometryRenderer;
+	class ShadowMapRenderer;
+	class Material;
+}
 
 
 
-class WorldRenderer : public Renderer {
+class WorldRenderer : public yrenderer::Renderer {
 public:
-	WorldRenderer(const string &name, SceneView& scene_view);
+	WorldRenderer(const string &name, yrenderer::SceneView& scene_view);
 
 	bool wireframe = false;
 
-	SceneView& scene_view;
+	yrenderer::SceneView& scene_view;
 
 	void reset();
 };

@@ -20,6 +20,7 @@ extern owned<nix::Context> _nix_context;
 }
 #endif
 
+namespace yrenderer {
 
 Context* api_init(GLFWwindow* window) {
 	nix::allow_separate_vertex_arrays = true;
@@ -81,6 +82,8 @@ void gpu_flush() {
 }
 
 void api_end() {
+}
+
 }
 
 #endif

@@ -7,6 +7,7 @@
 #include <lib/profiler/Profiler.h>
 #include <lib/math/mat4.h>
 
+namespace yrenderer {
 
 ThroughShaderRenderer::ThroughShaderRenderer(const string& name, shared<Shader> _shader) :
 	Renderer(name),
@@ -68,5 +69,7 @@ void ThroughShaderRenderer::draw(const RenderParams &params) {
 	gpu_timestamp_end(params, channel);
 	profiler::end(channel);
 #endif
+}
+
 }
 

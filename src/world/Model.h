@@ -38,7 +38,9 @@
 
 
 class Model;
-class Material;
+namespace yrenderer {
+	class Material;
+}
 class TraceData;
 class TemplateDataScriptVariable;
 class ModelTemplate;
@@ -138,7 +140,7 @@ public:
 	shared<Mesh> mesh[MODEL_NUM_MESHES];
 
 	// material
-	owned_array<Material> material;
+	owned_array<yrenderer::Material> material;
 	Array<int> num_uvs;
 
 	// properties

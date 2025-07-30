@@ -6,6 +6,7 @@
 #include <helper/ResourceManager.h>
 #include <lib/yrenderer/ShaderManager.h>
 
+namespace yrenderer {
 
 
 MaterialManager::MaterialManager(ResourceManager *_resource_manager, const Path& _material_dir) {
@@ -322,4 +323,6 @@ bool Material::is_transparent() const {
 	if (pass0.mode == TransparencyMode::MIX)
 		return true;
 	return false;
+}
+
 }

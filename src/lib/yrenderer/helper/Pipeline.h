@@ -10,6 +10,8 @@
 
 // TODO use...
 
+namespace yrenderer {
+
 class Pipeline {
     Shader *shader = nullptr;
 #ifdef USING_VULKAN
@@ -22,3 +24,5 @@ class Bindings {
     vulkan::DescriptorSet *dset = nullptr;
 #endif
 };
+
+}

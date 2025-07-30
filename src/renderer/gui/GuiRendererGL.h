@@ -10,13 +10,13 @@
 #include <lib/yrenderer/Renderer.h>
 #ifdef USING_OPENGL
 
-class GuiRendererGL : public Renderer {
+class GuiRendererGL : public yrenderer::Renderer {
 public:
 	GuiRendererGL();
 
-	void draw(const RenderParams& params) override;
+	void draw(const yrenderer::RenderParams& params) override;
 
-	void draw_gui(const RenderParams& params, FrameBuffer *source);
+	void draw_gui(const yrenderer::RenderParams& params, FrameBuffer *source);
 
 	shared<Shader> shader;
 	owned<VertexBuffer> vb;

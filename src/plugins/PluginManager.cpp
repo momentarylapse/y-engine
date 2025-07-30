@@ -40,7 +40,7 @@
 #include <lib/yrenderer/helper/ComputeTask.h>
 #include "../renderer/helper/LightMeter.h"
 #include "../renderer/path/RenderPath.h"
-#include "../renderer/post/HDRResolver.h"
+#include <lib/yrenderer/post/HDRResolver.h>
 #include "../renderer/world/WorldRendererForward.h"
 #include "../renderer/world/WorldRendererDeferred.h"
 #ifdef USING_OPENGL
@@ -55,7 +55,7 @@
 #endif
 #include <renderer/helper/Raytracing.h>
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
-#include "../renderer/regions/RegionRenderer.h"
+#include <lib/yrenderer/regions/RegionRenderer.h>
 #include <lib/yrenderer/scene/SceneView.h>
 #include "../y/EngineData.h"
 #include "../y/Component.h"
@@ -81,6 +81,8 @@
 #include "../lib/os/msg.h"
 #include "../lib/image/image.h"
 
+
+using namespace yrenderer;
 
 /*void global_delete(BaseClass *e) {
 	//msg_error("global delete... " + p2s(e));
@@ -206,7 +208,7 @@ void computetask_init(ComputeTask* task, const string& name, const shared<Shader
 		ny = n[1];
 	if (n.num >= 3)
 		nz = n[2];
-	new(task) ComputeTask(name, shader, nx, ny, nz);
+	new(task) yrenderer::ComputeTask(name, shader, nx, ny, nz);
 }
 
 void texture_init(Texture *t, int w, int h, const string &format) {
@@ -318,7 +320,7 @@ shared<Texture> __load_texture(const Path& filename) {
 	return engine.resource_manager->load_texture(filename);
 }
 
-xfer<Material> __load_material(const Path& filename) {
+xfer<yrenderer::Material> __load_material(const Path& filename) {
 	return engine.resource_manager->load_material(filename);
 }
 
@@ -336,12 +338,12 @@ Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
 
 //shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {
 Array<Texture*> render_path_get_gbuffer(RenderPath &r) {
-	if (r.type == RenderPathType::Deferred)
+	if (r.type == yrenderer::RenderPathType::Deferred)
 		return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
 	return {};
 }
 
-shared_array<Texture> hdr_resolver_get_tex_bloom(HDRResolver &r) {
+shared_array<Texture> hdr_resolver_get_tex_bloom(yrenderer::HDRResolver &r) {
 //Array<Texture*> hdr_resolver_get_tex_bloom(HDRResolver &r) {
 	msg_write("get bloom...");
 	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};

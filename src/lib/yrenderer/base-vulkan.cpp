@@ -13,6 +13,8 @@
 
 #ifdef USING_VULKAN
 
+namespace yrenderer {
+
 vulkan::Instance *instance = nullptr;
 vulkan::DescriptorPool *pool = nullptr;
 vulkan::Device *device = nullptr;
@@ -131,6 +133,8 @@ Array<float> gpu_read_timestamps() {
 
 void gpu_flush() {
 	device->wait_idle();
+}
+
 }
 
 #endif

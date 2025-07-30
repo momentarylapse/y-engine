@@ -8,10 +8,9 @@
 #include <lib/yrenderer/Renderer.h>
 #include <lib/yrenderer/helper/ComputeTask.h>
 
-class ComputeTask;
 class Camera;
 
-class LightMeter : public ComputeTask {
+class LightMeter : public yrenderer::ComputeTask {
 public:
 	LightMeter(ResourceManager* resource_manager, Texture* tex);
 	UniformBuffer* params;

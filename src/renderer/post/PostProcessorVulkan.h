@@ -19,8 +19,8 @@ public:
 	PostProcessorVulkan();
 	virtual ~PostProcessorVulkan();
 
-	void prepare(const RenderParams& params) override;
-	void draw(const RenderParams& params) override;
+	void prepare(const yrenderer::RenderParams& params) override;
+	void draw(const yrenderer::RenderParams& params) override;
 
 	void process(const Array<Texture*> &source, FrameBuffer *target, Shader *shader, const Any &data);
 	FrameBuffer* do_post_processing(FrameBuffer *source);

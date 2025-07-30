@@ -31,15 +31,15 @@ static const int MAX_RT_TRIAS = 65536;
 static const int MAX_RT_MESHES = 512;
 static const int MAX_RT_REQUESTS = 4096*16;
 
-void rt_setup_explicit(SceneView& scene_view, RaytracingMode mode) {
+void rt_setup_explicit(yrenderer::SceneView& scene_view, RaytracingMode mode) {
 	scene_view.ray_tracing_data = new RayTracingData(engine.window_renderer->device, mode);
 }
 
-void rt_setup(SceneView& scene_view) {
+void rt_setup(yrenderer::SceneView& scene_view) {
 	rt_setup_explicit(scene_view, RaytracingMode::COMPUTE);
 }
 
-void rt_update_frame(SceneView& scene_view) {
+void rt_update_frame(yrenderer::SceneView& scene_view) {
 	scene_view.ray_tracing_data->update_frame();
 }
 
@@ -166,7 +166,7 @@ void RayTracingData::update_frame() {
 					m->update_matrix();
 					auto vb = m->mesh[0]->sub[i].vertex_buffer;
 					make_indexed(vb);
-					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, vb));
+					rtx.blas.add(vulkan::AccelerationStructure::create_bottom(yrenderer::device, vb));
 					matrices.add(m->owner->get_matrix().transpose());
 				}
 			}
@@ -174,11 +174,11 @@ void RayTracingData::update_frame() {
 			for (auto *t: terrains) {
 				auto o = t->owner;
 				make_indexed(t->vertex_buffer.get());
-				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(device, t->vertex_buffer.get()));
+				rtx.blas.add(vulkan::AccelerationStructure::create_bottom(yrenderer::device, t->vertex_buffer.get()));
 				matrices.add(mat4::translation(o->pos).transpose());
 			}
 
-			rtx.tlas = vulkan::AccelerationStructure::create_top(device, rtx.blas, matrices);
+			rtx.tlas = vulkan::AccelerationStructure::create_top(yrenderer::device, rtx.blas, matrices);
 		}
 
 	} else if (mode == RaytracingMode::COMPUTE) {
@@ -186,7 +186,7 @@ void RayTracingData::update_frame() {
 }
 
 //Array<base::optional<RayHitInfo>>
-Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests) {
+Array<RayReply> vtrace(yrenderer::SceneView& scene_view, const Array<RayRequest>& requests) {
 	if (requests.num > MAX_RT_REQUESTS) {
 		msg_error("too many rt requests");
 		return {};
@@ -222,14 +222,14 @@ Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests)
 }
 #else
 
-void rt_setup(SceneView& scene_view) {
+void rt_setup(yrenderer::SceneView& scene_view) {
 	msg_error("raytracing only supported on vulkan!");
 }
 
-void rt_update_frame(SceneView& scene_view) {
+void rt_update_frame(yrenderer::SceneView& scene_view) {
 }
 
-Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests) {
+Array<RayReply> vtrace(yrenderer::SceneView& scene_view, const Array<RayRequest>& requests) {
 	return {};
 }
 #endif

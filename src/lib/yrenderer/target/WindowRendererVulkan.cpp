@@ -13,6 +13,7 @@
 #include <lib/math/rect.h>
 #include <Config.h> // for timing experiment
 
+namespace yrenderer {
 
 SurfaceRendererVulkan::SurfaceRendererVulkan(const string& name, Device *_device) : TargetRenderer(name) {
 	device = _device;
@@ -156,5 +157,6 @@ xfer<HeadlessSurfaceRendererVulkan> HeadlessSurfaceRendererVulkan::create(Device
 	return r;
 }
 
+}
 
 #endif

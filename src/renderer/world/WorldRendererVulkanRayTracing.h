@@ -17,17 +17,17 @@ enum class RaytracingMode;
 
 class WorldRendererVulkanRayTracing : public WorldRenderer {
 public:
-	WorldRendererVulkanRayTracing(vulkan::Device *device, SceneView& scene_view, int width, int height);
+	WorldRendererVulkanRayTracing(vulkan::Device *device, yrenderer::SceneView& scene_view, int width, int height);
 
-	void prepare(const RenderParams& params) override;
-	void draw(const RenderParams& params) override;
+	void prepare(const yrenderer::RenderParams& params) override;
+	void draw(const yrenderer::RenderParams& params) override;
 
 	//void render_into_texture(Camera *cam, RenderViewData &rvd, const RenderParams& params) override;
 
 	RaytracingMode mode;
 
 	vulkan::Device *device;
-	RenderViewData rvd;
+	yrenderer::RenderViewData rvd;
 
 	vulkan::StorageTexture *offscreen_image;
 	//vulkan::Texture *offscreen_image2;
@@ -70,7 +70,7 @@ public:
 		vulkan::UniformBuffer *buffer_cam;
 	} rtx;
 
-	owned<ThroughShaderRenderer> out_renderer;
+	owned<yrenderer::ThroughShaderRenderer> out_renderer;
 };
 
 #endif

@@ -13,6 +13,8 @@ class Path;
 class Model;
 class ResourceManager;
 
+namespace yrenderer {
+
 
 // types of transparency
 enum class TransparencyMode {
@@ -129,5 +131,7 @@ private:
 	Material *trivial_material;
 	base::map<Path, Material*> materials; // "originals" owned!
 };
+
+}
 
 

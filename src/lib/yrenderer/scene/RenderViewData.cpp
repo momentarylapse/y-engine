@@ -18,6 +18,8 @@
 
 extern float global_shadow_box_size; // :(
 
+namespace yrenderer {
+
 
 RenderViewData::RenderViewData() {
 	type = RenderPathType::Forward;
@@ -269,6 +271,8 @@ Shader* RenderViewData::get_shader(Material* material, int pass_no, const string
 
 bool RenderViewData::is_shadow_pass() const {
 	return material_shadow;
+}
+
 }
 
 

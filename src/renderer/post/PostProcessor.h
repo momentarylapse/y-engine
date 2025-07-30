@@ -16,7 +16,7 @@ struct vec2;
 class Any;
 class PostProcessor;
 
-struct PostProcessorStage : public Renderer {
+struct PostProcessorStage : public yrenderer::Renderer {
 	PostProcessorStage(const string &name);
 	PostProcessor *post = nullptr;
 
@@ -24,17 +24,17 @@ struct PostProcessorStage : public Renderer {
 };
 
 struct PostProcessorStageUser : public PostProcessorStage {
-	using Callback = Callable<void(const RenderParams&)>;
+	using Callback = Callable<void(const yrenderer::RenderParams&)>;
 	const Callback *func_prepare = nullptr;
 	const Callback *func_draw = nullptr;
 
 	PostProcessorStageUser(const Callback *p, const Callback *d);
 
-	void prepare(const RenderParams& params) override;
-	void draw(const RenderParams& params) override;
+	void prepare(const yrenderer::RenderParams& params) override;
+	void draw(const yrenderer::RenderParams& params) override;
 };
 
-class PostProcessor : public Renderer {
+class PostProcessor : public yrenderer::Renderer {
 public:
 	PostProcessor();
 	virtual ~PostProcessor();

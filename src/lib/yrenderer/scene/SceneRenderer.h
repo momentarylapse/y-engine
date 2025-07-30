@@ -9,8 +9,17 @@
 #include "RenderViewData.h"
 
 class Camera;
+
+namespace yrenderer {
+
 class MeshEmitter;
-enum class RenderPathType;
+
+enum class RenderPathType {
+	Direct,
+	Forward,
+	Deferred,
+	PathTracing
+};
 
 class SceneRenderer : public Renderer {
 public:
@@ -40,5 +49,7 @@ public:
 	static GraphicsPipeline* get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb);
 #endif
 };
+
+}
 
 

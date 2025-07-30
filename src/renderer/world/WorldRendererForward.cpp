@@ -23,10 +23,10 @@
 #include "../../world/Camera.h"
 
 
-WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRenderer("world", scene_view) {
+WorldRendererForward::WorldRendererForward(yrenderer::SceneView& scene_view) : WorldRenderer("world", scene_view) {
 	resource_manager->shader_manager->load_shader_module("forward/module-surface.shader");
 
-	scene_renderer = new SceneRenderer(RenderPathType::Forward, scene_view);
+	scene_renderer = new yrenderer::SceneRenderer(yrenderer::RenderPathType::Forward, scene_view);
 	scene_renderer->add_emitter(new WorldSkyboxEmitter);
 	scene_renderer->add_emitter(new WorldModelsEmitter);
 	scene_renderer->add_emitter(new WorldTerrainsEmitter);
@@ -35,7 +35,7 @@ WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRendere
 	scene_renderer->add_emitter(new WorldParticlesEmitter);
 }
 
-void WorldRendererForward::prepare(const RenderParams& params) {
+void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);
 	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 	
@@ -45,7 +45,7 @@ void WorldRendererForward::prepare(const RenderParams& params) {
 	profiler::end(ch_prepare);
 }
 
-void WorldRendererForward::draw(const RenderParams& params) {
+void WorldRendererForward::draw(const yrenderer::RenderParams& params) {
 	profiler::begin(channel);
 	gpu_timestamp_begin(params, channel);
 

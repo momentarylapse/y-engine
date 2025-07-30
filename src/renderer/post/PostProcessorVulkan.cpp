@@ -77,7 +77,7 @@ FrameBuffer *PostProcessorVulkan::next_fb(FrameBuffer *cur) {
 	return (cur == fb1) ? fb2.get() : fb1.get();
 }
 
-void PostProcessorVulkan::prepare(const RenderParams& params) {
+void PostProcessorVulkan::prepare(const yrenderer::RenderParams& params) {
 	for (auto c: children)
 		c->prepare(params);
 
@@ -98,7 +98,7 @@ void PostProcessorVulkan::prepare(const RenderParams& params) {
 	//profiler::end(ch_post_blur);
 }
 
-void PostProcessorVulkan::draw(const RenderParams& params) {
+void PostProcessorVulkan::draw(const yrenderer::RenderParams& params) {
 	if (stages.num == 0) {
 		for (auto c: children)
 			c->draw(params);

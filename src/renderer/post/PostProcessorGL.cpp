@@ -18,6 +18,8 @@
 #include "../../Config.h"
 #include "../../world/Camera.h"
 
+using namespace yrenderer;
+
 //static float resolution_scale_x = 1.0f;
 //static float resolution_scale_y = 1.0f;
 

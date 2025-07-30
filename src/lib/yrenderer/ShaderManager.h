@@ -9,6 +9,7 @@
 #include <lib/base/map.h>
 #include <lib/os/path.h>
 
+namespace yrenderer {
 
 class ShaderManager {
 public:
@@ -36,3 +37,4 @@ public:
 	base::map<Path,Shader*> shader_map;
 	bool ignore_missing_files = false;
 };
+}

@@ -7,6 +7,8 @@
 #include <lib/yrenderer/Renderer.h>
 #include <lib/yrenderer/scene/RenderViewData.h>
 
+namespace yrenderer {
+
 class TextureRenderer;
 class MeshEmitter;
 class SceneRenderer;
@@ -30,6 +32,8 @@ public:
 	static const kaba::Class *_class;
 };
 
+
+
 class CubeMapRenderer : public RenderTask {
 public:
 	explicit CubeMapRenderer(SceneView& scene_view, shared_array<MeshEmitter> emitters);
@@ -41,5 +45,7 @@ public:
 
 	void render(const RenderParams& params) override;
 };
+
+}
 
 #endif //CUBEMAPSOURCE_H

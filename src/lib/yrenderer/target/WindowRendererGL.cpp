@@ -15,6 +15,8 @@
 #include <lib/nix/nix.h>
 #include <lib/profiler/Profiler.h>
 
+namespace yrenderer {
+
 WindowRendererGL::WindowRendererGL(GLFWwindow* win) : TargetRenderer("win") {
 	window = win;
 #if HAS_LIB_GLFW
@@ -70,6 +72,8 @@ void WindowRendererGL::draw(const RenderParams& params) {
 
 	nix::set_srgb(prev_srgb);
 	profiler::end(channel);
+}
+
 }
 
 #endif

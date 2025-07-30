@@ -14,7 +14,7 @@
 
 WorldTerrainsEmitter::WorldTerrainsEmitter() : MeshEmitter("ter") {}
 
-void WorldTerrainsEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {
+void WorldTerrainsEmitter::emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) {
 	profiler::begin(channel);
 	gpu_timestamp_begin(params, channel);
 

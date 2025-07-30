@@ -10,6 +10,8 @@
 #include <lib/any/any.h>
 #include <lib/ygraphics/graphics-fwd.h>
 
+namespace yrenderer {
+
 struct RenderParams;
 
 struct Binding {
@@ -42,6 +44,8 @@ struct BindingData {
 	owned<vulkan::DescriptorSet> dset;
 #endif
 };
+
+}
 
 
 // sorry, but template<T> class Bindable : T... still sucks. Especially the constructor

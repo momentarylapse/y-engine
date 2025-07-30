@@ -15,10 +15,13 @@
 #include <lib/yrenderer/scene/SceneRenderer.h>
 #include "../../scene/SceneView.h"
 
-class MeshEmitter;
 class Camera;
 class Profiler;
+
+namespace yrenderer {
+
 class Material;
+class MeshEmitter;
 class GeometryEmitter;
 class TextureRenderer;
 struct SceneView;
@@ -47,4 +50,6 @@ private:
     void render_cascade(const RenderParams& params, Cascade& c);
 	void set_projection(const mat4& proj);
 };
+
+}
 

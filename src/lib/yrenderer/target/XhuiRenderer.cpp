@@ -7,6 +7,8 @@
 #include <lib/xhui/Painter.h>
 #include <lib/xhui/Context.h>
 
+namespace yrenderer {
+
 RenderParams XhuiRenderer::extract_params(Painter* p) {
 	auto pp = (xhui::Painter*)p;
 	RenderParams params;
@@ -55,4 +57,7 @@ void XhuiRenderer::render(Painter* p) {
 
 	render(params);
 }
+
+}
+
 #endif

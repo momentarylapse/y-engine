@@ -6,9 +6,9 @@
 
 #include <lib/yrenderer/scene/MeshEmitter.h>
 
-class WorldSkyboxEmitter : public MeshEmitter {
+class WorldSkyboxEmitter : public yrenderer::MeshEmitter {
 public:
 	WorldSkyboxEmitter();
-	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override;
+	void emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) override;
 };
 

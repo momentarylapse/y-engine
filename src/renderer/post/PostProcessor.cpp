@@ -20,11 +20,11 @@ PostProcessorStageUser::PostProcessorStageUser(const PostProcessorStageUser::Cal
 	func_draw = d;
 }
 
-void PostProcessorStageUser::prepare(const RenderParams& params) {
+void PostProcessorStageUser::prepare(const yrenderer::RenderParams& params) {
 	if (func_prepare)
 		(*func_prepare)(params);
 }
-void PostProcessorStageUser::draw(const RenderParams& params) {
+void PostProcessorStageUser::draw(const yrenderer::RenderParams& params) {
 	if (func_draw)
 		(*func_draw)(params);
 }

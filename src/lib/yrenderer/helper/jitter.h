@@ -9,6 +9,10 @@
 
 struct mat4;
 
+namespace yrenderer {
+
 mat4 jitter(float w, float h, int uid);
 void jitter_iterate();
+
+}
 

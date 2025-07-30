@@ -73,13 +73,15 @@ using namespace std::chrono;
 
 
 
-rect dynamicly_scaled_area(FrameBuffer *fb) {
-	//return rect(0, fb->width, 0, fb->height);
-	return rect(0, fb->width * engine.resolution_scale_x, 0, fb->height * engine.resolution_scale_y);
-}
+namespace yrenderer {
+	rect dynamicly_scaled_area(FrameBuffer *fb) {
+		//return rect(0, fb->width, 0, fb->height);
+		return rect(0, fb->width * engine.resolution_scale_x, 0, fb->height * engine.resolution_scale_y);
+	}
 
-rect dynamicly_scaled_source() {
-	return rect(0, engine.resolution_scale_x, 0, engine.resolution_scale_y);
+	rect dynamicly_scaled_source() {
+		return rect(0, engine.resolution_scale_x, 0, engine.resolution_scale_y);
+	}
 }
 
 
@@ -126,7 +128,7 @@ public:
 			config.game_dir | "Materials",
 			config.game_dir | "Fonts");
 
-		auto context = api_init(window);
+		auto context = yrenderer::api_init(window);
 		auto resource_manager = new ResourceManager(context,
 			config.game_dir | "Textures",
 			config.game_dir | "Materials",
@@ -231,11 +233,11 @@ public:
 
 	void main_loop() {
 		while (!glfwWindowShouldClose(window) and !engine.end_requested) {
-			gpu_flush();
+			yrenderer::gpu_flush();
 			profiler::next_frame();
-			reset_gpu_timestamp_queries();
+			yrenderer::reset_gpu_timestamp_queries();
 #ifdef USING_OPENGL
-			gpu_timestamp({}, -1);
+			yrenderer::gpu_timestamp({}, -1);
 #endif
 			engine.elapsed_rt = profiler::frame_dt;
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
@@ -253,13 +255,13 @@ public:
 				load_world(world.next_filename);
 				world.next_filename = "";
 			}
-			auto tt = gpu_read_timestamps();
+			auto tt = yrenderer::gpu_read_timestamps();
 			for (int i=0; i<tt.num; i++)
-				profiler::current_frame_timing.gpu.add({gpu_timestamp_queries[i], tt[i]});
+				profiler::current_frame_timing.gpu.add({yrenderer::gpu_timestamp_queries[i], tt[i]});
 
 		}
 
-		gpu_flush();
+		yrenderer::gpu_flush();
 	}
 
 	void reset_game() {
@@ -277,14 +279,14 @@ public:
 		GodEnd();
 
 		input::remove(window);
-		gpu_flush();
+		yrenderer::gpu_flush();
 		// sometimes there is a weird crash in another thread (I don't know in which library) otherwise
 		os::sleep(0.25f);
 
 		// TODO
 		//delete engine.world_renderer;
 		delete engine.window_renderer;
-		api_end();
+		yrenderer::api_end();
 		glfwDestroyWindow(window);
 
 		glfwTerminate();

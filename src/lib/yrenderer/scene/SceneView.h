@@ -18,6 +18,8 @@ struct XTerrainVBUpdater;
 class TerrainUpdateThread;
 struct RayTracingData;
 
+namespace yrenderer {
+
 static constexpr int MAX_LIGHTS = 1024 - 24; // :P
 
 // "scene" rendered by 1 camera
@@ -47,6 +49,8 @@ struct SceneView {
 	//TerrainUpdateThread* terrain_update_thread = nullptr;
 	Array<XTerrainVBUpdater*> updater;
 };
+
+}
 
 
 #endif //Y_SCENEVIEW_H

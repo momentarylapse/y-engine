@@ -7,6 +7,8 @@
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 
+namespace yrenderer {
+
 struct RenderViewData;
 struct RenderParams;
 
@@ -20,4 +22,6 @@ public:
 
 	int channel;
 };
+
+}
 

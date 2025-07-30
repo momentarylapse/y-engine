@@ -9,6 +9,8 @@
 
 #ifdef USING_VULKAN
 
+namespace yrenderer {
+
 // TODO "task executor"...
 class HeadlessRenderer : public RenderTask {
 public:
@@ -25,6 +27,8 @@ public:
 
 	RenderParams create_params(const rect& area) const;
 };
+
+}
 
 #endif
 

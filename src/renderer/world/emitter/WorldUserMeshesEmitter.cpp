@@ -13,9 +13,9 @@
 WorldUserMeshesEmitter::WorldUserMeshesEmitter() : MeshEmitter("user") {
 }
 
-void WorldUserMeshesEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) {
+void WorldUserMeshesEmitter::emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) {
 	profiler::begin(channel);
-	gpu_timestamp_begin(params, channel);
+	yrenderer::gpu_timestamp_begin(params, channel);
 
 	auto& meshes = ComponentManager::get_list_family<UserMesh>();
 
@@ -40,7 +40,7 @@ void WorldUserMeshesEmitter::emit(const RenderParams& params, RenderViewData& rv
 	profiler::end(channel);
 }
 
-void WorldUserMeshesEmitter::emit_transparent(const RenderParams& params, RenderViewData& rvd) {
+void WorldUserMeshesEmitter::emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) {
 
 }
 

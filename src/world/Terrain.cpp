@@ -127,7 +127,7 @@ bool Terrain::load(ResourceManager *resource_manager, const Path &_filename_, bo
 	return !error;
 }
 
-Terrain::Terrain(int nx, int nz, const vec3& _pattern, Material* _material) : Terrain() {
+Terrain::Terrain(int nx, int nz, const vec3& _pattern, yrenderer::Material* _material) : Terrain() {
 	num_x = nx;
 	num_z = nz;
 	height.resize((num_x + 1) * (num_z + 1));

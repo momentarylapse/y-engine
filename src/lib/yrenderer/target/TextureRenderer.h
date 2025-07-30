@@ -12,6 +12,8 @@
 #include <lib/base/optional.h>
 #include <lib/image/color.h>
 
+namespace yrenderer {
+
 class TextureRenderer : public RenderTask {
 public:
 	explicit TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options = {});
@@ -36,4 +38,6 @@ public:
 	bool clear_z = true;
 	Array<color> clear_colors;
 };
+
+}
 

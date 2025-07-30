@@ -22,6 +22,8 @@
 #include "../../Config.h"
 
 
+using namespace yrenderer;
+
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(vulkan::Device *_device, SceneView& scene_view, int w, int h) :
 		WorldRenderer("rt", scene_view) {
 	device = _device;

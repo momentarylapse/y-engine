@@ -9,8 +9,10 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/image/image.h>
 
-Texture *tex_white = nullptr;
-Texture *tex_black = nullptr;
+namespace yrenderer {
+
+Texture* tex_white = nullptr;
+Texture* tex_black = nullptr;
 
 Array<int> gpu_timestamp_queries;
 
@@ -19,6 +21,8 @@ void _create_default_textures() {
 	tex_black = new Texture();
 	tex_white->write(Image(16, 16, White));
 	tex_black->write(Image(16, 16, Black));
+}
+
 }
 
 

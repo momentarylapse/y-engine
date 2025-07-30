@@ -11,6 +11,7 @@
 #include <lib/profiler/Profiler.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+namespace yrenderer {
 
 const RenderParams RenderParams::WHATEVER = {};
 
@@ -97,4 +98,4 @@ void RenderTask::prepare_children(const RenderParams& params) {
 		c->prepare(params);
 }
 
-
+}

@@ -11,6 +11,28 @@
 #include <lib/math/vec2.h>
 
 
+Any mat4_to_any(const mat4& m) {
+	Any a = Any::EmptyList;
+	for (int i=0; i<16; i++)
+		a.list_set(i, ((float*)&m)[i]);
+	return a;
+}
+Any vec2_to_any(const vec2& v) {
+	Any a = Any::EmptyList;
+	a.list_set(0, v.x);
+	a.list_set(1, v.y);
+	return a;
+}
+Any vec3_to_any(const vec3& v) {
+	Any a = Any::EmptyList;
+	a.list_set(0, v.x);
+	a.list_set(1, v.y);
+	a.list_set(2, v.z);
+	return a;
+}
+
+namespace yrenderer {
+
 #ifdef USING_VULKAN
 void apply_shader_data(CommandBuffer* cb, const Any &shader_data);
 #else
@@ -85,26 +107,6 @@ void apply_shader_data(Shader *s, const Any &shader_data) {
 	}
 }
 #endif
-
-Any mat4_to_any(const mat4& m) {
-	Any a = Any::EmptyList;
-	for (int i=0; i<16; i++)
-		a.list_set(i, ((float*)&m)[i]);
-	return a;
-}
-Any vec2_to_any(const vec2& v) {
-	Any a = Any::EmptyList;
-	a.list_set(0, v.x);
-	a.list_set(1, v.y);
-	return a;
-}
-Any vec3_to_any(const vec3& v) {
-	Any a = Any::EmptyList;
-	a.list_set(0, v.x);
-	a.list_set(1, v.y);
-	a.list_set(2, v.z);
-	return a;
-}
 
 
 BindingData::BindingData(Shader* shader) {
@@ -181,4 +183,6 @@ void BindingData::apply(Shader* shader, const RenderParams& params) {
 	cb->bind_descriptor_set(0, dset.get());
 	apply_shader_data(cb, shader_data);
 #endif
+}
+
 }

@@ -9,6 +9,8 @@
 #include <lib/any/any.h>
 #include <lib/ygraphics/graphics-fwd.h>
 
+namespace yrenderer {
+
 class ComputeTask : public RenderTask {
 public:
     explicit ComputeTask(const string& name, const shared<Shader>& shader, int nx, int ny, int nz);
@@ -24,6 +26,8 @@ public:
 
     void render(const RenderParams &params) override;
 };
+
+}
 
 
 #endif //COMPUTETASK_H

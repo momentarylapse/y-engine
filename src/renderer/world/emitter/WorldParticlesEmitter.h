@@ -23,17 +23,17 @@ struct VertexPoint {
 };
 
 
-class WorldParticlesEmitter : public MeshEmitter {
+class WorldParticlesEmitter : public yrenderer::MeshEmitter {
 public:
 	WorldParticlesEmitter();
-	void emit_transparent(const RenderParams& params, RenderViewData& rvd) override;
+	void emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) override;
 
 //	shared<Shader> shader_fx;
 //	shared<Shader> shader_fx_points;
 	owned<VertexBuffer> vb_fx;
 	owned<VertexBuffer> vb_fx_points;
 
-	Material fx_material;
+	yrenderer::Material fx_material;
 
 	owned_array<VertexBuffer> fx_vertex_buffers;
 };

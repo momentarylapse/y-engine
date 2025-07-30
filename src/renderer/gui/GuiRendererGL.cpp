@@ -18,7 +18,11 @@
 #include <y/EngineData.h>
 
 
-void apply_shader_data(Shader *s, const Any &shader_data);
+using namespace yrenderer;
+
+namespace yrenderer {
+	void apply_shader_data(Shader *s, const Any &shader_data);
+}
 
 GuiRendererGL::GuiRendererGL() : Renderer("gui") {
 	shader = resource_manager->shader_manager->load_shader("forward/2d.shader");

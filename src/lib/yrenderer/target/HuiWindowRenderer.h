@@ -2,6 +2,9 @@
 #pragma once
 
 #include "../Renderer.h"
+
+namespace yrenderer {
+
 #ifdef USING_OPENGL
 
 class HuiWindowRenderer : public Renderer {
@@ -35,4 +38,7 @@ public:
 	Image image;
 };
 #endif
+
+}
+
 #endif

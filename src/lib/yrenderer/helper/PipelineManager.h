@@ -11,7 +11,7 @@
 
 struct string;
 
-namespace PipelineManager {
+namespace yrenderer::PipelineManager {
 
 GraphicsPipeline *get(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb, vulkan::CullMode culling, bool test_z, bool write_z);
 GraphicsPipeline *get_alpha(Shader *s, RenderPass *rp, PrimitiveTopology top, VertexBuffer *vb, Alpha src, Alpha dst, vulkan::CullMode culling, bool test_z, bool write_z);

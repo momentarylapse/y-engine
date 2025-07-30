@@ -18,6 +18,7 @@
 #include <lib/math/mat4.h>
 #include <lib/math/rect.h>
 
+using namespace yrenderer;
 
 
 struct UBOGUI {

@@ -13,6 +13,7 @@
 //#include <lib/threads/Thread.h>
 //#include <atomic>
 
+namespace yrenderer {
 
 void SceneView::choose_lights() {
 	lights.clear();
@@ -82,5 +83,7 @@ void SceneView::check_terrains(const vec3& cam_pos) {
 	/*for (auto *t: terrains) {
 		t->prepare_draw(cam_pos);
 	}*/
+
+}
 
 }

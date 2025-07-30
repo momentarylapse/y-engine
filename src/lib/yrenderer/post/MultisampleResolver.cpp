@@ -12,6 +12,8 @@ namespace nix {
 	void resolve_multisampling(FrameBuffer *target, FrameBuffer *source);
 }
 
+namespace yrenderer {
+
 MultisampleResolver::MultisampleResolver(Texture* tex_ms, Texture* depth_ms, Texture* tex_out, Texture* depth_out) : RenderTask("ms") {
 	shader_resolve_multisample = resource_manager->shader_manager->load_shader("forward/resolve-multisample.shader");
 	tsr = new ThroughShaderRenderer("ms", shader_resolve_multisample);
@@ -33,5 +35,7 @@ void MultisampleResolver::render(const RenderParams& params) {
 		// not sure, why this does not work... :(
 		//			nix::resolve_multisampling(fb_main.get(), fb_main_ms.get());
 	}
+}
+
 }
 

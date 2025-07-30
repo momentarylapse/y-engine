@@ -7,7 +7,7 @@
 #include "../world/WorldRenderer.h"
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/MultisampleResolver.h>
-#include "../post/HDRResolver.h"
+#include <lib/yrenderer/post/HDRResolver.h>
 #include "../world/WorldRendererForward.h"
 #include "../world/WorldRendererDeferred.h"
 #ifdef USING_VULKAN
@@ -37,6 +37,8 @@
 #include <world/components/MultiInstance.h>
 #include <lib/yrenderer/scene/MeshEmitter.h>
 #include "world/Light.h"
+
+using namespace yrenderer;
 
 
 HDRResolver *create_hdr_resolver(Camera *cam, Texture* tex, DepthBuffer* depth) {

@@ -16,6 +16,8 @@
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
 
+using namespace yrenderer;
+
 WorldParticlesEmitter::WorldParticlesEmitter() : MeshEmitter("fx"),
                                                  fx_material(engine.resource_manager)
 {

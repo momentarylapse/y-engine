@@ -7,6 +7,8 @@
 
 #include <lib/yrenderer/Renderer.h>
 
+namespace yrenderer {
+
 class ThroughShaderRenderer;
 class TextureRenderer;
 
@@ -20,5 +22,7 @@ public:
 	owned<TextureRenderer> into_texture;
 	shared<Shader> shader_resolve_multisample;
 };
+
+}
 
 #endif //MULTISAMPLERESOLVER_H

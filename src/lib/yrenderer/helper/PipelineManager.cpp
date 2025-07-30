@@ -11,7 +11,7 @@
 #include <lib/base/map.h>
 #include <lib/os/msg.h>
 
-namespace PipelineManager {
+namespace yrenderer::PipelineManager {
 
 struct PipelineKey {
 	Shader* s;

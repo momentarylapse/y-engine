@@ -11,6 +11,9 @@
 
 struct vec2;
 class Camera;
+
+namespace yrenderer {
+
 class ComputeTask;
 class TextureRenderer;
 class ThroughShaderRenderer;
@@ -39,4 +42,6 @@ public:
 
 	shared<DepthBuffer> _depth_buffer;
 };
+
+}
 

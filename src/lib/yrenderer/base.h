@@ -17,6 +17,8 @@ namespace xhui {
 class Painter;
 }
 
+namespace yrenderer {
+
 Context* api_init(GLFWwindow* window);
 #ifdef USING_VULKAN
 Context* api_init_external(vulkan::Instance* instance, vulkan::Device* device);
@@ -39,7 +41,11 @@ void gpu_timestamp_end(const RenderParams& params, int channel);
 Array<float> gpu_read_timestamps();
 extern Array<int> gpu_timestamp_queries;
 
+	// TODO wrap in Context...
+
 #ifdef USING_VULKAN
-extern vulkan::DescriptorPool *pool;
-extern vulkan::Device *device;
+	extern vulkan::DescriptorPool *pool;
+	extern vulkan::Device *device;
 #endif
+
+}

@@ -4,6 +4,7 @@
 #include <lib/profiler/Profiler.h>
 
 
+namespace yrenderer {
 
 ComputeTask::ComputeTask(const string& name, const shared<Shader>& _shader, int _nx, int _ny, int _nz) :
     RenderTask(name),
@@ -39,6 +40,8 @@ void ComputeTask::render(const RenderParams &params) {
 #endif
     gpu_timestamp_end(params, channel);
 	profiler::end(channel);
+}
+
 }
 
 

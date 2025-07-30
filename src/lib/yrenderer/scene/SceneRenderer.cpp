@@ -11,6 +11,7 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/yrenderer/helper/PipelineManager.h>
 
+namespace yrenderer {
 
 #ifdef USING_VULKAN
 GraphicsPipeline* SceneRenderer::get_pipeline(Shader *s, RenderPass *rp, const Material::RenderPassData &pass, PrimitiveTopology top, VertexBuffer *vb) {
@@ -78,6 +79,8 @@ void SceneRenderer::draw(const RenderParams& params) {
 
 	gpu_timestamp_end(params, channel);
 	profiler::end(channel);
+}
+
 }
 
 

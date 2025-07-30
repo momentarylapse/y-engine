@@ -13,15 +13,17 @@
 #include "../lib/math/random.h"
 #include "../lib/os/msg.h"
 
-extern Texture *tex_white;
+namespace yrenderer {
+	extern Texture *tex_white;
+}
 static Random pe_random;
 
 const kaba::Class *ParticleGroup::_class = nullptr;
 const kaba::Class *ParticleEmitter::_class = nullptr;
 
 ParticleGroup::ParticleGroup() {
-	if (tex_white)
-		texture = tex_white;
+	if (yrenderer::tex_white)
+		texture = yrenderer::tex_white;
 	source = rect::ID;
 	//pos = vec3::ZERO;
 }

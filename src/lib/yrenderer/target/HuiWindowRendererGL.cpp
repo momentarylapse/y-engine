@@ -4,6 +4,8 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/hui/hui.h>
 
+namespace yrenderer {
+
 HuiWindowRenderer::HuiWindowRenderer(Context* _ctx) : Renderer("hui") {
 	ctx = _ctx;
 }
@@ -29,6 +31,8 @@ void HuiWindowRenderer::render_frame() {
 	draw(params);
 
 	nix::end_frame_hui();
+}
+
 }
 
 #endif

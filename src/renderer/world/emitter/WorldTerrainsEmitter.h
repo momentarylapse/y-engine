@@ -6,10 +6,10 @@
 
 #include <lib/yrenderer/scene/MeshEmitter.h>
 
-class WorldTerrainsEmitter : public MeshEmitter {
+class WorldTerrainsEmitter : public yrenderer::MeshEmitter {
 public:
 	WorldTerrainsEmitter();
-	void emit(const RenderParams& params, RenderViewData& rvd, bool shadow_pass) override;
+	void emit(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd, bool shadow_pass) override;
 };
 
 

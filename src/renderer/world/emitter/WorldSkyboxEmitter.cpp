@@ -12,6 +12,8 @@
 #include <world/Camera.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+using namespace yrenderer;
+
 WorldSkyboxEmitter::WorldSkyboxEmitter() : MeshEmitter("sky") {
 }
 

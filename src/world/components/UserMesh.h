@@ -17,13 +17,15 @@
 #include <lib/ygraphics/graphics-impl.h>
 
 
-class Material;
+namespace yrenderer {
+	class Material;
+}
 
 class UserMesh : public Component {
 public:
 	UserMesh() = default;
 
-	owned<Material> material;
+	owned<yrenderer::Material> material;
 	string vertex_shader_module = "default";
 	string geometry_shader_module;
 

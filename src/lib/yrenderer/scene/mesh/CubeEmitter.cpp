@@ -9,6 +9,8 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/Box.h>
 
+namespace yrenderer {
+
 CubeEmitter::CubeEmitter() : MeshEmitter("cube") {
 	vb = new VertexBuffer("3f,3f,2f");
 	set_cube(Box::ID_SYM);
@@ -52,5 +54,7 @@ void CubeEmitter::emit(const RenderParams& params, RenderViewData& rvd, bool sha
 	auto shader = rvd.get_shader(material.get(), 0, "default", "");
 	auto& rd = rvd.start(params, mat4::ID, shader, *material, 0, PrimitiveTopology::TRIANGLES, vb.get());
 	rd.draw_triangles(params, vb.get());
+}
+
 }
 

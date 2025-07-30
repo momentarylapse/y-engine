@@ -21,6 +21,8 @@ using SwapChain = vulkan::SwapChain;
 using RenderPass = vulkan::RenderPass;
 using Device = vulkan::Device;
 
+namespace yrenderer {
+
 class SurfaceRendererVulkan : public TargetRenderer {
 public:
 	SurfaceRendererVulkan(const string& name, Device *device);
@@ -80,5 +82,7 @@ public:
 
 	static xfer<HeadlessSurfaceRendererVulkan> create(Device *device, int width, int height);
 };
+
+}
 
 #endif

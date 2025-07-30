@@ -31,7 +31,7 @@ void LightMeter::read() {
 	profiler::begin(ch_prepare);
 
 	// TODO barriers...
-	gpu_flush();
+	yrenderer::gpu_flush();
 	if (histogram.num == NBINS) {
 #ifdef USING_VULKAN
 		void* p = buf->map();

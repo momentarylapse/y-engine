@@ -12,6 +12,8 @@
 #include "world/Camera.h"
 #include "world/World.h"
 
+namespace yrenderer {
+
 const kaba::Class* CubeMapSource::_class = nullptr;;
 
 CubeMapSource::CubeMapSource() {
@@ -76,6 +78,8 @@ void CubeMapRenderer::render(const RenderParams& params) {
 		texture_renderers[i]->render(params);
 	}
 	gpu_timestamp_end(params, channel);
+}
+
 }
 
 

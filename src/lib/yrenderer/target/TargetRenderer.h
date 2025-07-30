@@ -10,6 +10,8 @@
 
 #include <lib/yrenderer/Renderer.h>
 
+namespace yrenderer {
+
 class TargetRenderer : public Renderer {
 public:
 	explicit TargetRenderer(const string &name);
@@ -18,3 +20,5 @@ public:
 
 	int ch_end;
 };
+
+}

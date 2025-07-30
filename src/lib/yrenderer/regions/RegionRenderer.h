@@ -5,12 +5,13 @@
  *      Author: michi
  */
 
-#ifndef SRC_RENDERER_REGIONS_REGIONRENDERERCOMMON_H_
-#define SRC_RENDERER_REGIONS_REGIONRENDERERCOMMON_H_
+#pragma once
 
 #include <lib/yrenderer/Renderer.h>
 
 #include <lib/math/rect.h>
+
+namespace yrenderer {
 
 class RegionRenderer : public Renderer {
 public:
@@ -31,4 +32,4 @@ public:
 	Array<Region*> sorted_regions;
 };
 
-#endif /* SRC_RENDERER_REGIONS_REGIONRENDERERCOMMON_H_ */
+}

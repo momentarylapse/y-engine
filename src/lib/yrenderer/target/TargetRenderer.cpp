@@ -9,6 +9,8 @@
 #include <lib/profiler/Profiler.h>
 
 
+namespace yrenderer {
+
 TargetRenderer::TargetRenderer(const string &name) : Renderer(name) {
 	ch_end = profiler::create_channel(name + ".end", channel);
 }
@@ -19,4 +21,6 @@ void TargetRenderer::draw(const RenderParams& params) {
 		c->draw(params);
 	}
 	profiler::end(channel);
+}
+
 }

@@ -21,6 +21,8 @@
 Any mat4_to_any(const mat4& m);
 Any vec2_to_any(const vec2& v);
 
+namespace yrenderer {
+
 static float resolution_scale_x = 1.0f;
 static float resolution_scale_y = 1.0f;
 
@@ -115,6 +117,8 @@ void HDRResolver::prepare(const RenderParams& params) {
 
 	gpu_timestamp_end(params, ch_prepare);
 	profiler::end(ch_prepare);
+}
+
 }
 
 #if 0

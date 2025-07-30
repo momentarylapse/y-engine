@@ -15,7 +15,10 @@
 #include <lib/ygraphics/graphics-fwd.h>
 
 class Model;
-struct SceneView;
+
+namespace yrenderer {
+	struct SceneView;
+}
 
 enum class RaytracingMode {
 	NONE,
@@ -91,12 +94,12 @@ struct RayReply {
 	int index, mesh, _a, _b;
 };
 
-void rt_setup_explicit(SceneView& scene_view, RaytracingMode mode);
-void rt_setup(SceneView& scene_view);
-void rt_update_frame(SceneView& scene_view);
+void rt_setup_explicit(yrenderer::SceneView& scene_view, RaytracingMode mode);
+void rt_setup(yrenderer::SceneView& scene_view);
+void rt_update_frame(yrenderer::SceneView& scene_view);
 
 //Array<base::optional<RayHitInfo>>
-Array<RayReply> vtrace(SceneView& scene_view, const Array<RayRequest>& requests);
+Array<RayReply> vtrace(yrenderer::SceneView& scene_view, const Array<RayRequest>& requests);
 
 
 #endif //RAYTRACING_H

@@ -10,16 +10,18 @@
 #include "WorldRenderer.h"
 #include <lib/yrenderer/scene/RenderViewData.h>
 
-class SceneRenderer;
+namespace yrenderer {
+	class SceneRenderer;
+}
 class Camera;
 class Profiler;
 
 class WorldRendererForward : public WorldRenderer {
 public:
-	explicit WorldRendererForward(SceneView& scene_view);
+	explicit WorldRendererForward(yrenderer::SceneView& scene_view);
 
-	void prepare(const RenderParams& params) override;
-	void draw(const RenderParams& params) override;
+	void prepare(const yrenderer::RenderParams& params) override;
+	void draw(const yrenderer::RenderParams& params) override;
 
-	SceneRenderer* scene_renderer;
+	yrenderer::SceneRenderer* scene_renderer;
 };

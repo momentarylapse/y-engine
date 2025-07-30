@@ -9,6 +9,8 @@
 
 class Painter;
 
+namespace yrenderer {
+
 class XhuiRenderer : public RenderTask {
 public:
 	rect native_area_window = rect::ID;
@@ -22,6 +24,8 @@ public:
 	// call in event_xp("area", xhui::event_id::Draw, [this] (Painter* p) { ... });
 	void render(Painter* p);
 };
+
+}
 
 
 #endif //XHUIRENDERER_H

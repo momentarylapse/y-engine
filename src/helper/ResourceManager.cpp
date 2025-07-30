@@ -23,39 +23,19 @@ namespace vulkan {
 
 ResourceManager::ResourceManager(::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
 	ctx = _ctx;
-	material_manager = new MaterialManager(this, material_dir);
+	material_manager = new yrenderer::MaterialManager(this, material_dir);
 	model_manager = new ModelManager(this, material_manager);
-	shader_manager = new ShaderManager(ctx, shader_dir);
+	shader_manager = new yrenderer::ShaderManager(ctx, shader_dir);
 	shader_manager->ignore_missing_files = engine.ignore_missing_files;
-	texture_manager = new TextureManager(ctx, texture_dir);
+	texture_manager = new yrenderer::TextureManager(ctx, texture_dir);
 }
 
-xfer<Material> ResourceManager::load_material(const Path &filename) {
+xfer<yrenderer::Material> ResourceManager::load_material(const Path &filename) {
 	return material_manager->load(filename);
 }
 
 xfer<Model> ResourceManager::load_model(const Path &filename) {
 	return model_manager->load(filename);
-}
-
-Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
-	if (filename.is_empty())
-		return Path::EMPTY;
-
-	if (filename.is_absolute())
-		return filename;
-
-	for (auto &d: dirs)
-		if (os::fs::exists(d | filename))
-			return d | filename;
-
-	return Path::EMPTY;
-	/*if (engine.ignore_missing_files) {
-		msg_error("missing shader: " + filename.str());
-		return Shader::load("");
-	}
-	throw Exception("missing shader: " + filename.str());
-	return filename;*/
 }
 
 

@@ -30,6 +30,8 @@
 #include <lib/ygraphics/graphics-impl.h>
 
 
+using namespace yrenderer;
+
 WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, int height) : WorldRenderer("world/def", scene_view) {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
@@ -90,7 +92,7 @@ WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, i
 	add_child(scene_renderer_trans.get());
 }
 
-void WorldRendererDeferred::prepare(const RenderParams& params) {
+void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);
 
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());

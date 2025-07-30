@@ -86,10 +86,10 @@ void EngineData::exit() {
 	end_requested = true;
 }
 
-void EngineData::add_render_task(RenderTask* task, int priority) {
+void EngineData::add_render_task(yrenderer::RenderTask* task, int priority) {
 	task->_priority = priority;
 	render_tasks.add(task);
-	base::inplace_sort(render_tasks, [](RenderTask *a, RenderTask *b) {
+	base::inplace_sort(render_tasks, [](yrenderer::RenderTask *a, yrenderer::RenderTask *b) {
 		return a->_priority <= b->_priority;
 	});
 }

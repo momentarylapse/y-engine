@@ -7,6 +7,8 @@
 #include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+namespace yrenderer {
+
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& tex, const Array<string>& options) : RenderTask(name) {
 	textures = tex;
 	render_pass = new RenderPass(weak(textures), options);
@@ -69,6 +71,8 @@ void TextureRenderer::render(const RenderParams& params) {
 
 	gpu_timestamp_end(params, channel);
 	profiler::end(channel);
+}
+
 }
 
 #endif

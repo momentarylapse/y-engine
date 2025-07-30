@@ -17,6 +17,7 @@
 #include <world/Light.h>
 #include <Config.h>
 
+namespace yrenderer {
 
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
@@ -85,4 +86,6 @@ void ShadowRenderer::render_cascade(const RenderParams& _params, Cascade& c) {
 
 	// all opaque meshes
 	c.texture_renderer->render(params);
+}
+
 }

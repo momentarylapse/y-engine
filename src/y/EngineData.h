@@ -17,21 +17,24 @@ namespace gui {
 	class Font;
 }
 
-
-class TargetRenderer;
-class Renderer;
-class ResourceManager;
-class MaterialManager;
-class ModelManager;
+namespace yrenderer {
+	class TargetRenderer;
+	class Renderer;
+	class MaterialManager;
 #ifdef USING_VULKAN
-class SurfaceRendererVulkan;
-using WindowRenderer = SurfaceRendererVulkan;
+	class SurfaceRendererVulkan;
+	using WindowRenderer = SurfaceRendererVulkan;
 #else
-class WindowRendererGL;
-using WindowRenderer = WindowRendererGL;
+	class WindowRendererGL;
+	using WindowRenderer = WindowRendererGL;
 #endif
-class RegionRenderer;
-class RenderTask;
+	class RegionRenderer;
+	class RenderTask;
+}
+
+
+class ResourceManager;
+class ModelManager;
 struct RenderPath;
 
 class EngineData {
@@ -88,13 +91,13 @@ public:
 	::Context *context;
 	ResourceManager *resource_manager;
 
-	WindowRenderer *window_renderer;
-	Renderer *gui_renderer;
-	RegionRenderer *region_renderer;
+	yrenderer::WindowRenderer *window_renderer;
+	yrenderer::Renderer *gui_renderer;
+	yrenderer::RegionRenderer *region_renderer;
 	Array<RenderPath*> render_paths;
 
-	Array<RenderTask*> render_tasks;
-	void add_render_task(RenderTask* task, int priority);
+	Array<yrenderer::RenderTask*> render_tasks;
+	void add_render_task(yrenderer::RenderTask* task, int priority);
 };
 extern EngineData engine;
 

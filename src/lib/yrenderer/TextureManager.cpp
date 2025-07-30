@@ -10,6 +10,8 @@
 #include <y/EngineData.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+namespace yrenderer {
+
 Path guess_absolute_path(const Path &filename, const Array<Path> dirs);
 
 TextureManager::TextureManager(::Context *_ctx, const Path &_texture_dir) {
@@ -81,6 +83,8 @@ shared<Texture> TextureManager::load_texture(const Path& filename) {
 void TextureManager::clear() {
 	textures.clear();
 	texture_map.clear();
+}
+
 }
 
 

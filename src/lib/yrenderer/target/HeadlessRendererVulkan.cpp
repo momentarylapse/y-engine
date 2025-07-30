@@ -5,6 +5,7 @@
 #include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+namespace yrenderer {
 
 HeadlessRenderer::HeadlessRenderer(vulkan::Device* d, const shared_array<Texture>& tex) : RenderTask("headless")
 {
@@ -33,6 +34,8 @@ void HeadlessRenderer::render(const RenderParams& params) {
 	device->graphics_queue.submit(command_buffer, {}, {}, fence);
 	fence->wait();
 	//device->wait_idle();
+}
+
 }
 
 #endif

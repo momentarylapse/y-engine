@@ -8,6 +8,7 @@
 #include <lib/base/map.h>
 #include <lib/os/path.h>
 
+namespace yrenderer {
 
 class TextureManager {
 public:
@@ -29,4 +30,6 @@ public:
 
 	shared<Texture> tex_white;
 };
+
+}
 

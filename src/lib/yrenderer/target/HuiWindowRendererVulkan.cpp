@@ -5,6 +5,8 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/hui/hui.h>
 
+namespace yrenderer {
+
 HuiWindowRenderer::HuiWindowRenderer(vulkan::Instance* instance) : Renderer("hui") {
 	device = vulkan::Device::create_simple(instance, nullptr, {"graphics", "anisotropy"});
 
@@ -55,6 +57,8 @@ RenderParams HuiWindowRenderer::create_params(int w, int h) {
 	params.frame_buffer = texture_renderer->frame_buffer.get();
 	return params;
 	//return texture_renderer->create_params({0, (float)w, 0, (float)h});
+}
+
 }
 
 #endif

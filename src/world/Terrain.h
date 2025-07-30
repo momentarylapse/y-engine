@@ -14,7 +14,9 @@
 #include "../y/Component.h"
 #include <lib/yrenderer/Material.h>
 #include <lib/ygraphics/graphics-fwd.h>
-class Material;
+namespace yrenderer {
+	class Material;
+}
 class CollisionData;
 
 enum class TerrainType {
@@ -53,7 +55,7 @@ public:
 class Terrain : public Component {
 public:
 	Terrain();
-	Terrain(int nx, int nz, const vec3& pattern, Material* material);
+	Terrain(int nx, int nz, const vec3& pattern, yrenderer::Material* material);
 	Terrain(ResourceManager *resource_manager, const Path &filename);
 	bool load(ResourceManager *resource_manager, const Path &filename, bool deep = true);
 	~Terrain() override;
@@ -82,7 +84,7 @@ public:
 	int chunk_lod_old[TERRAIN_MAX_CHUNKS][TERRAIN_MAX_CHUNKS];
 	vec3 pattern, min, max;
 	string vertex_shader_module;
-	owned<Material> material;
+	owned<yrenderer::Material> material;
 	Path material_file;
 
 	vec3 texture_scale[MATERIAL_MAX_TEXTURES];

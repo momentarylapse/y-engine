@@ -17,13 +17,33 @@ namespace vulkan {
 }
 #endif
 
+namespace yrenderer {
+
+Path guess_absolute_path(const Path &filename, const Array<Path> dirs) {
+	if (filename.is_empty())
+		return Path::EMPTY;
+
+	if (filename.is_absolute())
+		return filename;
+
+	for (auto &d: dirs)
+		if (os::fs::exists(d | filename))
+			return d | filename;
+
+	return Path::EMPTY;
+	/*if (engine.ignore_missing_files) {
+		msg_error("missing shader: " + filename.str());
+		return Shader::load("");
+	}
+	throw Exception("missing shader: " + filename.str());
+	return filename;*/
+}
+
 
 ShaderManager::ShaderManager(::Context *_ctx, const Path &_shader_dir) {
 	ctx = _ctx;
 	shader_dir = _shader_dir;
 }
-
-Path guess_absolute_path(const Path &filename, const Array<Path> dirs);
 
 
 xfer<Shader> ShaderManager::__load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size) {
@@ -171,5 +191,4 @@ void ShaderManager::clear() {
 	shader_map.clear();
 }
 
-
-
+}

@@ -13,6 +13,8 @@
 
 #include "lib/os/msg.h"
 
+namespace yrenderer {
+
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& textures, const Array<string>& options) : RenderTask(name) {
 	frame_buffer = new FrameBuffer(textures);
 }
@@ -61,6 +63,8 @@ void TextureRenderer::render(const RenderParams& params) {
 
 	gpu_timestamp_end(params, channel);
 	profiler::end(channel);
+}
+
 }
 
 

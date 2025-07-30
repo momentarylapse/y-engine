@@ -13,6 +13,7 @@
 
 struct GLFWwindow;
 
+namespace yrenderer {
 
 class WindowRendererGL : public TargetRenderer {
 public:
@@ -32,5 +33,7 @@ public:
 	DepthBuffer* _depth_buffer;
 	FrameBuffer* _frame_buffer;
 };
+
+}
 
 #endif

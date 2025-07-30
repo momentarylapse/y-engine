@@ -8,6 +8,8 @@
 #include "RegionRenderer.h"
 #include <lib/profiler/Profiler.h>
 
+namespace yrenderer {
+
 RegionRenderer::RegionRenderer() : Renderer("rgn") {
 }
 
@@ -36,6 +38,8 @@ void RegionRenderer::add_region(Renderer *renderer, const rect &dest, int z) {
 		for (int k=i+1; k<sorted_regions.num; k++)
 			if (sorted_regions[i]->z > sorted_regions[k]->z)
 				sorted_regions.swap(i, k);
+}
+
 }
 
 

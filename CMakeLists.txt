@@ -705,8 +705,12 @@ add_library(moduley SHARED
 	src/lib/yrenderer/helper/jitter.cpp
 	src/lib/yrenderer/helper/Pipeline.cpp
 	src/lib/yrenderer/helper/PipelineManager.cpp
+	src/lib/yrenderer/post/HDRResolver.cpp
 	src/lib/yrenderer/post/MultisampleResolver.cpp
 	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
+	src/lib/yrenderer/regions/RegionRenderer.cpp
+	src/lib/yrenderer/regions/RegionRendererGL.cpp
+	src/lib/yrenderer/regions/RegionRendererVulkan.cpp
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
 	src/lib/yrenderer/scene/MeshEmitter.cpp
@@ -737,13 +741,9 @@ add_library(moduley SHARED
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
-	src/renderer/post/HDRResolver.cpp
 	src/renderer/post/PostProcessor.cpp
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
-	src/renderer/regions/RegionRenderer.cpp
-	src/renderer/regions/RegionRendererGL.cpp
-	src/renderer/regions/RegionRendererVulkan.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -970,8 +970,12 @@ add_executable(y
 	src/lib/yrenderer/helper/jitter.cpp
 	src/lib/yrenderer/helper/Pipeline.cpp
 	src/lib/yrenderer/helper/PipelineManager.cpp
+	src/lib/yrenderer/post/HDRResolver.cpp
 	src/lib/yrenderer/post/MultisampleResolver.cpp
 	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
+	src/lib/yrenderer/regions/RegionRenderer.cpp
+	src/lib/yrenderer/regions/RegionRendererGL.cpp
+	src/lib/yrenderer/regions/RegionRendererVulkan.cpp
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
 	src/lib/yrenderer/scene/MeshEmitter.cpp
@@ -1002,13 +1006,9 @@ add_executable(y
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
-	src/renderer/post/HDRResolver.cpp
 	src/renderer/post/PostProcessor.cpp
 	src/renderer/post/PostProcessorGL.cpp
 	src/renderer/post/PostProcessorVulkan.cpp
-	src/renderer/regions/RegionRenderer.cpp
-	src/renderer/regions/RegionRendererGL.cpp
-	src/renderer/regions/RegionRendererVulkan.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp

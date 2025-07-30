@@ -10,6 +10,8 @@
 #include <lib/any/any.h>
 #include <lib/math/rect.h>
 
+namespace yrenderer {
+
 class ThroughShaderRenderer : public Renderer {
 public:
 	ThroughShaderRenderer(const string& name, shared<Shader> _shader);
@@ -27,5 +29,7 @@ public:
 	GraphicsPipeline* pipeline = nullptr;
 #endif
 };
+
+}
 
 #endif //THROUGHSHADERRENDERER_H

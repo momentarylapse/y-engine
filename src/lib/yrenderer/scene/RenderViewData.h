@@ -16,11 +16,14 @@
 #include <lib/yrenderer/Material.h>
 
 class Camera;
-struct SceneView;
-class RenderParams;
 struct mat4;
+
+namespace yrenderer {
+
 class ShaderCache;
 class Material;
+struct SceneView;
+class RenderParams;
 enum class RenderPathType;
 
 static constexpr int MAX_INSTANCES = 1<<11;
@@ -116,5 +119,7 @@ struct RenderViewData {
 	// material as id!
 	Shader* get_shader(Material* material, int pass_no, const string& vertex_shader_module, const string& geometry_shader_module);
 };
+
+}
 
 #endif //Y_RENDERVIEWDATA_H

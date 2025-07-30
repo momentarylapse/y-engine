@@ -5,6 +5,10 @@
 #include "MeshEmitter.h"
 #include <lib/profiler/Profiler.h>
 
+namespace yrenderer {
+
 MeshEmitter::MeshEmitter(const string &name) {
 	channel = profiler::create_channel(name, -1);
+}
+
 }

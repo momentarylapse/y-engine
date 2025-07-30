@@ -8,7 +8,6 @@
 #pragma once
 
 
-class RenderTask;
 struct rect;
 
 #include <lib/ygraphics/graphics-fwd.h>
@@ -18,6 +17,10 @@ struct rect;
 
 struct color;
 class ResourceManager;
+
+namespace yrenderer {
+
+class RenderTask;
 
 rect dynamicly_scaled_area(FrameBuffer *fb);
 rect dynamicly_scaled_source();
@@ -85,3 +88,5 @@ public:
 	Context* context;
 	ResourceManager* resource_manager;
 };
+
+}
