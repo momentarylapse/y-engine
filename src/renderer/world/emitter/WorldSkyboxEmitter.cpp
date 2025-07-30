@@ -10,7 +10,7 @@
 #include <world/World.h>
 #include <world/Model.h>
 #include <world/Camera.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 
 WorldSkyboxEmitter::WorldSkyboxEmitter() : MeshEmitter("sky") {
 }

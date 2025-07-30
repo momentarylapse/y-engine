@@ -6,7 +6,7 @@
 #include <renderer/base.h>
 #include <renderer/scene/RenderViewData.h>
 #include <y/EngineData.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/Box.h>
 
 CubeEmitter::CubeEmitter() : MeshEmitter("cube") {

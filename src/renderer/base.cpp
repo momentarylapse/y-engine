@@ -6,7 +6,7 @@
  */
 
 #include "base.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../lib/image/image.h"
 #include "../Config.h"
 

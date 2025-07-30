@@ -9,7 +9,7 @@
 #include "../y/EngineData.h"
 #include <lib/math/rect.h>
 #include <lib/profiler/Profiler.h>
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 
 const RenderParams RenderParams::WHATEVER = {};

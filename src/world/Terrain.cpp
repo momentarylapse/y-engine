@@ -12,7 +12,7 @@
 #include "World.h"
 #include "../y/EngineData.h"
 #include "../helper/ResourceManager.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/vec3.h>
 #include <lib/math/plane.h>
 #include <lib/os/file.h>

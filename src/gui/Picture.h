@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include "Node.h"
 #include "../lib/any/any.h"
 

@@ -23,7 +23,7 @@
 #include <lib/os/file.h>
 #include <lib/os/msg.h>
 #include <lib/doc/chunked.h>
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../meta.h"
 #include "Material.h"
 

@@ -9,7 +9,7 @@
 #include "Font.h"
 #include "../lib/math/vec2.h"
 #include "../lib/image/image.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 #include "../y/EngineData.h"
 

@@ -10,7 +10,7 @@
 
 #include <lib/base/base.h>
 #include <lib/os/path.h>
-#include "../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 
 
 namespace gui {

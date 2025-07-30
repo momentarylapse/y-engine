@@ -9,7 +9,7 @@
 #include "ThroughShaderRenderer.h"
 #include "../base.h"
 #include "../target/TextureRenderer.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <Config.h>
 #include <helper/ResourceManager.h>
 #include <lib/profiler/Profiler.h>

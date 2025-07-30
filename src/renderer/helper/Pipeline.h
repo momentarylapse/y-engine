@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 
 // TODO use...
 

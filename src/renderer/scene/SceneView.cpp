@@ -3,7 +3,7 @@
 //
 
 #include "SceneView.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <world/World.h>
 #include <world/Light.h>
 #include <world/Terrain.h>

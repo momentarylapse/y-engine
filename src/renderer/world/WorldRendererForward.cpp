@@ -20,7 +20,7 @@
 #include <renderer/world/emitter/WorldUserMeshesEmitter.h>
 #include "../../helper/ResourceManager.h"
 #include "../../world/Camera.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 
 
 WorldRendererForward::WorldRendererForward(SceneView& scene_view) : WorldRenderer("world", scene_view) {

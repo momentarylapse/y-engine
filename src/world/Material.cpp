@@ -4,7 +4,7 @@
 #include <lib/os/msg.h>
 #include <lib/os/config.h>
 #include <lib/any/any.h>
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../helper/ResourceManager.h"
 #include "../y/EngineData.h"
 

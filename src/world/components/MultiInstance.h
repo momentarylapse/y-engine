@@ -11,7 +11,7 @@
 #include "../../y/Entity.h"
 #include <lib/base/pointer.h>
 #include <lib/math/mat4.h>
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 
 class Model;
 

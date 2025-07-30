@@ -23,7 +23,7 @@
 #include "../../y/Entity.h"
 #include "../../y/EngineData.h"
 #include "../../Config.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #ifdef USING_VULKAN
 
 static const int MAX_RT_TRIAS = 65536;

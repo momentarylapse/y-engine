@@ -11,7 +11,7 @@
 #include "../scene/SceneView.h"
 #include "../path/RenderPath.h"
 #include "../base.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #include <lib/profiler/Profiler.h>
 #include "../../helper/ResourceManager.h"

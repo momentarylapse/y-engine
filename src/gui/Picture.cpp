@@ -9,7 +9,7 @@
 #include "../lib/math/rect.h"
 #include "../lib/math/vec3.h"
 #include "../lib/math/mat4.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <iostream>
 
 

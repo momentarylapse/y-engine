@@ -10,7 +10,7 @@
 
 #include "PostProcessor.h"
 #ifdef USING_OPENGL
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 
 struct vec2;
 class Any;

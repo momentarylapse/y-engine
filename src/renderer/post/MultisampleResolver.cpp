@@ -2,7 +2,7 @@
 #include "ThroughShaderRenderer.h"
 #include "../target/TextureRenderer.h"
 #include "../../helper/ResourceManager.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 // https://learnopengl.com/Advanced-OpenGL/Anti-Aliasing
 

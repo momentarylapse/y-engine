@@ -1,6 +1,6 @@
 #include "CubeMapSource.h"
 #include <Config.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #include <renderer/base.h>
 #include <renderer/path/RenderPath.h>

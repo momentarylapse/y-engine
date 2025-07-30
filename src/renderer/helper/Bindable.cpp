@@ -4,7 +4,7 @@
 
 #include "Bindable.h"
 #include "../Renderer.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/base/iter.h>
 #include <lib/os/msg.h>
 #include <lib/math/mat4.h>

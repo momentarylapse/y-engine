@@ -5,7 +5,7 @@
 #ifdef USING_VULKAN
 #include <lib/profiler/Profiler.h>
 #include <renderer/base.h>
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 TextureRenderer::TextureRenderer(const string& name, const shared_array<Texture>& tex, const Array<string>& options) : RenderTask(name) {
 	textures = tex;

@@ -1,7 +1,7 @@
 #if __has_include(<lib/hui/hui.h>)
 #include "HuiWindowRenderer.h"
 #ifdef USING_OPENGL
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/hui/hui.h>
 
 HuiWindowRenderer::HuiWindowRenderer(Context* _ctx) : Renderer("hui") {

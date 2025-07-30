@@ -26,7 +26,7 @@
 #include "../../helper/ResourceManager.h"
 #include "../../world/Camera.h"
 #include "../../Config.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 
 WorldRendererDeferred::WorldRendererDeferred(SceneView& scene_view, int width, int height) : WorldRenderer("world/def", scene_view) {

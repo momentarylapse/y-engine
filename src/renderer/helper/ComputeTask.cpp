@@ -1,6 +1,6 @@
 #include "ComputeTask.h"
 #include <renderer/base.h>
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
 
 

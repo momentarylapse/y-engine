@@ -5,7 +5,7 @@
 #include <lib/base/pointer.h>
 #include <lib/os/path.h>
 #include <lib/image/color.h>
-#include "../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 
 #define MATERIAL_MAX_TEXTURES		8
 

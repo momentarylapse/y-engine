@@ -18,7 +18,7 @@
 #include <renderer/target/TextureRenderer.h>
 #include <renderer/helper/CubeMapSource.h>
 #include "../../helper/ResourceManager.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <world/Camera.h>
 #include <world/Model.h>
 #include <world/World.h>

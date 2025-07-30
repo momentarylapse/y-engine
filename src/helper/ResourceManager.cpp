@@ -6,7 +6,7 @@
 #include <lib/nix/nix.h>
 #include <lib/image/image.h>
 #include <y/EngineData.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 
 #include <world/components/UserMesh.h>
 #include <world/Material.h>

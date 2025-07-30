@@ -7,7 +7,7 @@
 #pragma once
 
 #include "../../y/Component.h"
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 

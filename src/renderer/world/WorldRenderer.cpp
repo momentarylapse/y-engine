@@ -6,7 +6,7 @@
  */
 
 #include "WorldRenderer.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../../fx/Particle.h"
 #include "../../gui/Picture.h"
 #include "../../world/Camera.h"

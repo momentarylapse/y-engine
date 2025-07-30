@@ -8,7 +8,7 @@
 #ifndef SRC_FX_PARTICLEEMITTER_H_
 #define SRC_FX_PARTICLEEMITTER_H_
 
-#include "../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include "../lib/base/base.h"
 #include "../lib/base/pointer.h"
 #include "../lib/math/vec3.h"

@@ -14,7 +14,7 @@
 #include <lib/base/pointer.h>
 #include <lib/math/vec3.h>
 #include <lib/image/color.h>
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 
 class Material;

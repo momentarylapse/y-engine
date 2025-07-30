@@ -11,7 +11,7 @@
 #include "../ModelManager.h"
 #include "../../y/Entity.h"
 #include <lib/os/msg.h>
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 
 const kaba::Class *Animator::_class = nullptr;

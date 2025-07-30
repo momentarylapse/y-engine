@@ -24,7 +24,7 @@
 #pragma once
 
 
-#include "../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include "../y/Component.h"
 #include "Material.h"
 #include <lib/base/base.h>

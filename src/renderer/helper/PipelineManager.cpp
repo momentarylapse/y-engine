@@ -7,7 +7,7 @@
 
 #include "PipelineManager.h"
 #ifdef USING_VULKAN
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/base/map.h>
 #include <lib/os/msg.h>
 

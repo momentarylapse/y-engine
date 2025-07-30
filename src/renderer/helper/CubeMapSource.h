@@ -2,7 +2,7 @@
 #define CUBEMAPSOURCE_H
 
 #include <y/Component.h>
-#include <graphics-fwd.h>
+#include <lib/ygraphics/graphics-fwd.h>
 #include <lib/base/pointer.h>
 #include <renderer/Renderer.h>
 #include "../scene/RenderViewData.h"

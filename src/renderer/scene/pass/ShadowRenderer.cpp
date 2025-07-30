@@ -10,7 +10,7 @@
 #include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
 #include "../../base.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
 #include <world/Material.h>
 #include <world/Camera.h>

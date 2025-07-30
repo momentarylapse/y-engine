@@ -7,7 +7,7 @@
 
 #include "WindowRendererVulkan.h"
 #ifdef USING_VULKAN
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/os/msg.h>
 #include <lib/math/rect.h>

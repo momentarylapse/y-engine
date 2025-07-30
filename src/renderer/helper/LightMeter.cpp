@@ -4,7 +4,7 @@
 
 #include "LightMeter.h"
 #include <world/Camera.h>
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../base.h"
 #include <lib/profiler/Profiler.h>
 #include "../../helper/ResourceManager.h"

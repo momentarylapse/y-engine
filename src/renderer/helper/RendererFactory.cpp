@@ -30,7 +30,7 @@
 #include <helper/ResourceManager.h>
 
 // for debugging
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/image/image.h>
 #include <renderer/target/TextureRenderer.h>
 

@@ -6,7 +6,7 @@
 #include <lib/os/msg.h>
 #include <renderer/path/RenderPath.h>
 
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include "SceneView.h"
 #include "../base.h"
 #include <world/Camera.h>

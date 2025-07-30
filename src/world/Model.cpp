@@ -28,7 +28,7 @@
 #include "../y/Entity.h"
 #include <lib/math/complex.h>
 #include "../meta.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #include "components/Animator.h"
 

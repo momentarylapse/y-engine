@@ -10,7 +10,7 @@
 #include <lib/profiler/Profiler.h>
 #include <renderer/base.h>
 #include <y/ComponentManager.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 
 class MultiInstance;
 

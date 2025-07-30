@@ -6,7 +6,7 @@
  */
 
 #include "Particle.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 
 Shader *shader_fx;
 

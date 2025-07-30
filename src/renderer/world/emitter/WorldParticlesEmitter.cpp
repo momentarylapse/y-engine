@@ -11,7 +11,7 @@
 #include <fx/ParticleEmitter.h>
 #include <lib/profiler/Profiler.h>
 #include <world/Camera.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <y/EngineData.h>
 #include <y/ComponentManager.h>
 #include <y/Entity.h>

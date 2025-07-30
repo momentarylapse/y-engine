@@ -8,7 +8,7 @@
 #pragma once
 
 #include "../Renderer.h"
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include <lib/math/mat4.h>
 #include <lib/math/vec3.h>
 #include <lib/image/color.h>

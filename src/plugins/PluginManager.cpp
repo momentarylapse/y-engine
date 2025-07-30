@@ -75,7 +75,7 @@
 #include "../world/components/UserMesh.h"
 #include "../world/components/MultiInstance.h"
 #include "../meta.h"
-#include "../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../lib/kaba/dynamic/exception.h"
 #include "../lib/os/msg.h"
 #include "../lib/image/image.h"

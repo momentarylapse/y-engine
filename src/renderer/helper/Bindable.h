@@ -8,7 +8,7 @@
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 #include <lib/any/any.h>
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 
 struct RenderParams;
 

@@ -13,7 +13,7 @@
 #include <lib/math/vec3.h>
 #include "../y/Component.h"
 #include "Material.h"
-#include "../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include "../y/BaseClass.h"
 class Material;
 class CollisionData;

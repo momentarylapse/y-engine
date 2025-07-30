@@ -9,7 +9,7 @@
 #pragma once
 
 #include "../Renderer.h"
-#include "../../graphics-fwd.h"
+#include <lib/ygraphics/graphics-fwd.h>
 #include <lib/base/callable.h>
 
 struct vec2;

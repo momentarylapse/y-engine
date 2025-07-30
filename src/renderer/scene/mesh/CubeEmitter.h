@@ -6,7 +6,7 @@
 #define CUBEEMITTER_H
 
 #include "../MeshEmitter.h"
-#include <graphics-fwd.h>
+#include <lib/ygraphics/graphics-fwd.h>
 
 class Material;
 struct Box;

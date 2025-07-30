@@ -9,7 +9,7 @@
 #include <world/Terrain.h>
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 
 WorldTerrainsEmitter::WorldTerrainsEmitter() : MeshEmitter("ter") {}

@@ -8,7 +8,7 @@
 #include "GuiRendererGL.h"
 #ifdef USING_OPENGL
 #include "../base.h"
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"

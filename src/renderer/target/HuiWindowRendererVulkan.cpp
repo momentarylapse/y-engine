@@ -2,7 +2,7 @@
 #include "HuiWindowRenderer.h"
 #ifdef USING_VULKAN
 #include "TextureRenderer.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/hui/hui.h>
 
 HuiWindowRenderer::HuiWindowRenderer(vulkan::Instance* instance) : Renderer("hui") {

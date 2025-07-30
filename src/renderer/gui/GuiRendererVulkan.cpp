@@ -9,7 +9,7 @@
 #ifdef USING_VULKAN
 #include "../base.h"
 #include "../helper/PipelineManager.h"
-#include "../../graphics-impl.h"
+#include <lib/ygraphics/graphics-impl.h>
 #include "../../gui/gui.h"
 #include "../../gui/Picture.h"
 #include "../../helper/ResourceManager.h"

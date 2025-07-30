@@ -13,7 +13,7 @@
 #include <world/Camera.h>
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
-#include <graphics-impl.h>
+#include <lib/ygraphics/graphics-impl.h>
 #include <lib/base/sort.h>
 
 WorldModelsEmitter::WorldModelsEmitter() : MeshEmitter("mod") {
