@@ -12,9 +12,6 @@
 #include <world/Camera.h>
 #include <world/Light.h>
 #include <y/Entity.h>
-#ifdef USING_OPENGL
-#include <y/Entity.h>
-#endif
 
 extern float global_shadow_box_size; // :(
 

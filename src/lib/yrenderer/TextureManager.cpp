@@ -7,7 +7,6 @@
 #include <lib/os/file.h>
 #include <lib/os/msg.h>
 #include <lib/image/image.h>
-#include <y/EngineData.h>
 #include <lib/ygraphics/graphics-impl.h>
 
 namespace yrenderer {
@@ -48,7 +47,7 @@ shared<ygfx::Texture> TextureManager::load_texture(const Path& filename) {
 
 	Path fn = find_absolute_texture_path(filename);
 	if (fn.is_empty()) {
-		if (engine.ignore_missing_files) {
+		if (ignore_missing_files) {
 			msg_error("missing texture: " + str(filename));
 			return tex_white;
 		}
@@ -73,7 +72,7 @@ shared<ygfx::Texture> TextureManager::load_texture(const Path& filename) {
 		texture_map.add({fn, t});
 		return t;
 	} catch(Exception &e) {
-		if (!engine.ignore_missing_files)
+		if (!ignore_missing_files)
 			throw;
 		msg_error(e.message());
 		return tex_white;

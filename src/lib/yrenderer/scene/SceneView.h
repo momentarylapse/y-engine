@@ -40,14 +40,6 @@ struct SceneView {
 
 	void choose_lights();
 	void choose_shadows();
-
-	//void prepare_lights(float shadow_box_size, UniformBuffer* ubo_light);
-
-
-	void check_terrains(const vec3& cam_pos);
-
-	//TerrainUpdateThread* terrain_update_thread = nullptr;
-	Array<XTerrainVBUpdater*> updater;
 };
 
 }

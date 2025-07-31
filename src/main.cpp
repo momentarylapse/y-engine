@@ -287,6 +287,7 @@ public:
 		// TODO
 		//delete engine.world_renderer;
 		delete engine.window_renderer;
+		engine.resource_manager->clear();
 		yrenderer::api_end(engine.context);
 		glfwDestroyWindow(window);
 

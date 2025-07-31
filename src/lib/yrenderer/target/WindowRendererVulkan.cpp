@@ -12,7 +12,6 @@
 #include <lib/profiler/Profiler.h>
 #include <lib/os/msg.h>
 #include <lib/math/rect.h>
-#include <Config.h> // for timing experiment
 
 namespace yrenderer {
 

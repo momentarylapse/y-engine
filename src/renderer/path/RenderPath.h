@@ -69,6 +69,10 @@ public:
 	yrenderer::CubeMapSource* cube_map_source = nullptr;
 	owned<yrenderer::CubeMapRenderer> cube_map_renderer;
 	void suggest_cube_map_pos();
+
+
+	void check_terrains(const vec3& cam_pos);
+	Array<XTerrainVBUpdater*> updater;
 };
 
 WorldRenderer* create_world_renderer(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);

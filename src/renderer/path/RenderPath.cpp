@@ -21,6 +21,7 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <world/Camera.h>
 #include <world/Model.h>
+#include <world/Terrain.h>
 #include <world/World.h>
 #include <y/EngineData.h>
 #include <y/Entity.h>
@@ -29,6 +30,7 @@
 #include <lib/profiler/Profiler.h>
 #include <lib/math/Box.h>
 #include <lib/os/msg.h>
+#include <lib/os/time.h>
 #include <renderer/world/emitter/WorldModelsEmitter.h>
 #include <renderer/world/emitter/WorldTerrainsEmitter.h>
 #include <renderer/world/emitter/WorldUserMeshesEmitter.h>
@@ -110,7 +112,44 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 RenderPath::~RenderPath() = default;
 
 void RenderPath::prepare_basics() {
-	scene_view.check_terrains(cam_main->owner->pos);
+	check_terrains(cam_main->owner->pos);
+}
+
+void RenderPath::check_terrains(const vec3& cam_pos) {
+	auto& terrains = ComponentManager::get_list_family<Terrain>();
+	if (terrains.num == 0)
+		return;
+
+	if (updater.num == 0) {
+		auto u = new XTerrainVBUpdater;
+		u->terrain = terrains[0];
+		u->vb = new ygfx::VertexBuffer("3f,3f,2f");;
+		updater.add(u);
+
+		// first time: complete update!
+		terrains[0]->prepare_draw(cam_pos);
+		return;
+	}
+
+	os::Timer timer;
+	for (auto u: updater) {
+		while (timer.peek() < 0.0003f) {
+			int r = u->iterate(cam_pos);
+			if (r == 0)
+				break;
+			if (r == 2) {
+				auto vb = u->vb;
+				u->vb = terrains[0]->vertex_buffer.give();
+				terrains[0]->vertex_buffer = vb;
+				break;
+			}
+		}
+	}
+
+	/*for (auto *t: terrains) {
+		t->prepare_draw(cam_pos);
+	}*/
+
 }
 
 void RenderPath::create_shadow_renderer() {

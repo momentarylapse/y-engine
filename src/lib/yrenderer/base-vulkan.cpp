@@ -1,7 +1,5 @@
 #include "base.h"
 #include "helper/PipelineManager.h"
-#include <y/EngineData.h>
-#include <helper/ResourceManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #if __has_include(<lib/xhui/Painter.h>)
@@ -96,10 +94,10 @@ Context* api_init_xhui(xhui::Painter* p) {
 void api_end(Context* ctx) {
 	ctx->gpu_flush();
 	PipelineManager::clear();
-	engine.resource_manager->clear();
 	delete ctx->pool;
 	delete ctx->device;
 	delete ctx->instance;
+	delete ctx;
 }
 
 

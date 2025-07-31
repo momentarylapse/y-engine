@@ -1,16 +1,12 @@
 #include "CubeMapSource.h"
 #include <Config.h>
 #include <lib/ygraphics/graphics-impl.h>
-#include <lib/os/msg.h>
 #include <lib/yrenderer/base.h>
-#include <renderer/path/RenderPath.h>
-#include <lib/yrenderer/scene/SceneView.h>
 #include <lib/yrenderer/scene/SceneRenderer.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <y/Entity.h>
 
 #include "world/Camera.h"
-#include "world/World.h"
 
 namespace yrenderer {
 
@@ -72,8 +68,6 @@ void CubeMapRenderer::render(const RenderParams& params) {
 			ang = quaternion::rotation(vec3(0,pi,0));
 
 		scene_renderers[i]->set_view(texture_renderers[i]->make_params(params), source->owner->pos, ang, proj);
-		//prepare_lights(&cam);
-		//render_into_texture(source->frame_buffer[i].get(), &cam, rvd[i]);
 
 		texture_renderers[i]->render(params);
 	}

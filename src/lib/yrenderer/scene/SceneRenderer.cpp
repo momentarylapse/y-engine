@@ -7,7 +7,6 @@
 #include "SceneView.h"
 #include <lib/yrenderer/base.h>
 #include <lib/profiler/Profiler.h>
-#include <world/Light.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/yrenderer/helper/PipelineManager.h>
 
