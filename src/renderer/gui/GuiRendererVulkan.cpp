@@ -31,7 +31,7 @@ struct UBOGUI {
 
 GuiRendererVulkan::GuiRendererVulkan(Context* ctx) : Renderer(ctx, "ui") {
 
-	shader = resource_manager->shader_manager->load_shader("vulkan/2d.shader");
+	shader = shader_manager->load_shader("vulkan/2d.shader");
 
 	vb = new ygfx::VertexBuffer("3f,3f,2f");
 	vb->create_quad(rect::ID);

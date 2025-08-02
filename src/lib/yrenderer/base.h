@@ -17,15 +17,19 @@ namespace xhui {
 class Painter;
 }
 
-class ResourceManager;
-
 namespace yrenderer {
+
+class ShaderManager;
+class TextureManager;
+class MaterialManager;
 
 struct Context {
 
 	ygfx::Context* context;
 
-	ResourceManager* resource_manager = nullptr;
+	ShaderManager* shader_manager = nullptr;
+	TextureManager* texture_manager = nullptr;
+	MaterialManager* material_manager = nullptr;
 
 	ygfx::Texture* tex_white;
 	ygfx::Texture* tex_black;

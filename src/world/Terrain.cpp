@@ -9,15 +9,17 @@
 
 #include "Terrain.h"
 #include <lib/yrenderer/Material.h>
+#include <lib/yrenderer/TextureManager.h>
 #include "World.h"
 #include "../y/EngineData.h"
-#include "../helper/ResourceManager.h"
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/vec3.h>
 #include <lib/math/plane.h>
 #include <lib/os/file.h>
 #include <lib/os/msg.h>
 #include <lib/os/time.h>
+
+#include "lib/yrenderer/base.h"
 
 const kaba::Class *Terrain::_class = nullptr;
 
@@ -40,11 +42,11 @@ Terrain::Terrain() {
 	reset();
 }
 
-Terrain::Terrain(ResourceManager *resource_manager, const Path &_filename_) : Terrain() {
-	load(resource_manager, _filename_);
+Terrain::Terrain(yrenderer::Context *ctx, const Path &_filename_) : Terrain() {
+	load(ctx, _filename_);
 }
 
-bool Terrain::load(ResourceManager *resource_manager, const Path &_filename_, bool deep) {
+bool Terrain::load(yrenderer::Context* ctx, const Path &_filename_, bool deep) {
 	msg_write(format("loading terrain: %s", _filename_));
 	msg_right();
 
@@ -82,10 +84,10 @@ bool Terrain::load(ResourceManager *resource_manager, const Path &_filename_, bo
 			// Material
 			material_file = f->read_str();
 			if (deep) {
-				material = resource_manager->load_material(material_file);
+				material = ctx->material_manager->load(material_file);
 
 				while (num_textures > material->textures.num)
-					material->textures.add(resource_manager->load_texture(""));
+					material->textures.add(ctx->texture_manager->load_texture(""));
 
 
 				// height

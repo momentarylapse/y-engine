@@ -18,13 +18,12 @@
 #include <renderer/world/emitter/WorldSkyboxEmitter.h>
 #include <renderer/world/emitter/WorldTerrainsEmitter.h>
 #include <renderer/world/emitter/WorldUserMeshesEmitter.h>
-#include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include "../../world/Camera.h"
 
 
 WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", cam, scene_view) {
-	resource_manager->shader_manager->load_shader_module("forward/module-surface.shader");
+	shader_manager->load_shader_module("forward/module-surface.shader");
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
 	scene_renderer->add_emitter(new WorldSkyboxEmitter(ctx));

@@ -14,7 +14,7 @@ namespace yrenderer {
 CubeEmitter::CubeEmitter(Context* ctx) : MeshEmitter(ctx, "cube") {
 	vb = new ygfx::VertexBuffer("3f,3f,2f");
 	set_cube(Box::ID_SYM);
-	material = new Material(engine.resource_manager);
+	material = new Material(ctx);
 	material->textures.add(ctx->tex_white);
 }
 

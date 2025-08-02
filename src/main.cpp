@@ -133,7 +133,9 @@ public:
 			config.game_dir | "Textures",
 			config.game_dir | "Materials",
 			config.game_dir | "Materials");
-		context->resource_manager = resource_manager;
+		context->shader_manager = resource_manager->shader_manager;
+		context->texture_manager = resource_manager->texture_manager;
+		context->material_manager = resource_manager->material_manager;
 		engine.set_context(context, resource_manager);
 
 		create_base_renderer(context, window);

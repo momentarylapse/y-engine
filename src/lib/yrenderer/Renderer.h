@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include "ShaderManager.h"
 
 
 struct rect;
@@ -16,12 +17,12 @@ struct rect;
 #include <lib/math/rect.h>
 
 struct color;
-class ResourceManager;
 
 namespace yrenderer {
 
 class Context;
 class RenderTask;
+class ShaderManager;
 
 rect dynamicly_scaled_area(ygfx::FrameBuffer *fb);
 rect dynamicly_scaled_source();
@@ -66,7 +67,7 @@ public:
 	int channel;
 	int ch_prepare;
 	Context* ctx;
-	ResourceManager* resource_manager;
+	ShaderManager* shader_manager;
 };
 
 class RenderTask : public  VirtualBase {
@@ -87,7 +88,7 @@ public:
 	bool active = true;
 	int _priority = 0;
 	Context* ctx;
-	ResourceManager* resource_manager;
+	ShaderManager* shader_manager;
 };
 
 }

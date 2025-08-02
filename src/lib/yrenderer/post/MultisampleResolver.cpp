@@ -1,7 +1,6 @@
 #include "MultisampleResolver.h"
 #include "ThroughShaderRenderer.h"
 #include "../target/TextureRenderer.h"
-#include <helper/ResourceManager.h>
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 
@@ -15,7 +14,7 @@ namespace nix {
 namespace yrenderer {
 
 MultisampleResolver::MultisampleResolver(Context* ctx, ygfx::Texture* tex_ms, ygfx::Texture* depth_ms, ygfx::Texture* tex_out, ygfx::Texture* depth_out) : RenderTask(ctx, "ms") {
-	shader_resolve_multisample = resource_manager->shader_manager->load_shader("forward/resolve-multisample.shader");
+	shader_resolve_multisample = shader_manager->load_shader("forward/resolve-multisample.shader");
 	tsr = new ThroughShaderRenderer(ctx, "ms", shader_resolve_multisample);
 	tsr->bind_textures(0, {tex_ms, depth_ms});
 

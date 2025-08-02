@@ -21,7 +21,7 @@ using namespace ygfx;
 
 WorldParticlesEmitter::WorldParticlesEmitter(yrenderer::Context* ctx, Camera* _cam) :
 		MeshEmitter(ctx, "fx"),
-		fx_material(engine.resource_manager)
+		fx_material(ctx)
 {
 	cam = _cam;
 	fx_material.pass0.cull_mode = CullMode::NONE;

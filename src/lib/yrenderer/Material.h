@@ -11,7 +11,6 @@
 
 class Path;
 class Model;
-class ResourceManager;
 
 namespace yrenderer {
 
@@ -47,10 +46,13 @@ enum class ReflectionMode {
 
 enum class RenderPathType;
 
+class Context;
+class ShaderManager;
+
 // visual and physical properties
 class Material {
 public:
-	ResourceManager *resource_manager;
+	Context* ctx;
 
 	shared_array<ygfx::Texture> textures;
 
@@ -97,7 +99,7 @@ public:
 		float jump, _static, sliding, rolling;
 	} friction;
 
-	explicit Material(ResourceManager *resource_manager);
+	explicit Material(Context* ctx);
 	xfer<Material> copy();
 
 	bool is_transparent() const;
@@ -115,7 +117,7 @@ struct ShaderCache {
 
 class MaterialManager {
 public:
-	explicit MaterialManager(ResourceManager *resource_manager, const Path& material_dir);
+	explicit MaterialManager(Context *ctx, const Path& material_dir);
 	~MaterialManager();
 
 	void reset();
@@ -126,9 +128,10 @@ public:
 
 private:
 	Path material_dir;
-	ResourceManager *resource_manager;
-	Material *default_material;
-	Material *trivial_material;
+	Context* ctx;
+	ShaderManager* shader_manager;
+	Material* default_material;
+	Material* trivial_material;
 	base::map<Path, Material*> materials; // "originals" owned!
 };
 

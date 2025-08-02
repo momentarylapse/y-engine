@@ -25,7 +25,7 @@ namespace vulkan {
 
 ResourceManager::ResourceManager(yrenderer::Context *_ctx, const Path &texture_dir, const Path &material_dir, const Path &shader_dir) {
 	ctx = _ctx;
-	material_manager = new yrenderer::MaterialManager(this, material_dir);
+	material_manager = new yrenderer::MaterialManager(ctx, material_dir);
 	model_manager = new ModelManager(this, material_manager);
 	shader_manager = new yrenderer::ShaderManager(ctx->context, shader_dir);
 	shader_manager->ignore_missing_files = engine.ignore_missing_files;

@@ -66,23 +66,23 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	global_shadow_box_size = shadow_box_size;
 
-	resource_manager->shader_manager->default_shader = "default.shader";
-	resource_manager->shader_manager->load_shader_module("module-basic-interface.shader");
-	resource_manager->shader_manager->load_shader_module("module-basic-data.shader");
+	shader_manager->default_shader = "default.shader";
+	shader_manager->load_shader_module("module-basic-interface.shader");
+	shader_manager->load_shader_module("module-basic-data.shader");
 	const string light_sources = config.get_str("renderer.light_sources", "default");
-	resource_manager->shader_manager->load_shader_module(format("module-light-sources-%s.shader", light_sources));
+	shader_manager->load_shader_module(format("module-light-sources-%s.shader", light_sources));
 	const string shadows_method = config.get_str("shadow.quality", "pcf-hardening");
-	resource_manager->shader_manager->load_shader_module(format("module-shadows-%s.shader", shadows_method));
+	shader_manager->load_shader_module(format("module-shadows-%s.shader", shadows_method));
 	const string lighting_method = config.get_str("renderer.lighting", "pbr");
-	resource_manager->shader_manager->load_shader_module(format("module-lighting-%s.shader", lighting_method));
-	resource_manager->shader_manager->load_shader_module("module-vertex-default.shader");
-	resource_manager->shader_manager->load_shader_module("module-vertex-animated.shader");
-	resource_manager->shader_manager->load_shader_module("module-vertex-instanced.shader");
-	resource_manager->shader_manager->load_shader_module("module-vertex-lines.shader");
-	resource_manager->shader_manager->load_shader_module("module-vertex-points.shader");
-	resource_manager->shader_manager->load_shader_module("module-vertex-fx.shader");
-	resource_manager->shader_manager->load_shader_module("module-geometry-lines.shader");
-	resource_manager->shader_manager->load_shader_module("module-geometry-points.shader");
+	shader_manager->load_shader_module(format("module-lighting-%s.shader", lighting_method));
+	shader_manager->load_shader_module("module-vertex-default.shader");
+	shader_manager->load_shader_module("module-vertex-animated.shader");
+	shader_manager->load_shader_module("module-vertex-instanced.shader");
+	shader_manager->load_shader_module("module-vertex-lines.shader");
+	shader_manager->load_shader_module("module-vertex-points.shader");
+	shader_manager->load_shader_module("module-vertex-fx.shader");
+	shader_manager->load_shader_module("module-geometry-lines.shader");
+	shader_manager->load_shader_module("module-geometry-points.shader");
 
 
 	if (type != RenderPathType::PathTracing) {

@@ -6,10 +6,11 @@
  */
 
 #include "Renderer.h"
-#include <y/EngineData.h>
 #include <lib/math/rect.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/ygraphics/graphics-impl.h>
+
+#include "base.h"
 
 namespace yrenderer {
 
@@ -47,7 +48,7 @@ Renderer::Renderer(Context* _ctx, const string &name) {
 	ch_prepare = profiler::create_channel(name + ".p", channel);
 
 	ctx = _ctx;
-	resource_manager = engine.resource_manager;
+	shader_manager = ctx->shader_manager;
 }
 
 
@@ -78,7 +79,8 @@ RenderTask::RenderTask(Context* _ctx, const string& name) {
 	channel = profiler::create_channel(name, -1);
 
 	ctx = _ctx;
-	resource_manager = engine.resource_manager;
+	if (ctx)
+		shader_manager = ctx->shader_manager;
 }
 
 RenderTask::~RenderTask() = default;

@@ -14,8 +14,10 @@
 #include "../y/Component.h"
 #include <lib/yrenderer/Material.h>
 #include <lib/ygraphics/graphics-fwd.h>
+
 namespace yrenderer {
 	class Material;
+	class Context;
 }
 class CollisionData;
 
@@ -56,8 +58,8 @@ class Terrain : public Component {
 public:
 	Terrain();
 	Terrain(int nx, int nz, const vec3& pattern, yrenderer::Material* material);
-	Terrain(ResourceManager *resource_manager, const Path &filename);
-	bool load(ResourceManager *resource_manager, const Path &filename, bool deep = true);
+	Terrain(yrenderer::Context* ctx, const Path& filename);
+	bool load(yrenderer::Context* ctx, const Path& filename, bool deep = true);
 	~Terrain() override;
 	void reset();
 	void _cdecl update(int x1,int x2,int z1,int z2,int mode);

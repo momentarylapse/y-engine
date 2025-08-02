@@ -380,7 +380,7 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vec3 &pos) {
 	auto o = create_entity(pos, quaternion::ID);
 
 	auto t = o->add_component<Terrain>();
-	t->load(engine.resource_manager, filename);
+	t->load(engine.context, filename);
 
 	[[maybe_unused]] auto col = o->add_component<TerrainCollider>();
 

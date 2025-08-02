@@ -27,7 +27,7 @@ ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<Mes
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 
-	material = new Material(resource_manager);
+	material = new Material(ctx);
 	material->pass0.shader_path = "shadow.shader";
 
 	parent_scene = parent;

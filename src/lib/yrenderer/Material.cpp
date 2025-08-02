@@ -3,18 +3,21 @@
 #include <lib/os/config.h>
 #include <lib/any/any.h>
 #include <lib/ygraphics/graphics-impl.h>
-#include <helper/ResourceManager.h>
-#include <lib/yrenderer/ShaderManager.h>
+#include "ShaderManager.h"
+#include "TextureManager.h"
+
+#include "base.h"
 
 namespace yrenderer {
 
 	using namespace ygfx;
 
-MaterialManager::MaterialManager(ResourceManager *_resource_manager, const Path& _material_dir) {
-	resource_manager = _resource_manager;
+MaterialManager::MaterialManager(Context* _ctx, const Path& _material_dir) {
+	ctx = _ctx;
+	shader_manager = ctx->shader_manager;
 	material_dir = _material_dir;
 	// create the default material
-	trivial_material = new Material(resource_manager);
+	trivial_material = new Material(ctx);
 	//trivial_material->shader_path = Shader::default_3d;
 
 	set_default(trivial_material);
@@ -44,8 +47,8 @@ void MaterialManager::set_default(Material *m) {
 
 
 
-Material::Material(ResourceManager *rm) {
-	resource_manager = rm;
+Material::Material(Context* _ctx) {
+	ctx = _ctx;
 	// default values
 	reflection.cube_map = nullptr;
 
@@ -73,7 +76,7 @@ void Material::add_uniform(const string &name, float *p, int size) {
 }
 
 xfer<Material> Material::copy() {
-	auto m = new Material(resource_manager);
+	auto m = new Material(ctx);
 	m->albedo = albedo;
 	m->roughness = roughness;
 	m->metal = metal;
@@ -179,7 +182,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 			throw Exception("material file missing: " + filename.str());
 		}*/
 	}
-	Material *m = new Material(resource_manager);
+	Material *m = new Material(ctx);
 
 	m->albedo = any2color(c.get("color.albedo"));
 	m->roughness = c.get_float("color.roughness", 0.5f);
@@ -188,7 +191,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 
 	auto texture_files = c.get_str_array("textures");
 	for (auto &f: texture_files)
-		m->textures.add(resource_manager->load_texture(f));
+		m->textures.add(ctx->texture_manager->load_texture(f));
 	m->pass0.shader_path = c.get_str("shader", "");
 	m->cast_shadow = c.get_bool("shadow.cast", true);
 
@@ -249,7 +252,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 		texture_files = c.get_str_array("reflection.cubemap");
 		shared_array<Texture> cmt;
 		for (auto &f: texture_files)
-			cmt.add(resource_manager->load_texture(f));
+			cmt.add(ctx->texture_manager->load_texture(f));
 		m->reflection.density = c.get_float("reflection.density", 1);
 #if 0
 			m->reflection.cube_map = new CubeMap(m->reflection.cube_map_size);
@@ -283,7 +286,7 @@ void ShaderCache::_prepare_shader(RenderPathType render_path_type, const Materia
 		return;
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = material.resource_manager->shader_manager->load_surface_shader(material.pass0.shader_path, rpt, vertex_module, geometry_module);
+	shader[i] = material.ctx->shader_manager->load_surface_shader(material.pass0.shader_path, rpt, vertex_module, geometry_module);
 }
 void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, const Material &material, const string& vertex_module, const string& geometry_module, int k) {
 	int i = shader_index(render_path_type);
@@ -291,7 +294,7 @@ void ShaderCache::_prepare_shader_multi_pass(RenderPathType render_path_type, co
 		return;
 	static const string RENDER_PATH_NAME[3] = {"", "forward", "deferred"};
 	const string &rpt = RENDER_PATH_NAME[(int)render_path_type];
-	shader[i] = material.resource_manager->shader_manager->load_surface_shader(material.pass(k).shader_path, rpt, vertex_module, geometry_module);
+	shader[i] = material.ctx->shader_manager->load_surface_shader(material.pass(k).shader_path, rpt, vertex_module, geometry_module);
 }
 
 Shader *ShaderCache::get_shader(RenderPathType render_path_type) {

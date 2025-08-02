@@ -26,7 +26,7 @@ namespace yrenderer {
 }
 
 GuiRendererGL::GuiRendererGL(yrenderer::Context* ctx) : Renderer(ctx, "gui") {
-	shader = resource_manager->shader_manager->load_shader("forward/2d.shader");
+	shader = shader_manager->load_shader("forward/2d.shader");
 
 	vb = new VertexBuffer("3f,3f,2f");
 	vb->create_quad(rect::ID);
