@@ -82,7 +82,7 @@
 #include "../lib/image/image.h"
 
 
-using namespace yrenderer;
+//using namespace yrenderer;
 using namespace ygfx;
 
 /*void global_delete(BaseClass *e) {
@@ -199,7 +199,7 @@ void storagebuffer_init(ShaderStorageBuffer* buf, int size) {
 	new(buf) ShaderStorageBuffer(size);
 }
 
-void computetask_init(ComputeTask* task, yrenderer::Context* ctx, const string& name, const shared<Shader>& shader, const Array<int>& n) {
+void computetask_init(yrenderer::ComputeTask* task, yrenderer::Context* ctx, const string& name, const shared<Shader>& shader, const Array<int>& n) {
 	int nx = 1;
 	int ny = 1;
 	int nz = 1;
@@ -209,7 +209,7 @@ void computetask_init(ComputeTask* task, yrenderer::Context* ctx, const string& 
 		ny = n[1];
 	if (n.num >= 3)
 		nz = n[2];
-	new(task) ComputeTask(ctx, name, shader, nx, ny, nz);
+	new(task) yrenderer::ComputeTask(ctx, name, shader, nx, ny, nz);
 }
 
 void texture_init(Texture *t, int w, int h, const string &format) {
@@ -450,12 +450,12 @@ void export_world(kaba::Exporter* ext) {
 	ext->link_class_func("Camera.unproject", &Camera::unproject);
 
 
-	ext->declare_class_size("CubeMapSource", sizeof(CubeMapSource));
-	ext->declare_class_element("CubeMapSource.min_depth", &CubeMapSource::min_depth);
-	ext->declare_class_element("CubeMapSource.max_depth", &CubeMapSource::max_depth);
-	ext->declare_class_element("CubeMapSource.cube_map", &CubeMapSource::cube_map);
-	ext->declare_class_element("CubeMapSource.resolution", &CubeMapSource::resolution);
-	ext->declare_class_element("CubeMapSource.update_rate", &CubeMapSource::update_rate);
+	ext->declare_class_size("CubeMapSource", sizeof(yrenderer::CubeMapSource));
+	ext->declare_class_element("CubeMapSource.min_depth", &yrenderer::CubeMapSource::min_depth);
+	ext->declare_class_element("CubeMapSource.max_depth", &yrenderer::CubeMapSource::max_depth);
+	ext->declare_class_element("CubeMapSource.cube_map", &yrenderer::CubeMapSource::cube_map);
+	ext->declare_class_element("CubeMapSource.resolution", &yrenderer::CubeMapSource::resolution);
+	ext->declare_class_element("CubeMapSource.update_rate", &yrenderer::CubeMapSource::update_rate);
 
 
 	ext->declare_class_size("Model.Mesh", sizeof(Mesh));
@@ -559,6 +559,7 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("CollisionData.pos", &CollisionData::pos);
 	ext->declare_class_element("CollisionData.n", &CollisionData::n);
 
+	using Material = yrenderer::Material;
 	ext->declare_class_size("Material.Pass", sizeof(Material::RenderPassData));
 	ext->declare_class_element("Material.Pass.shader_path", &Material::RenderPassData::shader_path);
 
@@ -627,17 +628,17 @@ void export_world(kaba::Exporter* ext) {
 
 	Light light(Black, 0, 0);
 	ext->declare_class_size("Light", sizeof(Light));
-	ext->declare_class_element("Light.dir", _OFFSET(light, light.dir));
-	ext->declare_class_element("Light.color", _OFFSET(light, light.col));
-	ext->declare_class_element("Light.radius", _OFFSET(light, light.radius));
-	ext->declare_class_element("Light.theta", _OFFSET(light, light.theta));
-	ext->declare_class_element("Light.harshness", _OFFSET(light, light.harshness));
-	ext->declare_class_element("Light.enabled", &Light::enabled);
-	ext->declare_class_element("Light.allow_shadow", &Light::allow_shadow);
-	ext->declare_class_element("Light.user_shadow_control", &Light::user_shadow_control);
-	ext->declare_class_element("Light.user_shadow_theta", &Light::user_shadow_theta);
-	ext->declare_class_element("Light.shadow_dist_max", &Light::shadow_dist_max);
-	ext->declare_class_element("Light.shadow_dist_min", &Light::shadow_dist_min);
+	ext->declare_class_element("Light.dir", _OFFSET(light, light.light.dir));
+	ext->declare_class_element("Light.color", _OFFSET(light, light.light.col));
+	ext->declare_class_element("Light.radius", _OFFSET(light, light.light.radius));
+	ext->declare_class_element("Light.theta", _OFFSET(light, light.light.theta));
+	ext->declare_class_element("Light.harshness", _OFFSET(light, light.light.harshness));
+	ext->declare_class_element("Light.enabled", _OFFSET(light, light.enabled));
+	ext->declare_class_element("Light.allow_shadow", _OFFSET(light, light.allow_shadow));
+	ext->declare_class_element("Light.user_shadow_control", _OFFSET(light, light.user_shadow_control));
+	ext->declare_class_element("Light.user_shadow_theta", _OFFSET(light, light.user_shadow_theta));
+	ext->declare_class_element("Light.shadow_dist_max", _OFFSET(light, light.shadow_dist_max));
+	ext->declare_class_element("Light.shadow_dist_min", _OFFSET(light, light.shadow_dist_min));
 	ext->link_class_func("Light.set_direction", &Light::set_direction);
 
 	/*ext->link_class_func("Light.Parallel.__init__", &Light::__init_parallel__);
@@ -1057,15 +1058,16 @@ void export_engine(kaba::Exporter* ext) {
 }
 
 void export_renderer(kaba::Exporter* ext) {
-	ext->declare_class_size("Renderer", sizeof(Renderer));
+	ext->declare_class_size("Renderer", sizeof(yrenderer::Renderer));
 
 	{
+		using ComputeTask = yrenderer::ComputeTask;
 		ComputeTask ct(nullptr, "", nullptr, 0, 0, 0);
-		ext->declare_class_size("RenderTask", sizeof(RenderTask));
-		ext->declare_class_element("RenderTask.active", &RenderTask::active);
+		ext->declare_class_size("RenderTask", sizeof(yrenderer::RenderTask));
+		ext->declare_class_element("RenderTask.active", &yrenderer::RenderTask::active);
 		//ext->link_virtual("RenderTask.prepare", &RenderTask::prepare, &ct);
 		//ext->link_virtual("RenderTask.draw", &RenderTask::draw, &ct);
-		ext->link_virtual("RenderTask.render", &RenderTask::render, &ct);
+		ext->link_virtual("RenderTask.render", &yrenderer::RenderTask::render, &ct);
 
 		ext->declare_class_size("ComputeTask", sizeof(ComputeTask));
 		ext->declare_class_element("ComputeTask.nx", &ComputeTask::nx);
@@ -1091,14 +1093,14 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
 
 
-	ext->declare_class_size("RegionsRenderer", sizeof(RegionRenderer));
-	ext->declare_class_element("RegionRenderer.regions", &RegionRenderer::regions);
-	ext->link_class_func("RegionRenderer.add_region", &RegionRenderer::add_region);
+	ext->declare_class_size("RegionsRenderer", sizeof(yrenderer::RegionRenderer));
+	ext->declare_class_element("RegionRenderer.regions", &yrenderer::RegionRenderer::regions);
+	ext->link_class_func("RegionRenderer.add_region", &yrenderer::RegionRenderer::add_region);
 
-	ext->declare_class_size("RegionRenderer.Region", sizeof(RegionRenderer::Region));
-	ext->declare_class_element("RegionRenderer.Region.dest", &RegionRenderer::Region::dest);
-	ext->declare_class_element("RegionRenderer.Region.z", &RegionRenderer::Region::z);
-	ext->declare_class_element("RegionRenderer.Region.renderer", &RegionRenderer::Region::renderer);
+	ext->declare_class_size("RegionRenderer.Region", sizeof(yrenderer::RegionRenderer::Region));
+	ext->declare_class_element("RegionRenderer.Region.dest", &yrenderer::RegionRenderer::Region::dest);
+	ext->declare_class_element("RegionRenderer.Region.z", &yrenderer::RegionRenderer::Region::z);
+	ext->declare_class_element("RegionRenderer.Region.renderer", &yrenderer::RegionRenderer::Region::renderer);
 
 	ext->declare_class_size("PostProcessor", sizeof(PostProcessor));
 	ext->declare_class_element("PostProcessor.fb1", &PostProcessor::fb1);
@@ -1111,13 +1113,13 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("RayTracingData.buffer_meshes", &RayTracingData::buffer_meshes);
 	ext->declare_class_element("RayTracingData.num_meshes", &RayTracingData::num_meshes);
 
-	ext->declare_class_size("SceneView", sizeof(SceneView));
-	ext->declare_class_element("SceneView.surfel_buffer", &SceneView::surfel_buffer);
-	ext->declare_class_element("SceneView.num_surfels", &SceneView::num_surfels);
-	ext->declare_class_element("SceneView.probe_cells", &SceneView::probe_cells);
-	ext->declare_class_element("SceneView.probe_min", &SceneView::probe_min);
-	ext->declare_class_element("SceneView.probe_max", &SceneView::probe_max);
-	ext->declare_class_element("SceneView.ray_tracing_data", &SceneView::ray_tracing_data);
+	ext->declare_class_size("SceneView", sizeof(yrenderer::SceneView));
+	ext->declare_class_element("SceneView.surfel_buffer", &yrenderer::SceneView::surfel_buffer);
+	ext->declare_class_element("SceneView.num_surfels", &yrenderer::SceneView::num_surfels);
+	ext->declare_class_element("SceneView.probe_cells", &yrenderer::SceneView::probe_cells);
+	ext->declare_class_element("SceneView.probe_min", &yrenderer::SceneView::probe_min);
+	ext->declare_class_element("SceneView.probe_max", &yrenderer::SceneView::probe_max);
+	ext->declare_class_element("SceneView.ray_tracing_data", &yrenderer::SceneView::ray_tracing_data);
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
 	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);
@@ -1133,18 +1135,18 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->link_class_func("RenderPath.get_cubemap", &render_path_get_cubemap);
 
 
-	ext->declare_class_size("HDRResolver.BloomLevel", sizeof(HDRResolver::BloomLevel));
-	ext->declare_class_element("HDRResolver.BloomLevel.tex_out", &HDRResolver::BloomLevel::tex_out);
+	ext->declare_class_size("HDRResolver.BloomLevel", sizeof(yrenderer::HDRResolver::BloomLevel));
+	ext->declare_class_element("HDRResolver.BloomLevel.tex_out", &yrenderer::HDRResolver::BloomLevel::tex_out);
 
-	ext->declare_class_size("HDRResolver", sizeof(HDRResolver));
-	ext->declare_class_element("HDRResolver.texture", &HDRResolver::tex_main);
-	ext->declare_class_element("HDRResolver.depth_buffer", &HDRResolver::_depth_buffer);
-	ext->declare_class_element("HDRResolver.bloom_levels", &HDRResolver::bloom_levels);
+	ext->declare_class_size("HDRResolver", sizeof(yrenderer::HDRResolver));
+	ext->declare_class_element("HDRResolver.texture", &yrenderer::HDRResolver::tex_main);
+	ext->declare_class_element("HDRResolver.depth_buffer", &yrenderer::HDRResolver::_depth_buffer);
+	ext->declare_class_element("HDRResolver.bloom_levels", &yrenderer::HDRResolver::bloom_levels);
 	//ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
 
-	ext->declare_class_size("LightMeter", sizeof(LightMeter));
-	ext->declare_class_element("LightMeter.histogram", &LightMeter::histogram);
-	ext->declare_class_element("LightMeter.brightness", &LightMeter::brightness);
+	ext->declare_class_size("LightMeter", sizeof(yrenderer::LightMeter));
+	ext->declare_class_element("LightMeter.histogram", &yrenderer::LightMeter::histogram);
+	ext->declare_class_element("LightMeter.brightness", &yrenderer::LightMeter::brightness);
 }
 
 void PluginManager::export_kaba_package_y(kaba::Exporter* ext) {
@@ -1188,7 +1190,7 @@ void PluginManager::import_kaba() {
 	import_component_class<Terrain>(m_world, "Terrain");
 	import_component_class<Light>(m_world, "Light");
 	import_component_class<Camera>(m_world, "Camera");
-	import_component_class<CubeMapSource>(m_world, "CubeMapSource");
+	import_component_class<yrenderer::CubeMapSource>(m_world, "CubeMapSource");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
@@ -1308,8 +1310,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new LegacyParticle;
 	if (c == LegacyBeam::_class)
 		return new LegacyBeam;
-	if (c == CubeMapSource::_class)
-		return new CubeMapSource;
+	if (c == yrenderer::CubeMapSource::_class)
+		return new yrenderer::CubeMapSource;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

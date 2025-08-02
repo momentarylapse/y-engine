@@ -275,11 +275,19 @@ void RenderPath::prepare_instanced_matrices() {
 	//profiler::end(ch_pre);
 }
 
+
 void RenderPath::prepare(const RenderParams& params) {
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
 	scene_view.main_camera_params = cam->params();
-	scene_view.choose_lights(ComponentManager::get_list_family<Light>());
+	const auto& all_lights = ComponentManager::get_list_family<::Light>();
+	Array<yrenderer::Light*> lights;
+	for (auto l: all_lights) {
+		l->light._ang = l->owner->ang;
+		l->light.light.pos = l->owner->pos;
+		lights.add(&l->light);
+	}
+	scene_view.choose_lights(lights);
 	scene_view.choose_shadows();
 
 	if (type != RenderPathType::PathTracing)

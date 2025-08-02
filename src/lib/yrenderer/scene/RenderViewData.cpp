@@ -1,15 +1,15 @@
 #include "RenderViewData.h"
 #include "SceneRenderer.h"
 #include "CameraParams.h"
+#include "SceneView.h"
+#include "Light.h"
 
 #include <algorithm>
 #include <lib/base/iter.h>
 #include <lib/os/msg.h>
 
 #include <lib/ygraphics/graphics-impl.h>
-#include "SceneView.h"
 #include <lib/yrenderer/base.h>
-#include <world/Light.h>
 
 extern float global_shadow_box_size; // :(
 

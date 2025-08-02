@@ -280,10 +280,10 @@ bool World::load(const LevelData &ld) {
 	for (auto &l: ld.lights) {
 		auto o = new Entity(l.pos, quaternion::rotation(l.ang));
 		auto *ll = new Light(l._color, l.radius, l.theta);
-		ll->light.harshness = l.harshness;
-		ll->enabled = l.enabled;
-		if (ll->light.radius < 0)
-			ll->allow_shadow = true;
+		ll->light.light.harshness = l.harshness;
+		ll->light.enabled = l.enabled;
+		if (ll->light.light.radius < 0)
+			ll->light.allow_shadow = true;
 		o->_add_component_external_no_init_(ll);
 		add_components_no_init(o, l.components);
 		register_entity(o);
@@ -663,22 +663,22 @@ void World::iterate(float dt) {
 
 Light* attach_light_parallel(Entity* e, const color& c) {
 	auto l = e->add_component<Light>();
-	l->light.col = c;
+	l->light.light.col = c;
 	return l;
 }
 
 Light* attach_light_point(Entity* e, const color& c, float r) {
 	auto l = e->add_component<Light>();
-	l->light.col = c;
-	l->light.radius = r;
+	l->light.light.col = c;
+	l->light.light.radius = r;
 	return l;
 }
 
 Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
 	auto l = e->add_component<Light>();
-	l->light.col = c;
-	l->light.radius = r;
-	l->light.theta = theta;
+	l->light.light.col = c;
+	l->light.light.radius = r;
+	l->light.light.theta = theta;
 	return l;
 }
 

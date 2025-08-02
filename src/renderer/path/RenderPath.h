@@ -12,6 +12,7 @@
 class Camera;
 class PostProcessor;
 class WorldRenderer;
+class XTerrainVBUpdater;
 
 namespace yrenderer {
 	class CubeMapRenderer;

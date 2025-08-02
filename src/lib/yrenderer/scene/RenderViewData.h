@@ -2,9 +2,9 @@
 // Created by michi on 23.11.24.
 //
 
-#ifndef Y_RENDERVIEWDATA_H
-#define Y_RENDERVIEWDATA_H
+#pragma once
 
+#include "Light.h"
 #include <lib/base/base.h>
 #include <lib/base/map.h>
 #include <lib/base/pointer.h>
@@ -49,19 +49,6 @@ struct UBO {
 	color albedo, emission;
 	float roughness, metal;
 	int dummy[2];
-};
-
-struct LightMetaData {
-	int num_lights;
-	int num_surfels;
-	int dummy[2];
-	ivec3 probe_cells;
-	int _dummy3;
-	vec3 probe_min;
-	float _dummy4;
-	vec3 probe_max;
-	float _dummy5;
-	mat4 shadow_proj[2];
 };
 
 // single "draw call"
@@ -122,5 +109,3 @@ struct RenderViewData {
 };
 
 }
-
-#endif //Y_RENDERVIEWDATA_H

@@ -715,6 +715,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
 	src/lib/yrenderer/scene/CameraParams.cpp
+	src/lib/yrenderer/scene/Light.cpp
 	src/lib/yrenderer/scene/MeshEmitter.cpp
 	src/lib/yrenderer/scene/RenderViewData.cpp
 	src/lib/yrenderer/scene/SceneRenderer.cpp
@@ -981,6 +982,7 @@ add_executable(y
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
 	src/lib/yrenderer/scene/CameraParams.cpp
+	src/lib/yrenderer/scene/Light.cpp
 	src/lib/yrenderer/scene/MeshEmitter.cpp
 	src/lib/yrenderer/scene/RenderViewData.cpp
 	src/lib/yrenderer/scene/SceneRenderer.cpp

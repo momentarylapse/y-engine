@@ -6,6 +6,7 @@
  */
 
 #include "ShadowRenderer.h"
+#include "../Light.h"
 #include <lib/os/msg.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
@@ -13,7 +14,6 @@
 #include <lib/yrenderer/Material.h>
 #include "lib/yrenderer/scene/CameraParams.h"
 #include <lib/yrenderer/target/TextureRenderer.h>
-#include <world/Light.h>
 
 namespace yrenderer {
 

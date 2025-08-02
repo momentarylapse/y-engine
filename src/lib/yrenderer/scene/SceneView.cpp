@@ -3,7 +3,7 @@
 //
 
 #include "SceneView.h"
-#include <world/Light.h>
+#include "Light.h"
 #include <lib/base/iter.h>
 
 namespace yrenderer {
@@ -11,8 +11,10 @@ namespace yrenderer {
 void SceneView::choose_lights(const Array<Light*>& all_lights) {
 	lights.clear();
 	for (auto l: all_lights) {
-		if (l->enabled)
+		if (l->enabled) {
+			l->light.dir = l->_ang * vec3::EZ;
 			lights.add(l);
+		}
 	}
 }
 

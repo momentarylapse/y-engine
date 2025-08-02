@@ -8,18 +8,16 @@
 #include "CameraParams.h"
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
-#include <lib/math/mat4.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/math/vec3.h>
 
 
-class Light;
-struct UBOLight;
-struct XTerrainVBUpdater;
-class TerrainUpdateThread;
 struct RayTracingData;
 
 namespace yrenderer {
+
+struct Light;
+struct UBOLight;
 
 static constexpr int MAX_LIGHTS = 1024 - 24; // :P
 
