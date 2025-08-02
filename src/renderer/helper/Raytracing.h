@@ -48,7 +48,7 @@ struct RayTracingData {
 	};
 
 #ifdef USING_VULKAN
-	RayTracingData(vulkan::Device* _device, RaytracingMode mode);
+	RayTracingData(yrenderer::Context* ctx, RaytracingMode mode);
 
 	void update_frame();
 

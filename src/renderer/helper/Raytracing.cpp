@@ -3,20 +3,16 @@
 //
 
 #include "Raytracing.h"
-
 #include <lib/yrenderer/scene/SceneView.h>
 #include <lib/yrenderer/base.h>
 #include <lib/os/msg.h>
 #include <lib/base/iter.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/target/WindowRendererVulkan.h>
-#include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
-#include "../../world/Camera.h"
 #include <lib/yrenderer/Material.h>
 #include "../../world/Model.h"
 #include "../../world/Terrain.h"
-#include "../../world/World.h"
 #include "../../y/ComponentManager.h"
 #include "../../y/Entity.h"
 #include "../../y/EngineData.h"
@@ -29,7 +25,7 @@ static const int MAX_RT_MESHES = 512;
 static const int MAX_RT_REQUESTS = 4096*16;
 
 void rt_setup_explicit(yrenderer::SceneView& scene_view, RaytracingMode mode) {
-	scene_view.ray_tracing_data = new RayTracingData(engine.window_renderer->device, mode);
+	scene_view.ray_tracing_data = new RayTracingData(engine.context, mode);
 }
 
 void rt_setup(yrenderer::SceneView& scene_view) {
@@ -40,8 +36,8 @@ void rt_update_frame(yrenderer::SceneView& scene_view) {
 	scene_view.ray_tracing_data->update_frame();
 }
 
-RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
-	auto resource_manager = engine.resource_manager;
+RayTracingData::RayTracingData(yrenderer::Context* _ctx, RaytracingMode _mode) {
+	ctx = _ctx;
 	mode = _mode;
 
 	if (mode == RaytracingMode::NONE)
@@ -60,9 +56,9 @@ RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
 		rtx.dset = rtx.pool->create_set("acceleration-structure,image,buffer,buffer,buffer,buffer");
 		rtx.dset->set_uniform_buffer(5, buffer_meshes.get());
 
-		auto shader_gen = resource_manager->shader_manager->load_shader("vulkan/gen.shader");
-		auto shader1 = resource_manager->shader_manager->load_shader("vulkan/group1.shader");
-		auto shader2 = resource_manager->shader_manager->load_shader("vulkan/group2.shader");
+		auto shader_gen = ctx->shader_manager->load_shader("vulkan/gen.shader");
+		auto shader1 = ctx->shader_manager->load_shader("vulkan/group1.shader");
+		auto shader2 = ctx->shader_manager->load_shader("vulkan/group2.shader");
 		rtx.pipeline = new vulkan::RayPipeline("[[acceleration-structure,image,buffer,buffer,buffer,buffer]]", {shader_gen.get(), shader1.get(), shader2.get()}, 2);
 		rtx.pipeline->create_sbt();
 
@@ -72,7 +68,7 @@ RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
 
 		compute.pool = new vulkan::DescriptorPool("image:1,storage-buffer:2,buffer:8,sampler:1", 1);
 
-		auto shader = resource_manager->shader_manager->load_shader("compute/raytracing.shader");
+		auto shader = ctx->shader_manager->load_shader("compute/raytracing.shader");
 		compute.pipeline = new vulkan::ComputePipeline(shader.get());
 		compute.dset = compute.pool->create_set("storage-buffer,buffer,storage-buffer");
 		compute.dset->set_storage_buffer(0, buffer_requests.get());
@@ -80,8 +76,8 @@ RayTracingData::RayTracingData(vulkan::Device *device, RaytracingMode _mode) {
 		compute.dset->set_storage_buffer(2, buffer_reply.get());
 		compute.dset->update();
 
-		compute.command_buffer = device->command_pool->create_command_buffer();
-		compute.fence = new Fence(device);
+		compute.command_buffer = ctx->device->command_pool->create_command_buffer();
+		compute.fence = new Fence(ctx->device);
 	}
 }
 
