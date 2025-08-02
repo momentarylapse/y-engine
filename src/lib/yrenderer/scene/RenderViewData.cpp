@@ -1,17 +1,15 @@
 #include "RenderViewData.h"
 #include "SceneRenderer.h"
+#include "CameraParams.h"
 
 #include <algorithm>
 #include <lib/base/iter.h>
 #include <lib/os/msg.h>
-#include <renderer/path/RenderPath.h>
 
 #include <lib/ygraphics/graphics-impl.h>
 #include "SceneView.h"
 #include <lib/yrenderer/base.h>
-#include <world/Camera.h>
 #include <world/Light.h>
-#include <y/Entity.h>
 
 extern float global_shadow_box_size; // :(
 
@@ -24,14 +22,14 @@ RenderViewData::RenderViewData(Context* _ctx) {
 	type = RenderPathType::Forward;
 	ubo_light = new UniformBuffer(sizeof(LightMetaData) + MAX_LIGHTS * sizeof(UBOLight));
 	light_meta_data = {};
-	set_view(RenderParams::WHATEVER, vec3::ZERO, quaternion::ID, mat4::ID);
+	set_view(RenderParams::WHATEVER, CameraParams{});
 }
 
 void RenderViewData::set_scene_view(SceneView* _scene_view) {
 	scene_view = _scene_view;
 }
 
-void RenderViewData::set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& projection) {
+void RenderViewData::set_view(const RenderParams& params, const CameraParams& view, const mat4* proj) {
 	bool flip_y = params.target_is_window;
 
 #ifdef USING_OPENGL
@@ -40,14 +38,12 @@ void RenderViewData::set_view(const RenderParams& params, const vec3& pos, const
 	auto m = mat4::ID;
 #endif
 
-	view_pos = pos;
-	view_ang = ang;
-	ubo.v = mat4::rotation(ang.bar()) * mat4::translation(-pos);
-	ubo.p = projection * m;
-}
-
-void RenderViewData::set_view(const RenderParams& params, Camera* cam) {
-	set_view(params, cam->owner->pos, cam->owner->ang, cam->projection_matrix(params.desired_aspect_ratio));
+	camera_params = view;
+	ubo.v = view.view_matrix();
+	if (proj)
+		ubo.p = *proj * m;
+	else
+		ubo.p = view.projection_matrix(params.desired_aspect_ratio) * m;
 }
 
 
@@ -56,12 +52,13 @@ void RenderViewData::update_light_ubo() {
 	lights.resize(scene_view->lights.num);
 	for (auto&& [i, l]: enumerate(scene_view->lights))
 		// using current view
-		lights[i] = l->to_ubo(view_pos, view_ang, true);
+		lights[i] = l->to_ubo(camera_params.pos, camera_params.ang, true);
 
 	for (const auto [i,l]: enumerate(scene_view->shadow_indices)) {
 		auto ll = scene_view->lights[l];
 		// from reference cam
-		ll->shadow_projection = ll->suggest_shadow_projection(scene_view->cam, global_shadow_box_size);
+		// FIXME.... argh
+		ll->shadow_projection = ll->suggest_shadow_projection(scene_view->main_camera_params, global_shadow_box_size);
 		if constexpr (true)
 			light_meta_data.shadow_proj[ll->light.shadow_index] = ll->shadow_projection * ubo.v.inverse();
 		else
@@ -78,7 +75,7 @@ void RenderViewData::update_light_ubo() {
 void RenderData::set_material_x(const SceneView& scene_view, const Material& material, Shader* shader, int pass_no) {
 	nix::set_shader(shader);
 	if constexpr (SceneRenderer::using_view_space)
-		shader->set_floats("eye_pos", &scene_view.cam->owner->pos.x, 3); // NAH....
+		shader->set_floats("eye_pos", &scene_view.main_camera_params.pos.x, 3); // NAH....
 	else
 		shader->set_floats("eye_pos", &vec3::ZERO.x, 3);
 	for (auto &u: material.uniforms)

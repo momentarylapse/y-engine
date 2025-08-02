@@ -34,8 +34,9 @@ namespace yrenderer {
 
 class WorldRenderer : public yrenderer::Renderer {
 public:
-	WorldRenderer(yrenderer::Context* ctx, const string &name, yrenderer::SceneView& scene_view);
+	WorldRenderer(yrenderer::Context* ctx, const string &name, Camera* cam, yrenderer::SceneView& scene_view);
 
+	Camera* cam;
 	bool wireframe = false;
 
 	yrenderer::SceneView& scene_view;

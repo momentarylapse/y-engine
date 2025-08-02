@@ -19,9 +19,11 @@
 using namespace yrenderer;
 using namespace ygfx;
 
-WorldParticlesEmitter::WorldParticlesEmitter(yrenderer::Context* ctx) : MeshEmitter(ctx, "fx"),
-                                                 fx_material(engine.resource_manager)
+WorldParticlesEmitter::WorldParticlesEmitter(yrenderer::Context* ctx, Camera* _cam) :
+		MeshEmitter(ctx, "fx"),
+		fx_material(engine.resource_manager)
 {
+	cam = _cam;
 	fx_material.pass0.cull_mode = CullMode::NONE;
 	fx_material.pass0.mode = TransparencyMode::FUNCTIONS;
 	fx_material.pass0.source = Alpha::SOURCE_ALPHA;
@@ -34,7 +36,6 @@ WorldParticlesEmitter::WorldParticlesEmitter(yrenderer::Context* ctx) : MeshEmit
 void WorldParticlesEmitter::emit_transparent(const RenderParams& params, RenderViewData& rvd) {
 	profiler::begin(channel);
 	ctx->gpu_timestamp_begin(params, channel);
-	auto cam = rvd.scene_view->cam;
 
 	auto shader = rvd.get_shader(&fx_material, 0, "fx", "");
 

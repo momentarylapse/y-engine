@@ -62,7 +62,6 @@ public:
 	//virtual void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {};
 	void render_into_cubemap(yrenderer::CubeMapSource& source);
 
-	void prepare_basics();
 	void render_cubemaps(const yrenderer::RenderParams& params);
 	void prepare_instanced_matrices();
 
@@ -75,6 +74,6 @@ public:
 	Array<XTerrainVBUpdater*> updater;
 };
 
-WorldRenderer* create_world_renderer(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
+WorldRenderer* create_world_renderer(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
 
 #endif //RENDERPATH_H

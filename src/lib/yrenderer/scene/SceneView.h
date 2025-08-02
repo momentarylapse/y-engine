@@ -5,14 +5,15 @@
 #ifndef Y_SCENEVIEW_H
 #define Y_SCENEVIEW_H
 
+#include "CameraParams.h"
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 #include <lib/math/mat4.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/math/vec3.h>
 
+
 class Light;
-class Camera;
 struct UBOLight;
 struct XTerrainVBUpdater;
 class TerrainUpdateThread;
@@ -27,7 +28,7 @@ static constexpr int MAX_LIGHTS = 1024 - 24; // :P
 //   includes shadow/cube maps from multiple perspectives
 //   (might be shared with nearby cameras)
 struct SceneView {
-	Camera *cam; // the "owning" camera - might use a different perspective for rendering (e.g. cubemap)
+	CameraParams main_camera_params;
 	Array<ygfx::DepthBuffer*> shadow_maps;
 	shared<ygfx::CubeMap> cube_map;
 	Array<Light*> lights;

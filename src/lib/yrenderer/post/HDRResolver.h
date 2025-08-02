@@ -10,7 +10,6 @@
 #include <lib/yrenderer/Renderer.h>
 
 struct vec2;
-class Camera;
 
 namespace yrenderer {
 
@@ -20,12 +19,13 @@ class ThroughShaderRenderer;
 
 class HDRResolver : public Renderer {
 public:
-	HDRResolver(Context* ctx, Camera *cam, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer);
+	HDRResolver(Context* ctx, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer);
 	~HDRResolver() override;
 
 	void prepare(const RenderParams& params) override;
 
-	Camera *cam;
+	float exposure = 1.0f;
+	float bloom_factor = 1.0f;
 
 	shared<ygfx::Texture> tex_main;
 

@@ -6,7 +6,7 @@
  */
 
 #include "Light.h"
-#include "Camera.h"
+#include <lib/yrenderer/scene/CameraParams.h>
 #include "../y/Entity.h"
 //#include <lib/os/msg.h>
 
@@ -78,11 +78,11 @@ UBOLight Light::to_ubo(const vec3& view_pos, const quaternion& view_ang, bool us
 	return l;
 }
 
-mat4 Light::suggest_shadow_projection(Camera *cam, float shadow_box_size) const {
+mat4 Light::suggest_shadow_projection(const yrenderer::CameraParams& cam, float shadow_box_size) const {
 	auto o = owner;
 	if (type() == LightType::DIRECTIONAL) {
 		//msg_write(format("shadow dir: %s  %s", light.pos.str(), light.dir.str()));
-		vec3 center = cam->owner->pos + cam->owner->ang*vec3::EZ * (shadow_box_size / 3.0f);
+		vec3 center = cam.pos + cam.ang*vec3::EZ * (shadow_box_size / 3.0f);
 		float grid = shadow_box_size / 16;
 		center.x -= fmod(center.x, grid) - grid/2;
 		center.y -= fmod(center.y, grid) - grid/2;
@@ -99,7 +99,7 @@ mat4 Light::suggest_shadow_projection(Camera *cam, float shadow_box_size) const 
 		//msg_write(shadow_projection.str());
 	} else {
 		auto t = mat4::translation(- o->pos);
-		auto ang = cam->owner->ang;
+		auto ang = cam.ang;
 		if (type() == LightType::CONE or user_shadow_control)
 			ang = o->ang;
 		auto r = mat4::rotation(ang).transpose();

@@ -8,8 +8,6 @@
 #include "MeshEmitter.h"
 #include "RenderViewData.h"
 
-class Camera;
-
 namespace yrenderer {
 
 class MeshEmitter;
@@ -29,8 +27,7 @@ public:
 	shared_array<MeshEmitter> emitters;
 	void add_emitter(shared<MeshEmitter> emitter);
 
-	void set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& proj);
-	void set_view_from_camera(const RenderParams& params, Camera* cam);
+	void set_view(const RenderParams& params, const CameraParams& cam, const mat4* proj = nullptr);
 
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;

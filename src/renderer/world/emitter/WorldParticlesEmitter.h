@@ -22,11 +22,15 @@ struct VertexPoint {
 	color col;
 };
 
+class Camera;
+
 
 class WorldParticlesEmitter : public yrenderer::MeshEmitter {
 public:
-	explicit WorldParticlesEmitter(yrenderer::Context* ctx);
+	explicit WorldParticlesEmitter(yrenderer::Context* ctx, Camera* cam);
 	void emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) override;
+
+	Camera* cam;
 
 //	shared<Shader> shader_fx;
 //	shared<Shader> shader_fx_points;

@@ -30,7 +30,7 @@ public:
 	owned<yrenderer::SceneRenderer> scene_renderer_trans;
 	owned<yrenderer::ThroughShaderRenderer> out_renderer;
 
-	WorldRendererDeferred(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int width, int height);
+	WorldRendererDeferred(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, int width, int height);
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;
 

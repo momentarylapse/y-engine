@@ -16,6 +16,7 @@
 #include <lib/profiler/Profiler.h>
 #include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
+#include <lib/yrenderer/scene/CameraParams.h>
 #include "../../world/Camera.h"
 #include "../../world/World.h"
 #include "../../y/EngineData.h"
@@ -24,8 +25,8 @@
 
 using namespace yrenderer;
 
-WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Context* ctx, SceneView& scene_view, int w, int h) :
-		WorldRenderer(ctx, "rt", scene_view),
+WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Context* ctx, Camera* cam, SceneView& scene_view, int w, int h) :
+		WorldRenderer(ctx, "rt", cam, scene_view),
 		rvd(ctx)
 {
 	device = ctx->device;
@@ -92,13 +93,13 @@ void WorldRendererVulkanRayTracing::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
 	ctx->gpu_timestamp_begin(params, ch_prepare);
 
-	rvd.set_view(params, scene_view.cam);
+	rvd.set_view(params, cam->params());
 	rvd.update_light_ubo();
 
 	int w = width * engine.resolution_scale_x;
 	int h = height * engine.resolution_scale_y;
 
-	pc.iview = scene_view.cam->view_matrix().inverse();
+	pc.iview = cam->view_matrix().inverse();
 	pc.background = world.background;
 	pc.num_lights = scene_view.lights.num;
 	pc.t_rand += loop(pc.t_rand + 0.01f, 0.0f, 10.678f);

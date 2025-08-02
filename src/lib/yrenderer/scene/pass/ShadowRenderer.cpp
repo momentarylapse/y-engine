@@ -6,14 +6,13 @@
  */
 
 #include "ShadowRenderer.h"
-#include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/os/msg.h>
-#include <renderer/path/RenderPath.h>
-#include <lib/yrenderer/base.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
+#include <lib/yrenderer/base.h>
 #include <lib/yrenderer/Material.h>
-#include <world/Camera.h>
+#include "lib/yrenderer/scene/CameraParams.h"
+#include <lib/yrenderer/target/TextureRenderer.h>
 #include <world/Light.h>
 #include <Config.h>
 
@@ -32,7 +31,6 @@ ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<Mes
 	material->pass0.shader_path = "shadow.shader";
 
 	parent_scene = parent;
-	scene_view.cam = parent->cam;
 	scene_view.shadow_indices.clear();
 
 	for (int i=0; i<NUM_CASCADES; i++) {
@@ -61,7 +59,8 @@ void ShadowRenderer::set_projection(const mat4& proj) {
 #else*/
 		auto m = mat4::scale(c.scale, -c.scale, 1);
 //#endif
-		c.scene_renderer->set_view(RenderParams::WHATEVER, vec3::ZERO, quaternion::ID, m * proj);
+		const mat4 mp = m * proj;
+		c.scene_renderer->set_view(RenderParams::WHATEVER, CameraParams{vec3::ZERO, quaternion::ID}, &mp);
 	}
 }
 

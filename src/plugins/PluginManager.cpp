@@ -413,11 +413,11 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->link_virtual("Controller.on_render_inject", &System::on_render_inject, &con);
 	ext->link_class_func("Controller.__del_override__", &DeletionQueue::add);
 
-	ext->link("__get_component_list", (void*)&ComponentManager::_get_list);
-	ext->link("__get_component_family_list", (void*)&ComponentManager::_get_list_family);
-	ext->link("__get_component_list2", (void*)&ComponentManager::_get_list2);
+	ext->link_func("__get_component_list", &ComponentManager::_get_list);
+	ext->link_func("__get_component_family_list", &ComponentManager::_get_list_family);
+	ext->link_func("__get_component_list2", &ComponentManager::_get_list2);
 
-	ext->link("__get_controller", (void*)&SystemManager::get);
+	ext->link_func("__get_controller", &SystemManager::get);
 }
 
 void export_world(kaba::Exporter* ext) {
@@ -654,12 +654,12 @@ void export_world(kaba::Exporter* ext) {
 
 	ext->link("world", &world);
 	ext->link("cam", &cam_main);
-	ext->link("load_model", (void*)&__load_model);
-	ext->link("load_material", (void*)&__load_material);
+	ext->link_func("load_model", &__load_model);
+	ext->link_func("load_material", &__load_material);
 
-	ext->link("attach_light_parallel", (void*)&attach_light_parallel);
-	ext->link("attach_light_point", (void*)&attach_light_point);
-	ext->link("attach_light_cone", (void*)&attach_light_cone);
+	ext->link_func("attach_light_parallel", &attach_light_parallel);
+	ext->link_func("attach_light_point", &attach_light_point);
+	ext->link_func("attach_light_cone", &attach_light_cone);
 }
 
 void export_gfx(kaba::Exporter* ext) {
@@ -858,17 +858,17 @@ void export_ui(kaba::Exporter* ext) {
 	ext->link_class_func("VBox.__init__", &gui::VBox::__init__);
 
 #ifdef HAS_INPUT
-	ext->link("key_state", (void*)&input::get_key);
-	ext->link("key_down", (void*)&input::get_key_down);
-	ext->link("key_up", (void*)&input::get_key_up);
-	ext->link("button", (void*)&input::get_button);
+	ext->link_func("key_state", &input::get_key);
+	ext->link_func("key_down", &input::get_key_down);
+	ext->link_func("key_up", &input::get_key_up);
+	ext->link_func("button", &input::get_button);
 	ext->link("mouse", &input::mouse);
 	ext->link("dmouse", &input::dmouse);
 	ext->link("scroll", &input::scroll);
 	ext->link("vr_active", &input::vr_active);
 	ext->link("link_mouse_and_keyboard_into_pad", &input::link_mouse_and_keyboard_into_pad);
-	ext->link("get_pad", (void*)&input::get_pad);
-	ext->link("get_vr_device", (void*)&input::get_vr_device);
+	ext->link_func("get_pad", &input::get_pad);
+	ext->link_func("get_vr_device", &input::get_vr_device);
 
 	ext->declare_class_size("Gamepad", sizeof(input::Gamepad));
 	ext->declare_class_element("Gamepad.deadzone", &input::Gamepad::deadzone);
@@ -931,13 +931,13 @@ void export_sound(kaba::Exporter* ext) {
 
 	ext->declare_class_size("Listener", sizeof(audio::Listener));
 
-	ext->link("load_buffer", (void*)&audio::load_buffer);
-	ext->link("create_buffer", (void*)&audio::create_buffer);
-	ext->link("load_audio_stream", (void*)&audio::load_stream);
-	ext->link("create_audio_stream", (void*)&__create_audio_stream);
-	ext->link("emit_sound", (void*)&audio::emit_sound);
-	ext->link("emit_sound_file", (void*)&audio::emit_sound_file);
-	ext->link("emit_sound_stream", (void*)&audio::emit_sound_stream);
+	ext->link_func("load_buffer", &audio::load_buffer);
+	ext->link_func("create_buffer", &audio::create_buffer);
+	ext->link_func("load_audio_stream", &audio::load_stream);
+	ext->link_func("create_audio_stream", &__create_audio_stream);
+	ext->link_func("emit_sound", &audio::emit_sound);
+	ext->link_func("emit_sound_file", &audio::emit_sound_file);
+	ext->link_func("emit_sound_stream", &audio::emit_sound_stream);
 }
 
 void export_net(kaba::Exporter* ext) {
@@ -973,7 +973,7 @@ void export_engine(kaba::Exporter* ext) {
 	ext->declare_class_element("Profiler.FrameTimingData.total_time", &profiler::FrameTimingData::total_time);
 
 	ext->declare_class_size("Profiler", sizeof(profiler::Profiler));
-	ext->link("Profiler.get_name", (void*)&profiler::get_name);
+	ext->link_func("Profiler.get_name", &profiler::get_name);
 	ext->link("Profiler.avg_frame_time", &profiler::avg_frame_time);
 	ext->link("Profiler.frames", &profiler::frames);
 	ext->link("Profiler.channels", &profiler::channels);
@@ -1049,11 +1049,11 @@ void export_engine(kaba::Exporter* ext) {
 	ext->declare_class_element("RayReply.mesh", &RayReply::mesh);
 
 	ext->link("engine", &engine);
-	ext->link("screenshot", (void*)&screenshot);
-	ext->link("create_render_path", (void*)&create_render_path);
-	ext->link("rt_setup", (void*)&rt_setup);
-	ext->link("rt_update_frame", (void*)&rt_update_frame);
-	ext->link("rt_vtrace", (void*)&vtrace);
+	ext->link_func("screenshot", &screenshot);
+	ext->link_func("create_render_path", &create_render_path);
+	ext->link_func("rt_setup", &rt_setup);
+	ext->link_func("rt_update_frame", &rt_update_frame);
+	ext->link_func("rt_vtrace", &vtrace);
 }
 
 void export_renderer(kaba::Exporter* ext) {

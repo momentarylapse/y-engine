@@ -5,8 +5,9 @@ use image.Image
 struct ivec3
 	x, y, z: i32
 
+# "yrenderer.Context"
 class Context as @noauto
-	var context: void&
+	var context: void& # "ygfx.Context"
 	var tex_white: shared![Texture]
 
 class EngineData as @noauto

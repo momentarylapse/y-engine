@@ -26,6 +26,7 @@
 #include "../../helper/ResourceManager.h"
 #include "../../world/Camera.h"
 #include <lib/yrenderer/ShaderManager.h>
+#include <lib/yrenderer/scene/CameraParams.h>
 #include "../../Config.h"
 #include <lib/ygraphics/graphics-impl.h>
 
@@ -33,7 +34,7 @@
 using namespace yrenderer;
 using namespace ygfx;
 
-WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height) : WorldRenderer(ctx, "world/def", scene_view) {
+WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, Camera* cam, SceneView& scene_view, int width, int height) : WorldRenderer(ctx, "world/def", cam, scene_view) {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
@@ -88,7 +89,7 @@ WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView&
 	scene_renderer_trans = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 	scene_renderer_trans->add_emitter(new WorldModelsEmitter(ctx));
 	scene_renderer_trans->add_emitter(new WorldUserMeshesEmitter(ctx));
-	scene_renderer_trans->add_emitter(new WorldParticlesEmitter(ctx));
+	scene_renderer_trans->add_emitter(new WorldParticlesEmitter(ctx, cam));
 	scene_renderer_trans->allow_opaque = false;
 	add_child(scene_renderer_trans.get());
 }
@@ -99,14 +100,15 @@ void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());
 
 	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
+	const auto ycam = cam->params();
 
-	scene_renderer_background->set_view_from_camera(params, scene_view.cam);
+	scene_renderer_background->set_view(params, ycam);
 	scene_renderer_background->prepare(params); // keep drawing into direct target
 
-	scene_renderer->set_view_from_camera(sub_params, scene_view.cam);
+	scene_renderer->set_view(sub_params, ycam);
 	scene_renderer->prepare(sub_params);
 
-	scene_renderer_trans->set_view_from_camera(params, scene_view.cam);
+	scene_renderer_trans->set_view(params, ycam);
 	scene_renderer_trans->prepare(params); // keep drawing into direct target
 
 
@@ -131,7 +133,6 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 	profiler::begin(ch_trans);
 	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-	auto cam = scene_view.cam;
 	//cam->update_matrices(params.desired_aspect_ratio);
 	nix::set_projection_matrix(m * cam->projection_matrix(params.desired_aspect_ratio)); // TODO
 	nix::bind_uniform_buffer(BINDING_LIGHT, rvd.ubo_light.get());
@@ -162,7 +163,7 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 	if constexpr (SceneRenderer::using_view_space)
 		data.dict_set("eye_pos", vec3_to_any(vec3::ZERO));
 	else
-		data.dict_set("eye_pos", vec3_to_any(scene_view.cam->owner->pos)); // NAH
+		data.dict_set("eye_pos", vec3_to_any(cam->owner->pos)); // NAH
 #endif
 	data.dict_set("ambient_occlusion_radius:8", config.ambient_occlusion_radius);
 	out_renderer->bind_uniform_buffer(13, ssao_sample_buffer);

@@ -43,18 +43,18 @@
 using namespace yrenderer;
 
 
-HDRResolver* create_hdr_resolver(Context* ctx, Camera *cam, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
-	return new HDRResolver(ctx, cam, tex, depth);
+HDRResolver* create_hdr_resolver(Context* ctx, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
+	return new HDRResolver(ctx, tex, depth);
 }
 
-WorldRenderer* create_world_renderer(Context* ctx, SceneView& scene_view, RenderPathType type) {
+WorldRenderer* create_world_renderer(Context* ctx, Camera* cam, SceneView& scene_view, RenderPathType type) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
-		return new WorldRendererVulkanRayTracing(ctx, scene_view, engine.width, engine.height);
+		return new WorldRendererVulkanRayTracing(ctx, cam, scene_view, engine.width, engine.height);
 #endif
 	if (type == RenderPathType::Deferred)
-		return new WorldRendererDeferred(ctx, scene_view, engine.width, engine.height);
-	return new WorldRendererForward(ctx, scene_view);
+		return new WorldRendererDeferred(ctx, cam, scene_view, engine.width, engine.height);
+	return new WorldRendererForward(ctx, cam, scene_view);
 }
 
 float global_shadow_box_size;
@@ -65,8 +65,6 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	global_shadow_box_size = shadow_box_size;
-
-	scene_view.cam = cam;
 
 	resource_manager->shader_manager->default_shader = "default.shader";
 	resource_manager->shader_manager->load_shader_module("module-basic-interface.shader");
@@ -98,7 +96,7 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 	}
 
 
-	world_renderer = create_world_renderer(ctx, scene_view, type);
+	world_renderer = create_world_renderer(ctx, cam, scene_view, type);
 
 	if (type != RenderPathType::PathTracing)
 		create_shadow_renderer();
@@ -110,10 +108,6 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 }
 
 RenderPath::~RenderPath() = default;
-
-void RenderPath::prepare_basics() {
-	check_terrains(cam_main->owner->pos);
-}
 
 void RenderPath::check_terrains(const vec3& cam_pos) {
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
@@ -180,7 +174,7 @@ void RenderPath::create_post_processing(Renderer* source) {
 	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 	auto hdr_depth = new ygfx::DepthBuffer(engine.width, engine.height, "d:f32");
 
-	hdr_resolver = create_hdr_resolver(ctx, cam, hdr_tex, hdr_depth);
+	hdr_resolver = create_hdr_resolver(ctx, hdr_tex, hdr_depth);
 
 #ifdef USING_VULKAN
 	config.antialiasing_method = AntialiasingMethod::NONE;
@@ -219,8 +213,10 @@ void RenderPath::render_into_cubemap(CubeMapSource& source) {
 void RenderPath::suggest_cube_map_pos() {
 	if (!cube_map_source)
 		return;
+	cube_map_source->min_depth = cam->min_depth;
+	cube_map_source->max_depth = cam->max_depth;
 	if (world.ego) {
-		cube_map_source->owner->pos = world.ego->pos;
+		cube_map_source->pos = world.ego->pos;
 		cube_map_source->min_depth = 200;
 		if (auto m = world.ego->get_component<Model>())
 			cube_map_source->min_depth = m->prop.radius * 1.1f;
@@ -228,14 +224,14 @@ void RenderPath::suggest_cube_map_pos() {
 	}
 	auto& list = ComponentManager::get_list_family<Model>();
 	float max_score = 0;
-	cube_map_source->owner->pos = scene_view.cam->view_matrix() * vec3(0,0,1000);
+	cube_map_source->pos = cam->view_matrix() * vec3(0,0,1000);
 	cube_map_source->min_depth = 1000;
 	for (auto m: list)
 		for (auto mat: m->material) {
 			float score = mat->metal;
 			if (score > max_score) {
 				max_score = score;
-				cube_map_source->owner->pos = m->owner->pos;
+				cube_map_source->pos = m->owner->pos;
 				cube_map_source->min_depth = m->prop.radius;
 			}
 		}
@@ -243,9 +239,14 @@ void RenderPath::suggest_cube_map_pos() {
 
 void RenderPath::render_cubemaps(const RenderParams &params) {
 	suggest_cube_map_pos();
+
 	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
+	for (auto source: cube_map_sources)
+		source->pos = source->owner->pos;
+
 	cube_map_sources.add(cube_map_source);
-	for (auto& source: cube_map_sources) {
+
+	for (auto source: cube_map_sources) {
 		if (source->update_rate <= 0)
 			continue;
 		source->counter ++;
@@ -272,8 +273,9 @@ void RenderPath::prepare_instanced_matrices() {
 }
 
 void RenderPath::prepare(const RenderParams& params) {
-	prepare_basics();
+	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
+	scene_view.main_camera_params = cam->params();
 	scene_view.choose_lights();
 	scene_view.choose_shadows();
 
@@ -302,16 +304,19 @@ void RenderPath::prepare(const RenderParams& params) {
 	if (multisample_resolver)
 		multisample_resolver->render(params);
 
-	if (hdr_resolver)
+	if (hdr_resolver) {
+		hdr_resolver->exposure = cam->exposure;
+		hdr_resolver->bloom_factor = cam->bloom_factor;
 		hdr_resolver->prepare(params);
+	}
 
 
 	if (light_meter and hdr_resolver) {
-		light_meter->active = hdr_resolver->cam and hdr_resolver->cam->auto_exposure;
+		light_meter->active = cam and cam->auto_exposure;
 		if (light_meter->active) {
 			light_meter->read();
 			light_meter->setup();
-			light_meter->adjust_camera(hdr_resolver->cam);
+			light_meter->adjust_camera(cam);
 		}
 	}
 }

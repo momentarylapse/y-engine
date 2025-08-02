@@ -23,7 +23,7 @@
 #include "../../world/Camera.h"
 
 
-WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", scene_view) {
+WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", cam, scene_view) {
 	resource_manager->shader_manager->load_shader_module("forward/module-surface.shader");
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
@@ -32,14 +32,14 @@ WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::S
 	scene_renderer->add_emitter(new WorldTerrainsEmitter(ctx));
 	scene_renderer->add_emitter(new WorldUserMeshesEmitter(ctx));
 	scene_renderer->add_emitter(new WorldInstancedEmitter(ctx));
-	scene_renderer->add_emitter(new WorldParticlesEmitter(ctx));
+	scene_renderer->add_emitter(new WorldParticlesEmitter(ctx, cam));
 }
 
 void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);
-	scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
+	cam->update_matrix_cache(params.desired_aspect_ratio);
 	
-	scene_renderer->set_view_from_camera(params, scene_view.cam);
+	scene_renderer->set_view(params, cam->params());
 	scene_renderer->prepare(params);
 
 	profiler::end(ch_prepare);

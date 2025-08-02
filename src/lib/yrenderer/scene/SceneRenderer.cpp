@@ -36,12 +36,8 @@ void SceneRenderer::add_emitter(shared<MeshEmitter> emitter) {
 	emitters.add(emitter);
 }
 
-void SceneRenderer::set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& proj) {
-	rvd.set_view(params, pos, ang, proj);
-}
-
-void SceneRenderer::set_view_from_camera(const RenderParams& params, Camera* cam) {
-	rvd.set_view(params, cam);
+void SceneRenderer::set_view(const RenderParams& params, const CameraParams& cam, const mat4* proj) {
+	rvd.set_view(params, cam, proj);
 }
 
 void SceneRenderer::prepare(const RenderParams& params) {

@@ -10,7 +10,6 @@
 #include <world/Model.h>
 #include <world/ModelManager.h>
 #include <world/components/Animator.h>
-#include <world/Camera.h>
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
 #include <lib/ygraphics/graphics-impl.h>
@@ -62,7 +61,6 @@ void WorldModelsEmitter::emit(const yrenderer::RenderParams& params, yrenderer::
 void WorldModelsEmitter::emit_transparent(const yrenderer::RenderParams& params, yrenderer::RenderViewData& rvd) {
 	profiler::begin(channel);
 	ctx->gpu_timestamp_begin(params, channel);
-	auto cam = rvd.scene_view->cam;
 
 	struct DrawCallData {
 		Model* model;
@@ -79,7 +77,7 @@ void WorldModelsEmitter::emit_transparent(const yrenderer::RenderParams& params,
 			if (!material->is_transparent())
 				continue;
 
-			draw_calls.add({m, i, (m->owner->pos - cam->owner->pos).length()});
+			draw_calls.add({m, i, (m->owner->pos - rvd.camera_params.pos).length()});
 		}
 	}
 

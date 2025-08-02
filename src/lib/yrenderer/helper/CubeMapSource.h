@@ -18,6 +18,7 @@ public:
 	CubeMapSource();
 	~CubeMapSource() override;
 
+	vec3 pos;
 	float min_depth, max_depth;
 	shared<ygfx::CubeMap> cube_map;
 	shared<ygfx::DepthBuffer> depth_buffer;

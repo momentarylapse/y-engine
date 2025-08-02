@@ -14,8 +14,8 @@
 #include <lib/image/color.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/yrenderer/Material.h>
+#include <lib/yrenderer/scene/CameraParams.h>
 
-class Camera;
 struct mat4;
 
 namespace yrenderer {
@@ -23,6 +23,7 @@ namespace yrenderer {
 class Context;
 class ShaderCache;
 class Material;
+struct CameraParams;
 struct SceneView;
 class RenderParams;
 enum class RenderPathType;
@@ -90,8 +91,7 @@ struct RenderViewData {
 	bool is_shadow_pass() const;
 
 	Context* ctx;
-	vec3 view_pos;
-	quaternion view_ang;
+	CameraParams camera_params;
 	UBO ubo;
 #ifdef USING_VULKAN
 	Array<RenderData> rda;
@@ -100,8 +100,7 @@ struct RenderViewData {
 	RenderData rd;
 #endif
 
-	void set_view(const RenderParams& params, const vec3& pos, const quaternion& ang, const mat4& projection);
-	void set_view(const RenderParams& params, Camera* cam);
+	void set_view(const RenderParams& params, const CameraParams& view, const mat4* proj = nullptr);
 	void set_z(bool write, bool test);
 	void set_wire(bool enabled);
 	void set_cull(ygfx::CullMode mode);
