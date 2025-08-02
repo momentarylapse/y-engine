@@ -38,7 +38,7 @@
 #include "../renderer/helper/RendererFactory.h"
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/helper/ComputeTask.h>
-#include "../renderer/helper/LightMeter.h"
+#include <lib/yrenderer/helper/LightMeter.h>
 #include "../renderer/path/RenderPath.h"
 #include <lib/yrenderer/post/HDRResolver.h>
 #include "../renderer/world/WorldRendererForward.h"

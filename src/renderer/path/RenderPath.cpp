@@ -13,7 +13,7 @@
 #ifdef USING_VULKAN
 	#include "../world/WorldRendererVulkanRayTracing.h"
 #endif
-#include "../helper/LightMeter.h"
+#include <lib/yrenderer/helper/LightMeter.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include "../../helper/ResourceManager.h"
@@ -316,7 +316,7 @@ void RenderPath::prepare(const RenderParams& params) {
 		if (light_meter->active) {
 			light_meter->read();
 			light_meter->setup();
-			light_meter->adjust_camera(cam);
+			light_meter->adjust_camera(&cam->exposure, cam->auto_exposure_min, cam->auto_exposure_max);
 		}
 	}
 }

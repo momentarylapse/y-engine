@@ -12,10 +12,7 @@
 #include <lib/yrenderer/target/WindowRendererVulkan.h>
 #include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
-#include "../../gui/Node.h"
-#include "../../fx/Particle.h"
 #include "../../world/Camera.h"
-#include "../../world/Light.h"
 #include <lib/yrenderer/Material.h>
 #include "../../world/Model.h"
 #include "../../world/Terrain.h"

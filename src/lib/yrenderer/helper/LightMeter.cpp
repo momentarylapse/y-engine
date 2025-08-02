@@ -3,20 +3,21 @@
 //
 
 #include "LightMeter.h"
-#include <world/Camera.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/yrenderer/base.h>
 #include <lib/profiler/Profiler.h>
-#include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 
+#include <helper/ResourceManager.h>
+
+namespace yrenderer {
 
 constexpr int NBINS = 256;
 constexpr int NSAMPLES = 2560;
 
 using namespace ygfx;
 
-LightMeter::LightMeter(yrenderer::Context* ctx, Texture* tex)
+LightMeter::LightMeter(Context* ctx, Texture* tex)
 	: ComputeTask(ctx, "expo", ctx->resource_manager->shader_manager->load_shader("compute/brightness.shader"), NSAMPLES, 1, 1)
 {
 	ch_prepare = profiler::create_channel("expo.p", channel);
@@ -72,10 +73,12 @@ void LightMeter::setup() {
 #endif
 }
 
-void LightMeter::adjust_camera(Camera *cam) {
-	float exposure = clamp((float)pow(1.0f / brightness, 0.8f), cam->auto_exposure_min, cam->auto_exposure_max);
-	if (exposure > cam->exposure)
-		cam->exposure *= 1.05f;
-	if (exposure < cam->exposure)
-		cam->exposure /= 1.05f;
+void LightMeter::adjust_camera(float* exposure, float exposure_min, float exposure_max) {
+	float exposure_target = clamp((float)pow(1.0f / brightness, 0.8f), exposure_min, exposure_max);
+	if (exposure_target > *exposure)
+		*exposure *= 1.05f;
+	if (exposure_target < *exposure)
+		*exposure /= 1.05f;
+}
+
 }

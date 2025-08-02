@@ -12,7 +12,6 @@
 class Camera;
 class PostProcessor;
 class WorldRenderer;
-class LightMeter;
 
 namespace yrenderer {
 	class CubeMapRenderer;
@@ -24,6 +23,7 @@ namespace yrenderer {
 	class ShadowRenderer;
 	struct RenderViewData;
 	class CubeMapSource;
+	class LightMeter;
 	enum class RenderPathType;
 }
 
@@ -47,7 +47,7 @@ public:
 	PostProcessor* post_processor = nullptr;
 	yrenderer::TextureRenderer* texture_renderer = nullptr;
 	yrenderer::MultisampleResolver* multisample_resolver = nullptr;
-	LightMeter* light_meter = nullptr;
+	yrenderer::LightMeter* light_meter = nullptr;
 
 	Renderer* main_renderer = nullptr;
 
