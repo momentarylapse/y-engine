@@ -147,11 +147,14 @@ void RenderPath::check_terrains(const vec3& cam_pos) {
 }
 
 void RenderPath::create_shadow_renderer() {
+	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
+	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 	shadow_renderer = new ShadowRenderer(ctx, &scene_view, {
 		new WorldModelsEmitter(ctx),
 		new WorldTerrainsEmitter(ctx),
 		new WorldUserMeshesEmitter(ctx),
-		new WorldInstancedEmitter(ctx)});
+		new WorldInstancedEmitter(ctx)},
+		shadow_resolution);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
 	add_sub_task(shadow_renderer.get());
@@ -276,7 +279,7 @@ void RenderPath::prepare(const RenderParams& params) {
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
 	scene_view.main_camera_params = cam->params();
-	scene_view.choose_lights();
+	scene_view.choose_lights(ComponentManager::get_list_family<Light>());
 	scene_view.choose_shadows();
 
 	if (type != RenderPathType::PathTracing)

@@ -3,17 +3,13 @@
 //
 
 #include "SceneView.h"
-#include <world/World.h>
 #include <world/Light.h>
 #include <lib/base/iter.h>
-#include <y/ComponentManager.h>
-#include <lib/os/time.h>
 
 namespace yrenderer {
 
-void SceneView::choose_lights() {
+void SceneView::choose_lights(const Array<Light*>& all_lights) {
 	lights.clear();
-	auto& all_lights = ComponentManager::get_list_family<Light>();
 	for (auto l: all_lights) {
 		if (l->enabled)
 			lights.add(l);

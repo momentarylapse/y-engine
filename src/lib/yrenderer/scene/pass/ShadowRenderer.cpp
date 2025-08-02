@@ -14,18 +14,15 @@
 #include "lib/yrenderer/scene/CameraParams.h"
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <world/Light.h>
-#include <Config.h>
 
 namespace yrenderer {
 
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
 
-ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<MeshEmitter> emitters) :
+ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<MeshEmitter> emitters, int resolution) :
 		RenderTask(ctx, "shdw")
 {
-	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
-	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 
 	material = new Material(ctx);
 	material->pass0.shader_path = "shadow.shader";
@@ -41,8 +38,8 @@ ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<Mes
 		for (auto e: weak(emitters))
 			c.scene_renderer->add_emitter(e);
 
-		shared tex = new ygfx::Texture(shadow_resolution, shadow_resolution, "rgba:i8");
-		c.depth_buffer = new ygfx::DepthBuffer(shadow_resolution, shadow_resolution, "d:f32");
+		shared tex = new ygfx::Texture(resolution, resolution, "rgba:i8");
+		c.depth_buffer = new ygfx::DepthBuffer(resolution, resolution, "d:f32");
 		c.texture_renderer = new TextureRenderer(ctx, format("cas%d", i), {tex, c.depth_buffer}, {"autoclear"});
 		c.scale = (i == 0) ? 4.0f : 1.0f;
 		c.texture_renderer->add_child(c.scene_renderer.get());

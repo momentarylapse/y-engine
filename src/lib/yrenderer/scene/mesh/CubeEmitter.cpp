@@ -5,7 +5,6 @@
 #include "CubeEmitter.h"
 #include <lib/yrenderer/base.h>
 #include <lib/yrenderer/scene/RenderViewData.h>
-#include <y/EngineData.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/Box.h>
 
