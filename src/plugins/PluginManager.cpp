@@ -23,6 +23,7 @@
 #include "../helper/DeletionQueue.h"
 #include "../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
+#include <lib/yrenderer/_kaba_export.h>
 #include "../helper/Scheduler.h"
 #if __has_include("../input/InputManager.h")
 #include "../input/InputManager.h"
@@ -75,6 +76,7 @@
 #include "../world/components/Skeleton.h"
 #include "../world/components/UserMesh.h"
 #include "../world/components/MultiInstance.h"
+#include "../world/components/CubeMapSource.h"
 #include "../meta.h"
 #include <lib/ygraphics/graphics-impl.h>
 #include "../lib/kaba/dynamic/exception.h"
@@ -133,166 +135,6 @@ LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, co
 	return p;
 }
 
-void framebuffer_init(FrameBuffer *fb, const shared_array<Texture> &tex) {
-#ifdef USING_VULKAN
-	kaba::kaba_raise_exception(new kaba::KabaException("not implemented: FrameBuffer.__init__() for vulkan"));
-#else
-	new(fb) FrameBuffer(tex);
-#endif
-}
-
-shared<Texture> framebuffer_depthbuffer(FrameBuffer *fb) {
-#ifdef USING_VULKAN
-	return fb->attachments.back().get();
-#else
-	return fb->depth_buffer.get();
-#endif
-}
-
-shared_array<Texture> framebuffer_color_attachments(FrameBuffer *fb) {
-#ifdef USING_VULKAN
-	return fb->attachments;//.sub_ref(0, -1));
-#else
-	return fb->color_attachments;
-#endif
-}
-
-void buffer_update_array(Buffer *buf, const DynamicArray &data) {
-	buf->update_array(data);
-}
-
-void buffer_update_chunk(Buffer *buf, const void* data, int size) {
-	buf->update_part(data, 0, size);
-}
-
-void buffer_read_chunk(Buffer *buf, void* data, int size) {
-#ifdef USING_VULKAN
-	auto p = buf->map();
-	memcpy(data, p, size);
-	buf->unmap();
-#else
-	buf->read(data, size);
-#endif
-}
-
-void buffer_read_array(Buffer *buf, DynamicArray &data) {
-#ifdef USING_VULKAN
-	buffer_read_chunk(buf, data.data, data.num * data.element_size);
-#else
-	buf->read_array(data);
-#endif
-}
-
-void vertexbuffer_init(VertexBuffer *vb, const string &format) {
-	new(vb) VertexBuffer(format);
-}
-
-void vertexbuffer_update_array(VertexBuffer *buf, const DynamicArray &data) {
-	buf->update(data);
-}
-
-void uniformbuffer_init(UniformBuffer* buf, int size) {
-	new(buf) UniformBuffer(size);
-}
-
-void storagebuffer_init(ShaderStorageBuffer* buf, int size) {
-	new(buf) ShaderStorageBuffer(size);
-}
-
-void computetask_init(yrenderer::ComputeTask* task, yrenderer::Context* ctx, const string& name, const shared<Shader>& shader, const Array<int>& n) {
-	int nx = 1;
-	int ny = 1;
-	int nz = 1;
-	if (n.num >= 1)
-		nx = n[0];
-	if (n.num >= 2)
-		ny = n[1];
-	if (n.num >= 3)
-		nz = n[2];
-	new(task) yrenderer::ComputeTask(ctx, name, shader, nx, ny, nz);
-}
-
-void texture_init(Texture *t, int w, int h, const string &format) {
-	new(t) Texture(w, h, format);
-}
-
-void texture_delete(Texture *t) {
-	t->~Texture();
-}
-
-void texture_write(Texture *t, const Image &im) {
-	t->write(im);
-}
-
-void texture_write_float(Texture *t, const DynamicArray& data) {
-#ifdef USING_VULKAN
-	int n_in = data.num * data.element_size / (int)sizeof(float);
-	int n_tex = t->width * t->height * t->depth;
-	if (n_in != n_tex) {
-		msg_error(format("Texture.write_float(): size mismatch (input: %d - texture: %d)", n_in, n_tex));
-		return;
-	}
-	t->writex(data.data, t->width, t->height, t->depth, "r:f32");
-#else
-	t->write_float(data);
-#endif
-}
-
-void texture_read(Texture* t, Image& im) {
-#ifdef USING_VULKAN
-	t->read(im.data.data);
-#else
-	t->read(im);
-#endif
-}
-
-void cubemap_init(CubeMap *t, int size, const string &format) {
-	new(t) CubeMap(size, format);
-}
-
-void depthbuffer_init(DepthBuffer *t, int w, int h, const string &format) {
-#ifdef USING_VULKAN
-	new(t) DepthBuffer(w, h, format, true);
-#else
-	new(t) DepthBuffer(w, h, format);
-#endif
-}
-
-void imagetexture_init(DepthBuffer *t, int w, int h, const string &format) {
-#ifdef USING_VULKAN
-	new(t) ImageTexture(w, h, 1, format);
-#else
-	new(t) ImageTexture(w, h, format);
-#endif
-}
-
-void storagetexture_init(DepthBuffer *t, int nx, int ny, int nz, const string &format) {
-#ifdef USING_VULKAN
-	new(t) vulkan::StorageTexture(nx, ny, nz, format);
-#else
-	new(t) VolumeTexture(nx, ny, nz, format);
-#endif
-}
-
-void volumetexture_init(VolumeTexture *t, int nx, int ny, int nz, const string &format) {
-	new(t) VolumeTexture(nx, ny, nz, format);
-}
-
-void shader_set_float(Shader *s, const string &name, float f) {
-#ifdef USING_VULKAN
-	msg_error("unimplemented:  Shader.set_float()");
-#else
-	s->set_float(name, f);
-#endif
-}
-
-void shader_set_floats(Shader *s, const string &name, float *f, int num) {
-#ifdef USING_VULKAN
-	msg_error("unimplemented:  Shader.set_floats()");
-#else
-	s->set_floats(name, f, num);
-#endif
-}
 
 #pragma GCC pop_options
 
@@ -342,13 +184,6 @@ Array<Texture*> render_path_get_gbuffer(RenderPath &r) {
 	if (r.type == yrenderer::RenderPathType::Deferred)
 		return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
 	return {};
-}
-
-shared_array<Texture> hdr_resolver_get_tex_bloom(yrenderer::HDRResolver &r) {
-//Array<Texture*> hdr_resolver_get_tex_bloom(HDRResolver &r) {
-	msg_write("get bloom...");
-	return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
-	//return {r.bloom_levels[0].tex_out.get(), r.bloom_levels[1].tex_out.get(), r.bloom_levels[2].tex_out.get(), r.bloom_levels[3].tex_out.get()};
 }
 
 audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float sample_rate) {
@@ -559,28 +394,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("CollisionData.pos", &CollisionData::pos);
 	ext->declare_class_element("CollisionData.n", &CollisionData::n);
 
-	using Material = yrenderer::Material;
-	ext->declare_class_size("Material.Pass", sizeof(Material::RenderPassData));
-	ext->declare_class_element("Material.Pass.shader_path", &Material::RenderPassData::shader_path);
-
-	ext->declare_class_size("Material.Friction", sizeof(Material::Friction));
-	ext->declare_class_element("Material.Friction.sliding", &Material::Friction::sliding);
-	ext->declare_class_element("Material.Friction.rolling", &Material::Friction::rolling);
-	ext->declare_class_element("Material.Friction._static", &Material::Friction::_static);
-	ext->declare_class_element("Material.Friction.jump", &Material::Friction::jump);
-
-	ext->declare_class_size("Material", sizeof(Material));
-	ext->link_class_func("Material.__delete__", &kaba::generic_delete<Material>);
-	ext->declare_class_element("Material.textures", &Material::textures);
-	ext->declare_class_element("Material.pass0", &Material::pass0);
-	ext->declare_class_element("Material.albedo", &Material::albedo);
-	ext->declare_class_element("Material.roughness", &Material::roughness);
-	ext->declare_class_element("Material.metal", &Material::metal);
-	ext->declare_class_element("Material.emission", &Material::emission);
-	ext->declare_class_element("Material.cast_shadow", &Material::cast_shadow);
-	ext->declare_class_element("Material.friction", &Material::friction);
-	ext->link_class_func("Material.add_uniform", &Material::add_uniform);
-
 
 	ext->declare_class_element("World.background", &World::background);
 	ext->declare_class_element("World.skyboxes", &World::skybox);
@@ -664,61 +477,6 @@ void export_world(kaba::Exporter* ext) {
 }
 
 void export_gfx(kaba::Exporter* ext) {
-	ext->declare_enum("PrimitiveTopology.TRIANGLES", PrimitiveTopology::TRIANGLES);
-	ext->declare_enum("PrimitiveTopology.TRIANGLE_FAN", PrimitiveTopology::TRIANGLE_FAN);
-	ext->declare_enum("PrimitiveTopology.LINES", PrimitiveTopology::LINES);
-	ext->declare_enum("PrimitiveTopology.LINE_STRIP", PrimitiveTopology::LINE_STRIP);
-	ext->declare_enum("PrimitiveTopology.POINTS", PrimitiveTopology::POINTS);
-	ext->declare_enum("PrimitiveTopology.PATCHES", PrimitiveTopology::PATCHES);
-
-	ext->declare_enum("CullMode.NONE", CullMode::NONE);
-	ext->declare_enum("CullMode.BACK", CullMode::BACK);
-	ext->declare_enum("CullMode.FRONT", CullMode::FRONT);
-
-	ext->declare_class_size("FrameBuffer", sizeof(FrameBuffer));
-	ext->declare_class_element("FrameBuffer.width", &FrameBuffer::width);
-	ext->declare_class_element("FrameBuffer.height", &FrameBuffer::height);
-	ext->link_class_func("FrameBuffer.__init__", &framebuffer_init);
-	ext->link_class_func("FrameBuffer.depth_buffer", &framebuffer_depthbuffer);
-	ext->link_class_func("FrameBuffer.color_attachments", &framebuffer_color_attachments);
-
-	ext->link_class_func("Buffer.update", &buffer_update_array);
-	ext->link_class_func("Buffer.update_chunk", &buffer_update_chunk);
-	ext->link_class_func("Buffer.read", &buffer_read_array);
-	ext->link_class_func("Buffer.read_chunk", &buffer_read_chunk);
-
-	ext->declare_class_size("VertexBuffer", sizeof(VertexBuffer));
-	ext->link_class_func("VertexBuffer.__init__", &vertexbuffer_init);
-	ext->link_class_func("VertexBuffer.update", &vertexbuffer_update_array);
-
-	ext->declare_class_size("UniformBuffer", sizeof(UniformBuffer));
-	ext->link_class_func("UniformBuffer.__init__", &uniformbuffer_init);
-
-	ext->declare_class_size("ShaderStorageBuffer", sizeof(ShaderStorageBuffer));
-	ext->link_class_func("ShaderStorageBuffer.__init__", &storagebuffer_init);
-
-	ext->declare_class_size("Texture", sizeof(Texture));
-	ext->declare_class_element("Texture.width", &Texture::width);
-	ext->declare_class_element("Texture.height", &Texture::height);
-	ext->link_class_func("Texture.__init__", &texture_init);
-	ext->link_class_func("Texture.__delete__", &texture_delete);
-	ext->link_class_func("Texture.write", &texture_write);
-	ext->link_class_func("Texture.write_float", &texture_write_float);
-	ext->link_class_func("Texture.read", &texture_read);
-	ext->link_class_func("Texture.set_options", &Texture::set_options);
-
-	ext->link_class_func("CubeMap.__init__", &cubemap_init);
-
-	ext->link_class_func("DepthBuffer.__init__", &depthbuffer_init);
-
-	ext->link_class_func("ImageTexture.__init__", &imagetexture_init);
-
-	ext->link_class_func("StorageTexture.__init__", &storagetexture_init);
-
-	ext->link_class_func("VolumeTexture.__init__", &volumetexture_init);
-
-	ext->link_class_func("Shader.set_float", &shader_set_float);
-	ext->link_class_func("Shader.set_floats", &shader_set_floats);
 
 	ext->link_func("load_shader", &__load_shader);
 	ext->link_func("create_shader", &__create_shader);
@@ -990,10 +748,6 @@ void export_engine(kaba::Exporter* ext) {
 	ext->link_class_func("ResourceManager.load_material", &ResourceManager::load_material);
 	ext->link_class_func("ResourceManager.load_model", &ResourceManager::load_model);*/
 
-	ext->declare_class_size("Context", sizeof(yrenderer::Context));
-	ext->declare_class_element("Context.ctx", &yrenderer::Context::context);
-	ext->declare_class_element("Context.tex_white", &yrenderer::Context::tex_white);
-
 	ext->declare_class_size("EngineData", sizeof(EngineData));
 	ext->declare_class_element("EngineData.app_name", &EngineData::app_name);
 	ext->declare_class_element("EngineData.version", &EngineData::version);
@@ -1058,29 +812,6 @@ void export_engine(kaba::Exporter* ext) {
 }
 
 void export_renderer(kaba::Exporter* ext) {
-	ext->declare_class_size("Renderer", sizeof(yrenderer::Renderer));
-
-	{
-		using ComputeTask = yrenderer::ComputeTask;
-		ComputeTask ct(nullptr, "", nullptr, 0, 0, 0);
-		ext->declare_class_size("RenderTask", sizeof(yrenderer::RenderTask));
-		ext->declare_class_element("RenderTask.active", &yrenderer::RenderTask::active);
-		//ext->link_virtual("RenderTask.prepare", &RenderTask::prepare, &ct);
-		//ext->link_virtual("RenderTask.draw", &RenderTask::draw, &ct);
-		ext->link_virtual("RenderTask.render", &yrenderer::RenderTask::render, &ct);
-
-		ext->declare_class_size("ComputeTask", sizeof(ComputeTask));
-		ext->declare_class_element("ComputeTask.nx", &ComputeTask::nx);
-		ext->declare_class_element("ComputeTask.ny", &ComputeTask::ny);
-		ext->declare_class_element("ComputeTask.nz", &ComputeTask::nz);
-		ext->declare_class_element("ComputeTask.shader_data", &ComputeTask::bindings); // eh, close enough
-		ext->link_class_func("ComputeTask.__init__", &computetask_init);
-		ext->link_class_func("ComputeTask.bind_texture", &ComputeTask::bind_texture);
-		ext->link_class_func("ComputeTask.bind_image", &ComputeTask::bind_image);
-		ext->link_class_func("ComputeTask.bind_uniform_buffer", &ComputeTask::bind_uniform_buffer);
-		ext->link_class_func("ComputeTask.bind_storage_buffer", &ComputeTask::bind_storage_buffer);
-		ext->link_virtual("ComputeTask.render", &ComputeTask::render, &ct);
-	}
 
 #ifdef USING_VULKAN
 	using PostProcessor = PostProcessorVulkan;
@@ -1093,15 +824,6 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
 
 
-	ext->declare_class_size("RegionsRenderer", sizeof(yrenderer::RegionRenderer));
-	ext->declare_class_element("RegionRenderer.regions", &yrenderer::RegionRenderer::regions);
-	ext->link_class_func("RegionRenderer.add_region", &yrenderer::RegionRenderer::add_region);
-
-	ext->declare_class_size("RegionRenderer.Region", sizeof(yrenderer::RegionRenderer::Region));
-	ext->declare_class_element("RegionRenderer.Region.dest", &yrenderer::RegionRenderer::Region::dest);
-	ext->declare_class_element("RegionRenderer.Region.z", &yrenderer::RegionRenderer::Region::z);
-	ext->declare_class_element("RegionRenderer.Region.renderer", &yrenderer::RegionRenderer::Region::renderer);
-
 	ext->declare_class_size("PostProcessor", sizeof(PostProcessor));
 	ext->declare_class_element("PostProcessor.fb1", &PostProcessor::fb1);
 	ext->declare_class_element("PostProcessor.fb2", &PostProcessor::fb2);
@@ -1112,14 +834,6 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_size("RayTracingData", sizeof(RayTracingData));
 	ext->declare_class_element("RayTracingData.buffer_meshes", &RayTracingData::buffer_meshes);
 	ext->declare_class_element("RayTracingData.num_meshes", &RayTracingData::num_meshes);
-
-	ext->declare_class_size("SceneView", sizeof(yrenderer::SceneView));
-	ext->declare_class_element("SceneView.surfel_buffer", &yrenderer::SceneView::surfel_buffer);
-	ext->declare_class_element("SceneView.num_surfels", &yrenderer::SceneView::num_surfels);
-	ext->declare_class_element("SceneView.probe_cells", &yrenderer::SceneView::probe_cells);
-	ext->declare_class_element("SceneView.probe_min", &yrenderer::SceneView::probe_min);
-	ext->declare_class_element("SceneView.probe_max", &yrenderer::SceneView::probe_max);
-	ext->declare_class_element("SceneView.ray_tracing_data", &yrenderer::SceneView::ray_tracing_data);
 
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
 	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);
@@ -1133,20 +847,6 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->link_class_func("RenderPath.get_gbuffer", &render_path_get_gbuffer);
 	//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
 	ext->link_class_func("RenderPath.get_cubemap", &render_path_get_cubemap);
-
-
-	ext->declare_class_size("HDRResolver.BloomLevel", sizeof(yrenderer::HDRResolver::BloomLevel));
-	ext->declare_class_element("HDRResolver.BloomLevel.tex_out", &yrenderer::HDRResolver::BloomLevel::tex_out);
-
-	ext->declare_class_size("HDRResolver", sizeof(yrenderer::HDRResolver));
-	ext->declare_class_element("HDRResolver.texture", &yrenderer::HDRResolver::tex_main);
-	ext->declare_class_element("HDRResolver.depth_buffer", &yrenderer::HDRResolver::_depth_buffer);
-	ext->declare_class_element("HDRResolver.bloom_levels", &yrenderer::HDRResolver::bloom_levels);
-	//ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
-
-	ext->declare_class_size("LightMeter", sizeof(yrenderer::LightMeter));
-	ext->declare_class_element("LightMeter.histogram", &yrenderer::LightMeter::histogram);
-	ext->declare_class_element("LightMeter.brightness", &yrenderer::LightMeter::brightness);
 }
 
 void PluginManager::export_kaba_package_y(kaba::Exporter* ext) {
@@ -1159,6 +859,7 @@ void PluginManager::export_kaba_package_y(kaba::Exporter* ext) {
 	export_net(ext);
 	export_engine(ext);
 	export_renderer(ext);
+	export_package_yrenderer(ext);
 }
 
 template<class C>
@@ -1190,7 +891,7 @@ void PluginManager::import_kaba() {
 	import_component_class<Terrain>(m_world, "Terrain");
 	import_component_class<Light>(m_world, "Light");
 	import_component_class<Camera>(m_world, "Camera");
-	import_component_class<yrenderer::CubeMapSource>(m_world, "CubeMapSource");
+	import_component_class<::CubeMapSource>(m_world, "CubeMapSource");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
@@ -1310,8 +1011,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new LegacyParticle;
 	if (c == LegacyBeam::_class)
 		return new LegacyBeam;
-	if (c == yrenderer::CubeMapSource::_class)
-		return new yrenderer::CubeMapSource;
+	if (c == CubeMapSource::_class)
+		return new CubeMapSource;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;

@@ -37,10 +37,16 @@
 #include <renderer/world/emitter/WorldInstancedEmitter.h>
 #include <renderer/world/emitter/WorldSkyboxEmitter.h>
 #include <world/components/MultiInstance.h>
+#include <world/components/CubeMapSource.h>
 #include <lib/yrenderer/scene/MeshEmitter.h>
 #include "world/Light.h"
 
-using namespace yrenderer;
+//using namespace yrenderer;
+using Context = yrenderer::Context;
+using HDRResolver = yrenderer::HDRResolver;
+using SceneView = yrenderer::SceneView;
+using LightMeter = yrenderer::LightMeter;
+using RenderPathType = yrenderer::RenderPathType;
 
 
 HDRResolver* create_hdr_resolver(Context* ctx, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
@@ -86,10 +92,7 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 
 
 	if (type != RenderPathType::PathTracing) {
-		// not sure this is a good idea...
-		auto e = new Entity;
-		cube_map_source = new CubeMapSource;
-		cube_map_source->owner = e;
+		cube_map_source = new yrenderer::CubeMapSource;
 		cube_map_source->cube_map = new ygfx::CubeMap(cube_map_source->resolution, "rgba:i8");
 
 		scene_view.cube_map = cube_map_source->cube_map;
@@ -149,7 +152,7 @@ void RenderPath::check_terrains(const vec3& cam_pos) {
 void RenderPath::create_shadow_renderer() {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
-	shadow_renderer = new ShadowRenderer(ctx, &scene_view, {
+	shadow_renderer = new yrenderer::ShadowRenderer(ctx, &scene_view, {
 		new WorldModelsEmitter(ctx),
 		new WorldTerrainsEmitter(ctx),
 		new WorldUserMeshesEmitter(ctx),
@@ -161,7 +164,7 @@ void RenderPath::create_shadow_renderer() {
 }
 
 void RenderPath::create_cube_renderer() {
-	cube_map_renderer = new CubeMapRenderer(ctx, scene_view, {
+	cube_map_renderer = new yrenderer::CubeMapRenderer(ctx, scene_view, {
 		new WorldSkyboxEmitter(ctx),
 		new WorldModelsEmitter(ctx),
 		new WorldTerrainsEmitter(ctx),
@@ -192,12 +195,12 @@ void RenderPath::create_post_processing(Renderer* source) {
 		auto depth_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "d:f32");
 		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
-		texture_renderer = new TextureRenderer(ctx, "world-tex", {tex_ms, depth_ms}, {"samples=4"});
+		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {tex_ms, depth_ms}, {"samples=4"});
 
-		multisample_resolver = new MultisampleResolver(ctx, tex_ms, depth_ms, hdr_tex, hdr_depth);
+		multisample_resolver = new yrenderer::MultisampleResolver(ctx, tex_ms, depth_ms, hdr_tex, hdr_depth);
 	} else {
 		msg_error("no msaa");
-		texture_renderer = new TextureRenderer(ctx, "world-tex", {hdr_tex, hdr_depth});
+		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {hdr_tex, hdr_depth});
 	}
 
 	texture_renderer->add_child(source);
@@ -207,7 +210,7 @@ void RenderPath::create_post_processing(Renderer* source) {
 
 
 
-void RenderPath::render_into_cubemap(CubeMapSource& source) {
+void RenderPath::render_into_cubemap(yrenderer::CubeMapSource& source) {
 	cube_map_renderer->set_source(&source);
 	//cube_map_renderer->render(RenderParams::WHATEVER);
 }
@@ -240,16 +243,19 @@ void RenderPath::suggest_cube_map_pos() {
 		}
 }
 
-void RenderPath::render_cubemaps(const RenderParams &params) {
+void RenderPath::render_cubemaps(const yrenderer::RenderParams &params) {
 	suggest_cube_map_pos();
 
-	auto cube_map_sources = ComponentManager::get_list<CubeMapSource>();
+	auto cube_map_sources = ComponentManager::get_list<::CubeMapSource>();
 	for (auto source: cube_map_sources)
-		source->pos = source->owner->pos;
+		source->source.pos = source->owner->pos;
 
-	cube_map_sources.add(cube_map_source);
+	Array<yrenderer::CubeMapSource*> sources;
+	for (auto source: cube_map_sources)
+		sources.add(&source->source);
+	sources.add(cube_map_source);
 
-	for (auto source: cube_map_sources) {
+	for (auto source: sources) {
 		if (source->update_rate <= 0)
 			continue;
 		source->counter ++;
@@ -268,15 +274,15 @@ void RenderPath::prepare_instanced_matrices() {
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
 		if (!mi->ubo_matrices)
-			mi->ubo_matrices = new ygfx::UniformBuffer(MAX_INSTANCES * sizeof(mat4));
+			mi->ubo_matrices = new ygfx::UniformBuffer(yrenderer::MAX_INSTANCES * sizeof(mat4));
 		//mi->ubo_matrices->update_array(mi->matrices);
-		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, MAX_INSTANCES) * sizeof(mat4));
+		mi->ubo_matrices->update_part(&mi->matrices[0], 0, min(mi->matrices.num, yrenderer::MAX_INSTANCES) * sizeof(mat4));
 	}
 	//profiler::end(ch_pre);
 }
 
 
-void RenderPath::prepare(const RenderParams& params) {
+void RenderPath::prepare(const yrenderer::RenderParams& params) {
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
 	scene_view.main_camera_params = cam->params();
@@ -308,7 +314,7 @@ void RenderPath::prepare(const RenderParams& params) {
 		render_cubemaps(params);
 
 	if (texture_renderer) {
-		texture_renderer->set_area(dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
+		texture_renderer->set_area(yrenderer::dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 		texture_renderer->render(params);
 	}
 
@@ -332,7 +338,7 @@ void RenderPath::prepare(const RenderParams& params) {
 	}
 }
 
-void RenderPath::draw(const RenderParams& params) {
+void RenderPath::draw(const yrenderer::RenderParams& params) {
 	if (hdr_resolver)
 		hdr_resolver->draw(params);
 	else

@@ -9,6 +9,7 @@
 #include <lib/yrenderer/base.h>
 #include "../path/RenderPath.h"
 #include "../world/WorldRenderer.h"
+#include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/regions/RegionRenderer.h>
 #ifdef USING_VULKAN
@@ -110,6 +111,9 @@ void create_and_attach_render_path(yrenderer::Context* ctx, Camera *cam) {
 
 
 void create_base_renderer(yrenderer::Context* ctx, GLFWwindow* window) {
+	yrenderer::cubemap_default_resolution = config.get_int("cubemap.resolution", 256);
+	yrenderer::cubemap_default_rate = config.get_int("cubemap.update_rate", 9);
+
 	try {
 		engine.window_renderer = create_window_renderer(ctx, window);
 		engine.region_renderer = create_region_renderer(ctx);

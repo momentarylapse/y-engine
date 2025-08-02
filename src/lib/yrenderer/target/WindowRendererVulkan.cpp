@@ -16,10 +16,12 @@
 namespace yrenderer {
 
 SurfaceRendererVulkan::SurfaceRendererVulkan(Context* ctx, const string& name) : TargetRenderer(ctx, name) {
-	device = ctx->device;
+	if (ctx) {
+		device = ctx->device;
 
-	image_available_semaphore = new vulkan::Semaphore(device);
-	render_finished_semaphore = new vulkan::Semaphore(device);
+		image_available_semaphore = new vulkan::Semaphore(device);
+		render_finished_semaphore = new vulkan::Semaphore(device);
+	}
 
 
 	framebuffer_resized = false;

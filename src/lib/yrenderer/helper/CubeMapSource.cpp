@@ -1,6 +1,5 @@
 #include "CubeMapSource.h"
 #include "../scene/CameraParams.h"
-#include <Config.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/yrenderer/base.h>
 #include <lib/yrenderer/scene/SceneRenderer.h>
@@ -8,14 +7,15 @@
 
 namespace yrenderer {
 
-const kaba::Class* CubeMapSource::_class = nullptr;;
+int cubemap_default_resolution = 256;
+int cubemap_default_rate = 9;
 
 CubeMapSource::CubeMapSource() {
 	pos = vec3(0, 0, 0);
 	min_depth = 1.0f;
 	max_depth = 100000.0f;
-	resolution = config.get_int("cubemap.resolution", 256);
-	update_rate = config.get_int("cubemap.update_rate", 9);
+	resolution = cubemap_default_resolution;
+	update_rate = cubemap_default_rate;
 	counter = 0;
 }
 

@@ -729,6 +729,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/target/WindowRendererGL.cpp
 	src/lib/yrenderer/target/WindowRendererVulkan.cpp
 	src/lib/yrenderer/target/XhuiRenderer.cpp
+	src/lib/yrenderer/_kaba_export.cpp
 	src/lib/yrenderer/base-gl.cpp
 	src/lib/yrenderer/base-vulkan.cpp
 	src/lib/yrenderer/base.cpp
@@ -758,6 +759,7 @@ add_library(moduley SHARED
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
+	src/world/components/CubeMapSource.cpp
 	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
@@ -996,6 +998,7 @@ add_executable(y
 	src/lib/yrenderer/target/WindowRendererGL.cpp
 	src/lib/yrenderer/target/WindowRendererVulkan.cpp
 	src/lib/yrenderer/target/XhuiRenderer.cpp
+	src/lib/yrenderer/_kaba_export.cpp
 	src/lib/yrenderer/base-gl.cpp
 	src/lib/yrenderer/base-vulkan.cpp
 	src/lib/yrenderer/base.cpp
@@ -1025,6 +1028,7 @@ add_executable(y
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
+	src/world/components/CubeMapSource.cpp
 	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp

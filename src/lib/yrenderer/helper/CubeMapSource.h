@@ -1,7 +1,5 @@
-#ifndef CUBEMAPSOURCE_H
-#define CUBEMAPSOURCE_H
+#pragma once
 
-#include <y/Component.h>
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/base/pointer.h>
 #include <lib/yrenderer/Renderer.h>
@@ -13,10 +11,14 @@ class TextureRenderer;
 class MeshEmitter;
 class SceneRenderer;
 
-class CubeMapSource : public Component {
+extern int cubemap_default_resolution;
+extern int cubemap_default_rate;
+
+
+class CubeMapSource {
 public:
 	CubeMapSource();
-	~CubeMapSource() override;
+	~CubeMapSource();
 
 	vec3 pos;
 	float min_depth, max_depth;
@@ -29,8 +31,6 @@ public:
 	int resolution;
 	int update_rate;
 	int counter;
-
-	static const kaba::Class *_class;
 };
 
 
@@ -48,5 +48,3 @@ public:
 };
 
 }
-
-#endif //CUBEMAPSOURCE_H

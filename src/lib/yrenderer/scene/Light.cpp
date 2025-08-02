@@ -8,6 +8,7 @@
 namespace yrenderer {
 
 void Light::init(const color &c, float r, float t) {
+	_ang = quaternion::ID;
 	light.pos = vec3(0,0,0);
 	light.dir = vec3::EZ;
 	light.col = c;

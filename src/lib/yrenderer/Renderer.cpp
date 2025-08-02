@@ -48,7 +48,8 @@ Renderer::Renderer(Context* _ctx, const string &name) {
 	ch_prepare = profiler::create_channel(name + ".p", channel);
 
 	ctx = _ctx;
-	shader_manager = ctx->shader_manager;
+	if (ctx)
+		shader_manager = ctx->shader_manager;
 }
 
 
