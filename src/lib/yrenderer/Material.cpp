@@ -6,7 +6,7 @@
 #include "ShaderManager.h"
 #include "TextureManager.h"
 
-#include "base.h"
+#include "Context.h"
 
 namespace yrenderer {
 

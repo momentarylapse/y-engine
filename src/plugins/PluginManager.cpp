@@ -34,14 +34,11 @@
 #define HAS_INPUT
 #endif
 #include "../net/NetworkManager.h"
-#include <lib/yrenderer/base.h>
-#include <lib/yrenderer/Renderer.h>
+#include <lib/yrenderer/Context.h>
 #include "../renderer/helper/RendererFactory.h"
 #include <lib/yrenderer/helper/CubeMapSource.h>
-#include <lib/yrenderer/helper/ComputeTask.h>
-#include <lib/yrenderer/helper/LightMeter.h>
+#include <lib/yrenderer/scene/SceneRenderer.h>
 #include "../renderer/path/RenderPath.h"
-#include <lib/yrenderer/post/HDRResolver.h>
 #include "../renderer/world/WorldRendererForward.h"
 #include "../renderer/world/WorldRendererDeferred.h"
 #ifdef USING_OPENGL
@@ -54,8 +51,6 @@
 #endif
 #include <lib/yrenderer/target/WindowRenderer.h>
 #include <renderer/helper/Raytracing.h>
-#include <lib/yrenderer/scene/pass/ShadowRenderer.h>
-#include <lib/yrenderer/regions/RegionRenderer.h>
 #include <lib/yrenderer/scene/SceneView.h>
 #include "../y/EngineData.h"
 #include "../y/Component.h"

@@ -2,18 +2,11 @@
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/TextureManager.h>
 #include <lib/os/filesystem.h>
-#include <lib/os/file.h>
-#include <lib/os/msg.h>
-#include <lib/os/app.h>
-#include <lib/image/image.h>
 #include <y/EngineData.h>
 #include <lib/ygraphics/graphics-impl.h>
-
-#include <world/components/UserMesh.h>
 #include <lib/yrenderer/Material.h>
+#include <lib/yrenderer/Context.h>
 #include <world/ModelManager.h>
-
-#include "lib/yrenderer/base.h"
 
 #ifdef USING_VULKAN
 namespace vulkan {

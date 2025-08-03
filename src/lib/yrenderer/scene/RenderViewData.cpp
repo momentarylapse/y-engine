@@ -9,7 +9,7 @@
 #include <lib/os/msg.h>
 
 #include <lib/ygraphics/graphics-impl.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 
 extern float global_shadow_box_size; // :(
 

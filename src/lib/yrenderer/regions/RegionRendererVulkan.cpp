@@ -8,7 +8,7 @@
 #include "RegionRenderer.h"
 
 #ifdef USING_VULKAN
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/profiler/Profiler.h>
 

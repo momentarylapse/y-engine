@@ -22,6 +22,7 @@ namespace yrenderer {
 class ShaderManager;
 class TextureManager;
 class MaterialManager;
+class Material;
 
 struct Context {
 
@@ -43,6 +44,10 @@ struct Context {
 #endif
 
 	void _create_default_textures();
+
+	void create_managers(const Path& texture_dir, const Path& shader_dir, const Path& material_dir);
+	shared<ygfx::Texture> load_texture(const Path& path) const;
+	xfer<Material> load_material(const Path &filename) const;
 
 	void reset_gpu_timestamp_queries();
 

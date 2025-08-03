@@ -6,11 +6,10 @@
  */
 
 #include "Renderer.h"
+#include "Context.h"
 #include <lib/math/rect.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/ygraphics/graphics-impl.h>
-
-#include "base.h"
 
 namespace yrenderer {
 

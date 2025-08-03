@@ -5,7 +5,7 @@
 #include "SceneRenderer.h"
 #include "RenderViewData.h"
 #include "SceneView.h"
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/yrenderer/helper/PipelineManager.h>

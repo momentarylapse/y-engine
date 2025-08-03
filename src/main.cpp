@@ -38,7 +38,7 @@
 
 #include "plugins/PluginManager.h"
 
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include "renderer/helper/RendererFactory.h"
 #include "renderer/world/WorldRenderer.h"
 #include <lib/yrenderer/target/WindowRenderer.h>

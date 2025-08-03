@@ -9,7 +9,7 @@
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include "../path/RenderPath.h"
 #include <lib/os/msg.h>
 #include <lib/math/random.h>

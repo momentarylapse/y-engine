@@ -730,9 +730,9 @@ add_library(moduley SHARED
 	src/lib/yrenderer/target/WindowRendererVulkan.cpp
 	src/lib/yrenderer/target/XhuiRenderer.cpp
 	src/lib/yrenderer/_kaba_export.cpp
-	src/lib/yrenderer/base-gl.cpp
-	src/lib/yrenderer/base-vulkan.cpp
-	src/lib/yrenderer/base.cpp
+	src/lib/yrenderer/Context.cpp
+	src/lib/yrenderer/ContextGL.cpp
+	src/lib/yrenderer/ContextVulkan.cpp
 	src/lib/yrenderer/Material.cpp
 	src/lib/yrenderer/Renderer.cpp
 	src/lib/yrenderer/ShaderManager.cpp
@@ -999,9 +999,9 @@ add_executable(y
 	src/lib/yrenderer/target/WindowRendererVulkan.cpp
 	src/lib/yrenderer/target/XhuiRenderer.cpp
 	src/lib/yrenderer/_kaba_export.cpp
-	src/lib/yrenderer/base-gl.cpp
-	src/lib/yrenderer/base-vulkan.cpp
-	src/lib/yrenderer/base.cpp
+	src/lib/yrenderer/Context.cpp
+	src/lib/yrenderer/ContextGL.cpp
+	src/lib/yrenderer/ContextVulkan.cpp
 	src/lib/yrenderer/Material.cpp
 	src/lib/yrenderer/Renderer.cpp
 	src/lib/yrenderer/ShaderManager.cpp

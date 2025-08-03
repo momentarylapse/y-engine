@@ -10,6 +10,7 @@
 #include "Terrain.h"
 #include <lib/yrenderer/Material.h>
 #include <lib/yrenderer/TextureManager.h>
+#include <lib/yrenderer/Context.h>
 #include "World.h"
 #include "../y/EngineData.h"
 #include <lib/ygraphics/graphics-impl.h>
@@ -18,8 +19,6 @@
 #include <lib/os/file.h>
 #include <lib/os/msg.h>
 #include <lib/os/time.h>
-
-#include "lib/yrenderer/base.h"
 
 const kaba::Class *Terrain::_class = nullptr;
 

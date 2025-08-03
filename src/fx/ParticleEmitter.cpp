@@ -13,7 +13,7 @@
 #include <lib/math/random.h>
 #include <lib/os/msg.h>
 #include <y/EngineData.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 
 static Random pe_random;
 

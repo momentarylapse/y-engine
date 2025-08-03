@@ -8,7 +8,7 @@
 #include <world/components/MultiInstance.h>
 #include <world/Model.h>
 #include <lib/profiler/Profiler.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <y/ComponentManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 

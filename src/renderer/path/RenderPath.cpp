@@ -3,7 +3,7 @@
 //
 
 #include "RenderPath.h"
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include "../world/WorldRenderer.h"
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/MultisampleResolver.h>

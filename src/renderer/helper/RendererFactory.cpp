@@ -6,7 +6,7 @@
  */
 
 #include "RendererFactory.h"
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include "../path/RenderPath.h"
 #include "../world/WorldRenderer.h"
 #include <lib/yrenderer/helper/CubeMapSource.h>

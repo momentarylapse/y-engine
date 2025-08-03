@@ -1,4 +1,4 @@
-#include "base.h"
+#include "Context.h"
 #include "Material.h"
 #include "helper/ComputeTask.h"
 #include "helper/LightMeter.h"
@@ -422,6 +422,9 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 	ext->declare_class_size("Context", sizeof(yrenderer::Context));
 	ext->declare_class_element("Context.ctx", &yrenderer::Context::context);
 	ext->declare_class_element("Context.tex_white", &yrenderer::Context::tex_white);
+	ext->link_class_func("Context.create_managers", &yrenderer::Context::create_managers);
+	ext->link_class_func("Context.load_material", &yrenderer::Context::load_material);
+	ext->link_class_func("Context.load_texture", &yrenderer::Context::load_texture);
 
 
 	ext->link_func("api_init", &api_init);

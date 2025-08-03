@@ -7,7 +7,7 @@
 
 #include "HDRResolver.h"
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/yrenderer/ShaderManager.h>

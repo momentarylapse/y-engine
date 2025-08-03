@@ -7,7 +7,7 @@
 
 #include "WorldRendererForward.h"
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include "../path/RenderPath.h"
 #include <lib/image/image.h>

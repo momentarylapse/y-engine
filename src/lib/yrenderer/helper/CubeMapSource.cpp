@@ -1,7 +1,7 @@
 #include "CubeMapSource.h"
 #include "../scene/CameraParams.h"
 #include <lib/ygraphics/graphics-impl.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/scene/SceneRenderer.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 

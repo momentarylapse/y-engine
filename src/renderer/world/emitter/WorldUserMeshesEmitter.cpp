@@ -5,7 +5,7 @@
 #include "WorldUserMeshesEmitter.h"
 #include <lib/yrenderer/scene/RenderViewData.h>
 #include <lib/profiler/Profiler.h>
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <world/components/UserMesh.h>
 #include <y/ComponentManager.h>
 #include <y/Entity.h>
