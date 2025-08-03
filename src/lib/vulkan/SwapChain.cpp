@@ -53,6 +53,7 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, GLFW
 
 		int win_width = 0;
 		int win_height = 0;
+		glfwGetFramebufferSize(window, &win_width, &win_height);
 		while (win_width == 0 or win_height == 0) {
 			glfwWaitEvents();
 			glfwGetFramebufferSize(window, &win_width, &win_height);
