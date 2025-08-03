@@ -22,13 +22,7 @@ namespace yrenderer {
 	class TargetRenderer;
 	class Renderer;
 	class MaterialManager;
-#ifdef USING_VULKAN
-	class SurfaceRendererVulkan;
-	using WindowRenderer = SurfaceRendererVulkan;
-#else
-	class WindowRendererGL;
-	using WindowRenderer = WindowRendererGL;
-#endif
+	class WindowRenderer;
 	class RegionRenderer;
 	class RenderTask;
 }

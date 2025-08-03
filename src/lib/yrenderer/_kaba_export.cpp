@@ -11,8 +11,7 @@
 #include "scene/MeshEmitter.h"
 #include "scene/mesh/CubeEmitter.h"
 #include "regions/RegionRenderer.h"
-#include "target/WindowRendererVulkan.h"
-#include "target/WindowRendererGL.h"
+#include "target/WindowRenderer.h"
 #include "../ygraphics/graphics-impl.h"
 #include "../image/image.h"
 #include "../kabaexport/KabaExporter.h"
@@ -317,19 +316,13 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		ext->link_virtual("Renderer.draw", &Renderer::draw, &renderer);
 	}
 	{
-#ifdef USING_VULKAN
-		using WindowRenderer = WindowRendererVulkan;
-#else
-		class WindowRendererGL;
-		using WindowRenderer = WindowRendererGL;
-#endif
 		WindowRenderer wr(nullptr, nullptr);
 		ext->declare_class_size("WindowRenderer", sizeof(WindowRenderer));
+		ext->link_class_func("WindowRenderer.__init__", &kaba::generic_init_ext<WindowRenderer, yrenderer::Context*, GLFWwindow*>);
 		ext->link_virtual("WindowRenderer.__delete__", &kaba::generic_virtual<WindowRenderer>::__delete__, &wr);
 		ext->link_class_func("WindowRenderer.start_frame", &WindowRenderer::start_frame);
 		ext->link_class_func("WindowRenderer.end_frame", &WindowRenderer::end_frame);
 		ext->link_class_func("WindowRenderer.create_params", &WindowRenderer::create_params);
-		ext->link_func("WindowRenderer.create", &WindowRenderer::create);
 		ext->link_virtual("WindowRenderer.prepare", &WindowRenderer::prepare, &wr);
 		ext->link_virtual("WindowRenderer.draw", &WindowRenderer::draw, &wr);
 	}

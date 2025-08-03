@@ -5,7 +5,7 @@
  *      Author: michi
  */
 
-#include "WindowRendererVulkan.h"
+#include "WindowRenderer.h"
 #ifdef USING_VULKAN
 #include "../base.h"
 #include <lib/ygraphics/graphics-impl.h>
@@ -126,20 +126,15 @@ void SurfaceRendererVulkan::draw(const RenderParams& params) {
 
 
 #ifdef HAS_LIB_GLFW
-WindowRendererVulkan::WindowRendererVulkan(Context* ctx, GLFWwindow* _window) :
+WindowRenderer::WindowRenderer(Context* ctx, GLFWwindow* _window) :
 		SurfaceRendererVulkan(ctx, "win") {
 	window = _window;
+	if (ctx and window)
+		_create_swap_chain_and_stuff();
 }
 
-void WindowRendererVulkan::create_swap_chain() {
+void WindowRenderer::create_swap_chain() {
 	swap_chain = vulkan::SwapChain::create_for_glfw(device, window);
-}
-
-xfer<WindowRendererVulkan> WindowRendererVulkan::create(Context* ctx, GLFWwindow* window) {
-	//auto surface = device->instance->create_glfw_surface(window);
-	auto r = new WindowRendererVulkan(ctx, window);
-	r->_create_swap_chain_and_stuff();
-	return r;
 }
 #endif
 

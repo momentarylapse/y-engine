@@ -8,7 +8,7 @@
 #include <lib/os/msg.h>
 #include <lib/base/iter.h>
 #include <lib/profiler/Profiler.h>
-#include <lib/yrenderer/target/WindowRendererVulkan.h>
+#include <lib/yrenderer/target/WindowRenderer.h>
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/Material.h>
 #include "../../world/Model.h"

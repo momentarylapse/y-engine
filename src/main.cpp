@@ -41,11 +41,7 @@
 #include <lib/yrenderer/base.h>
 #include "renderer/helper/RendererFactory.h"
 #include "renderer/world/WorldRenderer.h"
-#ifdef USING_VULKAN
-	#include <lib/yrenderer/target/WindowRendererVulkan.h>
-#else
-	#include <lib/yrenderer/target/WindowRendererGL.h>
-#endif
+#include <lib/yrenderer/target/WindowRenderer.h>
 #include "renderer/path/RenderPath.h"
 
 #include "Config.h"

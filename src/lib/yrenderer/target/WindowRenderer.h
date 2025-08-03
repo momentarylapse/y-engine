@@ -8,21 +8,22 @@
 #pragma once
 
 #include "TargetRenderer.h"
-#ifdef USING_VULKAN
-
-#include <lib/vulkan/vulkan.h>
 
 struct GLFWwindow;
 
+#ifdef USING_VULKAN
+#include <lib/vulkan/vulkan.h>
 
 using Semaphore = vulkan::Semaphore;
 using Fence = vulkan::Fence;
 using SwapChain = vulkan::SwapChain;
 using RenderPass = vulkan::RenderPass;
 using Device = vulkan::Device;
+#endif
 
 namespace yrenderer {
 
+#ifdef USING_VULKAN
 class SurfaceRendererVulkan : public TargetRenderer {
 public:
 	SurfaceRendererVulkan(Context* ctx, const string& name);
@@ -58,20 +59,41 @@ public:
 	void _create_swap_chain_and_stuff();
 	void rebuild_default_stuff();
 };
+#endif
 
 #ifdef HAS_LIB_GLFW
-class WindowRendererVulkan : public SurfaceRendererVulkan {
+#ifdef USING_VULKAN
+class WindowRenderer : public SurfaceRendererVulkan {
 public:
-	WindowRendererVulkan(Context* ctx, GLFWwindow* win);
+	WindowRenderer(Context* ctx, GLFWwindow* win);
 
 	void create_swap_chain() override;
 
 	GLFWwindow* window;
+};
+#else
+class WindowRenderer : public TargetRenderer {
+public:
+	explicit WindowRenderer(Context* ctx, GLFWwindow* win);
 
-	static xfer<WindowRendererVulkan> create(Context* ctx, GLFWwindow* win);
+
+	bool start_frame();
+	void end_frame(const RenderParams& params);
+
+	void prepare(const RenderParams& params) override;
+	void draw(const RenderParams& params) override;
+
+	RenderParams create_params(float aspect_ratio);
+
+	GLFWwindow* window;
+
+	ygfx::DepthBuffer* _depth_buffer;
+	ygfx::FrameBuffer* _frame_buffer;
 };
 #endif
+#endif
 
+#ifdef USING_VULKAN
 class HeadlessSurfaceRendererVulkan : public SurfaceRendererVulkan {
 public:
 	HeadlessSurfaceRendererVulkan(Context* ctx, int width, int height);
@@ -82,7 +104,7 @@ public:
 
 	static xfer<HeadlessSurfaceRendererVulkan> create(Context* ctx, int width, int height);
 };
+#endif
 
 }
 
-#endif

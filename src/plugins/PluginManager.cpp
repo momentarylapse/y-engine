@@ -47,13 +47,12 @@
 #ifdef USING_OPENGL
 #include "../renderer/gui/GuiRendererGL.h"
 #include "../renderer/post/PostProcessorGL.h"
-#include <lib/yrenderer/target/WindowRendererGL.h>
 #endif
 #ifdef USING_VULKAN
 #include "../renderer/gui/GuiRendererVulkan.h"
 #include "../renderer/post/PostProcessorVulkan.h"
-#include <lib/yrenderer/target/WindowRendererVulkan.h>
 #endif
+#include <lib/yrenderer/target/WindowRenderer.h>
 #include <renderer/helper/Raytracing.h>
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/regions/RegionRenderer.h>

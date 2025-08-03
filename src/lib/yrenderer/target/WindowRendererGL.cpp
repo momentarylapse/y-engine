@@ -6,7 +6,7 @@
  */
 
 
-#include "WindowRendererGL.h"
+#include "WindowRenderer.h"
 #ifdef USING_OPENGL
 #if HAS_LIB_GLFW
 #include <GLFW/glfw3.h>
@@ -17,18 +17,20 @@
 
 namespace yrenderer {
 
-WindowRendererGL::WindowRendererGL(Context* ctx, GLFWwindow* win) : TargetRenderer(ctx, "win") {
+WindowRenderer::WindowRenderer(Context* ctx, GLFWwindow* win) : TargetRenderer(ctx, "win") {
 	window = win;
+	if (ctx and window) {
 #if HAS_LIB_GLFW
-	glfwMakeContextCurrent(window);
-	//glfwGetFramebufferSize(window, &width, &height);
+		glfwMakeContextCurrent(window);
+		//glfwGetFramebufferSize(window, &width, &height);
 #endif
 
-	_frame_buffer = ctx->context->default_framebuffer;
+		_frame_buffer = ctx->context->default_framebuffer;
+	}
 }
 
 
-bool WindowRendererGL::start_frame() {
+bool WindowRenderer::start_frame() {
 #if HAS_LIB_GLFW
 	nix::start_frame_glfw(ctx->context, window);
 	//jitter_iterate();
@@ -38,7 +40,7 @@ bool WindowRendererGL::start_frame() {
 #endif
 }
 
-void WindowRendererGL::end_frame(const RenderParams& params) {
+void WindowRenderer::end_frame(const RenderParams& params) {
 #if HAS_LIB_GLFW
 	profiler::begin(ch_end);
 	ctx->gpu_timestamp_begin(params, ch_end);
@@ -49,15 +51,15 @@ void WindowRendererGL::end_frame(const RenderParams& params) {
 }
 
 
-RenderParams WindowRendererGL::create_params(float aspect_ratio) {
+RenderParams WindowRenderer::create_params(float aspect_ratio) {
 	return RenderParams::into_window(_frame_buffer, aspect_ratio);
 }
 
-void WindowRendererGL::prepare(const RenderParams& params) {
+void WindowRenderer::prepare(const RenderParams& params) {
 
 }
 
-void WindowRendererGL::draw(const RenderParams& params) {
+void WindowRenderer::draw(const RenderParams& params) {
 	profiler::begin(channel);
 	auto sub_params = RenderParams::into_window(_frame_buffer, params.desired_aspect_ratio);
 	for (auto c: children)

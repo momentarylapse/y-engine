@@ -12,14 +12,13 @@
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/regions/RegionRenderer.h>
+#include <lib/yrenderer/target/WindowRenderer.h>
 #ifdef USING_VULKAN
 	#include "../gui/GuiRendererVulkan.h"
 	#include "../post/PostProcessorVulkan.h"
-	#include <lib/yrenderer/target/WindowRendererVulkan.h>
 #else
 	#include "../gui/GuiRendererGL.h"
 	#include "../post/PostProcessorGL.h"
-	#include <lib/yrenderer/target/WindowRendererGL.h>
 #endif
 #include <y/EngineData.h>
 #include <lib/os/msg.h>
@@ -58,11 +57,7 @@ void print_render_chain() {
 
 WindowRenderer *create_window_renderer(yrenderer::Context* ctx, GLFWwindow* window) {
 #ifdef HAS_LIB_GLFW
-#ifdef USING_VULKAN
-	return WindowRendererVulkan::create(ctx, window);
-#else
-	return new WindowRendererGL(ctx, window);
-#endif
+	return new WindowRenderer(ctx, window);
 #else
 	return nullptr;
 #endif
