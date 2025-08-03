@@ -8,7 +8,7 @@
 #include "Context.h"
 #include "TextureManager.h"
 #include "ShaderManager.h"
-#include "Material.h"
+#include "MaterialManager.h"
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/image/image.h>
 

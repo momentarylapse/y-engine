@@ -4,7 +4,7 @@
 #include <lib/os/filesystem.h>
 #include <y/EngineData.h>
 #include <lib/ygraphics/graphics-impl.h>
-#include <lib/yrenderer/Material.h>
+#include <lib/yrenderer/MaterialManager.h>
 #include <lib/yrenderer/Context.h>
 #include <world/ModelManager.h>
 

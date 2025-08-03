@@ -83,7 +83,7 @@ bool Terrain::load(yrenderer::Context* ctx, const Path &_filename_, bool deep) {
 			// Material
 			material_file = f->read_str();
 			if (deep) {
-				material = ctx->material_manager->load(material_file);
+				material = ctx->load_material(material_file);
 
 				while (num_textures > material->textures.num)
 					material->textures.add(ctx->texture_manager->load_texture(""));

@@ -734,6 +734,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/ContextGL.cpp
 	src/lib/yrenderer/ContextVulkan.cpp
 	src/lib/yrenderer/Material.cpp
+	src/lib/yrenderer/MaterialManager.cpp
 	src/lib/yrenderer/Renderer.cpp
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
@@ -1003,6 +1004,7 @@ add_executable(y
 	src/lib/yrenderer/ContextGL.cpp
 	src/lib/yrenderer/ContextVulkan.cpp
 	src/lib/yrenderer/Material.cpp
+	src/lib/yrenderer/MaterialManager.cpp
 	src/lib/yrenderer/Renderer.cpp
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp

@@ -25,7 +25,7 @@
 #include <lib/doc/chunked.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include "../meta.h"
-#include <lib/yrenderer/Material.h>
+#include <lib/yrenderer/MaterialManager.h>
 
 
 namespace yrenderer {
