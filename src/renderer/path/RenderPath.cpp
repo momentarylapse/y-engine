@@ -49,10 +49,6 @@ using LightMeter = yrenderer::LightMeter;
 using RenderPathType = yrenderer::RenderPathType;
 
 
-HDRResolver* create_hdr_resolver(Context* ctx, ygfx::Texture* tex, ygfx::DepthBuffer* depth) {
-	return new HDRResolver(ctx, tex, depth);
-}
-
 WorldRenderer* create_world_renderer(Context* ctx, Camera* cam, SceneView& scene_view, RenderPathType type) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
@@ -180,7 +176,7 @@ void RenderPath::create_post_processing(Renderer* source) {
 	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
 	auto hdr_depth = new ygfx::DepthBuffer(engine.width, engine.height, "d:f32");
 
-	hdr_resolver = create_hdr_resolver(ctx, hdr_tex, hdr_depth);
+	hdr_resolver = new HDRResolver(ctx, hdr_tex, hdr_depth, true);
 
 #ifdef USING_VULKAN
 	config.antialiasing_method = AntialiasingMethod::NONE;

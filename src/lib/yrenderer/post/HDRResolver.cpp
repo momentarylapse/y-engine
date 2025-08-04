@@ -28,7 +28,7 @@ static int BLUR_SCALE = 4;
 static int BLOOM_LEVEL_SCALE = 4;
 
 
-HDRResolver::HDRResolver(Context* ctx, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer) : Renderer(ctx, "hdr") {
+HDRResolver::HDRResolver(Context* ctx, const shared<ygfx::Texture>& tex, const shared<ygfx::DepthBuffer>& depth_buffer, bool manual_mode) : Renderer(ctx, "hdr") {
 	tex_main = tex;
 	_depth_buffer = depth_buffer;
 
@@ -72,7 +72,11 @@ HDRResolver::HDRResolver(Context* ctx, const shared<ygfx::Texture>& tex, const s
 	auto shader_out = shader_manager->load_shader("forward/hdr.shader");
 	out_renderer = new ThroughShaderRenderer(ctx, "out", shader_out);
 	out_renderer->bind_textures(0, {tex.get(), bloom_levels[0].tex_out.get(), bloom_levels[1].tex_out.get(), bloom_levels[2].tex_out.get(), bloom_levels[3].tex_out.get()});
-	children.add(out_renderer.get());
+
+	if (!manual_mode) {
+		auto ddd = (ygfx::Texture*)depth_buffer.get();
+		texture_renderer = new TextureRenderer(ctx, "tex", {tex, ddd});
+	}
 }
 
 
@@ -82,8 +86,15 @@ void HDRResolver::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
 	ctx->gpu_timestamp_begin(params, ch_prepare);
 
-	for (auto c: children)
-		c->prepare(params);
+	if (texture_renderer) {
+		texture_renderer->children = children;
+		texture_renderer->render(params);
+	} else {
+		for (auto c: children)
+			c->prepare(params);
+	}
+
+	out_renderer->prepare(params);
 
 	out_renderer->set_source(dynamicly_scaled_source());
 
@@ -115,6 +126,11 @@ void HDRResolver::prepare(const RenderParams& params) {
 	ctx->gpu_timestamp_end(params, ch_prepare);
 	profiler::end(ch_prepare);
 }
+
+void HDRResolver::draw(const RenderParams &params) {
+	out_renderer->draw(params);
+}
+
 
 }
 

@@ -16,6 +16,10 @@
 #include "../image/image.h"
 #include "../kabaexport/KabaExporter.h"
 #include "../os/msg.h"
+#include "target/TextureRenderer.h"
+
+
+#define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
 
 
 //using namespace yrenderer;
@@ -226,23 +230,25 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 	ext->declare_class_element("Material.friction", &Material::friction);
 	ext->link_class_func("Material.add_uniform", &Material::add_uniform);
 
-
-#define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
-
-	Light light;
-	ext->declare_class_size("YLight", sizeof(Light));
-	ext->declare_class_element("YLight.dir", _OFFSET(light, light.dir));
-	ext->declare_class_element("YLight.color", _OFFSET(light, light.col));
-	ext->declare_class_element("YLight.radius", _OFFSET(light, light.radius));
-	ext->declare_class_element("YLight.theta", _OFFSET(light, light.theta));
-	ext->declare_class_element("YLight.harshness", _OFFSET(light, light.harshness));
-	ext->declare_class_element("YLight.enabled", _OFFSET(light, enabled));
-	ext->declare_class_element("YLight.allow_shadow", _OFFSET(light, allow_shadow));
-	ext->declare_class_element("YLight.user_shadow_control", _OFFSET(light, user_shadow_control));
-	ext->declare_class_element("YLight.user_shadow_theta", _OFFSET(light, user_shadow_theta));
-	ext->declare_class_element("YLight.shadow_dist_max", _OFFSET(light, shadow_dist_max));
-	ext->declare_class_element("YLight.shadow_dist_min", _OFFSET(light, shadow_dist_min));
-//	ext->link_class_func("Light.set_direction", &Light::set_direction);
+	{
+		Light light;
+		ext->declare_class_size("YLight", sizeof(Light));
+		ext->declare_class_element("YLight.pos", _OFFSET(light, light.pos));
+		ext->declare_class_element("YLight.ang", &Light::_ang);
+		ext->declare_class_element("YLight.dir", _OFFSET(light, light.dir));
+		ext->declare_class_element("YLight.color", _OFFSET(light, light.col));
+		ext->declare_class_element("YLight.radius", _OFFSET(light, light.radius));
+		ext->declare_class_element("YLight.theta", _OFFSET(light, light.theta));
+		ext->declare_class_element("YLight.harshness", _OFFSET(light, light.harshness));
+		ext->declare_class_element("YLight.enabled", &Light::enabled);
+		ext->declare_class_element("YLight.allow_shadow", &Light::allow_shadow);
+		ext->declare_class_element("YLight.user_shadow_control", &Light::user_shadow_control);
+		ext->declare_class_element("YLight.user_shadow_theta", &Light::user_shadow_theta);
+		ext->declare_class_element("YLight.shadow_dist_max", &Light::shadow_dist_max);
+		ext->declare_class_element("YLight.shadow_dist_min", &Light::shadow_dist_min);
+		//	ext->link_class_func("Light.set_direction", &Light::set_direction);
+		ext->link_class_func("YLight.init", &Light::init);
+	}
 
 
 	ext->declare_enum("PrimitiveTopology.TRIANGLES", PrimitiveTopology::TRIANGLES);
@@ -346,6 +352,7 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		CubeEmitter emitter(nullptr);
 		ext->declare_class_size("CubeEmitter", sizeof(CubeEmitter));
 		ext->declare_class_element("CubeEmitter.material", &CubeEmitter::material);
+		ext->declare_class_element("CubeEmitter.matrix", &CubeEmitter::matrix);
 		ext->link_class_func("CubeEmitter.__init__", &kaba::generic_init_ext<CubeEmitter, yrenderer::Context*>);
 		ext->link_class_func("CubeEmitter.set_cube", &CubeEmitter::set_cube);
 		ext->link_virtual("CubeEmitter.emit", &CubeEmitter::emit, &emitter);
@@ -373,6 +380,14 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 	}
 
 	{
+		ext->declare_class_size("TextureRenderer", sizeof(TextureRenderer));
+		ext->declare_class_element("TextureRenderer.clear_z", &TextureRenderer::clear_z);
+		ext->declare_class_element("TextureRenderer.clear_colors", &TextureRenderer::clear_colors);
+		ext->link_class_func("TextureRenderer.__init__", &kaba::generic_init_ext<TextureRenderer, yrenderer::Context*, const string&, const shared_array<Texture>&, const Array<string>&>);
+		ext->link_class_func("TextureRenderer.set_area", &TextureRenderer::set_area);
+	}
+
+	{
 		ext->declare_class_size("RegionsRenderer", sizeof(yrenderer::RegionRenderer));
 		ext->declare_class_element("RegionRenderer.regions", &yrenderer::RegionRenderer::regions);
 		ext->link_class_func("RegionRenderer.add_region", &yrenderer::RegionRenderer::add_region);
@@ -393,6 +408,8 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		ext->declare_class_element("SceneView.probe_max", &SceneView::probe_max);
 		ext->declare_class_element("SceneView.ray_tracing_data", &SceneView::ray_tracing_data);
 		ext->link_class_func("SceneView.__init__", &kaba::generic_init<SceneView>);
+		ext->link_class_func("SceneView.choose_lights", &SceneView::choose_lights);
+		ext->link_class_func("SceneView.choose_shadows", &SceneView::choose_shadows);
 	}
 
 	{
@@ -402,15 +419,17 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		ext->link_class_func("RenderViewData.__init__", &kaba::generic_init_ext<RenderViewData, yrenderer::Context*>);
 	}
 
-
 	{
 		ext->declare_class_size("HDRResolver.BloomLevel", sizeof(HDRResolver::BloomLevel));
 		ext->declare_class_element("HDRResolver.BloomLevel.tex_out", &HDRResolver::BloomLevel::tex_out);
 
 		ext->declare_class_size("HDRResolver", sizeof(HDRResolver));
+		ext->declare_class_element("HDRResolver.exposure", &HDRResolver::exposure);
+		ext->declare_class_element("HDRResolver.bloom_factor", &HDRResolver::bloom_factor);
 		ext->declare_class_element("HDRResolver.texture", &HDRResolver::tex_main);
 		ext->declare_class_element("HDRResolver.depth_buffer", &HDRResolver::_depth_buffer);
 		ext->declare_class_element("HDRResolver.bloom_levels", &HDRResolver::bloom_levels);
+		ext->link_class_func("HDRResolver.__init__", &kaba::generic_init_ext<HDRResolver, yrenderer::Context*, const shared<Texture>&, const shared<DepthBuffer>&>);
 		//ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
 	}
 

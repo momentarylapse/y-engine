@@ -7,6 +7,7 @@
 
 #include "../MeshEmitter.h"
 #include <lib/ygraphics/graphics-fwd.h>
+#include <lib/math/mat4.h>
 
 struct Box;
 
@@ -18,6 +19,7 @@ class CubeEmitter : public MeshEmitter {
 public:
 	owned<ygfx::VertexBuffer> vb;
 	owned<Material> material;
+	mat4 matrix;
 
 	explicit CubeEmitter(Context* ctx);
 	void set_cube(const Box& box);
