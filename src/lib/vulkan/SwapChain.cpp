@@ -221,6 +221,10 @@ Array<VkImageView> SwapChain::create_image_views(Array<VkImage> &images) {
 
 SwapChain::SwapChain(Device *d) {
 	device = d;
+	swap_chain = nullptr;
+	width = height = 1;
+	image_count = 0;
+	image_format = VK_FORMAT_UNDEFINED;
 }
 
 SwapChain::~SwapChain() {
