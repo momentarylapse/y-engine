@@ -425,6 +425,10 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 	ext->link_class_func("Context.create_managers", &yrenderer::Context::create_managers);
 	ext->link_class_func("Context.load_material", &yrenderer::Context::load_material);
 	ext->link_class_func("Context.load_texture", &yrenderer::Context::load_texture);
+	ext->link_class_func("Context.load_shader", &yrenderer::Context::load_shader);
+	ext->link_class_func("Context.create_shader", &yrenderer::Context::create_shader);
+	ext->link_class_func("Context.load_shader_module", &yrenderer::Context::load_shader_module);
+	ext->link_class_func("Context.load_surface_shader", &yrenderer::Context::load_surface_shader);
 
 
 	ext->link_func("api_init", &api_init);
