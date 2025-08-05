@@ -11,7 +11,7 @@
 #if HAS_LIB_GLFW
 #include <GLFW/glfw3.h>
 #endif
-#include <lib/yrenderer/base.h>
+#include <lib/yrenderer/Context.h>
 #include <lib/nix/nix.h>
 #include <lib/profiler/Profiler.h>
 

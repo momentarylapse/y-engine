@@ -12,6 +12,7 @@
 #include "scene/mesh/CubeEmitter.h"
 #include "regions/RegionRenderer.h"
 #include "target/WindowRenderer.h"
+#include "target/XhuiRenderer.h"
 #include "../ygraphics/graphics-impl.h"
 #include "../image/image.h"
 #include "../kabaexport/KabaExporter.h"
@@ -333,6 +334,17 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		ext->link_virtual("WindowRenderer.draw", &WindowRenderer::draw, &wr);
 	}
 	{
+
+		XhuiRenderer xr(nullptr);
+		ext->declare_class_size("XhuiRenderer", sizeof(XhuiRenderer));
+		ext->link_class_func("XhuiRenderer.__init__", &kaba::generic_init_ext<XhuiRenderer, yrenderer::Context*>);
+		ext->link_virtual("XhuiRenderer.__delete__", &kaba::generic_virtual<XhuiRenderer>::__delete__, &xr);
+		ext->link_virtual("XhuiRenderer.render", &XhuiRenderer::render, &xr);
+		ext->link_class_func("XhuiRenderer.before_draw", &XhuiRenderer::before_draw);
+		ext->link_class_func("XhuiRenderer.draw", &XhuiRenderer::draw);
+		ext->link_class_func("XhuiRenderer.extract_params", &XhuiRenderer::extract_params);
+	}
+	{
 		ext->declare_class_size("SceneRenderer", sizeof(SceneRenderer));
 		ext->declare_class_element("SceneRenderer.background_color", &SceneRenderer::background_color);
 		ext->link_class_func("SceneRenderer.__init__", &kaba::generic_init_ext<SceneRenderer, yrenderer::Context*, RenderPathType, SceneView&>);
@@ -450,7 +462,8 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 	ext->link_class_func("Context.load_surface_shader", &yrenderer::Context::load_surface_shader);
 
 
-	ext->link_func("api_init", &api_init);
+	ext->link_func("api_init_glfw", &api_init_glfw);
+	ext->link_func("api_init_xhui", &api_init_xhui);
 }
 
 

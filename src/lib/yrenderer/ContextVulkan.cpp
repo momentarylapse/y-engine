@@ -25,7 +25,7 @@ void _create_context_stuff(Context* ctx) {
 }
 
 #if HAS_LIB_GLFW
-Context* api_init(GLFWwindow* window) {
+Context* api_init_glfw(GLFWwindow* window) {
 	auto ctx = new Context();
 	ctx->instance = vulkan::init({"glfw", "validation", "api=1.3", "rtx?", "verbosity=3"});
 	surface = ctx->instance->create_glfw_surface(window);

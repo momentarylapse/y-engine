@@ -682,6 +682,7 @@ add_library(moduley SHARED
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
 	src/lib/threads/ThreadPool.cpp
+	src/lib/vulkan/_kaba_export.cpp
 	src/lib/vulkan/AccelerationStructure.cpp
 	src/lib/vulkan/Buffer.cpp
 	src/lib/vulkan/CommandBuffer.cpp
@@ -952,6 +953,7 @@ add_executable(y
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
 	src/lib/threads/ThreadPool.cpp
+	src/lib/vulkan/_kaba_export.cpp
 	src/lib/vulkan/AccelerationStructure.cpp
 	src/lib/vulkan/Buffer.cpp
 	src/lib/vulkan/CommandBuffer.cpp

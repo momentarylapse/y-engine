@@ -14,14 +14,14 @@ namespace yrenderer {
 class XhuiRenderer : public RenderTask {
 public:
 	rect native_area_window = rect::ID;
-	XhuiRenderer(Context* ctx) : RenderTask(ctx, "xhui") {}
+	explicit XhuiRenderer(Context* ctx) : RenderTask(ctx, "xhui") {}
 	RenderParams extract_params(Painter* p);
 	void render(const RenderParams& params) override;
 
 	// call in event_xp(window->id, xhui::event_id::JustBeforeDraw, [this] (Painter* p) { ... });
-	void prepare(Painter* p);
+	void before_draw(Painter* p);
 	// call in event_xp("area", xhui::event_id::Draw, [this] (Painter* p) { ... });
-	void render(Painter* p);
+	void draw(Painter* p);
 };
 
 }

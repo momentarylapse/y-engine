@@ -124,7 +124,7 @@ public:
 			config.game_dir | "Materials",
 			config.game_dir | "Fonts");
 
-		auto context = yrenderer::api_init(window);
+		auto context = yrenderer::api_init_glfw(window);
 		auto resource_manager = new ResourceManager(context,
 			config.game_dir | "Textures",
 			config.game_dir | "Materials",

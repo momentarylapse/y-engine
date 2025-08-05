@@ -64,7 +64,7 @@ struct Context {
 	void gpu_flush();
 };
 
-Context* api_init(GLFWwindow* window);
+Context* api_init_glfw(GLFWwindow* window);
 #ifdef USING_VULKAN
 Context* api_init_external(vulkan::Instance* instance, vulkan::Device* device);
 #endif
