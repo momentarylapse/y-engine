@@ -79,18 +79,16 @@ WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, Camera* ca
 	add_child(scene_renderer_background.get());
 
 	scene_renderer = new SceneRenderer(ctx, RenderPathType::Deferred, scene_view);
-	scene_renderer->add_emitter(new WorldModelsEmitter(ctx));
+	scene_renderer->add_emitter(new WorldOpaqueModelsEmitter(ctx));
 	scene_renderer->add_emitter(new WorldTerrainsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldUserMeshesEmitter(ctx));
+	scene_renderer->add_emitter(new WorldOpaqueUserMeshesEmitter(ctx));
 	scene_renderer->add_emitter(new WorldInstancedEmitter(ctx));
-	scene_renderer->allow_transparent = false;
 	gbuffer_renderer->add_child(scene_renderer.get());
 
 	scene_renderer_trans = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
-	scene_renderer_trans->add_emitter(new WorldModelsEmitter(ctx));
-	scene_renderer_trans->add_emitter(new WorldUserMeshesEmitter(ctx));
+	scene_renderer_trans->add_emitter(new WorldTransparentModelsEmitter(ctx));
+	scene_renderer_trans->add_emitter(new WorldTransparentUserMeshesEmitter(ctx));
 	scene_renderer_trans->add_emitter(new WorldParticlesEmitter(ctx, cam));
-	scene_renderer_trans->allow_opaque = false;
 	add_child(scene_renderer_trans.get());
 }
 

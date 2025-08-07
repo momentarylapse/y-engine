@@ -27,10 +27,12 @@ WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, Camera* cam,
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
 	scene_renderer->add_emitter(new WorldSkyboxEmitter(ctx));
-	scene_renderer->add_emitter(new WorldModelsEmitter(ctx));
+	scene_renderer->add_emitter(new WorldOpaqueModelsEmitter(ctx));
 	scene_renderer->add_emitter(new WorldTerrainsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldUserMeshesEmitter(ctx));
+	scene_renderer->add_emitter(new WorldOpaqueUserMeshesEmitter(ctx));
 	scene_renderer->add_emitter(new WorldInstancedEmitter(ctx));
+	scene_renderer->add_emitter(new WorldTransparentModelsEmitter(ctx));
+	scene_renderer->add_emitter(new WorldTransparentUserMeshesEmitter(ctx));
 	scene_renderer->add_emitter(new WorldParticlesEmitter(ctx, cam));
 }
 

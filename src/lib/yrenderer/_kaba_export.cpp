@@ -358,7 +358,6 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		ext->declare_class_element("MeshEmitter._shared_ref_count", &MeshEmitter::_pointer_ref_counter);
 		ext->link_class_func("MeshEmitter.__init__", &kaba::generic_init_ext<MeshEmitter, yrenderer::Context*, const string&>);
 		ext->link_virtual("MeshEmitter.emit", &MeshEmitter::emit, &emitter);
-		ext->link_virtual("MeshEmitter.emit_transparent", &MeshEmitter::emit_transparent, &emitter);
 	}
 	{
 		CubeEmitter emitter(nullptr);

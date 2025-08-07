@@ -149,9 +149,9 @@ void RenderPath::create_shadow_renderer() {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 	shadow_renderer = new yrenderer::ShadowRenderer(ctx, &scene_view, {
-		new WorldModelsEmitter(ctx),
+		new WorldOpaqueModelsEmitter(ctx),
 		new WorldTerrainsEmitter(ctx),
-		new WorldUserMeshesEmitter(ctx),
+		new WorldOpaqueUserMeshesEmitter(ctx),
 		new WorldInstancedEmitter(ctx)},
 		shadow_resolution);
 	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
@@ -162,10 +162,11 @@ void RenderPath::create_shadow_renderer() {
 void RenderPath::create_cube_renderer() {
 	cube_map_renderer = new yrenderer::CubeMapRenderer(ctx, scene_view, {
 		new WorldSkyboxEmitter(ctx),
-		new WorldModelsEmitter(ctx),
+		new WorldOpaqueModelsEmitter(ctx),
 		new WorldTerrainsEmitter(ctx),
-		new WorldUserMeshesEmitter(ctx),
+		new WorldOpaqueUserMeshesEmitter(ctx),
 		new WorldInstancedEmitter(ctx)});
+	// transparent...?
 }
 
 
