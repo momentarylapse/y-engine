@@ -8,17 +8,15 @@
 #pragma once
 
 #include "WorldRenderer.h"
-#include <lib/yrenderer/scene/RenderViewData.h>
 
 namespace yrenderer {
 	class SceneRenderer;
 }
-class Camera;
 class Profiler;
 
 class WorldRendererForward : public WorldRenderer {
 public:
-	explicit WorldRendererForward(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view);
+	explicit WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view);
 
 	void add_background_emitter(shared<yrenderer::MeshEmitter> emitter) override;
 	void add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) override;

@@ -15,7 +15,6 @@
 #include <lib/math/vec4.h>
 #include <lib/math/vec2.h>
 #include <lib/profiler/Profiler.h>
-#include "../../world/Camera.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/scene/CameraParams.h>
 #include "../../Config.h"
@@ -25,7 +24,7 @@
 using namespace yrenderer;
 using namespace ygfx;
 
-WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, Camera* cam, SceneView& scene_view, int width, int height) : WorldRenderer(ctx, "world/def", cam, scene_view) {
+WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height) : WorldRenderer(ctx, "world/def", scene_view) {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
@@ -93,15 +92,14 @@ void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());
 
 	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
-	const auto ycam = cam->params();
 
-	scene_renderer_background->set_view(params, ycam);
+	scene_renderer_background->set_view(params, view);
 	scene_renderer_background->prepare(params); // keep drawing into direct target
 
-	scene_renderer->set_view(sub_params, ycam);
+	scene_renderer->set_view(sub_params, view);
 	scene_renderer->prepare(sub_params);
 
-	scene_renderer_trans->set_view(params, ycam);
+	scene_renderer_trans->set_view(params, view);
 	scene_renderer_trans->prepare(params); // keep drawing into direct target
 
 

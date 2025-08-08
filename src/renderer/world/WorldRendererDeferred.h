@@ -30,7 +30,7 @@ public:
 	owned<yrenderer::SceneRenderer> scene_renderer_trans;
 	owned<yrenderer::ThroughShaderRenderer> out_renderer;
 
-	WorldRendererDeferred(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, int width, int height);
+	WorldRendererDeferred(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int width, int height);
 
 	void add_background_emitter(shared<yrenderer::MeshEmitter> emitter) override;
 	void add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) override;

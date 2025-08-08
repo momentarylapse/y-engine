@@ -12,14 +12,14 @@
 #include <lib/image/image.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/ShaderManager.h>
-#include "../../world/Camera.h"
 
 
-WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", cam, scene_view) {
+WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", scene_view) {
 	shader_manager->load_shader_module("forward/module-surface.shader");
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
 }
+
 
 void WorldRendererForward::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
@@ -38,9 +38,8 @@ void WorldRendererForward::add_transparent_emitter(shared<yrenderer::MeshEmitter
 
 void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);
-	cam->update_matrix_cache(params.desired_aspect_ratio);
 	
-	scene_renderer->set_view(params, cam->params());
+	scene_renderer->set_view(params, view);
 	scene_renderer->prepare(params);
 
 	profiler::end(ch_prepare);

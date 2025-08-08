@@ -50,14 +50,14 @@ using LightMeter = yrenderer::LightMeter;
 using RenderPathType = yrenderer::RenderPathType;
 
 
-WorldRenderer* create_world_renderer(Context* ctx, Camera* cam, SceneView& scene_view, RenderPathType type) {
+WorldRenderer* create_world_renderer(Context* ctx, SceneView& scene_view, RenderPathType type) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
-		return new WorldRendererVulkanRayTracing(ctx, cam, scene_view, engine.width, engine.height);
+		return new WorldRendererVulkanRayTracing(ctx, scene_view, engine.width, engine.height);
 #endif
 	if (type == RenderPathType::Deferred)
-		return new WorldRendererDeferred(ctx, cam, scene_view, engine.width, engine.height);
-	return new WorldRendererForward(ctx, cam, scene_view);
+		return new WorldRendererDeferred(ctx, scene_view, engine.width, engine.height);
+	return new WorldRendererForward(ctx, scene_view);
 }
 
 float global_shadow_box_size;
@@ -96,7 +96,7 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 	}
 
 
-	world_renderer = create_world_renderer(ctx, cam, scene_view, type);
+	world_renderer = create_world_renderer(ctx, scene_view, type);
 	world_renderer->add_background_emitter(new WorldSkyboxEmitter(ctx));
 	world_renderer->add_opaque_emitter(new WorldOpaqueModelsEmitter(ctx));
 	world_renderer->add_opaque_emitter(new WorldTerrainsEmitter(ctx));
@@ -289,9 +289,11 @@ void FullCameraRenderer::prepare_instanced_matrices() {
 
 
 void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
+	world_renderer->view = cam->params();
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
 	scene_view.main_camera_params = cam->params();
+	cam->update_matrix_cache(params.desired_aspect_ratio);
 	const auto& all_lights = ComponentManager::get_list_family<::Light>();
 	Array<yrenderer::Light*> lights;
 	for (auto l: all_lights) {
