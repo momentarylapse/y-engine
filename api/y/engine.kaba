@@ -33,7 +33,7 @@ class EngineData as @noauto
 	#Font* default_font
 	var renderer: Renderer&
 	var region_renderer: RegionRenderer&
-	var render_paths: RenderPath&[]
+	var camera_renderers: FullCameraRenderer&[]
 	
 	func extern add_render_task(task: xfer[RenderTask], priority: i32)
 
@@ -96,13 +96,15 @@ class WorldRenderer
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
-class RenderPath
-	enum Type
-		DIRECT
-		FORWARD
-		DEFERRED
-		PATHTRACING
-	var type: Type
+
+enum RenderPathType
+	DIRECT
+	FORWARD
+	DEFERRED
+	PATHTRACING
+
+class FullCameraRenderer extends Renderer
+	var type: RenderPathType
 	var world_renderer: WorldRenderer*
 	var hdr_resolver: HDRResolver*
 	var light_meter: LightMeter*

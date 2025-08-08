@@ -748,7 +748,6 @@ add_library(moduley SHARED
 	src/renderer/gui/GuiRendererVulkan.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
-	src/renderer/path/RenderPath.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -759,6 +758,7 @@ add_library(moduley SHARED
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
+	src/renderer/FullCameraRenderer.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
 	src/world/components/CubeMapSource.cpp
@@ -1019,7 +1019,6 @@ add_executable(y
 	src/renderer/gui/GuiRendererVulkan.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
-	src/renderer/path/RenderPath.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -1030,6 +1029,7 @@ add_executable(y
 	src/renderer/world/WorldRendererDeferred.cpp
 	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
+	src/renderer/FullCameraRenderer.cpp
 	src/world/components/Animator.cpp
 	src/world/components/Collider.cpp
 	src/world/components/CubeMapSource.cpp

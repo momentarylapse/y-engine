@@ -9,7 +9,6 @@
 #ifdef USING_VULKAN
 #include "../helper/Raytracing.h"
 #include <lib/yrenderer/scene/SceneView.h>
-#include "../path/RenderPath.h"
 #include <lib/yrenderer/Context.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>

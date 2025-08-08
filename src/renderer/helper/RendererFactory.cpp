@@ -7,7 +7,7 @@
 
 #include "RendererFactory.h"
 #include <lib/yrenderer/Context.h>
-#include "../path/RenderPath.h"
+#include "../FullCameraRenderer.h"
 #include "../world/WorldRenderer.h"
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
@@ -97,10 +97,10 @@ public:
 	}
 };*/
 
-void create_and_attach_render_path(yrenderer::Context* ctx, Camera *cam) {
-	auto rp = create_render_path(ctx, cam);
-	engine.render_paths.add(rp);
-	engine.region_renderer->add_region(rp, rect::ID, 0);
+void create_and_attach_camera_renderer(yrenderer::Context* ctx, Camera *cam) {
+	auto cr = create_camera_renderer(ctx, cam);
+	engine.camera_renderers.add(cr);
+	engine.region_renderer->add_region(cr, rect::ID, 0);
 }
 
 

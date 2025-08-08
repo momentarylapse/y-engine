@@ -38,7 +38,7 @@
 #include "../renderer/helper/RendererFactory.h"
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/scene/SceneRenderer.h>
-#include "../renderer/path/RenderPath.h"
+#include "../renderer/FullCameraRenderer.h"
 #include "../renderer/world/WorldRendererForward.h"
 #include "../renderer/world/WorldRendererDeferred.h"
 #ifdef USING_OPENGL
@@ -161,19 +161,19 @@ xfer<yrenderer::Material> __load_material(const Path& filename) {
 }
 
 
-CubeMap* render_path_get_cubemap(RenderPath &r) {
+CubeMap* camera_renderer_get_cubemap(FullCameraRenderer &r) {
 	return r.scene_view.cube_map.get();
 }
 
-Array<Texture*> render_path_get_shadow_map(RenderPath &r) {
+Array<Texture*> camera_renderer_get_shadow_map(FullCameraRenderer &r) {
 	Array<Texture*> shadow_maps;
 	for (auto s: r.scene_view.shadow_maps)
 		shadow_maps.add(s);
 	return shadow_maps;
 }
 
-//shared_array<Texture> render_path_get_gbuffer(RenderPath &r) {
-Array<Texture*> render_path_get_gbuffer(RenderPath &r) {
+//shared_array<Texture> camera_renderer_get_gbuffer(FullCameraRenderer &r) {
+Array<Texture*> camera_renderer_get_gbuffer(FullCameraRenderer &r) {
 	if (r.type == yrenderer::RenderPathType::Deferred)
 		return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
 	return {};
@@ -770,7 +770,7 @@ void export_engine(kaba::Exporter* ext) {
 	ext->declare_class_element("EngineData.window_renderer", &EngineData::window_renderer);
 	ext->declare_class_element("EngineData.gui_renderer", &EngineData::gui_renderer);
 	ext->declare_class_element("EngineData.region_renderer", &EngineData::region_renderer);
-	ext->declare_class_element("EngineData.render_paths", &EngineData::render_paths);
+	ext->declare_class_element("EngineData.render_paths", &EngineData::camera_renderers);
 	ext->link_class_func("EngineData.exit", &EngineData::exit);
 	ext->link_class_func("EngineData.add_render_task", &EngineData::add_render_task);
 
@@ -798,7 +798,7 @@ void export_engine(kaba::Exporter* ext) {
 
 	ext->link("engine", &engine);
 	ext->link_func("screenshot", &screenshot);
-	ext->link_func("create_render_path", &create_render_path);
+	ext->link_func("create_camera_renderer", &create_camera_renderer);
 	ext->link_func("rt_setup", &rt_setup);
 	ext->link_func("rt_update_frame", &rt_update_frame);
 	ext->link_func("rt_vtrace", &vtrace);
@@ -823,18 +823,18 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("RayTracingData.buffer_meshes", &RayTracingData::buffer_meshes);
 	ext->declare_class_element("RayTracingData.num_meshes", &RayTracingData::num_meshes);
 
-	ext->declare_class_size("RenderPath", sizeof(RenderPath));
-	ext->declare_class_element("RenderPath.hdr_resolver", &RenderPath::hdr_resolver);
-	ext->declare_class_element("RenderPath.world_renderer", &RenderPath::world_renderer);
-	ext->declare_class_element("RenderPath.post_processor", &RenderPath::post_processor);
-	ext->declare_class_element("RenderPath.light_meter", &RenderPath::light_meter);
-	ext->declare_class_element("RenderPath.type", &RenderPath::type);
-	ext->declare_class_element("RenderPath.scene_view", &RenderPath::scene_view);
-	ext->link_class_func("RenderPath.render_into_cubemap", &RenderPath::render_into_cubemap);
-	ext->link_class_func("RenderPath.get_shadow_map", &render_path_get_shadow_map);
-	ext->link_class_func("RenderPath.get_gbuffer", &render_path_get_gbuffer);
-	//	ext->link_virtual("RenderPath.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
-	ext->link_class_func("RenderPath.get_cubemap", &render_path_get_cubemap);
+	ext->declare_class_size("FullCameraRenderer", sizeof(FullCameraRenderer));
+	ext->declare_class_element("FullCameraRenderer.hdr_resolver", &FullCameraRenderer::hdr_resolver);
+	ext->declare_class_element("FullCameraRenderer.world_renderer", &FullCameraRenderer::world_renderer);
+	ext->declare_class_element("FullCameraRenderer.post_processor", &FullCameraRenderer::post_processor);
+	ext->declare_class_element("FullCameraRenderer.light_meter", &FullCameraRenderer::light_meter);
+	ext->declare_class_element("FullCameraRenderer.type", &FullCameraRenderer::type);
+	ext->declare_class_element("FullCameraRenderer.scene_view", &FullCameraRenderer::scene_view);
+	ext->link_class_func("FullCameraRenderer.render_into_cubemap", &FullCameraRenderer::render_into_cubemap);
+	ext->link_class_func("FullCameraRenderer.get_shadow_map", &camera_renderer_get_shadow_map);
+	ext->link_class_func("FullCameraRenderer.get_gbuffer", &camera_renderer_get_gbuffer);
+	//	ext->link_virtual("FullCameraRenderer.render_into_texture", &RPF::render_into_texture, engine.world_renderer);
+	ext->link_class_func("FullCameraRenderer.get_cubemap", &camera_renderer_get_cubemap);
 }
 
 void PluginManager::export_kaba_package_y(kaba::Exporter* ext) {

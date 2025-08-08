@@ -2,8 +2,7 @@
 // Created by michi on 1/3/25.
 //
 
-#ifndef RENDERPATH_H
-#define RENDERPATH_H
+#pragma once
 
 
 #include <lib/yrenderer//Renderer.h>
@@ -28,10 +27,10 @@ namespace yrenderer {
 	enum class RenderPathType;
 }
 
-class RenderPath : public yrenderer::Renderer {
+class FullCameraRenderer : public yrenderer::Renderer {
 public:
-	explicit RenderPath(yrenderer::Context* ctx, yrenderer::RenderPathType type, Camera* cam);
-	~RenderPath() override;
+	explicit FullCameraRenderer(yrenderer::Context* ctx, Camera* cam, yrenderer::RenderPathType type);
+	~FullCameraRenderer() override;
 
 	yrenderer::RenderPathType type;
 
@@ -76,5 +75,3 @@ public:
 };
 
 WorldRenderer* create_world_renderer(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
-
-#endif //RENDERPATH_H

@@ -31,7 +31,7 @@ class Scheduler
 	func extern mut clear()
 
 
-func extern create_render_path(ctx: Context&, cam: Camera&) -> xfer[Renderer]
+func extern create_camera_renderer(ctx: Context&, cam: Camera&) -> xfer[FullCameraRenderer]
 
 
 var extern cam: Camera&

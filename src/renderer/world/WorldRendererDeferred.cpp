@@ -10,7 +10,6 @@
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/Context.h>
-#include "../path/RenderPath.h"
 #include <lib/os/msg.h>
 #include <lib/math/random.h>
 #include <lib/math/vec4.h>

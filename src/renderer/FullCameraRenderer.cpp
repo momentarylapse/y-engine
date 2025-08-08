@@ -2,21 +2,21 @@
 // Created by michi on 1/3/25.
 //
 
-#include "RenderPath.h"
+#include "FullCameraRenderer.h"
 #include <lib/yrenderer/Context.h>
-#include "../world/WorldRenderer.h"
+#include "world/WorldRenderer.h"
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/post/MultisampleResolver.h>
 #include <lib/yrenderer/post/HDRResolver.h>
-#include "../world/WorldRendererForward.h"
-#include "../world/WorldRendererDeferred.h"
+#include "world/WorldRendererForward.h"
+#include "world/WorldRendererDeferred.h"
 #ifdef USING_VULKAN
-	#include "../world/WorldRendererVulkanRayTracing.h"
+	#include "world/WorldRendererVulkanRayTracing.h"
 #endif
 #include <lib/yrenderer/helper/LightMeter.h>
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/yrenderer/helper/CubeMapSource.h>
-#include "../../helper/ResourceManager.h"
+#include "../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <world/Camera.h>
@@ -61,7 +61,7 @@ WorldRenderer* create_world_renderer(Context* ctx, Camera* cam, SceneView& scene
 
 float global_shadow_box_size;
 
-RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Renderer(ctx, "path") {
+FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathType _type) : Renderer(ctx, "cam") {
 	type = _type;
 	cam = _cam;
 	shadow_box_size = config.get_float("shadow.boxsize", 2000);
@@ -106,9 +106,9 @@ RenderPath::RenderPath(Context* ctx, RenderPathType _type, Camera* _cam) : Rende
 		create_post_processing(world_renderer);
 }
 
-RenderPath::~RenderPath() = default;
+FullCameraRenderer::~FullCameraRenderer() = default;
 
-void RenderPath::check_terrains(const vec3& cam_pos) {
+void FullCameraRenderer::check_terrains(const vec3& cam_pos) {
 	auto& terrains = ComponentManager::get_list_family<Terrain>();
 	if (terrains.num == 0)
 		return;
@@ -145,7 +145,7 @@ void RenderPath::check_terrains(const vec3& cam_pos) {
 
 }
 
-void RenderPath::create_shadow_renderer() {
+void FullCameraRenderer::create_shadow_renderer() {
 	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
 	int shadow_resolution = config.get_int("shadow.resolution", 1024);
 	shadow_renderer = new yrenderer::ShadowRenderer(ctx, &scene_view, {
@@ -159,7 +159,7 @@ void RenderPath::create_shadow_renderer() {
 	add_sub_task(shadow_renderer.get());
 }
 
-void RenderPath::create_cube_renderer() {
+void FullCameraRenderer::create_cube_renderer() {
 	cube_map_renderer = new yrenderer::CubeMapRenderer(ctx, scene_view, {
 		new WorldSkyboxEmitter(ctx),
 		new WorldOpaqueModelsEmitter(ctx),
@@ -170,7 +170,7 @@ void RenderPath::create_cube_renderer() {
 }
 
 
-void RenderPath::create_post_processing(Renderer* source) {
+void FullCameraRenderer::create_post_processing(Renderer* source) {
 
 	auto hdr_tex = new ygfx::Texture(engine.width, engine.height, "rgba:f16");
 	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
@@ -207,13 +207,13 @@ void RenderPath::create_post_processing(Renderer* source) {
 
 
 
-void RenderPath::render_into_cubemap(yrenderer::CubeMapSource& source) {
+void FullCameraRenderer::render_into_cubemap(yrenderer::CubeMapSource& source) {
 	cube_map_renderer->set_source(&source);
 	//cube_map_renderer->render(RenderParams::WHATEVER);
 }
 
 
-void RenderPath::suggest_cube_map_pos() {
+void FullCameraRenderer::suggest_cube_map_pos() {
 	if (!cube_map_source)
 		return;
 	cube_map_source->min_depth = cam->min_depth;
@@ -240,7 +240,7 @@ void RenderPath::suggest_cube_map_pos() {
 		}
 }
 
-void RenderPath::render_cubemaps(const yrenderer::RenderParams &params) {
+void FullCameraRenderer::render_cubemaps(const yrenderer::RenderParams &params) {
 	suggest_cube_map_pos();
 
 	auto cube_map_sources = ComponentManager::get_list<::CubeMapSource>();
@@ -266,7 +266,7 @@ void RenderPath::render_cubemaps(const yrenderer::RenderParams &params) {
 }
 
 // keep this outside the drawing function, making sure it only gets called once per frame!
-void RenderPath::prepare_instanced_matrices() {
+void FullCameraRenderer::prepare_instanced_matrices() {
 	//profiler::begin(ch_pre);
 	auto& list = ComponentManager::get_list_family<MultiInstance>();
 	for (auto *mi: list) {
@@ -279,7 +279,7 @@ void RenderPath::prepare_instanced_matrices() {
 }
 
 
-void RenderPath::prepare(const yrenderer::RenderParams& params) {
+void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
 	scene_view.main_camera_params = cam->params();
@@ -335,22 +335,22 @@ void RenderPath::prepare(const yrenderer::RenderParams& params) {
 	}
 }
 
-void RenderPath::draw(const yrenderer::RenderParams& params) {
+void FullCameraRenderer::draw(const yrenderer::RenderParams& params) {
 	if (hdr_resolver)
 		hdr_resolver->draw(params);
 	else
 		world_renderer->draw(params);
 }
 
-RenderPath* create_render_path(Context* ctx, Camera *cam) {
+FullCameraRenderer* create_camera_renderer(Context* ctx, Camera *cam) {
 	string type = config.get_str("renderer.path", "forward");
 
 	if (type == "direct")
-		return new RenderPath(ctx, RenderPathType::Direct, cam);
+		return new FullCameraRenderer(ctx, cam, RenderPathType::Direct);
 	if (type == "deferred")
-		return new RenderPath(ctx, RenderPathType::Deferred, cam);
+		return new FullCameraRenderer(ctx, cam, RenderPathType::Deferred);
 	if (type == "pathtracing" or type == "raytracing")
-		return new RenderPath(ctx, RenderPathType::PathTracing, cam);
-	return new RenderPath(ctx, RenderPathType::Forward, cam);
+		return new FullCameraRenderer(ctx, cam, RenderPathType::PathTracing);
+	return new FullCameraRenderer(ctx, cam, RenderPathType::Forward);
 }
 

@@ -9,7 +9,6 @@
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/helper/CubeMapSource.h>
-#include "../path/RenderPath.h"
 #include <lib/image/image.h>
 #include <lib/profiler/Profiler.h>
 #include <renderer/world/emitter/WorldInstancedEmitter.h>

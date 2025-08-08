@@ -42,7 +42,7 @@
 #include "renderer/helper/RendererFactory.h"
 #include "renderer/world/WorldRenderer.h"
 #include <lib/yrenderer/target/WindowRenderer.h>
-#include "renderer/path/RenderPath.h"
+#include "renderer/FullCameraRenderer.h"
 
 #include "Config.h"
 #include "lib/os/app.h"
@@ -167,7 +167,7 @@ public:
 		audio::attach_listener(cam_main->owner);
 
 		for (auto& cam: ComponentManager::get_list_family<Camera>())
-			create_and_attach_render_path(engine.context, cam);
+			create_and_attach_camera_renderer(engine.context, cam);
 		for (auto &s: world.systems)
 			SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
