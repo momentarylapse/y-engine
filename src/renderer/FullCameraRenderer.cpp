@@ -273,9 +273,6 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	}
 	render_path->set_lights(lights);
 
-	if (type != RenderPathType::PathTracing)
-		render_path->prepare(params);
-
 	if (cube_map_source)
 		scene_view.cube_map = cube_map_source->cube_map;
 
@@ -285,6 +282,8 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	if (texture_renderer) {
 		texture_renderer->set_area(yrenderer::dynamicly_scaled_area(texture_renderer->frame_buffer.get()));
 		texture_renderer->render(params);
+	} else if (type != RenderPathType::PathTracing) {
+		render_path->prepare(params);
 	}
 
 	if (multisample_resolver)
