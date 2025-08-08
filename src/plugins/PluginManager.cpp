@@ -809,6 +809,7 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_size("WorldRenderer", sizeof(WorldRenderer));
 	//ext->declare_class_element("WorldRenderer.shader_fx", &WorldRenderer::shader_fx);
 	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
+	ext->link_class_func("WorldRenderer.render_into_cubemap", &WorldRenderer::render_into_cubemap);
 
 
 	using PostProcessor = yrenderer::PostProcessor;
@@ -830,7 +831,6 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("FullCameraRenderer.light_meter", &FullCameraRenderer::light_meter);
 	ext->declare_class_element("FullCameraRenderer.type", &FullCameraRenderer::type);
 	ext->declare_class_element("FullCameraRenderer.scene_view", &FullCameraRenderer::scene_view);
-	ext->link_class_func("FullCameraRenderer.render_into_cubemap", &FullCameraRenderer::render_into_cubemap);
 	ext->link_class_func("FullCameraRenderer.get_shadow_map", &camera_renderer_get_shadow_map);
 	ext->link_class_func("FullCameraRenderer.get_gbuffer", &camera_renderer_get_gbuffer);
 	//	ext->link_virtual("FullCameraRenderer.render_into_texture", &RPF::render_into_texture, engine.world_renderer);

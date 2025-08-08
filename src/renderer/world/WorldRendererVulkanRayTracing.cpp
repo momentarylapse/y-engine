@@ -13,7 +13,6 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/os/msg.h>
 #include <lib/profiler/Profiler.h>
-#include "../../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/scene/CameraParams.h>
 #include "../../world/Camera.h"

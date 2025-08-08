@@ -7,6 +7,7 @@
 
 #include "WorldRendererForward.h"
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
+#include <lib/yrenderer/scene/pass/CubeMapRenderer.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/image/image.h>
@@ -20,20 +21,24 @@ WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::S
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
 
 	create_shadow_renderer(shadow_resolution);
+	create_cube_renderer();
 }
 
 
 void WorldRendererForward::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
+	cube_map_renderer->add_emitter(emitter);
 }
 
 void WorldRendererForward::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	shadow_renderer->add_emitter(emitter);
+	cube_map_renderer->add_emitter(emitter);
 }
 
 void WorldRendererForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
+	//cube_map_renderer->add_emitter(emitter);
 }
 
 
@@ -44,6 +49,8 @@ void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 	
 	scene_renderer->set_view(params, view);
 	scene_renderer->prepare(params);
+
+	shadow_renderer->render(params);
 
 	profiler::end(ch_prepare);
 }

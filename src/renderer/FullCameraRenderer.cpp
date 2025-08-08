@@ -106,8 +106,6 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 	world_renderer->add_transparent_emitter(new WorldTransparentUserMeshesEmitter(ctx));
 	world_renderer->add_transparent_emitter(new WorldParticlesEmitter(ctx, cam));
 
-	create_cube_renderer();
-
 	if (type != RenderPathType::Direct)
 		create_post_processing(world_renderer);
 }
@@ -151,16 +149,6 @@ void FullCameraRenderer::check_terrains(const vec3& cam_pos) {
 
 }
 
-void FullCameraRenderer::create_cube_renderer() {
-	cube_map_renderer = new yrenderer::CubeMapRenderer(ctx, scene_view, {
-		new WorldSkyboxEmitter(ctx),
-		new WorldOpaqueModelsEmitter(ctx),
-		new WorldTerrainsEmitter(ctx),
-		new WorldOpaqueUserMeshesEmitter(ctx),
-		new WorldInstancedEmitter(ctx)});
-	// transparent...?
-}
-
 
 void FullCameraRenderer::create_post_processing(Renderer* source) {
 
@@ -198,11 +186,6 @@ void FullCameraRenderer::create_post_processing(Renderer* source) {
 }
 
 
-
-void FullCameraRenderer::render_into_cubemap(yrenderer::CubeMapSource& source) {
-	cube_map_renderer->set_source(&source);
-	//cube_map_renderer->render(RenderParams::WHATEVER);
-}
 
 
 void FullCameraRenderer::suggest_cube_map_pos() {
@@ -249,9 +232,7 @@ void FullCameraRenderer::render_cubemaps(const yrenderer::RenderParams &params) 
 			continue;
 		source->counter ++;
 		if (source->counter >= source->update_rate) {
-			//render_into_cubemap(*source);
-			cube_map_renderer->set_source(source);
-			cube_map_renderer->render(params);
+			world_renderer->render_into_cubemap(params, *source);
 			source->counter = 0;
 		}
 	}
@@ -277,6 +258,10 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	prepare_instanced_matrices();
 	scene_view.main_camera_params = cam->params();
 	cam->update_matrix_cache(params.desired_aspect_ratio);
+
+	world_renderer->ambient_occlusion_radius = config.ambient_occlusion_radius;
+
+	// lights
 	const auto& all_lights = ComponentManager::get_list_family<::Light>();
 	Array<yrenderer::Light*> lights;
 	for (auto l: all_lights) {
@@ -284,22 +269,13 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 		l->light.light.pos = l->owner->pos;
 		lights.add(&l->light);
 	}
-	scene_view.choose_lights(lights);
-	scene_view.choose_shadows();
+	world_renderer->set_lights(lights);
 
 	if (type != RenderPathType::PathTracing)
 		world_renderer->prepare(params);
-	// FIXME replace by ...
-	//scene_view.cam->update_matrix_cache(params.desired_aspect_ratio);
 
 	if (cube_map_source)
 		scene_view.cube_map = cube_map_source->cube_map;
-
-	if (world_renderer->shadow_renderer)
-		world_renderer->shadow_renderer->render(params);
-
-
-	//cam->update_matrix_cache(params.desired_aspect_ratio);
 
 	if (type != RenderPathType::PathTracing)
 		render_cubemaps(params);

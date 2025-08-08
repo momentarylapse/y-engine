@@ -8,6 +8,8 @@
 #include "WorldRendererDeferred.h"
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
+#include <lib/yrenderer/scene/pass/CubeMapRenderer.h>
+#include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/os/msg.h>
@@ -17,7 +19,6 @@
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/scene/CameraParams.h>
-#include "../../Config.h"
 #include <lib/ygraphics/graphics-impl.h>
 
 
@@ -74,15 +75,18 @@ WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView&
 	add_child(scene_renderer_trans.get());
 
 	create_shadow_renderer(shadow_resolution);
+	create_cube_renderer();
 }
 
 void WorldRendererDeferred::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer_background->add_emitter(emitter);
+	cube_map_renderer->add_emitter(emitter);
 }
 
 void WorldRendererDeferred::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	shadow_renderer->add_emitter(emitter);
+	cube_map_renderer->add_emitter(emitter);
 }
 
 void WorldRendererDeferred::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
@@ -107,6 +111,8 @@ void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {
 
 
 	gbuffer_renderer->render(params);
+
+	shadow_renderer->render(params);
 
 	profiler::end(ch_prepare);
 }
@@ -159,7 +165,7 @@ void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const R
 	else
 		data.dict_set("eye_pos", vec3_to_any(cam->owner->pos)); // NAH
 #endif
-	data.dict_set("ambient_occlusion_radius:8", config.ambient_occlusion_radius);
+	data.dict_set("ambient_occlusion_radius:8", ambient_occlusion_radius);
 	out_renderer->bind_uniform_buffer(13, ssao_sample_buffer);
 
 	auto& rvd = scene_renderer->rvd;

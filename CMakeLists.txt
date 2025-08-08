@@ -717,6 +717,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/regions/RegionRendererGL.cpp
 	src/lib/yrenderer/regions/RegionRendererVulkan.cpp
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
+	src/lib/yrenderer/scene/pass/CubeMapRenderer.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
 	src/lib/yrenderer/scene/CameraParams.cpp
 	src/lib/yrenderer/scene/Light.cpp
@@ -988,6 +989,7 @@ add_executable(y
 	src/lib/yrenderer/regions/RegionRendererGL.cpp
 	src/lib/yrenderer/regions/RegionRendererVulkan.cpp
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
+	src/lib/yrenderer/scene/pass/CubeMapRenderer.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
 	src/lib/yrenderer/scene/CameraParams.cpp
 	src/lib/yrenderer/scene/Light.cpp

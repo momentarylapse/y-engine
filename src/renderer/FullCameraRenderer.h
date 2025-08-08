@@ -20,7 +20,6 @@ namespace yrenderer {
 	class TextureRenderer;
 	class MultisampleResolver;
 	class GeometryRenderer;
-	class ShadowRenderer;
 	struct RenderViewData;
 	class CubeMapSource;
 	class LightMeter;
@@ -51,20 +50,17 @@ public:
 	Renderer* main_renderer = nullptr;
 
 
-	void create_cube_renderer();
 	void create_post_processing(Renderer* source);
 
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;
 
 	//virtual void render_into_texture(FrameBuffer *fb, Camera *cam, RenderViewData &rvd) {};
-	void render_into_cubemap(yrenderer::CubeMapSource& source);
 
 	void render_cubemaps(const yrenderer::RenderParams& params);
 	void prepare_instanced_matrices();
 
 	yrenderer::CubeMapSource* cube_map_source = nullptr;
-	owned<yrenderer::CubeMapRenderer> cube_map_renderer;
 	void suggest_cube_map_pos();
 
 
