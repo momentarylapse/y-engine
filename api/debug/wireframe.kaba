@@ -3,6 +3,6 @@ use y.*
 class WireframeController extends Controller
 	func override on_key_down(k: Key)
 		if k == Key.W + Key.CONTROL #and key_state(KEY_CONTROL)
-			for r in engine.camera_renderers[0].render_path
-				r.wireframe = not r.wireframe
+			var r = engine.camera_renderers[0].render_path
+			r.wireframe = not r.wireframe
 			
