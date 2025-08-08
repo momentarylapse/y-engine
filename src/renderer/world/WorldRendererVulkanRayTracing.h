@@ -16,7 +16,7 @@ enum class RaytracingMode;
 
 class WorldRendererVulkanRayTracing : public yrenderer::RenderPath {
 public:
-	WorldRendererVulkanRayTracing(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int width, int height);
+	WorldRendererVulkanRayTracing(yrenderer::Context* ctx, int width, int height);
 
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;

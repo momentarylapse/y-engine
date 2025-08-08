@@ -14,7 +14,7 @@ namespace yrenderer {
 
 class RenderPathForward : public RenderPath {
 public:
-	explicit RenderPathForward(Context* ctx, SceneView& scene_view, int shadow_resolution);
+	explicit RenderPathForward(Context* ctx, int shadow_resolution);
 
 	void add_background_emitter(shared<MeshEmitter> emitter) override;
 	void add_opaque_emitter(shared<MeshEmitter> emitter) override;

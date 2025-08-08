@@ -17,28 +17,28 @@
 
 namespace yrenderer {
 
-RenderPathForward::RenderPathForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int shadow_resolution) : RenderPath(ctx, "fwd", scene_view) {
+RenderPathForward::RenderPathForward(Context* ctx, int shadow_resolution) : RenderPath(ctx, "fwd") {
 	shader_manager->load_shader_module("forward/module-surface.shader");
 
-	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
+	scene_renderer = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 
 	create_shadow_renderer(shadow_resolution);
 	create_cube_renderer();
 }
 
 
-void RenderPathForward::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathForward::add_background_emitter(shared<MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void RenderPathForward::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathForward::add_opaque_emitter(shared<MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	shadow_renderer->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void RenderPathForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathForward::add_transparent_emitter(shared<MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	//cube_map_renderer->add_emitter(emitter);
 }
@@ -46,7 +46,7 @@ void RenderPathForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> e
 
 
 
-void RenderPathForward::prepare(const yrenderer::RenderParams& params) {
+void RenderPathForward::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
 	
 	scene_renderer->set_view(params, view);
@@ -57,7 +57,7 @@ void RenderPathForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::end(ch_prepare);
 }
 
-void RenderPathForward::draw(const yrenderer::RenderParams& params) {
+void RenderPathForward::draw(const RenderParams& params) {
 	profiler::begin(channel);
 	ctx->gpu_timestamp_begin(params, channel);
 

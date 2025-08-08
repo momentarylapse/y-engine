@@ -25,7 +25,7 @@
 using namespace yrenderer;
 using namespace ygfx;
 
-RenderPathDeferred::RenderPathDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height, int shadow_resolution) : RenderPath(ctx, "def", scene_view) {
+RenderPathDeferred::RenderPathDeferred(Context* ctx, int width, int height, int shadow_resolution) : RenderPath(ctx, "def") {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
@@ -78,22 +78,22 @@ RenderPathDeferred::RenderPathDeferred(yrenderer::Context* ctx, SceneView& scene
 	create_cube_renderer();
 }
 
-void RenderPathDeferred::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathDeferred::add_background_emitter(shared<MeshEmitter> emitter) {
 	scene_renderer_background->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void RenderPathDeferred::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathDeferred::add_opaque_emitter(shared<MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	shadow_renderer->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void RenderPathDeferred::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathDeferred::add_transparent_emitter(shared<MeshEmitter> emitter) {
 	scene_renderer_trans->add_emitter(emitter);
 }
 
-void RenderPathDeferred::prepare(const yrenderer::RenderParams& params) {
+void RenderPathDeferred::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
 
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());

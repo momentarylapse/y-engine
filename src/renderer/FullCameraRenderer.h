@@ -5,8 +5,7 @@
 #pragma once
 
 
-#include <lib/yrenderer//Renderer.h>
-#include <lib/yrenderer/scene/SceneView.h>
+#include <lib/yrenderer/Renderer.h>
 
 class Camera;
 class XTerrainVBUpdater;
@@ -35,7 +34,6 @@ public:
 	float shadow_box_size;
 	int shadow_resolution;
 	Camera* cam;
-	yrenderer::SceneView scene_view;
 
 	yrenderer::RenderPath* render_path = nullptr;
 
@@ -67,4 +65,4 @@ public:
 	Array<XTerrainVBUpdater*> updater;
 };
 
-yrenderer::RenderPath* create_render_path(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
+yrenderer::RenderPath* create_render_path(yrenderer::Context* ctx, yrenderer::RenderPathType type);

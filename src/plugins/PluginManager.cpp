@@ -162,12 +162,12 @@ xfer<yrenderer::Material> __load_material(const Path& filename) {
 
 
 CubeMap* camera_renderer_get_cubemap(FullCameraRenderer &r) {
-	return r.scene_view.cube_map.get();
+	return r.render_path->scene_view.cube_map.get();
 }
 
 Array<Texture*> camera_renderer_get_shadow_map(FullCameraRenderer &r) {
 	Array<Texture*> shadow_maps;
-	for (auto s: r.scene_view.shadow_maps)
+	for (auto s: r.render_path->scene_view.shadow_maps)
 		shadow_maps.add(s);
 	return shadow_maps;
 }
@@ -810,6 +810,7 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_size("RenderPath", sizeof(RenderPath));
 	//ext->declare_class_element("WorldRenderer.shader_fx", &RenderPath::shader_fx);
 	ext->declare_class_element("RenderPath.wireframe", &RenderPath::wireframe);
+	ext->declare_class_element("RenderPath.scene_view", &RenderPath::scene_view);
 	ext->link_class_func("RenderPath.render_into_cubemap", &RenderPath::render_into_cubemap);
 
 
@@ -831,7 +832,6 @@ void export_renderer(kaba::Exporter* ext) {
 	ext->declare_class_element("FullCameraRenderer.post_processor", &FullCameraRenderer::post_processor);
 	ext->declare_class_element("FullCameraRenderer.light_meter", &FullCameraRenderer::light_meter);
 	ext->declare_class_element("FullCameraRenderer.type", &FullCameraRenderer::type);
-	ext->declare_class_element("FullCameraRenderer.scene_view", &FullCameraRenderer::scene_view);
 	ext->link_class_func("FullCameraRenderer.get_shadow_map", &camera_renderer_get_shadow_map);
 	ext->link_class_func("FullCameraRenderer.get_gbuffer", &camera_renderer_get_gbuffer);
 	//	ext->link_virtual("FullCameraRenderer.render_into_texture", &RPF::render_into_texture, engine.world_renderer);

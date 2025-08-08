@@ -91,6 +91,7 @@ class SceneView
 
 class RenderPath extends Renderer
 	var wireframe: bool
+	var scene_view: SceneView
 	
 
 	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
@@ -105,10 +106,9 @@ enum RenderPathType
 
 class FullCameraRenderer extends Renderer
 	var type: RenderPathType
-	var render_path: RenderPath*
+	var render_path: RenderPath&
 	var hdr_resolver: HDRResolver*
 	var light_meter: LightMeter*
-	var scene_view: SceneView
 	# debugging
 	func extern get_gbuffer() -> shared![Texture][]
 	func extern get_shadow_map() -> shared![DepthBuffer][]

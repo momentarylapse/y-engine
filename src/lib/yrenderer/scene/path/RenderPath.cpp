@@ -26,10 +26,7 @@ mat4 mtr(const vec3 &t, const quaternion &a) {
 	return mt * mr;
 }*/
 
-RenderPath::RenderPath(Context* ctx, const string &name, SceneView& _scene_view) :
-		Renderer(ctx, name),
-		scene_view(_scene_view)
-{
+RenderPath::RenderPath(Context* ctx, const string &name) : Renderer(ctx, name) {
 }
 
 RenderPath::~RenderPath() = default;

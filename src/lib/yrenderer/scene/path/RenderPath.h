@@ -21,33 +21,33 @@ class CubeMapSource;
 
 
 
-class RenderPath : public yrenderer::Renderer {
+class RenderPath : public Renderer {
 public:
-	RenderPath(yrenderer::Context* ctx, const string &name, yrenderer::SceneView& scene_view);
+	RenderPath(Context* ctx, const string &name);
 	~RenderPath() override;
 
-	yrenderer::CameraParams view;
+	CameraParams view;
 	bool wireframe = false;
 	float ambient_occlusion_radius = 0;
 
-	yrenderer::SceneView& scene_view;
+	SceneView scene_view;
 
-	owned<yrenderer::ShadowRenderer> shadow_renderer;
-	owned<yrenderer::CubeMapRenderer> cube_map_renderer;
+	owned<ShadowRenderer> shadow_renderer;
+	owned<CubeMapRenderer> cube_map_renderer;
 
-	virtual void add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {}
-	virtual void add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {}
-	virtual void add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {}
+	virtual void add_background_emitter(shared<MeshEmitter> emitter) {}
+	virtual void add_opaque_emitter(shared<MeshEmitter> emitter) {}
+	virtual void add_transparent_emitter(shared<MeshEmitter> emitter) {}
 
 
 	void create_shadow_renderer(int resolution);
 	void create_cube_renderer();
 
-	void set_lights(const Array<yrenderer::Light*>& lights);
+	void set_lights(const Array<Light*>& lights);
 
 	void reset();
 
-	void render_into_cubemap(const yrenderer::RenderParams& params, yrenderer::CubeMapSource& source);
+	void render_into_cubemap(const RenderParams& params, CubeMapSource& source);
 };
 
 }

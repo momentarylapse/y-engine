@@ -29,7 +29,7 @@ public:
 	owned<SceneRenderer> scene_renderer_trans;
 	owned<ThroughShaderRenderer> out_renderer;
 
-	RenderPathDeferred(Context* ctx, SceneView& scene_view, int width, int height, int shadow_resolution);
+	RenderPathDeferred(Context* ctx, int width, int height, int shadow_resolution);
 
 	void add_background_emitter(shared<MeshEmitter> emitter) override;
 	void add_opaque_emitter(shared<MeshEmitter> emitter) override;

@@ -52,14 +52,14 @@ using LightMeter = yrenderer::LightMeter;
 using RenderPathType = yrenderer::RenderPathType;
 
 
-yrenderer::RenderPath* create_render_path(Context* ctx, SceneView& scene_view, RenderPathType type, int shadow_resolution) {
+yrenderer::RenderPath* create_render_path(Context* ctx, RenderPathType type, int shadow_resolution) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
-		return new WorldRendererVulkanRayTracing(ctx, scene_view, engine.width, engine.height);
+		return new WorldRendererVulkanRayTracing(ctx, engine.width, engine.height);
 #endif
 	if (type == RenderPathType::Deferred)
-		return new yrenderer::RenderPathDeferred(ctx, scene_view, engine.width, engine.height, shadow_resolution);
-	return new yrenderer::RenderPathForward(ctx, scene_view, shadow_resolution);
+		return new yrenderer::RenderPathDeferred(ctx, engine.width, engine.height, shadow_resolution);
+	return new yrenderer::RenderPathForward(ctx, shadow_resolution);
 }
 
 float global_shadow_box_size;
@@ -94,11 +94,11 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 		cube_map_source = new yrenderer::CubeMapSource;
 		cube_map_source->cube_map = new ygfx::CubeMap(cube_map_source->resolution, "rgba:i8");
 
-		scene_view.cube_map = cube_map_source->cube_map;
+//		scene_view.cube_map = cube_map_source->cube_map;
 	}
 
 
-	render_path = create_render_path(ctx, scene_view, type, shadow_resolution);
+	render_path = create_render_path(ctx, type, shadow_resolution);
 	render_path->add_background_emitter(new WorldSkyboxEmitter(ctx));
 	render_path->add_opaque_emitter(new WorldOpaqueModelsEmitter(ctx));
 	render_path->add_opaque_emitter(new WorldTerrainsEmitter(ctx));
@@ -258,7 +258,7 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	render_path->view = cam->params();
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
-	scene_view.main_camera_params = cam->params();
+	render_path->scene_view.main_camera_params = cam->params();
 	cam->update_matrix_cache(params.desired_aspect_ratio);
 
 	render_path->ambient_occlusion_radius = config.ambient_occlusion_radius;
@@ -274,7 +274,7 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	render_path->set_lights(lights);
 
 	if (cube_map_source)
-		scene_view.cube_map = cube_map_source->cube_map;
+		render_path->scene_view.cube_map = cube_map_source->cube_map;
 
 	if (type != RenderPathType::PathTracing)
 		render_cubemaps(params);
