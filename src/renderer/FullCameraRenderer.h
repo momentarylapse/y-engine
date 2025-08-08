@@ -9,7 +9,6 @@
 #include <lib/yrenderer/scene/SceneView.h>
 
 class Camera;
-class WorldRenderer;
 class XTerrainVBUpdater;
 
 namespace yrenderer {
@@ -19,7 +18,7 @@ namespace yrenderer {
 	class PostProcessor;
 	class TextureRenderer;
 	class MultisampleResolver;
-	class GeometryRenderer;
+	class RenderPath;
 	struct RenderViewData;
 	class CubeMapSource;
 	class LightMeter;
@@ -38,7 +37,7 @@ public:
 	Camera* cam;
 	yrenderer::SceneView scene_view;
 
-	WorldRenderer* world_renderer = nullptr;
+	yrenderer::RenderPath* render_path = nullptr;
 
 	// post processing
 	yrenderer::HDRResolver* hdr_resolver = nullptr;
@@ -68,4 +67,4 @@ public:
 	Array<XTerrainVBUpdater*> updater;
 };
 
-WorldRenderer* create_world_renderer(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);
+yrenderer::RenderPath* create_render_path(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view, yrenderer::RenderPathType type);

@@ -24,7 +24,7 @@
 using namespace yrenderer;
 
 WorldRendererVulkanRayTracing::WorldRendererVulkanRayTracing(Context* ctx, SceneView& scene_view, int w, int h) :
-		WorldRenderer(ctx, "rt", scene_view),
+		RenderPath(ctx, "rt", scene_view),
 		rvd(ctx)
 {
 	device = ctx->device;

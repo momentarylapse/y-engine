@@ -719,6 +719,9 @@ add_library(moduley SHARED
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
 	src/lib/yrenderer/scene/pass/CubeMapRenderer.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
+	src/lib/yrenderer/scene/path/RenderPath.cpp
+	src/lib/yrenderer/scene/path/RenderPathDeferred.cpp
+	src/lib/yrenderer/scene/path/RenderPathForward.cpp
 	src/lib/yrenderer/scene/CameraParams.cpp
 	src/lib/yrenderer/scene/Light.cpp
 	src/lib/yrenderer/scene/MeshEmitter.cpp
@@ -755,9 +758,6 @@ add_library(moduley SHARED
 	src/renderer/world/emitter/WorldSkyboxEmitter.cpp
 	src/renderer/world/emitter/WorldTerrainsEmitter.cpp
 	src/renderer/world/emitter/WorldUserMeshesEmitter.cpp
-	src/renderer/world/WorldRenderer.cpp
-	src/renderer/world/WorldRendererDeferred.cpp
-	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/FullCameraRenderer.cpp
 	src/world/components/Animator.cpp
@@ -991,6 +991,9 @@ add_executable(y
 	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
 	src/lib/yrenderer/scene/pass/CubeMapRenderer.cpp
 	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
+	src/lib/yrenderer/scene/path/RenderPath.cpp
+	src/lib/yrenderer/scene/path/RenderPathDeferred.cpp
+	src/lib/yrenderer/scene/path/RenderPathForward.cpp
 	src/lib/yrenderer/scene/CameraParams.cpp
 	src/lib/yrenderer/scene/Light.cpp
 	src/lib/yrenderer/scene/MeshEmitter.cpp
@@ -1027,9 +1030,6 @@ add_executable(y
 	src/renderer/world/emitter/WorldSkyboxEmitter.cpp
 	src/renderer/world/emitter/WorldTerrainsEmitter.cpp
 	src/renderer/world/emitter/WorldUserMeshesEmitter.cpp
-	src/renderer/world/WorldRenderer.cpp
-	src/renderer/world/WorldRendererDeferred.cpp
-	src/renderer/world/WorldRendererForward.cpp
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/FullCameraRenderer.cpp
 	src/world/components/Animator.cpp

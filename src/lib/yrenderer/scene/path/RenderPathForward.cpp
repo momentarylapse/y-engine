@@ -1,11 +1,11 @@
 /*
- * WorldRendererForward.cpp
+ * RenderPathForward.cpp
  *
  *  Created on: Jun 2, 2021
  *      Author: michi
  */
 
-#include "WorldRendererForward.h"
+#include "RenderPathForward.h"
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/scene/pass/CubeMapRenderer.h>
 #include <lib/yrenderer/Context.h>
@@ -15,7 +15,9 @@
 #include <lib/yrenderer/ShaderManager.h>
 
 
-WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int shadow_resolution) : WorldRenderer(ctx, "world", scene_view) {
+namespace yrenderer {
+
+RenderPathForward::RenderPathForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int shadow_resolution) : RenderPath(ctx, "fwd", scene_view) {
 	shader_manager->load_shader_module("forward/module-surface.shader");
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
@@ -25,18 +27,18 @@ WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::S
 }
 
 
-void WorldRendererForward::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathForward::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void WorldRendererForward::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathForward::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	shadow_renderer->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void WorldRendererForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	//cube_map_renderer->add_emitter(emitter);
 }
@@ -44,7 +46,7 @@ void WorldRendererForward::add_transparent_emitter(shared<yrenderer::MeshEmitter
 
 
 
-void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
+void RenderPathForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);
 	
 	scene_renderer->set_view(params, view);
@@ -55,7 +57,7 @@ void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::end(ch_prepare);
 }
 
-void WorldRendererForward::draw(const yrenderer::RenderParams& params) {
+void RenderPathForward::draw(const yrenderer::RenderParams& params) {
 	profiler::begin(channel);
 	ctx->gpu_timestamp_begin(params, channel);
 
@@ -65,3 +67,4 @@ void WorldRendererForward::draw(const yrenderer::RenderParams& params) {
 	profiler::end(channel);
 }
 
+}

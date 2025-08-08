@@ -1,11 +1,11 @@
 /*
- * WorldRenderer.cpp
+ * RenderPathDeferred.cpp
  *
  *  Created on: 07.08.2020
  *      Author: michi
  */
 
-#include "WorldRendererDeferred.h"
+#include "RenderPathDeferred.h"
 #include <lib/yrenderer/target/TextureRenderer.h>
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/scene/pass/CubeMapRenderer.h>
@@ -25,7 +25,7 @@
 using namespace yrenderer;
 using namespace ygfx;
 
-WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height, int shadow_resolution) : WorldRenderer(ctx, "world/def", scene_view) {
+RenderPathDeferred::RenderPathDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height, int shadow_resolution) : RenderPath(ctx, "def", scene_view) {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
@@ -78,22 +78,22 @@ WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView&
 	create_cube_renderer();
 }
 
-void WorldRendererDeferred::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathDeferred::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer_background->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void WorldRendererDeferred::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathDeferred::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
 	shadow_renderer->add_emitter(emitter);
 	cube_map_renderer->add_emitter(emitter);
 }
 
-void WorldRendererDeferred::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
+void RenderPathDeferred::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer_trans->add_emitter(emitter);
 }
 
-void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {
+void RenderPathDeferred::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);
 
 	auto sub_params = params.with_target(gbuffer_renderer->frame_buffer.get());
@@ -117,7 +117,7 @@ void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {
 	profiler::end(ch_prepare);
 }
 
-void WorldRendererDeferred::draw(const RenderParams& params) {
+void RenderPathDeferred::draw(const RenderParams& params) {
 	profiler::begin(channel);
 	ctx->gpu_timestamp_begin(params, channel);
 
@@ -154,7 +154,7 @@ void WorldRendererDeferred::draw(const RenderParams& params) {
 	profiler::end(channel);
 }
 
-void WorldRendererDeferred::render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params) {
+void RenderPathDeferred::render_out_from_gbuffer(FrameBuffer *source, const RenderParams& params) {
 	profiler::begin(ch_gbuf_out);
 
 	auto& data = out_renderer->bindings.shader_data;

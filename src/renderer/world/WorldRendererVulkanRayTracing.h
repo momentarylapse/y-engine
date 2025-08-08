@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "WorldRenderer.h"
+#include <lib/yrenderer/scene/path/RenderPath.h>
 #ifdef USING_VULKAN
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/scene/RenderViewData.h>
 
 enum class RaytracingMode;
 
-class WorldRendererVulkanRayTracing : public WorldRenderer {
+class WorldRendererVulkanRayTracing : public yrenderer::RenderPath {
 public:
 	WorldRendererVulkanRayTracing(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int width, int height);
 

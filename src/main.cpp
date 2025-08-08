@@ -40,7 +40,6 @@
 
 #include <lib/yrenderer/Context.h>
 #include "renderer/helper/RendererFactory.h"
-#include "renderer/world/WorldRenderer.h"
 #include <lib/yrenderer/target/WindowRenderer.h>
 #include "renderer/FullCameraRenderer.h"
 

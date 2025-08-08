@@ -39,8 +39,8 @@
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/scene/SceneRenderer.h>
 #include "../renderer/FullCameraRenderer.h"
-#include "../renderer/world/WorldRendererForward.h"
-#include "../renderer/world/WorldRendererDeferred.h"
+#include <lib/yrenderer/scene/path/RenderPathForward.h>
+#include <lib/yrenderer/scene/path/RenderPathDeferred.h>
 #ifdef USING_OPENGL
 #include "../renderer/gui/GuiRendererGL.h"
 #endif
@@ -175,7 +175,7 @@ Array<Texture*> camera_renderer_get_shadow_map(FullCameraRenderer &r) {
 //shared_array<Texture> camera_renderer_get_gbuffer(FullCameraRenderer &r) {
 Array<Texture*> camera_renderer_get_gbuffer(FullCameraRenderer &r) {
 	if (r.type == yrenderer::RenderPathType::Deferred)
-		return weak(reinterpret_cast<WorldRendererDeferred*>(r.world_renderer)->gbuffer_textures);
+		return weak(reinterpret_cast<yrenderer::RenderPathDeferred*>(r.render_path)->gbuffer_textures);
 	return {};
 }
 
@@ -806,10 +806,11 @@ void export_engine(kaba::Exporter* ext) {
 
 void export_renderer(kaba::Exporter* ext) {
 
-	ext->declare_class_size("WorldRenderer", sizeof(WorldRenderer));
-	//ext->declare_class_element("WorldRenderer.shader_fx", &WorldRenderer::shader_fx);
-	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
-	ext->link_class_func("WorldRenderer.render_into_cubemap", &WorldRenderer::render_into_cubemap);
+	using RenderPath = yrenderer::RenderPath;
+	ext->declare_class_size("RenderPath", sizeof(RenderPath));
+	//ext->declare_class_element("WorldRenderer.shader_fx", &RenderPath::shader_fx);
+	ext->declare_class_element("RenderPath.wireframe", &RenderPath::wireframe);
+	ext->link_class_func("RenderPath.render_into_cubemap", &RenderPath::render_into_cubemap);
 
 
 	using PostProcessor = yrenderer::PostProcessor;
@@ -826,7 +827,7 @@ void export_renderer(kaba::Exporter* ext) {
 
 	ext->declare_class_size("FullCameraRenderer", sizeof(FullCameraRenderer));
 	ext->declare_class_element("FullCameraRenderer.hdr_resolver", &FullCameraRenderer::hdr_resolver);
-	ext->declare_class_element("FullCameraRenderer.world_renderer", &FullCameraRenderer::world_renderer);
+	ext->declare_class_element("FullCameraRenderer.render_path", &FullCameraRenderer::render_path);
 	ext->declare_class_element("FullCameraRenderer.post_processor", &FullCameraRenderer::post_processor);
 	ext->declare_class_element("FullCameraRenderer.light_meter", &FullCameraRenderer::light_meter);
 	ext->declare_class_element("FullCameraRenderer.type", &FullCameraRenderer::type);

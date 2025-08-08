@@ -8,7 +8,7 @@
 #include "RendererFactory.h"
 #include <lib/yrenderer/Context.h>
 #include "../FullCameraRenderer.h"
-#include "../world/WorldRenderer.h"
+#include <lib/yrenderer/scene/path/RenderPath.h>
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/regions/RegionRenderer.h>

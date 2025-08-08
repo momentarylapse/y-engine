@@ -1,5 +1,5 @@
 /*
- * WorldRenderer.h
+ * RenderPath.h
  *
  *  Created on: Jan 19, 2020
  *      Author: michi
@@ -12,19 +12,19 @@
 #include <lib/base/pointer.h>
 
 namespace yrenderer {
-	class ShadowMapRenderer;
-	class MeshEmitter;
-	class ShadowRenderer;
-	class CubeMapRenderer;
-	class CubeMapSource;
-}
+
+class ShadowMapRenderer;
+class MeshEmitter;
+class ShadowRenderer;
+class CubeMapRenderer;
+class CubeMapSource;
 
 
 
-class WorldRenderer : public yrenderer::Renderer {
+class RenderPath : public yrenderer::Renderer {
 public:
-	WorldRenderer(yrenderer::Context* ctx, const string &name, yrenderer::SceneView& scene_view);
-	~WorldRenderer() override;
+	RenderPath(yrenderer::Context* ctx, const string &name, yrenderer::SceneView& scene_view);
+	~RenderPath() override;
 
 	yrenderer::CameraParams view;
 	bool wireframe = false;
@@ -50,4 +50,4 @@ public:
 	void render_into_cubemap(const yrenderer::RenderParams& params, yrenderer::CubeMapSource& source);
 };
 
-
+}

@@ -3,7 +3,7 @@ use y.*
 class X extends Controller
 	var pic: shared![Picture][]
 	func override on_init()
-		for wr in engine.camera_renderers[0].world_renderer
+		for wr in engine.camera_renderers[0].render_path
 			for shared i=>db in wr.get_shadow_map()
 				pic.add(new Picture([0.2,0.4, 0.0+0.2*i,0.2+0.2*i], db, [0,1, 0,1]))
 	#	for shared db in engine.render_path.fb_shadow2.depth_buffer()

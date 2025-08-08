@@ -89,7 +89,7 @@ class SceneView
 	func __delete__()
 		pass
 
-class WorldRenderer
+class RenderPath extends Renderer
 	var wireframe: bool
 	
 
@@ -105,7 +105,7 @@ enum RenderPathType
 
 class FullCameraRenderer extends Renderer
 	var type: RenderPathType
-	var world_renderer: WorldRenderer*
+	var render_path: RenderPath*
 	var hdr_resolver: HDRResolver*
 	var light_meter: LightMeter*
 	var scene_view: SceneView
