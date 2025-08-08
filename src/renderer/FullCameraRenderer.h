@@ -40,7 +40,6 @@ public:
 	yrenderer::SceneView scene_view;
 
 	WorldRenderer* world_renderer = nullptr;
-	owned<yrenderer::ShadowRenderer> shadow_renderer;
 
 	// post processing
 	yrenderer::HDRResolver* hdr_resolver = nullptr;
@@ -52,7 +51,6 @@ public:
 	Renderer* main_renderer = nullptr;
 
 
-	void create_shadow_renderer();
 	void create_cube_renderer();
 	void create_post_processing(Renderer* source);
 

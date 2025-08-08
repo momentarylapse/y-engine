@@ -24,7 +24,7 @@
 using namespace yrenderer;
 using namespace ygfx;
 
-WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height) : WorldRenderer(ctx, "world/def", scene_view) {
+WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView& scene_view, int width, int height, int shadow_resolution) : WorldRenderer(ctx, "world/def", scene_view) {
 
 	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
 	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
@@ -72,6 +72,8 @@ WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, SceneView&
 
 	scene_renderer_trans = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 	add_child(scene_renderer_trans.get());
+
+	create_shadow_renderer(shadow_resolution);
 }
 
 void WorldRendererDeferred::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
@@ -80,6 +82,7 @@ void WorldRendererDeferred::add_background_emitter(shared<yrenderer::MeshEmitter
 
 void WorldRendererDeferred::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
+	shadow_renderer->add_emitter(emitter);
 }
 
 void WorldRendererDeferred::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {

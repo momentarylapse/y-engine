@@ -6,6 +6,8 @@
  */
 
 #include "WorldRenderer.h"
+#include <lib/yrenderer/scene/pass/ShadowRenderer.h>
+#include <lib/ygraphics/graphics-impl.h>
 
 
 using namespace yrenderer;
@@ -30,5 +32,15 @@ WorldRenderer::WorldRenderer(Context* ctx, const string &name, SceneView& _scene
 {
 }
 
+WorldRenderer::~WorldRenderer() = default;
+
+
 void WorldRenderer::reset() {
+}
+
+void WorldRenderer::create_shadow_renderer(int resolution) {
+	shadow_renderer = new ShadowRenderer(ctx, &scene_view, resolution);
+	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
+	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
+	add_sub_task(shadow_renderer.get());
 }

@@ -16,7 +16,7 @@ class Profiler;
 
 class WorldRendererForward : public WorldRenderer {
 public:
-	explicit WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view);
+	explicit WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int shadow_resolution);
 
 	void add_background_emitter(shared<yrenderer::MeshEmitter> emitter) override;
 	void add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) override;

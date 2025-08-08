@@ -14,10 +14,12 @@
 #include <lib/yrenderer/ShaderManager.h>
 
 
-WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view) : WorldRenderer(ctx, "world", scene_view) {
+WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, yrenderer::SceneView& scene_view, int shadow_resolution) : WorldRenderer(ctx, "world", scene_view) {
 	shader_manager->load_shader_module("forward/module-surface.shader");
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
+
+	create_shadow_renderer(shadow_resolution);
 }
 
 
@@ -27,6 +29,7 @@ void WorldRendererForward::add_background_emitter(shared<yrenderer::MeshEmitter>
 
 void WorldRendererForward::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
 	scene_renderer->add_emitter(emitter);
+	shadow_renderer->add_emitter(emitter);
 }
 
 void WorldRendererForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {

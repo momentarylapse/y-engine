@@ -20,7 +20,7 @@ namespace yrenderer {
 ShadowRenderer::Cascade::Cascade() = default;
 ShadowRenderer::Cascade::~Cascade() = default;
 
-ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<MeshEmitter> emitters, int resolution) :
+ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, int resolution) :
 		RenderTask(ctx, "shdw")
 {
 
@@ -35,8 +35,6 @@ ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<Mes
 		c.scene_renderer = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 		c.scene_renderer->is_shadow_pass = true;
 		c.scene_renderer->rvd.material_shadow = material.get();
-		for (auto e: weak(emitters))
-			c.scene_renderer->add_emitter(e);
 
 		shared tex = new ygfx::Texture(resolution, resolution, "rgba:i8");
 		c.depth_buffer = new ygfx::DepthBuffer(resolution, resolution, "d:f32");
@@ -45,6 +43,12 @@ ShadowRenderer::ShadowRenderer(Context* ctx, SceneView* parent, shared_array<Mes
 		c.texture_renderer->add_child(c.scene_renderer.get());
 	}
 }
+
+void ShadowRenderer::add_emitter(shared<MeshEmitter> emitter) {
+	for (int i=0; i<NUM_CASCADES; i++)
+		cascades[i].scene_renderer->add_emitter(emitter);
+}
+
 
 void ShadowRenderer::set_projection(const mat4& proj) {
 	for (int i=0; i<NUM_CASCADES; i++) {

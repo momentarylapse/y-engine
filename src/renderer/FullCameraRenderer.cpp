@@ -50,14 +50,14 @@ using LightMeter = yrenderer::LightMeter;
 using RenderPathType = yrenderer::RenderPathType;
 
 
-WorldRenderer* create_world_renderer(Context* ctx, SceneView& scene_view, RenderPathType type) {
+WorldRenderer* create_world_renderer(Context* ctx, SceneView& scene_view, RenderPathType type, int shadow_resolution) {
 #ifdef USING_VULKAN
 	if (type == RenderPathType::PathTracing)
 		return new WorldRendererVulkanRayTracing(ctx, scene_view, engine.width, engine.height);
 #endif
 	if (type == RenderPathType::Deferred)
-		return new WorldRendererDeferred(ctx, scene_view, engine.width, engine.height);
-	return new WorldRendererForward(ctx, scene_view);
+		return new WorldRendererDeferred(ctx, scene_view, engine.width, engine.height, shadow_resolution);
+	return new WorldRendererForward(ctx, scene_view, shadow_resolution);
 }
 
 float global_shadow_box_size;
@@ -96,7 +96,7 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 	}
 
 
-	world_renderer = create_world_renderer(ctx, scene_view, type);
+	world_renderer = create_world_renderer(ctx, scene_view, type, shadow_resolution);
 	world_renderer->add_background_emitter(new WorldSkyboxEmitter(ctx));
 	world_renderer->add_opaque_emitter(new WorldOpaqueModelsEmitter(ctx));
 	world_renderer->add_opaque_emitter(new WorldTerrainsEmitter(ctx));
@@ -105,9 +105,6 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 	world_renderer->add_transparent_emitter(new WorldTransparentModelsEmitter(ctx));
 	world_renderer->add_transparent_emitter(new WorldTransparentUserMeshesEmitter(ctx));
 	world_renderer->add_transparent_emitter(new WorldParticlesEmitter(ctx, cam));
-
-	if (type != RenderPathType::PathTracing)
-		create_shadow_renderer();
 
 	create_cube_renderer();
 
@@ -152,20 +149,6 @@ void FullCameraRenderer::check_terrains(const vec3& cam_pos) {
 		t->prepare_draw(cam_pos);
 	}*/
 
-}
-
-void FullCameraRenderer::create_shadow_renderer() {
-	//int shadow_box_size = config.get_float("shadow.boxsize", 2000);
-	int shadow_resolution = config.get_int("shadow.resolution", 1024);
-	shadow_renderer = new yrenderer::ShadowRenderer(ctx, &scene_view, {
-		new WorldOpaqueModelsEmitter(ctx),
-		new WorldTerrainsEmitter(ctx),
-		new WorldOpaqueUserMeshesEmitter(ctx),
-		new WorldInstancedEmitter(ctx)},
-		shadow_resolution);
-	scene_view.shadow_maps.add(shadow_renderer->cascades[0].depth_buffer);
-	scene_view.shadow_maps.add(shadow_renderer->cascades[1].depth_buffer);
-	add_sub_task(shadow_renderer.get());
 }
 
 void FullCameraRenderer::create_cube_renderer() {
@@ -312,8 +295,8 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 	if (cube_map_source)
 		scene_view.cube_map = cube_map_source->cube_map;
 
-	if (shadow_renderer)
-		shadow_renderer->render(params);
+	if (world_renderer->shadow_renderer)
+		world_renderer->shadow_renderer->render(params);
 
 
 	//cam->update_matrix_cache(params.desired_aspect_ratio);
