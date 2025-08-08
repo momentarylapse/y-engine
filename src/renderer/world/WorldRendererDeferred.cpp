@@ -15,14 +15,6 @@
 #include <lib/math/vec4.h>
 #include <lib/math/vec2.h>
 #include <lib/profiler/Profiler.h>
-#include <renderer/world/emitter/WorldInstancedEmitter.h>
-#include <renderer/world/emitter/WorldModelsEmitter.h>
-#include <renderer/world/emitter/WorldSkyboxEmitter.h>
-#include <renderer/world/emitter/WorldTerrainsEmitter.h>
-#include <renderer/world/emitter/WorldUserMeshesEmitter.h>
-#include <renderer/world/emitter/WorldParticlesEmitter.h>
-#include <world/World.h>
-#include "../../helper/ResourceManager.h"
 #include "../../world/Camera.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/scene/CameraParams.h>
@@ -74,21 +66,25 @@ WorldRendererDeferred::WorldRendererDeferred(yrenderer::Context* ctx, Camera* ca
 	ch_trans = profiler::create_channel("trans", channel);
 
 	scene_renderer_background = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
-	scene_renderer_background->add_emitter(new WorldSkyboxEmitter(ctx));
 	add_child(scene_renderer_background.get());
 
 	scene_renderer = new SceneRenderer(ctx, RenderPathType::Deferred, scene_view);
-	scene_renderer->add_emitter(new WorldOpaqueModelsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldTerrainsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldOpaqueUserMeshesEmitter(ctx));
-	scene_renderer->add_emitter(new WorldInstancedEmitter(ctx));
 	gbuffer_renderer->add_child(scene_renderer.get());
 
 	scene_renderer_trans = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
-	scene_renderer_trans->add_emitter(new WorldTransparentModelsEmitter(ctx));
-	scene_renderer_trans->add_emitter(new WorldTransparentUserMeshesEmitter(ctx));
-	scene_renderer_trans->add_emitter(new WorldParticlesEmitter(ctx, cam));
 	add_child(scene_renderer_trans.get());
+}
+
+void WorldRendererDeferred::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
+	scene_renderer_background->add_emitter(emitter);
+}
+
+void WorldRendererDeferred::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
+	scene_renderer->add_emitter(emitter);
+}
+
+void WorldRendererDeferred::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
+	scene_renderer_trans->add_emitter(emitter);
 }
 
 void WorldRendererDeferred::prepare(const yrenderer::RenderParams& params) {

@@ -27,6 +27,7 @@ namespace yrenderer {
 	class CubeMapSource;
 	class GeometryRenderer;
 	class ShadowMapRenderer;
+	class MeshEmitter;
 	class Material;
 }
 
@@ -40,6 +41,10 @@ public:
 	bool wireframe = false;
 
 	yrenderer::SceneView& scene_view;
+
+	virtual void add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {}
+	virtual void add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {}
+	virtual void add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {}
 
 	void reset();
 };

@@ -11,12 +11,6 @@
 #include <lib/yrenderer/helper/CubeMapSource.h>
 #include <lib/image/image.h>
 #include <lib/profiler/Profiler.h>
-#include <renderer/world/emitter/WorldInstancedEmitter.h>
-#include <renderer/world/emitter/WorldModelsEmitter.h>
-#include <renderer/world/emitter/WorldParticlesEmitter.h>
-#include <renderer/world/emitter/WorldSkyboxEmitter.h>
-#include <renderer/world/emitter/WorldTerrainsEmitter.h>
-#include <renderer/world/emitter/WorldUserMeshesEmitter.h>
 #include <lib/yrenderer/ShaderManager.h>
 #include "../../world/Camera.h"
 
@@ -25,15 +19,22 @@ WorldRendererForward::WorldRendererForward(yrenderer::Context* ctx, Camera* cam,
 	shader_manager->load_shader_module("forward/module-surface.shader");
 
 	scene_renderer = new yrenderer::SceneRenderer(ctx, yrenderer::RenderPathType::Forward, scene_view);
-	scene_renderer->add_emitter(new WorldSkyboxEmitter(ctx));
-	scene_renderer->add_emitter(new WorldOpaqueModelsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldTerrainsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldOpaqueUserMeshesEmitter(ctx));
-	scene_renderer->add_emitter(new WorldInstancedEmitter(ctx));
-	scene_renderer->add_emitter(new WorldTransparentModelsEmitter(ctx));
-	scene_renderer->add_emitter(new WorldTransparentUserMeshesEmitter(ctx));
-	scene_renderer->add_emitter(new WorldParticlesEmitter(ctx, cam));
 }
+
+void WorldRendererForward::add_background_emitter(shared<yrenderer::MeshEmitter> emitter) {
+	scene_renderer->add_emitter(emitter);
+}
+
+void WorldRendererForward::add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) {
+	scene_renderer->add_emitter(emitter);
+}
+
+void WorldRendererForward::add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) {
+	scene_renderer->add_emitter(emitter);
+}
+
+
+
 
 void WorldRendererForward::prepare(const yrenderer::RenderParams& params) {
 	profiler::begin(ch_prepare);

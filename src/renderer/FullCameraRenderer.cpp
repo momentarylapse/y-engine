@@ -36,6 +36,7 @@
 #include <renderer/world/emitter/WorldUserMeshesEmitter.h>
 #include <renderer/world/emitter/WorldInstancedEmitter.h>
 #include <renderer/world/emitter/WorldSkyboxEmitter.h>
+#include <renderer/world/emitter/WorldParticlesEmitter.h>
 #include <world/components/MultiInstance.h>
 #include <world/components/CubeMapSource.h>
 #include <lib/yrenderer/scene/MeshEmitter.h>
@@ -96,6 +97,14 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 
 
 	world_renderer = create_world_renderer(ctx, cam, scene_view, type);
+	world_renderer->add_background_emitter(new WorldSkyboxEmitter(ctx));
+	world_renderer->add_opaque_emitter(new WorldOpaqueModelsEmitter(ctx));
+	world_renderer->add_opaque_emitter(new WorldTerrainsEmitter(ctx));
+	world_renderer->add_opaque_emitter(new WorldOpaqueUserMeshesEmitter(ctx));
+	world_renderer->add_opaque_emitter(new WorldInstancedEmitter(ctx));
+	world_renderer->add_transparent_emitter(new WorldTransparentModelsEmitter(ctx));
+	world_renderer->add_transparent_emitter(new WorldTransparentUserMeshesEmitter(ctx));
+	world_renderer->add_transparent_emitter(new WorldParticlesEmitter(ctx, cam));
 
 	if (type != RenderPathType::PathTracing)
 		create_shadow_renderer();

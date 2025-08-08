@@ -20,6 +20,10 @@ class WorldRendererForward : public WorldRenderer {
 public:
 	explicit WorldRendererForward(yrenderer::Context* ctx, Camera* cam, yrenderer::SceneView& scene_view);
 
+	void add_background_emitter(shared<yrenderer::MeshEmitter> emitter) override;
+	void add_opaque_emitter(shared<yrenderer::MeshEmitter> emitter) override;
+	void add_transparent_emitter(shared<yrenderer::MeshEmitter> emitter) override;
+
 	void prepare(const yrenderer::RenderParams& params) override;
 	void draw(const yrenderer::RenderParams& params) override;
 
