@@ -10,7 +10,6 @@
 #include <lib/yrenderer/scene/SceneView.h>
 
 class Camera;
-class PostProcessor;
 class WorldRenderer;
 class XTerrainVBUpdater;
 
@@ -18,6 +17,7 @@ namespace yrenderer {
 	class CubeMapRenderer;
 	class SceneRenderer;
 	class HDRResolver;
+	class PostProcessor;
 	class TextureRenderer;
 	class MultisampleResolver;
 	class GeometryRenderer;
@@ -45,7 +45,7 @@ public:
 
 	// post processing
 	yrenderer::HDRResolver* hdr_resolver = nullptr;
-	PostProcessor* post_processor = nullptr;
+	yrenderer::PostProcessor* post_processor = nullptr;
 	yrenderer::TextureRenderer* texture_renderer = nullptr;
 	yrenderer::MultisampleResolver* multisample_resolver = nullptr;
 	yrenderer::LightMeter* light_meter = nullptr;

@@ -709,6 +709,9 @@ add_library(moduley SHARED
 	src/lib/yrenderer/helper/PipelineManager.cpp
 	src/lib/yrenderer/post/HDRResolver.cpp
 	src/lib/yrenderer/post/MultisampleResolver.cpp
+	src/lib/yrenderer/post/PostProcessor.cpp
+	src/lib/yrenderer/post/PostProcessorGL.cpp
+	src/lib/yrenderer/post/PostProcessorVulkan.cpp
 	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
 	src/lib/yrenderer/regions/RegionRenderer.cpp
 	src/lib/yrenderer/regions/RegionRendererGL.cpp
@@ -746,9 +749,6 @@ add_library(moduley SHARED
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
-	src/renderer/post/PostProcessor.cpp
-	src/renderer/post/PostProcessorGL.cpp
-	src/renderer/post/PostProcessorVulkan.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp
@@ -980,6 +980,9 @@ add_executable(y
 	src/lib/yrenderer/helper/PipelineManager.cpp
 	src/lib/yrenderer/post/HDRResolver.cpp
 	src/lib/yrenderer/post/MultisampleResolver.cpp
+	src/lib/yrenderer/post/PostProcessor.cpp
+	src/lib/yrenderer/post/PostProcessorGL.cpp
+	src/lib/yrenderer/post/PostProcessorVulkan.cpp
 	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
 	src/lib/yrenderer/regions/RegionRenderer.cpp
 	src/lib/yrenderer/regions/RegionRendererGL.cpp
@@ -1017,9 +1020,6 @@ add_executable(y
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/path/RenderPath.cpp
-	src/renderer/post/PostProcessor.cpp
-	src/renderer/post/PostProcessorGL.cpp
-	src/renderer/post/PostProcessorVulkan.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
 	src/renderer/world/emitter/WorldModelsEmitter.cpp
 	src/renderer/world/emitter/WorldParticlesEmitter.cpp

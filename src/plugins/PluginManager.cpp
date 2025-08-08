@@ -43,12 +43,11 @@
 #include "../renderer/world/WorldRendererDeferred.h"
 #ifdef USING_OPENGL
 #include "../renderer/gui/GuiRendererGL.h"
-#include "../renderer/post/PostProcessorGL.h"
 #endif
 #ifdef USING_VULKAN
 #include "../renderer/gui/GuiRendererVulkan.h"
-#include "../renderer/post/PostProcessorVulkan.h"
 #endif
+#include <lib/yrenderer/post/PostProcessor.h>
 #include <lib/yrenderer/target/WindowRenderer.h>
 #include <renderer/helper/Raytracing.h>
 #include <lib/yrenderer/scene/SceneView.h>
@@ -807,17 +806,12 @@ void export_engine(kaba::Exporter* ext) {
 
 void export_renderer(kaba::Exporter* ext) {
 
-#ifdef USING_VULKAN
-	using PostProcessor = PostProcessorVulkan;
-#endif
-#ifdef USING_OPENGL
-	using PostProcessor = PostProcessorGL;
-#endif
 	ext->declare_class_size("WorldRenderer", sizeof(WorldRenderer));
 	//ext->declare_class_element("WorldRenderer.shader_fx", &WorldRenderer::shader_fx);
 	ext->declare_class_element("WorldRenderer.wireframe", &WorldRenderer::wireframe);
 
 
+	using PostProcessor = yrenderer::PostProcessor;
 	ext->declare_class_size("PostProcessor", sizeof(PostProcessor));
 	ext->declare_class_element("PostProcessor.fb1", &PostProcessor::fb1);
 	ext->declare_class_element("PostProcessor.fb2", &PostProcessor::fb2);

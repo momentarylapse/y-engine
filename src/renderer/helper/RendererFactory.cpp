@@ -15,11 +15,10 @@
 #include <lib/yrenderer/target/WindowRenderer.h>
 #ifdef USING_VULKAN
 	#include "../gui/GuiRendererVulkan.h"
-	#include "../post/PostProcessorVulkan.h"
 #else
 	#include "../gui/GuiRendererGL.h"
-	#include "../post/PostProcessorGL.h"
 #endif
+#include <lib/yrenderer/post/PostProcessor.h>
 #include <y/EngineData.h>
 #include <lib/os/msg.h>
 #include <lib/profiler/Profiler.h>
@@ -77,9 +76,9 @@ RegionRenderer *create_region_renderer(yrenderer::Context* ctx) {
 
 PostProcessor *create_post_processor(yrenderer::Context* ctx) {
 #ifdef USING_VULKAN
-	return new PostProcessorVulkan(ctx);
+	return new PostProcessor(ctx);
 #else
-	return new PostProcessorGL(ctx, engine.width, engine.height);
+	return new PostProcessor(ctx, engine.width, engine.height);
 #endif
 }
 

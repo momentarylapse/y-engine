@@ -132,7 +132,7 @@ class PostProcessor
 	var fb1, fb2: FrameBuffer&
 	func extern next_fb(cur: FrameBuffer) -> FrameBuffer&
 	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
-	func extern mut add_stage(ctx: Context&, on_prepare: void->void, on_draw: void->void)
+	func extern mut add_stage(name: string, on_prepare: void->void, on_draw: void->void)
 
 
 class Profiler
