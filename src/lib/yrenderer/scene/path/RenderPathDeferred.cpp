@@ -135,10 +135,9 @@ void RenderPathDeferred::draw(const RenderParams& params) {
 	profiler::begin(ch_trans);
 	bool flip_y = params.target_is_window;
 	mat4 m = flip_y ? mat4::scale(1,-1,1) : mat4::ID;
-	//cam->update_matrices(params.desired_aspect_ratio);
-	nix::set_projection_matrix(m * cam->projection_matrix(params.desired_aspect_ratio)); // TODO
+	nix::set_projection_matrix(m * view.projection_matrix(params.desired_aspect_ratio));
 	nix::bind_uniform_buffer(BINDING_LIGHT, rvd.ubo_light.get());
-	nix::set_view_matrix(cam->view_matrix()); // TODO
+	nix::set_view_matrix(view.view_matrix());
 	nix::set_z(true, true);
 	nix::set_front(flip_y ? nix::Orientation::CW : nix::Orientation::CCW);
 
@@ -165,7 +164,7 @@ void RenderPathDeferred::render_out_from_gbuffer(FrameBuffer *source, const Rend
 	if constexpr (SceneRenderer::using_view_space)
 		data.dict_set("eye_pos", vec3_to_any(vec3::ZERO));
 	else
-		data.dict_set("eye_pos", vec3_to_any(cam->owner->pos)); // NAH
+		data.dict_set("eye_pos", vec3_to_any(view.pos)); // NAH
 #endif
 	data.dict_set("ambient_occlusion_radius:8", ambient_occlusion_radius);
 	out_renderer->bind_uniform_buffer(13, ssao_sample_buffer);
