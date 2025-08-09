@@ -6,6 +6,7 @@
  */
 
 #include "RenderPath.h"
+#include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/scene/pass/ShadowRenderer.h>
 #include <lib/yrenderer/scene/pass/CubeMapRenderer.h>
 #include <lib/ygraphics/graphics-impl.h>
@@ -26,10 +27,37 @@ mat4 mtr(const vec3 &t, const quaternion &a) {
 	return mt * mr;
 }*/
 
+string RenderPath::light_sources_module = "default";
+string RenderPath::lighting_method = "pbr";
+string RenderPath::shadow_method = "pcf-hardening";
+
 RenderPath::RenderPath(Context* ctx, const string &name) : Renderer(ctx, name) {
+	background_color = color(0.3f, 0.3f, 0.3f, 1);
+
+	if (ctx) {
+		shader_manager->default_shader = "default.shader";
+		ctx->load_shader_module("module-basic-interface.shader");
+		ctx->load_shader_module("module-basic-data.shader");
+		ctx->load_shader_module(format("module-light-sources-%s.shader", light_sources_module));
+		ctx->load_shader_module(format("module-shadows-%s.shader", shadow_method));
+		ctx->load_shader_module(format("module-lighting-%s.shader", lighting_method));
+		ctx->load_shader_module("module-vertex-default.shader");
+		ctx->load_shader_module("module-vertex-animated.shader");
+		ctx->load_shader_module("module-vertex-instanced.shader");
+		ctx->load_shader_module("module-vertex-lines.shader");
+		ctx->load_shader_module("module-vertex-points.shader");
+		ctx->load_shader_module("module-vertex-fx.shader");
+		ctx->load_shader_module("module-geometry-lines.shader");
+		ctx->load_shader_module("module-geometry-points.shader");
+	}
 }
 
 RenderPath::~RenderPath() = default;
+
+void RenderPath::set_view(const CameraParams& _view) {
+	view = _view;
+	scene_view.main_camera_params = view;
+}
 
 void RenderPath::set_lights(const Array<Light*>& lights) {
 	scene_view.choose_lights(lights);

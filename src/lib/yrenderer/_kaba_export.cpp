@@ -10,6 +10,9 @@
 #include "scene/SceneRenderer.h"
 #include "scene/MeshEmitter.h"
 #include "scene/mesh/CubeEmitter.h"
+#include "scene/path/RenderPath.h"
+#include "scene/path/RenderPathForward.h"
+#include "scene/path/RenderPathDeferred.h"
 #include "regions/RegionRenderer.h"
 #include "target/WindowRenderer.h"
 #include "target/XhuiRenderer.h"
@@ -428,6 +431,34 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		//ext->declare_class_element("RenderViewData.x", &RenderViewData::c);
 		ext->link_class_func("RenderViewData.set_view", &RenderViewData::set_view);
 		ext->link_class_func("RenderViewData.__init__", &kaba::generic_init_ext<RenderViewData, yrenderer::Context*>);
+	}
+
+	{
+		RenderPath rp(nullptr, "");
+		ext->declare_class_size("RenderPath", sizeof(RenderPath));
+		ext->declare_class_element("RenderPath.view", &RenderPath::view);
+		ext->declare_class_element("RenderPath.background_color", &RenderPath::background_color);
+		ext->declare_class_element("RenderPath.ambient_occlusion_radius", &RenderPath::ambient_occlusion_radius);
+		ext->link_class_func("RenderPath.set_lights", &RenderPath::set_lights);
+		ext->link_class_func("RenderPath.set_view", &RenderPath::set_view);
+		ext->link_virtual("RenderPath.add_background_emitter", &RenderPath::add_background_emitter, &rp);
+		ext->link_virtual("RenderPath.add_opaque_emitter", &RenderPath::add_opaque_emitter, &rp);
+		ext->link_virtual("RenderPath.add_transparent_emitter", &RenderPath::add_transparent_emitter, &rp);
+		ext->link("RenderPath.light_sources_module", &RenderPath::light_sources_module);
+		ext->link("RenderPath.lighting_method", &RenderPath::lighting_method);
+		ext->link("RenderPath.shadow_method", &RenderPath::shadow_method);
+	}
+	{
+		RenderPathForward fw(nullptr, 1024);
+		ext->declare_class_size("RenderPathForward", sizeof(RenderPathForward));
+		ext->link_class_func("RenderPathForward.__init__", &kaba::generic_init_ext<RenderPathForward, yrenderer::Context*, int>);
+		ext->link_virtual("RenderPathForward.add_background_emitter", &RenderPathForward::add_background_emitter, &fw);
+		ext->link_virtual("RenderPathForward.add_opaque_emitter", &RenderPathForward::add_opaque_emitter, &fw);
+		ext->link_virtual("RenderPathForward.add_transparent_emitter", &RenderPathForward::add_transparent_emitter, &fw);
+	}
+	{
+		ext->declare_class_size("RenderPathDeferred", sizeof(RenderPathDeferred));
+		ext->link_class_func("RenderPathDeferred.__init__", &kaba::generic_init_ext<RenderPathDeferred, yrenderer::Context*, int, int, int>);
 	}
 
 	{

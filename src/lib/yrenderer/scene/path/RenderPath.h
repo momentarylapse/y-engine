@@ -10,6 +10,7 @@
 #include <lib/yrenderer/Renderer.h>
 #include <lib/yrenderer/scene/SceneView.h>
 #include <lib/base/pointer.h>
+#include <lib/image/color.h>
 
 namespace yrenderer {
 
@@ -29,6 +30,7 @@ public:
 	CameraParams view;
 	bool wireframe = false;
 	float ambient_occlusion_radius = 0;
+	base::optional<color> background_color;
 
 	SceneView scene_view;
 
@@ -43,11 +45,17 @@ public:
 	void create_shadow_renderer(int resolution);
 	void create_cube_renderer();
 
+	void set_view(const CameraParams& view);
 	void set_lights(const Array<Light*>& lights);
 
 	void reset();
 
 	void render_into_cubemap(const RenderParams& params, CubeMapSource& source);
+
+	// shader modules
+	static string light_sources_module;
+	static string shadow_method;
+	static string lighting_method;
 };
 
 }

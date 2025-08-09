@@ -71,23 +71,9 @@ FullCameraRenderer::FullCameraRenderer(Context* ctx, Camera* _cam, RenderPathTyp
 	shadow_resolution = config.get_int("shadow.resolution", 1024);
 	global_shadow_box_size = shadow_box_size;
 
-	shader_manager->default_shader = "default.shader";
-	ctx->load_shader_module("module-basic-interface.shader");
-	ctx->load_shader_module("module-basic-data.shader");
-	const string light_sources = config.get_str("renderer.light_sources", "default");
-	ctx->load_shader_module(format("module-light-sources-%s.shader", light_sources));
-	const string shadows_method = config.get_str("shadow.quality", "pcf-hardening");
-	ctx->load_shader_module(format("module-shadows-%s.shader", shadows_method));
-	const string lighting_method = config.get_str("renderer.lighting", "pbr");
-	ctx->load_shader_module(format("module-lighting-%s.shader", lighting_method));
-	ctx->load_shader_module("module-vertex-default.shader");
-	ctx->load_shader_module("module-vertex-animated.shader");
-	ctx->load_shader_module("module-vertex-instanced.shader");
-	ctx->load_shader_module("module-vertex-lines.shader");
-	ctx->load_shader_module("module-vertex-points.shader");
-	ctx->load_shader_module("module-vertex-fx.shader");
-	ctx->load_shader_module("module-geometry-lines.shader");
-	ctx->load_shader_module("module-geometry-points.shader");
+	yrenderer::RenderPath::light_sources_module = config.get_str("renderer.light_sources", "default");
+	yrenderer::RenderPath::shadow_method = config.get_str("shadow.quality", "pcf-hardening");
+	yrenderer::RenderPath::lighting_method = config.get_str("renderer.lighting", "pbr");
 
 
 	if (type != RenderPathType::PathTracing) {
@@ -255,10 +241,10 @@ void FullCameraRenderer::prepare_instanced_matrices() {
 
 
 void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
-	render_path->view = cam->params();
+	render_path->set_view(cam->params());
+	//render_path->background_color = world.background; // no, WorldSkyboxEmitter will clear -> easier for cube maps (currently)
 	check_terrains(cam_main->owner->pos);
 	prepare_instanced_matrices();
-	render_path->scene_view.main_camera_params = cam->params();
 	cam->update_matrix_cache(params.desired_aspect_ratio);
 
 	render_path->ambient_occlusion_radius = config.ambient_occlusion_radius;

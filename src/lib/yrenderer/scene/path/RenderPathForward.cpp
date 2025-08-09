@@ -18,12 +18,14 @@
 namespace yrenderer {
 
 RenderPathForward::RenderPathForward(Context* ctx, int shadow_resolution) : RenderPath(ctx, "fwd") {
-	shader_manager->load_shader_module("forward/module-surface.shader");
+	if (ctx) {
+		shader_manager->load_shader_module("forward/module-surface.shader");
 
-	scene_renderer = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
+		scene_renderer = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
 
-	create_shadow_renderer(shadow_resolution);
-	create_cube_renderer();
+		create_shadow_renderer(shadow_resolution);
+		create_cube_renderer();
+	}
 }
 
 
@@ -50,6 +52,7 @@ void RenderPathForward::prepare(const RenderParams& params) {
 	profiler::begin(ch_prepare);
 	
 	scene_renderer->set_view(params, view);
+	scene_renderer->background_color = background_color;
 	scene_renderer->prepare(params);
 
 	shadow_renderer->render(params);

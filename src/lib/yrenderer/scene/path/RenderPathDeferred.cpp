@@ -26,56 +26,57 @@ using namespace yrenderer;
 using namespace ygfx;
 
 RenderPathDeferred::RenderPathDeferred(Context* ctx, int width, int height, int shadow_resolution) : RenderPath(ctx, "def") {
-
-	auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
-	auto tex2 = new Texture(width, height, "rgba:f16"); // emission
-	auto tex3 = new Texture(width, height, "rgba:f16"); // pos
-	auto tex4 = new Texture(width, height, "rgba:f16"); // normal,reflectivity
-	auto depth = new DepthBuffer(width, height, "ds:u24i8");
-	gbuffer_textures = {tex1, tex2, tex3, tex4, depth};
-	for (auto a: weak(gbuffer_textures))
-		a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
-
-
-	gbuffer_renderer = new TextureRenderer(ctx, "gbuf", gbuffer_textures);
-	gbuffer_renderer->clear_z = true;
-	gbuffer_renderer->clear_colors = {color(-1, 0,1,0)};
+	if (ctx) {
+		auto tex1 = new Texture(width, height, "rgba:f16"); // diffuse
+		auto tex2 = new Texture(width, height, "rgba:f16"); // emission
+		auto tex3 = new Texture(width, height, "rgba:f16"); // pos
+		auto tex4 = new Texture(width, height, "rgba:f16"); // normal,reflectivity
+		auto depth = new DepthBuffer(width, height, "ds:u24i8");
+		gbuffer_textures = {tex1, tex2, tex3, tex4, depth};
+		for (auto a: weak(gbuffer_textures))
+			a->set_options("wrap=clamp,magfilter=nearest,minfilter=nearest");
 
 
-	shader_manager->load_shader_module("forward/module-surface.shader");
-	shader_manager->load_shader_module("deferred/module-surface.shader");
-
-	auto shader_gbuffer_out = shader_manager->load_shader("deferred/out.shader");
-//	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
-//		msg_error("SSAO");
-
-	out_renderer = new ThroughShaderRenderer(ctx, "out", shader_gbuffer_out);
-	out_renderer->bind_textures(0, {tex1, tex2, tex3, tex4, depth});
+		gbuffer_renderer = new TextureRenderer(ctx, "gbuf", gbuffer_textures);
+		gbuffer_renderer->clear_z = true;
+		gbuffer_renderer->clear_colors = {color(-1, 0,1,0)};
 
 
-	Array<vec4> ssao_samples;
-	Random r;
-	for (int i=0; i<64; i++) {
-		auto v = r.dir() * pow(r.uniform01(), 1);
-		ssao_samples.add(vec4(v.x, v.y, abs(v.z), 0));
+		shader_manager->load_shader_module("forward/module-surface.shader");
+		shader_manager->load_shader_module("deferred/module-surface.shader");
+
+		auto shader_gbuffer_out = shader_manager->load_shader("deferred/out.shader");
+		//	if (!shader_gbuffer_out->link_uniform_block("SSAO", 13))
+		//		msg_error("SSAO");
+
+		out_renderer = new ThroughShaderRenderer(ctx, "out", shader_gbuffer_out);
+		out_renderer->bind_textures(0, {tex1, tex2, tex3, tex4, depth});
+
+
+		Array<vec4> ssao_samples;
+		Random r;
+		for (int i=0; i<64; i++) {
+			auto v = r.dir() * pow(r.uniform01(), 1);
+			ssao_samples.add(vec4(v.x, v.y, abs(v.z), 0));
+		}
+		ssao_sample_buffer = new UniformBuffer(ssao_samples.num * sizeof(vec4));
+		ssao_sample_buffer->update_array(ssao_samples);
+
+		ch_gbuf_out = profiler::create_channel("gbuf-out", channel);
+		ch_trans = profiler::create_channel("trans", channel);
+
+		scene_renderer_background = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
+		add_child(scene_renderer_background.get());
+
+		scene_renderer = new SceneRenderer(ctx, RenderPathType::Deferred, scene_view);
+		gbuffer_renderer->add_child(scene_renderer.get());
+
+		scene_renderer_trans = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
+		add_child(scene_renderer_trans.get());
+
+		create_shadow_renderer(shadow_resolution);
+		create_cube_renderer();
 	}
-	ssao_sample_buffer = new UniformBuffer(ssao_samples.num * sizeof(vec4));
-	ssao_sample_buffer->update_array(ssao_samples);
-
-	ch_gbuf_out = profiler::create_channel("gbuf-out", channel);
-	ch_trans = profiler::create_channel("trans", channel);
-
-	scene_renderer_background = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
-	add_child(scene_renderer_background.get());
-
-	scene_renderer = new SceneRenderer(ctx, RenderPathType::Deferred, scene_view);
-	gbuffer_renderer->add_child(scene_renderer.get());
-
-	scene_renderer_trans = new SceneRenderer(ctx, RenderPathType::Forward, scene_view);
-	add_child(scene_renderer_trans.get());
-
-	create_shadow_renderer(shadow_resolution);
-	create_cube_renderer();
 }
 
 void RenderPathDeferred::add_background_emitter(shared<MeshEmitter> emitter) {
@@ -101,6 +102,7 @@ void RenderPathDeferred::prepare(const RenderParams& params) {
 	gbuffer_renderer->set_area(dynamicly_scaled_area(gbuffer_renderer->frame_buffer.get()));
 
 	scene_renderer_background->set_view(params, view);
+	scene_renderer_background->background_color = background_color;
 	scene_renderer_background->prepare(params); // keep drawing into direct target
 
 	scene_renderer->set_view(sub_params, view);
