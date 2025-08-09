@@ -468,10 +468,10 @@ void export_package_yrenderer(kaba::Exporter* ext) {
 		ext->declare_class_size("HDRResolver", sizeof(HDRResolver));
 		ext->declare_class_element("HDRResolver.exposure", &HDRResolver::exposure);
 		ext->declare_class_element("HDRResolver.bloom_factor", &HDRResolver::bloom_factor);
-		ext->declare_class_element("HDRResolver.texture", &HDRResolver::tex_main);
-		ext->declare_class_element("HDRResolver.depth_buffer", &HDRResolver::_depth_buffer);
+		ext->declare_class_element("HDRResolver.texture", &HDRResolver::texture);
+		ext->declare_class_element("HDRResolver.depth_buffer", &HDRResolver::depth_buffer);
 		ext->declare_class_element("HDRResolver.bloom_levels", &HDRResolver::bloom_levels);
-		ext->link_class_func("HDRResolver.__init__", &kaba::generic_init_ext<HDRResolver, yrenderer::Context*, const shared<Texture>&, const shared<DepthBuffer>&>);
+		ext->link_class_func("HDRResolver.__init__", &kaba::generic_init_ext<HDRResolver, yrenderer::Context*, int, int>);
 		//ext->link_class_func("HDRResolver.tex_bloom", &hdr_resolver_get_tex_bloom);
 	}
 

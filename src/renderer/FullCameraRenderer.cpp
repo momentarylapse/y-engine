@@ -140,12 +140,8 @@ void FullCameraRenderer::check_terrains(const vec3& cam_pos) {
 
 void FullCameraRenderer::create_post_processing(Renderer* source) {
 
-	auto hdr_tex = new ygfx::Texture(engine.width, engine.height, "rgba:f16");
-	hdr_tex->set_options("wrap=clamp,minfilter=nearest");
-	hdr_tex->set_options("magfilter=" + config.resolution_scale_filter);
-	auto hdr_depth = new ygfx::DepthBuffer(engine.width, engine.height, "d:f32");
-
-	hdr_resolver = new HDRResolver(ctx, hdr_tex, hdr_depth, true);
+	HDRResolver::magfilter = config.resolution_scale_filter;
+	hdr_resolver = new HDRResolver(ctx, engine.width, engine.height, true);
 
 #ifdef USING_VULKAN
 	config.antialiasing_method = AntialiasingMethod::NONE;
@@ -162,15 +158,15 @@ void FullCameraRenderer::create_post_processing(Renderer* source) {
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
 		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {tex_ms, depth_ms}, {"samples=4"});
 
-		multisample_resolver = new yrenderer::MultisampleResolver(ctx, tex_ms, depth_ms, hdr_tex, hdr_depth);
+		multisample_resolver = new yrenderer::MultisampleResolver(ctx, tex_ms, depth_ms, hdr_resolver->texture.get(), hdr_resolver->depth_buffer.get());
 	} else {
 		msg_error("no msaa");
-		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {hdr_tex, hdr_depth});
+		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {hdr_resolver->texture, hdr_resolver->depth_buffer.get()});
 	}
 
 	texture_renderer->add_child(source);
 
-	light_meter = new LightMeter(ctx, hdr_tex);
+	light_meter = new LightMeter(ctx, hdr_resolver->texture.get());
 }
 
 
