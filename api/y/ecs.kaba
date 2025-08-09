@@ -59,6 +59,8 @@ class Component
 func extern __get_component_list(t: kaba.Class*) -> (Component&)[]&
 func get_component_list[T]() -> (T&)[]&
 	return __get_component_list(T) as (T&)[]&
+func query1[T]() -> (T&)[]&
+	return __get_component_list(T) as (T&)[]&
 
 func extern __get_component_family_list(t: kaba.Class*) -> (Component&)[]&
 func get_component_family_list[T]() -> (T&)[]&

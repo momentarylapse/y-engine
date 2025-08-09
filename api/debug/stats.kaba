@@ -17,16 +17,16 @@ func channel_level(channel: int) -> int
 class StatDisplay extends Picture
 
 	let CHANNEL_HEIGHT = 0.015
-	let DISPLAY_HEIGHT = 0.2
+	let DISPLAY_HEIGHT = 0.3
 	
 	func __init__()
-		super.__init__([0,1, 0,0.2], tex_white)
+		super.__init__([0,1, 0,DISPLAY_HEIGHT], tex_white)
 		align = Node.Align.LEFT | Node.Align.TOP | Node.Align.FILL_X
-		self.color = [0,0,0, 0.7]
+		self.color.a = 0
 		
 		visible = false
 	
-	func mut add_graph(data: Profiler.TimingData[], scale: float, y0: float)
+	func mut add_graph(data: Profiler.TimingData[], scale: f32, y0: f32, title: string)
 		var started: Profiler.TimingData[]
 		for t in data
 			if (t.channel & 0x80000000) == 0
@@ -41,7 +41,7 @@ class StatDisplay extends Picture
 						let w = dt * scale
 						let y = y0 - CHANNEL_HEIGHT * (level+1)
 						var p = new Picture([x, x + w, y, y + CHANNEL_HEIGHT], tex_white)
-						p.color = color.hsb(c * 3.4151, 0.5, 0.5, 0.5)
+						p.color = color.hsb(c * 3.4151, 0.4, 0.4, 1.0)
 						add(give(p))
 						if w > 0.02
 							var ll = Profiler.channels[c].name
@@ -51,30 +51,46 @@ class StatDisplay extends Picture
 							add(give(label))
 						started.remove(i)
 						break
+		var label = new Text(title, DISPLAY_HEIGHT*0.20, [engine.physical_aspect_ratio-0.14, y0-DISPLAY_HEIGHT*0.35])
+		label.color.a = 0.3
+		add(give(label))
 		
 	func mut update()
 		remove_all_children()
 		
+		# background
+		for i in 0:2
+			var bg = new Picture([0,1, i*DISPLAY_HEIGHT/2,(i+1)*DISPLAY_HEIGHT/2], tex_white)
+			bg.align = Node.Align.LEFT | Node.Align.TOP | Node.Align.FILL_X
+			let f = f32(i) * 0.1 + 0.1
+			bg.color = [f,f,f, 0.7]
+			add(give(bg))
+	
 		let frame_t = Profiler.previous_frame_timing.total_time
-		var scale = 1.5 / frame_t
+		var scale = engine.physical_aspect_ratio / frame_t
 		
 		# ms ticks
-		for t in 0.0:frame_t:0.001
-			var p = new Picture([t*scale, t*scale+0.001, 0, DISPLAY_HEIGHT], tex_white)
-			p.color = [1,1,1,0.1]
-			add(give(p))
-		if true
-			var p = new Picture([frame_t*scale, frame_t*scale+0.002, 0, DISPLAY_HEIGHT], tex_white)
-			p.color = [1,1,1,0.2]
-			add(give(p))
+		if frame_t < 0.1
+			var dt = if frame_t > 0.02
+				0.005
+			else
+				0.001
+			for t in dt:frame_t:dt
+				var p = new Picture([t*scale, t*scale+0.002, 0, DISPLAY_HEIGHT], tex_white)
+				p.color = [1,1,1,0.15]
+				add(give(p))
+				var l = new Text(" {{t*1000|0.0}} ms", CHANNEL_HEIGHT*1.3, [t*scale,0])
+				l.color.a = 0.5
+				add(give(l))
 			
-		add_graph(Profiler.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT)
-		add_graph(Profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2)
+		add_graph(Profiler.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT, "CPU")
+		add_graph(Profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2, "GPU")
 
 
 
 class Test extends Controller
-	var t = 0.0
+	var t_fps = 0.0
+	var t_stat: f32?
 	var stat_display: shared![StatDisplay]
 	var fps_display: shared![FpsDisplay]
 	
@@ -88,13 +104,21 @@ class Test extends Controller
 		if k == Key.CONTROL + Key.T
 			stat_display.visible = not stat_display.visible
 			stat_display.update()
+			t_stat = 0
 		if k == Key.CONTROL + Key.R
 			stat_display.update()
+			t_stat = nil
 
 
-	func override on_iterate(dt: float)
-		t += engine.elapsed_rt
-		if t > 0.3
+	func override on_iterate(dt: f32)
+		t_fps += engine.elapsed_rt
+		if t_fps > 0.3
 			fps_display.update()
-			t = 0
+			t_fps = 0
+		for t in t_stat
+			t_stat = t + engine.elapsed_rt
+			if t > 1.3
+				if stat_display.visible
+					stat_display.update()
+				t_stat = 0
 
