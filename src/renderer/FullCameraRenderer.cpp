@@ -143,24 +143,16 @@ void FullCameraRenderer::create_post_processing(Renderer* source) {
 	HDRResolver::magfilter = config.resolution_scale_filter;
 	hdr_resolver = new HDRResolver(ctx, engine.width, engine.height, true);
 
-#ifdef USING_VULKAN
-	config.antialiasing_method = AntialiasingMethod::NONE;
-#endif
-
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 
-		msg_write("ms tex:");
 		auto tex_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
-		msg_write("ms depth:");
 		auto depth_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "d:f32");
-		msg_write("ms renderer:");
 		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
 		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {tex_ms, depth_ms}, {"samples=4"});
 
 		multisample_resolver = new yrenderer::MultisampleResolver(ctx, tex_ms, depth_ms, hdr_resolver->texture.get(), hdr_resolver->depth_buffer.get());
 	} else {
-		msg_error("no msaa");
 		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {hdr_resolver->texture, hdr_resolver->depth_buffer.get()});
 	}
 

@@ -44,8 +44,8 @@ HDRResolver::HDRResolver(Context* ctx, int width, int height, bool manual_mode) 
 	float threshold = 1.0f;
 	for (int i=0; i<MAX_BLOOM_LEVELS; i++) {
 		auto& bl = bloom_levels[i];
-		bloomw /= BLOOM_LEVEL_SCALE;
-		bloomh /= BLOOM_LEVEL_SCALE;
+		bloomw = max(bloomw / BLOOM_LEVEL_SCALE, 4);
+		bloomh = max(bloomh / BLOOM_LEVEL_SCALE, 4);
 		bl.tex_temp = new ygfx::Texture(bloomw, bloomh, "rgba:f16");
 		auto depth0 = new ygfx::DepthBuffer(bloomw, bloomh, "d:f32");
 		bl.tex_out = new ygfx::Texture(bloomw, bloomh, "rgba:f16");
