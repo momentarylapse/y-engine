@@ -278,12 +278,17 @@ void export_world(kaba::Exporter* ext) {
 	ext->link_class_func("Camera.unproject", &Camera::unproject);
 
 
-	ext->declare_class_size("CubeMapSource", sizeof(yrenderer::CubeMapSource));
-	ext->declare_class_element("CubeMapSource.min_depth", &yrenderer::CubeMapSource::min_depth);
-	ext->declare_class_element("CubeMapSource.max_depth", &yrenderer::CubeMapSource::max_depth);
-	ext->declare_class_element("CubeMapSource.cube_map", &yrenderer::CubeMapSource::cube_map);
-	ext->declare_class_element("CubeMapSource.resolution", &yrenderer::CubeMapSource::resolution);
-	ext->declare_class_element("CubeMapSource.update_rate", &yrenderer::CubeMapSource::update_rate);
+#define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
+
+	{
+		CubeMapSource source;
+		ext->declare_class_size("CubeMapSource", sizeof(CubeMapSource));
+		ext->declare_class_element("CubeMapSource.min_depth", _OFFSET(source, source.min_depth));
+		ext->declare_class_element("CubeMapSource.max_depth", _OFFSET(source, source.max_depth));
+		ext->declare_class_element("CubeMapSource.cube_map", _OFFSET(source, source.cube_map));
+		ext->declare_class_element("CubeMapSource.resolution", _OFFSET(source, source.resolution));
+		ext->declare_class_element("CubeMapSource.update_rate", _OFFSET(source, source.update_rate));
+	}
 
 
 	ext->declare_class_size("Model.Mesh", sizeof(Mesh));
