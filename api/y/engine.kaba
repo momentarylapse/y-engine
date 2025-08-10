@@ -53,7 +53,7 @@ class ComputeTask extends RenderTask
 	nx: i32
 	ny: i32
 	nz: i32
-	shader_data: any
+	shader_data: Any
 	func extern __init__(ctx: Context&, name: string, shader: shared![Shader], n: i32[])
 	func override extern render(params: RenderParams)
 	func extern bind_texture(index: i32, tex: Texture&)
@@ -63,11 +63,11 @@ class ComputeTask extends RenderTask
 
 class RegionRenderer
 	struct Region
-		var dest: rect
+		var dest: Rect
 		var z: int
 		var renderer: Renderer&
 	var regions: Region[]
-	func extern add_region(r: Renderer&, dest: rect, z: int)
+	func extern add_region(r: Renderer&, dest: Rect, z: i32)
 
 
 #class ShadowRenderer

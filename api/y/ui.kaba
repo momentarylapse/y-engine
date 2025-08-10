@@ -66,7 +66,7 @@ class Node as shared
 		
 		#CENTER = int(Node.Align.CENTER_H | Node.Align.CENTER_V)
 		
-	func extern __init__(r: rect)
+	func extern __init__(r: Rect)
 	func extern virtual __delete__()
 	func extern mut __del_override__()
 		
@@ -86,11 +86,11 @@ class Node as shared
 	var pos: vec2
 	var x, y: f32
 	var width, height: f32
-	func extern set_area(r: rect)
-	var _eff_area: rect
-	var margin: rect
+	func extern set_area(r: Rect)
+	var _eff_area: Rect
+	var margin: Rect
 	var dz: f32
-	var color: color
+	var color: Color
 	var align: Align
 	var visible: bool
 	var children: shared![Node][]
@@ -102,14 +102,14 @@ class VBox extends Node
 	func extern __init__()
 		
 class Picture extends Node
-	func extern __init__(r: rect, tex: shared![Texture], source: rect = rect.ID)
+	func extern __init__(r: Rect, tex: shared![Texture], source: Rect = Rect.ID)
 	func extern override __delete__()
-	var source: rect
+	var source: Rect
 	var texture: shared![Texture]
 	var blur: f32
 	var angle: f32
 	var shader: shared[Shader]
-	var shader_data: any
+	var shader_data: Any
 
 class Text extends Picture
 	func extern __init__(t: string, font_size: f32, p: vec2 = vec2.0)
@@ -124,7 +124,7 @@ class Picture3d extends Node
 	var world_3d: bool
 	var lighting: bool
 	func __init__(m: Model*, mat: mat4, z: f32)
-		super.__init__(rect.ID)
+		super.__init__(Rect.ID)
 		model = m
 		self.matrix = mat
 
@@ -196,7 +196,7 @@ struct VRDevice
 	var name: string
 	var role: VRDeviceRole
 	var pos: vec3
-	var ang: quaternion
+	var ang: Quaternion
 	func extern button(b: Button) -> bool
 	func extern clicked(b: Button) -> bool
 	func extern axis(a: Axis) -> f32

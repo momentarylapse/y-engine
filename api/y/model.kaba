@@ -3,10 +3,10 @@ use gfx.*
 use ecs.*
 
 class Material
-	var albedo: color
-	var roughness: float
-	var metal: float
-	var emission: color
+	var albedo: Color
+	var roughness: f32
+	var metal: f32
+	var emission: Color
 	var textures: shared![Texture][]
 #	var shader: shared![Shader][6]
 	var cast_shadow: bool

@@ -12,7 +12,7 @@ struct BaseClass
 
 struct Entity extends BaseClass
 	var pos: vec3
-	var ang: quaternion
+	var ang: Quaternion
 	var parent: Entity*
 	func extern get_matrix() -> mat4
 	func extern __del_override__()
