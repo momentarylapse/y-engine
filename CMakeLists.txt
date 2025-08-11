@@ -214,24 +214,6 @@ else()
 endif()
 
 
-# lib: fftw3 (optional)
-set(LIB_FFTW3_ENABLED true CACHE BOOL "Use fftw3 library?")
-pkg_check_modules(FFTW3F fftw3f)
-if(FFTW3F_FOUND)
-else()
-	set(LIB_FFTW3_ENABLED false CACHE BOOL "fftw3 library not found" FORCE)
-endif()
-if(${LIB_FFTW3_ENABLED})
-	list(APPEND INCLUDE_DIRECTORIES ${FFTW3F_INCLUDE_DIRS})
-	list(APPEND LINK_DIRECTORIES ${FFTW3F_LIBRARY_DIRS})
-	list(APPEND DEPS ${FFTW3F_LIBRARIES})
-	list(APPEND COMPILE_OPTIONS ${FFTW3F_CFLAGS_OTHER})
-	list(APPEND COMPILE_DEFINITIONS HAS_LIB_FFTW3=1)
-else()
-	list(APPEND COMPILE_DEFINITIONS HAS_LIB_FFTW3=0)
-endif()
-
-
 # lib: survive (optional)
 set(LIB_SURVIVE_ENABLED true CACHE BOOL "Use survive library?")
 pkg_check_modules(SURVIVE survive)
@@ -563,8 +545,6 @@ add_library(moduley SHARED
 	src/lib/doc/pdf.cpp
 	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
-	src/lib/fft/_kaba_export.cpp
-	src/lib/fft/fft.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
 	src/lib/image/image_bmp.cpp
@@ -836,8 +816,6 @@ add_executable(y
 	src/lib/doc/pdf.cpp
 	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
-	src/lib/fft/_kaba_export.cpp
-	src/lib/fft/fft.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
 	src/lib/image/image_bmp.cpp
