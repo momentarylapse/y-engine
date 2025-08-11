@@ -677,6 +677,7 @@ add_library(moduley SHARED
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
+	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
 	src/lib/threads/Mutex.cpp
 	src/lib/threads/Thread.cpp
@@ -949,6 +950,7 @@ add_executable(y
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
+	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
 	src/lib/threads/Mutex.cpp
 	src/lib/threads/Thread.cpp

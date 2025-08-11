@@ -137,29 +137,6 @@ class PostProcessor
 	func extern mut add_stage(name: string, on_prepare: void->void, on_draw: void->void)
 
 
-class Profiler
-	struct Channel
-		var name: string
-		var parent: i32
-	struct TimingData
-		var channel: i32
-		var offset: f32
-	struct FrameTimingData
-		var cpu0: TimingData[]
-		var gpu: TimingData[]
-		var total_time: f32
-	func extern static get_name(channel: i32)
-	var extern static channels: Channel[]
-	var extern static previous_frame_timing: FrameTimingData
-	var extern static avg_frame_time: f32
-	var extern static frames: i32
-	#class Average
-	#	var frame_time: float
-	#	var location: float[16]
-	#var frames: int
-	#var avg: Average
-#var extern perf_mon: PerformanceMonitor*
-
 var extern engine: EngineData
 
 func extern screenshot(out im: Image)

@@ -9,6 +9,7 @@ use ui.*
 use engine.*
 use fx.*
 use world.*
+use profiler.*
 use networking.*
 
 

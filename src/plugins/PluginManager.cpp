@@ -8,7 +8,6 @@
 #include "PluginManager.h"
 #include <lib/kaba/kaba.h>
 #include <lib/kaba/lib/extern.h>
-#include <lib/profiler/Profiler.h>
 #include "../audio/SoundSource.h"
 #include "../audio/AudioBuffer.h"
 #include "../audio/AudioStream.h"
@@ -24,6 +23,7 @@
 #include "../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/_kaba_export.h>
+#include <lib/profiler/_kaba_export.h>
 #include "../helper/Scheduler.h"
 #if __has_include("../input/InputManager.h")
 #include "../input/InputManager.h"
@@ -716,28 +716,6 @@ void export_net(kaba::Exporter* ext) {
 
 void export_engine(kaba::Exporter* ext) {
 
-	ext->declare_class_size("Profiler.Channel", sizeof(profiler::Channel));
-	ext->declare_class_element("Profiler.Channel.name", &profiler::Channel::name);
-	ext->declare_class_element("Profiler.Channel.parent", &profiler::Channel::parent);
-
-	ext->declare_class_size("Profiler.TimingData", sizeof(profiler::TimingData));
-	ext->declare_class_element("Profiler.TimingData.channel", &profiler::TimingData::channel);
-	ext->declare_class_element("Profiler.TimingData.offset", &profiler::TimingData::offset);
-
-	ext->declare_class_size("Profiler.FrameTimingData", sizeof(profiler::FrameTimingData));
-	ext->declare_class_element("Profiler.FrameTimingData.cpu0", &profiler::FrameTimingData::cpu0);
-	ext->declare_class_element("Profiler.FrameTimingData.gpu", &profiler::FrameTimingData::gpu);
-	ext->declare_class_element("Profiler.FrameTimingData.total_time", &profiler::FrameTimingData::total_time);
-
-	ext->declare_class_size("Profiler", sizeof(profiler::Profiler));
-	ext->link_func("Profiler.get_name", &profiler::get_name);
-	ext->link("Profiler.avg_frame_time", &profiler::avg_frame_time);
-	ext->link("Profiler.frames", &profiler::frames);
-	ext->link("Profiler.channels", &profiler::channels);
-	ext->link("Profiler.previous_frame_timing", &profiler::previous_frame_timing);
-	//ext->link("perf_mon", &global_perf_mon);
-
-
 	// unused
 /*	ext->declare_class_size("ResourceManager", sizeof(ResourceManager));
 	ext->link_class_func("ResourceManager.load_shader", &ResourceManager::load_shader);
@@ -854,6 +832,7 @@ void PluginManager::export_kaba_package_y(kaba::Exporter* ext) {
 	export_engine(ext);
 	export_renderer(ext);
 	export_package_yrenderer(ext);
+	export_package_profiler(ext);
 }
 
 template<class C>
