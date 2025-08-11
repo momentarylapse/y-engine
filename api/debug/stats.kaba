@@ -1,4 +1,5 @@
 use y.*
+use image.*
 
 class FpsDisplay extends Text
 	func __init__()
@@ -87,16 +88,48 @@ class StatDisplay extends Picture
 		add_graph(Profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2, "GPU")
 
 
+class HistoryDisplay extends Picture
+	let W = 256
+	let H = 64
+	func __init__()
+		super.__init__([0,0.4, 0.3,0.4], tex_white)
+		align = Node.Align.LEFT | Node.Align.TOP
+		texture = new Texture(W, H, "rgba:i8")
+		
+		visible = false
+	func mut update()
+	func override on_iterate(dt: f32)
+		let DT = min(max(Profiler.history.total_times[-W:]), 0.05)
+		var im: Image
+		im.create(W, H, Color(0,0,0,0))
+		var yprev = 0
+		for i=>h in Profiler.history.total_times[-W:]
+			let y = clamp(i32(h / DT * H), 0, H)
+			for _y in 0:y
+				im.set_pixel(i, H-_y-1, Color.GRAY.with_alpha(0.3))
+			for _y in yprev:y+1
+				im.set_pixel(i, H-_y-1, Color.WHITE)
+			yprev = y
+		
+		for i in 0:W
+			let y = i32(0.01 / DT * H)
+			for k in 0:5
+				im.set_pixel(i, H-y*k-1, Color.GRAY)
+		
+		texture.write(im)
 
 class Test extends Controller
 	var t_fps = 0.0
 	var t_stat: f32?
 	var stat_display: shared![StatDisplay]
+	var history_display: shared![HistoryDisplay]
 	var fps_display: shared![FpsDisplay]
 	
 	func override on_init()
 		stat_display = new StatDisplay()
 		toplevel.add(stat_display)
+		history_display = new HistoryDisplay()
+		toplevel.add(history_display)
 		fps_display = new FpsDisplay()
 		toplevel.add(fps_display)
 
@@ -104,6 +137,7 @@ class Test extends Controller
 		if k == Key.CONTROL + Key.T
 			stat_display.visible = not stat_display.visible
 			stat_display.update()
+			history_display.visible = stat_display.visible
 			t_stat = 0
 		if k == Key.CONTROL + Key.R
 			stat_display.update()
@@ -120,5 +154,6 @@ class Test extends Controller
 			if t > 1.3
 				if stat_display.visible
 					stat_display.update()
+					history_display.update()
 				t_stat = 0
 
