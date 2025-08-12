@@ -28,14 +28,6 @@ Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p
 
 Text::~Text() = default;
 
-void Text::__init__(const string &t, float h, const vec2 &p) {
-	new(this) Text(t, h, p);
-}
-
-void Text::__delete__() {
-	this->Text::~Text();
-}
-
 void Text::rebuild() {
 	if (!font)
 		return;

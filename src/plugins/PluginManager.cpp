@@ -575,13 +575,14 @@ void export_ui(kaba::Exporter* ext) {
 	ext->declare_class_element("Node.visible", &gui::Node::visible);
 	ext->declare_class_element("Node.children", &gui::Node::children);
 	ext->declare_class_element("Node.parent", &gui::Node::parent);
-	ext->link_class_func("Node.__init__", &gui::Node::__init_base__);
-	ext->link_virtual("Node.__delete__", &gui::Node::__delete__, &node);
+	ext->link_class_func("Node.__init__", &kaba::generic_init_ext<gui::Node, const rect&>);
+	ext->link_virtual("Node.__delete__", &kaba::generic_virtual<gui::Node>::__delete__, &node);
 	ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
 	ext->link_class_func("Node.add", &gui::Node::add);
 	ext->link_class_func("Node.remove", &gui::Node::remove);
 	ext->link_class_func("Node.remove_all_children", &gui::Node::remove_all_children);
 	ext->link_class_func("Node.set_area", &gui::Node::set_area);
+	ext->link_class_func("Node._get", &gui::Node::get);
 	ext->link_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);
 	ext->link_virtual("Node.on_enter", &gui::Node::on_enter, &node);
 	ext->link_virtual("Node.on_leave", &gui::Node::on_leave, &node);
@@ -600,19 +601,19 @@ void export_ui(kaba::Exporter* ext) {
 	ext->declare_class_element("Picture.shader_data", &gui::Picture::shader_data);
 	ext->declare_class_element("Picture.blur", &gui::Picture::bg_blur);
 	ext->declare_class_element("Picture.angle", &gui::Picture::angle);
-	ext->link_class_func("Picture.__init__", &gui::Picture::__init__);
-	ext->link_virtual("Picture.__delete__", &gui::Picture::__delete__, &picture);
+	ext->link_class_func("Picture.__init__", &kaba::generic_init_ext<gui::Picture, const rect&, shared<Texture>, const rect&>);
+	ext->link_virtual("Picture.__delete__", &kaba::generic_virtual<gui::Picture>::__delete__, &picture);
 
 	gui::Text text(":::fake:::", 0, vec2::ZERO);
 	ext->declare_class_size("Text", sizeof(gui::Text));
 	ext->declare_class_element("Text.font_size", &gui::Text::font_size);
 	ext->declare_class_element("Text.text", &gui::Text::text);
-	ext->link_class_func("Text.__init__", &gui::Text::__init__);
-	ext->link_virtual("Text.__delete__", &gui::Text::__delete__, &text);
+	ext->link_class_func("Text.__init__", &kaba::generic_init_ext<gui::Text, const string&, float, const vec2&>);
+	ext->link_virtual("Text.__delete__", &kaba::generic_virtual<gui::Text>::__delete__, &text);
 	ext->link_class_func("Text.set_text", &gui::Text::set_text);
 
-	ext->link_class_func("HBox.__init__", &gui::HBox::__init__);
-	ext->link_class_func("VBox.__init__", &gui::VBox::__init__);
+	ext->link_class_func("HBox.__init__", &kaba::generic_init<gui::HBox>);
+	ext->link_class_func("VBox.__init__", &kaba::generic_init<gui::VBox>);
 
 #ifdef HAS_INPUT
 	ext->link_func("key_state", &input::get_key);

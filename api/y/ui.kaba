@@ -73,6 +73,9 @@ class Node as shared
 	func extern mut add(n: shared![Node])
 	func extern mut remove_all_children()
 	func extern mut remove(n: Node&)
+	func extern selfref _get(id: string) -> Node*
+	func selfref get[X](id: string) -> X*
+		return _get(id) as X*
 		
 	func extern virtual mut on_iterate(dt: f32)
 	func extern virtual mut on_enter()

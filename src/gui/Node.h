@@ -17,11 +17,8 @@ namespace gui {
 
 class Node : public Sharable<VirtualBase> {
 public:
-	Node(const rect &r);
-	virtual ~Node();
-
-	void __init_base__(const rect &r);
-	virtual void __delete__();
+	explicit Node(const rect &r);
+	~Node() override;
 
 
 	enum class Type {
@@ -48,6 +45,7 @@ public:
 		_TOP_LEFT = TOP | LEFT,
 	};
 
+	string id;
 	Type type;
 	bool visible;
 	vec2 pos; // coord system depends on align!
@@ -71,6 +69,7 @@ public:
 	void remove_all_children();
 	void update_geometry(const rect &target);
 	void set_area(const rect &r);
+	Node* get(const string &id);
 
 	virtual void on_iterate(float dt) {}
 	virtual bool on_left_button_down() { return false; }
@@ -87,13 +86,11 @@ public:
 class HBox : public Node {
 public:
 	HBox();
-	void __init__();
 };
 
 class VBox : public Node {
 public:
 	VBox();
-	void __init__();
 };
 
 /*class Spacer : public Node {

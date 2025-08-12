@@ -14,6 +14,7 @@ namespace gui {
 
 Node::Node(const rect &r) {
 	type = Type::NODE;
+	id = p2s(this);
 	set_area(r);
 	dz = 1;
 	col = White;
@@ -29,16 +30,7 @@ Node::Node(const rect &r) {
 	parent = nullptr;
 }
 
-Node::~Node() {
-}
-
-void Node::__init_base__(const rect &r) {
-	new(this) Node(r);
-}
-
-void Node::__delete__() {
-	this->Node::~Node();
-}
+Node::~Node() = default;
 
 void Node::add(shared<Node> n) {
 	children.add(n);
@@ -131,7 +123,7 @@ void Node::update_geometry(const rect &target) {
 	}
 
 	auto sub_area = eff_area;
-	for (auto n: children) {
+	for (auto n: weak(children)) {
 		n->update_geometry(sub_area);
 		if (type == Type::VBOX)
 			sub_area.y1 = n->eff_area.y2 + n->margin.y2;
@@ -140,14 +132,22 @@ void Node::update_geometry(const rect &target) {
 	}
 }
 
+Node* Node::get(const string& _id) {
+	if (id == _id)
+		return this;
+	for (auto n: weak(children)) {
+		if (n->id == _id)
+			return n;
+		if (auto c = n->get(_id))
+			return c;
+	}
+	return nullptr;
+}
+
 
 HBox::HBox() : Node(rect::ID) {
 	type = Type::HBOX;
 	align = Align::_FILL_XY;
-}
-
-void HBox::__init__() {
-	new(this) HBox();
 }
 
 
@@ -155,10 +155,6 @@ void HBox::__init__() {
 VBox::VBox() : Node(rect::ID) {
 	type = Type::VBOX;
 	align = Align::_FILL_XY;
-}
-
-void VBox::__init__() {
-	new(this) VBox();
 }
 
 }
