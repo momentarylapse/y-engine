@@ -579,10 +579,12 @@ void export_ui(kaba::Exporter* ext) {
 	ext->link_virtual("Node.__delete__", &kaba::generic_virtual<gui::Node>::__delete__, &node);
 	ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
 	ext->link_class_func("Node.add", &gui::Node::add);
+	ext->link_class_func("Node.add_from_source", &gui::Node::add_from_source);
 	ext->link_class_func("Node.remove", &gui::Node::remove);
 	ext->link_class_func("Node.remove_all_children", &gui::Node::remove_all_children);
 	ext->link_class_func("Node.set_area", &gui::Node::set_area);
 	ext->link_class_func("Node._get", &gui::Node::get);
+	ext->link_virtual("Node._set_option", &gui::Node::_set_option, &node);
 	ext->link_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);
 	ext->link_virtual("Node.on_enter", &gui::Node::on_enter, &node);
 	ext->link_virtual("Node.on_leave", &gui::Node::on_leave, &node);

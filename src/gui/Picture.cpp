@@ -26,5 +26,16 @@ Picture::Picture(const rect &r, shared<ygfx::Texture> tex, const rect &s) :
 
 Picture::~Picture() = default;
 
+void Picture::_set_option(const string &k, const string &v) {
+	if (k == "texture") {
+		// ...
+	} else if (k == "angle") {
+		angle = v._float();
+	} else {
+		Node::_set_option(k, v);
+	}
+}
+
+
 
 }

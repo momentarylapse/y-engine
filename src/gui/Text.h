@@ -21,6 +21,8 @@ public:
 	void rebuild();
 	void set_text(const string &t);
 
+	void _set_option(const string &k, const string &v) override;
+
 	string text;
 	float font_size;
 	Font *font;

@@ -7,7 +7,13 @@
 
 #include "Node.h"
 #include "gui.h"
+#include "Picture.h"
+#include "Text.h"
 #include "../y/EngineData.h"
+#include <lib/yrenderer/Context.h>
+#include <lib/ygraphics/graphics-impl.h>
+
+#include "lib/os/msg.h"
 //#include <algorithm>
 
 namespace gui {
@@ -143,6 +149,106 @@ Node* Node::get(const string& _id) {
 	}
 	return nullptr;
 }
+
+void print_resource(const Resource& r, const string& prefix) {
+	msg_write(format("%s%s %s  %s", prefix, r.type, r.id, str(r.options)));
+	for (const auto& c: r.children)
+		print_resource(c, prefix + "    ");
+}
+
+void Node::apply_resource(const Resource &r) {
+	if (r.id != "?" and r.id != "")
+		id = r.id;
+	//n->align = Align::NONE;
+	for (const auto& o: r.options) {
+		if (o.find("=") >= 0) {
+			auto xx = o.explode("=");
+			if (xx[1].head(1) == "'")
+				_set_option(xx[0], xx[1].sub_ref(1, -1).unescape());
+			else
+				_set_option(xx[0], xx[1]);
+		} else {
+			_set_option(o, "");
+		}
+	}
+
+	for (const auto& c: r.children) {
+		Node* n = nullptr;
+		if (c.type == "Node")
+			n = new Node(rect::ID);
+		else if (c.type == "Picture")
+			n = new Picture(rect::ID, engine.context->tex_white);
+		else if (c.type == "Text")
+			n = new Text("", 0.05, vec2(0,0));
+		else if (c.type == "HBox")
+			n = new HBox();
+		else if (c.type == "VBox")
+			n = new VBox();
+		else
+			continue;
+		add(n);
+		n->apply_resource(c);
+	}
+}
+
+
+void Node::add_from_source(const string& source) {
+	auto r = parse_resource(source);
+	//print_resource(r, "");
+	//if (r.id != "?")
+
+	apply_resource(r);
+}
+
+void Node::_set_option(const string& key, const string& value) {
+	if (key == "width") {
+		width = value._float();
+	} else if (key == "height") {
+		height = value._float();
+	} else if (key == "x") {
+		pos.x = value._float();
+	} else if (key == "y") {
+		pos.y = value._float();
+	} else if (key == "dz") {
+		dz = value._float();
+	} else if (key == "margin") {
+		float f = value._float();
+		margin = rect(f, f, f, f);
+	} else if (key == "visible") {
+		visible = value._bool();
+	} else if (key == "hidden") {
+		visible = false;
+	} else if (key == "color") {
+		col = color::parse(value);
+	} else if (key == "top") {
+		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
+		align = (Align)(align | Align::TOP);
+	} else if (key == "bottom") {
+		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
+		align = (Align)(align | Align::BOTTOM);
+	} else if (key == "left") {
+		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
+		align = (Align)(align | Align::LEFT);
+	} else if (key == "right") {
+		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
+		align = (Align)(align | Align::RIGHT);
+	} else if (key == "centerh") {
+		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
+		align = (Align)(align | Align::CENTER_H);
+	} else if (key == "centerv") {
+		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
+		align = (Align)(align | Align::CENTER_V);
+	} else if (key == "fillx") {
+		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
+		align = (Align)(align | Align::FILL_X);
+	} else if (key == "filly") {
+		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
+		align = (Align)(align | Align::FILL_Y);
+	} else if (key == "nonsquare") {
+		align = (Align)(align | Align::NONSQUARE);
+	}
+}
+
 
 
 HBox::HBox() : Node(rect::ID) {

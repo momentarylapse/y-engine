@@ -56,4 +56,16 @@ void Text::set_text(const string &t) {
 	}
 }
 
+void Text::_set_option(const string &k, const string &v) {
+	if (k == "size") {
+		font_size = v._float();
+		rebuild();
+	} else if (k == "text") {
+		set_text(v);
+	} else {
+		Picture::_set_option(k, v);
+	}
+}
+
+
 }

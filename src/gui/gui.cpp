@@ -130,5 +130,47 @@ void delete_node(Node *n) {
 	update_tree();
 }
 
+Resource parse_resource_line(const string& l) {
+	Resource r;
+	auto x = l.trim().explode(" ");
+	if (x.num >= 1)
+		r.type = x[0];
+	if (x.num >= 2) {
+		r.id = x[1];
+		r.options = x.sub_ref(2);
+	}
+	return r;
+}
+
+int count_initial_tabs(const string& s) {
+	for (int i=0; i<s.num; i++)
+		if (s[i] != '\t')
+			return i;
+	return -1;
+}
+
+Resource parse_resource(const Array<string>& lines, int& line_no) {
+	int indent0 = count_initial_tabs(lines[line_no]);
+	auto r = parse_resource_line(lines[line_no ++]);
+
+	while (line_no < lines.num) {
+		int indent = count_initial_tabs(lines[line_no]);
+		if (indent > indent0)
+			r.children.add(parse_resource(lines, line_no));
+		else
+			break;
+	}
+	return r;
+}
+
+Resource parse_resource(const string& s) {
+	auto lines = s.explode("\n");
+	int line_no = 0;
+	for (int i=0; i<lines.num; i++)
+		if (count_initial_tabs(lines[i]) == 0)
+			line_no = i;
+	return parse_resource(lines, line_no);
+}
+
 
 }

@@ -32,6 +32,15 @@ extern Array<Node*> sorted_nodes;
 void update_tree();
 
 void delete_node(Node *n);
+
+struct Resource {
+	string type;
+	string id;
+	Array<string> options;
+	Array<Resource> children;
+};
+
+Resource parse_resource(const string& s);
 }
 
 

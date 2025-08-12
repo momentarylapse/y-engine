@@ -18,6 +18,8 @@ public:
 	Picture(const rect &r, shared<ygfx::Texture> tex, const rect &source = rect::ID);
 	~Picture() override;
 
+	void _set_option(const string &k, const string &v) override;
+
 	rect source;
 
 	float bg_blur;
