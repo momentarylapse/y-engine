@@ -8,7 +8,7 @@
 #pragma once
 
 
-#include "../lib/base/pointer.h"
+#include <lib/base/pointer.h>
 #include <functional>
 
 struct vec2;

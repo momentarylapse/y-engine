@@ -41,14 +41,8 @@
 #include "../renderer/FullCameraRenderer.h"
 #include <lib/yrenderer/scene/path/RenderPathForward.h>
 #include <lib/yrenderer/scene/path/RenderPathDeferred.h>
-#ifdef USING_OPENGL
-#include "../renderer/gui/GuiRendererGL.h"
-#endif
-#ifdef USING_VULKAN
-#include "../renderer/gui/GuiRendererVulkan.h"
-#endif
+#include "../renderer/gui/GuiRenderer.h"
 #include <lib/yrenderer/post/PostProcessor.h>
-#include <lib/yrenderer/target/WindowRenderer.h>
 #include <renderer/helper/Raytracing.h>
 #include <lib/yrenderer/scene/SceneView.h>
 #include "../y/EngineData.h"

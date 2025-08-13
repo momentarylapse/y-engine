@@ -9,15 +9,12 @@
 #include "Node.h"
 #include "Font.h"
 #include "Text.h"
-#include "../meta.h"
 #include <lib/math/rect.h>
 #include <lib/kaba/kaba.h>
 #include <lib/ygraphics/graphics-impl.h>
 
 #include "plugins/PluginManager.h"
-#ifdef _X_ALLOW_X_
-#include "../helper/Profiler.h"
-#endif
+#include <lib/profiler/Profiler.h>
 #include <stdio.h>
 
 extern bool _parse_tokens_smart_strings_;
@@ -27,13 +24,11 @@ namespace gui {
 Array<Node*> all_nodes;
 Array<Node*> sorted_nodes;
 shared<Node> toplevel;
-//static int ch_gui_iter = -1;
+static int ch_gui_iter = -1;
 
 
 void init(int ch_iter) {
-#ifdef _X_ALLOW_X_
 	ch_gui_iter = profiler::create_channel("gui", ch_iter);
-#endif
 
 	Font::init_fonts();
 
@@ -98,9 +93,7 @@ void handle_mouse_move(const vec2 &m_prev, const vec2 &m) {
 }
 
 void iterate(float dt) {
-#ifdef _X_ALLOW_X_
 	profiler::begin(ch_gui_iter);
-#endif
 	auto nodes = all_nodes;
 	// tree might change...
 	for (auto n: nodes) {
@@ -120,9 +113,7 @@ void iterate(float dt) {
 #endif
 		}
 	}
-#ifdef _X_ALLOW_X_
 	profiler::end(ch_gui_iter);
-#endif
 }
 
 void delete_node(Node *n) {

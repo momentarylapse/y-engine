@@ -13,11 +13,7 @@
 #include <lib/yrenderer/post/ThroughShaderRenderer.h>
 #include <lib/yrenderer/regions/RegionRenderer.h>
 #include <lib/yrenderer/target/WindowRenderer.h>
-#ifdef USING_VULKAN
-	#include "../gui/GuiRendererVulkan.h"
-#else
-	#include "../gui/GuiRendererGL.h"
-#endif
+#include "../gui/GuiRenderer.h"
 #include <lib/yrenderer/post/PostProcessor.h>
 #include <y/EngineData.h>
 #include <lib/os/msg.h>
@@ -63,11 +59,7 @@ WindowRenderer *create_window_renderer(yrenderer::Context* ctx, GLFWwindow* wind
 }
 
 Renderer *create_gui_renderer(yrenderer::Context* ctx) {
-#ifdef USING_VULKAN
-	return new GuiRendererVulkan(ctx);
-#else
-	return new GuiRendererGL(ctx);
-#endif
+	return new GuiRenderer(ctx);
 }
 
 RegionRenderer *create_region_renderer(yrenderer::Context* ctx) {
