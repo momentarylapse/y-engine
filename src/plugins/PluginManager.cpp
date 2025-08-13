@@ -177,6 +177,12 @@ audio::AudioStream* __create_audio_stream(Callable<Array<float>(int)>& f, float 
 	return audio::create_stream([&f] (int n) { return f(n); }, sample_rate);
 }
 
+mat4 scene_view_shadow_projection(yrenderer::SceneView* s) {
+	if (s->shadow_indices.num < 1)
+		return mat4::ID;
+	return s->lights[s->shadow_indices[0]]->shadow_projection;
+}
+
 void PluginManager::init() {
 	kaba::default_context->register_package_init("y", engine.script_dir | "y", &export_kaba_package_y);
 	import_kaba();
@@ -790,6 +796,9 @@ void export_engine(kaba::Exporter* ext) {
 	ext->link_func("rt_setup", &rt_setup);
 	ext->link_func("rt_update_frame", &rt_update_frame);
 	ext->link_func("rt_vtrace", &vtrace);
+
+
+	ext->link_func("SceneView.shadow_projection", &scene_view_shadow_projection);
 }
 
 void export_renderer(kaba::Exporter* ext) {

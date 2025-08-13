@@ -88,6 +88,7 @@ class SceneView
 	var ray_tracing_data: RayTracingData*
 	func __delete__()
 		pass
+	func extern shadow_projection() -> mat4
 
 class RenderPath extends Renderer
 	var wireframe: bool
