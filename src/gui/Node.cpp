@@ -7,16 +7,17 @@
 
 #include "Node.h"
 #include "gui.h"
-#include "Picture.h"
-#include "Text.h"
 #include "../y/EngineData.h"
 #include <lib/yrenderer/Context.h>
 #include <lib/ygraphics/graphics-impl.h>
 
+#include "Text.h"
 #include "lib/os/msg.h"
 //#include <algorithm>
 
 namespace gui {
+
+Node::Node() : Node(rect::ID) {}
 
 Node::Node(const rect &r) {
 	type = Type::NODE;
@@ -164,30 +165,20 @@ void Node::apply_resource(const Resource &r) {
 		if (o.find("=") >= 0) {
 			auto xx = o.explode("=");
 			if (xx[1].head(1) == "'")
-				_set_option(xx[0], xx[1].sub_ref(1, -1).unescape());
+				set_option(xx[0], xx[1].sub_ref(1, -1).unescape());
 			else
-				_set_option(xx[0], xx[1]);
+				set_option(xx[0], xx[1]);
 		} else {
-			_set_option(o, "");
+			set_option(o, "");
 		}
 	}
 
 	for (const auto& c: r.children) {
-		Node* n = nullptr;
-		if (c.type == "Node")
-			n = new Node(rect::ID);
-		else if (c.type == "Picture")
-			n = new Picture(rect::ID, engine.context->tex_white);
-		else if (c.type == "Text")
-			n = new Text("", 0.05, vec2(0,0));
-		else if (c.type == "HBox")
-			n = new HBox();
-		else if (c.type == "VBox")
-			n = new VBox();
-		else
-			continue;
-		add(n);
-		n->apply_resource(c);
+		if (Node* n = create_node(c.type)) {
+			//msg_write("create " + c.type + "   " + p2s(n));
+			add(n);
+			n->apply_resource(c);
+		}
 	}
 }
 
@@ -249,16 +240,24 @@ void Node::_set_option(const string& key, const string& value) {
 	}
 }
 
+void Node::set_option(const string& key, const string& value) {
+	if (type == Type::TEXT)
+		(static_cast<Text&>(*this)._set_option(key, value));
+	else if (type == Type::PICTURE)
+		(static_cast<Picture&>(*this)._set_option(key, value));
+	else
+		_set_option(key, value);
+}
 
 
-HBox::HBox() : Node(rect::ID) {
+HBox::HBox() {
 	type = Type::HBOX;
 	align = Align::_FILL_XY;
 }
 
 
 
-VBox::VBox() : Node(rect::ID) {
+VBox::VBox() {
 	type = Type::VBOX;
 	align = Align::_FILL_XY;
 }

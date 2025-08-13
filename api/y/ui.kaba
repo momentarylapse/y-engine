@@ -66,6 +66,7 @@ class Node as shared
 		
 		#CENTER = int(Node.Align.CENTER_H | Node.Align.CENTER_V)
 		
+	func extern __init__()
 	func extern __init__(r: Rect)
 	func extern virtual __delete__()
 	func extern mut __del_override__()
@@ -78,7 +79,6 @@ class Node as shared
 	func selfref get[X](id: string) -> X*
 		return _get(id) as X*
 		
-	func extern virtual mut _set_option(k: string, v: string)
 	func extern virtual mut on_iterate(dt: f32)
 	func extern virtual mut on_enter()
 	func extern virtual mut on_leave()
@@ -101,12 +101,13 @@ class Node as shared
 	var children: shared![Node][]
 
 class HBox extends Node
-	func extern __init__()
+	func extern override __init__()
 
 class VBox extends Node
-	func extern __init__()
+	func extern override __init__()
 		
 class Picture extends Node
+	func extern override __init__()
 	func extern __init__(r: Rect, tex: shared![Texture], source: Rect = Rect.ID)
 	func extern override __delete__()
 	var source: Rect
@@ -117,6 +118,7 @@ class Picture extends Node
 	var shader_data: Any
 
 class Text extends Picture
+	func extern override __init__()
 	func extern __init__(t: string, font_size: f32, p: vec2 = vec2.0)
 	func extern override __delete__()
 	var text: string
@@ -129,7 +131,7 @@ class Picture3d extends Node
 	var world_3d: bool
 	var lighting: bool
 	func __init__(m: Model*, mat: mat4, z: f32)
-		super.__init__(Rect.ID)
+		#super.__init__(Rect.ID)
 		model = m
 		self.matrix = mat
 

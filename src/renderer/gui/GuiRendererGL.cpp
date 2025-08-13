@@ -55,6 +55,8 @@ void GuiRendererGL::draw_gui(const RenderParams& params, FrameBuffer *source) {
 			continue;
 		if (n->type == gui::Node::Type::PICTURE or n->type == gui::Node::Type::TEXT) {
 			auto *p = (gui::Picture*)n;
+			if (!p->texture)
+				continue;
 			auto s = shader.get();
 			if (p->shader) {
 				s = p->shader.get();

@@ -2,7 +2,7 @@ use y.*
 use image.*
 
 class FpsDisplay extends Text
-	func __init__()
+	func override __init__()
 		super.__init__("", 0.02, [0.01,0.01])
 		dz = 999
 	func mut update()
@@ -20,7 +20,7 @@ class StatDisplay extends Picture
 	let CHANNEL_HEIGHT = 0.015
 	let DISPLAY_HEIGHT = 0.3
 	
-	func __init__()
+	func override __init__()
 		super.__init__([0,1, 0,DISPLAY_HEIGHT], tex_white)
 		align = Node.Align.LEFT | Node.Align.TOP | Node.Align.FILL_X
 		self.color.a = 0
@@ -91,7 +91,7 @@ class StatDisplay extends Picture
 class HistoryDisplay extends Picture
 	let W = 256
 	let H = 64
-	func __init__()
+	func override __init__()
 		super.__init__([0,0.4, 0.3,0.4], tex_white)
 		align = Node.Align.LEFT | Node.Align.TOP
 		texture = new Texture(W, H, "rgba:i8")

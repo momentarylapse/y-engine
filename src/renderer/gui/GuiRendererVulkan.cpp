@@ -62,6 +62,8 @@ void GuiRendererVulkan::prepare_gui(ygfx::FrameBuffer *source, const RenderParam
 			continue;
 		if (n->type == gui::Node::Type::PICTURE or n->type == gui::Node::Type::TEXT) {
 			auto *p = (gui::Picture*)n;
+			if (!p->texture)
+				continue;
 
 			if (index >= ubo.num) {
 				dset.add(ctx->pool->create_set("sampler,sampler,buffer"));
@@ -101,6 +103,8 @@ void GuiRendererVulkan::draw_gui(ygfx::CommandBuffer *cb, ygfx::RenderPass *rend
 			continue;
 		if (n->type == gui::Node::Type::PICTURE or n->type == gui::Node::Type::TEXT) {
 			auto *p = (gui::Picture*)n;
+			if (!p->texture)
+				continue;
 			if (p->shader) {
 				auto pl = PipelineManager::get_gui(p->shader.get(), render_pass, "3f,3f,2f");
 				cb->bind_pipeline(pl);

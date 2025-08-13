@@ -21,6 +21,7 @@ namespace gui {
 
 class Node : public Sharable<VirtualBase> {
 public:
+	explicit Node();
 	explicit Node(const rect &r);
 	~Node() override;
 
@@ -77,7 +78,9 @@ public:
 	void set_area(const rect &r);
 	Node* get(const string &id);
 
-	virtual void _set_option(const string& k, const string& v);
+	// "fake" virtual...
+	void set_option(const string& k, const string& v);
+	void _set_option(const string& k, const string& v);
 
 	virtual void on_iterate(float dt) {}
 	virtual bool on_left_button_down() { return false; }

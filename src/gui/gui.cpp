@@ -8,15 +8,19 @@
 #include "gui.h"
 #include "Node.h"
 #include "Font.h"
+#include "Text.h"
 #include "../meta.h"
-#include "../lib/math/rect.h"
-#include "../lib/math/vec3.h"
-#include "../lib/math/mat4.h"
-#include "../lib/kaba/kaba.h"
+#include <lib/math/rect.h>
+#include <lib/kaba/kaba.h>
+#include <lib/ygraphics/graphics-impl.h>
+
+#include "plugins/PluginManager.h"
 #ifdef _X_ALLOW_X_
 #include "../helper/Profiler.h"
 #endif
 #include <stdio.h>
+
+extern bool _parse_tokens_smart_strings_;
 
 namespace gui {
 
@@ -33,11 +37,11 @@ void init(int ch_iter) {
 
 	Font::init_fonts();
 
-	toplevel = new Node(rect::ID);
+	toplevel = new Node();
 }
 
 void reset() {
-	toplevel = new Node(rect::ID);
+	toplevel = new Node();
 
 	all_nodes = {};
 	sorted_nodes = {};
@@ -132,7 +136,9 @@ void delete_node(Node *n) {
 
 Resource parse_resource_line(const string& l) {
 	Resource r;
-	auto x = l.trim().explode(" ");
+	_parse_tokens_smart_strings_ = true;
+	auto x = l.parse_tokens();//trim().explode(" ");
+	_parse_tokens_smart_strings_ = false;
 	if (x.num >= 1)
 		r.type = x[0];
 	if (x.num >= 2) {
@@ -170,6 +176,23 @@ Resource parse_resource(const string& s) {
 		if (count_initial_tabs(lines[i]) == 0)
 			line_no = i;
 	return parse_resource(lines, line_no);
+}
+
+
+Node* create_node(const string& type) {
+	if (type == "Node")
+		return new Node();
+	if (type == "Picture")
+		return new Picture();
+	if (type == "Text")
+		return new Text();
+	if (type == "HBox")
+		return new HBox();
+	if (type == "VBox")
+		return new VBox();
+	if (type.find(".") >= 0)
+		return static_cast<Node*>(PluginManager::create_instance_auto(type));
+	return nullptr;
 }
 
 

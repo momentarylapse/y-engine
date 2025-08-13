@@ -7,21 +7,24 @@
 
 #include "Text.h"
 #include "Font.h"
-#include "../lib/math/vec2.h"
-#include "../lib/image/image.h"
+#include <lib/math/vec2.h>
+#include <lib/image/image.h>
 #include <lib/ygraphics/graphics-impl.h>
-
-#include "../y/EngineData.h"
+#include <y/EngineData.h>
 
 
 namespace gui {
 
+
+//Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p.y), nullptr) {//rect::ID
+Text::Text() : Text(":::fake:::", 0.05f, {0,0}) {}
 
 Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p.y), nullptr) {//rect::ID
 	type = Type::TEXT;
 	//margin = rect(x, h/6, y, h/10);
 	font = Font::_default;
 	font_size = h;
+//	texture = nullptr; // needed, so we don't mess with tex_white...
 	if (t != ":::fake:::")
 		set_text(t);
 }

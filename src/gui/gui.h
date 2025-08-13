@@ -41,6 +41,7 @@ struct Resource {
 };
 
 Resource parse_resource(const string& s);
+Node* create_node(const string& type);
 }
 
 

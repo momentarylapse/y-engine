@@ -560,59 +560,67 @@ void export_ui(kaba::Exporter* ext) {
 	ext->declare_enum("VRDeviceRole.LIGHTHOUSE1", input::VRDeviceRole::Lighthouse1);
 #endif
 
-	gui::Node node(rect::ID);
-	ext->declare_class_size("Node", sizeof(gui::Node));
-	ext->declare_class_element("Node.x", &gui::Node::pos);
-	ext->declare_class_element("Node.y", _OFFSET(node, pos.y));
-	ext->declare_class_element("Node.pos", &gui::Node::pos);
-	ext->declare_class_element("Node.width", &gui::Node::width);
-	ext->declare_class_element("Node.height", &gui::Node::height);
-	ext->declare_class_element("Node._eff_area", &gui::Node::eff_area);
-	ext->declare_class_element("Node.margin", &gui::Node::margin);
-	ext->declare_class_element("Node.align", &gui::Node::align);
-	ext->declare_class_element("Node.dz", &gui::Node::dz);
-	ext->declare_class_element("Node.color", &gui::Node::col);
-	ext->declare_class_element("Node.visible", &gui::Node::visible);
-	ext->declare_class_element("Node.children", &gui::Node::children);
-	ext->declare_class_element("Node.parent", &gui::Node::parent);
-	ext->link_class_func("Node.__init__", &kaba::generic_init_ext<gui::Node, const rect&>);
-	ext->link_virtual("Node.__delete__", &kaba::generic_virtual<gui::Node>::__delete__, &node);
-	ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
-	ext->link_class_func("Node.add", &gui::Node::add);
-	ext->link_class_func("Node.add_from_source", &gui::Node::add_from_source);
-	ext->link_class_func("Node.remove", &gui::Node::remove);
-	ext->link_class_func("Node.remove_all_children", &gui::Node::remove_all_children);
-	ext->link_class_func("Node.set_area", &gui::Node::set_area);
-	ext->link_class_func("Node._get", &gui::Node::get);
-	ext->link_virtual("Node._set_option", &gui::Node::_set_option, &node);
-	ext->link_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);
-	ext->link_virtual("Node.on_enter", &gui::Node::on_enter, &node);
-	ext->link_virtual("Node.on_leave", &gui::Node::on_leave, &node);
-	ext->link_virtual("Node.on_left_button_down", &gui::Node::on_left_button_down, &node);
-	ext->link_virtual("Node.on_left_button_up", &gui::Node::on_left_button_up, &node);
-	ext->link_virtual("Node.on_middle_button_down", &gui::Node::on_middle_button_down, &node);
-	ext->link_virtual("Node.on_middle_button_up", &gui::Node::on_middle_button_up, &node);
-	ext->link_virtual("Node.on_right_button_down", &gui::Node::on_right_button_down, &node);
-	ext->link_virtual("Node.on_right_button_up", &gui::Node::on_right_button_up, &node);
+	{
+		gui::Node node;
+		ext->declare_class_size("Node", sizeof(gui::Node));
+		ext->declare_class_element("Node.x", &gui::Node::pos);
+		ext->declare_class_element("Node.y", _OFFSET(node, pos.y));
+		ext->declare_class_element("Node.pos", &gui::Node::pos);
+		ext->declare_class_element("Node.width", &gui::Node::width);
+		ext->declare_class_element("Node.height", &gui::Node::height);
+		ext->declare_class_element("Node._eff_area", &gui::Node::eff_area);
+		ext->declare_class_element("Node.margin", &gui::Node::margin);
+		ext->declare_class_element("Node.align", &gui::Node::align);
+		ext->declare_class_element("Node.dz", &gui::Node::dz);
+		ext->declare_class_element("Node.color", &gui::Node::col);
+		ext->declare_class_element("Node.visible", &gui::Node::visible);
+		ext->declare_class_element("Node.children", &gui::Node::children);
+		ext->declare_class_element("Node.parent", &gui::Node::parent);
+		ext->link_class_func("Node.__init__:Node", &kaba::generic_init<gui::Node>);
+		ext->link_class_func("Node.__init__:Node:math.Rect", &kaba::generic_init_ext<gui::Node, const rect&>);
+		ext->link_virtual("Node.__delete__", &kaba::generic_virtual<gui::Node>::__delete__, &node);
+		ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
+		ext->link_class_func("Node.add", &gui::Node::add);
+		ext->link_class_func("Node.add_from_source", &gui::Node::add_from_source);
+		ext->link_class_func("Node.remove", &gui::Node::remove);
+		ext->link_class_func("Node.remove_all_children", &gui::Node::remove_all_children);
+		ext->link_class_func("Node.set_area", &gui::Node::set_area);
+		ext->link_class_func("Node._get", &gui::Node::get);
+		ext->link_virtual("Node.on_iterate", &gui::Node::on_iterate, &node);
+		ext->link_virtual("Node.on_enter", &gui::Node::on_enter, &node);
+		ext->link_virtual("Node.on_leave", &gui::Node::on_leave, &node);
+		ext->link_virtual("Node.on_left_button_down", &gui::Node::on_left_button_down, &node);
+		ext->link_virtual("Node.on_left_button_up", &gui::Node::on_left_button_up, &node);
+		ext->link_virtual("Node.on_middle_button_down", &gui::Node::on_middle_button_down, &node);
+		ext->link_virtual("Node.on_middle_button_up", &gui::Node::on_middle_button_up, &node);
+		ext->link_virtual("Node.on_right_button_down", &gui::Node::on_right_button_down, &node);
+		ext->link_virtual("Node.on_right_button_up", &gui::Node::on_right_button_up, &node);
+	}
 
-	gui::Picture picture(rect::ID, nullptr);
-	ext->declare_class_size("Picture", sizeof(gui::Picture));
-	ext->declare_class_element("Picture.source", &gui::Picture::source);
-	ext->declare_class_element("Picture.texture", &gui::Picture::texture);
-	ext->declare_class_element("Picture.shader", &gui::Picture::shader);
-	ext->declare_class_element("Picture.shader_data", &gui::Picture::shader_data);
-	ext->declare_class_element("Picture.blur", &gui::Picture::bg_blur);
-	ext->declare_class_element("Picture.angle", &gui::Picture::angle);
-	ext->link_class_func("Picture.__init__", &kaba::generic_init_ext<gui::Picture, const rect&, shared<Texture>, const rect&>);
-	ext->link_virtual("Picture.__delete__", &kaba::generic_virtual<gui::Picture>::__delete__, &picture);
+	{
+		gui::Picture picture;//(rect::ID, nullptr);
+		ext->declare_class_size("Picture", sizeof(gui::Picture));
+		ext->declare_class_element("Picture.source", &gui::Picture::source);
+		ext->declare_class_element("Picture.texture", &gui::Picture::texture);
+		ext->declare_class_element("Picture.shader", &gui::Picture::shader);
+		ext->declare_class_element("Picture.shader_data", &gui::Picture::shader_data);
+		ext->declare_class_element("Picture.blur", &gui::Picture::bg_blur);
+		ext->declare_class_element("Picture.angle", &gui::Picture::angle);
+		ext->link_class_func("Picture.__init__:Picture", &kaba::generic_init<gui::Picture>);
+		ext->link_class_func("Picture.__init__:Picture:math.Rect:shared![Texture]:math.Rect", &kaba::generic_init_ext<gui::Picture, const rect&, shared<Texture>, const rect&>);
+		ext->link_virtual("Picture.__delete__", &kaba::generic_virtual<gui::Picture>::__delete__, &picture);
+	}
 
-	gui::Text text(":::fake:::", 0, vec2::ZERO);
-	ext->declare_class_size("Text", sizeof(gui::Text));
-	ext->declare_class_element("Text.font_size", &gui::Text::font_size);
-	ext->declare_class_element("Text.text", &gui::Text::text);
-	ext->link_class_func("Text.__init__", &kaba::generic_init_ext<gui::Text, const string&, float, const vec2&>);
-	ext->link_virtual("Text.__delete__", &kaba::generic_virtual<gui::Text>::__delete__, &text);
-	ext->link_class_func("Text.set_text", &gui::Text::set_text);
+	{
+		gui::Text text;//(":::fake:::", 0, vec2::ZERO);
+		ext->declare_class_size("Text", sizeof(gui::Text));
+		ext->declare_class_element("Text.font_size", &gui::Text::font_size);
+		ext->declare_class_element("Text.text", &gui::Text::text);
+		ext->link_class_func("Text.__init__:Text", &kaba::generic_init<gui::Text>);
+		ext->link_class_func("Text.__init__:Text:string:f32:math.vec2", &kaba::generic_init_ext<gui::Text, const string&, float, const vec2&>);
+		ext->link_virtual("Text.__delete__", &kaba::generic_virtual<gui::Text>::__delete__, &text);
+		ext->link_class_func("Text.set_text", &gui::Text::set_text);
+	}
 
 	ext->link_class_func("HBox.__init__", &kaba::generic_init<gui::HBox>);
 	ext->link_class_func("VBox.__init__", &kaba::generic_init<gui::VBox>);
@@ -1001,6 +1009,21 @@ void *PluginManager::create_instance(const Path &filename, const string &base_cl
 		return nullptr;
 	return create_instance(c, variables);
 }
+
+void* PluginManager::create_instance_auto(const string& extended_type_name) {
+	auto x = extended_type_name.explode(".");
+	string type = x.back();
+
+	for (auto m: weak(kaba::default_context->public_modules)) {
+		for (auto c: m->classes())
+			if (c->name == type) {
+				msg_error("create: " + c->long_name());
+				return create_instance(c, "");
+			}
+	}
+	return nullptr;
+}
+
 
 
 
