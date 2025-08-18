@@ -13,7 +13,7 @@
 #include <lib/kaba/kaba.h>
 #include <lib/ygraphics/graphics-impl.h>
 
-#include "plugins/PluginManager.h"
+#include "../plugins/PluginManager.h"
 #include <lib/profiler/Profiler.h>
 #include <stdio.h>
 
