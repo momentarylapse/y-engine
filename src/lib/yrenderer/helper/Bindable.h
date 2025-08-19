@@ -45,6 +45,8 @@ struct BindingData {
 #endif
 };
 
+void apply_shader_data(const RenderParams& params, ygfx::Shader* s, const Any& shader_data);
+
 }
 
 

@@ -7,6 +7,8 @@
 #include <lib/image/color.h>
 #include <lib/ygraphics/graphics-fwd.h>
 
+#include "lib/any/any.h"
+
 #define MATERIAL_MAX_TEXTURES		8
 
 class Path;
@@ -56,13 +58,7 @@ public:
 
 	shared_array<ygfx::Texture> textures;
 
-	struct ShaderUniform {
-		string name;
-		float *p;
-		int size;
-	};
-	Array<ShaderUniform> uniforms;
-	void add_uniform(const string &name, float *p, int size);
+	Any shader_data;
 
 	// light
 	color albedo, emission;
