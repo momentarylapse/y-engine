@@ -71,13 +71,4 @@ void apply_shader_data(const RenderParams& params, ygfx::Shader* s, const Any& s
 	} \
 
 
-struct mat4;
-struct vec2;
-struct vec3;
-
-Any mat4_to_any(const mat4& m);
-Any vec2_to_any(const vec2& v);
-Any vec3_to_any(const vec3& v);
-
-
 #endif //BINDABLE_H

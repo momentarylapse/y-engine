@@ -3,6 +3,7 @@
 //
 
 #include "WorldTerrainsEmitter.h"
+#include <lib/any/conversion.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/yrenderer/scene/RenderViewData.h>
