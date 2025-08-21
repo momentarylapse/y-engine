@@ -48,7 +48,7 @@ enum class ReflectionMode {
 
 enum class RenderPathType;
 
-class Context;
+struct Context;
 class ShaderManager;
 
 // visual and physical properties

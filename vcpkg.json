@@ -1,13 +1,13 @@
 {
   "dependencies": [
     "bullet3",
+    "fftw3",
     "freetype",
     "glew",
     "glfw3",
     "libogg",
     "libvorbis",
     "opengl",
-    "shaderc",
     "spirv-tools",
     "vulkan",
     "vulkan-headers",
