@@ -66,6 +66,7 @@
 #include "../world/components/CubeMapSource.h"
 #include "../meta.h"
 #include <lib/ygraphics/graphics-impl.h>
+#include <lib/ygraphics/Context.h>
 #include "../lib/kaba/dynamic/exception.h"
 #include "../lib/os/msg.h"
 #include "../lib/image/image.h"
@@ -129,7 +130,7 @@ void screenshot(Image& im) {
 #ifdef USING_VULKAN
 	msg_error("unimplemented:  screenshot()");
 #else
-	engine.context->context->default_framebuffer->read(im);
+	engine.context->context->ctx->default_framebuffer->read(im);
 #endif
 }
 

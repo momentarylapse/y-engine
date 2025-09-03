@@ -45,6 +45,7 @@
 
 #include "Config.h"
 #include "lib/os/app.h"
+#include "lib/ygraphics/Context.h"
 #include "world/Camera.h"
 #include "world/World.h"
 
@@ -125,6 +126,7 @@ public:
 			config.game_dir | "Fonts");
 
 		auto context = yrenderer::api_init_glfw(window);
+		context->context->_create_auxiliary_stuff();
 		auto resource_manager = new ResourceManager(context,
 			config.game_dir | "Textures",
 			config.game_dir | "Materials",
