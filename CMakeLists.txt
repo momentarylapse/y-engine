@@ -266,6 +266,7 @@ add_library(moduley SHARED
 	src/fx/Particle.cpp
 	src/fx/ParticleEmitter.cpp
 	src/fx/ParticleManager.cpp
+	src/gui/Canvas.cpp
 	src/gui/Font.cpp
 	src/gui/gui.cpp
 	src/gui/Node.cpp
@@ -545,6 +546,7 @@ add_executable(y
 	src/fx/Particle.cpp
 	src/fx/ParticleEmitter.cpp
 	src/fx/ParticleManager.cpp
+	src/gui/Canvas.cpp
 	src/gui/Font.cpp
 	src/gui/gui.cpp
 	src/gui/Node.cpp

@@ -22,7 +22,7 @@ Painter::Painter(DrawingHelperData* _aux, const rect& native_area, const rect& a
 	width = (int)area.width();
 	height = (int)area.height();
 	_clip = _area;
-	mat_pixel_to_rel = mat4::translation({- 1,- 1, 0}) *  mat4::scale(2.0f / (float)width, 2.0f / (float)height, 1);
+	mat_pixel_to_rel = mat4::translation({- 1,- 1, 0}) *  mat4::scale(2.0f / area.width(), 2.0f / area.height(), 1);
 
 	ui_scale = _ui_scale;
 	face = _face;
@@ -60,12 +60,14 @@ void Painter::set_font(const string &font, float size, bool bold, bool italic) {
 	if (font_size > 0)
 		font_size = size;
 	//face = pick_font(font_name, bold, italic);
-	face->set_size(font_size * ui_scale);
+	if (face)
+		face->set_size(font_size * ui_scale);
 }
 
 void Painter::set_font_size(float size) {
 	font_size = size;
-	face->set_size(size * ui_scale);
+	if (face)
+		face->set_size(size * ui_scale);
 }
 
 vec2 Painter::get_str_size(const string &str) {

@@ -1,7 +1,9 @@
+use image.Painter
 use gfx.*
 use ecs.*
 use model.*
 use kaba
+
 
 enum Key
 	LEFT_CONTROL, RIGHT_CONTROL
@@ -134,6 +136,11 @@ class Picture3d extends Node
 		#super.__init__(Rect.ID)
 		model = m
 		self.matrix = mat
+
+class Canvas extends Node
+	func extern override __init__()
+	func extern override __delete__()
+	func virtual mut on_draw(out p: Painter)
 
 var extern static toplevel: Node&
 func extern static key_state(k: Key) -> bool
