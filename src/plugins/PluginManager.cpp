@@ -97,18 +97,13 @@ Model* _create_object(World *w, const Path &filename, const vec3 &pos, const qua
 	return nullptr;
 }
 
-Model* _create_object_no_reg(World *w, const Path &filename, const vec3 &pos, const quaternion &ang) {
-	KABA_EXCEPTION_WRAPPER( return w->create_object_no_reg(filename, pos, ang); );
-	return nullptr;
-}
-
 MultiInstance* _create_object_multi(World *w, const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	KABA_EXCEPTION_WRAPPER( return w->create_object_multi(filename, pos, ang); );
 	return nullptr;
 }
 
-Model* _attach_model(World *w, Entity& e, const Path &filename) {
-	KABA_EXCEPTION_WRAPPER( return &w->attach_model(e, filename); );
+Model* _attach_model(World* w, Entity* e, const Path& filename) {
+	KABA_EXCEPTION_WRAPPER( return w->attach_model(e, filename); );
 	return nullptr;
 }
 
@@ -312,7 +307,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("Model.radius", (char*)&model.prop.radius - (char*)&model);
 	ext->declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
 	ext->declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
-	ext->declare_class_element("Model.name", (char*)&model.script_data.name - (char*)&model);
 	ext->link_class_func("Model.__init__", &Model::__init__);
 	ext->link_virtual("Model.__delete__", &Model::__delete__, &model);
 	ext->link_class_func("Model.make_editable", &Model::make_editable);
@@ -405,7 +399,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("World.msg_data", &World::msg_data);
 	ext->link_class_func("World.load_soon", &World::load_soon);
 	ext->link_class_func("World.create_object", &_create_object);
-	ext->link_class_func("World.create_object_no_reg", &_create_object_no_reg);
 	ext->link_class_func("World.create_object_multi", &_create_object_multi);
 	ext->link_class_func("World.create_terrain", &World::create_terrain);
 	ext->link_class_func("World.create_entity", &World::create_entity);

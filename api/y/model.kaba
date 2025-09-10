@@ -35,7 +35,7 @@ class Model extends Component
 		var vertex: vec3[]
 		var sub: Sub[]
 #	var matrix: matrix
-	var name: string
+###	var name: string
 	var radius: f32
 	var min, max: vec3
 	

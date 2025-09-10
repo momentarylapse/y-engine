@@ -87,14 +87,11 @@ public:
 	void unregister_entity(Entity *e);
 
 	Model *create_object(const Path &filename, const vec3 &pos, const quaternion &ang);
-	Model *create_object_no_reg(const Path &filename, const vec3 &pos, const quaternion &ang);
-	Model *create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang);
+	Model *create_object_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang);
 	Terrain *create_terrain(const Path &filename, const vec3 &pos);
-	Terrain *create_terrain_no_reg(const Path &filename, const vec3 &pos);
 
-	Model& attach_model_no_reg(Entity &e, const Path &filename);
-	Model& attach_model(Entity &e, const Path &filename);
-	void unattach_model(Model& m);
+	Model* attach_model(Entity* e, const Path &filename);
+	void unattach_model(Model* m);
 
 	MultiInstance* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 
