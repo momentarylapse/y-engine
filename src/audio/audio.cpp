@@ -80,7 +80,7 @@ void iterate(float dt) {
 		// TODO owner->get_component<SolidBody>()->vel
 		s->_apply_data();
 		if (s->suicidal and s->has_ended()) {
-			DeletionQueue::add(s->owner);
+			DeletionQueue::add_entity(s->owner);
 
 		} else if (s->stream) {
 #if HAS_LIB_OPENAL

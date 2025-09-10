@@ -15,7 +15,7 @@
 
 Entity::Entity() : Entity(vec3::ZERO, quaternion::ID) {}
 
-Entity::Entity(const vec3 &_pos, const quaternion &_ang) : BaseClass(BaseClass::Type::ENTITY) {
+Entity::Entity(const vec3 &_pos, const quaternion &_ang) {
 	pos = _pos;
 	ang = _ang;
 	parent = nullptr;
@@ -34,7 +34,6 @@ Entity::~Entity() {
 
 void Entity::on_init_rec() {
 	//msg_write("init rec");
-	on_init();
 	for (auto c: components) {
 		//msg_write(" -> " + c->component_type->name);
 		c->on_init();
@@ -44,7 +43,6 @@ void Entity::on_init_rec() {
 void Entity::on_delete_rec() {
 	for (auto c: components)
 		c->on_delete();
-	on_delete();
 }
 
 

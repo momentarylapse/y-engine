@@ -10,7 +10,7 @@ struct BaseClass
 	func extern virtual mut on_delete()
 	func extern virtual mut on_iterate(dt: float)
 
-struct Entity extends BaseClass
+struct Entity
 	var pos: vec3
 	var ang: Quaternion
 	var parent: Entity*

@@ -208,7 +208,7 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->link_class_func("Entity.__add_component", &Entity::_add_component_untyped_);
 	ext->link_class_func("Entity.__add_component_no_init", &Entity::add_component_no_init);
 	ext->link_class_func("Entity.delete_component", &Entity::delete_component);
-	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add);
+	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add_entity);
 
 	Component component;
 	ext->declare_class_size("Component", sizeof(Component));
