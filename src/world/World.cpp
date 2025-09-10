@@ -383,11 +383,11 @@ Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
 	t->load(engine.context, filename);
 
 	[[maybe_unused]] auto col = o->add_component<TerrainCollider>();
+	[[maybe_unused]] auto sb = o->add_component<SolidBody>();
+#if HAS_LIB_BULLET
+	dynamicsWorld->addRigidBody(sb->body);
+#endif
 
-	auto sb = o->add_component<SolidBody>();
-	sb->mass = 10000.0f;
-	sb->theta_0 = mat3::ZERO;
-	sb->passive = true;
 	register_entity(t->owner);
 
 	return t;
