@@ -255,12 +255,12 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-void add_components_no_init(Entity *ent, const Array<LevelData::ScriptData> &components) {
+void add_user_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		[[maybe_unused]] auto comp = ent->add_component_no_init(type, cc.var);
+		[[maybe_unused]] auto comp = ent->_add_component_untyped_(type, cc.var);
 #endif
 	}
 }
@@ -278,14 +278,15 @@ bool World::load(const LevelData &ld) {
 	fog = ld.fog;
 
 	for (auto &l: ld.lights) {
-		auto o = new Entity(l.pos, quaternion::rotation(l.ang));
-		auto *ll = new Light(l._color, l.radius, l.theta);
+		auto o = create_entity(l.pos, quaternion::rotation(l.ang));
+		auto ll = o->add_component<Light>();
+		ll->light.init(l._color, l.radius, l.theta);
 		ll->light.light.harshness = l.harshness;
 		ll->light.enabled = l.enabled;
 		if (ll->light.light.radius < 0)
 			ll->light.allow_shadow = true;
-		o->_add_component_external_no_init_(ll);
-		add_components_no_init(o, l.components);
+
+		add_user_components(o, l.components);
 		register_entity(o);
 	}
 
@@ -307,7 +308,7 @@ bool World::load(const LevelData &ld) {
 		cc->bloom_factor = c.bloom_factor;
 		cc->fov = c.fov;
 
-		add_components_no_init(cam_main->owner, c.components);
+		add_user_components(cam_main->owner, c.components);
 	}
 	auto& cameras = ComponentManager::get_list_family<Camera>();
 	if (cameras.num == 0) {
@@ -321,8 +322,9 @@ bool World::load(const LevelData &ld) {
 		if (!o.filename.is_empty()) {
 			//try {
 				auto q = quaternion::rotation(o.ang);
-				auto *oo = create_object_no_reg_x(o.filename, o.name, o.pos, q);
-				add_components_no_init(oo->owner, o.components);
+				auto *oo = create_object_x(o.filename, o.name, o.pos, q);
+
+				add_user_components(oo->owner, o.components);
 				register_entity(oo->owner);
 				if (ld.ego_index == i)
 					ego = oo->owner;
@@ -337,19 +339,17 @@ bool World::load(const LevelData &ld) {
 	// terrains
 	foreachi(auto &t, ld.terrains, i) {
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
-		auto tt = create_terrain_no_reg(t.filename, t.pos);
-		register_entity(tt->owner);
+		auto tt = create_terrain(t.filename, t.pos);
 
-		add_components_no_init(tt->owner, t.components);
+		add_user_components(tt->owner, t.components);
 		ok &= !tt->error;
 	}
 
 	// (raw) entities
 	foreachi(auto &e, ld.entities, i) {
 		auto ee = create_entity(e.pos, quaternion::rotation(e.ang));
-		register_entity(ee);
 
-		add_components_no_init(ee, e.components);
+		add_user_components(ee, e.components);
 	}
 
 	auto& model_list = ComponentManager::get_list_family<Model>();
@@ -375,7 +375,7 @@ void World::add_link(Link *l) {
 }
 
 
-Terrain *World::create_terrain_no_reg(const Path &filename, const vec3 &pos) {
+Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
 
 	auto o = create_entity(pos, quaternion::ID);
 
@@ -388,13 +388,8 @@ Terrain *World::create_terrain_no_reg(const Path &filename, const vec3 &pos) {
 	sb->mass = 10000.0f;
 	sb->theta_0 = mat3::ZERO;
 	sb->passive = true;
-
-	return t;
-}
-
-Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
-	auto t = create_terrain_no_reg(filename, pos);
 	register_entity(t->owner);
+
 	return t;
 }
 
@@ -409,37 +404,26 @@ Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
 	return entity_manager->create_entity(pos, ang);
 }
 
+// deprecated
 void World::register_entity(Entity *e) {
-	e->on_init_rec();
-
-#if HAS_LIB_BULLET
-	if (auto sb = e->get_component<SolidBody>())
-		dynamicsWorld->addRigidBody(sb->body);
-#endif
-
 	msg_data.e = e;
-	notify("entity-add");
+	notify("entity-add"); // FIXME this is pointless...
 }
 
 Model *World::create_object(const Path &filename, const vec3 &pos, const quaternion &ang) {
-	auto o = create_object_no_reg_x(filename, "", pos, ang);
-	register_entity(o->owner);
+	auto o = create_object_x(filename, "", pos, ang);
 	return o;
 }
 
-Model *World::create_object_no_reg(const Path &filename, const vec3 &pos, const quaternion &ang) {
-	return create_object_no_reg_x(filename, "", pos, ang);
-}
-
-Model *World::create_object_no_reg_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
+Model *World::create_object_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
 	auto e = create_entity(pos, ang);
-	auto& m = attach_model_no_reg(*e, filename);
-	m.script_data.name = name;
-	return &m;
+
+	auto m = attach_model(e, filename);
+	return m;
 }
 
 
-Model& World::attach_model_no_reg(Entity &e, const Path &filename) {
+Model* World::attach_model(Entity* e, const Path& filename) {
 	if (engine.resetting_game)
 		throw Exception("create_object during game reset");
 
@@ -449,45 +433,35 @@ Model& World::attach_model_no_reg(Entity &e, const Path &filename) {
 	//msg_write(on);
 	auto *m = engine.resource_manager->load_model(filename);
 
-	e._add_component_external_no_init_(m);
+	e->_add_component_external_no_init_(m);
 	m->update_matrix();
 
 
 	// automatic components
 	if (m->_template->solid_body) {
-		[[maybe_unused]] auto col = (MeshCollider*)e.add_component_no_init(MeshCollider::_class, "");
-		[[maybe_unused]] auto sb = (SolidBody*)e.add_component_no_init(SolidBody::_class, "");
+		[[maybe_unused]] auto col = e->add_component<MeshCollider>("");
+		[[maybe_unused]] auto sb = e->add_component<SolidBody>("");
+#if HAS_LIB_BULLET
+		dynamicsWorld->addRigidBody(sb->body);
+#endif
 	}
 
 	if (m->_template->skeleton)
-		e.add_component_no_init(Skeleton::_class, "");
+		e->add_component<Skeleton>("");
 
 	if (m->_template->animator)
-		e.add_component_no_init(Animator::_class, "");
-
-	return *m;
-}
-
-Model& World::attach_model(Entity &e, const Path &filename) {
-	auto& m = attach_model_no_reg(e, filename);
-	//m.on_init();
-	e.on_init_rec(); // FIXME might re-initialize too much...
-
-#if HAS_LIB_BULLET
-	if (auto sb = e.get_component<SolidBody>())
-		dynamicsWorld->addRigidBody(sb->body);
-#endif
+		e->add_component<Animator>("");
 
 	return m;
 }
 
-void World::unattach_model(Model& m) {
+void World::unattach_model(Model* m) {
 #if HAS_LIB_BULLET
-	if (auto sb = m.owner->get_component<SolidBody>())
+	if (auto sb = m->owner->get_component<SolidBody>())
 		dynamicsWorld->removeRigidBody(sb->body);
 #endif
 
-	m.owner->delete_component(&m);
+	m->owner->delete_component(m);
 }
 
 MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {

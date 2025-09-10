@@ -200,7 +200,7 @@ public:
 	}
 	void read(Stream *f) override {
 		// Object Data
-		me->script_data.name = f->read_str();
+		/*me->script_data.name =*/ f->read_str();
 		/*me->script_data.description =*/ f->read_str();
 
 		// Inventary
