@@ -15,11 +15,11 @@ struct mat4;
 class Component;
 
 
-class Entity : public BaseClass {
+class Entity {
 public:
 	Entity();
 	Entity(const vec3 &pos, const quaternion &ang);
-	~Entity() override;
+	~Entity();
 
 	void on_init_rec();
 	void on_delete_rec();
