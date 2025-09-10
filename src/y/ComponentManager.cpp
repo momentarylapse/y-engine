@@ -183,7 +183,7 @@ ComponentManager::PairList& ComponentManager::_get_list2(const kaba::Class *type
 	// TODO cache
 	_list.clear();
 	for (auto c1: _get_list(type_a)) {
-		if (auto c2 = c1->owner->_get_component_untyped_(type_b))
+		if (auto c2 = c1->owner->_get_component_generic_(type_b))
 			_list.add({c1->owner, c1, c2});
 	}
 

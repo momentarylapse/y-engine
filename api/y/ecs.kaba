@@ -18,24 +18,17 @@ struct Entity
 	func extern __del_override__()
 	
 	func extern selfref mut __add_component(t: kaba.Class*, vars: string) -> Component&
-	func extern selfref mut __add_component_no_init(t: kaba.Class*, vars: string) -> Component&
 	func extern selfref __get_component(t: kaba.Class*) -> Component*
+	func extern selfref __get_component_derived(t: kaba.Class*) -> Component*
 	
 	func selfref mut add_component[T](vars: string = "") -> T&
 		return __add_component(T, vars) as T&
-	func selfref mut add_component_no_init[T](vars: string = "") -> T&
-		return __add_component_no_init(T, vars) as T&
 	func selfref get_component[T]() -> T*
 		return __get_component(T) as T*
+	func selfref get_component_derived[T]() -> T*
+		return __get_component_derived(T) as T*
 	
 	func extern mut delete_component(c: Component&)
-	
-#	func selfref model() -> Model*
-#		var m: Model* = get_component(Model)
-#		return m
-#	func selfref body() -> SolidBody*
-#		var b: SolidBody* = get_component(SolidBody)
-#		return b
 
 
 

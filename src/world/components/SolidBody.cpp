@@ -116,7 +116,7 @@ void SolidBody::on_init() {
 
 #if HAS_LIB_BULLET
 	btCollisionShape *col_shape = nullptr;
-	if (auto col = owner->get_component<Collider>())
+	if (auto col = owner->get_component_derived<Collider>())
 		col_shape = col->col_shape;
 
 

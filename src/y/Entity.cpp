@@ -37,19 +37,11 @@ void Entity::on_delete_rec() {
 		c->on_delete();
 }
 
-
-// TODO (later) optimize...
-Component *Entity::_add_component_untyped_(const kaba::Class *type, const string &var) {
-	auto c = add_component_no_init(type, var);
-
-	c->on_init();
-	return c;
-}
-
-Component *Entity::add_component_no_init(const kaba::Class *type, const string &var) {
+Component *Entity::_add_component_generic_(const kaba::Class *type, const string &var) {
 	auto c = ComponentManager::create_component(type, var);
 	components.add(c);
 	c->owner = this;
+	c->on_init();
 	return c;
 }
 
@@ -70,14 +62,17 @@ void Entity::delete_component(Component *c) {
 	}
 }
 
-Component *Entity::_get_component_untyped_(const kaba::Class *type) const {
-	//msg_write("get " + type->name);
-	for (auto *c: components) {
-		//msg_write(p2s(c->component_type));
-		//msg_write("... " + c->component_type->name);
+Component *Entity::_get_component_derived_generic_(const kaba::Class *type) const {
+	for (auto *c: components)
 		if (c->component_type->is_derived_from(type))
 			return c;
-	}
+	return nullptr;
+}
+
+Component *Entity::_get_component_generic_(const kaba::Class *type) const {
+	for (auto *c: components)
+		if (c->component_type == type)
+			return c;
 	return nullptr;
 }
 
