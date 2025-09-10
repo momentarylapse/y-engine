@@ -32,14 +32,6 @@ Entity::~Entity() {
 	}
 }
 
-void Entity::on_init_rec() {
-	//msg_write("init rec");
-	for (auto c: components) {
-		//msg_write(" -> " + c->component_type->name);
-		c->on_init();
-	}
-}
-
 void Entity::on_delete_rec() {
 	for (auto c: components)
 		c->on_delete();
@@ -61,10 +53,11 @@ Component *Entity::add_component_no_init(const kaba::Class *type, const string &
 	return c;
 }
 
-void Entity::_add_component_external_no_init_(Component *c) {
+void Entity::_add_component_external_(Component *c) {
 	ComponentManager::_register(c);
 	components.add(c);
 	c->owner = this;
+	c->on_init();
 }
 
 void Entity::delete_component(Component *c) {

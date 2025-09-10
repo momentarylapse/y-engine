@@ -21,7 +21,6 @@ public:
 	Entity(const vec3 &pos, const quaternion &ang);
 	~Entity();
 
-	void on_init_rec();
 	void on_delete_rec();
 
 	Array<Component*> components;
@@ -40,7 +39,7 @@ public:
 		return static_cast<C*>(_get_component_untyped_(C::_class));
 	}
 
-	void _add_component_external_no_init_(Component *c);
+	void _add_component_external_(Component *c);
 
 
 	vec3 pos;

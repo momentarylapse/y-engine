@@ -438,7 +438,7 @@ Model* World::attach_model(Entity* e, const Path& filename) {
 	//msg_write(on);
 	auto *m = engine.resource_manager->load_model(filename);
 
-	e->_add_component_external_no_init_(m);
+	e->_add_component_external_(m);
 	m->update_matrix();
 
 
@@ -471,7 +471,7 @@ void World::unattach_model(Model* m) {
 
 MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	auto e = create_entity(vec3::ZERO, quaternion::ID);
-	auto mi = (MultiInstance*)e->add_component_no_init(MultiInstance::_class, "");
+	auto mi = e->add_component<MultiInstance>("");
 
 	mi->model = engine.resource_manager->load_model(filename);
 
@@ -655,32 +655,22 @@ Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
 
 Light *World::create_light_parallel(const quaternion &ang, const color &c) {
 	auto o = create_entity(v_0, ang);
-	auto l = attach_light_parallel(o, c);
-	register_entity(o);
-	return l;
+	return attach_light_parallel(o, c);
 }
 
 Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
 	auto o = create_entity(pos, quaternion::ID);
-	auto l = attach_light_point(o, c, r);
-	register_entity(o);
-	return l;
+	return attach_light_point(o, c, r);
 }
 
 Light *World::create_light_cone(const vec3 &pos, const quaternion &ang, const color &c, float r, float t) {
 	auto o = create_entity(pos, ang);
-	auto l = attach_light_cone(o, c, r, t);
-	register_entity(o);
-	return l;
+	return attach_light_cone(o, c, r, t);
 }
 
 Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 	auto o = create_entity(pos, ang);
-
-	auto c = new Camera();
-	o->_add_component_external_no_init_(c);
-	register_entity(o);
-	return c;
+	return o->add_component<Camera>();
 }
 
 
