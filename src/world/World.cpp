@@ -17,6 +17,7 @@
 #include "../y/Component.h"
 #include "../y/ComponentManager.h"
 #include "../y/Entity.h"
+#include "../y/EntityManager.h"
 #include "../meta.h"
 #include "ModelManager.h"
 #include "../helper/ResourceManager.h"
@@ -175,6 +176,7 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 #endif
 
 World::World() {
+	entity_manager = new EntityManager;
 
 #ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager();
@@ -213,9 +215,7 @@ void World::reset() {
 
 	gravity = v_0;
 
-	for (auto *o: entities)
-		delete o;
-	entities.clear();
+	entity_manager->reset();
 
 
 
@@ -405,10 +405,8 @@ bool GodLoadWorld(const Path &filename) {
 	return ok;
 }
 
-Entity *World::create_entity(const vec3 &pos, const quaternion &ang) {
-	auto e = new Entity(pos, ang);
-	entities.add(e);
-	return e;
+Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
+	return entity_manager->create_entity(pos, ang);
 }
 
 void World::register_entity(Entity *e) {
@@ -563,18 +561,12 @@ void World::unregister_entity(Entity *e) {
 }
 
 void World::delete_entity(Entity *e) {
-	int index = entities.find(e);
-	if (index < 0)
-		return;
-
 	unregister_entity(e);
 	e->on_delete_rec();
 
 	msg_data.e = e;
 	notify("entity-delete");
-	entities.erase(index);
-
-	delete e;
+	entity_manager->delete_entity(e);
 }
 
 void World::delete_link(Link *l) {
@@ -714,11 +706,7 @@ Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 
 
 void World::shift_all(const vec3 &dpos) {
-	for (auto *e: entities) {
-		e->pos += dpos;
-		//if (auto m = e->get_component<Model>())
-		//	m->update_matrix();
-	}
+	entity_manager->shift_all(dpos);
 
 	for (auto &sb: ComponentManager::get_list_family<SolidBody>())
 		sb->state_to_bullet();

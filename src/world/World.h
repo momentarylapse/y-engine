@@ -28,6 +28,7 @@ class Terrain;
 class SolidBody;
 class MultiInstance;
 class Entity;
+class EntityManager;
 class TemplateDataScriptVariable;
 class Light;
 class Camera;
@@ -81,7 +82,7 @@ public:
 	void save(const Path &filename);
 
 	Entity *create_entity(const vec3 &pos, const quaternion &ang);
-	Array<Entity*> entities;
+	owned<EntityManager> entity_manager;
 	void register_entity(Entity *e);
 	void unregister_entity(Entity *e);
 
