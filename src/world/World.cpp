@@ -417,8 +417,13 @@ Model *World::create_object(const Path &filename, const vec3 &pos, const quatern
 
 Model *World::create_object_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
 	auto e = create_entity(pos, ang);
-
 	auto m = attach_model(e, filename);
+
+	if (name != "" and false) {
+		auto tag = e->add_component<NameTag>();
+		tag->name = name;
+	}
+
 	return m;
 }
 

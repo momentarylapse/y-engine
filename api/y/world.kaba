@@ -106,6 +106,10 @@ class CubeMapSource extends Component
 	var update_rate: i32
 
 
+class NameTag extends Component
+	var name: string
+
+
 class Fog
 	var color: Color
 	var distance: f32

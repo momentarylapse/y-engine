@@ -216,6 +216,9 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->link_virtual("Component.on_collide", &Component::on_collide, &component);
 	ext->link_class_func("Component.set_variables", &Component::set_variables);
 
+	ext->declare_class_size("NameTag", sizeof(NameTag));
+	ext->declare_class_element("NameTag.name", &NameTag::name);
+
 	System con;
 	ext->declare_class_size("Controller", sizeof(System));
 	ext->link_class_func("Controller.__init__", &System::__init__);
@@ -881,6 +884,7 @@ void PluginManager::import_kaba() {
 	import_component_class<Light>(m_world, "Light");
 	import_component_class<Camera>(m_world, "Camera");
 	import_component_class<::CubeMapSource>(m_world, "CubeMapSource");
+	import_component_class<NameTag>(m_world, "NameTag");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
@@ -1002,6 +1006,8 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 		return new LegacyBeam;
 	if (c == CubeMapSource::_class)
 		return new CubeMapSource;
+	if (c == NameTag::_class)
+		return new NameTag;
 	void *p = c->create_instance();
 	assign_variables(p, c, variables);
 	return p;
