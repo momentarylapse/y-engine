@@ -514,6 +514,7 @@ add_library(moduley SHARED
 	src/y/ComponentManager.cpp
 	src/y/EngineData.cpp
 	src/y/Entity.cpp
+	src/y/EntityManager.cpp
 	src/y/System.cpp
 	src/y/SystemManager.cpp
 	src/Config.cpp
@@ -794,6 +795,7 @@ add_executable(y
 	src/y/ComponentManager.cpp
 	src/y/EngineData.cpp
 	src/y/Entity.cpp
+	src/y/EntityManager.cpp
 	src/y/System.cpp
 	src/y/SystemManager.cpp
 	src/Config.cpp
