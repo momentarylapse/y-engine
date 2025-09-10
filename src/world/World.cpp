@@ -260,7 +260,7 @@ void add_user_components(Entity *ent, const Array<LevelData::ScriptData> &compon
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		[[maybe_unused]] auto comp = ent->_add_component_untyped_(type, cc.var);
+		[[maybe_unused]] auto comp = ent->_add_component_generic_(type, cc.var);
 #endif
 	}
 }
@@ -484,7 +484,7 @@ MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3
 
 void World::set_active_physics(Entity *o, bool active, bool passive) { //, bool test_collisions) {
 	auto sb = o->get_component<SolidBody>();
-	auto c = o->get_component<Collider>();
+	auto c = o->get_component_derived<Collider>();
 
 #if HAS_LIB_BULLET
 	btScalar mass(active ? sb->mass : 0);

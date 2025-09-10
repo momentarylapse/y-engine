@@ -109,8 +109,7 @@ Model* _attach_model(World* w, Entity* e, const Path& filename) {
 
 LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, const vec3& pos, float radius, const color& c, shared<Texture>& tex, float ttl) {
 	auto e = w->create_entity(pos, quaternion::ID);
-	auto p = reinterpret_cast<LegacyParticle*>(e->_add_component_untyped_(type, ""));
-	//auto p = reinterpret_cast<LegacyParticle*>(PluginManager::create_instance(type, ""));
+	auto p = reinterpret_cast<LegacyParticle*>(e->_add_component_generic_(type, ""));
 	p->radius = radius;
 	p->col = c;
 	p->texture = tex;
@@ -199,9 +198,9 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->declare_class_element("Entity.ang", &Entity::ang);
 	ext->declare_class_element("Entity.parent", &Entity::parent);
 	ext->link_class_func("Entity.get_matrix", &Entity::get_matrix);
-	ext->link_class_func("Entity.__get_component", &Entity::_get_component_untyped_);
-	ext->link_class_func("Entity.__add_component", &Entity::_add_component_untyped_);
-	ext->link_class_func("Entity.__add_component_no_init", &Entity::add_component_no_init);
+	ext->link_class_func("Entity.__get_component", &Entity::_get_component_generic_);
+	ext->link_class_func("Entity.__get_component_derived", &Entity::_get_component_derived_generic_);
+	ext->link_class_func("Entity.__add_component", &Entity::_add_component_generic_);
 	ext->link_class_func("Entity.delete_component", &Entity::delete_component);
 	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add_entity);
 
