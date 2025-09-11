@@ -22,7 +22,7 @@ public:
 
 	Component *_add_component_generic_(Entity* entity, const kaba::Class *type, const string &var);
 	void _add_component_external_(Entity* entity, Component *c);
-	void delete_component(Entity* entity, Component *c);
+	void delete_component(Entity* entity, Component *c, bool notify=true);
 
 	template<class C>
 	C* add_component(Entity* entity, const string& var = "") {

@@ -67,7 +67,7 @@ class Animator extends Component
 	func extern mut is_done(op_no: i32) -> bool
 
 class Skeleton extends Component
-	var bones: Entity[]
+	var bones: Entity&[]
 	var pos0, dpos: vec3[]
 	var parents: i32[]
 	func extern mut reset()

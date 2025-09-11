@@ -401,7 +401,8 @@ public:
 		sk->dpos.resize(n);
 		sk->pos0.resize(n);
 		sk->filename.resize(n);
-		foreachi ([[maybe_unused]] auto &b, sk->bones, i) {
+		foreachi ([[maybe_unused]] auto& b, sk->bones, i) {
+			b = new Entity;
 			f->read_vector(&sk->dpos[i]);
 			sk->parents[i] = f->read_int();
 			sk->filename[i] = f->read_str();

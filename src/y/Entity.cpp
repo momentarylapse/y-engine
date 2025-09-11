@@ -30,6 +30,8 @@ Entity::~Entity() {
 	for (auto *c: components) {
 		c->owner = nullptr;
 		msg_error(format("deleting entity %s while component %s still attached", p2s(this), c->component_type->long_name()));
+		int*p = nullptr;
+		*p = 13;
 	}
 }
 
