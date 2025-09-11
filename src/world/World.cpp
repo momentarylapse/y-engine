@@ -177,6 +177,9 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 
 World::World() {
 	entity_manager = new EntityManager;
+	entity_manager->component_manager->factory = [] (const kaba::Class* type, const string& var) {
+		return (Component*)PluginManager::create_instance(type, var);
+	};
 
 #ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager(entity_manager.get());

@@ -1025,14 +1025,6 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 	return p;
 }
 
-void *PluginManager::create_instance(const Path &filename, const string &base_class, const Array<TemplateDataScriptVariable> &variables) {
-	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
-	auto c = find_class_derived(filename, base_class);
-	if (!c)
-		return nullptr;
-	return create_instance(c, variables);
-}
-
 void* PluginManager::create_instance_auto(const string& extended_type_name) {
 	auto x = extended_type_name.explode(".");
 	string type = x.back();

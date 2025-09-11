@@ -9,6 +9,7 @@
 
 #include <lib/base/base.h>
 #include <lib/base/map.h>
+#include <functional>
 
 class Entity;
 class Component;
@@ -57,5 +58,7 @@ public:
 	base::map<const kaba::Class*, ComponentListX> component_lists_by_type;
 	base::map<const kaba::Class*, ComponentListX> component_lists_by_family;
 	int ch_component = -1;
+
+	std::function<Component*(const kaba::Class*, const string& var)> factory;
 };
 
