@@ -53,10 +53,11 @@ void EntityManager::_add_component_external_(Entity* entity, Component *c) {
 	c->on_init();
 }
 
-void EntityManager::delete_component(Entity* entity, Component *c) {
+void EntityManager::delete_component(Entity* entity, Component *c, bool notify) {
 	int i = entity->components.find(c);
 	if (i >= 0) {
-		c->on_delete();
+		if (notify)
+			c->on_delete();
 		c->owner = nullptr;
 		entity->components.erase(i);
 		component_manager->delete_component(c);
@@ -71,8 +72,12 @@ void EntityManager::shift_all(const vec3 &dpos) {
 
 
 void EntityManager::reset() {
-	for (auto *o: entities)
-		delete o;
+	for (auto e: entities) {
+		while (e->components.num > 0)
+			delete_component(e, e->components.back(), false);
+
+		delete e;
+	}
 	entities.clear();
 }
 

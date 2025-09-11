@@ -606,9 +606,9 @@ void World::iterate_animations(float dt) {
 
 	// TODO
 	auto& list2 = entity_manager->get_component_list<Skeleton>();
-	for (auto *o: list2) {
-		for (auto &b: o->bones) {
-			if ([[maybe_unused]] auto *mm = b.get_component<Model>()) {
+	for (auto o: list2) {
+		for (auto b: o->bones) {
+			if ([[maybe_unused]] auto *mm = b->get_component<Model>()) {
 //				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
 //				mm->_matrix = o->get_owner<Entity3D>()->get_matrix() * b.dmatrix;
 			}
