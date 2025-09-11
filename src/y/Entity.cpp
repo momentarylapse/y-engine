@@ -29,38 +29,13 @@ Entity::Entity(const vec3 &_pos, const quaternion &_ang) {
 Entity::~Entity() {
 	for (auto *c: components) {
 		c->owner = nullptr;
-		EntityManager::global->component_manager->delete_component(c);
+		msg_error(format("deleting entity %s while component %s still attached", p2s(this), c->component_type->long_name()));
 	}
 }
 
 void Entity::on_delete_rec() {
 	for (auto c: components)
 		c->on_delete();
-}
-
-Component *Entity::_add_component_generic_(const kaba::Class *type, const string &var) {
-	auto c = EntityManager::global->component_manager->create_component(type, var);
-	components.add(c);
-	c->owner = this;
-	c->on_init();
-	return c;
-}
-
-void Entity::_add_component_external_(Component *c) {
-	EntityManager::global->component_manager->_register(c);
-	components.add(c);
-	c->owner = this;
-	c->on_init();
-}
-
-void Entity::delete_component(Component *c) {
-	int i = components.find(c);
-	if (i >= 0) {
-		c->on_delete();
-		c->owner = nullptr;
-		components.erase(i);
-		EntityManager::global->component_manager->delete_component(c);
-	}
 }
 
 Component *Entity::_get_component_derived_generic_(const kaba::Class *type) const {

@@ -177,9 +177,11 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 
 World::World() {
 	entity_manager = new EntityManager;
+#ifdef _X_ALLOW_X_
 	entity_manager->component_manager->factory = [] (const kaba::Class* type, const string& var) {
 		return (Component*)PluginManager::create_instance(type, var);
 	};
+#endif
 
 #ifdef _X_ALLOW_X_
 	particle_manager = new ParticleManager(entity_manager.get());
@@ -258,12 +260,12 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-void add_user_components(Entity *ent, const Array<LevelData::ScriptData> &components) {
+void add_user_components(EntityManager* em, Entity *ent, const Array<LevelData::ScriptData> &components) {
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		[[maybe_unused]] auto comp = ent->_add_component_generic_(type, cc.var);
+		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, cc.var);
 #endif
 	}
 }
@@ -282,14 +284,14 @@ bool World::load(const LevelData &ld) {
 
 	for (auto &l: ld.lights) {
 		auto o = create_entity(l.pos, quaternion::rotation(l.ang));
-		auto ll = o->add_component<Light>();
+		auto ll = entity_manager->add_component<Light>(o);
 		ll->light.init(l._color, l.radius, l.theta);
 		ll->light.light.harshness = l.harshness;
 		ll->light.enabled = l.enabled;
 		if (ll->light.light.radius < 0)
 			ll->light.allow_shadow = true;
 
-		add_user_components(o, l.components);
+		add_user_components(entity_manager.get(), o, l.components);
 		register_entity(o);
 	}
 
@@ -311,7 +313,7 @@ bool World::load(const LevelData &ld) {
 		cc->bloom_factor = c.bloom_factor;
 		cc->fov = c.fov;
 
-		add_user_components(cam_main->owner, c.components);
+		add_user_components(entity_manager.get(), cam_main->owner, c.components);
 	}
 	auto& cameras = entity_manager->get_component_list<Camera>();
 	if (cameras.num == 0) {
@@ -327,7 +329,7 @@ bool World::load(const LevelData &ld) {
 				auto q = quaternion::rotation(o.ang);
 				auto *oo = create_object_x(o.filename, o.name, o.pos, q);
 
-				add_user_components(oo->owner, o.components);
+				add_user_components(entity_manager.get(), oo->owner, o.components);
 				register_entity(oo->owner);
 				if (ld.ego_index == i)
 					ego = oo->owner;
@@ -344,7 +346,7 @@ bool World::load(const LevelData &ld) {
 		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
 		auto tt = create_terrain(t.filename, t.pos);
 
-		add_user_components(tt->owner, t.components);
+		add_user_components(entity_manager.get(), tt->owner, t.components);
 		ok &= !tt->error;
 	}
 
@@ -352,7 +354,7 @@ bool World::load(const LevelData &ld) {
 	foreachi(auto &e, ld.entities, i) {
 		auto ee = create_entity(e.pos, quaternion::rotation(e.ang));
 
-		add_user_components(ee, e.components);
+		add_user_components(entity_manager.get(), ee, e.components);
 	}
 
 	auto& model_list = entity_manager->get_component_list<Model>();
@@ -382,11 +384,11 @@ Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
 
 	auto o = create_entity(pos, quaternion::ID);
 
-	auto t = o->add_component<Terrain>();
+	auto t = entity_manager->add_component<Terrain>(o);
 	t->load(engine.context, filename);
 
-	[[maybe_unused]] auto col = o->add_component<TerrainCollider>();
-	[[maybe_unused]] auto sb = o->add_component<SolidBody>();
+	[[maybe_unused]] auto col = entity_manager->add_component<TerrainCollider>(o);
+	[[maybe_unused]] auto sb = entity_manager->add_component<SolidBody>(o);
 #if HAS_LIB_BULLET
 	dynamicsWorld->addRigidBody(sb->body);
 #endif
@@ -423,7 +425,7 @@ Model *World::create_object_x(const Path &filename, const string &name, const ve
 	auto m = attach_model(e, filename);
 
 	if (name != "" and false) {
-		auto tag = e->add_component<NameTag>();
+		auto tag = entity_manager->add_component<NameTag>(e);
 		tag->name = name;
 	}
 
@@ -441,24 +443,24 @@ Model* World::attach_model(Entity* e, const Path& filename) {
 	//msg_write(on);
 	auto *m = engine.resource_manager->load_model(filename);
 
-	e->_add_component_external_(m);
+	entity_manager->_add_component_external_(e, m);
 	m->update_matrix();
 
 
 	// automatic components
 	if (m->_template->solid_body) {
-		[[maybe_unused]] auto col = e->add_component<MeshCollider>("");
-		[[maybe_unused]] auto sb = e->add_component<SolidBody>("");
+		[[maybe_unused]] auto col = entity_manager->add_component<MeshCollider>(e);
+		[[maybe_unused]] auto sb = entity_manager->add_component<SolidBody>(e);
 #if HAS_LIB_BULLET
 		dynamicsWorld->addRigidBody(sb->body);
 #endif
 	}
 
 	if (m->_template->skeleton)
-		e->add_component<Skeleton>("");
+		entity_manager->add_component<Skeleton>(e);
 
 	if (m->_template->animator)
-		e->add_component<Animator>("");
+		entity_manager->add_component<Animator>(e);
 
 	return m;
 }
@@ -469,12 +471,12 @@ void World::unattach_model(Model* m) {
 		dynamicsWorld->removeRigidBody(sb->body);
 #endif
 
-	m->owner->delete_component(m);
+	entity_manager->delete_component(m->owner, m);
 }
 
 MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
 	auto e = create_entity(vec3::ZERO, quaternion::ID);
-	auto mi = e->add_component<MultiInstance>("");
+	auto mi = entity_manager->add_component<MultiInstance>(e);
 
 	mi->model = engine.resource_manager->load_model(filename);
 
@@ -635,21 +637,21 @@ void World::iterate(float dt) {
 #endif
 }
 
-Light* attach_light_parallel(Entity* e, const color& c) {
-	auto l = e->add_component<Light>();
+Light* World::attach_light_parallel(Entity* e, const color& c) {
+	auto l = entity_manager->add_component<Light>(e);
 	l->light.light.col = c;
 	return l;
 }
 
-Light* attach_light_point(Entity* e, const color& c, float r) {
-	auto l = e->add_component<Light>();
+Light* World::attach_light_point(Entity* e, const color& c, float r) {
+	auto l = entity_manager->add_component<Light>(e);
 	l->light.light.col = c;
 	l->light.light.radius = r;
 	return l;
 }
 
-Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
-	auto l = e->add_component<Light>();
+Light* World::attach_light_cone(Entity* e, const color& c, float r, float theta) {
+	auto l = entity_manager->add_component<Light>(e);
 	l->light.light.col = c;
 	l->light.light.radius = r;
 	l->light.light.theta = theta;
@@ -657,23 +659,23 @@ Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
 }
 
 Light *World::create_light_parallel(const quaternion &ang, const color &c) {
-	auto o = create_entity(v_0, ang);
-	return attach_light_parallel(o, c);
+	auto e = create_entity(v_0, ang);
+	return attach_light_parallel(e, c);
 }
 
 Light *World::create_light_point(const vec3 &pos, const color &c, float r) {
-	auto o = create_entity(pos, quaternion::ID);
-	return attach_light_point(o, c, r);
+	auto e = create_entity(pos, quaternion::ID);
+	return attach_light_point(e, c, r);
 }
 
 Light *World::create_light_cone(const vec3 &pos, const quaternion &ang, const color &c, float r, float t) {
-	auto o = create_entity(pos, ang);
-	return attach_light_cone(o, c, r, t);
+	auto e = create_entity(pos, ang);
+	return attach_light_cone(e, c, r, t);
 }
 
 Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
-	auto o = create_entity(pos, ang);
-	return o->add_component<Camera>();
+	auto e = create_entity(pos, ang);
+	return entity_manager->add_component<Camera>(e);
 }
 
 
