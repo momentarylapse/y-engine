@@ -108,6 +108,10 @@ public:
 	Array<Model*> skybox;
 	Fog fog;
 
+	Light* attach_light_parallel(Entity* e, const color& c);
+	Light* attach_light_point(Entity* e, const color& c, float r);
+	Light* attach_light_cone(Entity* e, const color& c, float r, float theta);
+
 	Light *create_light_parallel(const quaternion &ang, const color &c);
 	Light *create_light_point(const vec3 &p, const color &c, float r);
 	Light *create_light_cone(const vec3 &p, const quaternion &ang, const color &c, float r, float t);
@@ -177,10 +181,6 @@ void GodInit(int ch_iter);
 void GodEnd();
 bool GodLoadWorld(const Path &filename);
 
-
-Light* attach_light_parallel(Entity* e, const color& c);
-Light* attach_light_point(Entity* e, const color& c, float r);
-Light* attach_light_cone(Entity* e, const color& c, float r, float theta);
 
 enum {
 	NET_MSG_CREATE_OBJECT = 1000,

@@ -58,7 +58,7 @@ void exit() {
 
 void attach_listener(Entity* e) {
 	if (e)
-		e->add_component<Listener>();
+		EntityManager::global->add_component<Listener>(e);
 }
 
 float VolumeMusic = 1.0f, VolumeSound = 1.0f;
@@ -107,7 +107,7 @@ void reset() {
 
 SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 	auto e = world.create_entity(pos, quaternion::ID);
-	auto s = e->add_component<SoundSource>();
+	auto s = EntityManager::global->add_component<SoundSource>(e);
 	s->set_buffer(buffer);
 	s->min_distance = radius1;
 	s->max_distance = radius1 * 100;
@@ -122,7 +122,7 @@ SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius
 
 SoundSource& emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1) {
 	auto e = world.create_entity(pos, quaternion::ID);
-	auto s = e->add_component<SoundSource>();
+	auto s = EntityManager::global->add_component<SoundSource>(e);
 	s->set_stream(stream);
 	s->min_distance = radius1;
 	s->max_distance = radius1 * 100;

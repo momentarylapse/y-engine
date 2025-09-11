@@ -13,6 +13,7 @@
 
 struct mat4;
 class Component;
+class EntityManager;
 
 
 class Entity {
@@ -26,13 +27,6 @@ public:
 	Array<Component*> components;
 	Component *_get_component_generic_(const kaba::Class *type) const;
 	Component *_get_component_derived_generic_(const kaba::Class *type) const;
-	Component *_add_component_generic_(const kaba::Class *type, const string &var);
-	void delete_component(Component *c);
-
-	template<class C>
-	C* add_component(const string& var = "") {
-		return static_cast<C*>(_add_component_generic_(C::_class, var));
-	}
 
 	template<class C>
 	C* get_component() const {
@@ -43,8 +37,6 @@ public:
 	C* get_component_derived() const {
 		return static_cast<C*>(_get_component_derived_generic_(C::_class));
 	}
-
-	void _add_component_external_(Component *c);
 
 
 	vec3 pos;

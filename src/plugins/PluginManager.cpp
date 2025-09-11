@@ -110,7 +110,7 @@ Model* _attach_model(World* w, Entity* e, const Path& filename) {
 
 LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, const vec3& pos, float radius, const color& c, shared<Texture>& tex, float ttl) {
 	auto e = w->create_entity(pos, quaternion::ID);
-	auto p = reinterpret_cast<LegacyParticle*>(e->_add_component_generic_(type, ""));
+	auto p = reinterpret_cast<LegacyParticle*>(EntityManager::global->_add_component_generic_(e, type, ""));
 	p->radius = radius;
 	p->col = c;
 	p->texture = tex;
@@ -197,6 +197,25 @@ ComponentManager::PairList& __query_component_list2(const kaba::Class* type1, co
 	return EntityManager::global->component_manager->_get_list2(type1, type2);
 }
 
+class EntityWrapper : public Entity {
+public:
+	Component* add_component_generic(const kaba::Class* type, const string& vars) {
+		return EntityManager::global->_add_component_generic_(this, type, vars);
+	}
+	void delete_component(Component* c) {
+		return EntityManager::global->delete_component(this, c);
+	}
+};
+Light* attach_light_parallel(Entity* e, const color& c) {
+	return world.attach_light_parallel(e, c);
+}
+Light* attach_light_point(Entity* e, const color& c, float r) {
+	return world.attach_light_point(e, c, r);
+}
+Light* attach_light_cone(Entity* e, const color& c, float r, float theta) {
+	return world.attach_light_cone(e, c, r, theta);
+}
+
 void export_ecs(kaba::Exporter* ext) {
 	BaseClass entity(BaseClass::Type::NONE);
 	ext->declare_class_size("BaseClass", sizeof(BaseClass));
@@ -213,8 +232,8 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->link_class_func("Entity.get_matrix", &Entity::get_matrix);
 	ext->link_class_func("Entity.__get_component", &Entity::_get_component_generic_);
 	ext->link_class_func("Entity.__get_component_derived", &Entity::_get_component_derived_generic_);
-	ext->link_class_func("Entity.__add_component", &Entity::_add_component_generic_);
-	ext->link_class_func("Entity.delete_component", &Entity::delete_component);
+	ext->link_class_func("Entity.__add_component", &EntityWrapper::add_component_generic);
+	ext->link_class_func("Entity.delete_component", &EntityWrapper::delete_component);
 	ext->link_class_func("Entity.__del_override__", &DeletionQueue::add_entity);
 
 	Component component;

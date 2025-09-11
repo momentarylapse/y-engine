@@ -12,6 +12,8 @@
 #include "../../y/EngineData.h"
 #include "../ModelManager.h"
 #include "../../y/Entity.h"
+#include "y/EntityManager.h"
+#include <lib/base/iter.h>
 
 const kaba::Class *Skeleton::_class = nullptr;
 
@@ -31,6 +33,10 @@ Skeleton::~Skeleton() {
 
 void Skeleton::on_init() {
 	auto m = owner->get_component<Model>();
+	if (!m)
+		return;
+
+	// FIXME ...everything...
 
 	bones = m->_template->skeleton->bones;
 	parents = m->_template->skeleton->parents;
@@ -38,20 +44,20 @@ void Skeleton::on_init() {
 	pos0 = m->_template->skeleton->pos0;
 
 	// skeleton
-	for (int i=0; i<bones.num; i++) {
-		bones[i].parent = owner;
+	for (auto&& [i, b]: enumerate(bones)) {
+		b.parent = owner;
 		pos0[i] = _calc_bone_rest_pos(i);
-		bones[i].pos = pos0[i];
-		bones[i].ang = quaternion::ID;
+		b.pos = pos0[i];
+		b.ang = quaternion::ID;
 		auto mm = engine.resource_manager->load_model(m->_template->skeleton->filename[i]);
 		if (mm) {
-			bones[i]._add_component_external_(mm);
+			EntityManager::global->_add_component_external_(&b, mm);
 
 			if (mm->_template->skeleton)
-				bones[i].add_component<Skeleton>();
+				EntityManager::global->add_component<Skeleton>(&b);
 
 			if (mm->_template->animator)
-				bones[i].add_component<Animator>();
+				EntityManager::global->add_component<Animator>(&b);
 		}
 	}
 }

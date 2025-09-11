@@ -29,7 +29,7 @@ static void iterate_legacy_particles(Array<LegacyParticle*>& particles, float dt
 	}
 
 	for (auto p: to_del)
-		p->owner->delete_component(p);
+		EntityManager::global->delete_component(p->owner, p);
 }
 
 ParticleManager::ParticleManager(EntityManager* _entity_manager) {

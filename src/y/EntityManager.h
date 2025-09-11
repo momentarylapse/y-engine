@@ -19,6 +19,16 @@ public:
 
 	Entity* create_entity(const vec3& pos, const quaternion& ang);
 	void delete_entity(Entity* entity);
+
+	Component *_add_component_generic_(Entity* entity, const kaba::Class *type, const string &var);
+	void _add_component_external_(Entity* entity, Component *c);
+	void delete_component(Entity* entity, Component *c);
+
+	template<class C>
+	C* add_component(Entity* entity, const string& var = "") {
+		return static_cast<C*>(_add_component_generic_(entity, C::_class, var));
+	}
+
 	void reset();
 	void shift_all(const vec3& dpos);
 
