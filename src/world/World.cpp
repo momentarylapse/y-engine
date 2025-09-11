@@ -179,7 +179,7 @@ World::World() {
 	entity_manager = new EntityManager;
 
 #ifdef _X_ALLOW_X_
-	particle_manager = new ParticleManager();
+	particle_manager = new ParticleManager(entity_manager.get());
 #endif
 
 
@@ -310,7 +310,7 @@ bool World::load(const LevelData &ld) {
 
 		add_user_components(cam_main->owner, c.components);
 	}
-	auto& cameras = ComponentManager::get_list_family<Camera>();
+	auto& cameras = entity_manager->get_component_list<Camera>();
 	if (cameras.num == 0) {
 		msg_error("no camera defined... creating one");
 		cam_main = create_camera(v_0, quaternion::ID);
@@ -352,7 +352,7 @@ bool World::load(const LevelData &ld) {
 		add_user_components(ee, e.components);
 	}
 
-	auto& model_list = ComponentManager::get_list_family<Model>();
+	auto& model_list = entity_manager->get_component_list<Model>();
 	for (auto &l: ld.links) {
 		Entity *a = model_list[l.object[0]]->owner;
 		Entity *b = nullptr;
@@ -570,7 +570,7 @@ bool World::unregister(BaseClass* x) {
 }
 
 void World::iterate_physics(float dt) {
-	auto& list = ComponentManager::get_list_family<SolidBody>();
+	auto& list = entity_manager->get_component_list<SolidBody>();
 
 	if (physics_mode == PhysicsMode::FULL_EXTERNAL) {
 #if HAS_LIB_BULLET
@@ -594,13 +594,13 @@ void World::iterate_physics(float dt) {
 void World::iterate_animations(float dt) {
 #ifdef _X_ALLOW_X_
 	profiler::begin(ch_animation);
-	auto& list = ComponentManager::get_list_family<Animator>();
+	auto& list = entity_manager->get_component_list<Animator>();
 	for (auto *o: list)
 		o->do_animation(dt);
 
 
 	// TODO
-	auto& list2 = ComponentManager::get_list_family<Skeleton>();
+	auto& list2 = entity_manager->get_component_list<Skeleton>();
 	for (auto *o: list2) {
 		for (auto &b: o->bones) {
 			if ([[maybe_unused]] auto *mm = b.get_component<Model>()) {
@@ -677,10 +677,10 @@ Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 void World::shift_all(const vec3 &dpos) {
 	entity_manager->shift_all(dpos);
 
-	for (auto &sb: ComponentManager::get_list_family<SolidBody>())
+	for (auto &sb: entity_manager->get_component_list<SolidBody>())
 		sb->state_to_bullet();
 
-	for (auto *m: ComponentManager::get_list_family<Model>())
+	for (auto *m: entity_manager->get_component_list<Model>())
 		m->update_matrix();
 
 	msg_data.v = dpos;

@@ -8,6 +8,7 @@
 #include "Entity.h"
 #include "Component.h"
 #include "ComponentManager.h"
+#include "EntityManager.h"
 #include <lib/math/mat4.h>
 #include <lib/kaba/syntax/Class.h>
 #include <lib/os/msg.h>
@@ -28,7 +29,7 @@ Entity::Entity(const vec3 &_pos, const quaternion &_ang) {
 Entity::~Entity() {
 	for (auto *c: components) {
 		c->owner = nullptr;
-		ComponentManager::delete_component(c);
+		EntityManager::global->component_manager->delete_component(c);
 	}
 }
 
@@ -38,7 +39,7 @@ void Entity::on_delete_rec() {
 }
 
 Component *Entity::_add_component_generic_(const kaba::Class *type, const string &var) {
-	auto c = ComponentManager::create_component(type, var);
+	auto c = EntityManager::global->component_manager->create_component(type, var);
 	components.add(c);
 	c->owner = this;
 	c->on_init();
@@ -46,7 +47,7 @@ Component *Entity::_add_component_generic_(const kaba::Class *type, const string
 }
 
 void Entity::_add_component_external_(Component *c) {
-	ComponentManager::_register(c);
+	EntityManager::global->component_manager->_register(c);
 	components.add(c);
 	c->owner = this;
 	c->on_init();
@@ -58,7 +59,7 @@ void Entity::delete_component(Component *c) {
 		c->on_delete();
 		c->owner = nullptr;
 		components.erase(i);
-		ComponentManager::delete_component(c);
+		EntityManager::global->component_manager->delete_component(c);
 	}
 }
 

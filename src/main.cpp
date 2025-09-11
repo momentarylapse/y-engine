@@ -31,7 +31,7 @@
 #include "gui/gui.h"
 
 #include "y/EngineData.h"
-#include "y/ComponentManager.h"
+#include "y/EntityManager.h"
 #include "y/SystemManager.h"
 #include "meta.h"
 
@@ -105,7 +105,6 @@ public:
 		kaba::init();
 		NetworkManager::init();
 		ch_iter = profiler::create_channel("iter");
-		ComponentManager::init();
 		SchedulerManager::init(ch_iter);
 
 		engine.app_name = app_name;
@@ -168,7 +167,7 @@ public:
 		GodLoadWorld(filename);
 		audio::attach_listener(cam_main->owner);
 
-		for (auto& cam: ComponentManager::get_list_family<Camera>())
+		for (auto& cam: world.entity_manager->get_component_list<Camera>())
 			create_and_attach_camera_renderer(engine.context, cam);
 		for (auto &s: world.systems)
 			SystemManager::create(s.filename, s.class_name, s.variables);
@@ -306,7 +305,7 @@ public:
 
 		SystemManager::handle_iterate(engine.elapsed);
 		SchedulerManager::iterate(engine.elapsed);
-		ComponentManager::iterate(engine.elapsed);
+		world.entity_manager->component_manager->iterate(engine.elapsed);
 
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);

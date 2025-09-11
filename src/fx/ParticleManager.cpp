@@ -10,8 +10,7 @@
 #include "Particle.h"
 #include "ParticleEmitter.h"
 #include <y/Entity.h>
-#include <y/ComponentManager.h>
-
+#include <y/EntityManager.h>
 
 
 static void iterate_legacy_particles(Array<LegacyParticle*>& particles, float dt) {
@@ -33,8 +32,13 @@ static void iterate_legacy_particles(Array<LegacyParticle*>& particles, float dt
 		p->owner->delete_component(p);
 }
 
+ParticleManager::ParticleManager(EntityManager* _entity_manager) {
+	entity_manager = _entity_manager;
+}
+
+
 void ParticleManager::iterate(float dt) {
-	auto& list = ComponentManager::get_list_family<LegacyParticle>();
+	auto& list = entity_manager->get_component_list_family<LegacyParticle>();
 	iterate_legacy_particles(list, dt);
 }
 

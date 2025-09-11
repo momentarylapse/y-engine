@@ -19,8 +19,6 @@
 #include <lib/kaba/syntax/Function.h>
 #include <lib/os/msg.h>
 
-static int ch_component = -1;
-
 class ComponentListX {
 public:
 	ComponentManager::List list;
@@ -41,9 +39,6 @@ public:
 	}
 };
 
-base::map<const kaba::Class*, ComponentListX> component_lists_by_type;
-base::map<const kaba::Class*, ComponentListX> component_lists_by_family;
-
 bool class_func_did_override(const kaba::Class *type, const string &fname) {
 #ifdef _X_ALLOW_X_
 	for (auto f: weak(type->functions))
@@ -53,43 +48,50 @@ bool class_func_did_override(const kaba::Class *type, const string &fname) {
 	return false;
 }
 
-ComponentListX &_get_list_x(const kaba::Class *type) {
-	if (component_lists_by_type.find(type) >= 0) {
-		return component_lists_by_type[type];
+ComponentListX &_get_list_x(ComponentManager* cm, const kaba::Class *type) {
+	if (cm->component_lists_by_type.find(type) >= 0) {
+		return cm->component_lists_by_type[type];
 	} else {
 		ComponentListX list;
 		list.type_family = type;
 		list.needs_update = class_func_did_override(type, "on_iterate");
 #ifdef _X_ALLOW_X_
 		if (list.needs_update)
-			list.ch_iterate = profiler::create_channel(type->long_name(), ch_component);
+			list.ch_iterate = profiler::create_channel(type->long_name(), cm->ch_component);
 #endif
-		component_lists_by_type.set(type, list);
-		return component_lists_by_type[type];
+		cm->component_lists_by_type.set(type, list);
+		return cm->component_lists_by_type[type];
 	}
 }
 
-ComponentListX &_get_list_x_family(const kaba::Class *type_family) {
-	if (component_lists_by_family.find(type_family) >= 0) {
-		return component_lists_by_family[type_family];
+ComponentListX &_get_list_x_family(ComponentManager* cm, const kaba::Class *type_family) {
+	if (cm->component_lists_by_family.find(type_family) >= 0) {
+		return cm->component_lists_by_family[type_family];
 	} else {
 		ComponentListX list;
 		list.type_family = type_family;
 		list.needs_update = class_func_did_override(type_family, "on_iterate");
 #ifdef _X_ALLOW_X_
 		if (list.needs_update)
-			list.ch_iterate = profiler::create_channel(type_family->long_name(), ch_component);
+			list.ch_iterate = profiler::create_channel(type_family->long_name(), cm->ch_component);
 #endif
-		component_lists_by_family.set(type_family, list);
-		return component_lists_by_family[type_family];
+		cm->component_lists_by_family.set(type_family, list);
+		return cm->component_lists_by_family[type_family];
 	}
 }
 
-void ComponentManager::init() {
+ComponentManager::ComponentManager() {
 #ifdef _X_ALLOW_X_
 	ch_component = profiler::create_channel("component");
 #endif
 }
+
+ComponentManager::~ComponentManager() {
+#ifdef _X_ALLOW_X_
+	profiler::delete_channel(ch_component);
+#endif
+}
+
 
 
 void ComponentManager::_register(Component *c) {
@@ -102,11 +104,11 @@ void ComponentManager::_register(Component *c) {
 }
 
 void ComponentManager::_unregister(Component *c) {
-	auto& list = _get_list_x(c->component_type);
+	auto& list = _get_list_x(this, c->component_type);
 	list.remove(c);
 
 	auto type_family = get_component_type_family(c->component_type);
-	auto& flist = _get_list_x_family(type_family);
+	auto& flist = _get_list_x_family(this, type_family);
 	flist.remove(c);
 }
 
@@ -149,11 +151,11 @@ void ComponentManager::delete_component(Component *c) {
 
 
 ComponentManager::List &ComponentManager::_get_list(const kaba::Class *type) {
-	return _get_list_x(type).list;
+	return _get_list_x(this, type).list;
 }
 
 ComponentManager::List &ComponentManager::_get_list_family(const kaba::Class *type_family) {
-	return _get_list_x_family(type_family).list;
+	return _get_list_x_family(this, type_family).list;
 }
 
 void ComponentManager::iterate(float dt) {

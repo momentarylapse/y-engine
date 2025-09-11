@@ -6,11 +6,11 @@
 #include "SoundSource.h"
 #include "../helper/DeletionQueue.h"
 #include "../world/World.h" // FIXME
-#include "../y/ComponentManager.h"
+#include "../y/EntityManager.h"
 #include "../y/Entity.h"
 #include "../y/EngineData.h"
-#include "../lib/base/base.h"
-#include "../lib/base/algo.h"
+#include <lib/base/base.h>
+#include <lib/base/algo.h>
 
 #if HAS_LIB_OPENAL
 
@@ -75,7 +75,7 @@ void garbage_collection() {
 }
 
 void iterate(float dt) {
-	auto& sources = ComponentManager::get_list<SoundSource>();
+	auto& sources = EntityManager::global->get_component_list<SoundSource>();
 	for (auto s: sources) {
 		// TODO owner->get_component<SolidBody>()->vel
 		s->_apply_data();
@@ -96,7 +96,7 @@ void iterate(float dt) {
 		}
 	}
 	DeletionQueue::delete_all();
-	auto& listeners = ComponentManager::get_list<Listener>();
+	auto& listeners = EntityManager::global->get_component_list<Listener>();
 	if (listeners.num >= 1)
 		listeners[0]->apply_data();
 }

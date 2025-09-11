@@ -5,7 +5,12 @@
 #include "EntityManager.h"
 #include "Entity.h"
 
-EntityManager::EntityManager() = default;
+EntityManager* EntityManager::global = nullptr;
+
+EntityManager::EntityManager() {
+	global = this;
+	component_manager = new ComponentManager();
+}
 
 EntityManager::~EntityManager() {
 	reset();

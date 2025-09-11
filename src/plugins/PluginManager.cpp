@@ -71,6 +71,7 @@
 #include "../lib/kaba/dynamic/exception.h"
 #include "../lib/os/msg.h"
 #include "../lib/image/image.h"
+#include "y/EntityManager.h"
 
 
 //using namespace yrenderer;
@@ -184,6 +185,18 @@ void PluginManager::init() {
 	import_kaba();
 }
 
+ComponentManager::List& __query_component_list(const kaba::Class* type) {
+	return EntityManager::global->component_manager->_get_list(type);
+}
+
+ComponentManager::List& __query_component_list_family(const kaba::Class* type) {
+	return EntityManager::global->component_manager->_get_list_family(type);
+}
+
+ComponentManager::PairList& __query_component_list2(const kaba::Class* type1, const kaba::Class* type2) {
+	return EntityManager::global->component_manager->_get_list2(type1, type2);
+}
+
 void export_ecs(kaba::Exporter* ext) {
 	BaseClass entity(BaseClass::Type::NONE);
 	ext->declare_class_size("BaseClass", sizeof(BaseClass));
@@ -240,9 +253,9 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->link_virtual("Controller.on_render_inject", &System::on_render_inject, &con);
 	ext->link_class_func("Controller.__del_override__", &DeletionQueue::add);
 
-	ext->link_func("__get_component_list", &ComponentManager::_get_list);
-	ext->link_func("__get_component_family_list", &ComponentManager::_get_list_family);
-	ext->link_func("__get_component_list2", &ComponentManager::_get_list2);
+	ext->link_func("__get_component_list", &__query_component_list);
+	ext->link_func("__get_component_family_list", &__query_component_list_family);
+	ext->link_func("__get_component_list2", &__query_component_list2);
 
 	ext->link_func("__get_controller", &SystemManager::get);
 }
