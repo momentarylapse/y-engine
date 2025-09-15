@@ -15,16 +15,17 @@
 #include <lib/image/color.h>
 #include <y/Entity.h>
 
-class LevelData;
+struct LevelData;
 
 
 class Model;
 class Object;
 namespace yrenderer {
 	class Material;
+	enum class LightType;
 }
 class Terrain;
-class TemplateDataScriptVariable;
+struct TemplateDataScriptVariable;
 class Light;
 class ParticleManager;
 class Particle;
@@ -33,8 +34,7 @@ class Particle;
 enum class PhysicsMode;
 enum class LinkType;
 
-class Fog {
-public:
+struct Fog {
 	bool enabled;
 	int mode;
 	float start, end, distance;
@@ -42,61 +42,53 @@ public:
 };
 
 
-class LevelData {
-public:
+struct LevelData {
 	LevelData();
 	bool load(const Path &filename);
 	void save(const Path &filename);
 
 
-	class ScriptData {
-	public:
+	struct ScriptData {
 		Path filename;
 		string class_name;
-		string var;
 		Array<TemplateDataScriptVariable> variables;
 	};
 
-	class Terrain {
-	public:
+	struct Terrain {
 		Path filename;
 		vec3 pos;
 		Array<ScriptData> components;
 	};
 
-	class Object {
-	public:
+	struct Object {
 		Path filename;
 		string name;
 		vec3 pos, ang;
 		Array<ScriptData> components;
 	};
 
-	class Entity {
-	public:
+	struct Entity {
 		string name;
 		vec3 pos, ang;
 		Array<ScriptData> components;
 	};
 
-	class Light {
-	public:
+	struct Light {
 		bool enabled;
 		vec3 pos, ang;
-		color _color;
+		yrenderer::LightType type;
+		color _color; // physical units
 		float radius, theta, harshness;
 		Array<ScriptData> components;
 	};
 
-	class Camera {
-	public:
+	struct Camera {
 		vec3 pos, ang;
 		float fov, min_depth, max_depth, exposure, bloom_factor;
 		Array<ScriptData> components;
 	};
 
-	class Link {
-	public:
+	struct Link {
 		int object[2];
 		LinkType type;
 		vec3 pos, ang;

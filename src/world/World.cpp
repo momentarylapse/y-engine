@@ -178,8 +178,11 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 World::World() {
 	entity_manager = new EntityManager;
 #ifdef _X_ALLOW_X_
-	entity_manager->component_manager->factory = [] (const kaba::Class* type, const string& var) {
-		return (Component*)PluginManager::create_instance(type, var);
+	entity_manager->component_manager->factory = [] (const kaba::Class* type, const ComponentManager::Params& params) {
+		Array<TemplateDataScriptVariable> vars;
+		for (const auto& [k, v]: params)
+			vars.add({k, v.str()});
+		return (Component*)PluginManager::create_instance(type, vars);
 	};
 #endif
 
@@ -265,7 +268,10 @@ void add_user_components(EntityManager* em, Entity *ent, const Array<LevelData::
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, cc.var);
+		base::map<string, Any> params;
+		for (const auto& v: cc.variables)
+			params.set(v.name, v.value);
+		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, params);
 #endif
 	}
 }
@@ -285,10 +291,10 @@ bool World::load(const LevelData &ld) {
 	for (auto &l: ld.lights) {
 		auto o = create_entity(l.pos, quaternion::rotation(l.ang));
 		auto ll = entity_manager->add_component<Light>(o);
-		ll->light.init(l._color, l.radius, l.theta);
+		ll->light.init(l.type, l._color, l.theta);
 		ll->light.light.harshness = l.harshness;
 		ll->light.enabled = l.enabled;
-		if (ll->light.light.radius < 0)
+		if (ll->light.type == yrenderer::LightType::DIRECTIONAL)
 			ll->light.allow_shadow = true;
 
 		add_user_components(entity_manager.get(), o, l.components);

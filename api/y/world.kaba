@@ -47,6 +47,7 @@ class Terrain extends Component
 	# ...
 
 class Light extends Component
+	#var type: LightType
 	var dir: vec3
 	var color: Color
 	var radius: f32
