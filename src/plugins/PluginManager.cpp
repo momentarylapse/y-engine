@@ -110,7 +110,7 @@ Model* _attach_model(World* w, Entity* e, const Path& filename) {
 
 LegacyParticle* _world_add_legacy_particle(World* w, const kaba::Class* type, const vec3& pos, float radius, const color& c, shared<Texture>& tex, float ttl) {
 	auto e = w->create_entity(pos, quaternion::ID);
-	auto p = reinterpret_cast<LegacyParticle*>(EntityManager::global->_add_component_generic_(e, type, ""));
+	auto p = reinterpret_cast<LegacyParticle*>(EntityManager::global->_add_component_generic_(e, type));
 	p->radius = radius;
 	p->col = c;
 	p->texture = tex;
@@ -200,7 +200,9 @@ ComponentManager::PairList& __query_component_list2(const kaba::Class* type1, co
 class EntityWrapper : public Entity {
 public:
 	Component* add_component_generic(const kaba::Class* type, const string& vars) {
-		return EntityManager::global->_add_component_generic_(this, type, vars);
+		if (vars != "")
+			msg_error("TODO component params Any{}");
+		return EntityManager::global->_add_component_generic_(this, type, {});
 	}
 	void delete_component(Component* c) {
 		return EntityManager::global->delete_component(this, c);
@@ -466,8 +468,9 @@ void export_world(kaba::Exporter* ext) {
 
 #define _OFFSET(VAR, MEMBER)	(char*)&VAR.MEMBER - (char*)&VAR
 
-	Light light(Black, 0, 0);
+	Light light(yrenderer::LightType::DIRECTIONAL, Black);
 	ext->declare_class_size("Light", sizeof(Light));
+	ext->declare_class_element("Light.type", _OFFSET(light, light.type));
 	ext->declare_class_element("Light.dir", _OFFSET(light, light.light.dir));
 	ext->declare_class_element("Light.color", _OFFSET(light, light.light.col));
 	ext->declare_class_element("Light.radius", _OFFSET(light, light.light.radius));
@@ -953,7 +956,7 @@ void PluginManager::assign_variables(void *_p, const kaba::Class *c, const Array
 	char *p = (char*)_p;
 	for (auto &v: variables) {
 		for (auto &e: c->elements) {
-			if (v.name == e.name.lower().replace("_", "")) {
+			if (v.name == e.name) {
 				//msg_write("  " + e.type->long_name() + " " + e.name + " = " + v.value);
 				if (e.type == kaba::TypeInt32)
 					*(int*)(p + e.offset) = v.value._int();
@@ -966,10 +969,6 @@ void PluginManager::assign_variables(void *_p, const kaba::Class *c, const Array
 			}
 		}
 	}
-}
-
-void PluginManager::assign_variables(void *_p, const kaba::Class *c, const string &variables) {
-	assign_variables(_p, c, parse_variables(variables));
 }
 
 const kaba::Class *PluginManager::find_class_derived(const Path &filename, const string &base_class) {
@@ -1006,15 +1005,15 @@ const kaba::Class *PluginManager::find_class(const Path &filename, const string 
 	return nullptr;
 }
 
-void *PluginManager::create_instance(const kaba::Class *c, const string &variables) {
-	return create_instance(c, parse_variables(variables));
-}
-
 void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateDataScriptVariable> &variables) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	msg_write(format("creating instance  %s", c->long_name()));
 	if (c == SolidBody::_class)
 		return new SolidBody;
+	if (c == ModelRef::_class)
+		return new ModelRef;
+	if (c == TerrainRef::_class)
+		return new TerrainRef;
 	if (c == MeshCollider::_class)
 		return new MeshCollider;
 	if (c == TerrainCollider::_class)
@@ -1026,7 +1025,7 @@ void *PluginManager::create_instance(const kaba::Class *c, const Array<TemplateD
 	if (c == Skeleton::_class)
 		return new Skeleton;
 	if (c == Light::_class)
-		return new Light(White, -1, -1);
+		return new Light(yrenderer::LightType::POINT, White);
 	if (c == Camera::_class)
 		return new Camera;
 	if (c == audio::SoundSource::_class)
@@ -1052,7 +1051,7 @@ void* PluginManager::create_instance_auto(const string& extended_type_name) {
 		for (auto c: m->classes())
 			if (c->name == type) {
 				msg_error("create: " + c->long_name());
-				return create_instance(c, "");
+				return create_instance(c, {});
 			}
 	}
 	return nullptr;
