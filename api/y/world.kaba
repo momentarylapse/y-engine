@@ -7,6 +7,7 @@ use model.*
 use audio.*
 
 class SolidBody extends Component
+	let PARAMETERS = "mass,theta,physics_active,physics_passive,g_factor"
 	var vel: vec3 # world frame
 	var rot: vec3 # world frame
 	var mass: f32
@@ -47,7 +48,8 @@ class Terrain extends Component
 	# ...
 
 class Light extends Component
-	#var type: LightType
+	let PARAMETERS = "type,dir,color,radius,theta,harshness,enabled,allow_shadow"
+	var type: i32#LightType
 	var dir: vec3
 	var color: Color
 	var radius: f32
@@ -77,6 +79,7 @@ func extern ref attach_light_cone(e: Entity, c: Color, radius: f32, theta: f32) 
 
 
 class Camera extends Component
+	let PARAMETERS = "min_depth,max_depth,exposure,fov"
 	var exposure: f32
 	var bloom_radius: f32
 	var bloom_factor: f32
@@ -111,10 +114,23 @@ class NameTag extends Component
 	var name: string
 
 
+class ModelRef extends Component
+	let PARAMETERS = "filename"
+	var model: Model*
+	var filename: os.Path
+
+
+class TerrainRef extends Component
+	let PARAMETERS = "filename"
+	var terrain: Terrain*
+	var filename: os.Path
+
+
 class Fog
 	var color: Color
 	var distance: f32
 	var enabled: bool
+
 
 class Link extends BaseClass
 	var a, b: Model*
