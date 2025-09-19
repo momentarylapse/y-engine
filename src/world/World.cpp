@@ -178,11 +178,14 @@ void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 World::World() {
 	entity_manager = new EntityManager;
 #ifdef _X_ALLOW_X_
-	entity_manager->component_manager->factory = [] (const kaba::Class* type, const ComponentManager::Params& params) {
-		Array<TemplateDataScriptVariable> vars;
+	entity_manager->component_manager->f_create = [] (const kaba::Class* type) {
+		return (Component*)PluginManager::create_instance(type, Array<ScriptInstanceDataVariable>{});
+	};
+	entity_manager->component_manager->f_apply = [] (const kaba::Class* type, Component* c, const Array<ScriptInstanceDataVariable>& vars) {
+		/*Array<ScriptInstanceDataVariable> vars;
 		for (const auto& [k, v]: params)
-			vars.add({k, v.str()});
-		return (Component*)PluginManager::create_instance(type, vars);
+			vars.add({k, v.str()});*/
+		PluginManager::assign_variables(c, type, vars);
 	};
 #endif
 
@@ -263,15 +266,15 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-void add_user_components(EntityManager* em, Entity *ent, const Array<LevelData::ScriptData> &components) {
+void add_user_components(EntityManager* em, Entity *ent, const Array<ScriptInstanceData>& components) {
 	for (auto &cc: components) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		base::map<string, Any> params;
+		/*base::map<string, Any> params;
 		for (const auto& v: cc.variables)
-			params.set(v.name, v.value);
-		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, params);
+			params.set(v.name, v.value);*/
+		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, cc.variables);
 #endif
 	}
 }
@@ -358,7 +361,7 @@ bool World::load(const LevelData &ld) {
 
 	// (raw) entities
 	foreachi(auto &e, ld.entities, i) {
-		auto ee = create_entity(e.pos, quaternion::rotation(e.ang));
+		auto ee = create_entity(e.pos, e.ang);
 
 		add_user_components(entity_manager.get(), ee, e.components);
 	}
