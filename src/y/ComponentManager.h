@@ -19,12 +19,14 @@ namespace kaba {
 	class Class;
 }
 class Any;
+struct ScriptInstanceDataVariable;
 
 
 class ComponentManager {
 public:
 	using List = Array<Component*>;
-	using Params = base::map<string, Any>;
+	//using Params = base::map<string, Any>;
+	using Params = Array<ScriptInstanceDataVariable>;
 
 	ComponentManager();
 	~ComponentManager();
@@ -62,6 +64,8 @@ public:
 	base::map<const kaba::Class*, ComponentListX> component_lists_by_family;
 	int ch_component = -1;
 
-	std::function<Component*(const kaba::Class*, const Params& var)> factory;
+	std::function<Component*(const kaba::Class*)> f_create;
+	std::function<void(const kaba::Class*, Component*, const Params&)> f_apply;
+	//std::function<const kaba::Class*(const string&)> f_parse_type;
 };
 

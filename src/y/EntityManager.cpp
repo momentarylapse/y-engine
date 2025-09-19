@@ -5,6 +5,8 @@
 #include "EntityManager.h"
 #include "Entity.h"
 #include "Component.h"
+#include <lib/base/iter.h>
+#include <lib/kaba/syntax/Class.h>
 
 EntityManager* EntityManager::global = nullptr;
 
@@ -37,12 +39,21 @@ void EntityManager::delete_entity(Entity* e) {
 	delete e;
 }
 
+int EntityManager::entity_index(Entity *entity) const {
+	for (auto&& [i, e]: enumerate(entities))
+		if (e == entity)
+			return i;
+	return -1;
+}
+
+
 
 Component *EntityManager::_add_component_generic_(Entity* entity, const kaba::Class *type, const Params &var) {
 	auto c = component_manager->create_component(type, var);
 	entity->components.add(c);
 	c->owner = entity;
-	c->on_init();
+	if (init_components)
+		c->on_init();
 	return c;
 }
 
@@ -50,13 +61,14 @@ void EntityManager::_add_component_external_(Entity* entity, Component *c) {
 	component_manager->_register(c);
 	entity->components.add(c);
 	c->owner = entity;
-	c->on_init();
+	if (init_components)
+		c->on_init();
 }
 
 void EntityManager::delete_component(Entity* entity, Component *c, bool notify) {
 	int i = entity->components.find(c);
 	if (i >= 0) {
-		if (notify)
+		if (notify and init_components)
 			c->on_delete();
 		c->owner = nullptr;
 		entity->components.erase(i);
