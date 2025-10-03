@@ -38,7 +38,6 @@ ModelTemplate::ModelTemplate(Model *m) {
 	model = m;
 	solid_body = nullptr;
 	mesh_collider = nullptr;
-	animator = nullptr;
 	skeleton = nullptr;
 }
 
@@ -442,9 +441,10 @@ public:
 #if 1
 		[[maybe_unused]] int version = f->read_int();
 
+		me->_template->components.add({"Animator"});
 
 		auto meta = new MetaMove;
-		me->_template->animator->meta = meta;
+		me->_template->meta_move = meta;
 
 		// headers
 		int num_anims = f->read_int();
@@ -651,9 +651,7 @@ xfer<Model> ModelManager::load(const Path &_filename) {
 	m->_template->filename = filename;
 	m->_template->solid_body = new SolidBody;
 	m->_template->mesh_collider = new MeshCollider;
-	m->_template->animator = new Animator;
 	m->_template->skeleton = new Skeleton;
-	m->_template->vertex_shader_module = "default";
 
 	modelmanager::ModelParser p(this);
 	p.read(filename, m);
@@ -667,10 +665,6 @@ xfer<Model> ModelManager::load(const Path &_filename) {
 		delete m->_template->solid_body;
 		m->_template->solid_body = nullptr;
 	}
-	if (!m->_template->animator->meta) {
-		delete m->_template->animator;
-		m->_template->animator = nullptr;
-	}
 	if (m->_template->skeleton->bones.num == 0) {
 		delete m->_template->skeleton;
 		m->_template->skeleton = nullptr;
@@ -681,12 +675,9 @@ xfer<Model> ModelManager::load(const Path &_filename) {
 	AppraiseDimensions(m);
 
 	for (int i=0; i<MODEL_NUM_MESHES; i++)
-		m->mesh[i]->post_process(m->_template->animator);
+		m->mesh[i]->post_process(m->_template->meta_move.get());
 
 	PostProcessPhys(m, m->_template->mesh_collider->phys);
-
-	if (m->_template->animator)
-		m->_template->vertex_shader_module = "animated";
 
 
 

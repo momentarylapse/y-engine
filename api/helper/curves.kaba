@@ -29,6 +29,12 @@ class Curve extends UserMesh
 			
 		for vb in vertex_buffer
 			vb.update(v)
+
+	func mut set_contiguous(contiguous: bool)
+		if contiguous
+			topology = PrimitiveTopology.LINESTRIP
+		else
+			topology = PrimitiveTopology.LINES
 	
 func mut create_curve(w: f32, col: Color) -> Curve&
 	var e = world.create_entity(vec3.0, Quaternion.ID)
