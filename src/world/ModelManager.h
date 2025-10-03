@@ -15,8 +15,7 @@ class MetaMove;
 class Model;
 class Path;
 class SolidBody;
-class MeshCollider;
-class Animator;
+struct PhysicalMesh;
 class Skeleton;
 struct ScriptInstanceData;
 class ResourceManager;
@@ -31,14 +30,14 @@ public:
 	Model *model;
 	Array<Path> bone_model_filename;
 	SolidBody *solid_body;
-	MeshCollider *mesh_collider;
-	//Animator *animator;
+	shared<PhysicalMesh> physical_mesh;
 	shared<MetaMove> meta_move;
 	Skeleton *skeleton;
 	Array<ScriptInstanceData> components;
 
 
 	explicit ModelTemplate(Model *m);
+	~ModelTemplate();
 };
 
 class ModelManager {
