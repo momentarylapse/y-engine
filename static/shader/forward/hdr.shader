@@ -105,9 +105,9 @@ void main() {
 	
 	out_color.rgb = tone_map(out_color.rgb);
 
-#ifdef vulkan
+/*#ifdef vulkan
 	out_color.rgb = pow(out_color.rgb, vec3(1.0 / gamma));
-#endif
+#endif*/
 	out_color.a = 1;
 }
 </FragmentShader>
