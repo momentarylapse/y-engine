@@ -48,11 +48,10 @@ class Terrain extends Component
 	# ...
 
 class Light extends Component
-	let PARAMETERS = "type,dir,color,radius,theta,harshness,enabled,allow_shadow"
+	let PARAMETERS = "type,color,power,theta,harshness,enabled,allow_shadow"
 	var type: i32#LightType
-	var dir: vec3
 	var color: Color
-	var radius: f32
+	var power: f32
 	var theta: f32
 	var harshness: f32
 	var enabled: bool
