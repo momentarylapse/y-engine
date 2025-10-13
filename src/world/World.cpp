@@ -181,11 +181,19 @@ World::World() {
 	entity_manager->component_manager->f_create = [] (const kaba::Class* type) {
 		return (Component*)PluginManager::create_instance(type, Array<ScriptInstanceDataVariable>{});
 	};
-	entity_manager->component_manager->f_apply = [] (const kaba::Class* type, Component* c, const Array<ScriptInstanceDataVariable>& vars) {
+	entity_manager->component_manager->f_apply = [this] (const kaba::Class* type, Component* c, const Array<ScriptInstanceDataVariable>& vars) {
 		/*Array<ScriptInstanceDataVariable> vars;
 		for (const auto& [k, v]: params)
 			vars.add({k, v.str()});*/
 		PluginManager::assign_variables(c, type, vars);
+		if (type == ModelRef::_class) {
+			auto cc = static_cast<ModelRef*>(c);
+			cc->model = engine.resource_manager->load_model(cc->filename);
+		}
+		if (type == TerrainRef::_class) {
+			auto cc = static_cast<TerrainRef*>(c);
+			cc->terrain = new Terrain(engine.context, cc->filename);
+		}
 	};
 #endif
 
@@ -324,12 +332,7 @@ bool World::load(const LevelData &ld) {
 		cc->bloom_factor = c.bloom_factor;
 		cc->fov = c.fov;
 
-		add_user_components(entity_manager.get(), cam_main->owner, c.components);
-	}
-	auto& cameras = entity_manager->get_component_list<Camera>();
-	if (cameras.num == 0) {
-		msg_error("no camera defined... creating one");
-		cam_main = create_camera(v_0, quaternion::ID);
+		add_user_components(entity_manager.get(), cc->owner, c.components);
 	}
 
 	// objects
@@ -342,7 +345,7 @@ bool World::load(const LevelData &ld) {
 
 				add_user_components(entity_manager.get(), oo->owner, o.components);
 				register_entity(oo->owner);
-				if (ld.ego_index == i)
+				if (ld.ego_index == i + 1000000000)
 					ego = oo->owner;
 				if (i % 5 == 0)
 					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
@@ -366,6 +369,8 @@ bool World::load(const LevelData &ld) {
 		auto ee = create_entity(e.pos, e.ang);
 
 		add_user_components(entity_manager.get(), ee, e.components);
+		if (ld.ego_index == i)
+			ego = ee;
 	}
 
 	auto& model_list = entity_manager->get_component_list<Model>();
@@ -375,6 +380,14 @@ bool World::load(const LevelData &ld) {
 		if (l.object[1] >= 0)
 			b = model_list[l.object[1]]->owner;
 		add_link(Link::create(l.type, a, b, l.pos, quaternion::rotation(l.ang)));
+	}
+
+	auto& cameras = entity_manager->get_component_list<Camera>();
+	if (cameras.num == 0) {
+		msg_error("no camera defined... creating one");
+		cam_main = create_camera(v_0, quaternion::ID);
+	} else if (!cam_main) {
+		cam_main = cameras[0];
 	}
 
 	systems = ld.systems;

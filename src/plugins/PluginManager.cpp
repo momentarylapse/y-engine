@@ -942,6 +942,8 @@ void import_kaba() {
 	import_component_class<Camera>(m_world, "Camera");
 	import_component_class<::CubeMapSource>(m_world, "CubeMapSource");
 	import_component_class<NameTag>(m_world, "NameTag");
+	import_component_class<ModelRef>(m_world, "ModelRef");
+	import_component_class<TerrainRef>(m_world, "TerrainRef");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
@@ -1068,6 +1070,30 @@ const kaba::Class *find_class_derived(const Path &filename, const string &base_c
 
 const kaba::Class *find_class(const Path &filename, const string &name) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
+	if (filename.is_empty()) {
+		if (name == "Camera")
+			return Camera::_class;
+		if (name == "Light")
+			return Light::_class;
+		if (name == "ModelRef")
+			return ModelRef::_class;
+		if (name == "TerrainRef")
+			return TerrainRef::_class;
+		if (name == "SolidBody")
+			return SolidBody::_class;
+		if (name == "Skeleton")
+			return Skeleton::_class;
+		if (name == "Animator")
+			return Animator::_class;
+		if (name == "MeshCollider")
+			return MeshCollider::_class;
+		if (name == "TerrainCollider")
+			return TerrainCollider::_class;
+		if (name == "BoxCollider")
+			return BoxCollider::_class;
+		if (name == "SphereCollider")
+			return SphereCollider::_class;
+	}
 	try {
 		auto s = kaba::default_context->load_module(filename);
 		for (auto c: s->classes()) {

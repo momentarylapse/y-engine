@@ -146,13 +146,15 @@ bool LevelData::load(const Path &filename) {
 				o.pos = s2v(e.value("pos"));
 				o.ang = s2v(e.value("ang"));
 				if (e.value("role") == "ego")
-					ego_index = objects.num;
+					ego_index = objects.num + 1000000000; // :P
 				read_components(o.components, e);
 				objects.add(o);
 			} else if (e.tag == "entity") {
 				Entity o;
 				o.pos = s2v(e.value("pos"));
 				o.ang = quaternion::rotation(s2v(e.value("ang")));
+				if (e.value("role") == "ego")
+					ego_index = entities.num;
 				read_components(o.components, e);
 				entities.add(o);
 			} else if (e.tag == "link") {
