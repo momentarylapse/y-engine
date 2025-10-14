@@ -43,6 +43,7 @@
 
 #include "Camera.h"
 #include "PhysicsSimulation.h"
+#include "lib/base/sort.h"
 
 
 //#define _debug_matrices_
@@ -77,27 +78,13 @@ void AddNetMsg(int msg, int argi0, const string &args)
 }
 
 
-int num_insane=0;
-
-inline bool TestVectorSanity(vec3 &v, const char *name) {
-	if (inf_v(v)) {
-		num_insane++;
-		v=v_0;
-		if (num_insane>100)
-			return false;
-		msg_error(format("Vektor %s unendlich!!!!!!!",name));
-		return true;
-	}
-	return false;
-}
-
-
 
 
 
 
 
 void GodInit(int ch_iter) {
+	// FIXME: heap allocate world?
 #ifdef _X_ALLOW_X_
 	world.ch_iterate = profiler::create_channel("world", ch_iter);
 	world.ch_animation = profiler::create_channel("animation", ch_iter);
@@ -193,8 +180,22 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
+Array<ScriptInstanceData> sort_components(const Array<ScriptInstanceData>& components) {
+	auto r = components;
+	for (int i=0; i<r.num; i++)
+		for (int k=i+1; k<r.num; k++) {
+			if (!r[i].filename.is_empty() and r[k].filename.is_empty())
+				r.swap(i, k);
+			else if (r[i].class_name == "SolidBody" and r[k].class_name == "MeshCollider")
+				r.swap(i, k);
+			else if (r[i].class_name == "SolidBody" and r[k].class_name == "TerrainCollider")
+				r.swap(i, k);
+		}
+	return r;
+}
+
 void add_user_components(EntityManager* em, Entity *ent, const Array<ScriptInstanceData>& components) {
-	for (auto &cc: components) {
+	for (auto &cc: sort_components(components)) {
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
@@ -330,7 +331,6 @@ Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
 
 	[[maybe_unused]] auto col = entity_manager->add_component<TerrainCollider>(o);
 	[[maybe_unused]] auto sb = entity_manager->add_component<SolidBody>(o, {{"physics_active", "", "false"}});
-	physics_simulation->register_body(sb);
 	register_entity(t->owner);
 
 	return t;
@@ -386,28 +386,21 @@ Model* World::attach_model(Entity* e, const Path& filename) {
 
 
 	// automatic components
-	for (const auto& c: m->_template->components)
-		if (c.class_name == "SolidBody") {
-			[[maybe_unused]] auto col = entity_manager->add_component<MeshCollider>(e);
-			[[maybe_unused]] auto sb = entity_manager->add_component<SolidBody>(e, c.variables);
-			physics_simulation->register_body(sb);
-		}
-
-	if (m->_template->skeleton)
-		entity_manager->add_component<Skeleton>(e);
-
 	for (const auto& c: m->_template->components) {
-		if (c.class_name == "Animator")
+		if (c.class_name == "SolidBody") {
+			entity_manager->add_component<MeshCollider>(e);
+			entity_manager->add_component<SolidBody>(e, c.variables);
+		} else if (c.class_name == "Skeleton") {
+			entity_manager->add_component<Skeleton>(e);
+		} else if (c.class_name == "Animator") {
 			entity_manager->add_component<Animator>(e);
+		}
 	}
 
 	return m;
 }
 
 void World::unattach_model(Model* m) {
-	if (auto sb = m->owner->get_component<SolidBody>())
-		physics_simulation->unregister_body(sb);
-
 	entity_manager->delete_component(m->owner, m);
 }
 
@@ -446,10 +439,6 @@ void World::unregister_entity(Entity *e) {
 	// ego...
 	if (e == ego)
 		ego = nullptr;
-
-
-	if (auto sb = e->get_component<SolidBody>())
-		physics_simulation->unregister_body(sb);
 }
 
 void World::delete_entity(Entity *e) {
@@ -568,8 +557,7 @@ Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 void World::shift_all(const vec3 &dpos) {
 	entity_manager->shift_all(dpos);
 
-	for (auto &sb: entity_manager->get_component_list<SolidBody>())
-		sb->state_to_bullet();
+	physics_simulation->update_all_bullet();
 
 	for (auto *m: entity_manager->get_component_list<Model>())
 		m->update_matrix();

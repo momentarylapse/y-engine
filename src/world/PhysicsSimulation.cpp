@@ -11,8 +11,6 @@
 #include <y/EntityManager.h>
 #include <y/Entity.h>
 
-#include "lib/os/msg.h"
-
 #if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
@@ -110,13 +108,14 @@ PhysicsSimulation::~PhysicsSimulation() {
 
 void PhysicsSimulation::on_add_component(const EntityMessageParams &params) {
 	if (params.component->component_type == SolidBody::_class) {
-		msg_error("ADD SOLID BODY");
+		//msg_error("ADD SOLID BODY");
+		register_body(static_cast<SolidBody*>(params.component));
 	}
 }
 
 void PhysicsSimulation::on_remove_component(const EntityMessageParams &params) {
 	if (params.component->component_type == SolidBody::_class) {
-		msg_error("REMOVE SOLID BODY");
+		unregister_body(static_cast<SolidBody*>(params.component));
 	}
 }
 
@@ -220,6 +219,12 @@ base::optional<CollisionData> PhysicsSimulation::trace(const vec3 &p1, const vec
 #endif
 	return base::None;
 }
+
+void PhysicsSimulation::update_all_bullet() {
+	for (auto &sb: world->entity_manager->get_component_list<SolidBody>())
+		sb->state_to_bullet();
+}
+
 
 
 

@@ -37,6 +37,7 @@ public:
 	void set_active_physics(Entity *o, bool active, bool passive);
 	void register_body(SolidBody* sb);
 	void unregister_body(SolidBody* sb);
+	void update_all_bullet();
 
 	base::optional<CollisionData> trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore = nullptr);
 
