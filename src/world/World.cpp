@@ -336,9 +336,9 @@ Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
 	return t;
 }
 
-bool GodLoadWorld(const Path &filename) {
+bool GodLoadWorld(const Path& filename) {
 	LevelData level_data;
-	bool ok = level_data.load(engine.map_dir | filename.with(".world"));
+	bool ok = level_data.load(filename);
 	ok &= world.load(level_data);
 	return ok;
 }
@@ -351,6 +351,15 @@ Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
 void World::register_entity(Entity *e) {
 	msg_data.e = e;
 	notify("entity-add"); // FIXME this is pointless...
+}
+
+Entity* World::load_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
+	const auto t = LevelData::load_template(engine.object_dir | filename);
+
+	auto e = create_entity(pos, ang);
+	add_user_components(entity_manager.get(), e, t.components);
+
+	return e;
 }
 
 Model *World::create_object(const Path &filename, const vec3 &pos, const quaternion &ang) {

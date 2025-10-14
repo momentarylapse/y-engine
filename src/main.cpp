@@ -158,13 +158,17 @@ public:
 		load_world(config.default_world);
 	}
 
-	void load_world(const Path &filename) {
+	void load_world(const Path& _filename) {
+		auto filename = _filename;
+		if (filename.extension() != "world")
+			filename = filename.with(".world");
+
 		msg_write("o------------------------------------------------------o");
 		msg_write("| loading                                              |");
 		msg_right();
 		reset_game();
 
-		GodLoadWorld(filename);
+		GodLoadWorld(engine.map_dir | filename);
 		audio::attach_listener(cam_main->owner);
 
 		for (auto& cam: world.entity_manager->get_component_list<Camera>())

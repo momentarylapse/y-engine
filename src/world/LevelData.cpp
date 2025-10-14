@@ -25,13 +25,13 @@ LevelData::LevelData() {
 }
 
 
-bool LevelData::load(const Path &filename) {
+bool LevelData::load(const Path& filename) {
 	world_filename = filename;
 
 	using namespace PluginManager;
 
 	xml::Parser p;
-	p.load(filename);
+	p.load(world_filename);
 	if (auto meta = p.elements[0].find("meta")) {
 		for (auto &e: meta->elements) {
 			if (e.tag == "background") {
