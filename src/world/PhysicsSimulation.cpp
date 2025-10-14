@@ -11,6 +11,8 @@
 #include <y/EntityManager.h>
 #include <y/Entity.h>
 
+#include "lib/os/msg.h"
+
 #if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>
 //#include <BulletCollision/CollisionShapes/btConvexPointCloudShape.h>
@@ -91,6 +93,9 @@ PhysicsSimulation::PhysicsSimulation(World* _world) {
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 	dynamicsWorld->setInternalTickCallback(myTickCallback);
 #endif
+
+	world->entity_manager->out_add_component >> in_add_component;
+	world->entity_manager->out_remove_component >> in_remove_component;
 }
 
 PhysicsSimulation::~PhysicsSimulation() {
@@ -102,6 +107,20 @@ PhysicsSimulation::~PhysicsSimulation() {
 	delete collisionConfiguration;
 #endif
 }
+
+void PhysicsSimulation::on_add_component(const EntityMessageParams &params) {
+	if (params.component->component_type == SolidBody::_class) {
+		msg_error("ADD SOLID BODY");
+	}
+}
+
+void PhysicsSimulation::on_remove_component(const EntityMessageParams &params) {
+	if (params.component->component_type == SolidBody::_class) {
+		msg_error("REMOVE SOLID BODY");
+	}
+}
+
+
 
 void PhysicsSimulation::on_iterate(float dt) {
 	auto& list = world->entity_manager->get_component_list<SolidBody>();
