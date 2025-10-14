@@ -78,8 +78,6 @@ public:
 
 	Entity *create_entity(const vec3 &pos, const quaternion &ang);
 	owned<EntityManager> entity_manager;
-	void register_entity(Entity *e);
-	void unregister_entity(Entity *e);
 
 	Entity* load_template(const Path &filename, const vec3 &pos, const quaternion &ang);
 
@@ -94,7 +92,6 @@ public:
 
 	void set_active_physics(Entity *o, bool active, bool passive);//, bool test_collisions);
 
-	bool unregister(BaseClass *o);
 	void delete_entity(Entity *e);
 	void delete_link(Link *l);
 

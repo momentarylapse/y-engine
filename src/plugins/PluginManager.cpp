@@ -452,7 +452,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->link_class_func("World.create_object_multi", &_create_object_multi);
 	ext->link_class_func("World.create_terrain", &World::create_terrain);
 	ext->link_class_func("World.create_entity", &World::create_entity);
-	ext->link_class_func("World.register_entity", &World::register_entity);
 	ext->link_class_func("World.set_active_physics", &World::set_active_physics);
 	ext->link_class_func("World.create_light_parallel", &World::create_light_parallel);
 	ext->link_class_func("World.create_light_point", &World::create_light_point);
@@ -465,7 +464,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->link_class_func("World.shift_all", &World::shift_all);
 	ext->link_class_func("World.get_g", &World::get_g);
 	ext->link_class_func("World.trace", &World::trace);
-	ext->link_class_func("World.unregister", &World::unregister);
 	ext->link_class_func("World.delete_entity", &World::delete_entity);
 	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);

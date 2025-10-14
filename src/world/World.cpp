@@ -231,7 +231,6 @@ bool World::load(const LevelData &ld) {
 			ll->light.power = yrenderer::Light::_radius_to_power(l.radius);
 
 		add_user_components(entity_manager.get(), o, l.components);
-		register_entity(o);
 	}
 
 	// skybox
@@ -264,7 +263,6 @@ bool World::load(const LevelData &ld) {
 				auto *oo = create_object_x(o.filename, o.name, o.pos, q);
 
 				add_user_components(entity_manager.get(), oo->owner, o.components);
-				register_entity(oo->owner);
 				if (ld.ego_index == i + 1000000000)
 					ego = oo->owner;
 				if (i % 5 == 0)
@@ -323,15 +321,13 @@ void World::add_link(Link *l) {
 
 
 Terrain *World::create_terrain(const Path &filename, const vec3 &pos) {
+	auto e = create_entity(pos, quaternion::ID);
 
-	auto o = create_entity(pos, quaternion::ID);
-
-	auto t = entity_manager->add_component<Terrain>(o);
+	auto t = entity_manager->add_component<Terrain>(e);
 	t->load(engine.context, filename);
 
-	[[maybe_unused]] auto col = entity_manager->add_component<TerrainCollider>(o);
-	[[maybe_unused]] auto sb = entity_manager->add_component<SolidBody>(o, {{"physics_active", "", "false"}});
-	register_entity(t->owner);
+	entity_manager->add_component<TerrainCollider>(e);
+	entity_manager->add_component<SolidBody>(e, {{"physics_active", "", "false"}});
 
 	return t;
 }
@@ -347,27 +343,26 @@ Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
 	return entity_manager->create_entity(pos, ang);
 }
 
-// deprecated
-void World::register_entity(Entity *e) {
-	msg_data.e = e;
-	notify("entity-add"); // FIXME this is pointless...
-}
-
 Entity* World::load_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
-	const auto t = LevelData::load_template(engine.object_dir | filename);
-
 	auto e = create_entity(pos, ang);
+
+	const auto t = LevelData::load_template(engine.object_dir | filename);
 	add_user_components(entity_manager.get(), e, t.components);
 
 	return e;
 }
 
 Model *World::create_object(const Path &filename, const vec3 &pos, const quaternion &ang) {
-	auto o = create_object_x(filename, "", pos, ang);
-	return o;
+	return create_object_x(filename, "", pos, ang);
 }
 
 Model *World::create_object_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang) {
+	if (engine.resetting_game)
+		throw Exception("create_object during game reset");
+
+	if (filename.is_empty())
+		throw Exception("create_object: empty filename");
+
 	auto e = create_entity(pos, ang);
 	auto m = attach_model(e, filename);
 
@@ -381,30 +376,13 @@ Model *World::create_object_x(const Path &filename, const string &name, const ve
 
 
 Model* World::attach_model(Entity* e, const Path& filename) {
-	if (engine.resetting_game)
-		throw Exception("create_object during game reset");
-
-	if (filename.is_empty())
-		throw Exception("create_object: empty filename");
-
-	//msg_write(on);
 	auto *m = engine.resource_manager->load_model(filename);
 
 	entity_manager->_add_component_external_(e, m);
 	m->update_matrix();
 
-
 	// automatic components
-	for (const auto& c: m->_template->components) {
-		if (c.class_name == "SolidBody") {
-			entity_manager->add_component<MeshCollider>(e);
-			entity_manager->add_component<SolidBody>(e, c.variables);
-		} else if (c.class_name == "Skeleton") {
-			entity_manager->add_component<Skeleton>(e);
-		} else if (c.class_name == "Animator") {
-			entity_manager->add_component<Animator>(e);
-		}
-	}
+	add_user_components(entity_manager.get(), e, m->_template->components);
 
 	return m;
 }
@@ -441,43 +419,21 @@ void World::notify(const string &msg) {
 		}
 }
 
-void World::unregister_entity(Entity *e) {
-	if (false)
-		AddNetMsg(NET_MSG_DELETE_OBJECT, e->object_id, "");
-
-	// ego...
-	if (e == ego)
-		ego = nullptr;
-}
-
 void World::delete_entity(Entity *e) {
-	unregister_entity(e);
-	e->on_delete_rec();
+	//e->on_delete_rec();
 
 	msg_data.e = e;
 	notify("entity-delete");
 	entity_manager->delete_entity(e);
 }
 
-void World::delete_link(Link *l) {
-	if (unregister(l))
-		delete l;
-}
-
-bool World::unregister(BaseClass* x) {
-	//msg_error("World.unregister  " + i2s((int)x->type));
-	if (x->type == BaseClass::Type::ENTITY) {
-		auto e = (Entity*)x;
-		unregister_entity(e);
-	} else if (x->type == BaseClass::Type::LINK) {
-		foreachi(auto *l, links, i)
-			if (l == x) {
-				//msg_write(" -> LINK");
-				links.erase(i);
-				return true;
-			}
-	}
-	return false;
+void World::delete_link(Link* _l) {
+	foreachi(auto *l, links, i)
+		if (l == _l) {
+			//msg_write(" -> LINK");
+			links.erase(i);
+			delete l;
+		}
 }
 
 void World::iterate_animations(float dt) {
@@ -523,12 +479,15 @@ void World::iterate(float dt) {
 
 Light* World::attach_light_parallel(Entity* e, const color& c) {
 	auto l = entity_manager->add_component<Light>(e);
+	l->light.type = yrenderer::LightType::DIRECTIONAL;
 	l->light.col = c;
 	return l;
 }
 
+// r is deprecated... c used to defined power -> implicit radius
 Light* World::attach_light_point(Entity* e, const color& c, float r) {
 	auto l = entity_manager->add_component<Light>(e);
+	l->light.type = yrenderer::LightType::POINT;
 	l->light.col = c;
 	//l->light.power = yrenderer::Light::_radius_to_power(r);
 	return l;
@@ -536,6 +495,7 @@ Light* World::attach_light_point(Entity* e, const color& c, float r) {
 
 Light* World::attach_light_cone(Entity* e, const color& c, float r, float theta) {
 	auto l = entity_manager->add_component<Light>(e);
+	l->light.type = yrenderer::LightType::CONE;
 	l->light.col = c;
 	//l->light.power = yrenderer::Light::_radius_to_power(r);
 	l->light.theta = theta;
