@@ -19,6 +19,7 @@
 #include "LevelData.h"
 
 
+class PhysicsSimulation;
 class Model;
 class Object;
 namespace yrenderer {
@@ -38,11 +39,6 @@ struct LevelData;
 enum class LinkType;
 
 
-class btDefaultCollisionConfiguration;
-class btCollisionDispatcher;
-class btBroadphaseInterface;
-class btSequentialImpulseConstraintSolver;
-class btDiscreteDynamicsWorld;
 
 
 
@@ -120,7 +116,6 @@ public:
 	ParticleManager *particle_manager;
 
 	void iterate(float dt);
-	void iterate_physics(float dt);
 	void iterate_animations(float dt);
 
 	void shift_all(const vec3 &dpos);
@@ -142,16 +137,10 @@ public:
 
 	Array<ScriptInstanceData> systems;
 
-
-	btDefaultCollisionConfiguration* collisionConfiguration;
-	btCollisionDispatcher* dispatcher;
-	btBroadphaseInterface* overlappingPairCache;
-	btSequentialImpulseConstraintSolver* solver;
-	btDiscreteDynamicsWorld* dynamicsWorld;
-
 	Array<Link*> links;
 
 	PhysicsMode physics_mode;
+	PhysicsSimulation* physics_simulation;
 
 
 	base::optional<CollisionData> trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore = nullptr);
