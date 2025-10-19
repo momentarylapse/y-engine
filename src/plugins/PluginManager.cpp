@@ -58,6 +58,7 @@
 #include "../world/ModelManager.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
+#include "../world/Physics.h"
 #include "../world/components/Light.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
@@ -68,9 +69,9 @@
 #include "../world/components/CubeMapSource.h"
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/ygraphics/Context.h>
-#include "../lib/kaba/dynamic/exception.h"
-#include "../lib/os/msg.h"
-#include "../lib/image/image.h"
+#include <lib/kaba/dynamic/exception.h>
+#include <lib/os/msg.h>
+#include <lib/image/image.h>
 #include <ecs/EntityManager.h>
 #include <ecs/BaseClass.h>
 
@@ -438,12 +439,22 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("TerrainRef.filename", &TerrainRef::filename);
 	ext->declare_class_element("TerrainRef.terrain", &TerrainRef::terrain);
 
+
+	ext->declare_class_size("Physics", sizeof(Physics));
+	ext->declare_class_element("Physics.links", &Physics::links);
+	ext->declare_class_element("Physics.gravity", &Physics::gravity);
+	ext->declare_class_element("Physics.mode", &Physics::mode);
+	ext->declare_class_element("Physics.enabled", &Physics::enabled);
+	ext->declare_class_element("Physics.collisions_enabled", &Physics::collisions_enabled);
+	ext->link_class_func("Physics.set_active_physics", &Physics::set_active_physics);
+	ext->link_class_func("Physics.add_link", &Physics::add_link);
+	ext->link_class_func("Physics.delete_link", &Physics::delete_link);
+	ext->link_class_func("Physics.get_g", &Physics::get_g);
+
+
 	ext->declare_class_element("World.background", &World::background);
 	ext->declare_class_element("World.skyboxes", &World::skybox);
-	ext->declare_class_element("World.links", &World::links);
 	ext->declare_class_element("World.fog", &World::fog);
-	ext->declare_class_element("World.gravity", &World::gravity);
-	ext->declare_class_element("World.physics_mode", &World::physics_mode);
 	ext->declare_class_element("World.msg_data", &World::msg_data);
 	ext->link_class_func("World.ego", &World::ego);
 	ext->link_class_func("World.load_soon", &World::load_soon);
@@ -452,20 +463,16 @@ void export_world(kaba::Exporter* ext) {
 	ext->link_class_func("World.create_object_multi", &_create_object_multi);
 	ext->link_class_func("World.create_terrain", &World::create_terrain);
 	ext->link_class_func("World.create_entity", &World::create_entity);
-	ext->link_class_func("World.set_active_physics", &World::set_active_physics);
 	ext->link_class_func("World.create_light_parallel", &World::create_light_parallel);
 	ext->link_class_func("World.create_light_point", &World::create_light_point);
 	ext->link_class_func("World.create_light_cone", &World::create_light_cone);
 	ext->link_class_func("World.create_camera", &World::create_camera);
 	ext->link_class_func("World.attach_model", &_attach_model);
 	ext->link_class_func("World.unattach_model", &World::unattach_model);
-	ext->link_class_func("World.add_link", &World::add_link);
 	ext->link_class_func("World._add_particle", &_world_add_legacy_particle);
 	ext->link_class_func("World.shift_all", &World::shift_all);
-	ext->link_class_func("World.get_g", &World::get_g);
 	ext->link_class_func("World.trace", &World::trace);
 	ext->link_class_func("World.delete_entity", &World::delete_entity);
-	ext->link_class_func("World.delete_link", &World::delete_link);
 	ext->link_class_func("World.subscribe", &World::subscribe);
 
 
@@ -800,8 +807,6 @@ void export_engine(kaba::Exporter* ext) {
 	ext->declare_class_element("EngineData.app_name", &EngineData::app_name);
 	ext->declare_class_element("EngineData.version", &EngineData::version);
 	ext->declare_class_element("EngineData.context", &EngineData::context);
-	ext->declare_class_element("EngineData.physics_enabled", &EngineData::physics_enabled);
-	ext->declare_class_element("EngineData.collisions_enabled", &EngineData::collisions_enabled);
 	ext->declare_class_element("EngineData.elapsed", &EngineData::elapsed);
 	ext->declare_class_element("EngineData.elapsed_rt", &EngineData::elapsed_rt);
 	ext->declare_class_element("EngineData.time_scale", &EngineData::time_scale);
@@ -911,15 +916,15 @@ void export_kaba_package_y(kaba::Exporter* ext) {
 }
 
 template<class C>
-void import_component_class(shared<kaba::Module> m, const string &name) {
+void import_component_class(shared<kaba::Module> m, const string& name, const string& base_class = "ecs.Component") {
 	for (auto c: m->classes()) {
 		if (c->name == name)
 			C::_class = c;
 	}
 	if (!C::_class)
 		throw Exception(format("y.kaba: %s missing", name));
-	if (!C::_class->is_derived_from_s("ecs.Component"))
-		throw Exception(format("y.kaba: %s not derived from Component", name));
+	if (!C::_class->is_derived_from_s(base_class))
+		throw Exception(format("y.kaba: %s not derived from %s", name, base_class));
 }
 
 void import_kaba() {
@@ -944,6 +949,7 @@ void import_kaba() {
 	import_component_class<ModelRef>(m_world, "ModelRef");
 	import_component_class<TerrainRef>(m_world, "TerrainRef");
 	import_component_class<EgoMarker>(m_world, "EgoMarker");
+	import_component_class<Physics>(m_world, "Physics", "ecs.Controller"); // well, not a Component... but ok
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");

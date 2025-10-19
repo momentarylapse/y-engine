@@ -19,7 +19,6 @@ class EngineData as @noauto
 	var resetting_game, game_running, first_frame: bool
 	var physical_aspect_ratio: f32
 	
-	var physics_enabled, collisions_enabled: bool
 	var detail_level: f32
 	
 	var elapsed: f32

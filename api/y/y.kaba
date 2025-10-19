@@ -1,6 +1,7 @@
 use os
 use kaba
 use image.Image
+use common.*
 use gfx.*
 use ecs.*
 use model.*

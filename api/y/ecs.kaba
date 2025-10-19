@@ -1,4 +1,5 @@
 use kaba
+use common.*
 
 #class extern Model
 #class extern SolidBody
@@ -67,4 +68,31 @@ func query2[T1,T2]() -> (Entity&,T1&,T2&)[]&
 
 #func ffff()
 #	get_component_list[int]()
+
+
+
+class Controller extends BaseClass
+	func extern override __delete__()
+	
+	# common
+#	extern virtual void on_iterate(float dt)
+	func extern virtual mut on_key_down(key: Key)
+	func extern virtual mut on_key_up(key: Key)
+	func extern virtual mut on_left_button_down()
+	func extern virtual mut on_left_button_up()
+	func extern virtual mut on_middle_button_down()
+	func extern virtual mut on_middle_button_up()
+	func extern virtual mut on_right_button_down()
+	func extern virtual mut on_right_button_up()
+	func extern virtual mut on_input()
+	
+	# rare
+	func extern virtual mut on_iterate_pre(dt: f32)
+	func extern virtual mut on_draw_pre()
+	func extern virtual mut on_render_inject()
+
+
+func extern __get_controller(type: kaba.Class*) -> Controller*
+func get_controller[T]() -> T*
+	return __get_controller(T) as T*
 

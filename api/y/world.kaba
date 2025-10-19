@@ -149,12 +149,22 @@ class Link extends BaseClass
 #	...
 
 
-enum PhysicsMode
-	NONE
-	SIMPLE
-	FULL_INTERNAL
-	FULL_EXTERNAL
-		
+
+class Physics extends Controller
+	enum Mode
+		NONE
+		SIMPLE
+		FULL_INTERNAL
+		FULL_EXTERNAL
+	var mode: Mode
+	var gravity: vec3
+	var links: Link&[]
+	var enabled: bool
+	var collisions_enabled: bool
+	func extern get_g(pos: vec3) -> vec3
+	func extern delete_link(e: Link*)
+	func extern mut set_active_physics(o: Model, active: bool)
+
 
 enum TraceMode
 	PHYSICAL = 1
@@ -163,17 +173,12 @@ enum TraceMode
 
 
 class World
-	func extern ego() -> Entity*
+	func extern selfref ego() -> Entity*
 	
 	var background: Color
 	var skyboxes: Model&[]
 	
 	var fog: Fog
-	var gravity: vec3
-	
-	var links: Link&[]
-	
-	var physics_mode: PhysicsMode
 	
 	func extern mut load_soon(filename: os.Path)
 	
@@ -194,9 +199,7 @@ class World
 	func extern mut selfref create_entity(pos: vec3, ang: Quaternion = Quaternion.ID) -> Entity&
 	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> Model&
 	func extern mut selfref unattach_model(m: Model&)
-	func extern mut set_active_physics(o: Model, active: bool)
 	func extern mut shift_all(dpos: vec3)
-	func extern get_g(pos: vec3) -> vec3
 	func extern trace(p1: vec3, p2: vec3, mode: TraceMode = TraceMode.PHYSICAL, ignore: Entity* = (nil as Entity*)) -> CollisionData?
 	
 	func selfref objects() -> Model&[]&
@@ -208,7 +211,6 @@ class World
 
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)
-	func extern delete_link(e: Link*)
 	
 	class MessageData
 		var e: Entity*

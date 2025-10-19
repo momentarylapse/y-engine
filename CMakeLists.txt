@@ -515,7 +515,7 @@ add_library(moduley SHARED
 	src/world/Link.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
-	src/world/PhysicsSimulation.cpp
+	src/world/Physics.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
 	src/Config.cpp
@@ -798,7 +798,7 @@ add_executable(y
 	src/world/Link.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
-	src/world/PhysicsSimulation.cpp
+	src/world/Physics.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
 	src/Config.cpp

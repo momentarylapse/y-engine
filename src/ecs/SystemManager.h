@@ -19,8 +19,9 @@ public:
 
 	static void reset();
 
-	static void create(const Path& filename, const string& name, const Array<ScriptInstanceDataVariable> &variables);
-	static System *get(const kaba::Class *_class);
+	static void create(const Path& filename, const string& name, const Array<ScriptInstanceDataVariable>& variables);
+	static System* get(const kaba::Class* _class);
+	static void add_external(const kaba::Class* _class, System* s, bool immortal);
 
 	static void handle_iterate_pre(float dt);
 	static void handle_iterate(float dt);
