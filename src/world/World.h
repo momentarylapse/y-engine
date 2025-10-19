@@ -41,7 +41,6 @@ enum class LinkType;
 
 
 
-
 enum class PhysicsMode {
 	NONE,
 	SIMPLE,
@@ -130,7 +129,7 @@ public:
 	bool net_msg_enabled;
 	Array<GodNetMessage> net_messages;
 
-	Entity *ego;
+	Entity* ego();
 
 
 	Array<ScriptInstanceData> systems;

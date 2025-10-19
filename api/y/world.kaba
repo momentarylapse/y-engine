@@ -34,6 +34,9 @@ class SphereCollider extends Collider
 class TerrainCollider extends Collider
 
 
+class EgoMarker extends Component
+
+
 class MultiInstance extends Component
 	var model: Model*
 	var matrices: mat4[]
@@ -160,7 +163,7 @@ enum TraceMode
 
 
 class World
-	var ego: Entity*
+	func extern ego() -> Entity*
 	
 	var background: Color
 	var skyboxes: Model&[]

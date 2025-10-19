@@ -170,10 +170,10 @@ void FullCameraRenderer::suggest_cube_map_pos() {
 		return;
 	cube_map_source->min_depth = cam->min_depth;
 	cube_map_source->max_depth = cam->max_depth;
-	if (world.ego) {
-		cube_map_source->pos = world.ego->pos;
+	if (auto e = world.ego()) {
+		cube_map_source->pos = e->pos;
 		cube_map_source->min_depth = 200;
-		if (auto m = world.ego->get_component<Model>())
+		if (auto m = e->get_component<Model>())
 			cube_map_source->min_depth = m->prop.radius * 1.1f;
 		return;
 	}

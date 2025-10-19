@@ -255,7 +255,6 @@ bool World::load(const LevelData &ld) {
 	}
 
 	// objects
-	ego = nullptr;
 	foreachi(auto &o, ld.objects, i)
 		if (!o.filename.is_empty()) {
 			//try {
@@ -264,7 +263,7 @@ bool World::load(const LevelData &ld) {
 
 				add_user_components(entity_manager.get(), oo->owner, o.components);
 				if (ld.ego_index == i + 1000000000)
-					ego = oo->owner;
+					entity_manager->add_component<EgoMarker>(oo->owner);
 				if (i % 5 == 0)
 					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
 
@@ -288,7 +287,7 @@ bool World::load(const LevelData &ld) {
 
 		add_user_components(entity_manager.get(), ee, e.components);
 		if (ld.ego_index == i)
-			ego = ee;
+			entity_manager->add_component<EgoMarker>(ee);
 	}
 
 	auto& model_list = entity_manager->get_component_list<Model>();
@@ -317,6 +316,13 @@ bool World::load(const LevelData &ld) {
 void World::add_link(Link *l) {
 	links.add(l);
 	physics_simulation->add_link(l);
+}
+
+Entity* World::ego() {
+	auto& list = entity_manager->get_component_list<EgoMarker>();
+	if (list.num >= 1)
+		return list[0]->owner;
+	return nullptr;
 }
 
 

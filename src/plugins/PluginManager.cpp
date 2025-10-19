@@ -441,11 +441,11 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("World.background", &World::background);
 	ext->declare_class_element("World.skyboxes", &World::skybox);
 	ext->declare_class_element("World.links", &World::links);
-	ext->declare_class_element("World.ego", &World::ego);
 	ext->declare_class_element("World.fog", &World::fog);
 	ext->declare_class_element("World.gravity", &World::gravity);
 	ext->declare_class_element("World.physics_mode", &World::physics_mode);
 	ext->declare_class_element("World.msg_data", &World::msg_data);
+	ext->link_class_func("World.ego", &World::ego);
 	ext->link_class_func("World.load_soon", &World::load_soon);
 	ext->link_class_func("World.load_template", &World::load_template);
 	ext->link_class_func("World.create_object", &_create_object);
@@ -943,6 +943,7 @@ void import_kaba() {
 	import_component_class<NameTag>(m_world, "NameTag");
 	import_component_class<ModelRef>(m_world, "ModelRef");
 	import_component_class<TerrainRef>(m_world, "TerrainRef");
+	import_component_class<EgoMarker>(m_world, "EgoMarker");
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
@@ -1092,6 +1093,8 @@ const kaba::Class *find_class(const Path &filename, const string &name) {
 			return BoxCollider::_class;
 		if (name == "SphereCollider")
 			return SphereCollider::_class;
+		if (name == "EgoMarker")
+			return EgoMarker::_class;
 	}
 	try {
 		auto s = kaba::default_context->load_module(filename);
