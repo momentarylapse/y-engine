@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <y/System.h>
+#include <ecs/System.h>
 #include <lib/base/optional.h>
 #include <lib/pattern/Observable.h>
 

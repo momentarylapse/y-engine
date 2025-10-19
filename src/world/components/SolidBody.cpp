@@ -11,8 +11,8 @@
 #include "../Model.h"
 #include "../ModelManager.h"
 #include "../Terrain.h"
-#include "../../y/Entity.h"
-#include "../../y/EngineData.h"
+#include <ecs/Entity.h>
+#include <EngineData.h>
 #include <lib/math/quaternion.h>
 #include <lib/os/msg.h>
 

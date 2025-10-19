@@ -9,10 +9,10 @@
 #include "InputManager.h"
 #include "../gui/Node.h"
 #include "../gui/gui.h"
-#include "../lib/math/vec2.h"
-#include "../y/EngineData.h"
-#include "../y/System.h"
-#include "../y/SystemManager.h"
+#include <lib/math/vec2.h>
+#include <EngineData.h>
+#include <ecs/System.h>
+#include <ecs/SystemManager.h>
 
 #include <GLFW/glfw3.h>
 

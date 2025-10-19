@@ -47,18 +47,18 @@
 #include <lib/yrenderer/post/PostProcessor.h>
 #include <renderer/helper/Raytracing.h>
 #include <lib/yrenderer/scene/SceneView.h>
-#include "../y/EngineData.h"
-#include "../y/Component.h"
-#include "../y/ComponentManager.h"
-#include "../y/System.h"
-#include "../y/SystemManager.h"
-#include "../world/Camera.h"
+#include <EngineData.h>
+#include <ecs/Component.h>
+#include <ecs/ComponentManager.h>
+#include <ecs/System.h>
+#include <ecs/SystemManager.h>
+#include "../world/components/Camera.h"
 #include "../world/Link.h"
 #include "../world/Model.h"
 #include "../world/ModelManager.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
-#include "../world/Light.h"
+#include "../world/components/Light.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
 #include "../world/components/Animator.h"
@@ -71,8 +71,8 @@
 #include "../lib/kaba/dynamic/exception.h"
 #include "../lib/os/msg.h"
 #include "../lib/image/image.h"
-#include "y/EntityManager.h"
-#include "y/BaseClass.h"
+#include <ecs/EntityManager.h>
+#include <ecs/BaseClass.h>
 
 namespace kaba {
 	extern const Class* TypePath;

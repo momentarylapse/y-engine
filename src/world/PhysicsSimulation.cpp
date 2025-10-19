@@ -8,8 +8,8 @@
 #include "Model.h"
 #include "components/Collider.h"
 #include "components/SolidBody.h"
-#include <y/EntityManager.h>
-#include <y/Entity.h>
+#include <ecs/EntityManager.h>
+#include <ecs/Entity.h>
 
 #if HAS_LIB_BULLET
 #include <btBulletDynamicsCommon.h>

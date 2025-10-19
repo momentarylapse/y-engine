@@ -30,9 +30,9 @@
 
 #include "gui/gui.h"
 
-#include "y/EngineData.h"
-#include "y/EntityManager.h"
-#include "y/SystemManager.h"
+#include "EngineData.h"
+#include "ecs/EntityManager.h"
+#include "ecs/SystemManager.h"
 #include "meta.h"
 
 
@@ -46,7 +46,7 @@
 #include "Config.h"
 #include "lib/os/app.h"
 #include "lib/ygraphics/Context.h"
-#include "world/Camera.h"
+#include "world/components/Camera.h"
 #include "world/World.h"
 
 const string app_name = "y";

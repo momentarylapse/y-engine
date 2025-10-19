@@ -7,8 +7,8 @@
 
 #include "Keyboard.h"
 #include "InputManager.h"
-#include "../y/System.h"
-#include "../y/SystemManager.h"
+#include <ecs/System.h>
+#include <ecs/SystemManager.h>
 #include <GLFW/glfw3.h>
 
 namespace input {

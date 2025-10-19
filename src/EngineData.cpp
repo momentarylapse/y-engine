@@ -13,7 +13,7 @@
 #include <lib/kaba/kaba.h>
 #include <lib/yrenderer/Renderer.h>
 
-#include "../helper/ResourceManager.h"
+#include <helper/ResourceManager.h>
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/yrenderer/TextureManager.h>
 

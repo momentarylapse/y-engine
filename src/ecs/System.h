@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../y/Entity.h"
+#include "Entity.h"
 
 class System : public BaseClass {
 public:

@@ -13,16 +13,15 @@
 #include <lib/os/msg.h>
 #include <lib/nix/nix.h>
 #include <lib/kaba/kaba.h>
-#include "../y/EngineData.h"
-#include "../y/Component.h"
-#include "../y/ComponentManager.h"
-#include "../y/Entity.h"
-#include "../y/EntityManager.h"
+#include <EngineData.h>
+#include <ecs/Component.h>
+#include <ecs/ComponentManager.h>
+#include <ecs/Entity.h>
+#include <ecs/EntityManager.h>
 #include "../meta.h"
 #include "ModelManager.h"
 #include "../helper/ResourceManager.h"
 #include "Link.h"
-#include "Light.h"
 #include <lib/yrenderer/Material.h>
 #include "Model.h"
 #include "Terrain.h"
@@ -33,6 +32,8 @@
 #include "components/Animator.h"
 #include "components/Skeleton.h"
 #include "components/MultiInstance.h"
+#include "components/Light.h"
+#include "components/Camera.h"
 
 #ifdef _X_ALLOW_X_
 #include "../fx/ParticleManager.h"
@@ -41,7 +42,6 @@
 #endif
 
 
-#include "Camera.h"
 #include "PhysicsSimulation.h"
 #include "lib/base/sort.h"
 

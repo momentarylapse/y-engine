@@ -2,10 +2,9 @@
 // Created by Michael Ankele on 2024-10-13.
 //
 
-#ifndef CONTROLLERMANAGER_H
-#define CONTROLLERMANAGER_H
+#pragma once
 
-#include "../lib/base/base.h"
+#include <lib/base/base.h>
 
 class Path;
 class System;
@@ -33,6 +32,3 @@ public:
 	static Array<System*> systems;
 };
 
-
-
-#endif //CONTROLLERMANAGER_H

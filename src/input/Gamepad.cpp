@@ -8,12 +8,11 @@
 #include "Gamepad.h"
 #include "Mouse.h"
 #include "Keyboard.h"
-#include "../lib/math/vec2.h"
-#include "../y/EngineData.h"
+#include <EngineData.h>
 #include <cmath>
 #include <GLFW/glfw3.h>
-
-#include "../lib/os/msg.h"
+#include <lib/math/vec2.h>
+#include <lib/os/msg.h>
 
 namespace input {
 

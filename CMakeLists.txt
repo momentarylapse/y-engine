@@ -262,6 +262,13 @@ add_library(moduley SHARED
 	src/audio/Listener.cpp
 	src/audio/Loading.cpp
 	src/audio/SoundSource.cpp
+	src/ecs/BaseClass.cpp
+	src/ecs/Component.cpp
+	src/ecs/ComponentManager.cpp
+	src/ecs/Entity.cpp
+	src/ecs/EntityManager.cpp
+	src/ecs/System.cpp
+	src/ecs/SystemManager.cpp
 	src/fx/Beam.cpp
 	src/fx/Particle.cpp
 	src/fx/ParticleEmitter.cpp
@@ -496,30 +503,23 @@ add_library(moduley SHARED
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/FullCameraRenderer.cpp
 	src/world/components/Animator.cpp
+	src/world/components/Camera.cpp
 	src/world/components/Collider.cpp
 	src/world/components/CubeMapSource.cpp
+	src/world/components/Light.cpp
 	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
-	src/world/Camera.cpp
 	src/world/LevelData.cpp
-	src/world/Light.cpp
 	src/world/Link.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
 	src/world/PhysicsSimulation.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
-	src/y/BaseClass.cpp
-	src/y/Component.cpp
-	src/y/ComponentManager.cpp
-	src/y/EngineData.cpp
-	src/y/Entity.cpp
-	src/y/EntityManager.cpp
-	src/y/System.cpp
-	src/y/SystemManager.cpp
 	src/Config.cpp
+	src/EngineData.cpp
 	src/LibExport.cpp
 	src/main.cpp)
 target_include_directories(moduley PUBLIC ${INCLUDE_DIRECTORIES})
@@ -545,6 +545,13 @@ add_executable(y
 	src/audio/Listener.cpp
 	src/audio/Loading.cpp
 	src/audio/SoundSource.cpp
+	src/ecs/BaseClass.cpp
+	src/ecs/Component.cpp
+	src/ecs/ComponentManager.cpp
+	src/ecs/Entity.cpp
+	src/ecs/EntityManager.cpp
+	src/ecs/System.cpp
+	src/ecs/SystemManager.cpp
 	src/fx/Beam.cpp
 	src/fx/Particle.cpp
 	src/fx/ParticleEmitter.cpp
@@ -779,30 +786,23 @@ add_executable(y
 	src/renderer/world/WorldRendererVulkanRayTracing.cpp
 	src/renderer/FullCameraRenderer.cpp
 	src/world/components/Animator.cpp
+	src/world/components/Camera.cpp
 	src/world/components/Collider.cpp
 	src/world/components/CubeMapSource.cpp
+	src/world/components/Light.cpp
 	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
-	src/world/Camera.cpp
 	src/world/LevelData.cpp
-	src/world/Light.cpp
 	src/world/Link.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
 	src/world/PhysicsSimulation.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
-	src/y/BaseClass.cpp
-	src/y/Component.cpp
-	src/y/ComponentManager.cpp
-	src/y/EngineData.cpp
-	src/y/Entity.cpp
-	src/y/EntityManager.cpp
-	src/y/System.cpp
-	src/y/SystemManager.cpp
 	src/Config.cpp
+	src/EngineData.cpp
 	src/main.cpp)
 target_include_directories(y PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_directories(y PUBLIC ${LINK_DIRECTORIES})

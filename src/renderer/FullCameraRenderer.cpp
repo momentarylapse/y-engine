@@ -21,13 +21,14 @@
 #include "../helper/ResourceManager.h"
 #include <lib/yrenderer/ShaderManager.h>
 #include <lib/ygraphics/graphics-impl.h>
-#include <world/Camera.h>
+#include <world/components/Camera.h>
+#include <world/components/Light.h>
 #include <world/Model.h>
 #include <world/Terrain.h>
 #include <world/World.h>
-#include <y/EngineData.h>
-#include <y/Entity.h>
-#include <y/EntityManager.h>
+#include <EngineData.h>
+#include <ecs/Entity.h>
+#include <ecs/EntityManager.h>
 #include <Config.h>
 #include <lib/profiler/Profiler.h>
 #include <lib/math/Box.h>
@@ -42,7 +43,6 @@
 #include <world/components/MultiInstance.h>
 #include <world/components/CubeMapSource.h>
 #include <lib/yrenderer/scene/MeshEmitter.h>
-#include "world/Light.h"
 
 //using namespace yrenderer;
 using Context = yrenderer::Context;
