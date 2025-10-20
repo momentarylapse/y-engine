@@ -1,6 +1,6 @@
 use y.*
 
-class X extends Controller
+class X extends System
 	var pic: shared![Picture][]
 	func override on_init()
 		for shared i=>db in engine.camera_renderers[0].get_shadow_map()

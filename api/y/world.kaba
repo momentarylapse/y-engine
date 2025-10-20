@@ -150,7 +150,7 @@ class Link extends BaseClass
 
 
 
-class Physics extends Controller
+class Physics extends System
 	enum Mode
 		NONE
 		SIMPLE

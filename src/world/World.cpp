@@ -445,7 +445,7 @@ void World::iterate(float dt) {
 		return;
 #ifdef _X_ALLOW_X_
 	profiler::begin(ch_iterate);
-	physics->on_iterate(dt);
+	//physics->on_iterate(dt);
 
 		/*for (auto *o: objects)
 			if (o)

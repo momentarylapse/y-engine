@@ -1,7 +1,7 @@
 use y.*
 use helper.curves.*
 
-class ShadowDebugger extends Controller
+class ShadowDebugger extends System
 	var pic: shared![Picture][]
 	var lines: Curve&
 	

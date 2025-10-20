@@ -41,7 +41,7 @@ void SystemManager::reset() {
 
 void SystemManager::create(const Path& filename, const string& __name, const Array<ScriptInstanceDataVariable> &variables) {
 	msg_write("add system: " + filename.str());
-	auto type = PluginManager::find_class_derived(filename, "ecs.Controller");
+	auto type = PluginManager::find_class_derived(filename, "ecs.System");
 	auto* s = reinterpret_cast<System*>(PluginManager::create_instance(type, variables));
 	s->ch_iterate = profiler::create_channel(type->long_name(), ch_system);
 

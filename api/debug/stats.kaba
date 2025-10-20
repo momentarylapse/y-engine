@@ -118,7 +118,7 @@ class HistoryDisplay extends Picture
 		
 		texture.write(im)
 
-class Test extends Controller
+class Test extends System
 	var t_fps = 0.0
 	var t_stat: f32?
 	var stat_display: shared![StatDisplay]

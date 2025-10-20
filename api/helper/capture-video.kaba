@@ -3,7 +3,7 @@ use os
 use image.Image
 
 
-class VideoCapturer extends Controller
+class VideoCapturer extends System
 	var frame = 0
 	
 	func override on_init()

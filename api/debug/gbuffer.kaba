@@ -1,6 +1,6 @@
 use y.*
 
-class X extends Controller
+class X extends System
 	var pic: shared![Picture][]
 	
 	func override on_init()

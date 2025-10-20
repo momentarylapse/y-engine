@@ -260,32 +260,32 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->declare_class_element("NameTag.name", &NameTag::name);
 
 	System con;
-	ext->declare_class_size("Controller", sizeof(System));
-	ext->link_class_func("Controller.__init__", &System::__init__);
-	ext->link_virtual("Controller.__delete__", &System::__delete__, &con);
-	ext->link_virtual("Controller.on_init", &System::on_init, &con);
-	ext->link_virtual("Controller.on_delete", &System::on_delete, &con);
-	ext->link_virtual("Controller.on_iterate", &System::on_iterate, &con);
-	ext->link_virtual("Controller.on_iterate_pre", &System::on_iterate_pre, &con);
-	ext->link_virtual("Controller.on_draw_pre", &System::on_draw_pre, &con);
-	ext->link_virtual("Controller.on_input", &System::on_input, &con);
-	ext->link_virtual("Controller.on_key", &System::on_key, &con);
-	ext->link_virtual("Controller.on_key_down", &System::on_key_down, &con);
-	ext->link_virtual("Controller.on_key_up", &System::on_key_up, &con);
-	ext->link_virtual("Controller.on_left_button_down", &System::on_left_button_down, &con);
-	ext->link_virtual("Controller.on_left_button_up", &System::on_left_button_up, &con);
-	ext->link_virtual("Controller.on_middle_button_down", &System::on_middle_button_down, &con);
-	ext->link_virtual("Controller.on_middle_button_up", &System::on_middle_button_up, &con);
-	ext->link_virtual("Controller.on_right_button_down", &System::on_right_button_down, &con);
-	ext->link_virtual("Controller.on_right_button_up", &System::on_right_button_up, &con);
-	ext->link_virtual("Controller.on_render_inject", &System::on_render_inject, &con);
-	ext->link_class_func("Controller.__del_override__", &DeletionQueue::add);
+	ext->declare_class_size("System", sizeof(System));
+	ext->link_class_func("System.__init__", &System::__init__);
+	ext->link_virtual("System.__delete__", &System::__delete__, &con);
+	ext->link_virtual("System.on_init", &System::on_init, &con);
+	ext->link_virtual("System.on_delete", &System::on_delete, &con);
+	ext->link_virtual("System.on_iterate", &System::on_iterate, &con);
+	ext->link_virtual("System.on_iterate_pre", &System::on_iterate_pre, &con);
+	ext->link_virtual("System.on_draw_pre", &System::on_draw_pre, &con);
+	ext->link_virtual("System.on_input", &System::on_input, &con);
+	ext->link_virtual("System.on_key", &System::on_key, &con);
+	ext->link_virtual("System.on_key_down", &System::on_key_down, &con);
+	ext->link_virtual("System.on_key_up", &System::on_key_up, &con);
+	ext->link_virtual("System.on_left_button_down", &System::on_left_button_down, &con);
+	ext->link_virtual("System.on_left_button_up", &System::on_left_button_up, &con);
+	ext->link_virtual("System.on_middle_button_down", &System::on_middle_button_down, &con);
+	ext->link_virtual("System.on_middle_button_up", &System::on_middle_button_up, &con);
+	ext->link_virtual("System.on_right_button_down", &System::on_right_button_down, &con);
+	ext->link_virtual("System.on_right_button_up", &System::on_right_button_up, &con);
+	ext->link_virtual("System.on_render_inject", &System::on_render_inject, &con);
+	ext->link_class_func("System.__del_override__", &DeletionQueue::add);
 
 	ext->link_func("__get_component_list", &__query_component_list);
 	ext->link_func("__get_component_family_list", &__query_component_list_family);
 	ext->link_func("__get_component_list2", &__query_component_list2);
 
-	ext->link_func("__get_controller", &SystemManager::get);
+	ext->link_func("__get_system", &SystemManager::get);
 }
 
 void export_world(kaba::Exporter* ext) {
@@ -949,7 +949,7 @@ void import_kaba() {
 	import_component_class<ModelRef>(m_world, "ModelRef");
 	import_component_class<TerrainRef>(m_world, "TerrainRef");
 	import_component_class<EgoMarker>(m_world, "EgoMarker");
-	import_component_class<Physics>(m_world, "Physics", "ecs.Controller"); // well, not a Component... but ok
+	import_component_class<Physics>(m_world, "Physics", "ecs.System"); // well, not a Component... but ok
 
 	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");

@@ -71,7 +71,7 @@ func query2[T1,T2]() -> (Entity&,T1&,T2&)[]&
 
 
 
-class Controller extends BaseClass
+class System extends BaseClass
 	func extern override __delete__()
 	
 	# common
@@ -92,7 +92,7 @@ class Controller extends BaseClass
 	func extern virtual mut on_render_inject()
 
 
-func extern __get_controller(type: kaba.Class*) -> Controller*
-func get_controller[T]() -> T*
-	return __get_controller(T) as T*
+func extern __get_system(type: kaba.Class*) -> System*
+func get_system[T]() -> T*
+	return __get_system(T) as T*
 
