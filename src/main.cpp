@@ -99,6 +99,8 @@ public:
 
 	void init(const Array<string> &arg) {
 		config.load(arg);
+		if (config.api_version != EngineData::CURRENT_API_VERSION)
+			throw Exception(format("api version mismatch: game=%d engine=%d", config.api_version, EngineData::CURRENT_API_VERSION));
 
 		window = create_window();
 

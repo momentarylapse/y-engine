@@ -5,8 +5,7 @@
  *      Author: michi
  */
 
-#ifndef SRC_CONFIG_H_
-#define SRC_CONFIG_H_
+#pragma once
 
 
 #include <lib/base/base.h>
@@ -21,6 +20,7 @@ enum class AntialiasingMethod {
 
 class Config : public Configuration {
 public:
+	int api_version = 0;
 	int debug_level = 0;
 	string main_script;
 	string default_world;
@@ -43,5 +43,3 @@ public:
 	void load(const Array<string> &arg);
 };
 extern Config config;
-
-#endif /* SRC_CONFIG_H_ */

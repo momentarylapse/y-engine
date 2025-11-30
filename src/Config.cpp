@@ -105,6 +105,8 @@ void Config::load(const Array<string> &arg) {
 	if (p.error)
 		exit(1);
 
+	api_version = get_int("api.version", 0);
+
 	// deprecated
 	if (has("default-world") and !has("default.world"))
 		set_str("default.world", get_str("default-world", ""));
