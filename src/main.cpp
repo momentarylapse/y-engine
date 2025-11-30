@@ -98,7 +98,9 @@ public:
 	int ch_iter = -1;
 
 	void init(const Array<string> &arg) {
-		config.load(arg);
+		RawConfig game_ini;
+		game_ini.load(arg);
+		config = game_ini.digest();
 		if (config.api_version != EngineData::CURRENT_API_VERSION)
 			throw Exception(format("api version mismatch: game=%d engine=%d", config.api_version, EngineData::CURRENT_API_VERSION));
 
@@ -111,7 +113,7 @@ public:
 
 		engine.app_name = app_name;
 		engine.version = app_version;
-		if (config.get_str("error.missing-files", "ignore") == "ignore")
+		if (config.ignore_missing_files)
 			engine.ignore_missing_files = true;
 
 
@@ -194,16 +196,13 @@ public:
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 #endif
 
-		int w = config.get_int("screen.width", 1024);
-		int h = config.get_int("screen.height", 768);
+		int w = config.screen_width;
+		int h = config.screen_height;
 		engine.width = w;
 		engine.height = h;
 		auto monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
 
-		string mode = config.get_str("screen.mode", "window");
-		bool fullscreen = (mode == "fullscreen"); //config.get_bool("screen.fullscreen", false);
-		bool windowed_fullscreen = (mode == "windowed-fullscreen"); //config.get_bool("screen.windowed-fullscreen", false);
 		engine.physical_aspect_ratio = (float)w / (float)h;
 
 		glfwWindowHint(GLFW_RED_BITS, vidmode->redBits);
@@ -213,10 +212,10 @@ public:
 
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
-		if (!fullscreen and !windowed_fullscreen)
+		if (config.screen_mode == ScreenMode::Windowed)
 			monitor = nullptr;
 
-		if (windowed_fullscreen) {
+		if (config.screen_mode == ScreenMode::WindowedFullscreen) {
 			w = vidmode->width;
 			h = vidmode->height;
 		}
@@ -230,7 +229,7 @@ public:
 
 		glfwSetWindowUserPointer(window, this);
 		glfwMakeContextCurrent(window);
-		if (config.get_bool("renderer.uncapped-framerate", false))
+		if (config.uncapped_framerate)
 			glfwSwapInterval(0);
 		else
 			glfwSwapInterval(1);
