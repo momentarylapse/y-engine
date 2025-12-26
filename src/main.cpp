@@ -277,6 +277,8 @@ public:
 		CameraReset();
 		world.reset();
 		gui::reset();
+
+		engine.resolution_scale_x = engine.resolution_scale_y = config.resolution_scale_max;
 	}
 
 	void cleanup() {

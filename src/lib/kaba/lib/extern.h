@@ -10,7 +10,9 @@
 #include "../../base/base.h"
 
 namespace kaba {
-class Module;
+	struct CommonTypes;
+	struct Package;
+	class Module;
 
 class Context;
 
@@ -90,8 +92,13 @@ public:
 class Exporter {
 public:
 	Context* ctx;
-	Module* module;
-	Exporter(Context* _ctx, Module* _module);
+	Package* package;
+
+	// for restoring global state
+	Context* secret_lib_context;
+	CommonTypes* x_common_types;
+
+	Exporter(Context* ctx, Package* package);
 	virtual ~Exporter();
 	virtual void declare_class_size(const string& name, int size);
 	virtual void _declare_class_element(const string& name, int offset);
