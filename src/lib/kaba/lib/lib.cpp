@@ -57,7 +57,7 @@ Flags flags_mix(const Array<Flags> &f) {
 }
 
 
-void add_internal_package(Context* c, const string& name, Flags flags) {
+void add_internal_package(Context* c, const string& name, const string& version, Flags flags) {
 	for (auto p: weak(c->internal_packages))
 		if (p->name == name) {
 			cur_package = p;
@@ -66,7 +66,7 @@ void add_internal_package(Context* c, const string& name, Flags flags) {
 		}
 
 	// new
-	shared p = new Package(name, Path::EMPTY);
+	shared p = new Package(name, version, Path::EMPTY);
 	p->auto_import = flags_has(flags, Flags::AutoImport);
 	shared s = c->create_empty_module(name);
 	s->tree->base_class->name = name;
@@ -103,7 +103,7 @@ const Class *add_type_simple(const string &name, int size, int alignment, Flags 
 
 
 const Class *add_class_template(const string &name, const Array<string>& params, TemplateClassInstantiator* instantiator) {
-	auto t = cur_package_module->context->template_manager->add_class_template(cur_package_module->tree.get(), name, params, instantiator);
+	auto t = cur_package_module->context->template_manager->create_class_template(cur_package_module->tree.get(), name, params, instantiator);
 	__add_class__(t, nullptr);
 	return t;
 }
@@ -586,6 +586,7 @@ void func_add_param(const string &name, const Class *type, Flags flags) {
 		cur_func->literal_param_type.add(type);
 		cur_func->num_params ++;
 		cur_func->mandatory_params = cur_func->num_params;
+		cur_func->abstract_node->params[2]->params.resize(cur_func->num_params*3);
 	}
 }
 
@@ -598,14 +599,14 @@ void func_add_param_def_x(const string &name, const Class *type, const void *p, 
 		cur_func->literal_param_type.add(type);
 		cur_func->num_params ++;
 		//cur_func->mandatory_params = cur_func->num_params;
+		cur_func->abstract_node->params[2]->params.resize(cur_func->num_params*3);
 
 		Constant *c = cur_package_module->tree->add_constant(type, cur_class);
 		if (type == common_types.i32)
 			c->as_int() = *(int*)p;
 		if (type == common_types.f32)
 			c->as_float() = *(float*)p;
-		cur_func->default_parameters.resize(cur_func->num_params - 1);
-		cur_func->default_parameters.add(add_node_const(c));
+		cur_func->abstract_node->params[2]->set_param(cur_func->num_params*3-1, add_node_const(c));
 	}
 }
 
@@ -656,7 +657,7 @@ void init_lib(Context *c) {
 	SIAddPackageImage(c);
 	SIAddPackageThread(c);
 
-	add_internal_package(c, "base");
+	add_internal_package(c, "base", "(ignored...)");
 	SIAddXCommands(c);
 
 

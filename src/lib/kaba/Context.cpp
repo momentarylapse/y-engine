@@ -159,8 +159,16 @@ Package* get_package_containing_module(Module* m) {
 	// TODO check parents...
 
 	// new package
-	auto package = new Package(dir.basename(), dir);
+	auto package = new Package(dir.basename(), "0", dir);
 	ctx->external_packages.add(package);
+
+	// parse info
+	{
+		auto s = os::fs::read_text(dir | ".kaba-package");
+		for (const auto& l: s.explode("\n"))
+			if (l.head(8) == "version ")
+				package->version = l.sub(8);
+	}
 
 	// package init override?
 	for (const auto& init: ctx->package_inits)
@@ -175,8 +183,9 @@ Package* get_package_containing_module(Module* m) {
 	return package;
 }
 
-Package::Package(const string& _name, const Path& _directory) {
+Package::Package(const string& _name, const string& _version, const Path& _directory) {
 	name = _name;
+	version = _version;
 	directory = _directory;
 	directory_dynamic = Context::installation_root() | name;
 	is_installed = (directory == default_directory());
@@ -270,18 +279,18 @@ void Context::execute_single_command(const string &cmd) {
 	parser->Exp.reset_walker();
 
 	// parse
-	func->block->type = common_types.unknown;
-	parser->parse_abstract_complete_command_into_block(func->block.get());
+	func->block_node->type = common_types.unknown;
+	parser->parse_abstract_complete_command_into_block(func->block_node.get());
 	if (config.verbose) {
 		msg_write("ABSTRACT SINGLE:");
-		func->block->show();
+		func->block_node->show();
 	}
-	parser->con.concretify_node(func->block.get(), func->block.get(), func->name_space);
+	parser->con.concretify_node(func->block_node.get(), func->block, func->name_space);
 
-	if (func->block->params.num == 0)
+	if (func->block_node->params.num == 0)
 		return;
 
-	auto node = func->block->params[0];
+	auto node = func->block_node->params[0];
 	
 	// implicit print(...)?
 	if (node->type != common_types._void) {
@@ -290,7 +299,7 @@ void Context::execute_single_command(const string &cmd) {
 
 		auto cmd = add_node_call(f_print);
 		cmd->set_param(0, n_str);
-		func->block->params[0] = cmd;
+		func->block_node->params[0] = cmd;
 	}
 	//for (auto *c: tree->owned_classes)
 	for (int i=0; i<tree->owned_classes.num; i++) // array might change...
@@ -378,7 +387,7 @@ Package *Context::get_package(const string &name) const {
 }
 
 Path Context::installation_root() {
-	return os::app::directory_home | ".kaba";
+	return os::app::home_directory | ".kaba";
 }
 
 Path Context::packages_root() {
