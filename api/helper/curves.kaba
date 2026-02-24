@@ -27,7 +27,7 @@ class Curve extends UserMesh
 		for p in points
 			v.add([p, width, color])
 			
-		for vb in vertex_buffer
+		for mut vb in vertex_buffer
 			vb.update(v)
 
 	func mut set_contiguous(contiguous: bool)

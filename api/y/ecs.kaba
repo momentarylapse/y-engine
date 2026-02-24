@@ -52,18 +52,18 @@ class Component
 	use owner
 
 
-func extern __get_component_list(t: kaba.Class*) -> (Component&)[]&
-func get_component_list[T]() -> (T&)[]&
+func extern globalref __get_component_list(t: kaba.Class*) -> (Component&)[]&
+func globalref get_component_list[T]() -> (T&)[]&
 	return __get_component_list(T) as (T&)[]&
-func query1[T]() -> (T&)[]&
+func globalref query1[T]() -> (T&)[]&
 	return __get_component_list(T) as (T&)[]&
 
-func extern __get_component_family_list(t: kaba.Class*) -> (Component&)[]&
-func get_component_family_list[T]() -> (T&)[]&
+func extern globalref __get_component_family_list(t: kaba.Class*) -> (Component&)[]&
+func globalref get_component_family_list[T]() -> (T&)[]&
 	return __get_component_family_list(T) as (T&)[]&
 
-func extern __get_component_list2(t1: kaba.Class*, t2: kaba.Class*) -> (Entity&,Component&,Component&)[]&
-func query2[T1,T2]() -> (Entity&,T1&,T2&)[]&
+func extern globalref __get_component_list2(t1: kaba.Class*, t2: kaba.Class*) -> (Entity&,Component&,Component&)[]&
+func globalref query2[T1,T2]() -> (Entity&,T1&,T2&)[]&
 	return __get_component_list2(T1,T2) as (Entity&,T1&,T2&)[]&
 
 #func ffff()
@@ -92,7 +92,7 @@ class System extends BaseClass
 	func extern virtual mut on_render_inject()
 
 
-func extern __get_system(type: kaba.Class*) -> System*
-func get_system[T]() -> T*
+func extern globalref __get_system(type: kaba.Class*) -> System*
+func globalref get_system[T]() -> T*
 	return __get_system(T) as T*
 
