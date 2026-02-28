@@ -898,6 +898,7 @@ void export_renderer(kaba::Exporter* ext) {
 }
 
 void export_kaba_package_y(kaba::Exporter* ext) {
+	ext->package_info("y", "0.2");
 	export_gfx(ext);
 	export_ecs(ext);
 	export_world(ext);
