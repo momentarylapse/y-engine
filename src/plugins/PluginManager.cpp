@@ -908,7 +908,7 @@ void export_kaba_package_y(kaba::Exporter* ext) {
 	export_net(ext);
 	export_engine(ext);
 	export_renderer(ext);
-	export_package_yrenderer(ext);
+	_export_package_yrenderer_internal(ext);
 	export_package_profiler(ext);
 }
 
