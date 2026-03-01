@@ -1,5 +1,5 @@
 use kaba
-use common.*
+use .common.*
 
 #class extern Model
 #class extern SolidBody

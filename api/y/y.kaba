@@ -1,17 +1,17 @@
 use os
 use kaba
 use image.Image
-use common.*
-use gfx.*
-use ecs.*
-use model.*
-use audio.*
-use ui.*
-use engine.*
-use fx.*
-use world.*
-use profiler.*
-use networking.*
+use .common.*
+use .gfx.*
+use .ecs.*
+use .model.*
+use .audio.*
+use .ui.*
+use .engine.*
+use .fx.*
+use .world.*
+use .profiler.*
+use .networking.*
 
 
 let EXPORT_IMPORTS = true

@@ -1,5 +1,5 @@
-use ecs.*
-use gfx.*
+use .ecs.*
+use .gfx.*
 
 class LegacyParticle extends Component
 	var vel: vec3

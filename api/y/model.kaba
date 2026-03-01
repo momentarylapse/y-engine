@@ -1,6 +1,6 @@
 use os
-use gfx.*
-use ecs.*
+use .gfx.*
+use .ecs.*
 
 class Material
 	var albedo: Color

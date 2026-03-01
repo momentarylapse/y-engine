@@ -1,10 +1,10 @@
 use os
 use kaba
-use gfx.*
-use fx.*
-use ecs.*
-use model.*
-use audio.*
+use .gfx.*
+use .fx.*
+use .ecs.*
+use .model.*
+use .audio.*
 
 
 class SolidBody extends Component

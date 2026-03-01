@@ -1,7 +1,7 @@
 use image.Painter
-use gfx.*
-use common.*
-use model.*
+use .gfx.*
+use .common.*
+use .model.*
 use kaba
 
 

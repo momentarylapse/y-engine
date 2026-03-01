@@ -1,5 +1,5 @@
 use net
-use ecs.*
+use .ecs.*
 
 class Connection
 	var s: owned![net.Socket]

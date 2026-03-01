@@ -1,5 +1,5 @@
 use os
-use gfx.*
+use .gfx.*
 use image.Image
 
 struct ivec3
