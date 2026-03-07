@@ -29,9 +29,16 @@ class SolidBody extends Component
 
 class Collider extends Component
 class MeshCollider extends Collider
-class BoxCollider extends Collider
-class SphereCollider extends Collider
 class TerrainCollider extends Collider
+
+
+class BoxCollider extends Collider
+	let PARAMETERS = "min,max"
+	var min, max: vec3
+
+class SphereCollider extends Collider
+	let PARAMETERS = "radius"
+	var radius: f32
 
 
 class EgoMarker extends Component

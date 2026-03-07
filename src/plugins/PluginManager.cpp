@@ -402,6 +402,13 @@ void export_world(kaba::Exporter* ext) {
 
 	ext->declare_class_size("Collider", sizeof(Collider));
 
+	ext->declare_class_size("SphereCollider", sizeof(SphereCollider));
+	ext->declare_class_element("SphereCollider.radius", &SphereCollider::radius);
+
+	ext->declare_class_size("BoxCollider", sizeof(BoxCollider));
+	ext->declare_class_element("BoxCollider.min", &BoxCollider::min);
+	ext->declare_class_element("BoxCollider.max", &BoxCollider::max);
+
 	ext->declare_class_size("MultiInstance", sizeof(MultiInstance));
 	ext->declare_class_element("MultiInstance.model", &MultiInstance::model);
 	ext->declare_class_element("MultiInstance.matrices", &MultiInstance::matrices);
