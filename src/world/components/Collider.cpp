@@ -144,6 +144,7 @@ void BoxCollider::on_init() {
 	auto comp = new btCompoundShape(false, 0);
 	auto pp = new btBoxShape(bt_set_v((max-min) / 2));
 	comp->addChildShape(bt_set_trafo((min+max)/2, quaternion::ID), pp);
+	col_shape = comp;
 #endif
 }
 

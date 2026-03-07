@@ -1125,6 +1125,7 @@ void *create_instance(const kaba::Class *c, const string &variables) {
 	return create_instance(c, parse_variables(variables));
 }
 
+// yes, we could skip the special cases... but then we need to export virtual functions properly...
 void *create_instance(const kaba::Class *c, const Array<ScriptInstanceDataVariable> &variables) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	msg_write(format("creating instance  %s", c->long_name()));
@@ -1138,6 +1139,10 @@ void *create_instance(const kaba::Class *c, const Array<ScriptInstanceDataVariab
 		return new MeshCollider;
 	if (c == TerrainCollider::_class)
 		return new TerrainCollider;
+	if (c == SphereCollider::_class)
+		return new SphereCollider;
+	if (c == BoxCollider::_class)
+		return new BoxCollider;
 	if (c == Terrain::_class)
 		return new Terrain;
 	if (c == Animator::_class)
