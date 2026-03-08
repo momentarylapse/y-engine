@@ -1,7 +1,7 @@
 use y.*
 use image.*
 
-class FpsDisplay extends Text
+class FpsPanel extends Text
 	func override __init__()
 		super.__init__("", 0.02, [0.01,0.01])
 		dz = 999
@@ -15,7 +15,7 @@ func channel_level(channel: int) -> int
 	return channel_level(parent) + 1
 
 
-class StatDisplay extends Picture
+class ProfilerPanel extends Picture
 
 	let CHANNEL_HEIGHT = 0.015
 	let DISPLAY_HEIGHT = 0.3
@@ -88,7 +88,7 @@ class StatDisplay extends Picture
 		add_graph(Profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2, "GPU")
 
 
-class HistoryDisplay extends Picture
+class HistoryPanel extends Picture
 	let W = 256
 	let H = 64
 	func override __init__()
@@ -118,42 +118,42 @@ class HistoryDisplay extends Picture
 		
 		texture.write(im)
 
-class Test extends System
+class ProfilerDisplay extends System
 	var t_fps = 0.0
 	var t_stat: f32?
-	var stat_display: shared![StatDisplay]
-	var history_display: shared![HistoryDisplay]
-	var fps_display: shared![FpsDisplay]
+	var profiler_panel: shared![ProfilerPanel]
+	var history_panel: shared![HistoryPanel]
+	var fps_panel: shared![FpsPanel]
 	
 	func override on_init()
-		stat_display = new StatDisplay()
-		toplevel.add(stat_display)
-		history_display = new HistoryDisplay()
-		toplevel.add(history_display)
-		fps_display = new FpsDisplay()
-		toplevel.add(fps_display)
+		profiler_panel = new ProfilerPanel()
+		toplevel.add(profiler_panel)
+		history_panel = new HistoryPanel()
+		toplevel.add(history_panel)
+		fps_panel = new FpsPanel()
+		toplevel.add(fps_panel)
 
 	func override on_key_down(k: Key)
 		if k == Key.CONTROL + Key.T
-			stat_display.visible = not stat_display.visible
-			stat_display.update()
-			history_display.visible = stat_display.visible
+			profiler_panel.visible = not profiler_panel.visible
+			profiler_panel.update()
+			history_panel.visible = profiler_panel.visible
 			t_stat = 0
 		if k == Key.CONTROL + Key.R
-			stat_display.update()
+			profiler_panel.update()
 			t_stat = nil
 
 
 	func override on_iterate(dt: f32)
 		t_fps += engine.elapsed_rt
 		if t_fps > 0.3
-			fps_display.update()
+			fps_panel.update()
 			t_fps = 0
 		for t in t_stat
 			t_stat = t + engine.elapsed_rt
 			if t > 1.3
-				if stat_display.visible
-					stat_display.update()
-					history_display.update()
+				if profiler_panel.visible
+					profiler_panel.update()
+					history_panel.update()
 				t_stat = 0
 
