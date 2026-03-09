@@ -184,7 +184,7 @@ mat4 scene_view_shadow_projection(yrenderer::SceneView* s) {
 }
 
 void init() {
-	kaba::default_context->register_package_init("y", engine.script_dir | "y", &export_kaba_package_y);
+	kaba::default_context->register_package_init("yengine", engine.script_dir | "yengine", &export_kaba_package_y);
 	import_kaba();
 }
 
@@ -257,10 +257,12 @@ void export_ecs(kaba::Exporter* ext) {
 
 	System con;
 	ext->declare_class_size("System", sizeof(System));
-	ext->link_class_func("System.__init__", &System::__init__);
-	ext->link_virtual("System.__delete__", &System::__delete__, &con);
+	ext->link_class_func("System.__init__", &kaba::generic_init<System>);
+	ext->link_virtual("System.__delete__", &kaba::generic_virtual<System>::__delete__, &con);
 	ext->link_virtual("System.on_init", &System::on_init, &con);
 	ext->link_virtual("System.on_delete", &System::on_delete, &con);
+	ext->link_virtual("System.on_add_component", &System::on_add_component, &con);
+	ext->link_virtual("System.on_remove_component", &System::on_remove_component, &con);
 	ext->link_virtual("System.on_iterate", &System::on_iterate, &con);
 	ext->link_virtual("System.on_iterate_pre", &System::on_iterate_pre, &con);
 	ext->link_virtual("System.on_draw_pre", &System::on_draw_pre, &con);
@@ -281,7 +283,7 @@ void export_ecs(kaba::Exporter* ext) {
 	ext->link_func("__get_component_family_list", &__query_component_list_family);
 	ext->link_func("__get_component_list2", &__query_component_list2);
 
-	ext->link_func("__get_system", &SystemManager::get);
+	ext->link_func("__get_system", &SystemManager::_get_generic);
 }
 
 void export_world(kaba::Exporter* ext) {

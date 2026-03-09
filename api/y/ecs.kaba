@@ -70,8 +70,14 @@ func globalref query2[T1,T2]() -> (Entity&,T1&,T2&)[]&
 #	get_component_list[int]()
 
 
+struct ComponentInfo
+	var e: Entity&
+	var c: Component&
+	var type: kaba.Class*
+
 
 class System extends BaseClass
+	func extern override __init__()
 	func extern override __delete__()
 	
 	# common
@@ -85,6 +91,8 @@ class System extends BaseClass
 	func extern virtual mut on_right_button_down()
 	func extern virtual mut on_right_button_up()
 	func extern virtual mut on_input()
+	func extern virtual mut on_add_component(c: ComponentInfo)
+	func extern virtual mut on_remove_component(c: ComponentInfo)
 	
 	# rare
 	func extern virtual mut on_iterate_pre(dt: f32)

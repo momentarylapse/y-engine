@@ -46,6 +46,7 @@
 #include "Config.h"
 #include "lib/os/app.h"
 #include "lib/ygraphics/Context.h"
+#include "world/Physics.h"
 #include "world/components/Camera.h"
 #include "world/World.h"
 
@@ -145,7 +146,7 @@ public:
 
 		GodInit(ch_iter);
 		PluginManager::init();
-		SystemManager::init(ch_iter);
+		SystemManager::init(ch_iter, world.entity_manager.get());
 
 		ErrorHandler::init();
 
@@ -172,12 +173,25 @@ public:
 		msg_right();
 		reset_game();
 
-		GodLoadWorld(engine.map_dir | filename);
+		LevelData level_data;
+		bool ok = level_data.load(engine.map_dir | filename);
+		ok &= world.load(level_data);
 		audio::attach_listener(cam_main->owner);
 
 		for (auto& cam: world.entity_manager->get_component_list<Camera>())
 			create_and_attach_camera_renderer(engine.context, cam);
-		for (auto &s: world.systems)
+		{
+			auto physics = new Physics();
+			physics->entity_manager = world.entity_manager.get();
+			SystemManager::register_system(Physics::_class, physics);
+
+			//physics->mode = PhysicsMode::FULL_EXTERNAL;
+			physics->enabled = level_data.physics_enabled;
+			physics->mode = level_data.physics_mode;
+			physics->gravity = level_data.gravity;
+			physics->collisions_enabled = true; // level_data.physics_enabled;
+		}
+		for (auto &s: level_data.systems)
 			SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
 			SystemManager::create(s, "", {});
