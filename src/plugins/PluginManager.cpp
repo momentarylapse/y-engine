@@ -80,6 +80,8 @@ namespace PluginManager {
 //using namespace yrenderer;
 using namespace ygfx;
 
+const string api_version = "0.2";
+
 /*void global_delete(BaseClass *e) {
 	//msg_error("global delete... " + p2s(e));
 	world.unregister(e);
@@ -907,7 +909,7 @@ void export_renderer(kaba::Exporter* ext) {
 }
 
 void export_kaba_package_y(kaba::Exporter* ext) {
-	ext->package_info("y", "0.2");
+	ext->package_info("yengine", EngineData::CURRENT_API_VERSION);
 	export_gfx(ext);
 	export_ecs(ext);
 	export_world(ext);
@@ -928,18 +930,18 @@ void import_component_class(shared<kaba::Module> m, const string& name, const st
 			C::_class = c;
 	}
 	if (!C::_class)
-		throw Exception(format("y.kaba: %s missing", name));
+		throw Exception(format("yengine.kaba: %s missing", name));
 	if (!C::_class->is_derived_from_s(base_class))
-		throw Exception(format("y.kaba: %s not derived from %s", name, base_class));
+		throw Exception(format("yengine.kaba: %s not derived from %s", name, base_class));
 }
 
 void import_kaba() {
-	auto m_model = kaba::default_context->load_module("y/model.kaba");
+	auto m_model = kaba::default_context->load_module("yengine/model.kaba");
 	import_component_class<Animator>(m_model, "Animator");
 	import_component_class<Skeleton>(m_model, "Skeleton");
 	import_component_class<Model>(m_model, "Model");
 
-	auto m_world = kaba::default_context->load_module("y/world.kaba");
+	auto m_world = kaba::default_context->load_module("yengine/world.kaba");
 	import_component_class<SolidBody>(m_world, "SolidBody");
 	import_component_class<Collider>(m_world, "Collider");
 	import_component_class<MeshCollider>(m_world, "MeshCollider");
@@ -957,17 +959,17 @@ void import_kaba() {
 	import_component_class<EgoMarker>(m_world, "EgoMarker");
 	import_component_class<Physics>(m_world, "Physics", "ecs.System"); // well, not a Component... but ok
 
-	auto m_fx = kaba::default_context->load_module("y/fx.kaba");
+	auto m_fx = kaba::default_context->load_module("yengine/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
 	import_component_class<ParticleEmitter>(m_fx, "ParticleEmitter");
 	import_component_class<LegacyParticle>(m_fx, "LegacyParticle");
 	import_component_class<LegacyBeam>(m_fx, "LegacyBeam");
 
-	auto m_audio = kaba::default_context->load_module("y/audio.kaba");
+	auto m_audio = kaba::default_context->load_module("yengine/audio.kaba");
 	import_component_class<audio::SoundSource>(m_audio, "SoundSource");
 	import_component_class<audio::Listener>(m_audio, "Listener");
 
-	auto m_y = kaba::default_context->load_module("y/y.kaba");
+	auto m_y = kaba::default_context->load_module("yengine/yengine.kaba");
 	import_component_class<UserMesh>(m_y, "UserMesh");
 
 	//msg_write(MeshCollider::_class->name);

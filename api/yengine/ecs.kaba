@@ -74,6 +74,10 @@ struct ComponentInfo
 	var e: Entity&
 	var c: Component&
 	var type: kaba.Class*
+	func selfref get[T]() -> T*
+		if type == T
+			return c as T*
+		return nil
 
 
 class System extends BaseClass
