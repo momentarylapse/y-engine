@@ -49,14 +49,13 @@ class MultiInstance extends Component
 	var matrices: mat4[]
 
 
-class Terrain extends Component
+class Terrain
 	var pattern: vec3
 	var num_x, num_z: i32
 	var height: f32[]
 	var vertex_shader_module: string
-	var material: owned![Material]
 	var texture_scale: vec3[8]
-	func extern get_height(p: vec3) -> f32
+	func extern get_height(e: Entity&, p: vec3) -> f32
 	func extern mut update(x1: i32, x2: i32, y1: i32, y2: i32, mask: i32)
 	# ...
 
@@ -134,9 +133,9 @@ class ModelRef extends Component
 
 
 class TerrainRef extends Component
-	let PARAMETERS = "filename"
+	let PARAMETERS = "terrain,material"
 	var terrain: Terrain*
-	var filename: os.Path
+	var material: Material*
 
 
 class Fog
@@ -201,7 +200,7 @@ class World
 	func extern mut selfref load_template(filename: os.Path, pos: vec3, ang: Quaternion = Quaternion.ID) -> Entity&
 	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: Quaternion) -> Model&
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: Quaternion[]) -> MultiInstance&
-	func extern mut selfref create_terrain(filename: os.Path, pos: vec3) -> Terrain&
+	func extern mut selfref create_terrain(filename: os.Path, pos: vec3) -> TerrainRef&
 	func extern mut selfref create_camera(pos: vec3, ang: Quaternion) -> Camera&
 	func extern mut selfref create_entity(pos: vec3, ang: Quaternion = Quaternion.ID) -> Entity&
 	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> Model&
@@ -211,8 +210,8 @@ class World
 	
 	func selfref objects() -> Model&[]&
 		return get_component_family_list[Model]()
-	func selfref terrains() -> Terrain&[]&
-		return get_component_family_list[Terrain]()
+	func selfref terrains() -> TerrainRef&[]&
+		return get_component_family_list[TerrainRef]()
 	func selfref lights() -> Light&[]&
 		return get_component_family_list[Light]()
 

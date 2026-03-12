@@ -139,6 +139,7 @@ public:
 		context->texture_manager = resource_manager->texture_manager;
 		context->material_manager = resource_manager->material_manager;
 		engine.set_context(context, resource_manager);
+		PluginManager::default_resource_manager = resource_manager;
 
 		create_base_renderer(context, window);
 

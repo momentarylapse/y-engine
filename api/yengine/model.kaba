@@ -10,8 +10,8 @@ class Material
 	var textures: shared![Texture][]
 #	var shader: shared![Shader][6]
 	var cast_shadow: bool
-		shader_path: os.Path
 	struct Pass
+		var shader_path: os.Path
 	var pass0: Pass
 	struct Friction
 		sliding: f32

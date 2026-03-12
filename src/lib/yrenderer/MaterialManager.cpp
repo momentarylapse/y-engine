@@ -20,6 +20,7 @@ MaterialManager::MaterialManager(Context* _ctx, const Path& _material_dir) {
 	material_dir = _material_dir;
 	// create the default material
 	trivial_material = new Material(ctx);
+	trivial_material->textures = {ctx->tex_white};
 	//trivial_material->shader_path = Shader::default_3d;
 
 	set_default(trivial_material);
@@ -107,15 +108,21 @@ color any2color(const Any &a) {
 	return Black;
 }
 
+Path MaterialManager::get_filename(const Material* m) {
+	for (auto&& [f, _m]: materials)
+		if (_m == m)
+			return f;
+	return "";
+}
 
-xfer<Material> MaterialManager::load(const Path &filename) {
+Material* MaterialManager::load(const Path& filename) {
 	// an empty name loads the default material
 	if (filename.is_empty())
-		return default_material->copy();
+		return default_material;
 
 	for (auto&& [f, m]: materials)
 		if (f == filename)
-			return m->copy();
+			return m;
 
 
 	msg_write("loading material " + filename.str());
@@ -124,7 +131,7 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	if (!c.load(material_dir | filename.with(".material"))) {
 		//if (engine.ignore_missing_files) {
 			msg_error("material file missing: " + filename.str());
-			return default_material->copy();
+			return default_material;
 		/*} else {
 			throw Exception("material file missing: " + filename.str());
 		}*/
@@ -219,7 +226,11 @@ xfer<Material> MaterialManager::load(const Path &filename) {
 	}
 
 	materials.set(filename, m);
-	return m->copy();
+	return m;
+}
+
+xfer<Material> MaterialManager::load_copy(const Path &filename) {
+	return load(filename)->copy();
 }
 
 }
