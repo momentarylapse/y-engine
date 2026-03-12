@@ -144,8 +144,17 @@ class Fog
 	var enabled: bool
 
 
-class Link extends BaseClass
-	var a, b: Model*
+enum LinkType
+	NONE
+	SOCKET as "socket"
+	HINGE as "hinge"
+	UNIVERSAL as "universal"
+	SPRING as "spring"
+	SLIDER as "slider"
+
+class Link extends Component
+	var type: i32
+	var a, b: Entity*
 	func extern mut set_motor(v: f32, max: f32)
 #	extern void mut set_axis(vector v)
 	func extern mut set_frame(n: i32, q: Quaternion)
@@ -164,11 +173,9 @@ class Physics extends System
 		FULL_EXTERNAL
 	var mode: Mode
 	var gravity: vec3
-	var links: Link&[]
 	var enabled: bool
 	var collisions_enabled: bool
 	func extern get_g(pos: vec3) -> vec3
-	func extern delete_link(e: Link*)
 	func extern mut set_active_physics(o: Model, active: bool)
 
 
