@@ -9,19 +9,17 @@
 #include <lib/any/any.h>
 #include <lib/os/msg.h>
 #include <lib/os/config.h>
+#include <lib/base/iter.h>
 
 namespace yrenderer {
 
 	using namespace ygfx;
 
-MaterialManager::MaterialManager(Context* _ctx, const Path& _material_dir) {
-	ctx = _ctx;
-	shader_manager = ctx->shader_manager;
+MaterialManager::MaterialManager(TextureManager* tm, const Path& _material_dir) : Node() {
+	texture_manager = tm;
 	material_dir = _material_dir;
 	// create the default material
-	trivial_material = new Material(ctx);
-	trivial_material->textures = {ctx->tex_white};
-	//trivial_material->shader_path = Shader::default_3d;
+	trivial_material = create_internal();
 
 	set_default(trivial_material);
 }
@@ -108,56 +106,72 @@ color any2color(const Any &a) {
 	return Black;
 }
 
-Path MaterialManager::get_filename(const Material* m) {
-	for (auto&& [f, _m]: materials)
+Path MaterialManager::get_filename(const Material* m) const {
+	for (const auto&& [f, _m]: materials)
 		if (_m == m)
 			return f;
 	return "";
 }
 
-Material* MaterialManager::load(const Path& filename) {
-	// an empty name loads the default material
-	if (filename.is_empty())
-		return default_material;
+string MaterialManager::describe(const Material* m) const {
+	if (!m)
+		return "[none]";
+	string name = str(get_filename(m));
+	if (name == "")
+		name = "[internal]";
+	if (m->parent)
+		name += " < " + str(get_filename(m->parent));
+	return name;
+}
 
-	for (auto&& [f, m]: materials)
-		if (f == filename)
-			return m;
-
-
-	msg_write("loading material " + filename.str());
+void MaterialManager::_load_from_file(Material* m, const Path &filename) {
 
 	Configuration c;
-	if (!c.load(material_dir | filename.with(".material"))) {
+	if (!c.load(filename)) {
 		//if (engine.ignore_missing_files) {
 			msg_error("material file missing: " + filename.str());
-			return default_material;
+			return;
 		/*} else {
 			throw Exception("material file missing: " + filename.str());
 		}*/
 	}
-	auto m = new Material(ctx);
 
-	m->albedo = any2color(c.get("color.albedo"));
-	m->roughness = c.get_float("color.roughness", 0.5f);
-	m->metal = c.get_float("color.metal", 0.1f);
-	m->emission = any2color(c.get("color.emission"));
+	if (c.has("parent")) {
+		auto parent = load(str(c.get("parent")));
+		m->derive_from(parent);
+	}
 
-	auto texture_files = c.get_str_array("textures");
-	for (auto &f: texture_files)
-		m->textures.add(ctx->texture_manager->load_texture(f));
-	m->pass0.shader_path = c.get_str("shader", "");
-	m->cast_shadow = c.get_bool("shadow.cast", true);
+	if (c.has("color.albedo"))
+		m->albedo = any2color(c.get("color.albedo"));
+	if (c.has("color.roughness"))
+		m->roughness = c.get_float("color.roughness", 0.5f);
+	if (c.has("color.metal"))
+		m->metal = c.get_float("color.metal", 0.1f);
+	if (c.has("color.emission"))
+		m->emission = any2color(c.get("color.emission"));
 
-	m->friction._static = c.get_float("friction.static", 0.5f);
-	m->friction.sliding = c.get_float("friction.slide", 0.5f);
-	m->friction.rolling = c.get_float("friction.roll", 0.5f);
-	m->friction.jump = c.get_float("friction.jump", 0.5f);
+	if (c.has("textures")) {
+		auto texture_files = c.get_str_array("textures");
+		m->textures.resize(max(m->textures.num, texture_files.num));
+		for (const auto& [i, f]: enumerate(texture_files))
+			m->textures[i] = texture_manager->load_texture(f);
+	}
+	if (c.has("shader"))
+		m->pass0.shader_path = c.get_str("shader", "");
+	if (c.has("shadow.cast"))
+		m->cast_shadow = c.get_bool("shadow.cast", true);
+
+	if (c.has("friction.static"))
+		m->friction._static = c.get_float("friction.static", 0.5f);
+	if (c.has("friction.slide"))
+		m->friction.sliding = c.get_float("friction.slide", 0.5f);
+	if (c.has("friction.roll"))
+		m->friction.rolling = c.get_float("friction.roll", 0.5f);
+	if (c.has("friction.jump"))
+		m->friction.jump = c.get_float("friction.jump", 0.5f);
 
 	auto add_pass = [m] (int index) -> Material::RenderPassData& {
-		if (index == 1)
-			m->extended = new Material::ExtendedData;
-		m->num_passes = max(m->num_passes, index + 1);
+		m->set_num_passes(max(m->num_passes, index + 1));
 		return m->pass(index);
 	};
 	auto try_parse_pass = [m, &c, add_pass] (const string& key, int index) {
@@ -203,10 +217,10 @@ Material* MaterialManager::load(const Path& filename) {
 	string mode = c.get_str("reflection.mode", "");
 	if (mode == "static") {
 		m->reflection.mode = ReflectionMode::CUBE_MAP_STATIC;
-		texture_files = c.get_str_array("reflection.cubemap");
+		auto texture_files = c.get_str_array("reflection.cubemap");
 		shared_array<Texture> cmt;
 		for (auto &f: texture_files)
-			cmt.add(ctx->texture_manager->load_texture(f));
+			cmt.add(texture_manager->load_texture(f));
 		m->reflection.density = c.get_float("reflection.density", 1);
 #if 0
 			m->reflection.cube_map = new CubeMap(m->reflection.cube_map_size);
@@ -224,13 +238,154 @@ Material* MaterialManager::load(const Path& filename) {
 	} else if (mode != "") {
 		msg_error("unknown reflection mode: " + mode);
 	}
+}
 
+string alpha_to_str(ygfx::Alpha a) {
+	if (a == ygfx::Alpha::ZERO)
+		return "zero";
+	if (a == ygfx::Alpha::ONE)
+		return "one";
+	if (a == ygfx::Alpha::SOURCE_COLOR)
+		return "source-color";
+	if (a == ygfx::Alpha::SOURCE_INV_COLOR)
+		return "source-inv-color";
+	if (a == ygfx::Alpha::SOURCE_ALPHA)
+		return "source-alpha";
+	if (a == ygfx::Alpha::SOURCE_INV_ALPHA)
+		return "source-inv-alpha";
+	if (a == ygfx::Alpha::DEST_COLOR)
+		return "dest-color";
+	if (a == ygfx::Alpha::DEST_INV_COLOR)
+		return "dest-inv-color";
+	if (a == ygfx::Alpha::DEST_ALPHA)
+		return "dest-alpha";
+	if (a == ygfx::Alpha::DEST_INV_ALPHA)
+		return "dest-inv-alpha";
+	return "???";
+}
+
+Array<string> paths_to_str_arr(const Array<Path> &files) {
+	Array<string> r;
+	for (auto f: files)
+		r.add(f.str());
+	return r;
+}
+
+Any color2any(const color &c) {
+	Any r = Any::EmptyList;
+	r.add(c.r);
+	r.add(c.g);
+	r.add(c.b);
+	r.add(c.a);
+	return r;
+}
+
+void MaterialManager::_write_to_file(Material* material, const Path &filename) {
+
+	Configuration c;
+
+	Array<Path> texture_files;
+	for (auto t: weak(material->textures))
+		texture_files.add(texture_manager->texture_file(t));
+
+	c.set_str_array("textures", paths_to_str_arr(texture_files));
+	if (!material->cast_shadow)
+		c.set_bool("cast-shadows", material->cast_shadow);
+
+	c.set("color.albedo", color2any(material->albedo));
+	if (material->emission != Black)
+		c.set("color.emission", color2any(material->emission));
+	c.set_float("color.roughness", material->roughness);
+	c.set_float("color.metal", material->metal);
+
+	for (int i=0; i<material->num_passes; i++) {
+		auto &p = material->pass(i);
+		string key = format("pass%d", i);
+		c.set_str(key + ".shader", str(p.shader_path));
+
+		if (p.mode == yrenderer::TransparencyMode::FACTOR) {
+			c.set_str(key + ".mode", "factor");
+			c.set_float(key + ".factor", p.factor);
+		} else if (p.mode == yrenderer::TransparencyMode::FUNCTIONS) {
+			c.set_str(key + ".mode", "function");
+			c.set_str(key + ".source", alpha_to_str(p.source));
+			c.set_str(key + ".dest", alpha_to_str(p.destination));
+		} else if (p.mode == yrenderer::TransparencyMode::MIX) {
+			c.set_str(key + ".mode", "mix");
+		} else if (p.mode == yrenderer::TransparencyMode::COLOR_KEY_HARD) {
+			c.set_str(key + ".mode", "key-hard");
+		} else if (p.mode == yrenderer::TransparencyMode::COLOR_KEY_SMOOTH) {
+			c.set_str(key + ".mode", "key-smooth");
+		} else {
+			c.set_str(key + ".mode", "solid");
+		}
+		if (p.cull_mode == ygfx::CullMode::NONE)
+			c.set_str(key + ".cull", "none");
+		else if (p.cull_mode == ygfx::CullMode::FRONT)
+			c.set_str(key + ".cull", "front");
+		if (p.mode != yrenderer::TransparencyMode::NONE or !p.z_buffer or !p.z_test)
+			c.set_bool(key + ".z-write", p.z_buffer);
+		if (!p.z_test)
+			c.set_bool(key + ".z-test", p.z_test);
+		/*if (material->transparency_mode != TransparencyMode::NONE) {
+			c.set_bool("transparency.zbuffer", material->alpha_z_buffer);
+		}*/
+	}
+
+	c.set_float("friction.static", material->friction._static);
+	c.set_float("friction.slide", material->friction.sliding);
+	c.set_float("friction.roll", material->friction.rolling);
+	c.set_float("friction.jump", material->friction.jump);
+
+	c.save(filename);
+}
+
+Material* MaterialManager::load(const Path& filename) {
+	// an empty name loads the default material
+	if (filename.is_empty())
+		return default_material;
+
+	for (auto&& [f, m]: materials)
+		if (f == filename)
+			return m;
+
+
+	msg_write("loading material " + str(filename));
+
+	auto m = new Material();
 	materials.set(filename, m);
+	_load_from_file(m, material_dir | filename.with(".material"));
 	return m;
 }
 
-xfer<Material> MaterialManager::load_copy(const Path &filename) {
+xfer<Material> MaterialManager::load_copy(const Path& filename) {
 	return load(filename)->copy();
 }
 
+void MaterialManager::invalidate(Material* m) {
+	having_changes.add(m);
+	out_material_edited(m);
+}
+
+bool MaterialManager::has_changes(Material *m) const {
+	return having_changes.contains(m);
+}
+
+void MaterialManager::set_save_state(Material* m) {
+	having_changes.erase(m);
+}
+
+Material* MaterialManager::create_internal() {
+	auto m = new Material();
+	m->textures = {texture_manager->load_texture("")};
+	internal_materials.add(m);
+	return m;
+}
+
+bool MaterialManager::is_from_file(Material* m) const {
+	for (const auto&& [f, _m]: materials)
+		if (_m == m)
+			return true;
+	return false;
+}
 }

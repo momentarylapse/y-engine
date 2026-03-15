@@ -5,29 +5,45 @@
 #pragma once
 
 #include "Material.h"
+#include <lib/pattern/Observable.h>
 
 namespace yrenderer {
 
-class MaterialManager {
+class TextureManager;
+
+class MaterialManager : public obs::Node<VirtualBase> {
 public:
-	explicit MaterialManager(Context* ctx, const Path& material_dir);
-	~MaterialManager();
+	explicit MaterialManager(TextureManager* texture_manager, const Path& material_dir);
+	~MaterialManager() override;
+
+	obs::xsource<Material*> out_material_edited{this, "material-edited"};
 
 	void reset();
 
 	void set_default(Material* m);
-	void set_default_shader(ygfx::Shader* s);
 	Material* load(const Path& filename);
 	xfer<Material> load_copy(const Path& filename);
-	Path get_filename(const Material* m);
+	Path get_filename(const Material* m) const;
+	string describe(const Material* m) const;
+	void invalidate(Material* m);
+	void set_save_state(Material* m);
+	Material* create_internal();
+	bool is_from_file(Material* m) const;
+	bool has_changes(Material* m) const;
 
 	Path material_dir;
+
+
+	void _load_from_file(Material* material, const Path& filename);
+	void _write_to_file(Material* material, const Path& filename);
+
 private:
-	Context* ctx;
-	ShaderManager* shader_manager;
+	TextureManager* texture_manager;
 	Material* default_material;
 	Material* trivial_material;
 	base::map<Path, Material*> materials; // "originals" owned!
+	owned_array<Material> internal_materials;
+	base::set<Material*> having_changes;
 };
 
 }
