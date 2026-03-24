@@ -29,6 +29,10 @@ j user meshes
 * point shadows
 
 
+* Model as resource, not Component
+* SolidBody -> RigidBody
+* Physics as System
+* ui.Node from layout.Node
 
 
 

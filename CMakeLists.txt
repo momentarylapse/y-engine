@@ -470,7 +470,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/scene/RenderViewData.cpp
 	src/lib/yrenderer/scene/SceneRenderer.cpp
 	src/lib/yrenderer/scene/SceneView.cpp
-	src/lib/yrenderer/target/HeadlessRendererVulkan.cpp
+	src/lib/yrenderer/target/HeadlessRenderer.cpp
 	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
 	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
 	src/lib/yrenderer/target/TargetRenderer.cpp
@@ -753,7 +753,7 @@ add_executable(y
 	src/lib/yrenderer/scene/RenderViewData.cpp
 	src/lib/yrenderer/scene/SceneRenderer.cpp
 	src/lib/yrenderer/scene/SceneView.cpp
-	src/lib/yrenderer/target/HeadlessRendererVulkan.cpp
+	src/lib/yrenderer/target/HeadlessRenderer.cpp
 	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
 	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
 	src/lib/yrenderer/target/TargetRenderer.cpp
