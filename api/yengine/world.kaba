@@ -127,9 +127,8 @@ class NameTag extends Component
 
 
 class ModelRef extends Component
-	let PARAMETERS = "filename"
+	let PARAMETERS = "model"
 	var model: Model*
-	var filename: os.Path
 
 
 class TerrainRef extends Component

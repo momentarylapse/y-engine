@@ -30,6 +30,8 @@ j user meshes
 
 
 * Model as resource, not Component
+	ModelRef.filename -> model
+	skybox as ModelRef
 * SolidBody -> RigidBody
 * Physics as System
 * ui.Node from layout.Node
