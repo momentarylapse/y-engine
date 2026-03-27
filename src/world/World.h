@@ -68,10 +68,10 @@ public:
 	void load_soon(const Path &filename);
 	void save(const Path &filename);
 
-	Entity *create_entity(const vec3 &pos, const quaternion &ang);
+	Entity* create_entity(const vec3 &pos, const quaternion &ang);
 	owned<EntityManager> entity_manager;
 
-	Entity* load_template(const Path &filename, const vec3 &pos, const quaternion &ang);
+	Entity* create_from_template(const Path &filename, const vec3 &pos, const quaternion &ang);
 
 	Model* create_object(const Path &filename, const vec3 &pos, const quaternion &ang);
 	Model* create_object_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang);

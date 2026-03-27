@@ -171,9 +171,6 @@ void add_user_components(EntityManager* em, Entity *ent, const Array<ScriptInsta
 		msg_write("add component " + cc.class_name);
 #ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
-		/*base::map<string, Any> params;
-		for (const auto& v: cc.variables)
-			params.set(v.name, v.value);*/
 		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, cc.variables);
 #endif
 	}
@@ -234,9 +231,9 @@ bool World::load(const LevelData &ld) {
 		if (!o.filename.is_empty()) {
 			//try {
 				auto q = quaternion::rotation(o.ang);
-				auto *oo = create_object_x(o.filename, o.name, o.pos, q);
+				auto *oo = create_from_template(o.filename, o.pos, q);
 
-				add_user_components(entity_manager.get(), oo->owner, o.components);
+				add_user_components(entity_manager.get(), oo, o.components);
 				if (i % 5 == 0)
 					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
 
@@ -314,7 +311,7 @@ Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
 	return entity_manager->create_entity(pos, ang);
 }
 
-Entity* World::load_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
+Entity* World::create_from_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
 	auto e = create_entity(pos, ang);
 
 	const auto t = engine.resource_manager->load_template(filename);

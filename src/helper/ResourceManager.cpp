@@ -22,9 +22,16 @@ class TemplateManager {
 public:
 	base::map<Path, Template*> templates;
 
+	Path full_path(const Path& _filename) const {
+		auto filename = _filename.is_absolute() ? _filename : engine.object_dir | _filename;
+		if (filename.extension() != "template")
+			return filename.with(".template");
+		return filename;
+	}
+
 	// relative filename!
 	Template* load(const Path& _filename) {
-		auto filename = _filename.is_absolute() ? _filename : engine.object_dir | _filename;
+		auto filename = full_path(_filename);
 		for (auto&& [f, t]: templates)
 			if (f == filename)
 				return t;
@@ -65,7 +72,7 @@ public:
 			for (const auto& v: c.variables)
 				o += format("\t%s=%s\n", v.name, v.value);
 		}
-		os::fs::write_text(filename.is_absolute() ? filename : engine.object_dir | filename, o);
+		os::fs::write_text(full_path(filename), o);
 	}
 
 	Path get_filename(const Template* t) const {

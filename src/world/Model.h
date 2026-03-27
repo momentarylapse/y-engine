@@ -171,6 +171,8 @@ public:
 	static const kaba::Class *_class;
 };
 
+Model* entity_get_model(Entity* entity);
+
 
 // types of shading/normal vectors
 enum {

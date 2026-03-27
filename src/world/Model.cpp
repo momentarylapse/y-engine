@@ -593,3 +593,12 @@ void Model::SortingTest(vec3 &delta_pos,const vec3 &dpos,matrix *mat,bool allow_
 }
 #endif
 
+
+Model* entity_get_model(Entity* entity) {
+	if (auto m = entity->get_component<Model>())
+		return m;
+	if (auto mr = entity->get_component<ModelRef>())
+		return mr->model;
+	return nullptr;
+}
+
