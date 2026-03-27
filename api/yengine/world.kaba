@@ -137,6 +137,14 @@ class TerrainRef extends Component
 	var material: Material*
 
 
+struct Template
+	# opaque data...
+
+class TemplateRef extends Component
+	let PARAMETERS = "template"
+	var template: Template*
+
+
 class Fog
 	var color: Color
 	var distance: f32
