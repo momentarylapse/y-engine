@@ -93,7 +93,7 @@ SolidBody::SolidBody() {
 
 void SolidBody::on_init() {
 	auto o = owner;
-	auto m = owner->get_component<Model>();
+	auto m = entity_get_model(owner);
 	auto t = o->get_component<TerrainRef>();
 
 	if (!active and !passive)
@@ -275,7 +275,7 @@ void SolidBody::do_simple_physics(float dt) {
 	}
 
 	// new orientation
-	auto m = owner->get_component<Model>();
+	auto m = entity_get_model(owner);
 	if (m) {
 		m->update_matrix();
 
@@ -334,7 +334,7 @@ void SolidBody::get_theta_world(mat3 &theta_world, mat3 &theta_world_inv) {
 void SolidBody::update_data() {
 	unfreeze(this);
 	if (!active) {
-		owner->get_component<Model>()->update_matrix();
+		entity_get_model(owner)->update_matrix();
 	}
 
 	// set ode data..

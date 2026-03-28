@@ -26,8 +26,7 @@ void WorldOpaqueModelsEmitter::emit(const yrenderer::RenderParams& params, yrend
 	profiler::begin(channel);
 	ctx->gpu_timestamp_begin(params, channel);
 
-	auto draw_model = [&params, &rvd, shadow_pass] (Model* m) {
-		auto ani = m->owner ? m->owner->get_component<Animator>() : nullptr;
+	auto draw_model = [&params, &rvd, shadow_pass] (Model* m, Animator* ani) {
 		for (int i=0; i<m->material.num; i++) {
 			auto material = m->material[i];
 			if (material->is_transparent())
@@ -58,16 +57,15 @@ void WorldOpaqueModelsEmitter::emit(const yrenderer::RenderParams& params, yrend
 
 	auto& list = EntityManager::global->get_component_list<Model>();
 	for (auto m: list) {
-		draw_model(m);
+		draw_model(m, m->owner->get_component<Animator>());
 	}
 
 	auto& list2 = EntityManager::global->get_component_list<ModelRef>();
-	for (auto m: list2) {
-		if (m->model) {
-			m->model->owner = m->owner;
-			draw_model(m->model);
+	for (auto mr: list2)
+		if (mr->model) {
+			mr->model->owner = mr->owner;
+			draw_model(mr->model, mr->owner->get_component<Animator>());
 		}
-	}
 
 	ctx->gpu_timestamp_end(params, channel);
 	profiler::end(channel);
@@ -89,9 +87,7 @@ void WorldTransparentModelsEmitter::emit(const yrenderer::RenderParams& params, 
 	};
 	Array<DrawCallData> draw_calls;
 
-	auto& list = EntityManager::global->get_component_list<Model>();
-
-	for (auto m: list) {
+	auto maybe_add = [&] (Model* m) {
 		for (int i=0; i<m->material.num; i++) {
 			auto material = m->material[i];
 			if (!material->is_transparent())
@@ -115,7 +111,15 @@ void WorldTransparentModelsEmitter::emit(const yrenderer::RenderParams& params, 
 
 			draw_calls.add({m, i, zz});
 		}
-	}
+	};
+
+	auto& list = EntityManager::global->get_component_list<Model>();
+	for (auto m: list)
+		maybe_add(m);
+	auto& list2 = EntityManager::global->get_component_list<ModelRef>();
+	for (auto mr: list2)
+		if (auto m = mr->model)
+			maybe_add(m);
 
 	// sort: far to near
 	draw_calls = base::sorted(draw_calls, [] (const auto& a, const auto& b) { return a.z >= b.z; });

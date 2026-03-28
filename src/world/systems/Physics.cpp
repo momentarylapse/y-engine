@@ -159,7 +159,7 @@ void Physics::on_iterate(float dt) {
 	}
 
 	for (auto *sb: list) {
-		if (auto m = sb->owner->get_component<Model>())
+		if (auto m = entity_get_model(sb->owner))
 			m->update_matrix();
 	}
 }

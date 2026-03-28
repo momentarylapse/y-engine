@@ -243,9 +243,11 @@ class World
 	func extern mut subscribe(msg: string, f: void->void)
 
 
-#func model(e: Entity) -> Model*
-#	var m: Model* = e.get_component[Model]()
-#	return m
+func ref get_model(out e: Entity) -> Model*
+	for mut mr in e.get_component[ModelRef]()
+		return mr.model
+	return e.get_component[Model]()
+	return nil
 #func body(e: Entity) -> SolidBody*
 #	var b: SolidBody* = e.get_component(SolidBody)
 #	return b

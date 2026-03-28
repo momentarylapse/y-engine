@@ -255,6 +255,7 @@ bool World::load(const LevelData &ld) {
 	}
 
 
+	// FIXME...
 	auto& model_list = entity_manager->get_component_list<Model>();
 	for (auto &l: ld.links) {
 		Entity *a = model_list[l.object[0]]->owner;
