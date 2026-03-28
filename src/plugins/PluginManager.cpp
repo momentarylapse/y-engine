@@ -54,12 +54,12 @@
 #include <ecs/System.h>
 #include <ecs/SystemManager.h>
 #include "../world/components/Camera.h"
-#include "../world/Link.h"
+#include "../world/components/Link.h"
 #include "../world/Model.h"
 #include "../world/ModelManager.h"
 #include "../world/Terrain.h"
 #include "../world/World.h"
-#include "../world/Physics.h"
+#include "../world/systems/Physics.h"
 #include "../world/components/Light.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"

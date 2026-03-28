@@ -507,15 +507,15 @@ add_library(moduley SHARED
 	src/world/components/Collider.cpp
 	src/world/components/CubeMapSource.cpp
 	src/world/components/Light.cpp
+	src/world/components/Link.cpp
 	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
+	src/world/systems/Physics.cpp
 	src/world/LevelData.cpp
-	src/world/Link.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
-	src/world/Physics.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
 	src/Config.cpp
@@ -790,15 +790,15 @@ add_executable(y
 	src/world/components/Collider.cpp
 	src/world/components/CubeMapSource.cpp
 	src/world/components/Light.cpp
+	src/world/components/Link.cpp
 	src/world/components/MultiInstance.cpp
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
+	src/world/systems/Physics.cpp
 	src/world/LevelData.cpp
-	src/world/Link.cpp
 	src/world/Model.cpp
 	src/world/ModelManager.cpp
-	src/world/Physics.cpp
 	src/world/Terrain.cpp
 	src/world/World.cpp
 	src/Config.cpp

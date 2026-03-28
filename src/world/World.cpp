@@ -9,6 +9,8 @@
 \*----------------------------------------------------------------------------*/
 
 #include <algorithm>
+#include <lib/base/base.h>
+#include <lib/base/sort.h>
 #include <lib/config.h>
 #include <lib/os/msg.h>
 #include <lib/nix/nix.h>
@@ -21,12 +23,12 @@
 #include "../meta.h"
 #include "ModelManager.h"
 #include "../helper/ResourceManager.h"
-#include "Link.h"
 #include <lib/yrenderer/Material.h>
 #include "Model.h"
 #include "Terrain.h"
 #include "World.h"
 
+#include "components/Link.h"
 #include "components/SolidBody.h"
 #include "components/Collider.h"
 #include "components/Animator.h"
@@ -34,6 +36,8 @@
 #include "components/MultiInstance.h"
 #include "components/Light.h"
 #include "components/Camera.h"
+#include "systems/Physics.h"
+#include "ecs/SystemManager.h"
 
 #ifdef _X_ALLOW_X_
 #include "../fx/ParticleManager.h"
@@ -41,10 +45,6 @@
 #include <lib/profiler/Profiler.h>
 #endif
 
-
-#include "Physics.h"
-#include "ecs/SystemManager.h"
-#include "lib/base/sort.h"
 
 
 //#define _debug_matrices_

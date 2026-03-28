@@ -8,9 +8,8 @@
 #include "SolidBody.h"
 #include "Collider.h"
 #include "../World.h"
-#include "../Physics.h"
+#include "../systems/Physics.h"
 #include "../Model.h"
-#include "../ModelManager.h"
 #include "../Terrain.h"
 #include <ecs/Entity.h>
 #include <ecs/SystemManager.h>

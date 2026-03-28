@@ -46,7 +46,7 @@
 #include "Config.h"
 #include "lib/os/app.h"
 #include "lib/ygraphics/Context.h"
-#include "world/Physics.h"
+#include "world/systems/Physics.h"
 #include "world/components/Camera.h"
 #include "world/World.h"
 

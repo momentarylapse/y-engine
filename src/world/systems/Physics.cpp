@@ -3,11 +3,11 @@
 //
 
 #include "Physics.h"
-#include "World.h"
-#include "Link.h"
-#include "Model.h"
-#include "components/Collider.h"
-#include "components/SolidBody.h"
+#include "../World.h"
+#include "../components/Link.h"
+#include "../Model.h"
+#include "../components/Collider.h"
+#include "../components/SolidBody.h"
 #include <ecs/EntityManager.h>
 #include <ecs/Entity.h>
 #include <lib/base/iter.h>
