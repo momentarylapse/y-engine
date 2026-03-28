@@ -127,14 +127,19 @@ class NameTag extends Component
 
 
 class ModelRef extends Component
-	let PARAMETERS = "model"
+	let PARAMETERS = "model,materials"
 	var model: Model*
+	var materials: Material&[]
+	func extern globalref get_material(index: i32) -> Material&
+	func extern mut set_material(index: i32, m: Material&)
+	func mut make_material_editable(index: i32)
+		set_material(index, make_material_unique(get_material(index)))
 
 
 class TerrainRef extends Component
 	let PARAMETERS = "terrain,material"
 	var terrain: Terrain*
-	var material: Material*
+	var material: Material&
 
 
 struct Template
@@ -215,7 +220,7 @@ class World
 		return _add_particle(T, pos, radius, c, tex, ttl) as T&
 		
 	func extern mut selfref load_template(filename: os.Path, pos: vec3, ang: Quaternion = Quaternion.ID) -> Entity&
-	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: Quaternion) -> Model&
+#	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: Quaternion) -> Model&
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: Quaternion[]) -> MultiInstance&
 	func extern mut selfref create_terrain(filename: os.Path, pos: vec3) -> TerrainRef&
 	func extern mut selfref create_camera(pos: vec3, ang: Quaternion) -> Camera&
@@ -225,8 +230,8 @@ class World
 	func extern mut shift_all(dpos: vec3)
 	func extern globalref trace(p1: vec3, p2: vec3, mode: TraceMode = TraceMode.PHYSICAL, ignore: Entity* = (nil as Entity*)) -> CollisionData?
 	
-	func selfref objects() -> Model&[]&
-		return get_component_family_list[Model]()
+	func selfref objects() -> ModelRef&[]&
+		return get_component_family_list[ModelRef]()
 	func selfref terrains() -> TerrainRef&[]&
 		return get_component_family_list[TerrainRef]()
 	func selfref lights() -> Light&[]&

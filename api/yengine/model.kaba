@@ -22,7 +22,8 @@ class Material
 	var shader_data: Any
 	func extern __delete__()
 	
-func extern load_material(filename: os.Path) -> xfer[Material]
+func extern load_material(filename: os.Path) -> Material&
+func extern make_material_unique(m: Material&) -> Material&
 
 class Model extends Component
 	class Mesh as shared
@@ -39,7 +40,7 @@ class Model extends Component
 	var radius: f32
 	var min, max: vec3
 	
-	var materials: owned![Material][]
+	var materials: Material&[]
 	
 	var mesh: shared![Mesh][3]
 
@@ -72,4 +73,4 @@ class Skeleton extends Component
 	var parents: i32[]
 	func extern mut reset()
 
-func extern load_model(filename: os.Path) -> xfer[Model]
+func extern load_model(filename: os.Path) -> Model&

@@ -10,7 +10,7 @@ class Curve extends UserMesh
 		topology = PrimitiveTopology.LINESTRIP
 		vertex_shader_module = "lines"
 		geometry_shader_module = "lines"
-		material = load_material("points")
+		material := load_material("points")
 	func mut add_absolute(p: vec3)
 		points.add(p - owner.pos)
 		update_vb()

@@ -35,6 +35,8 @@ public:
 		for (auto&& [f, t]: templates)
 			if (f == filename)
 				return t;
+		if (!os::fs::exists(filename))
+			return nullptr;
 		auto t = new Template;
 		templates.set(filename, t);
 		ScriptInstanceData* current = nullptr;
@@ -134,10 +136,6 @@ ResourceManager::ResourceManager(yrenderer::Context *_ctx, const Path &texture_d
 	shader_manager->ignore_missing_files = engine.ignore_missing_files;
 	template_manager = new TemplateManager();
 	terrain_manager = new TerrainManager();
-}
-
-xfer<yrenderer::Material> ResourceManager::load_material_copy(const Path& filename) {
-	return material_manager->load_copy(filename);
 }
 
 yrenderer::Material* ResourceManager::load_material(const Path& filename) {

@@ -310,8 +310,11 @@ Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
 Entity* World::create_from_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
 	auto e = create_entity(pos, ang);
 
-	const auto t = engine.resource_manager->load_template(filename);
-	add_user_components(entity_manager.get(), e, t->components);
+	if (const auto t = engine.resource_manager->load_template(filename)) {
+		add_user_components(entity_manager.get(), e, t->components);
+	} else {
+		attach_model(e, filename.no_ext());
+	}
 
 	return e;
 }

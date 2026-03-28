@@ -43,7 +43,32 @@ const kaba::Class* Model::_class = nullptr;
 
 bool Model::AllowDeleteRecursive = true;
 
+void ModelRef::update_materials() {
+	if (model) {
+		materials.resize(model->materials.num);
+		for (int i=0; i<model->materials.num; i++)
+			if (!materials[i])
+				materials[i] = model->materials[i];
+	}
+}
 
+void ModelRef::set_material(int index, yrenderer::Material *m) {
+	if (index < 0)
+		return;
+	if (materials.num <= index)
+		materials.resize(index + 1);
+	materials[index] = m;
+}
+
+yrenderer::Material *ModelRef::get_material(int index) {
+	if (index < 0)
+		return nullptr;
+	if (index < materials.num and materials[index])
+		return materials[index];
+	if (model and index < model->materials.num)
+		return model->materials[index];
+	return nullptr;
+}
 
 
 SubMesh::SubMesh() {
@@ -267,8 +292,7 @@ Model *Model::copy(Model *pre_allocated) {
 	m->prop = prop;
 	m->_template = _template;
 
-	for (auto mat: material)
-		m->material.add(mat->copy());
+	m->materials = materials;
 	
 
 	// "copy" presettings (just using references)

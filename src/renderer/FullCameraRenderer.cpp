@@ -184,7 +184,7 @@ void FullCameraRenderer::suggest_cube_map_pos() {
 	cube_map_source->min_depth = 1000;
 	for (auto mr: list)
 		if (auto m = mr->model)
-			for (auto mat: m->material) {
+			for (auto mat: m->materials) {
 				float score = mat->metal;
 				if (score > max_score) {
 					max_score = score;

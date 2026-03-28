@@ -51,6 +51,10 @@ class Animator;
 
 struct ModelRef : Component {
 	Model* model = nullptr;
+	Array<yrenderer::Material*> materials;
+	void update_materials();
+	void set_material(int index, yrenderer::Material* m);
+	yrenderer::Material* get_material(int index);
 	static const kaba::Class* _class;
 };
 
@@ -142,7 +146,7 @@ public:
 	shared<Mesh> mesh[MODEL_NUM_MESHES];
 
 	// material
-	owned_array<yrenderer::Material> material;
+	Array<yrenderer::Material*> materials;
 	Array<int> num_uvs;
 
 	// properties
