@@ -85,11 +85,6 @@ void AddNetMsg(int msg, int argi0, const string &args)
 
 
 void GodInit(int ch_iter) {
-	// FIXME: heap allocate world?
-#ifdef _X_ALLOW_X_
-	world.ch_iterate = profiler::create_channel("world", ch_iter);
-	world.ch_animation = profiler::create_channel("animation", ch_iter);
-#endif
 }
 
 void GodEnd() {
@@ -388,45 +383,6 @@ void World::delete_entity(Entity *e) {
 	msg_data.e = e;
 	notify("entity-delete");
 	entity_manager->delete_entity(e);
-}
-
-void World::iterate_animations(float dt) {
-#ifdef _X_ALLOW_X_
-	profiler::begin(ch_animation);
-	auto& list = entity_manager->get_component_list<Animator>();
-	for (auto *o: list)
-		o->do_animation(dt);
-
-
-	// TODO
-	auto& list2 = entity_manager->get_component_list<Skeleton>();
-	for (auto o: list2) {
-		for (auto b: o->bones) {
-			if ([[maybe_unused]] auto *mm = b->get_component<Model>()) {
-//				b.dmatrix = matrix::translation(b.cur_pos) * matrix::rotation(b.cur_ang);
-//				mm->_matrix = o->get_owner<Entity3D>()->get_matrix() * b.dmatrix;
-			}
-		}
-	}
-		//o->do_animation(dt);
-	profiler::end(ch_animation);
-#endif
-}
-
-void World::iterate(float dt) {
-	if (dt == 0)
-		return;
-#ifdef _X_ALLOW_X_
-	profiler::begin(ch_iterate);
-	//physics->on_iterate(dt);
-
-		/*for (auto *o: objects)
-			if (o)
-				if (auto m = o->get_component<Model>())
-					m->update_matrix();*/
-
-	profiler::end(ch_iterate);
-#endif
 }
 
 Light* World::attach_light_parallel(Entity* e, const color& c) {

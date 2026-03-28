@@ -46,7 +46,9 @@
 #include "Config.h"
 #include "lib/os/app.h"
 #include "lib/ygraphics/Context.h"
+#include "world/Model.h"
 #include "world/systems/Physics.h"
+#include "world/systems/AnimationManager.h"
 #include "world/components/Camera.h"
 #include "world/World.h"
 
@@ -192,6 +194,11 @@ public:
 			physics->gravity = level_data.gravity;
 			physics->collisions_enabled = true; // level_data.physics_enabled;
 		}
+		{
+			auto ani = new AnimationManager();
+			ani->entity_manager = world.entity_manager.get();
+			SystemManager::register_system(AnimationManager::_class, ani);
+		}
 		for (auto &s: level_data.systems)
 			SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
@@ -321,7 +328,6 @@ public:
 
 		network_manager.iterate();
 
-		world.iterate(engine.elapsed);
 		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
 
@@ -332,7 +338,6 @@ public:
 		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
 
-		world.iterate_animations(engine.elapsed);
 		profiler::end(ch_iter);
 	}
 

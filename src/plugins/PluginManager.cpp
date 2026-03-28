@@ -60,6 +60,7 @@
 #include "../world/Terrain.h"
 #include "../world/World.h"
 #include "../world/systems/Physics.h"
+#include "../world/systems/AnimationManager.h"
 #include "../world/components/Light.h"
 #include "../world/components/SolidBody.h"
 #include "../world/components/Collider.h"
@@ -75,6 +76,7 @@
 #include <lib/image/image.h>
 #include <ecs/EntityManager.h>
 #include <ecs/BaseClass.h>
+
 
 namespace PluginManager {
 
@@ -961,6 +963,7 @@ void import_kaba() {
 	import_component_class<EgoMarker>(m_world, "EgoMarker");
 	import_component_class<Link>(m_world, "Link");
 	import_component_class<Physics>(m_world, "Physics", "ecs.System"); // well, not a Component... but ok
+	import_component_class<AnimationManager>(m_world, "AnimationManager", "ecs.System");
 
 	auto m_fx = kaba::default_context->load_module("yengine/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");

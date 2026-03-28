@@ -100,9 +100,6 @@ public:
 
 	ParticleManager *particle_manager;
 
-	void iterate(float dt);
-	void iterate_animations(float dt);
-
 	void shift_all(const vec3 &dpos);
 
 	bool net_msg_enabled;
@@ -127,8 +124,6 @@ public:
 		Entity *e;
 		vec3 v;
 	} msg_data;
-
-	int ch_iterate = -1, ch_animation = -1;
 };
 extern World world;
 

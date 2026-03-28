@@ -512,6 +512,7 @@ add_library(moduley SHARED
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
+	src/world/systems/AnimationManager.cpp
 	src/world/systems/Physics.cpp
 	src/world/LevelData.cpp
 	src/world/Model.cpp
@@ -795,6 +796,7 @@ add_executable(y
 	src/world/components/Skeleton.cpp
 	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
+	src/world/systems/AnimationManager.cpp
 	src/world/systems/Physics.cpp
 	src/world/LevelData.cpp
 	src/world/Model.cpp
