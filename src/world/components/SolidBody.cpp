@@ -276,11 +276,8 @@ void SolidBody::do_simple_physics(float dt) {
 
 	// new orientation
 	auto m = entity_get_model(owner);
-	if (m) {
-		owner->get_component<ModelRef>()->update_matrix();
-
+	if (m)
 		m->_ResetPhysAbsolute_();
-	}
 
 	// reset forces
 	force_int = torque_int = v_0;

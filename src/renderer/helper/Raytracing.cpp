@@ -93,13 +93,12 @@ void RayTracingData::update_frame() {
 
 	for (auto mr: models)
 		if (auto m = mr->model) {
-			mr->update_matrix();
 			mr->update_materials();
 			for (int i=0; i<m->materials.num; i++) {
 				auto material = mr->get_material(i);
 
 				MeshDescription md;
-				md.matrix = m->_matrix;
+				md.matrix = mr->owner->get_matrix();
 				md.num_triangles = m->mesh[0]->sub[i].triangle_index.num / 3;
 				md.albedo = material->albedo.with_alpha(material->roughness);
 				md.emission = material->emission.with_alpha(material->metal);
@@ -136,7 +135,6 @@ void RayTracingData::update_frame() {
 			// update
 			for (auto mr: models)
 				if (auto m = mr->model) {
-					mr->update_matrix();
 					for (int i=0; i<m->materials.num; i++)
 						matrices.add(mr->owner->get_matrix().transpose());
 				}

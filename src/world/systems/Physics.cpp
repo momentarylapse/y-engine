@@ -157,11 +157,6 @@ void Physics::on_iterate(float dt) {
 		for (auto *o: list)
 			o->do_simple_physics(dt);
 	}
-
-	for (auto *sb: list) {
-		if (auto mr = sb->owner->get_component<ModelRef>())
-			mr->update_matrix();
-	}
 }
 
 void Physics::register_link(Link *l) {

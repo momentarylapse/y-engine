@@ -55,7 +55,6 @@ struct ModelRef : Component {
 	void update_materials();
 	void set_material(int index, yrenderer::Material* m);
 	yrenderer::Material* get_material(int index);
-	void update_matrix();
 	static const kaba::Class* _class;
 };
 
@@ -158,8 +157,6 @@ public:
 	bool is_copy;
 
 	bool visible;
-
-	mat4 _matrix, matrix_old;
 
 	// template
 	shared<ModelTemplate> _template;

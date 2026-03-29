@@ -360,7 +360,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_size("Model", sizeof(Model));
 	ext->declare_class_element("Model.mesh", &Model::mesh);
 	ext->declare_class_element("Model.materials", &Model::materials);
-	ext->declare_class_element("Model.matrix", &Model::_matrix);
 	ext->declare_class_element("Model.radius", (char*)&model.prop.radius - (char*)&model);
 	ext->declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
 	ext->declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
@@ -452,7 +451,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("ModelRef.materials", &ModelRef::materials);
 	ext->link_class_func("ModelRef.get_material", &ModelRef::get_material);
 	ext->link_class_func("ModelRef.set_material", &ModelRef::set_material);
-	ext->link_class_func("ModelRef.update_matrix", &ModelRef::update_matrix);
 
 	ext->declare_class_size("TerrainRef", sizeof(TerrainRef));
 	ext->declare_class_element("TerrainRef.terrain", &TerrainRef::terrain);

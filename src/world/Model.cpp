@@ -66,11 +66,6 @@ yrenderer::Material *ModelRef::get_material(int index) {
 	return nullptr;
 }
 
-void ModelRef::update_matrix() {
-	if (model)
-		model->_matrix = owner->get_matrix();
-}
-
 
 SubMesh::SubMesh() {
 	force_update = true;
@@ -532,7 +527,7 @@ bool Model::TraceMesh(const vec3 &p1, const vec3 &p2, const vec3 &dir, float ran
 
 vec3 _cdecl Model::get_vertex(int index) {
 	auto s = mesh[MESH_HIGH];
-	return _matrix * s->vertex[index];
+	return s->vertex[index];
 }
 
 

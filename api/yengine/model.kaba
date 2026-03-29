@@ -50,7 +50,6 @@ class Model
 	func extern mut make_editable()
 	func extern mut begin_edit(detail: i32)
 	func extern mut end_edit(detail: i32)
-#	func extern update_matrix()
 	
 	func extern get_vertex(index: i32) -> vec3
 

@@ -203,11 +203,9 @@ bool World::load(const LevelData &ld) {
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
 	for (int i=0; i<skybox.num; i++) {
-		msg_error(str(ld.skybox_filename[i]));
 		skybox[i] = new ModelRef;
 		skybox[i]->owner = new Entity(v_0, quaternion::rotation_v(ld.skybox_ang[i])); // FIXME data leak... eh
 		skybox[i]->model = engine.resource_manager->load_model(ld.skybox_filename[i]);
-		msg_write(skybox[i]->model->mesh[0]->vertex.num);
 	}
 	background = ld.background_color;
 
@@ -436,9 +434,6 @@ void World::shift_all(const vec3 &dpos) {
 
 	if (auto physics = SystemManager::get<Physics>())
 		physics->update_all_bullet();
-
-	for (auto *m: entity_manager->get_component_list<ModelRef>())
-		m->update_matrix();
 
 	msg_data.v = dpos;
 	notify("shift");
