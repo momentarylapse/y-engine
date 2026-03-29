@@ -25,7 +25,7 @@ class Material
 func extern load_material(filename: os.Path) -> Material&
 func extern make_material_unique(m: Material&) -> Material&
 
-class Model extends Component
+class Model
 	class Mesh as shared
 		struct Sub
 			var num_triangles: i32
@@ -44,8 +44,8 @@ class Model extends Component
 	
 	var mesh: shared![Mesh][3]
 
-	func extern override __init__()
-	func extern override __delete__()
+	func extern __init__()
+	func extern __delete__()
 	
 	func extern mut make_editable()
 	func extern mut begin_edit(detail: i32)

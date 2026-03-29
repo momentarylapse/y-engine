@@ -277,7 +277,7 @@ void SolidBody::do_simple_physics(float dt) {
 	// new orientation
 	auto m = entity_get_model(owner);
 	if (m) {
-		m->update_matrix();
+		owner->get_component<ModelRef>()->update_matrix();
 
 		m->_ResetPhysAbsolute_();
 	}
@@ -334,7 +334,7 @@ void SolidBody::get_theta_world(mat3 &theta_world, mat3 &theta_world_inv) {
 void SolidBody::update_data() {
 	unfreeze(this);
 	if (!active) {
-		entity_get_model(owner)->update_matrix();
+		//entity_get_model(owner)->update_matrix();
 	}
 
 	// set ode data..

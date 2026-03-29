@@ -93,7 +93,7 @@ void RayTracingData::update_frame() {
 
 	for (auto mr: models)
 		if (auto m = mr->model) {
-			m->update_matrix();
+			mr->update_matrix();
 			mr->update_materials();
 			for (int i=0; i<m->materials.num; i++) {
 				auto material = mr->get_material(i);
@@ -136,7 +136,7 @@ void RayTracingData::update_frame() {
 			// update
 			for (auto mr: models)
 				if (auto m = mr->model) {
-					m->update_matrix();
+					mr->update_matrix();
 					for (int i=0; i<m->materials.num; i++)
 						matrices.add(mr->owner->get_matrix().transpose());
 				}

@@ -21,7 +21,7 @@
 
 class Physics;
 class Model;
-class Object;
+struct ModelRef;
 namespace yrenderer {
 	class Material;
 }
@@ -77,15 +77,14 @@ public:
 	Model* create_object_x(const Path &filename, const string &name, const vec3 &pos, const quaternion &ang);
 	TerrainRef* create_terrain(const Path &filename, const vec3 &pos);
 
-	Model* attach_model(Entity* e, const Path &filename);
-	void unattach_model(Model* m);
+	ModelRef* attach_model(Entity* e, const Path &filename);
 
 	MultiInstance* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 
 	void delete_entity(Entity *e);
 
 	color background;
-	Array<Model*> skybox;
+	owned_array<ModelRef> skybox;
 	Fog fog;
 
 	Light* attach_light_parallel(Entity* e, const color& c);

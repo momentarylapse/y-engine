@@ -36,7 +36,6 @@ void WorldInstancedEmitter::emit(const RenderParams& params, RenderViewData& rvd
 
 			auto shader = rvd.get_shader(material, 0, "instanced", "");
 
-			m->update_matrix();
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
 			auto& rd = rvd.start(params, mat4::ID, shader, material, 0, ygfx::PrimitiveTopology::TRIANGLES, vb);
 

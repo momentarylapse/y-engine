@@ -111,7 +111,7 @@ MultiInstance* _create_object_multi(World *w, const Path &filename, const Array<
 	return nullptr;
 }
 
-Model* _attach_model(World* w, Entity* e, const Path& filename) {
+ModelRef* _attach_model(World* w, Entity* e, const Path& filename) {
 	KABA_EXCEPTION_WRAPPER( return w->attach_model(e, filename); );
 	return nullptr;
 }
@@ -364,18 +364,13 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("Model.radius", (char*)&model.prop.radius - (char*)&model);
 	ext->declare_class_element("Model.min", (char*)&model.prop.min - (char*)&model);
 	ext->declare_class_element("Model.max", (char*)&model.prop.max- (char*)&model);
-	ext->link_class_func("Model.__init__", &Model::__init__);
-	ext->link_virtual("Model.__delete__", &Model::__delete__, &model);
+	ext->link_class_func("Model.__init__", &kaba::generic_init<Model>);
+	ext->link_class_func("Model.__delete__", &kaba::generic_delete<Model>);
 	ext->link_class_func("Model.make_editable", &Model::make_editable);
 	ext->link_class_func("Model.begin_edit", &Model::begin_edit);
 	ext->link_class_func("Model.end_edit", &Model::end_edit);
 	ext->link_class_func("Model.get_vertex", &Model::get_vertex);
-	ext->link_class_func("Model.update_matrix", &Model::update_matrix);
 //	ext->link_class_func("Model.set_bone_model", &Model::set_bone_model);
-
-	ext->link_virtual("Model.on_init", &Model::on_init, &model);
-	ext->link_virtual("Model.on_delete", &Model::on_delete, &model);
-	ext->link_virtual("Model.on_iterate", &Model::on_iterate, &model);
 
 
 	ext->declare_class_size("UserMesh", sizeof(UserMesh));
@@ -457,6 +452,7 @@ void export_world(kaba::Exporter* ext) {
 	ext->declare_class_element("ModelRef.materials", &ModelRef::materials);
 	ext->link_class_func("ModelRef.get_material", &ModelRef::get_material);
 	ext->link_class_func("ModelRef.set_material", &ModelRef::set_material);
+	ext->link_class_func("ModelRef.update_matrix", &ModelRef::update_matrix);
 
 	ext->declare_class_size("TerrainRef", sizeof(TerrainRef));
 	ext->declare_class_element("TerrainRef.terrain", &TerrainRef::terrain);
@@ -491,7 +487,6 @@ void export_world(kaba::Exporter* ext) {
 	ext->link_class_func("World.create_light_cone", &World::create_light_cone);
 	ext->link_class_func("World.create_camera", &World::create_camera);
 	ext->link_class_func("World.attach_model", &_attach_model);
-	ext->link_class_func("World.unattach_model", &World::unattach_model);
 	ext->link_class_func("World._add_particle", &_world_add_legacy_particle);
 	ext->link_class_func("World.shift_all", &World::shift_all);
 	ext->link_class_func("World.trace", &World::trace);
@@ -957,7 +952,7 @@ void import_kaba() {
 	auto m_model = kaba::default_context->load_module("yengine/model.kaba");
 	import_component_class<Animator>(m_model, "Animator");
 	import_component_class<Skeleton>(m_model, "Skeleton");
-	import_component_class<Model>(m_model, "Model");
+	//import_component_class<Model>(m_model, "Model");
 
 	auto m_world = kaba::default_context->load_module("yengine/world.kaba");
 	import_component_class<SolidBody>(m_world, "SolidBody");

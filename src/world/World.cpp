@@ -203,9 +203,11 @@ bool World::load(const LevelData &ld) {
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
 	for (int i=0; i<skybox.num; i++) {
-		skybox[i] = engine.resource_manager->load_model_copy(ld.skybox_filename[i]);
-		if (skybox[i])
-			skybox[i]->owner = new Entity(v_0, quaternion::rotation_v(ld.skybox_ang[i]));
+		msg_error(str(ld.skybox_filename[i]));
+		skybox[i] = new ModelRef;
+		skybox[i]->owner = new Entity(v_0, quaternion::rotation_v(ld.skybox_ang[i])); // FIXME data leak... eh
+		skybox[i]->model = engine.resource_manager->load_model(ld.skybox_filename[i]);
+		msg_write(skybox[i]->model->mesh[0]->vertex.num);
 	}
 	background = ld.background_color;
 
@@ -256,7 +258,7 @@ bool World::load(const LevelData &ld) {
 
 
 	// FIXME...
-	auto& model_list = entity_manager->get_component_list<Model>();
+	auto& model_list = entity_manager->get_component_list<ModelRef>();
 	for (auto &l: ld.links) {
 		Entity *a = model_list[l.object[0]]->owner;
 		Entity *b = nullptr;
@@ -338,24 +340,18 @@ Model *World::create_object_x(const Path &filename, const string &name, const ve
 		tag->name = name;
 	}
 
-	return m;
+	return m->model;
 }
 
 
-Model* World::attach_model(Entity* e, const Path& filename) {
-	auto *m = engine.resource_manager->load_model_copy(filename);
-
-	entity_manager->_add_component_external_(e, m);
-	m->update_matrix();
+ModelRef* World::attach_model(Entity* e, const Path& filename) {
+	auto mr = entity_manager->add_component<ModelRef>(e);
+	mr->model = engine.resource_manager->load_model(filename);
 
 	// automatic components
-	add_user_components(entity_manager.get(), e, m->_template->components);
+	add_user_components(entity_manager.get(), e, mr->model->_template->components);
 
-	return m;
-}
-
-void World::unattach_model(Model* m) {
-	entity_manager->delete_component(m->owner, m);
+	return mr;
 }
 
 MultiInstance* World::create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang) {
@@ -441,7 +437,7 @@ void World::shift_all(const vec3 &dpos) {
 	if (auto physics = SystemManager::get<Physics>())
 		physics->update_all_bullet();
 
-	for (auto *m: entity_manager->get_component_list<Model>())
+	for (auto *m: entity_manager->get_component_list<ModelRef>())
 		m->update_matrix();
 
 	msg_data.v = dpos;

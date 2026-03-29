@@ -55,6 +55,7 @@ struct ModelRef : Component {
 	void update_materials();
 	void set_material(int index, yrenderer::Material* m);
 	yrenderer::Material* get_material(int index);
+	void update_matrix();
 	static const kaba::Class* _class;
 };
 
@@ -112,13 +113,10 @@ enum {
 	MESH_PHYSICAL = 42 // for edward
 };
 
-class Model : public Component {
+class Model {
 public:
 	Model();
-	~Model() override;
-
-	void _cdecl __init__();
-	void _cdecl __delete__() override;
+	~Model();
 
 	Model *copy(Model *pre_allocated = nullptr);
 	void reset_data();
@@ -162,7 +160,6 @@ public:
 	bool visible;
 
 	mat4 _matrix, matrix_old;
-	void update_matrix();
 
 	// template
 	shared<ModelTemplate> _template;
@@ -170,9 +167,6 @@ public:
 
 	// engine data
 	bool _detail_needed_[MODEL_NUM_MESHES]; // per frame
-
-
-	static const kaba::Class *_class;
 };
 
 Model* entity_get_model(Entity* entity);

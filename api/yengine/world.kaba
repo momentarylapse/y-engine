@@ -204,7 +204,7 @@ class World
 	func extern selfref ego() -> Entity*
 	
 	var background: Color
-	var skyboxes: Model&[]
+	var skyboxes: ModelRef&[]
 	
 	var fog: Fog
 	
@@ -225,8 +225,7 @@ class World
 	func extern mut selfref create_terrain(filename: os.Path, pos: vec3) -> TerrainRef&
 	func extern mut selfref create_camera(pos: vec3, ang: Quaternion) -> Camera&
 	func extern mut selfref create_entity(pos: vec3, ang: Quaternion = Quaternion.ID) -> Entity&
-	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> Model&
-	func extern mut selfref unattach_model(m: Model&)
+	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> ModelRef&
 	func extern mut shift_all(dpos: vec3)
 	func extern globalref trace(p1: vec3, p2: vec3, mode: TraceMode = TraceMode.PHYSICAL, ignore: Entity* = (nil as Entity*)) -> CollisionData?
 	
@@ -251,7 +250,6 @@ class World
 func ref get_model(out e: Entity) -> Model*
 	for mut mr in e.get_component[ModelRef]()
 		return mr.model
-	return e.get_component[Model]()
 	return nil
 #func body(e: Entity) -> SolidBody*
 #	var b: SolidBody* = e.get_component(SolidBody)
