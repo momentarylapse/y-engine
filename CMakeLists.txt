@@ -509,8 +509,8 @@ add_library(moduley SHARED
 	src/world/components/Light.cpp
 	src/world/components/Link.cpp
 	src/world/components/MultiInstance.cpp
+	src/world/components/RigidBody.cpp
 	src/world/components/Skeleton.cpp
-	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
 	src/world/systems/AnimationManager.cpp
 	src/world/systems/Physics.cpp
@@ -793,8 +793,8 @@ add_executable(y
 	src/world/components/Light.cpp
 	src/world/components/Link.cpp
 	src/world/components/MultiInstance.cpp
+	src/world/components/RigidBody.cpp
 	src/world/components/Skeleton.cpp
-	src/world/components/SolidBody.cpp
 	src/world/components/UserMesh.cpp
 	src/world/systems/AnimationManager.cpp
 	src/world/systems/Physics.cpp

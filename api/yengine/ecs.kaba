@@ -2,7 +2,7 @@ use kaba
 use .common.*
 
 #class extern Model
-#class extern SolidBody
+#class extern RigidBody
 
 struct BaseClass
 	#func extern __init__()
@@ -35,7 +35,7 @@ struct Entity
 
 struct CollisionData
 	var entity: Entity&
-	#var body: SolidBody*
+	#var body: RigidBody*
 	var pos, n: vec3
 
 

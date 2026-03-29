@@ -7,14 +7,13 @@ use .model.*
 use .audio.*
 
 
-class SolidBody extends Component
-	let PARAMETERS = "mass,theta,physics_active,physics_passive,g_factor"
+class RigidBody extends Component
+	let PARAMETERS = "mass,theta,dynamic,g_factor"
 	var vel: vec3 # world frame
 	var rot: vec3 # world frame
 	var mass: f32
 	var theta: mat3 # local frame
-	var physics_active: bool
-	var physics_passive: bool
+	var dynamic: bool
 	var g_factor: f32
 	
 	# all parameters in world frame!
@@ -188,7 +187,7 @@ class Physics extends System
 	var enabled: bool
 	var collisions_enabled: bool
 	func extern get_g(pos: vec3) -> vec3
-	func extern mut set_active_physics(o: Model, active: bool)
+	func extern mut set_dynamic(out e: Entity, dynamic: bool)
 
 
 class AnimationManager extends System
@@ -251,8 +250,8 @@ func ref get_model(out e: Entity) -> Model*
 	for mut mr in e.get_component[ModelRef]()
 		return mr.model
 	return nil
-#func body(e: Entity) -> SolidBody*
-#	var b: SolidBody* = e.get_component(SolidBody)
+#func body(e: Entity) -> RigidBody*
+#	var b: RigidBody* = e.get_component(RigidBody)
 #	return b
 
 var extern world: World
