@@ -164,15 +164,12 @@ enum LinkType
 	SLIDER as "slider"
 
 class Link extends Component
-	var type: i32
-	var a, b: Entity*
+	let PARAMETERS = "type,a,b"
+	var type: LinkType
+	var a, b: i32
 	func extern mut set_motor(v: f32, max: f32)
 #	extern void mut set_axis(vector v)
 	func extern mut set_frame(n: i32, q: Quaternion)
-
-#	class Socket extends Link
-#		extern void __init__(Model* a, Model* b, vector pos)
-#	...
 
 
 
@@ -227,6 +224,8 @@ class World
 	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> ModelRef&
 	func extern mut shift_all(dpos: vec3)
 	func extern globalref trace(p1: vec3, p2: vec3, mode: TraceMode = TraceMode.PHYSICAL, ignore: Entity* = (nil as Entity*)) -> CollisionData?
+	
+	func extern selfref entity(index: i32) -> Entity*
 	
 	func selfref objects() -> ModelRef&[]&
 		return get_component_family_list[ModelRef]()
