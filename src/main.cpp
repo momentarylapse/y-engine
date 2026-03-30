@@ -413,11 +413,11 @@ int main(const Array<string> &arg) {
 
 	try {
 		y_app.run(arg);
-	} catch (const std::exception& e) {
-		msg_error(e.what());
-		return EXIT_FAILURE;
 	} catch (const Exception& e) {
 		msg_error(e.message());
+		return EXIT_FAILURE;
+	} catch (const std::exception& e) {
+		msg_error(e.what());
 		return EXIT_FAILURE;
 	}
 
