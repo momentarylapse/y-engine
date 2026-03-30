@@ -15,6 +15,8 @@
 #include <lib/os/msg.h>
 #include <lib/nix/nix.h>
 #include <lib/kaba/kaba.h>
+#include <lib/os/filesystem.h>
+#include <lib/profiler/Profiler.h>
 #include <EngineData.h>
 #include <ecs/Component.h>
 #include <ecs/ComponentManager.h>
@@ -39,10 +41,9 @@
 #include "systems/Physics.h"
 #include "ecs/SystemManager.h"
 
+#include "../plugins/PluginManager.h"
 #ifdef _X_ALLOW_X_
 #include "../fx/ParticleManager.h"
-#include "../plugins/PluginManager.h"
-#include <lib/profiler/Profiler.h>
 #endif
 
 
@@ -164,10 +165,13 @@ Array<ScriptInstanceData> sort_components(const Array<ScriptInstanceData>& compo
 void add_user_components(EntityManager* em, Entity *ent, const Array<ScriptInstanceData>& components) {
 	for (auto &cc: sort_components(components)) {
 		msg_write("add component " + cc.class_name);
-#ifdef _X_ALLOW_X_
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
 		[[maybe_unused]] auto comp = em->_add_component_generic_(ent, type, cc.variables);
-#endif
+
+		// templates -> recursion...
+		if (type == TemplateRef::_class)
+			if (auto t = ((TemplateRef*)comp)->_template)
+				add_user_components(em, ent, t->components);
 	}
 }
 
@@ -186,7 +190,7 @@ bool World::load(const LevelData &ld) {
 
 	fog = ld.fog;
 
-	for (auto &l: ld.lights) {
+	/*for (auto &l: ld.lights) {
 		auto o = create_entity(l.pos, quaternion::rotation(l.ang));
 		auto ll = entity_manager->add_component<Light>(o);
 		ll->light.init(l.type, l._color, l.theta);
@@ -198,7 +202,7 @@ bool World::load(const LevelData &ld) {
 			ll->light.power = yrenderer::Light::_radius_to_power(l.radius);
 
 		add_user_components(entity_manager.get(), o, l.components);
-	}
+	}*/
 
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
@@ -209,6 +213,7 @@ bool World::load(const LevelData &ld) {
 	}
 	background = ld.background_color;
 
+#if 0
 	for (auto &c: ld.cameras) {
 		auto cc = create_camera(c.pos, quaternion::rotation(c.ang));
 		cam_main = cc;
@@ -246,6 +251,7 @@ bool World::load(const LevelData &ld) {
 		add_user_components(entity_manager.get(), tt->owner, t.components);
 		ok &= tt->terrain and !tt->terrain->error;
 	}
+#endif
 
 	// (raw) entities
 	foreachi(auto &e, ld.entities, i) {
@@ -256,7 +262,7 @@ bool World::load(const LevelData &ld) {
 
 
 	// FIXME...
-	auto& model_list = entity_manager->get_component_list<ModelRef>();
+	/*auto& model_list = entity_manager->get_component_list<ModelRef>();
 	for (auto &l: ld.links) {
 		Entity *a = model_list[l.object[0]]->owner;
 		Entity *b = nullptr;
@@ -267,7 +273,7 @@ bool World::load(const LevelData &ld) {
 		ll->a = a;
 		ll->b = b;
 		ll->link_type = l.type;
-	}
+	}*/
 
 	auto& cameras = entity_manager->get_component_list<Camera>();
 	if (cameras.num == 0) {
@@ -298,7 +304,7 @@ TerrainRef* World::create_terrain(const Path &filename, const vec3 &pos) {
 	t->material = engine.resource_manager->load_material("");
 
 	entity_manager->add_component<TerrainCollider>(e);
-	entity_manager->add_component<RigidBody>(e, {{"dynamic", "", "false"}});
+	entity_manager->add_component<RigidBody>(e, {{"dynamic", false}});
 
 	return t;
 }
@@ -312,8 +318,8 @@ Entity* World::create_from_template(const Path& filename, const vec3 &pos, const
 
 	if (const auto t = engine.resource_manager->load_template(filename)) {
 		add_user_components(entity_manager.get(), e, t->components);
-	} else {
-		attach_model(e, filename.no_ext());
+	} else if (os::fs::exists(engine.object_dir | filename.with(".model"))) {
+		attach_model(e, filename);
 	}
 
 	return e;

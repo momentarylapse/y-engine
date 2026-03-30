@@ -91,7 +91,7 @@ bool LevelData::load(const Path& filename) {
 
 				for (const auto& a: ee.attributes)
 					if (a.key != "script" and a.key != "class" and a.key != "var")
-						sd.variables.add({a.key, "", a.value});
+						sd.variables.add({a.key, Any::parse(a.value)});
 				components.add(sd);
 			}
 	};
@@ -100,56 +100,66 @@ bool LevelData::load(const Path& filename) {
 	if (auto cont = p.elements[0].find("3d")) {
 		for (auto &e: cont->elements) {
 			if (e.tag == "camera") {
-				Camera c;
-				c.pos = s2v(e.value("pos"));
-				c.ang = s2v(e.value("ang"));
-				c.fov = e.value("fov", f2s(pi/4, 3))._float();
-				c.min_depth = e.value("minDepth", "1")._float();
-				c.max_depth = e.value("maxDepth", "10000")._float();
-				c.exposure = e.value("exposure", "1")._float();
-				c.bloom_factor = e.value("bloomFactor", "0.15")._float();
-				read_components(c.components, e);
-				cameras.add(c);
-			} else if (e.tag == "light") {
-				Light l;
-				l.harshness = e.value("harshness")._float();
-				l._color = s2c(e.value("color"));
-				l.radius = -1;
-				l.theta = -1;
-				if (e.value("type") == "directional") {
-					l.type = yrenderer::LightType::DIRECTIONAL;
-					l.ang = s2v(e.value("ang"));
-				} else if (e.value("type") == "point") {
-					l.type = yrenderer::LightType::POINT;
-					l.pos= s2v(e.value("pos"));
-					l.radius = e.value("radius")._float();
-				} else if (e.value("type") == "cone") {
-					l.type = yrenderer::LightType::CONE;
-					l.pos= s2v(e.value("pos"));
-					l.ang = s2v(e.value("ang"));
-					l.radius = e.value("radius")._float();
-					l.theta = e.value("theta")._float();
-				}
-				l.enabled = e.value("enabled", "true")._bool();
-				read_components(l.components, e);
-				lights.add(l);
-			} else if (e.tag == "terrain") {
-				Terrain t;
-				t.filename = e.value("file");
-				t.material = e.value("material");
-				t.pos = s2v(e.value("pos"));
-				read_components(t.components, e);
-				terrains.add(t);
-			} else if (e.tag == "object") {
-				Object o;
-				o.filename = e.value("file");
-				o.name = e.value("name");
+				Entity o;
 				o.pos = s2v(e.value("pos"));
-				o.ang = s2v(e.value("ang"));
+				o.ang = quaternion::rotation(s2v(e.value("ang")));
+				ScriptInstanceData c = {"Camera"};
+				c.set("fov", e.value("fov", f2s(pi/4, 3))._float());
+				c.set("min_depth", e.value("minDepth", "1")._float());
+				c.set("max_depth", e.value("maxDepth", "10000")._float());
+				c.set("exposure", e.value("exposure", "1")._float());
+				c.set("bloom_factor", e.value("bloomFactor", "0.15")._float());
+				o.components.add(c);
+				read_components(o.components, e);
+				entities.add(o);
+			} else if (e.tag == "light") {
+				Entity o;
+				o.pos = s2v(e.value("pos"));
+				o.ang = quaternion::rotation(s2v(e.value("ang")));
+				ScriptInstanceData l = {"Light"};
+				l.set("harshness", e.value("harshness")._float());
+				l.set("color", e.value("color"));
+				l.set("power", e.value("power", "1.0")._float());
+				l.set("theta", -1.0);
+				l.set("allow_shadow", false);
+				if (e.value("type") == "directional") {
+					l.set("type", (int)yrenderer::LightType::DIRECTIONAL);
+					l.set("allow_shadow", true);
+				} else if (e.value("type") == "point") {
+					l.set("type", (int)yrenderer::LightType::POINT);
+					if (e.has_value("radius"))
+						l.set("power", yrenderer::Light::_radius_to_power(e.value("radius")._float()));
+				} else if (e.value("type") == "cone") {
+					l.set("type", (int)yrenderer::LightType::CONE);
+					if (e.has_value("radius"))
+						l.set("power", yrenderer::Light::_radius_to_power(e.value("radius")._float()));
+					l.set("theta", e.value("theta")._float());
+				}
+				l.set("enabled", e.value("enabled", "true")._bool());
+				o.components.add(l);
+				read_components(o.components, e);
+				entities.add(o);
+			} else if (e.tag == "terrain") {
+				Entity o;
+				o.pos = s2v(e.value("pos"));
+				o.ang = quaternion::rotation(s2v(e.value("ang")));
+				ScriptInstanceData t = {"TerrainRef"};
+				t.set("terrain", e.value("file"));
+				t.set("material", e.value("material"));
+				o.components.add(t);
+				read_components(o.components, e);
+				entities.add(o);
+			} else if (e.tag == "object") {
+				Entity o;
+				o.pos = s2v(e.value("pos"));
+				o.ang = quaternion::rotation(s2v(e.value("ang")));
+				ScriptInstanceData t = {"TemplateRef"};
+				t.set("template", e.value("file"));
+				o.components.add(t);
 				if (e.value("role") == "ego")
 					o.components.add({"EgoMarker", "", {}});
 				read_components(o.components, e);
-				objects.add(o);
+				entities.add(o);
 			} else if (e.tag == "entity") {
 				Entity o;
 				o.pos = s2v(e.value("pos"));
@@ -159,7 +169,7 @@ bool LevelData::load(const Path& filename) {
 				read_components(o.components, e);
 				entities.add(o);
 			} else if (e.tag == "link") {
-				Link l;
+				/*Link l;
 				l.pos = s2v(e.value("pos"));
 				l.ang = s2v(e.value("ang"));
 				l.object[0] = e.value("a")._int();
@@ -171,7 +181,7 @@ bool LevelData::load(const Path& filename) {
 					l.type = LinkType::UNIVERSAL;
 				if (e.value("type") == "spring")
 					l.type = LinkType::SPRING;
-				links.add(l);
+				links.add(l);*/
 			}
 		}
 	}
@@ -325,7 +335,7 @@ void LevelData::save(const Path &filename) {
 
 Array<ScriptInstanceData> LevelData::auto_terrain_components() {
 	return {{"TerrainCollider", "", {{}}},
-		{"RigidBody", "", {{"dynamic", "", "false"}}}};
+		{"RigidBody", "", {{"dynamic", false}}}};
 }
 
 
