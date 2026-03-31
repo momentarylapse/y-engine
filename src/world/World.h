@@ -91,8 +91,6 @@ public:
 
 	Camera* create_camera(const vec3& pos, const quaternion& ang);
 
-	ParticleManager* particle_manager;
-
 	void shift_all(const vec3& dpos);
 
 	Entity* ego();

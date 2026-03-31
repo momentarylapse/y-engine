@@ -20,7 +20,6 @@
 
 struct ParticleGroup : Component {
 	ParticleGroup();
-	void __init__();
 
 	Particle* emit_particle(const vec3& pos, const color& col, float r, float ttl);
 	Beam* emit_beam(const vec3& pos, const vec3& length, const color& col, float r, float ttl);
@@ -41,7 +40,6 @@ struct ParticleGroup : Component {
 
 struct ParticleEmitter : ParticleGroup {
 	ParticleEmitter();
-	void __init__();
 
 	virtual void on_init_particle(Particle *p) {}
 	virtual void on_init_beam(Beam *b) {}

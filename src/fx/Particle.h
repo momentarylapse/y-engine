@@ -34,8 +34,6 @@ struct LegacyParticle : Component {
 	LegacyParticle();
 	~LegacyParticle() override;
 
-	void __init__();
-	void __delete__() override;
 	void on_iterate(float dt) override {}
 
 	vec3 vel;

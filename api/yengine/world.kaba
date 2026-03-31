@@ -188,6 +188,7 @@ class Physics extends System
 
 
 class AnimationManager extends System
+class ParticleManager extends System
 
 
 enum TraceMode

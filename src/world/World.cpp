@@ -36,9 +36,6 @@
 #include "ecs/SystemManager.h"
 
 #include "../plugins/PluginManager.h"
-#ifdef _X_ALLOW_X_
-#include "../fx/ParticleManager.h"
-#endif
 
 
 
@@ -65,10 +62,6 @@ World::World() {
 	entity_manager->component_manager->f_apply = [this] (const kaba::Class* type, Component* c, const Array<ScriptInstanceDataVariable>& vars) {
 		PluginManager::assign_variables(c, type, vars);
 	};
-#endif
-
-#ifdef _X_ALLOW_X_
-	particle_manager = new ParticleManager(entity_manager.get());
 #endif
 
 	reset();

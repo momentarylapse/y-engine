@@ -193,11 +193,8 @@ public:
 			physics->gravity = level_data.gravity;
 			physics->collisions_enabled = true; // level_data.physics_enabled;
 		}
-		{
-			auto ani = new AnimationManager();
-			ani->entity_manager = world.entity_manager.get();
-			SystemManager::register_system(AnimationManager::_class, ani);
-		}
+		SystemManager::register_system(AnimationManager::_class, new AnimationManager());
+		SystemManager::register_system(ParticleManager::_class, new ParticleManager());
 		for (auto &s: level_data.systems)
 			SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
@@ -333,7 +330,6 @@ public:
 		SchedulerManager::iterate(engine.elapsed);
 		world.entity_manager->component_manager->iterate(engine.elapsed);
 
-		world.particle_manager->iterate(engine.elapsed);
 		gui::iterate(engine.elapsed);
 
 		profiler::end(ch_iter);

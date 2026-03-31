@@ -52,7 +52,6 @@ void SystemManager::register_system(const kaba::Class* type, System* s) {
 	systems.add(s);
 	system_by_type.add({type, s});
 	s->ch_iterate = profiler::create_channel(type->long_name(), ch_system);
-	// TODO set entity_manager
 
 	s->entity_manager = entity_manager;
 	entity_manager->out_add_component >> s->in_add_component;

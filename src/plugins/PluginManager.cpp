@@ -15,6 +15,7 @@
 #include "../fx/Particle.h"
 #include "../fx/Beam.h"
 #include "../fx/ParticleEmitter.h"
+#include "../fx/ParticleManager.h"
 #include "../gui/gui.h"
 #include "../gui/Node.h"
 #include "../gui/Picture.h"
@@ -581,8 +582,8 @@ void export_fx(kaba::Exporter* ext) {
 		ext->declare_class_element("LegacyParticle.color", &LegacyParticle::col);
 		ext->declare_class_element("LegacyParticle.source", &LegacyParticle::source);
 		ext->declare_class_element("LegacyParticle.enabled", &LegacyParticle::enabled);
-		ext->link_class_func("LegacyParticle.__init__", &LegacyParticle::__init__);
-		ext->link_virtual("LegacyParticle.__delete__", &LegacyParticle::__delete__, &particle);
+		ext->link_class_func("LegacyParticle.__init__", &kaba::generic_init<LegacyParticle>);
+		ext->link_virtual("LegacyParticle.__delete__", &kaba::generic_virtual<LegacyParticle>::__delete__, &particle);
 		//ext->link_virtual("LegacyParticle.on_iterate", &Particle::on_iterate, &particle);
 		//ext->link_class_func("LegacyParticle.__del_override__", &global_delete);
 		ext->link_class_func("LegacyParticle.__del_override__", &DeletionQueue::add);
@@ -596,7 +597,7 @@ void export_fx(kaba::Exporter* ext) {
 	ParticleGroup group;
 	ext->declare_class_size("ParticleGroup", sizeof(ParticleGroup));
 	ext->declare_class_element("ParticleGroup.source", &ParticleGroup::source);
-	ext->link_class_func("ParticleGroup.__init__", &ParticleGroup::__init__);
+	ext->link_class_func("ParticleGroup.__init__", &kaba::generic_init<ParticleGroup>);
 	ext->link_class_func("ParticleGroup.emit", &ParticleGroup::emit_particle);
 	ext->link_class_func("ParticleGroup.emit_beam", &ParticleGroup::emit_beam);
 	ext->link_class_func("ParticleGroup.iterate_particles", &ParticleGroup::iterate_particles);
@@ -613,7 +614,7 @@ void export_fx(kaba::Exporter* ext) {
 	ext->declare_class_element("ParticleEmitter.spawn_beams", &ParticleEmitter::spawn_beams);
 	ext->declare_class_element("ParticleEmitter.spawn_dt", &ParticleEmitter::spawn_dt);
 	ext->declare_class_element("ParticleEmitter.spawn_time_to_live", &ParticleEmitter::spawn_time_to_live);
-	ext->link_class_func("ParticleEmitter.__init__", &ParticleEmitter::__init__);
+	ext->link_class_func("ParticleEmitter.__init__", &kaba::generic_init<ParticleEmitter>);
 	ext->link_class_func("ParticleEmitter.emit_particle", &ParticleEmitter::emit_particle);
 	ext->link_class_func("ParticleEmitter.iterate_emitter", &ParticleEmitter::iterate_emitter);
 	ext->link_virtual("ParticleEmitter.__delete__", &ParticleEmitter::__delete__, &emitter);
@@ -973,6 +974,7 @@ void import_kaba() {
 	import_component_class<Link>(m_world, "Link");
 	import_component_class<Physics>(m_world, "Physics", "ecs.System"); // well, not a Component... but ok
 	import_component_class<AnimationManager>(m_world, "AnimationManager", "ecs.System");
+	import_component_class<ParticleManager>(m_world, "ParticleManager", "ecs.System");
 
 	auto m_fx = kaba::default_context->load_module("yengine/fx.kaba");
 	import_component_class<ParticleGroup>(m_fx, "ParticleGroup");
