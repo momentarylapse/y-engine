@@ -40,7 +40,6 @@ void WorldOpaqueModelsEmitter::emit(const yrenderer::RenderParams& params, yrend
 			auto& rd = rvd.start(params, e->get_matrix(), shader, material, 0, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
 			if (ani) {
-				ani->buf->update_array(ani->dmatrix);
 #ifdef USING_VULKAN
 				rd.dset->set_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, ani->buf);
 #else
@@ -141,7 +140,6 @@ void WorldTransparentModelsEmitter::emit(const yrenderer::RenderParams& params, 
 			auto& rd = rvd.start(params, dc.entity->get_matrix(), shader, material, k, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
 			if (dc.ani) {
-				dc.ani->buf->update_array(dc.ani->dmatrix);
 #ifdef USING_VULKAN
 				rd.dset->set_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, dc.ani->buf);
 #else

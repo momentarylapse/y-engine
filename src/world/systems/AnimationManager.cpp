@@ -8,6 +8,8 @@
 #include "../components/Skeleton.h"
 #include <lib/profiler/Profiler.h>
 
+#include "lib/os/msg.h"
+
 const kaba::Class* AnimationManager::_class = nullptr;
 
 void AnimationManager::on_iterate(float dt) {
@@ -18,6 +20,7 @@ void AnimationManager::on_iterate(float dt) {
 
 
 	// TODO
+#if 0
 	auto& list2 = entity_manager->get_component_list<Skeleton>();
 	for (auto o: list2) {
 		for (auto b: o->bones) {
@@ -27,6 +30,23 @@ void AnimationManager::on_iterate(float dt) {
 			}
 		}
 	}
-	//o->do_animation(dt);
+#endif
+
 	profiler::end(ch_iterate);
+}
+
+void AnimationManager::on_add_component(const EntityMessageParams &params) {
+	if (auto a = params.get<Skeleton>()) {
+		msg_error("ADD SKELETON");
+		//a->_register(entity_manager);
+	} else if (auto a = params.get<Animator>()) {
+		msg_error("ADD ANIMATION");
+		a->_register();
+	}
+}
+
+void AnimationManager::on_remove_component(const EntityMessageParams &params) {
+	if (auto a = params.get<Animator>()) {
+		a->unregister();
+	}
 }

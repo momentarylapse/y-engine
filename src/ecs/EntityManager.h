@@ -18,6 +18,12 @@ struct EntityMessageParams {
 	Entity* entity;
 	Component* component;
 	const kaba::Class* type;
+	template<class T>
+	T* get() const {
+		if (type == T::_class)
+			return (T*)component;
+		return nullptr;
+	}
 };
 
 class EntityManager : public obs::Node<VirtualBase> {

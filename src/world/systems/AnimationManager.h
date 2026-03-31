@@ -10,6 +10,8 @@
 class AnimationManager : public System {
 public:
 	void on_iterate(float dt) override;
+	void on_add_component(const EntityMessageParams &params) override;
+	void on_remove_component(const EntityMessageParams &params) override;
 
 	static const kaba::Class* _class;
 };

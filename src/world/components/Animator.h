@@ -64,9 +64,6 @@ public:
 
 
 
-#define MODEL_MAX_MOVE_OPS				8
-
-
 // commands for animation (move operations)
 class MoveOperation {
 public:
@@ -89,29 +86,31 @@ public:
 	Animator();
 	~Animator() override;
 
-	void on_init() override;
+	void _register();
+	void unregister();
 
 	// move operations
-	int num_operations;
 	bool auto_animated;
-	MoveOperation operation[MODEL_MAX_MOVE_OPS];
+	Array<MoveOperation> operations;
 	shared<MetaMove> meta;
 
 	// dynamical data (own)
 	//Mesh *mesh[MODEL_NUM_MESHES]; // here the animated vertices are stored before rendering
 
+
 	Array<mat4> dmatrix;
 	ygfx::UniformBuffer* buf;
 
 	// animation
-	void _cdecl reset();
-	bool _cdecl is_done(int operation_no);
-	bool _cdecl add_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop);
-	bool _cdecl add(MoveOperation::Command cmd, int move_no, float &time, float dt, bool loop);
-	int _cdecl get_frames(int move_no);
+	void reset();
+	bool is_done(int operation_no);
+	bool _is_done(MoveOperation& op);
+	bool add_x(MoveOperation::Command cmd, float param1, float param2, int move_no, float &time, float dt, float vel_param, bool loop);
+	bool add(MoveOperation::Command cmd, int move_no, float &time, float dt, bool loop);
+	int get_frames(int move_no);
 	void do_animation(float elapsed);
 
-	void _add_time(int operation_no, float elapsed, float v, bool loop);
+	void _add_time(MoveOperation& op, float elapsed, float v, bool loop);
 
 
 
