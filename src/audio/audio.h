@@ -10,7 +10,9 @@
 struct vec3;
 struct quaternion;
 class Path;
-struct Entity;
+namespace ecs {
+	struct Entity;
+}
 
 namespace audio {
 
@@ -22,7 +24,7 @@ extern float VolumeMusic, VolumeSound;
 
 void init();
 void exit();
-void attach_listener(Entity* e);
+void attach_listener(ecs::Entity* e);
 void iterate(float dt);
 void reset();
 

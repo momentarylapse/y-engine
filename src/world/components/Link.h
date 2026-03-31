@@ -14,7 +14,9 @@ struct quaternion;
 
 class btTypedConstraint;
 
-struct Entity;
+namespace ecs {
+	struct Entity;
+}
 struct RigidBody;
 
 
@@ -28,7 +30,7 @@ enum class LinkType {
 	SLIDER
 };
 
-struct Link : Component {
+struct Link : ecs::Component {
 	//Link();
 	~Link() override;
 

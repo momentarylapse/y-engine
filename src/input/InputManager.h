@@ -24,13 +24,13 @@ void iterate();
 
 #define SEND_EVENT(NAME) \
 	{ \
-		for (auto s: SystemManager::systems) \
+		for (auto s: ecs::SystemManager::systems) \
 			s->NAME(); \
 		gui::handle_input(mouse01, [](gui::Node *n) { return n->NAME(); }); \
 	}
 
 #define SEND_EVENT_P(NAME, k) \
-	for (auto s: SystemManager::systems) \
+	for (auto s: ecs::SystemManager::systems) \
 		s->NAME(k);
 
 

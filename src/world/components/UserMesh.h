@@ -21,7 +21,7 @@ namespace yrenderer {
 	struct Material;
 }
 
-struct UserMesh : Component {
+struct UserMesh : ecs::Component {
 	UserMesh() = default;
 
 	owned<yrenderer::Material> material;

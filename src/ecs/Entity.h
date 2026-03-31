@@ -12,6 +12,9 @@
 #include "BaseClass.h"
 
 struct mat4;
+
+namespace ecs {
+
 struct Component;
 class EntityManager;
 
@@ -47,4 +50,6 @@ struct Entity {
 	Entity *parent;
 	Entity *_cdecl root() const;
 };
+
+}
 

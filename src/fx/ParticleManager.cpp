@@ -30,7 +30,7 @@ static void iterate_legacy_particles(Array<LegacyParticle*>& particles, float dt
 	}
 
 	for (auto p: to_del)
-		EntityManager::global->delete_component(p->owner, p);
+		ecs::EntityManager::global->delete_component(p->owner, p);
 }
 
 

@@ -24,7 +24,9 @@ namespace yrenderer {
 	enum class LightType;
 }
 class Terrain;
-struct ScriptInstanceData;
+namespace ecs {
+	struct InstanceData;
+}
 struct Light;
 class ParticleManager;
 struct Particle;
@@ -46,13 +48,13 @@ struct LevelData {
 	bool load(const Path &filename);
 	void save(const Path &filename);
 
-	static Array<ScriptInstanceData> auto_terrain_components();
+	static Array<ecs::InstanceData> auto_terrain_components();
 
 	struct Entity {
 		string name;
 		vec3 pos;
 		quaternion ang;
-		Array<ScriptInstanceData> components;
+		Array<ecs::InstanceData> components;
 	};
 
 	Path world_filename;
@@ -60,7 +62,7 @@ struct LevelData {
 	Array<vec3> skybox_ang;
 	color background_color;
 	Array<Entity> entities;
-	Array<ScriptInstanceData> systems;
+	Array<ecs::InstanceData> systems;
 
 	bool physics_enabled;
 	PhysicsMode physics_mode;

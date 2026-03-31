@@ -78,7 +78,7 @@ struct MoveOperation {
 	float time, param1, param2;
 };
 
-struct Animator : Component {
+struct Animator : ecs::Component {
 	Animator();
 	~Animator() override;
 

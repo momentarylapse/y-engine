@@ -14,7 +14,7 @@
 
 class Model;
 
-struct MultiInstance : Component {
+struct MultiInstance : ecs::Component {
 	MultiInstance();
 	~MultiInstance() override;
 

@@ -30,7 +30,7 @@ struct Particle {
 	bool enabled;
 };
 
-struct LegacyParticle : Component {
+struct LegacyParticle : ecs::Component {
 	LegacyParticle();
 	~LegacyParticle() override;
 

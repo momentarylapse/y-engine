@@ -13,7 +13,7 @@
 const kaba::Class* AnimationManager::_class = nullptr;
 
 void AnimationManager::on_iterate(float dt) {
-	profiler::begin(ch_iterate);
+	profiler::begin(channel);
 	auto& list = entity_manager->get_component_list<Animator>();
 	for (auto *o: list)
 		o->do_animation(dt);
@@ -32,10 +32,10 @@ void AnimationManager::on_iterate(float dt) {
 	}
 #endif
 
-	profiler::end(ch_iterate);
+	profiler::end(channel);
 }
 
-void AnimationManager::on_add_component(const EntityMessageParams &params) {
+void AnimationManager::on_add_component(const ecs::MessageParams &params) {
 	if (auto a = params.get<Skeleton>()) {
 		msg_error("ADD SKELETON");
 		//a->_register(entity_manager);
@@ -45,7 +45,7 @@ void AnimationManager::on_add_component(const EntityMessageParams &params) {
 	}
 }
 
-void AnimationManager::on_remove_component(const EntityMessageParams &params) {
+void AnimationManager::on_remove_component(const ecs::MessageParams &params) {
 	if (auto a = params.get<Animator>()) {
 		a->unregister();
 	}

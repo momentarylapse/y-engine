@@ -148,7 +148,7 @@ public:
 		audio::init();
 
 		PluginManager::init();
-		SystemManager::init(ch_iter, world.entity_manager.get());
+		ecs::SystemManager::init(ch_iter, world.entity_manager.get());
 
 		ErrorHandler::init();
 
@@ -185,7 +185,7 @@ public:
 		{
 			auto physics = new Physics();
 			physics->entity_manager = world.entity_manager.get();
-			SystemManager::register_system(Physics::_class, physics);
+			ecs::SystemManager::register_system(Physics::_class, physics);
 
 			//physics->mode = PhysicsMode::FULL_EXTERNAL;
 			physics->enabled = level_data.physics_enabled;
@@ -193,12 +193,12 @@ public:
 			physics->gravity = level_data.gravity;
 			physics->collisions_enabled = true; // level_data.physics_enabled;
 		}
-		SystemManager::register_system(AnimationManager::_class, new AnimationManager());
-		SystemManager::register_system(ParticleManager::_class, new ParticleManager());
+		ecs::SystemManager::register_system(AnimationManager::_class, new AnimationManager());
+		ecs::SystemManager::register_system(ParticleManager::_class, new ParticleManager());
 		for (auto &s: level_data.systems)
-			SystemManager::create(s.filename, s.class_name, s.variables);
+			ecs::SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
-			SystemManager::create(s, "", {});
+			ecs::SystemManager::create(s, "", {});
 
 		msg_left();
 		msg_write("|                                                      |");
@@ -266,7 +266,7 @@ public:
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
 			input::iterate();
-			SystemManager::handle_input();
+			ecs::SystemManager::handle_input();
 
 			iterate();
 			draw_frame();
@@ -290,7 +290,7 @@ public:
 	void reset_game() {
 		//for (auto rp: engine.render_paths)
 		//	rp->world_renderer->reset();
-		SystemManager::reset();
+		ecs::SystemManager::reset();
 		SchedulerManager::reset();
 		CameraReset();
 		world.reset();
@@ -319,14 +319,14 @@ public:
 
 	void iterate() {
 		profiler::begin(ch_iter);
-		SystemManager::handle_iterate_pre(engine.elapsed);
+		ecs::SystemManager::handle_iterate_pre(engine.elapsed);
 
 		network_manager.iterate();
 
 		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
 
-		SystemManager::handle_iterate(engine.elapsed);
+		ecs::SystemManager::handle_iterate(engine.elapsed);
 		SchedulerManager::iterate(engine.elapsed);
 		world.entity_manager->component_manager->iterate(engine.elapsed);
 
@@ -378,7 +378,7 @@ public:
 		if (!engine.window_renderer->start_frame())
 			return;
 		const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
-		SystemManager::handle_draw_pre();
+		ecs::SystemManager::handle_draw_pre();
 		timer_render.peek();
 		for (auto t: engine.render_tasks)
 			if (t->_priority < 1000 and t->active)

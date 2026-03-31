@@ -90,7 +90,7 @@ struct PhysicalMeshAbsolute {
 
 
 
-struct Collider : Component {
+struct Collider : ecs::Component {
 	Collider();
 	~Collider() override;
 

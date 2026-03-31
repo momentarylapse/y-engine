@@ -15,6 +15,9 @@
 #include <lib/kaba/syntax/Function.h>
 #include <lib/os/msg.h>
 
+
+namespace ecs {
+
 struct ComponentListX {
 	ComponentManager::List list;
 	bool needs_update = false;
@@ -169,5 +172,7 @@ Array<const kaba::Class*> ComponentManager::all_types() const {
 	for (const auto& [t, l]: component_lists_by_type)
 		r.add(t);
 	return r;
+}
+
 }
 

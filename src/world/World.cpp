@@ -54,12 +54,12 @@ void DrawSplashScreen(const string &str, float per){}
 
 
 World::World() {
-	entity_manager = new EntityManager;
+	entity_manager = new ecs::EntityManager;
 #ifdef _X_ALLOW_X_
 	entity_manager->component_manager->f_create = [] (const kaba::Class* type) {
-		return (Component*)PluginManager::create_instance(type, Array<ScriptInstanceDataVariable>{});
+		return (ecs::Component*)PluginManager::create_instance(type, Array<ecs::InstanceDataVariable>{});
 	};
-	entity_manager->component_manager->f_apply = [this] (const kaba::Class* type, Component* c, const Array<ScriptInstanceDataVariable>& vars) {
+	entity_manager->component_manager->f_apply = [this] (const kaba::Class* type, ecs::Component* c, const Array<ecs::InstanceDataVariable>& vars) {
 		PluginManager::assign_variables(c, type, vars);
 	};
 #endif
@@ -95,7 +95,7 @@ void World::load_soon(const Path &filename) {
 	next_filename = filename;
 }
 
-Array<ScriptInstanceData> sort_components(const Array<ScriptInstanceData>& components) {
+Array<ecs::InstanceData> sort_components(const Array<ecs::InstanceData>& components) {
 	auto r = components;
 	for (int i=0; i<r.num; i++)
 		for (int k=i+1; k<r.num; k++) {
@@ -107,7 +107,7 @@ Array<ScriptInstanceData> sort_components(const Array<ScriptInstanceData>& compo
 	return r;
 }
 
-void add_user_components(EntityManager* em, Entity *ent, const Array<ScriptInstanceData>& components) {
+void add_user_components(ecs::EntityManager* em, ecs::Entity *ent, const Array<ecs::InstanceData>& components) {
 	for (auto &cc: sort_components(components)) {
 		msg_write("add component " + cc.class_name);
 		auto type = PluginManager::find_class(cc.filename, cc.class_name);
@@ -124,7 +124,7 @@ bool World::load(const LevelData& ld) {
 	bool ok = true;
 	reset();
 
-	if (auto physics = SystemManager::get<Physics>()) {
+	if (auto physics = ecs::SystemManager::get<Physics>()) {
 		physics->mode = PhysicsMode::FULL_EXTERNAL;
 		physics->enabled = ld.physics_enabled;
 		physics->mode = ld.physics_mode;
@@ -138,7 +138,7 @@ bool World::load(const LevelData& ld) {
 	skybox.resize(ld.skybox_filename.num);
 	for (int i=0; i<skybox.num; i++) {
 		skybox[i] = new ModelRef;
-		skybox[i]->owner = new Entity(v_0, quaternion::rotation_v(ld.skybox_ang[i])); // FIXME data leak... eh
+		skybox[i]->owner = new ecs::Entity(v_0, quaternion::rotation_v(ld.skybox_ang[i])); // FIXME data leak... eh
 		skybox[i]->model = engine.resource_manager->load_model(ld.skybox_filename[i]);
 	}
 	background = ld.background_color;
@@ -162,14 +162,14 @@ bool World::load(const LevelData& ld) {
 	return ok;
 }
 
-Entity* World::ego() {
+ecs::Entity* World::ego() {
 	auto& list = entity_manager->get_component_list<EgoMarker>();
 	if (list.num >= 1)
 		return list[0]->owner;
 	return nullptr;
 }
 
-Entity* World::get_entity(int index) {
+ecs::Entity* World::get_entity(int index) {
 	if (index < 0 or index >= entity_manager->entities.num)
 		return nullptr;
 	return entity_manager->entities[index];
@@ -190,11 +190,11 @@ TerrainRef* World::create_terrain(const Path &filename, const vec3 &pos) {
 	return t;
 }
 
-Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
+ecs::Entity *World::create_entity(const vec3& pos, const quaternion& ang) {
 	return entity_manager->create_entity(pos, ang);
 }
 
-Entity* World::create_from_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
+ecs::Entity* World::create_from_template(const Path& filename, const vec3 &pos, const quaternion& ang) {
 	auto e = create_entity(pos, ang);
 
 	if (const auto t = engine.resource_manager->load_template(filename)) {
@@ -229,7 +229,7 @@ Model *World::create_object_x(const Path &filename, const string &name, const ve
 }
 
 
-ModelRef* World::attach_model(Entity* e, const Path& filename) {
+ModelRef* World::attach_model(ecs::Entity* e, const Path& filename) {
 	auto mr = entity_manager->add_component<ModelRef>(e);
 	mr->model = engine.resource_manager->load_model(filename);
 
@@ -262,14 +262,14 @@ void World::notify(const string &msg) {
 		}
 }
 
-void World::delete_entity(Entity *e) {
+void World::delete_entity(ecs::Entity *e) {
 
 	msg_data.e = e;
 	notify("entity-delete");
 	entity_manager->delete_entity(e);
 }
 
-Light* World::attach_light_parallel(Entity* e, const color& c) {
+Light* World::attach_light_parallel(ecs::Entity* e, const color& c) {
 	auto l = entity_manager->add_component<Light>(e);
 	l->light.type = yrenderer::LightType::DIRECTIONAL;
 	l->light.col = c;
@@ -277,7 +277,7 @@ Light* World::attach_light_parallel(Entity* e, const color& c) {
 }
 
 // r is deprecated... c used to defined power -> implicit radius
-Light* World::attach_light_point(Entity* e, const color& c, float r) {
+Light* World::attach_light_point(ecs::Entity* e, const color& c, float r) {
 	auto l = entity_manager->add_component<Light>(e);
 	l->light.type = yrenderer::LightType::POINT;
 	l->light.col = c;
@@ -285,7 +285,7 @@ Light* World::attach_light_point(Entity* e, const color& c, float r) {
 	return l;
 }
 
-Light* World::attach_light_cone(Entity* e, const color& c, float r, float theta) {
+Light* World::attach_light_cone(ecs::Entity* e, const color& c, float r, float theta) {
 	auto l = entity_manager->add_component<Light>(e);
 	l->light.type = yrenderer::LightType::CONE;
 	l->light.col = c;
@@ -318,7 +318,7 @@ Camera *World::create_camera(const vec3 &pos, const quaternion &ang) {
 void World::shift_all(const vec3 &dpos) {
 	entity_manager->shift_all(dpos);
 
-	if (auto physics = SystemManager::get<Physics>())
+	if (auto physics = ecs::SystemManager::get<Physics>())
 		physics->update_all_bullet();
 
 	msg_data.v = dpos;
@@ -331,9 +331,9 @@ enum TraceMode {
 	SIMPLE = 4
 };
 
-base::optional<CollisionData> World::trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore) {
+base::optional<CollisionData> World::trace(const vec3 &p1, const vec3 &p2, int mode, ecs::Entity *o_ignore) {
 	if (mode & TraceMode::PHYSICAL) {
-		if (auto physics = SystemManager::get<Physics>())
+		if (auto physics = ecs::SystemManager::get<Physics>())
 			return physics->trace(p1, p2, mode, o_ignore);
 	} else if (mode & TraceMode::VISIBLE) {
 

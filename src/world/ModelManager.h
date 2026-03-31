@@ -18,7 +18,9 @@ class Path;
 struct RigidBody;
 struct PhysicalMesh;
 struct Skeleton;
-struct ScriptInstanceData;
+namespace ecs {
+	struct InstanceData;
+}
 class ResourceManager;
 namespace yrenderer {
 	class MaterialManager;
@@ -32,7 +34,7 @@ struct ModelTemplate : Sharable<base::Empty> {
 	shared<PhysicalMesh> physical_mesh;
 	shared<MetaMove> meta_move;
 	Skeleton *skeleton;
-	Array<ScriptInstanceData> components;
+	Array<ecs::InstanceData> components;
 
 
 	explicit ModelTemplate(Model *m);

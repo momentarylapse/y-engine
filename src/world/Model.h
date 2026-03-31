@@ -48,7 +48,7 @@ class Animator;
 
 
 
-struct ModelRef : Component {
+struct ModelRef : ecs::Component {
 	Model* model = nullptr;
 	Array<yrenderer::Material*> materials;
 	void update_materials();
@@ -165,7 +165,7 @@ public:
 	bool _detail_needed_[MODEL_NUM_MESHES]; // per frame
 };
 
-Model* entity_get_model(Entity* entity);
+Model* entity_get_model(ecs::Entity* entity);
 
 
 // types of shading/normal vectors

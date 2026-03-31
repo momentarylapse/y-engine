@@ -18,7 +18,7 @@
 #include "Particle.h"
 #include "Beam.h"
 
-struct ParticleGroup : Component {
+struct ParticleGroup : ecs::Component {
 	ParticleGroup();
 
 	Particle* emit_particle(const vec3& pos, const color& col, float r, float ttl);

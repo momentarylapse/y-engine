@@ -22,7 +22,7 @@ namespace yrenderer {
 }
 
 
-struct Camera : Component {
+struct Camera : ecs::Component {
 	Camera();
 
 	bool enabled;
