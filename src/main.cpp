@@ -33,7 +33,6 @@
 #include "EngineData.h"
 #include "ecs/EntityManager.h"
 #include "ecs/SystemManager.h"
-#include "meta.h"
 
 
 #include "plugins/PluginManager.h"
@@ -184,7 +183,6 @@ public:
 			create_and_attach_camera_renderer(engine.context, cam);
 		{
 			auto physics = new Physics();
-			physics->entity_manager = world.entity_manager.get();
 			ecs::SystemManager::register_system(Physics::_class, physics);
 
 			//physics->mode = PhysicsMode::FULL_EXTERNAL;

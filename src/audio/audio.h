@@ -31,12 +31,12 @@ void reset();
 
 
 
-class SoundSource;
+struct SoundSource;
 
 // TODO move to World?
-SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1);
-SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius1);
-SoundSource& emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1);
+SoundSource* emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1);
+SoundSource* emit_sound_file(const Path &filename, const vec3 &pos, float radius1);
+SoundSource* emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1);
 
 };
 

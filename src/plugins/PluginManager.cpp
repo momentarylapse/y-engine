@@ -240,7 +240,7 @@ Light* attach_light_cone(ecs::Entity* e, const color& c, float r, float theta) {
 }
 
 void export_ecs(kaba::Exporter* ext) {
-	ecs::BaseClass entity(ecs::BaseClass::Type::NONE);
+	ecs::BaseClass entity;
 	ext->declare_class_size("BaseClass", sizeof(ecs::BaseClass));
 	//	ext->link_class_func("BaseClass.__init__", &ecs::Entity::__init__);
 	ext->link_virtual("BaseClass.__delete__", &ecs::BaseClass::__delete__, &entity);

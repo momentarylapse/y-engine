@@ -105,7 +105,7 @@ void reset() {
 }
 
 
-SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
+SoundSource* emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 	auto e = world.create_entity(pos, quaternion::ID);
 	auto s = ecs::EntityManager::global->add_component<SoundSource>(e);
 	s->set_buffer(buffer);
@@ -113,14 +113,14 @@ SoundSource& emit_sound(AudioBuffer* buffer, const vec3 &pos, float radius1) {
 	s->max_distance = radius1 * 100;
 	s->suicidal = true;
 	s->play(false);
-	return *s;
+	return s;
 }
 
-SoundSource& emit_sound_file(const Path &filename, const vec3 &pos, float radius1) {
+SoundSource* emit_sound_file(const Path &filename, const vec3 &pos, float radius1) {
 	return emit_sound(load_buffer(filename), pos, radius1);
 }
 
-SoundSource& emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1) {
+SoundSource* emit_sound_stream(AudioStream* stream, const vec3 &pos, float radius1) {
 	auto e = world.create_entity(pos, quaternion::ID);
 	auto s = ecs::EntityManager::global->add_component<SoundSource>(e);
 	s->set_stream(stream);
@@ -128,7 +128,7 @@ SoundSource& emit_sound_stream(AudioStream* stream, const vec3 &pos, float radiu
 	s->max_distance = radius1 * 100;
 	s->suicidal = true;
 	s->play(false);
-	return *s;
+	return s;
 }
 }
 

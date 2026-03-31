@@ -20,7 +20,6 @@
 #include <ecs/ComponentManager.h>
 #include <ecs/Entity.h>
 #include <ecs/EntityManager.h>
-#include "../meta.h"
 #include "ModelManager.h"
 #include "../helper/ResourceManager.h"
 #include "Model.h"

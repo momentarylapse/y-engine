@@ -87,15 +87,15 @@ void RenderViewData::update_light_ubo() {
 
 #ifdef USING_OPENGL
 
-void RenderData::set_material_x(const SceneView& scene_view, const Material& material, Shader* shader, int pass_no) {
+void RenderData::set_material_x(const SceneView& scene_view, const Material* material, Shader* shader, int pass_no) {
 	nix::set_shader(shader);
 	if constexpr (SceneRenderer::using_view_space)
 		shader->set_floats("eye_pos", &scene_view.main_camera_params.pos.x, 3); // NAH....
 	else
 		shader->set_floats("eye_pos", &vec3::ZERO.x, 3);
-	apply_shader_data(RenderParams{}, shader, material.shader_data);
+	apply_shader_data(RenderParams{}, shader, material->shader_data);
 
-	auto& pass = material.pass(pass_no);
+	auto& pass = material->pass(pass_no);
 	nix::set_z(pass.z_buffer, pass.z_test);
 	if (pass.mode == TransparencyMode::FUNCTIONS)
 		nix::set_alpha(pass.source, pass.destination);
@@ -106,13 +106,13 @@ void RenderData::set_material_x(const SceneView& scene_view, const Material& mat
 	else
 		nix::disable_alpha();
 
-	nix::bind_textures(weak(material.textures));
+	nix::bind_textures(weak(material->textures));
 	nix::bind_texture(BINDING_CUBE, scene_view.cube_map.get());
 
-	shader->set_color_l(shader->location[Shader::LOCATION_MATERIAL_ALBEDO], material.albedo);
-	shader->set_float_l(shader->location[Shader::LOCATION_MATERIAL_ROUGHNESS], material.roughness);
-	shader->set_float_l(shader->location[Shader::LOCATION_MATERIAL_METAL], material.metal);
-	shader->set_color_l(shader->location[Shader::LOCATION_MATERIAL_EMISSION], material.emission);
+	shader->set_color_l(shader->location[Shader::LOCATION_MATERIAL_ALBEDO], material->albedo);
+	shader->set_float_l(shader->location[Shader::LOCATION_MATERIAL_ROUGHNESS], material->roughness);
+	shader->set_float_l(shader->location[Shader::LOCATION_MATERIAL_METAL], material->metal);
+	shader->set_color_l(shader->location[Shader::LOCATION_MATERIAL_EMISSION], material->emission);
 }
 
 void RenderData::set_texture(int binding, Texture *tex) {
@@ -165,7 +165,7 @@ void RenderViewData::clear(const RenderParams& params, const Array<color>& color
 }
 
 RenderData& RenderViewData::start(const RenderParams& params, const mat4& matrix,
-                                  Shader* shader, const Material& material, int pass_no,
+                                  Shader* shader, const Material* material, int pass_no,
                                   PrimitiveTopology top, VertexBuffer *vb) {
 
 	rd.set_material_x(*scene_view, material, shader, pass_no);
