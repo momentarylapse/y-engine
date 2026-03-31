@@ -17,8 +17,7 @@
 #include <ecs/Component.h>
 
 
-class Particle {
-public:
+struct Particle {
 	Particle() {}
 	Particle(const vec3 &pos, const color& col, float r, float ttl);
 
@@ -31,8 +30,7 @@ public:
 	bool enabled;
 };
 
-class LegacyParticle : public Component {
-public:
+struct LegacyParticle : Component {
 	LegacyParticle();
 	~LegacyParticle() override;
 

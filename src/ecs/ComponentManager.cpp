@@ -15,8 +15,7 @@
 #include <lib/kaba/syntax/Function.h>
 #include <lib/os/msg.h>
 
-class ComponentListX {
-public:
+struct ComponentListX {
 	ComponentManager::List list;
 	bool needs_update = false;
 	const kaba::Class *type_family = nullptr;

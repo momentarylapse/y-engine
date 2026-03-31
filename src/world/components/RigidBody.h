@@ -16,8 +16,7 @@ class Model;
 class btRigidBody;
 
 // attach AFTER [Model, Terrain, Collider]
-class RigidBody : public Component {
-public:
+struct RigidBody : Component {
 	RigidBody();
 	~RigidBody() override;
 

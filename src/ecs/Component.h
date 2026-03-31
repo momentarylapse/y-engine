@@ -11,7 +11,7 @@
 
 #include "BaseClass.h"
 
-class Entity;
+struct Entity;
 struct CollisionData;
 struct ScriptInstanceDataVariable;
 struct ScriptInstanceData;
@@ -19,8 +19,7 @@ namespace kaba {
 	class Class;
 }
 
-class Component : public VirtualBase {
-public:
+struct Component : VirtualBase {
 	Component();
 	~Component() override;
 	virtual void on_init() {}
@@ -42,14 +41,12 @@ public:
 	}
 };
 
-class NameTag : public Component {
-public:
+struct NameTag : Component {
 	string name;
 	static const kaba::Class* _class;
 };
 
-class EgoMarker : public Component {
-public:
+struct EgoMarker : Component {
 	static const kaba::Class* _class;
 };
 
@@ -57,8 +54,7 @@ struct Template {
 	Array<ScriptInstanceData> components;
 };
 
-class TemplateRef : public Component {
-public:
+struct TemplateRef : Component {
 	Template* _template = nullptr;
 	static const kaba::Class* _class;
 };

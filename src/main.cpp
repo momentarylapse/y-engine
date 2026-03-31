@@ -147,7 +147,6 @@ public:
 
 		audio::init();
 
-		GodInit(ch_iter);
 		PluginManager::init();
 		SystemManager::init(ch_iter, world.entity_manager.get());
 
@@ -305,7 +304,6 @@ public:
 
 	void cleanup() {
 		reset_game();
-		GodEnd();
 
 		input::remove(window);
 		engine.context->gpu_flush();

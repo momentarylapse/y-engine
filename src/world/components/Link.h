@@ -14,8 +14,8 @@ struct quaternion;
 
 class btTypedConstraint;
 
-class Entity;
-class RigidBody;
+struct Entity;
+struct RigidBody;
 
 
 
@@ -28,8 +28,7 @@ enum class LinkType {
 	SLIDER
 };
 
-class Link : public Component {
-public:
+struct Link : Component {
 	//Link();
 	~Link() override;
 
@@ -52,23 +51,5 @@ public:
 
 	static const kaba::Class* _class;
 };
-
-/*class LinkSocket : public Link {
-public:
-	LinkSocket(Entity *a, Entity *b, const vec3 &pos);
-	void __init__(Entity *a, Entity *b, const vec3 &pos);
-};
-
-class LinkHinge : public Link {
-public:
-	LinkHinge(Entity *a, Entity *b, const vec3 &pos, const quaternion &ang);
-	void __init__(Entity *a, Entity *b, const vec3 &pos, const quaternion &ang);
-};
-
-class LinkUniversal : public Link {
-public:
-	LinkUniversal(Entity *a, Entity *b, const vec3 &pos, const quaternion &ang);
-	void __init__(Entity *a, Entity *b, const vec3 &pos, const quaternion &ang);
-};*/
 
 

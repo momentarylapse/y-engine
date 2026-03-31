@@ -23,31 +23,23 @@ class Physics;
 class Model;
 struct ModelRef;
 namespace yrenderer {
-	class Material;
+	struct Material;
 }
 class Terrain;
-class TerrainRef;
-class RigidBody;
-class MultiInstance;
-class Entity;
+struct TerrainRef;
+struct RigidBody;
+struct MultiInstance;
+struct Entity;
 class EntityManager;
-class Light;
-class Camera;
-class ParticleManager;
-class LegacyParticle;
-class Link;
+struct Light;
+struct Camera;
+struct Link;
 struct LevelData;
 enum class LinkType;
 
 
 
 
-
-// network messages
-struct GodNetMessage {
-	int msg, arg_i[4];
-	string arg_s;
-};
 
 struct CollisionData {
 	Entity *entity;
@@ -81,7 +73,7 @@ public:
 
 	MultiInstance* create_object_multi(const Path &filename, const Array<vec3> &pos, const Array<quaternion> &ang);
 
-	void delete_entity(Entity *e);
+	void delete_entity(Entity* e);
 
 	Entity* get_entity(int index);
 
@@ -93,23 +85,20 @@ public:
 	Light* attach_light_point(Entity* e, const color& c, float r);
 	Light* attach_light_cone(Entity* e, const color& c, float r, float theta);
 
-	Light *create_light_parallel(const quaternion &ang, const color &c);
-	Light *create_light_point(const vec3 &p, const color &c, float r);
-	Light *create_light_cone(const vec3 &p, const quaternion &ang, const color &c, float r, float t);
+	Light* create_light_parallel(const quaternion& ang, const color& c);
+	Light* create_light_point(const vec3& p, const color& c, float r);
+	Light* create_light_cone(const vec3& p, const quaternion& ang, const color& c, float r, float t);
 
-	Camera *create_camera(const vec3 &pos, const quaternion &ang);
+	Camera* create_camera(const vec3& pos, const quaternion& ang);
 
-	ParticleManager *particle_manager;
+	ParticleManager* particle_manager;
 
-	void shift_all(const vec3 &dpos);
-
-	bool net_msg_enabled;
-	Array<GodNetMessage> net_messages;
+	void shift_all(const vec3& dpos);
 
 	Entity* ego();
 
 
-	base::optional<CollisionData> trace(const vec3 &p1, const vec3 &p2, int mode, Entity *o_ignore = nullptr);
+	base::optional<CollisionData> trace(const vec3& p1, const vec3& p2, int mode, Entity* o_ignore = nullptr);
 
 	typedef void callback();
 	using Callback = Callable<void()>;
@@ -128,9 +117,6 @@ public:
 };
 extern World world;
 
-
-void GodInit(int ch_iter);
-void GodEnd();
 
 
 enum {

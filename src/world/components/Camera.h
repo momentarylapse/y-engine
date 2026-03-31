@@ -22,8 +22,7 @@ namespace yrenderer {
 }
 
 
-class Camera : public Component {
-public:
+struct Camera : Component {
 	Camera();
 
 	bool enabled;

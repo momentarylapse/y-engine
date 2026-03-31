@@ -10,7 +10,7 @@
 struct vec3;
 struct quaternion;
 class Path;
-class Entity;
+struct Entity;
 
 namespace audio {
 

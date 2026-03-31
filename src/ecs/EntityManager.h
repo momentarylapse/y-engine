@@ -11,7 +11,7 @@
 
 struct vec3;
 struct quaternion;
-class Entity;
+struct Entity;
 
 
 struct EntityMessageParams {

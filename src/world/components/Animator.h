@@ -15,7 +15,7 @@ class Model;
 struct vec3;
 struct quaternion;
 struct mat4;
-class MetaMove;
+struct MetaMove;
 
 
 
@@ -26,8 +26,7 @@ enum class AnimationType {
 };
 
 // single animation
-class Move {
-public:
+struct Move {
 	string name;
 	int id;
 	AnimationType type;
@@ -40,8 +39,7 @@ public:
 };
 
 // a list of animations
-class MetaMove : public Sharable<base::Empty> {
-public:
+struct MetaMove : Sharable<base::Empty> {
 	MetaMove();
 	// universal animation data
 	Array<Move> move;
@@ -65,8 +63,7 @@ public:
 
 
 // commands for animation (move operations)
-class MoveOperation {
-public:
+struct MoveOperation {
 	// move operations
 	enum class Command {
 		SET,			// overwrite
@@ -81,8 +78,7 @@ public:
 	float time, param1, param2;
 };
 
-class Animator : public Component {
-public:
+struct Animator : Component {
 	Animator();
 	~Animator() override;
 

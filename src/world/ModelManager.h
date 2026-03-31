@@ -12,12 +12,12 @@
 #include <lib/base/map.h>
 #include <lib/os/path.h>
 
-class MetaMove;
+struct MetaMove;
 class Model;
 class Path;
-class RigidBody;
+struct RigidBody;
 struct PhysicalMesh;
-class Skeleton;
+struct Skeleton;
 struct ScriptInstanceData;
 class ResourceManager;
 namespace yrenderer {
@@ -25,8 +25,7 @@ namespace yrenderer {
 }
 
 
-class ModelTemplate : public Sharable<base::Empty> {
-public:
+struct ModelTemplate : Sharable<base::Empty> {
 	Path filename;
 	Model *model;
 	Array<Path> bone_model_filename;

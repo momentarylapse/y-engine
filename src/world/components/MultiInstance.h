@@ -14,8 +14,7 @@
 
 class Model;
 
-class MultiInstance : public Component {
-public:
+struct MultiInstance : Component {
 	MultiInstance();
 	~MultiInstance() override;
 

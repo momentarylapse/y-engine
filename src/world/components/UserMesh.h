@@ -18,11 +18,10 @@
 
 
 namespace yrenderer {
-	class Material;
+	struct Material;
 }
 
-class UserMesh : public Component {
-public:
+struct UserMesh : Component {
 	UserMesh() = default;
 
 	owned<yrenderer::Material> material;

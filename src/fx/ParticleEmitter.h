@@ -18,8 +18,7 @@
 #include "Particle.h"
 #include "Beam.h"
 
-class ParticleGroup : public Component {
-public:
+struct ParticleGroup : Component {
 	ParticleGroup();
 	void __init__();
 
@@ -40,8 +39,7 @@ public:
 	static const kaba::Class *_class;
 };
 
-class ParticleEmitter : public ParticleGroup {
-public:
+struct ParticleEmitter : ParticleGroup {
 	ParticleEmitter();
 	void __init__();
 

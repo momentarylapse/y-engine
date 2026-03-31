@@ -14,8 +14,7 @@ class Model;
 class Path;
 
 
-class Skeleton : public Component {
-public:
+struct Skeleton : Component {
 	Skeleton();
 	~Skeleton() override;
 

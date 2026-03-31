@@ -12,9 +12,9 @@
 #include <lib/any/any.h>
 #include <functional>
 
-class Entity;
-class Component;
-class ComponentListX;
+struct Entity;
+struct Component;
+struct ComponentListX;
 namespace kaba {
 	class Class;
 }

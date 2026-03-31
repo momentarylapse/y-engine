@@ -13,7 +13,7 @@
 class Model;
 class Object;
 class Terrain;
-class Light;
+struct Light;
 
 
 

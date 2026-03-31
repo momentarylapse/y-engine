@@ -22,7 +22,7 @@ namespace yrenderer {
 
 struct Context;
 class ShaderCache;
-class Material;
+struct Material;
 struct CameraParams;
 struct SceneView;
 struct RenderParams;

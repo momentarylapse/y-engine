@@ -8,7 +8,6 @@
 | last updated: 2009.11.22 (c) by MichiSoft TM                                 |
 \*----------------------------------------------------------------------------*/
 
-#include <algorithm>
 #include <lib/base/base.h>
 #include <lib/base/sort.h>
 #include <lib/config.h>
@@ -16,7 +15,6 @@
 #include <lib/nix/nix.h>
 #include <lib/kaba/kaba.h>
 #include <lib/os/filesystem.h>
-#include <lib/profiler/Profiler.h>
 #include <EngineData.h>
 #include <ecs/Component.h>
 #include <ecs/ComponentManager.h>
@@ -25,16 +23,12 @@
 #include "../meta.h"
 #include "ModelManager.h"
 #include "../helper/ResourceManager.h"
-#include <lib/yrenderer/Material.h>
 #include "Model.h"
 #include "Terrain.h"
 #include "World.h"
 
-#include "components/Link.h"
 #include "components/RigidBody.h"
 #include "components/Collider.h"
-#include "components/Animator.h"
-#include "components/Skeleton.h"
 #include "components/MultiInstance.h"
 #include "components/Light.h"
 #include "components/Camera.h"
@@ -46,9 +40,6 @@
 #include "../fx/ParticleManager.h"
 #endif
 
-
-
-//#define _debug_matrices_
 
 
 
@@ -63,33 +54,7 @@ void DrawSplashScreen(const string &str, float per){}
 #endif
 
 
-// network messages
-void AddNetMsg(int msg, int argi0, const string &args)
-{
-#if 0
-#ifdef _X_ALLOW_X_
-	if ((!world.net_msg_enabled) || (!Net.Enabled))
-		return;
-	GodNetMessage m;
-	m.msg = msg;
-	m.arg_i[0] = argi0;
-	m.arg_s = args;
-	world.net_messages.add(m);
-#endif
-#endif
-}
 
-
-
-
-
-
-
-void GodInit(int ch_iter) {
-}
-
-void GodEnd() {
-}
 
 World::World() {
 	entity_manager = new EntityManager;
@@ -112,17 +77,10 @@ World::World() {
 World::~World() = default;
 
 void World::reset() {
-	net_msg_enabled = false;
-	net_messages.clear();
-
 	observers.clear();
 
 	entity_manager->reset();
 
-
-
-	// skybox
-	//   (models deleted by meta)
 	skybox.clear();
 	
 
@@ -133,12 +91,6 @@ void World::reset() {
 	fog.enabled = false;
 	fog.start = 0;
 	fog.end = 100000;
-
-
-	// physics
-#ifdef _X_ALLOW_X_
-	//LinksReset();
-#endif
 }
 
 void World::save(const Path &filename) {
@@ -175,8 +127,7 @@ void add_user_components(EntityManager* em, Entity *ent, const Array<ScriptInsta
 	}
 }
 
-bool World::load(const LevelData &ld) {
-	net_msg_enabled = false;
+bool World::load(const LevelData& ld) {
 	bool ok = true;
 	reset();
 
@@ -190,20 +141,6 @@ bool World::load(const LevelData &ld) {
 
 	fog = ld.fog;
 
-	/*for (auto &l: ld.lights) {
-		auto o = create_entity(l.pos, quaternion::rotation(l.ang));
-		auto ll = entity_manager->add_component<Light>(o);
-		ll->light.init(l.type, l._color, l.theta);
-		ll->light.harshness = l.harshness;
-		ll->light.enabled = l.enabled;
-		if (ll->light.type == yrenderer::LightType::DIRECTIONAL)
-			ll->light.allow_shadow = true;
-		else
-			ll->light.power = yrenderer::Light::_radius_to_power(l.radius);
-
-		add_user_components(entity_manager.get(), o, l.components);
-	}*/
-
 	// skybox
 	skybox.resize(ld.skybox_filename.num);
 	for (int i=0; i<skybox.num; i++) {
@@ -213,68 +150,14 @@ bool World::load(const LevelData &ld) {
 	}
 	background = ld.background_color;
 
-#if 0
-	for (auto &c: ld.cameras) {
-		auto cc = create_camera(c.pos, quaternion::rotation(c.ang));
-		cam_main = cc;
-		cc->min_depth = c.min_depth;
-		cc->max_depth = c.max_depth;
-		cc->exposure = c.exposure;
-		cc->bloom_factor = c.bloom_factor;
-		cc->fov = c.fov;
 
-		add_user_components(entity_manager.get(), cc->owner, c.components);
-	}
-
-	// objects
-	foreachi(auto &o, ld.objects, i)
-		if (!o.filename.is_empty()) {
-			//try {
-				auto q = quaternion::rotation(o.ang);
-				auto *oo = create_from_template(o.filename, o.pos, q);
-
-				add_user_components(entity_manager.get(), oo, o.components);
-				if (i % 5 == 0)
-					DrawSplashScreen("Objects", (float)i / (float)ld.objects.num / 5 * 3);
-
-			/*} catch (...) {
-				ok = false;
-			}*/
-		}
-
-	// terrains
-	foreachi(auto &t, ld.terrains, i) {
-		DrawSplashScreen("Terrain...", 0.6f + (float)i / (float)ld.terrains.num * 0.4f);
-		auto tt = create_terrain(t.filename, t.pos);
-		tt->material = engine.resource_manager->load_material(t.material);
-
-		add_user_components(entity_manager.get(), tt->owner, t.components);
-		ok &= tt->terrain and !tt->terrain->error;
-	}
-#endif
-
-	// (raw) entities
-	foreachi(auto &e, ld.entities, i) {
+	// entities
+	for (const auto& e: ld.entities) {
 		auto ee = create_entity(e.pos, e.ang);
-
 		add_user_components(entity_manager.get(), ee, e.components);
 	}
 
-
-	// FIXME...
-	/*auto& model_list = entity_manager->get_component_list<ModelRef>();
-	for (auto &l: ld.links) {
-		Entity *a = model_list[l.object[0]]->owner;
-		Entity *b = nullptr;
-		if (l.object[1] >= 0)
-			b = model_list[l.object[1]]->owner;
-		auto e = create_entity(l.pos, quaternion::rotation(l.ang));
-		auto ll = entity_manager->add_component<Link>(e);
-		ll->a = a;
-		ll->b = b;
-		ll->link_type = l.type;
-	}*/
-
+	// pick main camera
 	auto& cameras = entity_manager->get_component_list<Camera>();
 	if (cameras.num == 0) {
 		msg_error("no camera defined... creating one");
@@ -283,7 +166,6 @@ bool World::load(const LevelData &ld) {
 		cam_main = cameras[0];
 	}
 
-	net_msg_enabled = true;
 	return ok;
 }
 
@@ -388,7 +270,6 @@ void World::notify(const string &msg) {
 }
 
 void World::delete_entity(Entity *e) {
-	//e->on_delete_rec();
 
 	msg_data.e = e;
 	notify("entity-delete");

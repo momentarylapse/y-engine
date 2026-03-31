@@ -14,7 +14,7 @@
 
 using namespace yrenderer;
 
-class MultiInstance;
+struct MultiInstance;
 
 WorldInstancedEmitter::WorldInstancedEmitter(Context* ctx) : MeshEmitter(ctx, "inst") {
 }

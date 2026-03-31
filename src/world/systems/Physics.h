@@ -8,9 +8,9 @@
 #include <ecs/EntityManager.h>
 #include <lib/base/optional.h>
 
-class Link;
-class CollisionData;
-class RigidBody;
+struct Link;
+struct CollisionData;
+struct RigidBody;
 
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;

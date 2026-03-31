@@ -12,12 +12,11 @@
 #include "BaseClass.h"
 
 struct mat4;
-class Component;
+struct Component;
 class EntityManager;
 
 
-class Entity {
-public:
+struct Entity {
 	Entity();
 	Entity(const vec3 &pos, const quaternion &ang);
 	~Entity();

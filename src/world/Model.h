@@ -39,11 +39,11 @@
 
 class Model;
 namespace yrenderer {
-	class Material;
+	struct Material;
 }
-class TraceData;
+struct TraceData;
 class ModelTemplate;
-class MeshCollider;
+struct MeshCollider;
 class Animator;
 
 

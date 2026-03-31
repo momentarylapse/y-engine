@@ -9,7 +9,7 @@
 #define SRC_HELPER_DELETIONQUEUE_H_
 
 class BaseClass;
-class Entity;
+struct Entity;
 namespace gui {
 	class Node;
 }
