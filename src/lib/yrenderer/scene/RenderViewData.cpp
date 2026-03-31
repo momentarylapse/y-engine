@@ -119,6 +119,10 @@ void RenderData::set_texture(int binding, Texture *tex) {
 	nix::bind_texture(binding, tex);
 }
 
+void RenderData::set_uniform_buffer(int binding, UniformBuffer* ubo) {
+	nix::bind_uniform_buffer(binding, ubo);
+}
+
 void RenderData::draw_triangles(const RenderParams&, VertexBuffer* vb) {
 	nix::draw_triangles(vb);
 }
@@ -245,6 +249,10 @@ void RenderData::set_textures(const SceneView& scene_view, const Array<Texture*>
 
 void RenderData::set_texture(int binding, Texture *tex) {
 	dset->set_texture(binding, tex);
+}
+
+void RenderData::set_uniform_buffer(int binding, UniformBuffer* ubo) {
+	dset->set_uniform_buffer(binding, ubo);
 }
 
 void RenderData::draw_triangles(const RenderParams& params, VertexBuffer* vb) {

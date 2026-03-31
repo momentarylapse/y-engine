@@ -39,13 +39,8 @@ void WorldOpaqueModelsEmitter::emit(const yrenderer::RenderParams& params, yrend
 			auto vb = m->mesh[0]->sub[i].vertex_buffer;
 			auto& rd = rvd.start(params, e->get_matrix(), shader, material, 0, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
-			if (ani) {
-#ifdef USING_VULKAN
-				rd.dset->set_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, ani->buf);
-#else
-				nix::bind_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, ani->buf);
-#endif
-			}
+			if (ani)
+				rd.set_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, ani->buf);
 
 			rd.draw_triangles(params, vb);
 		}
@@ -139,13 +134,8 @@ void WorldTransparentModelsEmitter::emit(const yrenderer::RenderParams& params, 
 
 			auto& rd = rvd.start(params, dc.entity->get_matrix(), shader, material, k, ygfx::PrimitiveTopology::TRIANGLES, vb);
 
-			if (dc.ani) {
-#ifdef USING_VULKAN
-				rd.dset->set_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, dc.ani->buf);
-#else
-				nix::bind_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, dc.ani->buf);
-#endif
-			}
+			if (dc.ani)
+				rd.set_uniform_buffer(yrenderer::BINDING_BONE_MATRICES, dc.ani->buf);
 
 			rd.draw_triangles(params, vb);
 		}
