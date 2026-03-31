@@ -193,6 +193,7 @@ public:
 		}
 		ecs::SystemManager::register_system(AnimationManager::_class, new AnimationManager());
 		ecs::SystemManager::register_system(ParticleManager::_class, new ParticleManager());
+		ecs::SystemManager::register_system(NetworkManager::_class, new NetworkManager());
 		for (auto &s: level_data.systems)
 			ecs::SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
@@ -318,8 +319,6 @@ public:
 	void iterate() {
 		profiler::begin(ch_iter);
 		ecs::SystemManager::handle_iterate_pre(engine.elapsed);
-
-		network_manager.iterate();
 
 		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
