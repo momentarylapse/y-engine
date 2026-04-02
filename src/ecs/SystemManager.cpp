@@ -90,6 +90,11 @@ System* SystemManager::_get_generic(const kaba::Class* type) {
 	return nullptr;
 }
 
+void SystemManager::handle_finished_loading() {
+	for (auto *c: systems)
+		c->on_finished_loading();
+}
+
 void SystemManager::handle_iterate(float dt) {
 	profiler::begin(ch_system);
 	for (auto *c: systems) {

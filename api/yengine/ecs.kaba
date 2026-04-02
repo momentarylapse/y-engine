@@ -86,6 +86,7 @@ class System extends BaseClass
 	
 	# common
 #	extern virtual void on_iterate(float dt)
+	func extern virtual mut on_finished_loading()
 	func extern virtual mut on_key_down(key: Key)
 	func extern virtual mut on_key_up(key: Key)
 	func extern virtual mut on_left_button_down()

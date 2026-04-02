@@ -53,7 +53,29 @@ class Model
 	
 	func extern get_vertex(index: i32) -> vec3
 
+
+
+class ModelRef extends Component
+	let PARAMETERS = "model,materials"
+	var model: Model*
+	var materials: Material&[]
+	func extern globalref get_material(index: i32) -> Material&
+	func extern mut set_material(index: i32, m: Material&)
+	func mut make_material_editable(index: i32)
+		set_material(index, make_material_unique(get_material(index)))
+
+
+class Skeleton extends Component
+	var bones: Entity&[]
+	var pos0, dpos: vec3[]
+	var parents: i32[]
+	func extern mut reset()
+
+
 class Animator extends Component
+	#let REQUIRES = [ModelRef, Skeleton]
+	let REQUIRES = Skeleton
+
 	enum Operation
 		SET           # overwrite
 		SET_NEW_KEYED # overwrite, if current doesn't equal 0
@@ -66,10 +88,5 @@ class Animator extends Component
 	func extern mut add(op: Operation, move: i32, out t: f32, dt: f32, loop: bool = true) -> bool
 	func extern mut is_done(op_no: i32) -> bool
 
-class Skeleton extends Component
-	var bones: Entity&[]
-	var pos0, dpos: vec3[]
-	var parents: i32[]
-	func extern mut reset()
 
 func extern load_model(filename: os.Path) -> Model&

@@ -28,14 +28,18 @@ class RigidBody extends Component
 
 class Collider extends Component
 class MeshCollider extends Collider
+	let REQUIRES = RigidBody
 class TerrainCollider extends Collider
+	let REQUIRES = RigidBody
 
 
 class BoxCollider extends Collider
+	let REQUIRES = RigidBody
 	let PARAMETERS = "min,max"
 	var min, max: vec3
 
 class SphereCollider extends Collider
+	let REQUIRES = RigidBody
 	let PARAMETERS = "radius"
 	var radius: f32
 
@@ -123,16 +127,6 @@ class CubeMapSource extends Component
 
 class NameTag extends Component
 	var name: string
-
-
-class ModelRef extends Component
-	let PARAMETERS = "model,materials"
-	var model: Model*
-	var materials: Material&[]
-	func extern globalref get_material(index: i32) -> Material&
-	func extern mut set_material(index: i32, m: Material&)
-	func mut make_material_editable(index: i32)
-		set_material(index, make_material_unique(get_material(index)))
 
 
 class TerrainRef extends Component

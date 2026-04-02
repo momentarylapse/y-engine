@@ -174,30 +174,37 @@ public:
 		msg_right();
 		reset_game();
 
+		// load world description
 		LevelData level_data;
 		bool ok = level_data.load(engine.map_dir | filename);
-		ok &= world.load(level_data);
-		audio::attach_listener(cam_main->owner);
 
-		for (auto& cam: world.entity_manager->get_component_list<Camera>())
-			create_and_attach_camera_renderer(engine.context, cam);
-		{
-			auto physics = new Physics();
-			ecs::SystemManager::register_system(Physics::_class, physics);
-
+		// systems
+		ecs::SystemManager::register_system(AnimationManager::_class, new AnimationManager());
+		ecs::SystemManager::register_system(ParticleManager::_class, new ParticleManager());
+		ecs::SystemManager::register_system(NetworkManager::_class, new NetworkManager());
+		ecs::SystemManager::register_system(Physics::_class, new Physics());
+		if (auto physics = ecs::SystemManager::get<Physics>()) {
+			// TODO include in level_data.systems!
 			//physics->mode = PhysicsMode::FULL_EXTERNAL;
 			physics->enabled = level_data.physics_enabled;
 			physics->mode = level_data.physics_mode;
 			physics->gravity = level_data.gravity;
 			physics->collisions_enabled = true; // level_data.physics_enabled;
 		}
-		ecs::SystemManager::register_system(AnimationManager::_class, new AnimationManager());
-		ecs::SystemManager::register_system(ParticleManager::_class, new ParticleManager());
-		ecs::SystemManager::register_system(NetworkManager::_class, new NetworkManager());
 		for (auto &s: level_data.systems)
 			ecs::SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)
 			ecs::SystemManager::create(s, "", {});
+
+		// entities
+		ok &= world.load(level_data);
+
+		ecs::SystemManager::handle_finished_loading();
+
+		// TODO turn into Systems and use on_handle_finished_loading()!
+		audio::attach_listener(cam_main->owner);
+		for (auto& cam: world.entity_manager->get_component_list<Camera>())
+			create_and_attach_camera_renderer(engine.context, cam);
 
 		msg_left();
 		msg_write("|                                                      |");
