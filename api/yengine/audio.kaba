@@ -21,20 +21,20 @@ class SoundSource extends Component
 	var min_distance, max_distance: f32
 
 
+class AudioManager extends System
+	let FILTER = SoundSource
+	var volume_music: f32
+	var volume_sounds: f32
+
+
 func extern load_buffer(filename: os.Path) -> AudioBuffer&
 func extern create_buffer(samples: f32[], sample_rate: f32) -> AudioBuffer&
 
 func extern load_audio_stream(filename: os.Path) -> AudioStream&
 func extern create_audio_stream(f: i32->f32[], sample_rate: f32) -> AudioStream&
 
-func extern emit_sound(buffer: AudioBuffer&, pos: vec3, radius1: f32) -> SoundSource&
-func extern emit_sound_file(filename: os.Path, pos: vec3, radius1: f32) -> SoundSource&
-func extern emit_sound_stream(stream: AudioStream&, pos: vec3, radius1: f32) -> SoundSource&
-
 
 class Listener extends Component
 
 
 #void save_sound(Path filename, float[] buf_r, float[] buf_l, int freq, int channels, int bits)
-var volume_music: f32
-var volume_sounds: f32

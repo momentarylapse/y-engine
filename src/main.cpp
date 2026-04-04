@@ -181,6 +181,7 @@ public:
 		// systems
 		ecs::SystemManager::register_system(AnimationManager::_class, new AnimationManager());
 		ecs::SystemManager::register_system(ParticleManager::_class, new ParticleManager());
+		ecs::SystemManager::register_system(audio::Manager::_class, new audio::Manager());
 		ecs::SystemManager::register_system(NetworkManager::_class, new NetworkManager());
 		ecs::SystemManager::register_system(Physics::_class, new Physics());
 		if (auto physics = ecs::SystemManager::get<Physics>()) {
@@ -202,7 +203,6 @@ public:
 		ecs::SystemManager::handle_finished_loading();
 
 		// TODO turn into Systems and use on_handle_finished_loading()!
-		audio::attach_listener(cam_main->owner);
 		for (auto& cam: world.entity_manager->get_component_list<Camera>())
 			create_and_attach_camera_renderer(engine.context, cam);
 
@@ -327,7 +327,6 @@ public:
 		profiler::begin(ch_iter);
 		ecs::SystemManager::handle_iterate_pre(engine.elapsed);
 
-		audio::iterate(engine.elapsed);
 		DeletionQueue::delete_all();
 
 		ecs::SystemManager::handle_iterate(engine.elapsed);
