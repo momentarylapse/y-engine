@@ -45,6 +45,7 @@
 #include "Config.h"
 #include "lib/os/app.h"
 #include "lib/ygraphics/Context.h"
+#include "lib/yrenderer/regions/RegionRenderer.h"
 #include "world/Model.h"
 #include "world/systems/Physics.h"
 #include "world/systems/AnimationManager.h"
@@ -294,8 +295,12 @@ public:
 	}
 
 	void reset_game() {
-		//for (auto rp: engine.render_paths)
-		//	rp->world_renderer->reset();
+		for (auto rp: engine.camera_renderers) {
+			engine.region_renderer->remove_region(rp);
+			delete rp;
+		}
+		engine.camera_renderers.clear();
+
 		ecs::SystemManager::reset();
 		SchedulerManager::reset();
 		CameraReset();
