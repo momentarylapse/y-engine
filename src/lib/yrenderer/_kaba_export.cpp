@@ -215,6 +215,13 @@ void _export_package_yrenderer_internal(kaba::Exporter* ext) {
 
 	ext->declare_class_size("Material.Pass", sizeof(Material::RenderPassData));
 	ext->declare_class_element("Material.Pass.shader_path", &Material::RenderPassData::shader_path);
+	ext->declare_class_element("Material.Pass.cull_mode", &Material::RenderPassData::cull_mode);
+	ext->declare_class_element("Material.Pass.wire_mode", &Material::RenderPassData::wire_mode);
+	ext->declare_class_element("Material.Pass.z_write", &Material::RenderPassData::z_write);
+	ext->declare_class_element("Material.Pass.z_test", &Material::RenderPassData::z_test);
+	ext->declare_class_element("Material.Pass.mode", &Material::RenderPassData::mode);
+	ext->declare_class_element("Material.Pass.source", &Material::RenderPassData::source);
+	ext->declare_class_element("Material.Pass.destination", &Material::RenderPassData::destination);
 
 	ext->declare_class_size("Material.Friction", sizeof(Material::Friction));
 	ext->declare_class_element("Material.Friction.sliding", &Material::Friction::sliding);

@@ -71,8 +71,9 @@ struct Material {
 		TransparencyMode mode = TransparencyMode::NONE;
 		ygfx::Alpha source, destination;
 		float factor = 1;
-		bool z_buffer = true;
+		bool z_write = true;
 		bool z_test = true;
+		bool wire_mode = false;
 		ygfx::CullMode cull_mode;
 		Path shader_path;
 	};

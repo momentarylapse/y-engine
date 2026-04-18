@@ -96,7 +96,7 @@ void RenderData::set_material_x(const SceneView& scene_view, const Material* mat
 	apply_shader_data(RenderParams{}, shader, material->shader_data);
 
 	auto& pass = material->pass(pass_no);
-	nix::set_z(pass.z_buffer, pass.z_test);
+	nix::set_z(pass.z_write, pass.z_test);
 	if (pass.mode == TransparencyMode::FUNCTIONS)
 		nix::set_alpha(pass.source, pass.destination);
 	else if (pass.mode == TransparencyMode::COLOR_KEY_HARD)
