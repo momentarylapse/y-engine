@@ -23,6 +23,7 @@ class UserMesh extends Component
 	material: Material&
 	vertex_shader_module: string = "default"
 	geometry_shader_module: string
+	tessellation_shader_module: string
 
 
 class Scheduler

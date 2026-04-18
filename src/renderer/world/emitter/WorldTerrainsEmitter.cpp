@@ -22,7 +22,7 @@ void WorldTerrainsEmitter::emit(const yrenderer::RenderParams& params, yrenderer
 	auto draw_terrains = [&params, &rvd, shadow_pass] (ecs::Entity* o, Terrain* t, yrenderer::Material* material) {
 		if (shadow_pass and !material->cast_shadow)
 			return;
-		auto shader = rvd.get_shader(material, 0, t->vertex_shader_module, "");
+		auto shader = rvd.get_shader(material, 0, t->vertex_shader_module);
 		if (shadow_pass)
 			material = rvd.material_shadow;
 
