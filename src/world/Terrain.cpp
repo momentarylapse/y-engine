@@ -13,6 +13,7 @@
 #include <lib/yrenderer/Context.h>
 #include "World.h"
 #include <EngineData.h>
+#include <Config.h>
 #include <helper/ResourceManager.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/math/vec3.h>
@@ -30,22 +31,20 @@ const kaba::Class* TerrainRef::_class = nullptr;
 //#define max(a,b)		(((a)>(b))?(a):(b))
 //#define min(a,b)		(((a)<(b))?(a):(b))
 
-#define TESSELLATED 1
-
 void Terrain::reset() {
 	//filename = "";
 	error = false;
 	num_x = num_z = 0;
 	changed = false;
 	force_redraw = true;
-#if TESSELLATED
-	vertex_shader_module = "terrain";
-	tessellation_shader_module = "terrain";
-	topology = ygfx::PrimitiveTopology::PATCHES;
-#else
-	vertex_shader_module = "default";
-	topology = ygfx::PrimitiveTopology::TRIANGLES;
-#endif
+	if (config.terrain_tessellated) {
+		vertex_shader_module = "terrain";
+		tessellation_shader_module = "terrain";
+		topology = ygfx::PrimitiveTopology::PATCHES;
+	} else {
+		vertex_shader_module = "default";
+		topology = ygfx::PrimitiveTopology::TRIANGLES;
+	}
 }
 
 Terrain::Terrain() {
@@ -636,9 +635,9 @@ void XTerrainVBUpdater::upload() {
 }
 
 int XTerrainVBUpdater::iterate(const vec3 &cam_pos) {
-#if TESSELLATED
-	return iterate_new();
-#endif
+	if (config.terrain_tessellated)
+		return iterate_new();
+
 	if (mode == 0) {
 		terrain->calc_detail(owner, cam_pos);
 
