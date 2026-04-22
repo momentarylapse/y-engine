@@ -30,13 +30,22 @@ const kaba::Class* TerrainRef::_class = nullptr;
 //#define max(a,b)		(((a)>(b))?(a):(b))
 //#define min(a,b)		(((a)<(b))?(a):(b))
 
+#define TESSELLATED 1
+
 void Terrain::reset() {
 	//filename = "";
 	error = false;
 	num_x = num_z = 0;
 	changed = false;
 	force_redraw = true;
+#if TESSELLATED
+	vertex_shader_module = "terrain";
+	tessellation_shader_module = "terrain";
+	topology = ygfx::PrimitiveTopology::PATCHES;
+#else
 	vertex_shader_module = "default";
+	topology = ygfx::PrimitiveTopology::TRIANGLES;
+#endif
 }
 
 Terrain::Terrain() {
@@ -627,6 +636,9 @@ void XTerrainVBUpdater::upload() {
 }
 
 int XTerrainVBUpdater::iterate(const vec3 &cam_pos) {
+#if TESSELLATED
+	return iterate_new();
+#endif
 	if (mode == 0) {
 		terrain->calc_detail(owner, cam_pos);
 
@@ -662,6 +674,44 @@ int XTerrainVBUpdater::iterate(const vec3 &cam_pos) {
 		return 2; // swap vb and restart!
 	}
 	return 1; // keep iterating!
+}
+
+int XTerrainVBUpdater::iterate_new() {
+	if (mode == 0) {
+		int N = 32; // TERRAIN_CHUNK_SIZE
+		int NX = terrain->num_x / N;
+		int NZ = terrain->num_z / N;
+
+		terrain->texture_height = new ygfx::Texture(terrain->num_x+1, terrain->num_z+1, "r:f32");
+		terrain->texture_height->write_float(terrain->height);
+
+		float LX = terrain->pattern.x * N;
+		float LZ = terrain->pattern.z * N;
+		/*Array<int> indices;
+		for (int i=0; i<=NX; i++)
+			for (int j=0; j<=NZ; j++)
+				vertices.add({{(float)i*LX,0,(float)j*LZ}, {0,0,1}, (float)i,(float)j});
+		for (int i=0; i<NX; i++)
+			for (int j=0; j<NZ; j++) {
+				indices.add(i*(NZ+1) + j);
+				indices.add((i+1)*(NZ+1) + j);
+				indices.add((i+1)*(NZ+1) + j+1);
+				indices.add(i*(NZ+1) + j+1);
+		}*/
+		for (int i=0; i<NX; i++)
+			for (int j=0; j<NZ; j++) {
+				vertices.add({{(float)i*LX,0,(float)j*LZ}, {0,0,1}, (float)i,(float)j});
+				vertices.add({{(float)(i+1)*LX,0,(float)j*LZ}, {0,0,1}, (float)i+1,(float)j});
+				vertices.add({{(float)(i+1)*LX,0,(float)(j+1)*LZ}, {0,0,1}, (float)i+1,(float)j+1});
+				vertices.add({{(float)i*LX,0,(float)(j+1)*LZ}, {0,0,1}, (float)i,(float)j+1});
+			}
+		vb->update(vertices);
+		//vb->update_index(indices);
+
+		mode = 666;
+		return 2;
+	}
+	return 0;
 }
 
 void Terrain::prepare_draw(ecs::Entity* owner, const vec3 &cam_pos) {
