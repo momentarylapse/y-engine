@@ -489,6 +489,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
+	src/plugins/export.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
@@ -773,6 +774,7 @@ add_executable(y
 	src/lib/yrenderer/ShaderManager.cpp
 	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
+	src/plugins/export.cpp
 	src/plugins/PluginManager.cpp
 	src/renderer/gui/GuiRendererGL.cpp
 	src/renderer/gui/GuiRendererVulkan.cpp
