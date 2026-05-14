@@ -88,7 +88,7 @@ using namespace ygfx;
 ResourceManager* default_resource_manager = nullptr;
 
 void init() {
-	kaba::default_context->register_package_init("yengine", engine.script_dir | "yengine", &export_kaba_package_yengine);
+	reinterpret_cast<kaba::Context*>(kaba::default_context)->register_package_init("yengine", engine.script_dir | "yengine", &export_kaba_package_yengine);
 	import_kaba();
 }
 
@@ -386,7 +386,7 @@ void* create_instance_auto(const string& extended_type_name) {
 	auto x = extended_type_name.explode(".");
 	string& type = x.back();
 
-	for (auto m: weak(kaba::default_context->public_modules)) {
+	for (auto m: weak(reinterpret_cast<kaba::Context*>(kaba::default_context)->public_modules)) {
 		for (auto c: m->classes())
 			if (c->name == type) {
 				msg_error("create: " + c->long_name());
