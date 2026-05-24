@@ -2,38 +2,38 @@ use image.Image
 use os
 
 
-enum PrimitiveTopology
+enum extern PrimitiveTopology
 	TRIANGLES
 	LINES
 	LINESTRIP
 	POINTS
 	PATCHES
 
-struct Vertex
+struct extern Vertex
 	var p, n: vec3
 	var u, v: f32
 
-struct VertexFx
+struct extern VertexFx
 	pos: vec3
 	color: Color
 	u, v: f32
 
-struct PointVertex
+struct extern PointVertex
 	pos: vec3
 	radius: f32
 	color: Color
 
-class FrameBuffer
+class extern FrameBuffer
 	var width, height: i32
 	func extern __init__(att: shared![Texture][])
 	func extern selfref depth_buffer() -> shared[DepthBuffer]
 	func extern selfref color_attachments() -> shared![Texture][]
 
-class Shader as shared
+class extern Shader as Sharable
 	func extern set_float(name: string, f: f32)
 	func extern set_floats(name: string, f: f32&, num: i32)
 
-class Texture as shared
+class extern Texture as Sharable
 	var width, height: i32
 	func extern __init__(w: i32, h: i32, format: string = "rgba:i8")
 	func extern __delete__()
@@ -42,33 +42,33 @@ class Texture as shared
 	func extern mut read(out im: Image)
 	func extern mut set_options(op: string)
 
-class CubeMap extends Texture
+class extern CubeMap extends Texture
 	func extern __init__(size: i32, format: string)
-class DepthBuffer extends Texture
+class extern DepthBuffer extends Texture
 	func extern override __init__(w: i32, h: i32, format: string)
-class ImageTexture extends Texture
+class extern ImageTexture extends Texture
 	func extern override __init__(w: i32, h: i32, format: string)
-class StorageTexture extends Texture
+class extern StorageTexture extends Texture
 	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
-class VolumeTexture extends Texture
+class extern VolumeTexture extends Texture
 	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
 
 
 
-class Buffer
+class extern Buffer
 	func extern mut update(data: @DynamicArray)
 	func extern mut update_chunk(data: void*, size: i32)
 	func extern mut read(mut data: @DynamicArray)
 	func extern mut read_chunk(data: void*, size: i32)
 
-class VertexBuffer
+class extern VertexBuffer
 	func extern __init__(format: string = "3f,3f,2f")
 	func extern mut update(data: @DynamicArray)
 
-class UniformBuffer extends Buffer
+class extern UniformBuffer extends Buffer
 	func extern __init__(size: i32)
 
-class ShaderStorageBuffer extends Buffer
+class extern ShaderStorageBuffer extends Buffer
 	func extern __init__(size: i32)
 
 

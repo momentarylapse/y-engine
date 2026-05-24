@@ -1,0 +1,202 @@
+
+[yengine.model.Animator]
+	@info = ""
+	owner = ""
+
+[yengine.model.Animator.Operation]
+	@info = ""
+
+[yengine.model.Animator.Operation.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.model.Animator.Operation.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.model.Animator.Operation.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.model.Animator.__init__]
+	@info = ""
+
+[yengine.model.Animator.add]
+	@info = ""
+	@return = ""
+	dt = ""
+	loop = ""
+	move = ""
+	op = ""
+	t = ""
+
+[yengine.model.Animator.add_x]
+	@info = ""
+	@return = ""
+	dt = ""
+	loop = ""
+	move = ""
+	op = ""
+	p1 = ""
+	p2 = ""
+	t = ""
+	vel_param = ""
+
+[yengine.model.Animator.is_done]
+	@info = ""
+	@return = ""
+	op_no = ""
+
+[yengine.model.Animator.reset]
+	@info = ""
+
+[yengine.model.Material]
+	@info = ""
+	albedo = ""
+	cast_shadow = ""
+	emission = ""
+	friction = ""
+	metal = ""
+	pass0 = ""
+	roughness = ""
+	shader_data = ""
+	textures = ""
+
+[yengine.model.Material.Friction]
+	@info = ""
+	jump = ""
+	rolling = ""
+	sliding = ""
+
+[yengine.model.Material.Friction.__init__]
+	@info = ""
+	jump = ""
+	rolling = ""
+	sliding = ""
+
+[yengine.model.Material.Pass]
+	@info = ""
+	cull_mode = ""
+	destination = ""
+	mode = ""
+	shader_path = ""
+	source = ""
+	wire_mode = ""
+
+[yengine.model.Material.Pass.__init__]
+	@info = ""
+	cull_mode = ""
+	destination = ""
+	mode = ""
+	shader_path = ""
+	source = ""
+	wire_mode = ""
+
+[yengine.model.Material.__init__]
+	@info = ""
+
+[yengine.model.Model]
+	@info = ""
+	materials = ""
+	max = ""
+	mesh = ""
+	min = ""
+	radius = ""
+
+[yengine.model.Model.Mesh]
+	@info = ""
+	bone_index = ""
+	sub = ""
+	vertex = ""
+
+[yengine.model.Model.Mesh.Sub]
+	@info = ""
+	normal = ""
+	num_triangles = ""
+	skin_vertex = ""
+	triangle_index = ""
+
+[yengine.model.Model.Mesh.Sub.__init__]
+	@info = ""
+	normal = ""
+	num_triangles = ""
+	skin_vertex = ""
+	triangle_index = ""
+
+[yengine.model.Model.Mesh.__init__]
+	@info = ""
+
+[yengine.model.Model.__init__]
+	@info = ""
+
+[yengine.model.Model.begin_edit]
+	@info = ""
+	detail = ""
+
+[yengine.model.Model.end_edit]
+	@info = ""
+	detail = ""
+
+[yengine.model.Model.get_vertex]
+	@info = ""
+	@return = ""
+	index = ""
+
+[yengine.model.Model.make_editable]
+	@info = ""
+
+[yengine.model.ModelRef]
+	@info = ""
+	materials = ""
+	model = ""
+	owner = ""
+
+[yengine.model.ModelRef.__init__]
+	@info = ""
+
+[yengine.model.ModelRef.get_material]
+	@info = ""
+	@return = ""
+	index = ""
+
+[yengine.model.ModelRef.make_material_editable]
+	@info = ""
+	index = ""
+
+[yengine.model.ModelRef.set_material]
+	@info = ""
+	index = ""
+	m = ""
+
+[yengine.model.Skeleton]
+	@info = ""
+	bones = ""
+	dpos = ""
+	owner = ""
+	parents = ""
+	pos0 = ""
+
+[yengine.model.Skeleton.__init__]
+	@info = ""
+
+[yengine.model.Skeleton.reset]
+	@info = ""
+
+[yengine.model.load_material]
+	@info = ""
+	@return = ""
+	filename = ""
+
+[yengine.model.load_model]
+	@info = ""
+	@return = ""
+	filename = ""
+
+[yengine.model.make_material_unique]
+	@info = ""
+	@return = ""
+	m = ""

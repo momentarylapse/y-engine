@@ -1,0 +1,19 @@
+
+[yengine.common.Key]
+	@info = ""
+
+[yengine.common.Key.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.common.Key.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.common.Key.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""

@@ -1,0 +1,77 @@
+
+[yengine.audio.AudioBuffer]
+	@info = ""
+
+[yengine.audio.AudioManager]
+	@info = ""
+	volume_music = ""
+	volume_sounds = ""
+
+[yengine.audio.AudioManager.__init__]
+	@info = ""
+
+[yengine.audio.AudioStream]
+	@info = ""
+
+[yengine.audio.Listener]
+	@info = ""
+	owner = ""
+
+[yengine.audio.Listener.__init__]
+	@info = ""
+
+[yengine.audio.SoundSource]
+	@info = ""
+	loop = ""
+	max_distance = ""
+	min_distance = ""
+	owner = ""
+	speed = ""
+	suicidal = ""
+	volume = ""
+
+[yengine.audio.SoundSource.__init__]
+	@info = ""
+
+[yengine.audio.SoundSource.pause]
+	@info = ""
+	pause = ""
+
+[yengine.audio.SoundSource.play]
+	@info = ""
+
+[yengine.audio.SoundSource.set_buffer]
+	@info = ""
+	buffer = ""
+
+[yengine.audio.SoundSource.set_stream]
+	@info = ""
+	stream = ""
+
+[yengine.audio.SoundSource.stop]
+	@info = ""
+
+[yengine.audio.SoundSource.update]
+	@info = ""
+
+[yengine.audio.create_audio_stream]
+	@info = ""
+	@return = ""
+	f = ""
+	sample_rate = ""
+
+[yengine.audio.create_buffer]
+	@info = ""
+	@return = ""
+	sample_rate = ""
+	samples = ""
+
+[yengine.audio.load_audio_stream]
+	@info = ""
+	@return = ""
+	filename = ""
+
+[yengine.audio.load_buffer]
+	@info = ""
+	@return = ""
+	filename = ""

@@ -1,0 +1,237 @@
+
+[yengine.gfx.Buffer]
+	@info = ""
+
+[yengine.gfx.Buffer.read]
+	@info = ""
+	data = ""
+
+[yengine.gfx.Buffer.read_chunk]
+	@info = ""
+	data = ""
+	size = ""
+
+[yengine.gfx.Buffer.update]
+	@info = ""
+	data = ""
+
+[yengine.gfx.Buffer.update_chunk]
+	@info = ""
+	data = ""
+	size = ""
+
+[yengine.gfx.CubeMap]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.CubeMap.__init__]
+	@info = ""
+	format = ""
+	size = ""
+
+[yengine.gfx.DepthBuffer]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.DepthBuffer.__init__]
+	@info = ""
+	format = ""
+	h = ""
+	w = ""
+
+[yengine.gfx.FrameBuffer]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.FrameBuffer.__init__]
+	@info = ""
+	att = ""
+
+[yengine.gfx.FrameBuffer.color_attachments]
+	@info = ""
+	@return = ""
+
+[yengine.gfx.FrameBuffer.depth_buffer]
+	@info = ""
+	@return = ""
+
+[yengine.gfx.ImageTexture]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.ImageTexture.__init__]
+	@info = ""
+	format = ""
+	h = ""
+	w = ""
+
+[yengine.gfx.PointVertex]
+	@info = ""
+	color = ""
+	pos = ""
+	radius = ""
+
+[yengine.gfx.PointVertex.__init__]
+	@info = ""
+	color = ""
+	pos = ""
+	radius = ""
+
+[yengine.gfx.PrimitiveTopology]
+	@info = ""
+
+[yengine.gfx.PrimitiveTopology.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.gfx.PrimitiveTopology.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.gfx.PrimitiveTopology.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.gfx.Shader]
+	@info = ""
+
+[yengine.gfx.Shader.__init__]
+	@info = ""
+
+[yengine.gfx.Shader.set_float]
+	@info = ""
+	f = ""
+	name = ""
+
+[yengine.gfx.Shader.set_floats]
+	@info = ""
+	f = ""
+	name = ""
+	num = ""
+
+[yengine.gfx.ShaderStorageBuffer]
+	@info = ""
+
+[yengine.gfx.ShaderStorageBuffer.__init__]
+	@info = ""
+	size = ""
+
+[yengine.gfx.StorageTexture]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.StorageTexture.__init__]
+	@info = ""
+	format = ""
+	nx = ""
+	ny = ""
+	nz = ""
+
+[yengine.gfx.Texture]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.Texture.__init__]
+	@info = ""
+	format = ""
+	h = ""
+	w = ""
+
+[yengine.gfx.Texture.read]
+	@info = ""
+	im = ""
+
+[yengine.gfx.Texture.set_options]
+	@info = ""
+	op = ""
+
+[yengine.gfx.Texture.write]
+	@info = ""
+	im = ""
+
+[yengine.gfx.Texture.write_float]
+	@info = ""
+	data = ""
+
+[yengine.gfx.UniformBuffer]
+	@info = ""
+
+[yengine.gfx.UniformBuffer.__init__]
+	@info = ""
+	size = ""
+
+[yengine.gfx.Vertex]
+	@info = ""
+	n = ""
+	p = ""
+	u = ""
+	v = ""
+
+[yengine.gfx.Vertex.__init__]
+	@info = ""
+	n = ""
+	p = ""
+	u = ""
+	v = ""
+
+[yengine.gfx.VertexBuffer]
+	@info = ""
+
+[yengine.gfx.VertexBuffer.__init__]
+	@info = ""
+	format = ""
+
+[yengine.gfx.VertexBuffer.update]
+	@info = ""
+	data = ""
+
+[yengine.gfx.VertexFx]
+	@info = ""
+	color = ""
+	pos = ""
+	u = ""
+	v = ""
+
+[yengine.gfx.VertexFx.__init__]
+	@info = ""
+	color = ""
+	pos = ""
+	u = ""
+	v = ""
+
+[yengine.gfx.VolumeTexture]
+	@info = ""
+	height = ""
+	width = ""
+
+[yengine.gfx.VolumeTexture.__init__]
+	@info = ""
+	format = ""
+	nx = ""
+	ny = ""
+	nz = ""
+
+[yengine.gfx.create_shader]
+	@info = ""
+	@return = ""
+	source = ""
+
+[yengine.gfx.load_shader]
+	@info = ""
+	@return = ""
+	filename = ""
+
+[yengine.gfx.load_texture]
+	@info = ""
+	@return = ""
+	filename = ""

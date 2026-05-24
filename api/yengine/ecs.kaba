@@ -4,14 +4,14 @@ use .common.*
 #class extern Model
 #class extern RigidBody
 
-struct BaseClass
+struct extern BaseClass
 	#func extern __init__()
 	func extern virtual __delete__()
 	func extern virtual mut on_init()
 	func extern virtual mut on_delete()
 	func extern virtual mut on_iterate(dt: float)
 
-struct Entity
+struct extern Entity
 	var pos: vec3
 	var ang: Quaternion
 	var parent: Entity*
@@ -33,14 +33,14 @@ struct Entity
 
 
 
-struct CollisionData
+struct extern CollisionData
 	var entity: Entity&
 	#var body: RigidBody*
 	var pos, n: vec3
 
 
 # always let the engine create/delete!
-class Component
+class extern Component
 	func extern __init__()
 	func extern virtual __delete__()
 	func extern virtual mut on_init()
@@ -70,7 +70,7 @@ func globalref query2[T1,T2]() -> (Entity&,T1&,T2&)[]&
 #	get_component_list[int]()
 
 
-struct ComponentInfo
+struct extern ComponentInfo
 	var e: Entity&
 	var c: Component&
 	var type: kaba.Class*
@@ -80,7 +80,7 @@ struct ComponentInfo
 		return nil
 
 
-class System extends BaseClass
+class extern System extends BaseClass
 	func extern override __init__()
 	func extern override __delete__()
 	

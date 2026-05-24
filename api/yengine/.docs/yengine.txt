@@ -1,0 +1,41 @@
+
+[yengine]
+	@info = "A game engine..."
+
+[yengine.Scheduler]
+	@info = ""
+
+[yengine.Scheduler.__init__]
+	@info = ""
+
+[yengine.Scheduler.clear]
+	@info = ""
+
+[yengine.Scheduler.later]
+	@info = ""
+	dt = ""
+	f = ""
+
+[yengine.Scheduler.repeat]
+	@info = ""
+	dt = ""
+	f = ""
+
+[yengine.UserMesh]
+	@info = ""
+	geometry_shader_module = ""
+	material = ""
+	owner = ""
+	tessellation_shader_module = ""
+	topology = ""
+	vertex_buffer = ""
+	vertex_shader_module = ""
+
+[yengine.UserMesh.__init__]
+	@info = ""
+
+[yengine.create_camera_renderer]
+	@info = ""
+	@return = ""
+	cam = ""
+	ctx = ""

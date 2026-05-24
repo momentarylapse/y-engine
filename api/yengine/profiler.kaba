@@ -1,16 +1,16 @@
 
-class Profiler
-	struct Channel
+class extern Profiler
+	struct extern Channel
 		var name: string
 		var parent: i32
-	struct TimingData
+	struct extern TimingData
 		var channel: i32
 		var offset: f32
-	struct FrameTimingData
+	struct extern FrameTimingData
 		var cpu0: TimingData[]
 		var gpu: TimingData[]
 		var total_time: f32
-	struct FrameHistory
+	struct extern FrameHistory
 		var total_times: f32[]
 	func extern static get_name(channel: i32)
 	var extern static channels: Channel[]

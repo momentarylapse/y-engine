@@ -17,7 +17,7 @@ use .networking.*
 let EXPORT_IMPORTS = true
 
 
-class UserMesh extends Component
+class extern UserMesh extends Component
 	vertex_buffer: owned[VertexBuffer]
 	topology: PrimitiveTopology
 	material: Material&
@@ -26,7 +26,7 @@ class UserMesh extends Component
 	tessellation_shader_module: string
 
 
-class Scheduler
+class extern Scheduler
 	func extern __init__()
 	func extern __delete__()
 	func extern mut later(dt: f32, f: void->void)

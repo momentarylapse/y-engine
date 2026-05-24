@@ -1,7 +1,7 @@
 use .ecs.*
 use .gfx.*
 
-class LegacyParticle extends Component
+class extern LegacyParticle extends Component
 	var vel: vec3
 	var radius = 1.0
 	var time_to_live = 2.0
@@ -13,12 +13,12 @@ class LegacyParticle extends Component
 	func extern override __init__()
 	func extern override __delete__()
 
-class LegacyBeam extends LegacyParticle
+class extern LegacyBeam extends LegacyParticle
 	var length = vec3.EZ
 	#func extern __init__(p: vec3, l: vec3, r: float, t: shared![Texture], ttl: float)
 
 
-class Particle
+class extern Particle
 	var pos, vel: vec3
 	var radius: f32
 	var time_to_live: f32
@@ -26,11 +26,11 @@ class Particle
 	var color: Color
 	var enabled: bool
 
-class Beam extends Particle
+class extern Beam extends Particle
 	var length: vec3
 
 
-class ParticleGroup extends Component
+class extern ParticleGroup extends Component
 #	var update_dt = 0.1
 	#var texture: shared![Texture]
 	var texture: Texture&
@@ -44,7 +44,7 @@ class ParticleGroup extends Component
 	func extern virtual mut on_iterate_particle(out p: Particle, dt: float)
 	func extern virtual mut on_iterate_beam(out p: Beam, dt: float)
 
-class ParticleEmitter extends ParticleGroup
+class extern ParticleEmitter extends ParticleGroup
 	var spawn_beams: bool
 	var spawn_dt: f32
 	var spawn_time_to_live: f32

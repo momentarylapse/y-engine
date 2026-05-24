@@ -1,0 +1,310 @@
+
+[yengine.engine.ComputeTask]
+	@info = ""
+	active = ""
+	nx = ""
+	ny = ""
+	nz = ""
+	shader_data = ""
+
+[yengine.engine.ComputeTask.__init__]
+	@info = ""
+	ctx = ""
+	n = ""
+	name = ""
+	shader = ""
+
+[yengine.engine.ComputeTask.bind_image]
+	@info = ""
+	index = ""
+	tex = ""
+
+[yengine.engine.ComputeTask.bind_storage_buffer]
+	@info = ""
+	buf = ""
+	index = ""
+
+[yengine.engine.ComputeTask.bind_texture]
+	@info = ""
+	index = ""
+	tex = ""
+
+[yengine.engine.ComputeTask.bind_uniform_buffer]
+	@info = ""
+	buf = ""
+	index = ""
+
+[yengine.engine.ComputeTask.render]
+	@info = ""
+	params = ""
+
+[yengine.engine.Context]
+	@info = ""
+	context = ""
+	tex_white = ""
+
+[yengine.engine.EngineData]
+	@info = ""
+	camera_renderers = ""
+	console_enabled = ""
+	context = ""
+	debug = ""
+	detail_level = ""
+	elapsed = ""
+	elapsed_rt = ""
+	first_frame = ""
+	fps_max = ""
+	fps_min = ""
+	game_running = ""
+	initial_world_file = ""
+	physical_aspect_ratio = ""
+	region_renderer = ""
+	renderer = ""
+	resetting_game = ""
+	resolution_scale = ""
+	second_world_file = ""
+	show_timings = ""
+	time_scale = ""
+
+[yengine.engine.EngineData.add_render_task]
+	@info = ""
+	priority = ""
+	task = ""
+
+[yengine.engine.EngineData.exit]
+	@info = ""
+
+[yengine.engine.FullCameraRenderer]
+	@info = ""
+	hdr_resolver = ""
+	light_meter = ""
+	render_path = ""
+	type = ""
+
+[yengine.engine.FullCameraRenderer.__init__]
+	@info = ""
+
+[yengine.engine.FullCameraRenderer.get_cubemap]
+	@info = ""
+	@return = ""
+
+[yengine.engine.FullCameraRenderer.get_gbuffer]
+	@info = ""
+	@return = ""
+
+[yengine.engine.FullCameraRenderer.get_shadow_map]
+	@info = ""
+	@return = ""
+
+[yengine.engine.HDRResolver]
+	@info = ""
+	bloom_levels = ""
+	depth_buffer = ""
+	light_meter = ""
+	texture = ""
+
+[yengine.engine.HDRResolver.BloomLevel]
+	@info = ""
+	tex_out = ""
+
+[yengine.engine.HDRResolver.BloomLevel.__init__]
+	@info = ""
+
+[yengine.engine.HDRResolver.__init__]
+	@info = ""
+
+[yengine.engine.LightMeter]
+	@info = ""
+	brightness = ""
+	histogram = ""
+
+[yengine.engine.LightMeter.__init__]
+	@info = ""
+
+[yengine.engine.PostProcessor]
+	@info = ""
+	fb1 = ""
+	fb2 = ""
+
+[yengine.engine.PostProcessor.add_stage]
+	@info = ""
+	name = ""
+	on_draw = ""
+	on_prepare = ""
+
+[yengine.engine.PostProcessor.next_fb]
+	@info = ""
+	@return = ""
+	cur = ""
+
+[yengine.engine.PostProcessor.process]
+	@info = ""
+	shader = ""
+	source = ""
+	target = ""
+
+[yengine.engine.RayReply]
+	@info = ""
+	f = ""
+	g = ""
+	index = ""
+	mesh = ""
+	n = ""
+	p = ""
+	t = ""
+
+[yengine.engine.RayReply.__init__]
+	@info = ""
+	f = ""
+	g = ""
+	index = ""
+	mesh = ""
+	n = ""
+	p = ""
+	t = ""
+
+[yengine.engine.RayRequest]
+	@info = ""
+	p0 = ""
+	p1 = ""
+
+[yengine.engine.RayRequest.__init__]
+	@info = ""
+	p0 = ""
+	p1 = ""
+
+[yengine.engine.RayTracingData]
+	@info = ""
+	buffer_meshes = ""
+	num_meshes = ""
+
+[yengine.engine.RayTracingData.__init__]
+	@info = ""
+	buffer_meshes = ""
+	num_meshes = ""
+
+[yengine.engine.RegionRenderer]
+	@info = ""
+	regions = ""
+
+[yengine.engine.RegionRenderer.Region]
+	@info = ""
+	dest = ""
+	renderer = ""
+	z = ""
+
+[yengine.engine.RegionRenderer.Region.__init__]
+	@info = ""
+	dest = ""
+	renderer = ""
+	z = ""
+
+[yengine.engine.RegionRenderer.__init__]
+	@info = ""
+
+[yengine.engine.RegionRenderer.add_region]
+	@info = ""
+	dest = ""
+	r = ""
+	z = ""
+
+[yengine.engine.RenderParams]
+	@info = ""
+
+[yengine.engine.RenderPath]
+	@info = ""
+	scene_view = ""
+	wireframe = ""
+
+[yengine.engine.RenderPath.__init__]
+	@info = ""
+
+[yengine.engine.RenderPathType]
+	@info = ""
+
+[yengine.engine.RenderPathType.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.engine.RenderPathType.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.engine.RenderPathType.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.engine.RenderTask]
+	@info = ""
+	active = ""
+
+[yengine.engine.RenderTask.__init__]
+	@info = ""
+
+[yengine.engine.RenderTask.render]
+	@info = ""
+	params = ""
+
+[yengine.engine.Renderer]
+	@info = ""
+
+[yengine.engine.Renderer.__init__]
+	@info = ""
+
+[yengine.engine.Renderer.draw]
+	@info = ""
+	params = ""
+
+[yengine.engine.Renderer.prepare]
+	@info = ""
+	params = ""
+
+[yengine.engine.SceneView]
+	@info = ""
+	num_surfels = ""
+	probe_cells = ""
+	probe_max = ""
+	probe_min = ""
+	ray_tracing_data = ""
+	surfel_buffer = ""
+
+[yengine.engine.SceneView.__init__]
+	@info = ""
+
+[yengine.engine.SceneView.shadow_projection]
+	@info = ""
+	@return = ""
+
+[yengine.engine.ivec3]
+	@info = ""
+	x = ""
+	y = ""
+	z = ""
+
+[yengine.engine.ivec3.__init__]
+	@info = ""
+	x = ""
+	y = ""
+	z = ""
+
+[yengine.engine.rt_setup]
+	@info = ""
+	sv = ""
+
+[yengine.engine.rt_update_frame]
+	@info = ""
+	sv = ""
+
+[yengine.engine.rt_vtrace]
+	@info = ""
+	@return = ""
+	requests = ""
+	sv = ""
+
+[yengine.engine.screenshot]
+	@info = ""
+	im = ""

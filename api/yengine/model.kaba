@@ -2,7 +2,7 @@ use os
 use .gfx.*
 use .ecs.*
 
-class Material
+class extern Material
 	var albedo: Color
 	var roughness: f32
 	var metal: f32
@@ -10,14 +10,14 @@ class Material
 	var textures: shared![Texture][]
 #	var shader: shared![Shader][6]
 	var cast_shadow: bool
-	struct Pass
+	struct extern Pass
 		var mode: i32
 		var source, destination: i32
 		var cull_mode: i32 #ygfx.CullMode
 		var wire_mode: bool
 		var shader_path: os.Path
 	var pass0: Pass
-	struct Friction
+	struct extern Friction
 		sliding: f32
 		_static: f32
 		rolling: f32
@@ -29,9 +29,9 @@ class Material
 func extern load_material(filename: os.Path) -> Material&
 func extern make_material_unique(m: Material&) -> Material&
 
-class Model
-	class Mesh as shared
-		struct Sub
+class extern Model
+	class extern Mesh as Sharable
+		struct extern Sub
 			var num_triangles: i32
 			var triangle_index: i32[]
 			var skin_vertex: f32[]
@@ -59,7 +59,7 @@ class Model
 
 
 
-class ModelRef extends Component
+class extern ModelRef extends Component
 	let PARAMETERS = "model,materials"
 	var model: Model*
 	var materials: Material&[]
@@ -69,14 +69,14 @@ class ModelRef extends Component
 		set_material(index, make_material_unique(get_material(index)))
 
 
-class Skeleton extends Component
+class extern Skeleton extends Component
 	var bones: Entity&[]
 	var pos0, dpos: vec3[]
 	var parents: i32[]
 	func extern mut reset()
 
 
-class Animator extends Component
+class extern Animator extends Component
 	#let REQUIRES = [ModelRef, Skeleton]
 	let REQUIRES = Skeleton
 

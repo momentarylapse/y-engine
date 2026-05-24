@@ -1,0 +1,176 @@
+
+[yengine.ecs.BaseClass]
+	@info = ""
+
+[yengine.ecs.BaseClass.__init__]
+	@info = ""
+
+[yengine.ecs.BaseClass.on_delete]
+	@info = ""
+
+[yengine.ecs.BaseClass.on_init]
+	@info = ""
+
+[yengine.ecs.BaseClass.on_iterate]
+	@info = ""
+	dt = ""
+
+[yengine.ecs.CollisionData]
+	@info = ""
+	entity = ""
+	n = ""
+	pos = ""
+
+[yengine.ecs.CollisionData.__init__]
+	@info = ""
+	entity = ""
+	n = ""
+	pos = ""
+
+[yengine.ecs.Component]
+	@info = ""
+	owner = ""
+
+[yengine.ecs.Component.__init__]
+	@info = ""
+
+[yengine.ecs.Component.on_collide]
+	@info = ""
+	col = ""
+
+[yengine.ecs.Component.on_delete]
+	@info = ""
+
+[yengine.ecs.Component.on_init]
+	@info = ""
+
+[yengine.ecs.Component.on_iterate]
+	@info = ""
+	dt = ""
+
+[yengine.ecs.Component.set_variables]
+	@info = ""
+	vars = ""
+
+[yengine.ecs.ComponentInfo]
+	@info = ""
+	c = ""
+	e = ""
+	type = ""
+
+[yengine.ecs.ComponentInfo.__init__]
+	@info = ""
+	c = ""
+	e = ""
+	type = ""
+
+[yengine.ecs.ComponentInfo.get]
+	@info = ""
+
+[yengine.ecs.Entity]
+	@info = ""
+	ang = ""
+	parent = ""
+	pos = ""
+
+[yengine.ecs.Entity.__init__]
+	@info = ""
+	ang = ""
+	parent = ""
+	pos = ""
+
+[yengine.ecs.Entity.add_component]
+	@info = ""
+
+[yengine.ecs.Entity.delete_component]
+	@info = ""
+	c = ""
+
+[yengine.ecs.Entity.get_component]
+	@info = ""
+
+[yengine.ecs.Entity.get_component[model.ModelRef]]
+	@info = ""
+	@return = ""
+
+[yengine.ecs.Entity.get_component_derived]
+	@info = ""
+
+[yengine.ecs.Entity.get_componentmodel.ModelRef]
+	@info = ""
+	@return = ""
+
+[yengine.ecs.Entity.get_matrix]
+	@info = ""
+	@return = ""
+
+[yengine.ecs.System]
+	@info = ""
+
+[yengine.ecs.System.__init__]
+	@info = ""
+
+[yengine.ecs.System.on_add_component]
+	@info = ""
+	c = ""
+
+[yengine.ecs.System.on_draw_pre]
+	@info = ""
+
+[yengine.ecs.System.on_finished_loading]
+	@info = ""
+
+[yengine.ecs.System.on_input]
+	@info = ""
+
+[yengine.ecs.System.on_iterate_pre]
+	@info = ""
+	dt = ""
+
+[yengine.ecs.System.on_key_down]
+	@info = ""
+	key = ""
+
+[yengine.ecs.System.on_key_up]
+	@info = ""
+	key = ""
+
+[yengine.ecs.System.on_left_button_down]
+	@info = ""
+
+[yengine.ecs.System.on_left_button_up]
+	@info = ""
+
+[yengine.ecs.System.on_middle_button_down]
+	@info = ""
+
+[yengine.ecs.System.on_middle_button_up]
+	@info = ""
+
+[yengine.ecs.System.on_remove_component]
+	@info = ""
+	c = ""
+
+[yengine.ecs.System.on_render_inject]
+	@info = ""
+
+[yengine.ecs.System.on_right_button_down]
+	@info = ""
+
+[yengine.ecs.System.on_right_button_up]
+	@info = ""
+
+[yengine.ecs.get_component_family_list]
+	@info = ""
+
+[yengine.ecs.get_component_list]
+	@info = ""
+
+[yengine.ecs.get_system]
+	@info = ""
+
+[yengine.ecs.query1]
+	@info = ""
+
+[yengine.ecs.query2]
+	@info = ""

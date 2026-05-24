@@ -7,7 +7,7 @@ use .model.*
 use .audio.*
 
 
-class RigidBody extends Component
+class extern RigidBody extends Component
 	let PARAMETERS = "mass,theta,dynamic,g_factor"
 	var vel: vec3 # world frame
 	var rot: vec3 # world frame
@@ -26,33 +26,33 @@ class RigidBody extends Component
 	func extern mut update_motion(mask: i32)
 
 
-class Collider extends Component
-class MeshCollider extends Collider
+class extern Collider extends Component
+class extern MeshCollider extends Collider
 	let REQUIRES = RigidBody
-class TerrainCollider extends Collider
+class extern TerrainCollider extends Collider
 	let REQUIRES = RigidBody
 
 
-class BoxCollider extends Collider
+class extern BoxCollider extends Collider
 	let REQUIRES = RigidBody
 	let PARAMETERS = "min,max"
 	var min, max: vec3
 
-class SphereCollider extends Collider
+class extern SphereCollider extends Collider
 	let REQUIRES = RigidBody
 	let PARAMETERS = "radius"
 	var radius: f32
 
 
-class EgoMarker extends Component
+class extern EgoMarker extends Component
 
 
-class MultiInstance extends Component
+class extern MultiInstance extends Component
 	var model: Model*
 	var matrices: mat4[]
 
 
-class Terrain
+class extern Terrain
 	var pattern: vec3
 	var num_x, num_z: i32
 	var height: f32[]
@@ -63,7 +63,7 @@ class Terrain
 	# ...
 
 
-class Light extends Component
+class extern Light extends Component
 	let PARAMETERS = "type,color,power,theta,harshness,enabled,allow_shadow"
 	var type: i32#LightType
 	var color: Color
@@ -93,7 +93,7 @@ func extern ref attach_light_point(e: Entity, c: Color, radius: f32) -> Light&
 func extern ref attach_light_cone(e: Entity, c: Color, radius: f32, theta: f32) -> Light&
 
 
-class Camera extends Component
+class extern Camera extends Component
 	let PARAMETERS = "min_depth,max_depth,exposure,fov"
 	var exposure: f32
 	var bloom_radius: f32
@@ -118,32 +118,32 @@ class Camera extends Component
 	func extern mut update_matrix_cache(aspect_ratio: f32)
 
 
-class CubeMapSource extends Component
+class extern CubeMapSource extends Component
 	var min_depth, max_depth: f32
 	var cube_map: shared[CubeMap]
 	var resolution: i32
 	var update_rate: i32
 
 
-class NameTag extends Component
+class extern NameTag extends Component
 	var name: string
 
 
-class TerrainRef extends Component
+class extern TerrainRef extends Component
 	let PARAMETERS = "terrain,material"
 	var terrain: Terrain*
 	var material: Material&
 
 
-struct Template
+struct extern Template
 	# opaque data...
 
-class TemplateRef extends Component
+class extern TemplateRef extends Component
 	let PARAMETERS = "template"
 	var template: Template*
 
 
-class Fog
+class extern Fog
 	var color: Color
 	var distance: f32
 	var enabled: bool
@@ -157,7 +157,7 @@ enum LinkType
 	SPRING as "spring"
 	SLIDER as "slider"
 
-class Link extends Component
+class extern Link extends Component
 	let PARAMETERS = "type,a,b"
 	var type: LinkType
 	var a, b: i32
@@ -167,7 +167,7 @@ class Link extends Component
 
 
 
-class Physics extends System
+class extern Physics extends System
 	enum Mode
 		NONE
 		SIMPLE
@@ -181,8 +181,8 @@ class Physics extends System
 	func extern mut set_dynamic(out e: Entity, dynamic: bool)
 
 
-class AnimationManager extends System
-class ParticleManager extends System
+class extern AnimationManager extends System
+class extern ParticleManager extends System
 
 
 enum TraceMode
@@ -191,7 +191,7 @@ enum TraceMode
 	SIMPLE = 4
 
 
-class World
+class extern World
 	func extern selfref ego() -> Entity*
 	
 	var background: Color
@@ -237,7 +237,7 @@ class World
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)
 	
-	class MessageData
+	class extern MessageData
 		var e: Entity*
 		var v: vec3
 	var msg_data: MessageData

@@ -1,0 +1,414 @@
+
+[yengine.ui.Button]
+	@info = ""
+
+[yengine.ui.Button.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.Button.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.Button.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.Canvas]
+	@info = ""
+	align = ""
+	children = ""
+	color = ""
+	dz = ""
+	height = ""
+	margin = ""
+	pos = ""
+	visible = ""
+	width = ""
+	x = ""
+	y = ""
+
+[yengine.ui.Canvas.__init__]
+	@info = ""
+
+[yengine.ui.Canvas.on_draw]
+	@info = ""
+	p = ""
+
+[yengine.ui.Gamepad]
+	@info = ""
+	deadzone = ""
+
+[yengine.ui.Gamepad.Button]
+	@info = ""
+
+[yengine.ui.Gamepad.Button.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.Gamepad.Button.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.Gamepad.Button.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.Gamepad.__init__]
+	@info = ""
+
+[yengine.ui.Gamepad.axis]
+	@info = ""
+	@return = ""
+	a = ""
+
+[yengine.ui.Gamepad.button]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.Gamepad.clicked]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.Gamepad.is_present]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Gamepad.name]
+	@info = ""
+	@return = ""
+
+[yengine.ui.HBox]
+	@info = ""
+	align = ""
+	children = ""
+	color = ""
+	dz = ""
+	height = ""
+	margin = ""
+	pos = ""
+	visible = ""
+	width = ""
+	x = ""
+	y = ""
+
+[yengine.ui.HBox.__init__]
+	@info = ""
+
+[yengine.ui.Node]
+	@info = ""
+	align = ""
+	children = ""
+	color = ""
+	dz = ""
+	height = ""
+	margin = ""
+	pos = ""
+	visible = ""
+	width = ""
+	x = ""
+	y = ""
+
+[yengine.ui.Node.Align]
+	@info = ""
+
+[yengine.ui.Node.Align.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.Node.Align.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.Node.Align.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.Node.__init__]
+	@info = ""
+	r = ""
+
+[yengine.ui.Node.add]
+	@info = ""
+	n = ""
+
+[yengine.ui.Node.add_from_source]
+	@info = ""
+	s = ""
+
+[yengine.ui.Node.get]
+	@info = ""
+
+[yengine.ui.Node.on_enter]
+	@info = ""
+
+[yengine.ui.Node.on_iterate]
+	@info = ""
+	dt = ""
+
+[yengine.ui.Node.on_leave]
+	@info = ""
+
+[yengine.ui.Node.on_left_button_down]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.on_left_button_up]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.on_middle_button_down]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.on_middle_button_up]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.on_right_button_down]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.on_right_button_up]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.remove]
+	@info = ""
+	n = ""
+
+[yengine.ui.Node.remove_all_children]
+	@info = ""
+
+[yengine.ui.Node.set_area]
+	@info = ""
+	r = ""
+
+[yengine.ui.Picture]
+	@info = ""
+	align = ""
+	angle = ""
+	blur = ""
+	children = ""
+	color = ""
+	dz = ""
+	height = ""
+	margin = ""
+	pos = ""
+	shader = ""
+	shader_data = ""
+	source = ""
+	texture = ""
+	visible = ""
+	width = ""
+	x = ""
+	y = ""
+
+[yengine.ui.Picture.__init__]
+	@info = ""
+	r = ""
+	source = ""
+	tex = ""
+
+[yengine.ui.Picture3d]
+	@info = ""
+	align = ""
+	children = ""
+	color = ""
+	dz = ""
+	height = ""
+	lighting = ""
+	margin = ""
+	matrix = ""
+	model = ""
+	pos = ""
+	visible = ""
+	width = ""
+	world_3d = ""
+	x = ""
+	y = ""
+
+[yengine.ui.Picture3d.__init__]
+	@info = ""
+	m = ""
+	mat = ""
+	z = ""
+
+[yengine.ui.Text]
+	@info = ""
+	align = ""
+	angle = ""
+	blur = ""
+	children = ""
+	color = ""
+	dz = ""
+	font_size = ""
+	height = ""
+	margin = ""
+	pos = ""
+	shader = ""
+	shader_data = ""
+	source = ""
+	text = ""
+	texture = ""
+	visible = ""
+	width = ""
+	x = ""
+	y = ""
+
+[yengine.ui.Text.__init__]
+	@info = ""
+	font_size = ""
+	p = ""
+	t = ""
+
+[yengine.ui.Text.set_text]
+	@info = ""
+	t = ""
+
+[yengine.ui.VBox]
+	@info = ""
+	align = ""
+	children = ""
+	color = ""
+	dz = ""
+	height = ""
+	margin = ""
+	pos = ""
+	visible = ""
+	width = ""
+	x = ""
+	y = ""
+
+[yengine.ui.VBox.__init__]
+	@info = ""
+
+[yengine.ui.VRDevice]
+	@info = ""
+	ang = ""
+	name = ""
+	pos = ""
+	role = ""
+
+[yengine.ui.VRDevice.Axis]
+	@info = ""
+
+[yengine.ui.VRDevice.Axis.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.VRDevice.Axis.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.VRDevice.Axis.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.VRDevice.Button]
+	@info = ""
+
+[yengine.ui.VRDevice.Button.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.VRDevice.Button.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.VRDevice.Button.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.VRDevice.__init__]
+	@info = ""
+	ang = ""
+	name = ""
+	pos = ""
+	role = ""
+
+[yengine.ui.VRDevice.axis]
+	@info = ""
+	@return = ""
+	a = ""
+
+[yengine.ui.VRDevice.button]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.VRDevice.clicked]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.VRDeviceRole]
+	@info = ""
+
+[yengine.ui.VRDeviceRole.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.VRDeviceRole.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.VRDeviceRole.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.button]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.get_pad]
+	@info = ""
+	@return = ""
+	index = ""
+
+[yengine.ui.get_vr_device]
+	@info = ""
+	@return = ""
+	role = ""
+
+[yengine.ui.key_down]
+	@info = ""
+	@return = ""
+	k = ""
+
+[yengine.ui.key_state]
+	@info = ""
+	@return = ""
+	k = ""
+
+[yengine.ui.key_up]
+	@info = ""
+	@return = ""
+	k = ""

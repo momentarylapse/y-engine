@@ -6,11 +6,11 @@ struct ivec3
 	x, y, z: i32
 
 # "yrenderer.Context"
-class Context as @noauto
+class extern Context as @noauto
 	var context: void& # "ygfx.Context"
 	var tex_white: shared![Texture]
 
-class EngineData as @noauto
+class extern EngineData as @noauto
 	var context: Context&
 	var debug: bool
 	var show_timings: bool
@@ -38,17 +38,17 @@ class EngineData as @noauto
 
 	func extern exit()
 
-struct RenderParams
+struct extern RenderParams
 
-class Renderer
+class extern Renderer
 	func virtual prepare(params: RenderParams)
 	func virtual draw(params: RenderParams)
 
-class RenderTask extends Renderer
+class extern RenderTask extends Renderer
 	var active: bool
 	func virtual render(params: RenderParams)
 
-class ComputeTask extends RenderTask
+class extern ComputeTask extends RenderTask
 	nx: i32
 	ny: i32
 	nz: i32
@@ -60,8 +60,8 @@ class ComputeTask extends RenderTask
 	func extern bind_uniform_buffer(index: i32, buf: UniformBuffer&)
 	func extern bind_storage_buffer(index: i32, buf: ShaderStorageBuffer&)
 
-class RegionRenderer
-	struct Region
+class extern RegionRenderer
+	struct extern Region
 		var dest: Rect
 		var z: int
 		var renderer: Renderer&
@@ -69,16 +69,16 @@ class RegionRenderer
 	func extern add_region(r: Renderer&, dest: Rect, z: i32)
 
 
-#class ShadowRenderer
+#class extern ShadowRenderer
 #	struct Cascade
 #		depth_buffer: DepthBuffer&
 #	cascades: Cascade[2]
 
-struct RayTracingData
+struct extern RayTracingData
 	buffer_meshes: UniformBuffer*
 	num_meshes: i32
 
-class SceneView
+class extern SceneView
 	var surfel_buffer: owned[UniformBuffer]
 	var num_surfels: i32
 	var probe_cells: ivec3
@@ -89,7 +89,7 @@ class SceneView
 		pass
 	func extern shadow_projection() -> mat4
 
-class RenderPath extends Renderer
+class extern RenderPath extends Renderer
 	var wireframe: bool
 	var scene_view: SceneView
 	
@@ -98,13 +98,13 @@ class RenderPath extends Renderer
 	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
 
 
-enum RenderPathType
+enum extern RenderPathType
 	DIRECT
 	FORWARD
 	DEFERRED
 	PATHTRACING
 
-class FullCameraRenderer extends Renderer
+class extern FullCameraRenderer extends Renderer
 	var type: RenderPathType
 	var render_path: RenderPath&
 	var hdr_resolver: HDRResolver*
@@ -114,12 +114,12 @@ class FullCameraRenderer extends Renderer
 	func extern get_shadow_map() -> shared![DepthBuffer][]
 	func extern get_cubemap() -> CubeMap*
 
-class LightMeter
+class extern LightMeter
 	var histogram: i32[]
 	var brightness: f32
 
 
-class HDRResolver
+class extern HDRResolver
 	var texture: shared![Texture]
 	var depth_buffer: shared![DepthBuffer]
 	
@@ -130,7 +130,7 @@ class HDRResolver
 	var light_meter: LightMeter&
 
 
-class PostProcessor
+class extern PostProcessor
 	var fb1, fb2: FrameBuffer&
 	func extern next_fb(cur: FrameBuffer) -> FrameBuffer&
 	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
@@ -141,11 +141,11 @@ var extern engine: EngineData
 
 func extern screenshot(out im: Image)
 
-struct RayRequest
+struct extern RayRequest
 	p0: vec3
 	p1: vec3
 
-struct RayReply
+struct extern RayReply
 	p, n: vec3
 	f, g, t: f32
 	index, mesh: i32

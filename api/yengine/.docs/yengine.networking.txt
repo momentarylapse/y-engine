@@ -1,0 +1,36 @@
+
+[yengine.networking.Connection]
+	@info = ""
+	buffer = ""
+	s = ""
+
+[yengine.networking.Connection.__init__]
+	@info = ""
+
+[yengine.networking.Connection.end_block]
+	@info = ""
+
+[yengine.networking.Connection.send]
+	@info = ""
+
+[yengine.networking.Connection.start_block]
+	@info = ""
+	id = ""
+
+[yengine.networking.NetworkManager]
+	@info = ""
+	cur_con = ""
+
+[yengine.networking.NetworkManager.__init__]
+	@info = ""
+
+[yengine.networking.NetworkManager.connect_to_host]
+	@info = ""
+	@return = ""
+	host = ""
+
+[yengine.networking.NetworkManager.event]
+	@info = ""
+	e = ""
+	f = ""
+	id = ""

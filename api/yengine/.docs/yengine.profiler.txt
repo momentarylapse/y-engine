@@ -1,0 +1,47 @@
+
+[yengine.profiler.Profiler]
+	@info = ""
+
+[yengine.profiler.Profiler.Channel]
+	@info = ""
+	name = ""
+	parent = ""
+
+[yengine.profiler.Profiler.Channel.__init__]
+	@info = ""
+	name = ""
+	parent = ""
+
+[yengine.profiler.Profiler.FrameHistory]
+	@info = ""
+	total_times = ""
+
+[yengine.profiler.Profiler.FrameHistory.__init__]
+	@info = ""
+	total_times = ""
+
+[yengine.profiler.Profiler.FrameTimingData]
+	@info = ""
+	cpu0 = ""
+	gpu = ""
+	total_time = ""
+
+[yengine.profiler.Profiler.FrameTimingData.__init__]
+	@info = ""
+	cpu0 = ""
+	gpu = ""
+	total_time = ""
+
+[yengine.profiler.Profiler.TimingData]
+	@info = ""
+	channel = ""
+	offset = ""
+
+[yengine.profiler.Profiler.TimingData.__init__]
+	@info = ""
+	channel = ""
+	offset = ""
+
+[yengine.profiler.Profiler.get_name]
+	@info = ""
+	channel = ""

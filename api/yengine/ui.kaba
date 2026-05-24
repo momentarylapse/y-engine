@@ -11,7 +11,7 @@ enum Button
 	MIDDLE
 	RIGHT
 
-class Node as shared
+class extern Node as Sharable
 	enum Align
 		NONE
 		FILL_X = 2^0
@@ -60,13 +60,13 @@ class Node as shared
 	var visible: bool
 	var children: shared![Node][]
 
-class HBox extends Node
+class extern HBox extends Node
 	func extern override __init__()
 
-class VBox extends Node
+class extern VBox extends Node
 	func extern override __init__()
 		
-class Picture extends Node
+class extern Picture extends Node
 	func extern override __init__()
 	func extern __init__(r: Rect, tex: shared![Texture], source: Rect = Rect.ID)
 	func extern override __delete__()
@@ -77,7 +77,7 @@ class Picture extends Node
 	var shader: shared[Shader]
 	var shader_data: Any
 
-class Text extends Picture
+class extern Text extends Picture
 	func extern override __init__()
 	func extern __init__(t: string, font_size: f32, p: vec2 = vec2.0)
 	func extern override __delete__()
@@ -85,7 +85,7 @@ class Text extends Picture
 	var font_size: f32
 	func extern set_text(t: string)
 	
-class Picture3d extends Node
+class extern Picture3d extends Node
 	var model: Model*
 	var matrix: mat4
 	var world_3d: bool
@@ -95,7 +95,7 @@ class Picture3d extends Node
 		model = m
 		self.matrix = mat
 
-class Canvas extends Node
+class extern Canvas extends Node
 	func extern override __init__()
 	func extern override __delete__()
 	func virtual mut on_draw(out p: Painter)
@@ -110,7 +110,7 @@ var extern static mouse, dmouse, scroll: vec2
 	
 var extern static link_mouse_and_keyboard_into_pad: bool
 	
-class Gamepad as shared
+class extern Gamepad as Sharable
 	enum Button
 		CROSS, CIRCLE, SQUARE, TRIANGLE
 		L1, R1
@@ -139,7 +139,7 @@ enum VRDeviceRole
 	LIGHTHOUSE0
 	LIGHTHOUSE1
 		
-struct VRDevice
+struct extern VRDevice
 
 	enum Button
 		TRIGGER = 0

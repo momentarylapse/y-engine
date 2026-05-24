@@ -1,0 +1,122 @@
+
+[yengine.fx.Beam]
+	@info = ""
+	color = ""
+	enabled = ""
+	length = ""
+	pos = ""
+	radius = ""
+	suicidal = ""
+	time_to_live = ""
+	vel = ""
+
+[yengine.fx.LegacyBeam]
+	@info = ""
+	color = ""
+	enabled = ""
+	length = ""
+	owner = ""
+	radius = ""
+	source = ""
+	texture = ""
+	time_to_live = ""
+	vel = ""
+
+[yengine.fx.LegacyBeam.__init__]
+	@info = ""
+
+[yengine.fx.LegacyParticle]
+	@info = ""
+	color = ""
+	enabled = ""
+	owner = ""
+	radius = ""
+	source = ""
+	texture = ""
+	time_to_live = ""
+	vel = ""
+
+[yengine.fx.LegacyParticle.__init__]
+	@info = ""
+
+[yengine.fx.Particle]
+	@info = ""
+	color = ""
+	enabled = ""
+	pos = ""
+	radius = ""
+	suicidal = ""
+	time_to_live = ""
+	vel = ""
+
+[yengine.fx.ParticleEmitter]
+	@info = ""
+	owner = ""
+	source = ""
+	spawn_beams = ""
+	spawn_dt = ""
+	spawn_time_to_live = ""
+	texture = ""
+
+[yengine.fx.ParticleEmitter.__init__]
+	@info = ""
+
+[yengine.fx.ParticleEmitter.iterate_emitter]
+	@info = ""
+	dt = ""
+
+[yengine.fx.ParticleEmitter.on_init_beam]
+	@info = ""
+	p = ""
+
+[yengine.fx.ParticleEmitter.on_init_particle]
+	@info = ""
+	p = ""
+
+[yengine.fx.ParticleEmitter.on_iterate]
+	@info = ""
+	dt = ""
+
+[yengine.fx.ParticleGroup]
+	@info = ""
+	owner = ""
+	source = ""
+	texture = ""
+
+[yengine.fx.ParticleGroup.__init__]
+	@info = ""
+
+[yengine.fx.ParticleGroup.emit]
+	@info = ""
+	@return = ""
+	col = ""
+	pos = ""
+	radius = ""
+	ttl = ""
+
+[yengine.fx.ParticleGroup.emit_beam]
+	@info = ""
+	@return = ""
+	col = ""
+	length = ""
+	pos = ""
+	radius = ""
+	ttl = ""
+
+[yengine.fx.ParticleGroup.iterate_particles]
+	@info = ""
+	dt = ""
+
+[yengine.fx.ParticleGroup.on_iterate]
+	@info = ""
+	dt = ""
+
+[yengine.fx.ParticleGroup.on_iterate_beam]
+	@info = ""
+	dt = ""
+	p = ""
+
+[yengine.fx.ParticleGroup.on_iterate_particle]
+	@info = ""
+	dt = ""
+	p = ""

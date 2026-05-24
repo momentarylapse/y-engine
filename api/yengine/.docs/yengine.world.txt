@@ -1,0 +1,506 @@
+
+[yengine.world.AnimationManager]
+	@info = ""
+
+[yengine.world.AnimationManager.__init__]
+	@info = ""
+
+[yengine.world.BoxCollider]
+	@info = ""
+	max = ""
+	min = ""
+	owner = ""
+
+[yengine.world.BoxCollider.__init__]
+	@info = ""
+
+[yengine.world.Camera]
+	@info = "A rendering view, located in the 3d world and projecting onto the screen."
+	auto_exposure = ""
+	auto_exposure_max = ""
+	auto_exposure_min = ""
+	auto_exposure_speed = ""
+	bloom_factor = ""
+	bloom_radius = ""
+	enabled = ""
+	exposure = "The brightness factor used when rendering."
+	focal_blur = "(experimental)"
+	focal_length = "(experimental)"
+	focus_enabled = "(experimental)"
+	fov = "The vertical opening angle (top to bottom)."
+	max_depth = "Maximal drawing distance."
+	min_depth = "Minimal drawing distance."
+	owner = ""
+	show = ""
+
+[yengine.world.Camera.__init__]
+	@info = ""
+
+[yengine.world.Camera.project]
+	@info = "Projects a point from the 3d world onto the screen."
+	@return = "Projected relative screen coordinates."
+	p = "The point in 3d space."
+
+[yengine.world.Camera.unproject]
+	@info = ""
+	@return = ""
+	p = ""
+
+[yengine.world.Camera.update_matrix_cache]
+	@info = ""
+	aspect_ratio = ""
+
+[yengine.world.Collider]
+	@info = ""
+	owner = ""
+
+[yengine.world.Collider.__init__]
+	@info = ""
+
+[yengine.world.CubeMapSource]
+	@info = ""
+	cube_map = ""
+	max_depth = ""
+	min_depth = ""
+	owner = ""
+	resolution = ""
+	update_rate = ""
+
+[yengine.world.CubeMapSource.__init__]
+	@info = ""
+
+[yengine.world.EgoMarker]
+	@info = ""
+	owner = ""
+
+[yengine.world.EgoMarker.__init__]
+	@info = ""
+
+[yengine.world.Fog]
+	@info = ""
+	color = ""
+	distance = ""
+	enabled = ""
+
+[yengine.world.Light]
+	@info = ""
+	allow_shadow = ""
+	color = ""
+	enabled = ""
+	harshness = ""
+	owner = ""
+	power = ""
+	shadow_dist_max = ""
+	shadow_dist_min = ""
+	theta = ""
+	type = ""
+	user_shadow_control = ""
+	user_shadow_theta = ""
+
+[yengine.world.Light.__init__]
+	@info = ""
+
+[yengine.world.Light.set_direction]
+	@info = ""
+	dir = ""
+
+[yengine.world.Link]
+	@info = ""
+	a = ""
+	b = ""
+	owner = ""
+	type = ""
+
+[yengine.world.Link.__init__]
+	@info = ""
+
+[yengine.world.Link.set_frame]
+	@info = ""
+	n = ""
+	q = ""
+
+[yengine.world.Link.set_motor]
+	@info = ""
+	max = ""
+	v = ""
+
+[yengine.world.LinkType]
+	@info = ""
+
+[yengine.world.LinkType.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.world.LinkType.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.world.LinkType.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.world.MeshCollider]
+	@info = ""
+	owner = ""
+
+[yengine.world.MeshCollider.__init__]
+	@info = ""
+
+[yengine.world.MultiInstance]
+	@info = ""
+	matrices = ""
+	model = ""
+	owner = ""
+
+[yengine.world.MultiInstance.__init__]
+	@info = ""
+
+[yengine.world.NameTag]
+	@info = ""
+	name = ""
+	owner = ""
+
+[yengine.world.NameTag.__init__]
+	@info = ""
+
+[yengine.world.ParticleManager]
+	@info = ""
+
+[yengine.world.ParticleManager.__init__]
+	@info = ""
+
+[yengine.world.Physics]
+	@info = ""
+	collisions_enabled = ""
+	enabled = ""
+	gravity = ""
+	mode = ""
+
+[yengine.world.Physics.Mode]
+	@info = ""
+
+[yengine.world.Physics.Mode.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.world.Physics.Mode.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.world.Physics.Mode.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.world.Physics.__init__]
+	@info = ""
+
+[yengine.world.Physics.get_g]
+	@info = ""
+	@return = ""
+	pos = ""
+
+[yengine.world.Physics.set_dynamic]
+	@info = ""
+	dynamic = ""
+	e = ""
+
+[yengine.world.RigidBody]
+	@info = ""
+	dynamic = ""
+	g_factor = ""
+	mass = ""
+	owner = ""
+	rot = ""
+	theta = ""
+	vel = ""
+
+[yengine.world.RigidBody.__init__]
+	@info = ""
+
+[yengine.world.RigidBody.add_force]
+	@info = ""
+	f = ""
+	rho = ""
+
+[yengine.world.RigidBody.add_impulse]
+	@info = ""
+	p = ""
+	rho = ""
+
+[yengine.world.RigidBody.add_torque]
+	@info = ""
+	t = ""
+
+[yengine.world.RigidBody.add_torque_impulse]
+	@info = ""
+	l = ""
+
+[yengine.world.RigidBody.update_mass]
+	@info = ""
+
+[yengine.world.RigidBody.update_motion]
+	@info = ""
+	mask = ""
+
+[yengine.world.SphereCollider]
+	@info = ""
+	owner = ""
+	radius = ""
+
+[yengine.world.SphereCollider.__init__]
+	@info = ""
+
+[yengine.world.Template]
+	@info = ""
+
+[yengine.world.TemplateRef]
+	@info = ""
+	owner = ""
+	template = ""
+
+[yengine.world.TemplateRef.__init__]
+	@info = ""
+
+[yengine.world.Terrain]
+	@info = ""
+	height = ""
+	num_x = ""
+	num_z = ""
+	pattern = ""
+	texture_scale = ""
+	vertex_shader_module = ""
+
+[yengine.world.Terrain.__init__]
+	@info = ""
+
+[yengine.world.Terrain.get_height]
+	@info = ""
+	@return = ""
+	e = ""
+	p = ""
+
+[yengine.world.Terrain.update]
+	@info = ""
+	mask = ""
+	x1 = ""
+	x2 = ""
+	y1 = ""
+	y2 = ""
+
+[yengine.world.TerrainCollider]
+	@info = ""
+	owner = ""
+
+[yengine.world.TerrainCollider.__init__]
+	@info = ""
+
+[yengine.world.TerrainRef]
+	@info = ""
+	material = ""
+	owner = ""
+	terrain = ""
+
+[yengine.world.TerrainRef.__init__]
+	@info = ""
+
+[yengine.world.TraceMode]
+	@info = ""
+
+[yengine.world.TraceMode.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.world.TraceMode.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.world.TraceMode.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.world.World]
+	@info = ""
+	background = ""
+	fog = ""
+	msg_data = ""
+	skyboxes = ""
+
+[yengine.world.World.MessageData]
+	@info = ""
+	e = ""
+	v = ""
+
+[yengine.world.World.__init__]
+	@info = ""
+
+[yengine.world.World.attach_model]
+	@info = ""
+	@return = ""
+	e = ""
+	filename = ""
+
+[yengine.world.World.create_camera]
+	@info = ""
+	@return = ""
+	ang = ""
+	pos = ""
+
+[yengine.world.World.create_entity]
+	@info = ""
+	@return = ""
+	ang = ""
+	pos = ""
+
+[yengine.world.World.create_light_cone]
+	@info = ""
+	@return = ""
+	ang = ""
+	c = ""
+	pos = ""
+	radius = ""
+	theta = ""
+
+[yengine.world.World.create_light_parallel]
+	@info = ""
+	@return = ""
+	ang = ""
+	c = ""
+
+[yengine.world.World.create_light_point]
+	@info = ""
+	@return = ""
+	c = ""
+	pos = ""
+	radius = ""
+
+[yengine.world.World.create_object_multi]
+	@info = ""
+	@return = ""
+	ang = ""
+	filename = ""
+	pos = ""
+
+[yengine.world.World.create_particle]
+	@info = ""
+	c = ""
+	radius = ""
+	tex = ""
+	ttl = ""
+
+[yengine.world.World.create_terrain]
+	@info = ""
+	@return = ""
+	filename = ""
+	pos = ""
+
+[yengine.world.World.delete_entity]
+	@info = ""
+	e = ""
+
+[yengine.world.World.ego]
+	@info = ""
+	@return = ""
+
+[yengine.world.World.emit_sound]
+	@info = ""
+	@return = ""
+	buffer = ""
+	pos = ""
+	radius1 = ""
+
+[yengine.world.World.emit_sound_file]
+	@info = ""
+	@return = ""
+	filename = ""
+	pos = ""
+	radius1 = ""
+
+[yengine.world.World.emit_sound_stream]
+	@info = ""
+	@return = ""
+	pos = ""
+	radius1 = ""
+	stream = ""
+
+[yengine.world.World.entity]
+	@info = ""
+	@return = ""
+	index = ""
+
+[yengine.world.World.lights]
+	@info = ""
+	@return = ""
+
+[yengine.world.World.load_soon]
+	@info = ""
+	filename = ""
+
+[yengine.world.World.load_template]
+	@info = ""
+	@return = ""
+	ang = ""
+	filename = ""
+	pos = ""
+
+[yengine.world.World.objects]
+	@info = ""
+	@return = ""
+
+[yengine.world.World.shift_all]
+	@info = ""
+	dpos = ""
+
+[yengine.world.World.subscribe]
+	@info = ""
+	f = ""
+	msg = ""
+
+[yengine.world.World.terrains]
+	@info = ""
+	@return = ""
+
+[yengine.world.World.trace]
+	@info = ""
+	@return = ""
+	ignore = ""
+	mode = ""
+	p1 = ""
+	p2 = ""
+
+[yengine.world.attach_light_cone]
+	@info = ""
+	@return = ""
+	c = ""
+	e = ""
+	radius = ""
+	theta = ""
+
+[yengine.world.attach_light_parallel]
+	@info = ""
+	@return = ""
+	c = ""
+	e = ""
+
+[yengine.world.attach_light_point]
+	@info = ""
+	@return = ""
+	c = ""
+	e = ""
+	radius = ""
+
+[yengine.world.get_model]
+	@info = ""
+	@return = ""
+	e = ""
