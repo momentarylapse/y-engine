@@ -10,6 +10,7 @@
 #include "../../config.h"
 #include "lib.h"
 #include "list.h"
+#include "optional.h"
 #include "shared.h"
 #include "../dynamic/exception.h"
 #include "../../base/callable.h"
@@ -209,6 +210,9 @@ public:
 	}
 };
 
+bool op_int_eq(int, int);
+bool op_int_neq(int, int);
+
 void SIAddPackageOSPath(Context *c) {
 	add_internal_package(c, "os", "1");
 
@@ -299,6 +303,9 @@ void SIAddPackageOS(Context *c) {
 	const_cast<Class*>(TypeTerminal)->from_template = common_types.namespace_t;
 	auto TypeApp = add_type("app", 0);
 	const_cast<Class*>(TypeApp)->from_template = common_types.namespace_t;
+
+	auto TypeStringOptional = add_type_optional(common_types.string);
+	lib_create_optional<string>(TypeStringOptional);
 
 	auto TypeCallbackStringList = add_type_func(common_types._void, {common_types.string_list});
 
@@ -512,6 +519,8 @@ void SIAddPackageOS(Context *c) {
 		class_add_enum("LINUX", TypeSystemType, SystemType::Linux);
 		class_add_enum("WINDOWS", TypeSystemType, SystemType::Windows);
 		class_add_enum("MAC", TypeSystemType, SystemType::Mac);
+		add_operator(OperatorID::Equal, common_types._bool, TypeSystemType, TypeSystemType, InlineID::Int32Equal, &op_int_eq);
+		add_operator(OperatorID::NotEqual, common_types._bool, TypeSystemType, TypeSystemType, InlineID::Int32NotEqual, &op_int_neq);
 
 
 	add_class(TypeTerminal);
@@ -541,6 +550,9 @@ void SIAddPackageOS(Context *c) {
 
 	add_func("exit", common_types._void, &kaba_os_exit, Flags::Static);
 		func_add_param("status", common_types.i32);
+
+	add_func("get_env", TypeStringOptional, &os::app::get_env, Flags::Static);
+		func_add_param("var", common_types.string);
 
 
 	add_ext_var("app_directory_dynamic", common_types.path, &os::app::directory_dynamic);

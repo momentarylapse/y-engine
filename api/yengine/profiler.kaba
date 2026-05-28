@@ -1,5 +1,5 @@
 
-class extern Profiler
+namespace profiler
 	struct extern Channel
 		var name: string
 		var parent: i32
@@ -12,7 +12,23 @@ class extern Profiler
 		var total_time: f32
 	struct extern FrameHistory
 		var total_times: f32[]
-	func extern static get_name(channel: i32)
+	struct extern ChannelStats
+		var channel: i32
+		var total, average: f32
+		var count: i32
+
+	func extern get_name(channel: i32) -> string
+	func extern create_channel(name: string, parent=-1) -> i32
+	func extern delete_channel(channel: i32)
+	func extern set_parent(channel: i32, parent: i32)
+	func extern set_name(channel: i32, name: string)
+
+	func extern begin(channel: i32)
+	func extern end(channel: i32)
+	func extern next_frame()
+
+	func extern digest_report(td: FrameTimingData) -> ChannelStats[]
+
 	var extern static channels: Channel[]
 	var extern static previous_frame_timing: FrameTimingData
 	var extern static avg_frame_time: f32

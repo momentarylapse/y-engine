@@ -2,12 +2,33 @@ use image.Image
 use os
 
 
+struct ivec3
+	x, y, z: i32
+
+
 enum extern PrimitiveTopology
 	TRIANGLES
 	LINES
 	LINESTRIP
 	POINTS
 	PATCHES
+
+enum extern CullMode
+	NONE
+	FONT
+	BACK
+
+enum extern Alpha
+	ZERO
+	ONE
+	SOURCE_COLOR
+	SOURCE_INV_COLOR
+	SOURCE_ALPHA
+	SOURCE_INV_ALPHA
+	DEST_COLOR
+	DEST_INV_COLOR
+	DEST_ALPHA
+	DEST_INV_ALPHA
 
 struct extern Vertex
 	var p, n: vec3
@@ -34,7 +55,7 @@ class extern Shader as Sharable
 	func extern set_floats(name: string, f: f32&, num: i32)
 
 class extern Texture as Sharable
-	var width, height: i32
+	var width, height, depth: i32
 	func extern __init__(w: i32, h: i32, format: string = "rgba:i8")
 	func extern __delete__()
 	func extern mut write(im: Image)
@@ -64,6 +85,7 @@ class extern Buffer
 class extern VertexBuffer
 	func extern __init__(format: string = "3f,3f,2f")
 	func extern mut update(data: @DynamicArray)
+	func extern mut create_quad(d: Rect, s = Rect.ID)
 
 class extern UniformBuffer extends Buffer
 	func extern __init__(size: i32)

@@ -449,6 +449,7 @@ add_library(moduley SHARED
 	src/lib/yrenderer/helper/CubeMapSource.cpp
 	src/lib/yrenderer/helper/jitter.cpp
 	src/lib/yrenderer/helper/LightMeter.cpp
+	src/lib/yrenderer/helper/LineHelper.cpp
 	src/lib/yrenderer/helper/Pipeline.cpp
 	src/lib/yrenderer/helper/PipelineManager.cpp
 	src/lib/yrenderer/post/HDRResolver.cpp
@@ -736,6 +737,7 @@ add_executable(y
 	src/lib/yrenderer/helper/CubeMapSource.cpp
 	src/lib/yrenderer/helper/jitter.cpp
 	src/lib/yrenderer/helper/LightMeter.cpp
+	src/lib/yrenderer/helper/LineHelper.cpp
 	src/lib/yrenderer/helper/Pipeline.cpp
 	src/lib/yrenderer/helper/PipelineManager.cpp
 	src/lib/yrenderer/post/HDRResolver.cpp

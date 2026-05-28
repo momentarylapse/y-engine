@@ -2,8 +2,6 @@ use os
 use .gfx.*
 use image.Image
 
-struct ivec3
-	x, y, z: i32
 
 # "yrenderer.Context"
 class extern Context as @noauto

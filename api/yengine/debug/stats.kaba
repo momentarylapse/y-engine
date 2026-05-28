@@ -6,10 +6,10 @@ class FpsPanel extends Text
 		super.__init__("", 0.02, [0.01,0.01])
 		dz = 999
 	func mut update()
-		set_text("{{1.0/Profiler.avg_frame_time|0.1}}")
+		set_text("{{1.0/profiler.avg_frame_time|0.1}}")
 
 func channel_level(channel: int) -> int
-	let parent = Profiler.channels[channel].parent
+	let parent = profiler.channels[channel].parent
 	if parent < 0
 		return 0
 	return channel_level(parent) + 1
@@ -27,8 +27,8 @@ class ProfilerPanel extends Picture
 		
 		visible = false
 	
-	func mut add_graph(data: Profiler.TimingData[], scale: f32, y0: f32, title: string)
-		var started: Profiler.TimingData[]
+	func mut add_graph(data: profiler.TimingData[], scale: f32, y0: f32, title: string)
+		var started: profiler.TimingData[]
 		for t in data
 			if (t.channel & 0x80000000) == 0
 				started.add(t)
@@ -45,7 +45,7 @@ class ProfilerPanel extends Picture
 						p.color = color.hsb(c * 3.4151, 0.4, 0.4, 1.0)
 						add(give(p))
 						if w > 0.02
-							var ll = Profiler.channels[c].name
+							var ll = profiler.channels[c].name
 							if w > 0.1
 								ll += " {{dt * 1000|0.2}}"
 							let label = new Text(ll, CHANNEL_HEIGHT, [x+0.001, y])
@@ -67,7 +67,7 @@ class ProfilerPanel extends Picture
 			bg.color = [f,f,f, 0.7]
 			add(give(bg))
 	
-		let frame_t = Profiler.previous_frame_timing.total_time
+		let frame_t = profiler.previous_frame_timing.total_time
 		var scale = engine.physical_aspect_ratio / frame_t
 		
 		# ms ticks
@@ -84,8 +84,8 @@ class ProfilerPanel extends Picture
 				l.color.a = 0.5
 				add(give(l))
 			
-		add_graph(Profiler.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT, "CPU")
-		add_graph(Profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2, "GPU")
+		add_graph(profiler.previous_frame_timing.cpu0, scale, DISPLAY_HEIGHT, "CPU")
+		add_graph(profiler.previous_frame_timing.gpu, scale, DISPLAY_HEIGHT/2, "GPU")
 
 
 class HistoryPanel extends Picture
@@ -99,11 +99,11 @@ class HistoryPanel extends Picture
 		visible = false
 	func mut update()
 	func override on_iterate(dt: f32)
-		let DT = min(max(Profiler.history.total_times[-W:]), 0.05)
+		let DT = min(max(profiler.history.total_times[-W:]), 0.05)
 		var im: Image
 		im.create(W, H, Color(0,0,0,0))
 		var yprev = 0
-		for i=>h in Profiler.history.total_times[-W:]
+		for i=>h in profiler.history.total_times[-W:]
 			let y = clamp(i32(h / DT * H), 0, H)
 			for _y in 0:y
 				im.set_pixel(i, H-_y-1, Color.GRAY.with_alpha(0.3))
