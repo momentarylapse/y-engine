@@ -1,0 +1,51 @@
+
+
+struct extern Address
+	var host: string
+	var port: i32
+#	func extern __init__()
+#	func extern __delete__()
+
+class extern Socket
+	var uuid: i32
+	var handle: i32
+	
+	func extern mut __init__()
+	func extern mut __delete__()
+	func extern mut accept() -> xfer[Socket]
+	func extern mut close()
+	func extern mut set_blocking(block: bool)
+	func extern mut set_target(target: Address)
+	func extern get_sender() -> Address
+	func extern mut read(size: i32) -> bytes
+	func extern mut write(buf: bytes) -> bool
+	func extern can_read() -> bool
+	func extern can_write() -> bool
+	func extern is_connected() -> bool
+
+func extern listen(port: i32, block: bool) -> xfer[Socket]
+func extern connect(addr: string, port: i32) -> xfer[Socket]
+func extern create_udp(port: i32) -> xfer[Socket]
+
+
+class extern BinaryBuffer
+	var data: bytes
+	func extern mut __init__()
+	func extern mut __delete__()
+	func extern mut __rshift__(out i: i32)
+	func extern mut __rshift__(out f: f32)
+	func extern mut __rshift__(out b: bool)
+	func extern mut __rshift__(out c: u8)
+	func extern mut __rshift__(out s: string)
+	func extern mut __rshift__(out v: vec3)
+	func extern mut clear()
+	func extern mut start_block()
+	func extern mut end_block()
+	func extern mut set_pos(pos: i32)
+	func extern get_pos() -> i32
+	func extern mut __lshift__(i: i32)
+	func extern mut __lshift__(f: f32)
+	func extern mut __lshift__(b: bool)
+	func extern mut __lshift__(c: u8)
+	func extern mut __lshift__(s: string)
+	func extern mut __lshift__(v: vec3)

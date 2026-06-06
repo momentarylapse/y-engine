@@ -9,6 +9,7 @@
 #include "TextureManager.h"
 #include "ShaderManager.h"
 #include "helper/ComputeTask.h"
+#include "helper/CubeMapSource.h"
 #include "helper/LightMeter.h"
 #include "helper/LineHelper.h"
 #include "post/HDRResolver.h"
@@ -237,7 +238,6 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	ext->declare_class_element("Material.shader_data", &Material::shader_data);
 
 	{
-		Light light;
 		ext->declare_class_size("YLight", sizeof(Light));
 		ext->declare_class_element("YLight.pos", &Light::pos);
 		ext->declare_class_element("YLight.ang", &Light::_ang);
@@ -456,6 +456,7 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 		ext->declare_class_element("SceneView.probe_max", &SceneView::probe_max);
 		ext->declare_class_element("SceneView.ray_tracing_data", &SceneView::ray_tracing_data);
 		ext->link_class_func("SceneView.__init__", &kaba::generic_init<SceneView>);
+		ext->link_class_func("SceneView.__delete__", &kaba::generic_delete<SceneView>);
 		ext->link_class_func("SceneView.choose_lights", &SceneView::choose_lights);
 		ext->link_class_func("SceneView.choose_shadows", &SceneView::choose_shadows);
 	}
@@ -489,9 +490,11 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	{
 		RenderPath rp(nullptr, "");
 		ext->declare_class_size("RenderPath", sizeof(RenderPath));
+		ext->declare_class_element("RenderPath.wireframe", &RenderPath::wireframe);
 		ext->declare_class_element("RenderPath.view", &RenderPath::view);
 		ext->declare_class_element("RenderPath.background_color", &RenderPath::background_color);
 		ext->declare_class_element("RenderPath.ambient_occlusion_radius", &RenderPath::ambient_occlusion_radius);
+		ext->declare_class_element("RenderPath.scene_view", &RenderPath::scene_view);
 		ext->link_class_func("RenderPath.set_lights", &RenderPath::set_lights);
 		ext->link_class_func("RenderPath.set_view", &RenderPath::set_view);
 		ext->link_virtual("RenderPath.remove_all_emitters", &RenderPath::remove_all_emitters, &rp);

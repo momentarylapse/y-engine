@@ -2,7 +2,7 @@ use os
 use kaba
 use image.Image
 use .common.*
-use .gfx.*
+use .yrenderer.*
 use .ecs.*
 use .model.*
 use .audio.*
@@ -10,7 +10,6 @@ use .ui.*
 use .engine.*
 use .fx.*
 use .world.*
-use .profiler.*
 use .networking.*
 
 

@@ -1,6 +1,13 @@
 use image.Image
 use os
 
+enum Api
+	NONE
+	OPEN_GL
+	VULKAN
+
+func extern api() -> Api
+
 
 struct ivec3
 	x, y, z: i32
@@ -94,8 +101,6 @@ class extern ShaderStorageBuffer extends Buffer
 	func extern __init__(size: i32)
 
 
-var extern tex_white: shared![Texture] # TODO use engine.context.tex_white?
+class extern GfxContext
+	func extern make_public()
 
-func extern load_shader(filename: os.Path) -> shared![Shader]
-func extern create_shader(source: string) -> xfer[Shader]
-func extern load_texture(filename: os.Path) -> shared![Texture]

@@ -1,12 +1,6 @@
 use os
-use .gfx.*
+use .yrenderer.*
 use image.Image
-
-
-# "yrenderer.Context"
-class extern Context as @noauto
-	var context: void& # "ygfx.Context"
-	var tex_white: shared![Texture]
 
 class extern EngineData as @noauto
 	var context: Context&
@@ -16,84 +10,36 @@ class extern EngineData as @noauto
 	#bool wire_mode
 	var resetting_game, game_running, first_frame: bool
 	var physical_aspect_ratio: f32
-	
+
 	var detail_level: f32
-	
+
 	var elapsed: f32
 	var elapsed_rt: f32
 	var time_scale: f32
-	
+
 	var fps_min, fps_max: f32
 	var resolution_scale: vec2
-	
+
 	var initial_world_file, second_world_file: os.Path
 	#Font* default_font
 	var renderer: Renderer&
 	var region_renderer: RegionRenderer&
 	var camera_renderers: FullCameraRenderer&[]
-	
+
 	func extern add_render_task(task: xfer[RenderTask], priority: i32)
 
 	func extern exit()
 
-struct extern RenderParams
 
-class extern Renderer
-	func virtual prepare(params: RenderParams)
-	func virtual draw(params: RenderParams)
+var extern engine: EngineData
 
-class extern RenderTask extends Renderer
-	var active: bool
-	func virtual render(params: RenderParams)
+func extern screenshot(out im: Image)
 
-class extern ComputeTask extends RenderTask
-	nx: i32
-	ny: i32
-	nz: i32
-	shader_data: Any
-	func extern __init__(ctx: Context&, name: string, shader: shared![Shader], n: i32[])
-	func override extern render(params: RenderParams)
-	func extern bind_texture(index: i32, tex: Texture&)
-	func extern bind_image(index: i32, tex: Texture&)
-	func extern bind_uniform_buffer(index: i32, buf: UniformBuffer&)
-	func extern bind_storage_buffer(index: i32, buf: ShaderStorageBuffer&)
+var extern tex_white: shared![Texture] # TODO use engine.context.tex_white?
 
-class extern RegionRenderer
-	struct extern Region
-		var dest: Rect
-		var z: int
-		var renderer: Renderer&
-	var regions: Region[]
-	func extern add_region(r: Renderer&, dest: Rect, z: i32)
-
-
-#class extern ShadowRenderer
-#	struct Cascade
-#		depth_buffer: DepthBuffer&
-#	cascades: Cascade[2]
-
-struct extern RayTracingData
-	buffer_meshes: UniformBuffer*
-	num_meshes: i32
-
-class extern SceneView
-	var surfel_buffer: owned[UniformBuffer]
-	var num_surfels: i32
-	var probe_cells: ivec3
-	var probe_min: vec3
-	var probe_max: vec3
-	var ray_tracing_data: RayTracingData*
-	func __delete__()
-		pass
-	func extern shadow_projection() -> mat4
-
-class extern RenderPath extends Renderer
-	var wireframe: bool
-	var scene_view: SceneView
-	
-
-	#func extern virtual render_into_texture(fb: FrameBuffer, cam: Camera)
-	#func extern render_into_cubemap(db: DepthBuffer, cube: CubeMap, pos: vector)
+func extern load_shader(filename: os.Path) -> shared![Shader]
+func extern create_shader(source: string) -> xfer[Shader]
+func extern load_texture(filename: os.Path) -> shared![Texture]
 
 
 enum extern RenderPathType
@@ -112,32 +58,6 @@ class extern FullCameraRenderer extends Renderer
 	func extern get_shadow_map() -> shared![DepthBuffer][]
 	func extern get_cubemap() -> CubeMap*
 
-class extern LightMeter
-	var histogram: i32[]
-	var brightness: f32
-
-
-class extern HDRResolver
-	var texture: shared![Texture]
-	var depth_buffer: shared![DepthBuffer]
-	
-	class BloomLevel
-		tex_out: shared![Texture]
-	var bloom_levels: BloomLevel[4]
-	
-	var light_meter: LightMeter&
-
-
-class extern PostProcessor
-	var fb1, fb2: FrameBuffer&
-	func extern next_fb(cur: FrameBuffer) -> FrameBuffer&
-	func extern process(source: Texture*[], target: FrameBuffer, shader: Shader)
-	func extern mut add_stage(name: string, on_prepare: void->void, on_draw: void->void)
-
-
-var extern engine: EngineData
-
-func extern screenshot(out im: Image)
 
 struct extern RayRequest
 	p0: vec3

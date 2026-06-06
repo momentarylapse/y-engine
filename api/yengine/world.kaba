@@ -1,6 +1,6 @@
 use os
 use kaba
-use .gfx.*
+use .yrenderer.*
 use .fx.*
 use .ecs.*
 use .model.*
@@ -15,13 +15,13 @@ class extern RigidBody extends Component
 	var theta: mat3 # local frame
 	var dynamic: bool
 	var g_factor: f32
-	
+
 	# all parameters in world frame!
 	func extern mut add_force(f: vec3, rho: vec3 = vec3.0)
 	func extern mut add_impulse(p: vec3, rho: vec3 = vec3.0)
 	func extern mut add_torque(t: vec3)
 	func extern mut add_torque_impulse(l: vec3)
-	
+
 	func extern mut update_mass()
 	func extern mut update_motion(mask: i32)
 
@@ -78,15 +78,6 @@ class extern Light extends Component
 	var shadow_dist_max: f32
 	func extern mut set_direction(dir: vec3)
 
-#	class Spherical extends Light
-#		func extern __init__(pos: vec3, c: color, radius: float)
-#
-#	class Parallel extends Light
-#		func extern __init__(ang: quaternion, c: color)
-#
-#	class Cone extends Light
-#		func extern __init__(pos: vec3, ang: quaternion, c: color, radius: float, theta: float)
-
 
 func extern ref attach_light_parallel(e: Entity, c: Color) -> Light&
 func extern ref attach_light_point(e: Entity, c: Color, radius: f32) -> Light&
@@ -98,19 +89,19 @@ class extern Camera extends Component
 	var exposure: f32
 	var bloom_radius: f32
 	var bloom_factor: f32
-	
+
 	var auto_exposure: bool
 	var auto_exposure_min: f32
 	var auto_exposure_max: f32
 	var auto_exposure_speed: f32 # ignored
-	
+
 	var focus_enabled: bool
 	var focal_length: f32
 	var focal_blur: f32
-	
+
 	var fov: f32
 	var min_depth, max_depth: f32
-	
+
 	var show, enabled: bool
 
 	func extern project(p: vec3) -> vec3
@@ -193,14 +184,14 @@ enum TraceMode
 
 class extern World
 	func extern selfref ego() -> Entity*
-	
+
 	var background: Color
 	var skyboxes: ModelRef&[]
-	
+
 	var fog: Fog
-	
+
 	func extern mut load_soon(filename: os.Path)
-	
+
 	func extern mut selfref create_light_parallel(ang: Quaternion, c: Color) -> Light&
 	func extern mut selfref create_light_point(pos: vec3, c: Color, radius: f32) -> Light&
 	func extern mut selfref create_light_cone(pos: vec3, ang: Quaternion, c: Color, radius: f32, theta: f32) -> Light&
@@ -209,12 +200,12 @@ class extern World
 	func extern mut selfref _add_particle(type: kaba.Class*, pos: vec3, radius: f32, c: Color, tex: shared![Texture], ttl: f32 = -1.0) -> LegacyParticle&
 	func mut selfref create_particle[T](pos: vec3, radius: f32, c: Color = Color.WHITE, tex: shared![Texture] = tex_white, ttl: f32 = -1.0) -> T&
 		return _add_particle(T, pos, radius, c, tex, ttl) as T&
-		
+
 
 	func extern emit_sound(buffer: AudioBuffer&, pos: vec3, radius1: f32) -> SoundSource&
 	func extern emit_sound_file(filename: os.Path, pos: vec3, radius1: f32) -> SoundSource&
 	func extern emit_sound_stream(stream: AudioStream&, pos: vec3, radius1: f32) -> SoundSource&
-		
+
 	func extern mut selfref load_template(filename: os.Path, pos: vec3, ang: Quaternion = Quaternion.ID) -> Entity&
 #	func extern mut selfref create_object(filename: os.Path, pos: vec3, ang: Quaternion) -> Model&
 	func extern mut selfref create_object_multi(filename: os.Path, pos: vec3[], ang: Quaternion[]) -> MultiInstance&
@@ -224,9 +215,9 @@ class extern World
 	func extern mut selfref attach_model(e: Entity&, filename: os.Path) -> ModelRef&
 	func extern mut shift_all(dpos: vec3)
 	func extern globalref trace(p1: vec3, p2: vec3, mode: TraceMode = TraceMode.PHYSICAL, ignore: Entity* = (nil as Entity*)) -> CollisionData?
-	
+
 	func extern selfref entity(index: i32) -> Entity*
-	
+
 	func selfref objects() -> ModelRef&[]&
 		return get_component_family_list[ModelRef]()
 	func selfref terrains() -> TerrainRef&[]&
@@ -236,12 +227,12 @@ class extern World
 
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)
-	
+
 	class extern MessageData
 		var e: Entity*
 		var v: vec3
 	var msg_data: MessageData
-	
+
 	func extern mut subscribe(msg: string, f: void->void)
 
 

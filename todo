@@ -27,19 +27,28 @@ j universal shaders
 	~ data mapping from scripts
 j user meshes
 * point shadows
+* multiple shadows (multi pass)
 
 
-* Model as resource, not Component
-	ModelRef.filename -> model
-	skybox as ModelRef
-* SolidBody -> RigidBody
-* Physics as System
-* ui.Node from layout.Node
+== management ==
+
+* kaba packages
+	* split
+	* engine vs game repo?
 
 
 
 
 == other ==
+
+J Model as resource, not Component
+	ModelRef.filename -> model
+	skybox as ModelRef
+J SolidBody -> RigidBody
+j Physics as System
+* ui.Node from layout.Node
+
+
 
 * model scaling? (orbits...)
 
