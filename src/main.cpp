@@ -202,11 +202,11 @@ public:
 		// entities
 		ok &= world.load(level_data);
 
-		ecs::SystemManager::handle_finished_loading();
-
 		// TODO turn into Systems and use on_handle_finished_loading()!
 		for (auto& cam: world.entity_manager->get_component_list<Camera>())
 			create_and_attach_camera_renderer(engine.context, cam);
+
+		ecs::SystemManager::handle_finished_loading();
 
 		msg_left();
 		msg_write("|                                                      |");

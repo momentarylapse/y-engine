@@ -4,7 +4,7 @@ class HDRDebugger extends System
 	var pic: shared![Picture][]
 	var t: shared[Text]
 
-	func override on_init()
+	func override on_finished_loading()
 		for hdr in engine.camera_renderers[0].hdr_resolver
 			pic.add(new Picture([0.8,1.0, 0.8, 1.0], hdr.texture))
 			var y0 = 1.0

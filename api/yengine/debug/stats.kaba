@@ -126,7 +126,7 @@ class ProfilerDisplay extends System
 	var history_panel: shared![HistoryPanel]
 	var fps_panel: shared![FpsPanel]
 
-	func override on_init()
+	func override on_finished_loading()
 		profiler_panel = new ProfilerPanel()
 		toplevel.add(profiler_panel)
 		history_panel = new HistoryPanel()

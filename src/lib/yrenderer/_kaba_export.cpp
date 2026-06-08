@@ -254,6 +254,7 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 		ext->declare_class_element("YLight.shadow_dist_min", &Light::shadow_dist_min);
 		//	ext->link_class_func("Light.set_direction", &Light::set_direction);
 		ext->link_class_func("YLight.init", &Light::init);
+		ext->link_class_func("YLight.suggest_shadow_projection", &Light::suggest_shadow_projection);
 	}
 
 	ext->link_func("api", &get_api);
@@ -449,6 +450,9 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	{
 		ext->declare_class_size("SceneView", sizeof(SceneView));
 		ext->declare_class_element("SceneView.main_camera_params", &SceneView::main_camera_params);
+		ext->declare_class_element("SceneView.lights", &SceneView::lights);
+		ext->declare_class_element("SceneView.shadow_indices", &SceneView::shadow_indices);
+		ext->declare_class_element("SceneView.shadow_box_size", &SceneView::shadow_box_size);
 		ext->declare_class_element("SceneView.surfel_buffer", &SceneView::surfel_buffer);
 		ext->declare_class_element("SceneView.num_surfels", &SceneView::num_surfels);
 		ext->declare_class_element("SceneView.probe_cells", &SceneView::probe_cells);

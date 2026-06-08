@@ -3,7 +3,7 @@ use ..yengine.*
 class GBufferDebugger extends System
 	var pic: shared![Picture][]
 
-	func override on_init()
+	func override on_finished_loading()
 		for i=>tex in engine.camera_renderers[0].get_gbuffer()
 			pic.add(new Picture([0.0,0.2, 0.2*i, 0.2+0.2*i], tex))
 			#	for d in gbuf.depth_buffer()

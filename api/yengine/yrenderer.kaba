@@ -13,6 +13,7 @@ enum extern LightType
 
 struct extern YLight
 	func extern mut init(type: LightType, c: Color, theta: f32 = -1.0)
+	func extern suggest_shadow_projection(cam: CameraParams, shadow_box_size: f32) -> mat4
 	var type: LightType
 	var pos: vec3
 	var ang: Quaternion
@@ -132,9 +133,10 @@ func extern apply_shader_data(params: RenderParams, s: Shader*, shader_data: Any
 # interfaces
 
 class extern Renderer
-	func extern add_child(r: Renderer&)
-	func extern virtual prepare(params: RenderParams)
-	func extern virtual draw(params: RenderParams)
+	func extern mut add_child(r: Renderer&)
+	func extern virtual mut __delete__()
+	func extern virtual mut prepare(params: RenderParams)
+	func extern virtual mut draw(params: RenderParams)
 
 
 class extern RenderTask extends Renderer
@@ -214,7 +216,10 @@ struct extern RayTracingData
 	num_meshes: i32
 
 class extern SceneView
-	#var main_camera_params: CameraParams
+	var main_camera_params: CameraParams
+	var shadow_indices: i32[] # read-only
+	var lights: YLight&[] # read-only
+	var shadow_box_size: f32
 	var surfel_buffer: owned[UniformBuffer]
 	var num_surfels: i32
 	var probe_cells: ivec3
@@ -286,7 +291,7 @@ class extern HDRResolver extends Renderer
 	var exposure: f32
 	var bloom_factor: f32
 
-	class BloomLevel
+	class extern BloomLevel
 		tex_out: shared![Texture]
 	var bloom_levels: BloomLevel[4]
 
