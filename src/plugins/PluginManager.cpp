@@ -276,7 +276,7 @@ const kaba::Class *find_class_derived(const Path &filename, const string &base_c
 		msg_error(e.message());
 		throw Exception(e.message());
 	}
-	throw Exception(format("script does not contain a class derived from '%s'", base_class));
+	throw Exception(format("script '%s' does not contain a class derived from '%s'", filename, base_class));
 	return nullptr;
 }
 
@@ -323,7 +323,7 @@ const kaba::Class *find_class(const Path &filename, const string &name) {
 		msg_error(e.message());
 		throw;
 	}
-	throw Exception(format("script does not contain a class named '%s'", name));
+	throw Exception(format("script '%s' does not contain a class named '%s'", filename, name));
 	return nullptr;
 }
 

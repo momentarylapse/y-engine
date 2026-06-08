@@ -174,6 +174,7 @@ public:
 		msg_write("| loading                                              |");
 		msg_right();
 		reset_game();
+		world.reset();
 
 		// load world description
 		LevelData level_data;
