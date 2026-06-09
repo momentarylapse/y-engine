@@ -117,6 +117,7 @@ class extern CubeMapSource extends Component
 
 
 class extern NameTag extends Component
+	let PARAMETERS = "name"
 	var name: string
 
 
@@ -183,12 +184,10 @@ enum TraceMode
 
 
 class extern World
-	func extern selfref ego() -> Entity*
-
 	var background: Color
 	var skyboxes: ModelRef&[]
 
-	var fog: Fog
+	var fog: Fog # deprecated
 
 	func extern mut load_soon(filename: os.Path)
 
@@ -227,6 +226,13 @@ class extern World
 		return get_component_family_list[TerrainRef]()
 	func selfref lights() -> Light&[]&
 		return get_component_family_list[Light]()
+
+	func extern selfref ego() -> Entity*
+	func selfref find_by_name(name: string) -> Entity*
+		for n in get_component_list[NameTag]()
+			if n.name == name
+				return n.owner
+		return nil
 
 #	func extern delete(o: void*)
 	func extern delete_entity(e: Entity*)

@@ -281,7 +281,7 @@ const kaba::Class *find_class_derived(const Path &filename, const string &base_c
 }
 
 const kaba::Class *find_class(const Path &filename, const string &name) {
-	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
+	//msg_write(format("INSTANCE  %s:   %s", filename, name));
 	if (filename.is_empty()) {
 		if (name == "Camera")
 			return Camera::_class;
@@ -311,6 +311,8 @@ const kaba::Class *find_class(const Path &filename, const string &name) {
 			return SphereCollider::_class;
 		if (name == "EgoMarker")
 			return EgoMarker::_class;
+		if (name == "NameTag")
+			return NameTag::_class;
 	}
 	try {
 		auto s = kaba::default_context->load_module(filename, false);
