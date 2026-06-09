@@ -196,6 +196,9 @@ class extern World
 	func extern mut selfref create_light_point(pos: vec3, c: Color, radius: f32) -> Light&
 	func extern mut selfref create_light_cone(pos: vec3, ang: Quaternion, c: Color, radius: f32, theta: f32) -> Light&
 
+	func extern mut selfref create_link_socket(a: Entity&, b: Entity*, pos: vec3) -> Link&
+	func extern mut selfref create_link_hinge(a: Entity&, b: Entity*, pos: vec3, axis: vec3) -> Link&
+
 	#func extern mut selfref add_particle(p: xfer[LegacyParticle]) -> LegacyParticle&
 	func extern mut selfref _add_particle(type: kaba.Class*, pos: vec3, radius: f32, c: Color, tex: shared![Texture], ttl: f32 = -1.0) -> LegacyParticle&
 	func mut selfref create_particle[T](pos: vec3, radius: f32, c: Color = Color.WHITE, tex: shared![Texture] = tex_white, ttl: f32 = -1.0) -> T&
