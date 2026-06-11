@@ -94,6 +94,9 @@ class extern Context as @noauto
 	var material_manager: MaterialManager*
 	var tex_white: shared![Texture]
 	func extern create_managers(texture_dir: os.Path, shader_dir: os.Path, material_dir: os.Path)
+	func extern load_material(path: os.Path) -> Material&
+	func extern create_internal_material() -> Material&
+	func extern load_texture(path: os.Path) -> shared![Texture]
 	func extern load_shader(path: os.Path) -> shared![Shader]
 	func extern create_shader(source: string) -> xfer[Shader]
 	func extern load_surface_shader(path: os.Path, render_path: string, vertex_module: string, geometry_module: string) -> shared![Shader]
@@ -187,6 +190,7 @@ class extern TextureRenderer extends Renderer
 
 class extern MeshEmitter extends Object as shared
 	func extern __init__(ctx: Context&, name: string)
+	func extern virtual mut prepare(params: RenderParams)
 	func extern virtual mut emit(params: RenderParams, rvd: RenderViewData, shadow_pass: bool)
 	var ctx: Context&
 
