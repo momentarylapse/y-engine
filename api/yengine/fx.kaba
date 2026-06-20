@@ -32,8 +32,8 @@ class extern Beam extends Particle
 
 class extern ParticleGroup extends Component
 #	var update_dt = 0.1
-	#var texture: shared![Texture]
-	var texture: Texture&
+	var texture: shared![Texture]
+	#var texture: Texture&
 	var source: Rect
 	
 	func extern override __init__()

@@ -65,6 +65,7 @@ const float PI = 3.141592954;*/
 
 #import basic-data
 #import lighting
+#import fog
 
 
 #define tex_albedo   tex0
@@ -113,14 +114,14 @@ float get_ambient_occlusion(vec3 p, vec3 n) {
 	vec3 pv = p;
 	//vec4 pp = matrix.project * vec4(p,1);
 	//pp.xyz /= pp.w;
-	
+
 	vec3 nv = n;
-	
+
 	vec3 randomVec = vec3(_surf_rand3d(pv)*2-1, _surf_rand3d(p + n)*2-1, 0);
 	vec3 tangent   = normalize(randomVec - nv * dot(nv, randomVec));
 	vec3 bitangent = cross(nv, tangent);
 	mat3 TBN       = mat3(tangent, bitangent, nv);
-	
+
 	float occlusion = 0;
 	float bias = ambient_occlusion_bias;
 	float R = ambient_occlusion_radius;
@@ -130,14 +131,14 @@ float get_ambient_occlusion(vec3 p, vec3 n) {
 		//dp = ssao_samples[i];
 		if (dot(dp, n) < 0.3)
 			continue;
-		
-		
+
+
 		vec3 spv = p + dp*R;
 		vec3 sqv = project_onto_z(spv);
-		
+
 		float rangeCheck = smoothstep(0.0, 1.0, R / abs(pv.z - sqv.z));
 		occlusion += (sqv.z <= spv.z + bias ? 1.0 : 0.0) * rangeCheck;
-		
+
 		count += 1.0;
 	}
 	return occlusion / count;
@@ -154,16 +155,16 @@ void main() {
 	float roughness = nr.w;
 	float metal = em.a;
 	vec3 p = texture(tex_pos, in_uv).xyz;
-	
+
 	if (albedo.a < 0) {
 		discard;
 		return;
 	}
-	
+
 	if (metal > 0.9 && roughness < 0.2) {
 		vec3 dir = reflect(normalize(p), n);
 		dir /= length(dir.xy);
-		
+
 		vec3 q = p + n*0.5;
 		/*if (n.z < -0.9) {
 			out_color = vec4(1,0,0,1);
@@ -186,14 +187,16 @@ void main() {
 		out_color = vec4(1,0,0,1);
 		return;
 	}
-	
+
 	float occlusion = get_ambient_occlusion(p, n);
-	
+
 	out_color = perform_lighting(p, n, albedo, vec4(emission, 1), metal, roughness, occlusion, eye_pos);
 	out_color.rgb *= (1-occlusion);
 	//out_color.rgb = pp.xyz;
 	//out_color.rgb = vec3(1-occlusion);
-	
+
+	fog_apply(out_color, p);
+
 //	out_color.rgb = pow(out_color.rgb, vec3(1.0 / 2.2)); // gamma correction
 	// should happen in post-processing stage....
 }
