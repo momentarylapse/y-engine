@@ -123,20 +123,18 @@ public:
 
 		msg_write("on init...");
 
-		engine.set_dirs(config.game_dir | "Textures",
-			config.game_dir | "Maps",
-			config.game_dir | "Objects",
-			config.game_dir | "Sounds",
+		engine.set_dirs(config.game_dir | "Sounds",
 			config.game_dir | "Scripts",
-			config.game_dir | "Materials",
 			config.game_dir | "Fonts");
 
 		auto context = yrenderer::api_init_glfw(window);
 		context->context->_create_auxiliary_stuff();
 		auto resource_manager = new ResourceManager(context,
-			config.game_dir | "Textures",
-			config.game_dir | "Materials",
-			config.game_dir | "Materials");
+			config.game_dir | "Objects",
+			config.game_dir | "Maps",
+			{config.game_dir | "Textures"},
+			{config.game_dir | "Materials"},
+			{config.game_dir | "Materials", os::app::directory_static | "shader"});
 		context->shader_manager = resource_manager->shader_manager;
 		context->texture_manager = resource_manager->texture_manager;
 		context->material_manager = resource_manager->material_manager;
@@ -178,7 +176,7 @@ public:
 
 		// load world description
 		LevelData level_data;
-		bool ok = level_data.load(engine.map_dir | filename);
+		bool ok = level_data.load(engine.resource_manager->map_dir | filename);
 
 		// systems
 		ecs::SystemManager::register_system(AnimationManager::_class, new AnimationManager());

@@ -74,13 +74,13 @@ struct extern CameraParams
 
 
 class extern TextureManager
-#	func extern __init__(ctx: GfxContext, dir: os.Path)
+#	func extern __init__(ctx: GfxContext, dir: os.Path[])
 class extern ShaderManager
 	var default_shader: string
-#	func extern __init__(ctx: GfxContext, dir: os.Path)
+#	func extern __init__(ctx: GfxContext, dir: os.Path[])
 	func extern mut load_shader_module(filename: os.Path)
 class extern MaterialManager
-#	func extern __init__(tm: TextureManager, dir: os.Path)
+#	func extern __init__(tm: TextureManager, dir: os.Path[])
 
 
 #---------------------------
@@ -93,7 +93,7 @@ class extern Context as @noauto
 	var shader_manager: ShaderManager*
 	var material_manager: MaterialManager*
 	var tex_white: shared![Texture]
-	func extern create_managers(texture_dir: os.Path, shader_dir: os.Path, material_dir: os.Path)
+	func extern create_managers(texture_dirs: os.Path[], shader_dirs: os.Path[], material_dirs: os.Path[])
 	func extern load_material(path: os.Path) -> Material&
 	func extern create_internal_material() -> Material&
 	func extern load_texture(path: os.Path) -> shared![Texture]
@@ -115,7 +115,7 @@ class extern RenderData as @noauto
 
 class extern RenderViewData
 	func extern __init__(ctx: Context&)
-	func extern set_view(params: RenderParams, cam: CameraParams, proj: mat4* = (nil as mat4*))
+	func extern set_view(params: RenderParams, cam: CameraParams, proj=(nil as mat4*))
 	func extern get_shader(material: Material*, pass_no: i32, vertex_shader_module: string, geometry_shader_module="", tessellation_module="") -> Shader&
 	func extern start(params: RenderParams, matrix: mat4, shader: Shader*, material: Material*, pass_no: i32, top: PrimitiveTopology, vb: VertexBuffer*) -> RenderData&
 
@@ -204,7 +204,7 @@ class extern CubeEmitter extends MeshEmitter
 
 class extern SceneRenderer extends Renderer
 	func extern mut __init__(ctx: Context&, type: i32, scene_view: SceneView&)
-	func extern mut set_view(params: RenderParams, cam: CameraParams, proj: mat4* = (nil as mat4*))
+	func extern mut set_view(params: RenderParams, cam: CameraParams, proj=(nil as mat4*))
 	func extern mut add_emitter(emitters: shared![MeshEmitter])
 
 	var background_color: Color?
