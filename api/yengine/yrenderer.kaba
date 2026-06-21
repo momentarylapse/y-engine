@@ -230,6 +230,9 @@ class extern SceneView
 	var probe_min: vec3
 	var probe_max: vec3
 	var ray_tracing_data: RayTracingData*
+	var fog_enabled: bool
+	var fog_density: f32
+	var fog_color: Color
 	func extern __init__()
 	func extern __delete__()
 #	func extern shadow_projection() -> mat4
