@@ -9,6 +9,7 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/ygraphics/Context.h>
 
+
 #ifdef USING_OPENGL
 namespace nix {
 	extern FrameBuffer* cur_framebuffer;
@@ -46,26 +47,24 @@ void XhuiRenderer::render(const RenderParams& params) {
 	params.command_buffer->set_viewport(params.area);
 #endif
 #ifdef USING_OPENGL
-	nix::set_viewport(params.area);
+	//nix::set_viewport(params.area);
+	// OpenGL' coordinate system is annoying (-_-)'
+	nix::set_viewport(params.area + vec2(0, native_area_window.y1 - params.area.y1));
 	nix::set_scissor(params.area, params.frame_buffer->area());
 #endif
 
 	for (auto c: children)
 		c->draw(params);
-
-#ifdef USING_OPENGL
-	nix::set_scissor(rect::EMPTY, params.frame_buffer->area());
-	nix::set_viewport(native_area_window);
-#endif
-#ifdef USING_VULKAN
-	params.command_buffer->set_viewport(native_area_window);
-#endif
 }
 
 void XhuiRenderer::draw(Painter* p) {
+	const auto clip0 = p->clip();
 	const auto params = extract_params(p);
 
 	render(params);
+
+	reinterpret_cast<xhui::Painter*>(p)->prepare_2d_drawing();
+	p->set_clip(clip0);
 }
 
 }
