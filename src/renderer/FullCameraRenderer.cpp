@@ -153,21 +153,22 @@ void FullCameraRenderer::create_post_processing(Renderer* source) {
 	if (config.antialiasing_method == AntialiasingMethod::MSAA) {
 		msg_error("yes msaa");
 
-		hdr_resolver = new HDRResolver(ctx, engine.width, engine.height, true);
+		multisample_resolver = new yrenderer::MultisampleResolver(ctx, engine.width, engine.height, 4);
+		multisample_resolver->add_child(source);
 
-		auto tex_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "rgba:f16");
-		auto depth_ms = new ygfx::TextureMultiSample(engine.width, engine.height, 4, "d:f32");
-		//auto depth_ms = new nix::RenderBuffer(engine.width, engine.height, 4, "ds:u24i88");
-		texture_renderer = new yrenderer::TextureRenderer(ctx, "world-tex", {tex_ms, depth_ms}, {"samples=4"});
+		hdr_resolver = new HDRResolver(ctx, engine.width, engine.height);
+		hdr_resolver->add_child(multisample_resolver);
 
-		multisample_resolver = new yrenderer::MultisampleResolver(ctx, tex_ms, depth_ms, hdr_resolver->texture.get(), hdr_resolver->depth_buffer.get());
-	} else {
-		hdr_resolver = new HDRResolver(ctx, engine.width, engine.height, false);
 		texture_renderer = hdr_resolver->texture_renderer.get();
-	}
-	add_child(hdr_resolver);
+		add_child(hdr_resolver);
+	} else {
+		hdr_resolver = new HDRResolver(ctx, engine.width, engine.height);
+		hdr_resolver->add_child(source);
 
-	texture_renderer->add_child(source);
+		texture_renderer = hdr_resolver->texture_renderer.get();
+		add_child(hdr_resolver);
+	}
+
 
 	light_meter = new LightMeter(ctx, hdr_resolver->texture.get());
 	add_sub_task(light_meter);
