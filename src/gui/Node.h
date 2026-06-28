@@ -7,13 +7,13 @@
 
 #pragma once
 
-#include "../lib/base/base.h"
-#include "../lib/base/pointer.h"
-#include "../lib/math/rect.h"
-#include "../lib/math/vec2.h"
-#include "../lib/image/color.h"
+#include <lib/base/base.h>
+#include <lib/base/pointer.h>
+#include <lib/math/rect.h>
+#include <lib/math/vec2.h>
+#include <lib/image/color.h>
 
-namespace gui {
+namespace layout {
 	struct Resource;
 }
 
@@ -72,7 +72,7 @@ public:
 	shared_array<Node> children;
 	void add(shared<Node> n);
 	void add_from_source(const string& source);
-	void apply_resource(const Resource& r);
+	void apply_resource(const layout::Resource& r);
 	void remove(Node &n);
 	void remove_all_children();
 	void update_geometry(const rect &target);

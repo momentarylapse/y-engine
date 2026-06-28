@@ -8,6 +8,7 @@
 #include "Node.h"
 #include "gui.h"
 #include <EngineData.h>
+#include <lib/layout/Resource.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/ygraphics/graphics-impl.h>
 
@@ -151,27 +152,18 @@ Node* Node::get(const string& _id) {
 	return nullptr;
 }
 
-void print_resource(const Resource& r, const string& prefix) {
+void print_resource(const layout::Resource& r, const string& prefix) {
 	msg_write(format("%s%s %s  %s", prefix, r.type, r.id, str(r.options)));
 	for (const auto& c: r.children)
 		print_resource(c, prefix + "    ");
 }
 
-void Node::apply_resource(const Resource &r) {
+void Node::apply_resource(const layout::Resource &r) {
 	if (r.id != "?" and r.id != "")
 		id = r.id;
 	//n->align = Align::NONE;
-	for (const auto& o: r.options) {
-		if (o.find("=") >= 0) {
-			auto xx = o.explode("=");
-			if (xx[1].head(1) == "'")
-				set_option(xx[0], xx[1].sub_ref(1, -1).unescape());
-			else
-				set_option(xx[0], xx[1]);
-		} else {
-			set_option(o, "");
-		}
-	}
+	for (const auto& o: r.options)
+		set_option(o.key, o.value);
 
 	for (const auto& c: r.children) {
 		if (Node* n = create_node(c.type)) {
@@ -184,7 +176,7 @@ void Node::apply_resource(const Resource &r) {
 
 
 void Node::add_from_source(const string& source) {
-	auto r = parse_resource(source);
+	auto r = layout::parse_resource(source);
 	//print_resource(r, "");
 	//if (r.id != "?")
 
