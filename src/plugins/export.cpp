@@ -629,6 +629,9 @@ void export_ui(kaba::IExporter* ext) {
 		ext->declare_class_element("Node._eff_area", &gui::Node::eff_area);
 		ext->declare_class_element("Node.margin", &gui::Node::margin);
 		ext->declare_class_element("Node.align", &gui::Node::align);
+		ext->declare_class_element("Node.size_mode_x", &gui::Node::size_mode_x);
+		ext->declare_class_element("Node.size_mode_y", &gui::Node::size_mode_y);
+		ext->declare_class_element("Node.non_square", &gui::Node::non_square);
 		ext->declare_class_element("Node.dz", &gui::Node::dz);
 		ext->declare_class_element("Node.color", &gui::Node::col);
 		ext->declare_class_element("Node.visible", &gui::Node::visible);

@@ -15,6 +15,7 @@
 
 namespace layout {
 	struct Resource;
+	enum class SizeMode;
 }
 
 namespace gui {
@@ -36,7 +37,7 @@ public:
 		CANVAS
 	};
 
-	enum Align {
+	/*enum Align {
 		NONE,
 		FILL_X = 1<<0,
 		FILL_Y = 1<<1,
@@ -49,7 +50,7 @@ public:
 		CENTER_V = 1<<9,
 		_FILL_XY = FILL_X | FILL_Y,
 		_TOP_LEFT = TOP | LEFT,
-	};
+	};*/
 
 	string id;
 	Type type;
@@ -58,7 +59,9 @@ public:
 	float width, height;
 	rect margin;
 	//rect padding;
-	Align align;
+	bool non_square;
+	layout::SizeMode size_mode_x, size_mode_y;
+	vec2 align;
 	color col;
 	//float group_alpha;
 	float dz;

@@ -9,9 +9,9 @@
 #include "gui.h"
 #include <EngineData.h>
 #include <lib/layout/Resource.h>
+#include <lib/layout/Node.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/ygraphics/graphics-impl.h>
-
 #include "Text.h"
 #include "lib/os/msg.h"
 //#include <algorithm>
@@ -28,7 +28,10 @@ Node::Node(const rect &r) {
 	col = White;
 	visible = true;
 	margin = rect::EMPTY;
-	align = Align::_TOP_LEFT;
+	size_mode_x = layout::SizeMode::Shrink;
+	size_mode_y = layout::SizeMode::Shrink;
+	align = {0, 0};
+	non_square = false;
 
 	eff_col = White;
 	eff_area = r;
@@ -92,35 +95,23 @@ void Node::update_geometry(const rect &target) {
 	if (parent) {
 		eff_area = target;
 		float fx = 1/engine.physical_aspect_ratio;
-		if (align & Align::NONSQUARE)
+		if (non_square)
 			fx = 1;
 
-		if (align & Align::FILL_X) {
+		if (size_mode_x == layout::SizeMode::Shrink) {
+			eff_area.x1 = target.x1 + align.x * target.width() + (margin.x1 + pos.x - align.x * (margin.x1 + margin.x2 + width)) * fx;
+			eff_area.x2 = eff_area.x1 + width * fx;
+		} else {
 			eff_area.x1 = target.x1 + margin.x1 * fx;
 			eff_area.x2 = target.x2 - margin.x2 * fx;
-		} else if (align & Align::LEFT) {
-			eff_area.x1 = target.x1 + (margin.x1 + pos.x) * fx;
-			eff_area.x2 = target.x1 + (margin.x1 + pos.x + width) * fx;
-		} else if (align & Align::CENTER_H) {
-			eff_area.x1 = target.center().x + (pos.x - width / 2) * fx;
-			eff_area.x2 = target.center().x + (pos.x + width / 2) * fx;
-		} else if (align & Align::RIGHT) {
-			eff_area.x1 = target.x2 + (pos.x - margin.x2 - width) * fx;
-			eff_area.x2 = target.x2 + (pos.x - margin.x2) * fx;
 		}
 
-		if (align & Align::FILL_Y) {
+		if (size_mode_y == layout::SizeMode::Shrink) {
+			eff_area.y1 = target.y1 + align.y * target.height() + (margin.y1 + pos.y - align.y * (margin.y1 + margin.y2 + height));
+			eff_area.y2 = eff_area.y1 + height;
+		} else {
 			eff_area.y1 = target.y1 + margin.y1;
 			eff_area.y2 = target.y2 - margin.y2;
-		} else if (align & Align::TOP) {
-			eff_area.y1 = target.y1 + margin.y1 + pos.y;
-			eff_area.y2 = target.y1 + margin.y1 + pos.y + height;
-		} else if (align & Align::CENTER_V) {
-			eff_area.y1 = target.center().y + pos.y - height / 2;
-			eff_area.y2 = target.center().y + pos.y + height / 2;
-		} else if (align & Align::BOTTOM) {
-			eff_area.y1 = target.y2 + (pos.y - margin.y2 - height);
-			eff_area.y2 = target.y2 + (pos.y - margin.y2);
 		}
 
 		//eff_area = rect_sub_margin(eff_area, margin);
@@ -176,8 +167,8 @@ void Node::apply_resource(const layout::Resource &r) {
 
 
 void Node::add_from_source(const string& source) {
-	auto r = layout::parse_resource(source);
-	//print_resource(r, "");
+	auto r = layout::Resource::parse(source, false);
+	print_resource(r, "");
 	//if (r.id != "?")
 
 	apply_resource(r);
@@ -204,31 +195,33 @@ void Node::_set_option(const string& key, const string& value) {
 	} else if (key == "color") {
 		col = color::parse(value);
 	} else if (key == "top") {
-		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
-		align = (Align)(align | Align::TOP);
+		size_mode_y = layout::SizeMode::Shrink;
+		align.y = 0;
 	} else if (key == "bottom") {
-		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
-		align = (Align)(align | Align::BOTTOM);
+		size_mode_y = layout::SizeMode::Shrink;
+		align.y = 1;
 	} else if (key == "left") {
-		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
-		align = (Align)(align | Align::LEFT);
+		size_mode_x = layout::SizeMode::Shrink;
+		align.x = 0;
 	} else if (key == "right") {
-		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
-		align = (Align)(align | Align::RIGHT);
+		size_mode_x = layout::SizeMode::Shrink;
+		align.x = 1;
 	} else if (key == "centerh") {
-		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
-		align = (Align)(align | Align::CENTER_H);
+		size_mode_x = layout::SizeMode::Shrink;
+		align.x = 0.5f;
 	} else if (key == "centerv") {
-		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
-		align = (Align)(align | Align::CENTER_V);
+		size_mode_y = layout::SizeMode::Shrink;
+		align.y = 0.5f;
+	} else if (key == "center") {
+		size_mode_x = layout::SizeMode::Shrink;
+		size_mode_y = layout::SizeMode::Shrink;
+		align = {0.5f, 0.5f};
 	} else if (key == "fillx") {
-		align = (Align)(align & ~(Align::LEFT | Align::CENTER_H | Align::RIGHT | Align::FILL_X));
-		align = (Align)(align | Align::FILL_X);
+		size_mode_x = layout::SizeMode::Fill;
 	} else if (key == "filly") {
-		align = (Align)(align & ~(Align::TOP | Align::CENTER_V | Align::BOTTOM | Align::FILL_Y));
-		align = (Align)(align | Align::FILL_Y);
+		size_mode_y = layout::SizeMode::Fill;
 	} else if (key == "nonsquare") {
-		align = (Align)(align | Align::NONSQUARE);
+		non_square = true;
 	}
 }
 
@@ -244,14 +237,16 @@ void Node::set_option(const string& key, const string& value) {
 
 HBox::HBox() {
 	type = Type::HBOX;
-	align = Align::_FILL_XY;
+	size_mode_x = layout::SizeMode::Fill;
+	size_mode_y = layout::SizeMode::Fill;
 }
 
 
 
 VBox::VBox() {
 	type = Type::VBOX;
-	align = Align::_FILL_XY;
+	size_mode_x = layout::SizeMode::Fill;
+	size_mode_y = layout::SizeMode::Fill;
 }
 
 }

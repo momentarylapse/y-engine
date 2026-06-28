@@ -23,8 +23,9 @@ class ProfilerPanel extends Picture
 
 	func override __init__()
 		super.__init__([0,1, 0,DISPLAY_HEIGHT], tex_white)
-		align = Node.Align.LEFT | Node.Align.TOP | Node.Align.FILL_X
-		self.color.a = 0
+		align = [0,0]
+		size_mode_x = Node.SizeMode.FILL
+		color.a = 0
 
 		visible = false
 
@@ -63,7 +64,8 @@ class ProfilerPanel extends Picture
 		# background
 		for i in 0:2
 			var bg = new Picture([0,1, i*DISPLAY_HEIGHT/2,(i+1)*DISPLAY_HEIGHT/2], tex_white)
-			bg.align = Node.Align.LEFT | Node.Align.TOP | Node.Align.FILL_X
+			bg.align = [0,0]
+			bg.size_mode_x = Node.SizeMode.FILL
 			let f = f32(i) * 0.1 + 0.1
 			bg.color = [f,f,f, 0.7]
 			add(give(bg))
@@ -94,7 +96,7 @@ class HistoryPanel extends Picture
 	let H = 64
 	func override __init__()
 		super.__init__([0,0.4, 0.3,0.4], tex_white)
-		align = Node.Align.LEFT | Node.Align.TOP
+		align = [0,0]
 		texture = new Texture(W, H, "rgba:i8")
 
 		visible = false

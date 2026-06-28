@@ -25,7 +25,7 @@ public:
 	static Font *load(const string &name);
 	static void init_fonts();
 
-	void render_text(const string &str, Node::Align align, Image &im);
+	void render_text(const string &str, int align, Image &im);
 	int get_width(const string &str);
 	int get_height(const string &str);
 	float get_height_rel(const string &str);

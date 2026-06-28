@@ -12,6 +12,8 @@
 #include <lib/ygraphics/graphics-impl.h>
 #include <EngineData.h>
 
+#include "lib/os/msg.h"
+
 
 namespace gui {
 
@@ -35,7 +37,7 @@ void Text::rebuild() {
 	if (!font)
 		return;
 	Image im;
-	font->render_text(text, align, im);
+	font->render_text(text, align.x > 0 ? 1 : -1, im);
 	if (im.width == 0 or im.height == 0)
 		im.create(1,1, color(0,0,0,0));
 
@@ -48,7 +50,7 @@ void Text::rebuild() {
 
 	height = font_size * font->get_height_rel(text);
 	width = height * (float)im.width / (float)im.height;
-	if (align & Align::NONSQUARE)
+	if (non_square)
 		 width /= engine.physical_aspect_ratio;
 }
 
