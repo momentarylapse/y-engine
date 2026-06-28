@@ -497,8 +497,7 @@ add_library(moduley SHARED
 	src/net/NetworkManager.cpp
 	src/plugins/export.cpp
 	src/plugins/PluginManager.cpp
-	src/renderer/gui/GuiRendererGL.cpp
-	src/renderer/gui/GuiRendererVulkan.cpp
+	src/renderer/gui/GuiRenderer.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp
@@ -788,8 +787,7 @@ add_executable(y
 	src/net/NetworkManager.cpp
 	src/plugins/export.cpp
 	src/plugins/PluginManager.cpp
-	src/renderer/gui/GuiRendererGL.cpp
-	src/renderer/gui/GuiRendererVulkan.cpp
+	src/renderer/gui/GuiRenderer.cpp
 	src/renderer/helper/Raytracing.cpp
 	src/renderer/helper/RendererFactory.cpp
 	src/renderer/world/emitter/WorldInstancedEmitter.cpp

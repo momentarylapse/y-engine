@@ -10,12 +10,13 @@
 //#include "../lib/base/base.h"
 //#include "gui.h"
 #include "Node.h"
+#include <lib/ygraphics/font.h>
 
 class Image;
 
 namespace gui {
 
-class Font {
+/*class Font {
 public:
 	void *face = nullptr;
 	string name;
@@ -34,6 +35,10 @@ public:
 	//static const float LINE_GAP;
 	//static const float LINE_Y_OFFSET;
 	static Font *_default;
-};
+};*/
+
+
+	extern font::Face *default_font;
+	void init_fonts();
 
 }

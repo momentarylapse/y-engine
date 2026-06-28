@@ -26,6 +26,6 @@ class HDRDebugger extends System
 		for mut p in pic
 			p.source = [0,engine.resolution_scale.x, 0,engine.resolution_scale.y]
 		for lm in engine.camera_renderers[0].light_meter
-			t!.set_text("max brightness: {{lm.brightness|.3}}")
+			t!.text = "max brightness: {{lm.brightness|.3}}"
 
 

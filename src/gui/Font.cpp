@@ -5,6 +5,32 @@
  *      Author: michi
  */
 
+
+#include "Font.h"
+#include "../Config.h"
+#include <lib/ygraphics/Context.h>
+
+#include "EngineData.h"
+#include "lib/os/app.h"
+#include "lib/os/msg.h"
+
+
+namespace gui {
+	font::Face *default_font = nullptr;
+
+	void init_fonts() {
+		font::init();
+		default_font = font::load_face(config.default_font, false, false);
+		if (!default_font)
+			default_font = font::load_face("FreeSans", false, false);
+		if (!default_font)
+			throw Exception("no font found...");
+
+	}
+}
+
+#if 0
+
 #include "Font.h"
 #include "gui.h"
 #include "../Config.h"
@@ -353,4 +379,4 @@ float Font::get_height_rel(const string &str) {
 
 }
 
-
+#endif

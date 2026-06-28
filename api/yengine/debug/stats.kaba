@@ -4,10 +4,10 @@ use image.*
 
 class FpsPanel extends Text
 	func override __init__()
-		super.__init__("", 0.02, [0.01,0.01])
+		super.__init__("", 0.017, [0.01,0.01])
 		dz = 999
 	func mut update()
-		set_text("{{1.0/profiler.avg_frame_time|0.1}}")
+		text = "{{1.0/profiler.avg_frame_time|0.1}}"
 
 func channel_level(channel: int) -> int
 	let parent = profiler.channels[channel].parent
@@ -44,17 +44,17 @@ class ProfilerPanel extends Picture
 						let w = dt * scale
 						let y = y0 - CHANNEL_HEIGHT * (level+1)
 						var p = new Picture([x, x + w, y, y + CHANNEL_HEIGHT], tex_white)
-						p.color = color.hsb(c * 3.4151, 0.4, 0.4, 1.0)
+						p.color = Color.hsb(c * 3.4151, 0.3, 0.6, 1.0)
 						add(give(p))
 						if w > 0.02
 							var ll = profiler.channels[c].name
 							if w > 0.1
 								ll += " {{dt * 1000|0.2}}"
-							let label = new Text(ll, CHANNEL_HEIGHT, [x+0.001, y])
+							let label = new Text(ll, CHANNEL_HEIGHT*0.6, [x+0.001, y+0.002])
 							add(give(label))
 						started.remove(i)
 						break
-		var label = new Text(title, DISPLAY_HEIGHT*0.20, [engine.physical_aspect_ratio-0.14, y0-DISPLAY_HEIGHT*0.35])
+		var label = new Text(title, DISPLAY_HEIGHT*0.15, [engine.physical_aspect_ratio-0.14, y0-DISPLAY_HEIGHT*0.35])
 		label.color.a = 0.3
 		add(give(label))
 
@@ -83,7 +83,7 @@ class ProfilerPanel extends Picture
 				var p = new Picture([t*scale, t*scale+0.002, 0, DISPLAY_HEIGHT], tex_white)
 				p.color = [1,1,1,0.15]
 				add(give(p))
-				var l = new Text(" {{t*1000|0.0}} ms", CHANNEL_HEIGHT*1.3, [t*scale,0])
+				var l = new Text(" {{t*1000|0.0}} ms", CHANNEL_HEIGHT, [t*scale,0])
 				l.color.a = 0.5
 				add(give(l))
 

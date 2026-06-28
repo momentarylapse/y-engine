@@ -30,39 +30,52 @@ class extern Node as Sharable
 	func selfref get[X](id: string) -> X*
 		return _get(id) as X*
 
+	func extern virtual mut set_option(key: string, value: string)
+	func extern virtual get_greed_factor() -> vec2
+	func extern virtual get_content_min_size() -> vec2
+	func extern virtual mut negotiate_content_area(available: Rect)
+
 	func extern virtual mut on_iterate(dt: f32)
-	func extern virtual mut on_enter()
+	func extern virtual mut on_enter(m: vec2)
 	func extern virtual mut on_leave()
-	func extern virtual mut on_left_button_down() -> bool
-	func extern virtual mut on_left_button_up() -> bool
-	func extern virtual mut on_middle_button_down() -> bool
-	func extern virtual mut on_middle_button_up() -> bool
-	func extern virtual mut on_right_button_down() -> bool
-	func extern virtual mut on_right_button_up() -> bool
-	var pos: vec2
-	var x, y: f32
+	func extern virtual mut on_left_button_down(m: vec2)
+	func extern virtual mut on_left_button_up(m: vec2)
+	func extern virtual mut on_middle_button_down(m: vec2)
+	func extern virtual mut on_middle_button_up(m: vec2)
+	func extern virtual mut on_right_button_down(m: vec2)
+	func extern virtual mut on_right_button_up(m: vec2)
+
+	var id: string
 	var width, height: f32
 	func extern set_area(r: Rect)
-	var _eff_area: Rect
-	var margin: Rect
+	var area: Rect
+	var margin, padding: Rect
 	var dz: f32
 	var color: Color
 	var align: vec2
 	var size_mode_x, size_mode_y: SizeMode
-	var non_square: bool
+#	var non_square: bool
 	var visible: bool
+	var allow_hover: bool
 	var children: shared![Node][]
 
 class extern HBox extends Node
 	func extern override __init__()
+	func extern override get_content_min_size() -> vec2
+	func extern override negotiate_content_area(available: Rect)
+	func extern override set_option(k: string, v: string)
 
 class extern VBox extends Node
 	func extern override __init__()
+	func extern override get_content_min_size() -> vec2
+	func extern override negotiate_content_area(available: Rect)
+	func extern override set_option(k: string, v: string)
 
 class extern Picture extends Node
 	func extern override __init__()
 	func extern __init__(r: Rect, tex: shared![Texture], source: Rect = Rect.ID)
 	func extern override __delete__()
+	func extern override set_option(k: string, v: string)
 	var source: Rect
 	var texture: shared![Texture]
 	var blur: f32
@@ -74,9 +87,10 @@ class extern Text extends Picture
 	func extern override __init__()
 	func extern __init__(t: string, font_size: f32, p: vec2 = vec2.0)
 	func extern override __delete__()
+	func extern override get_content_min_size() -> vec2
+	func extern override set_option(k: string, v: string)
 	var text: string
 	var font_size: f32
-	func extern set_text(t: string)
 
 class extern Picture3d extends Node
 	var model: Model*

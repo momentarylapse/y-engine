@@ -26,7 +26,7 @@ void iterate();
 	{ \
 		for (auto s: ecs::SystemManager::systems) \
 			s->NAME(); \
-		gui::handle_input(mouse01, [](gui::Node *n) { return n->NAME(); }); \
+		gui::handle_input(mouse, [](gui::Node *n) { n->NAME(mouse); }); \
 	}
 
 #define SEND_EVENT_P(NAME, k) \

@@ -12,11 +12,11 @@
 #include "Canvas.h"
 #include <lib/math/rect.h>
 #include <lib/kaba/kaba.h>
-#include <lib/ygraphics/graphics-impl.h>
-
-#include "../plugins/PluginManager.h"
+#include <lib/layout/Node.h>
 #include <lib/profiler/Profiler.h>
-#include <stdio.h>
+#include "../plugins/PluginManager.h"
+#include "lib/os/msg.h"
+
 
 extern bool _parse_tokens_smart_strings_;
 
@@ -27,17 +27,24 @@ Array<Node*> sorted_nodes;
 shared<Node> toplevel;
 static int ch_gui_iter = -1;
 
+ygfx::DrawingHelperData* aux = nullptr;
+float ui_scale;
+
 
 void init(int ch_iter) {
 	ch_gui_iter = profiler::create_channel("gui", ch_iter);
 
-	Font::init_fonts();
+	init_fonts();
 
 	toplevel = new Node();
+	toplevel->size_mode_x = layout::SizeMode::Fill;
+	toplevel->size_mode_y = layout::SizeMode::Fill;
 }
 
 void reset() {
 	toplevel = new Node();
+	toplevel->size_mode_x = layout::SizeMode::Fill;
+	toplevel->size_mode_y = layout::SizeMode::Fill;
 
 	all_nodes = {};
 	sorted_nodes = {};
@@ -53,14 +60,15 @@ void update_tree() {
 	all_nodes.clear();
 	if (toplevel)
 		add_to_node_list(toplevel.get());
-	update();
+	//update();
 }
 
-void update() {
+void update(float aspect_ratio) {
 	if (toplevel)
-		toplevel->update_geometry(rect::ID);
+		toplevel->negotiate_outer_area({0,aspect_ratio, 0,1});
 
 	sorted_nodes = all_nodes;
+	return;
 	//std::sort(sorted_nodes.begin(), sorted_nodes.end(), [](Node *a, Node *b) { return a->eff_z < b->eff_z; });
 	for (int i=0; i<sorted_nodes.num; i++)
 		for (int j=i+1; j<sorted_nodes.num; j++)
@@ -73,22 +81,22 @@ void update() {
 	//}
 }
 
-// input: [0:1]x[0:1]
-void handle_input(const vec2 &m, std::function<bool(Node *n)> f) {
+// input: [0:R]x[0:1]
+void handle_input(const vec2 &m, std::function<void(Node *n)> f) {
 	foreachb(Node *n, sorted_nodes) {
-		if (n->eff_area.inside(m)) {
-			if (f(n))
-				return;
+		if (n->allow_hover and n->visible and n->area.inside(m)) {
+			f(n);
+			return;
 		}
 	}
 }
 
-// input: [0:1]x[0:1]
+// input: [0:R]x[0:1]
 void handle_mouse_move(const vec2 &m_prev, const vec2 &m) {
 	for (auto n: all_nodes) {
-		if (n->eff_area.inside(m) and !n->eff_area.inside(m_prev))
-			n->on_enter();
-		if (!n->eff_area.inside(m) and n->eff_area.inside(m_prev))
+		if (n->area.inside(m) and !n->area.inside(m_prev))
+			n->on_enter(m);
+		if (!n->area.inside(m) and n->area.inside(m_prev))
 			n->on_leave();
 	}
 }
@@ -130,7 +138,7 @@ void delete_node(Node *n) {
 Node* create_node(const string& type) {
 	if (type == "Node")
 		return new Node();
-	if (type == "Picture")
+	if (type == "Picture" or type == "Rectangle")
 		return new Picture();
 	if (type == "Text")
 		return new Text();

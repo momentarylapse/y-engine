@@ -66,8 +66,8 @@ void init_mouse(GLFWwindow *window) {
 	double xpos, ypos;
 	glfwPollEvents();
 	glfwGetCursorPos(window, &xpos, &ypos);
-	mouse_state_prev.m.x = mouse_state.m.x = xpos;
-	mouse_state_prev.m.y = mouse_state.m.y = ypos;
+	mouse_state_prev.m.x = mouse_state.m.x = (float)xpos;
+	mouse_state_prev.m.y = mouse_state.m.y = (float)ypos;
 
 
 	glfwSetCursorPosCallback(window, cursor_position_callback);
@@ -89,10 +89,10 @@ void iterate_mouse_pre() {
 
 void iterate_mouse() {
 
-	auto mouse01_prev = mouse01;
+	auto mouse_prev = mouse;
 
 	//mouse = vec3(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
-	dmouse = mouse_state.d / 500.0f;
+	dmouse = mouse_state.d / 800.0f;
 	mouse += dmouse;
 	mouse.x = clamp(mouse.x, 0.0f, engine.physical_aspect_ratio);
 	mouse.y = clamp(mouse.y, 0.0f, 1.0f);
@@ -106,7 +106,7 @@ void iterate_mouse() {
 	}
 
 	// FIXME might be handled after a click event...!
-	gui::handle_mouse_move(mouse01_prev, mouse01);
+	gui::handle_mouse_move(mouse_prev, mouse);
 }
 
 
@@ -117,8 +117,8 @@ bool get_button(int index) {
 
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos) {
 	//std::cout << "mouse " << xpos << " " << ypos << "\n";
-	mouse_state.m.x = xpos;
-	mouse_state.m.y = ypos;
+	mouse_state.m.x = (float)xpos;
+	mouse_state.m.y = (float)ypos;
 
 	//SEND_EVENT(on_mouse_move);
 }

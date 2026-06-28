@@ -37,6 +37,17 @@ j user meshes
 	* engine vs game repo?
 
 
+== ui ==
+
+* ui.Node from layout.Node
+	boxes
+	Rectangle
+	ShaderNode?
+~	color space?
+J	BUG font size
+~	BUG texture alpha
+J	BUG hover coordinates
+	BUG gl
 
 
 == other ==
@@ -46,7 +57,6 @@ J Model as resource, not Component
 	skybox as ModelRef
 J SolidBody -> RigidBody
 j Physics as System
-* ui.Node from layout.Node
 
 
 
