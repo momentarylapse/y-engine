@@ -18,7 +18,6 @@ class extern Node as Sharable
 		FILL
 
 	func extern __init__()
-	func extern __init__(r: Rect)
 	func extern virtual __delete__()
 	func extern mut __del_override__()
 
@@ -73,11 +72,11 @@ class extern VBox extends Node
 
 class extern Picture extends Node
 	func extern override __init__()
-	func extern __init__(r: Rect, tex: shared![Texture], source: Rect = Rect.ID)
+	func extern __init__(r: Rect, tex: shared[Texture], source=Rect.ID)
 	func extern override __delete__()
 	func extern override set_option(k: string, v: string)
 	var source: Rect
-	var texture: shared![Texture]
+	var texture: shared[Texture]
 	var blur: f32
 	var angle: f32
 	var shader: shared[Shader]

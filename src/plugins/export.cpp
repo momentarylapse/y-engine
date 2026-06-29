@@ -638,7 +638,6 @@ void export_ui(kaba::IExporter* ext) {
 		ext->declare_class_element("Node.children", &gui::Node::children);
 		ext->declare_class_element("Node.parent", &gui::Node::parent);
 		ext->link_class_func("Node.__init__:Node", &kaba::generic_init<gui::Node>);
-		ext->link_class_func("Node.__init__:Node:math.Rect", &kaba::generic_init_ext<gui::Node, const rect&>);
 		ext->link_virtual("Node.__delete__", &kaba::generic_virtual<gui::Node>::__delete__, &node);
 		ext->link_class_func("Node.__del_override__", &DeletionQueue::add);
 		ext->link_class_func("Node.add", &gui::Node::add);
@@ -672,7 +671,7 @@ void export_ui(kaba::IExporter* ext) {
 		ext->declare_class_element("Picture.blur", &gui::Picture::bg_blur);
 		ext->declare_class_element("Picture.angle", &gui::Picture::angle);
 		ext->link_class_func("Picture.__init__:Picture", &kaba::generic_init<gui::Picture>);
-		ext->link_class_func("Picture.__init__:Picture:math.Rect:shared![Texture]:math.Rect", &kaba::generic_init_ext<gui::Picture, const rect&, shared<Texture>, const rect&>);
+		ext->link_class_func("Picture.__init__:Picture:math.Rect:shared[Texture]:math.Rect", &kaba::generic_init_ext<gui::Picture, const rect&, shared<Texture>, const rect&>);
 		ext->link_virtual("Picture.__delete__", &kaba::generic_virtual<gui::Picture>::__delete__, &picture);
 		ext->link_virtual("Picture.set_option", &kaba::generic_virtual<gui::Picture>::set_option, &picture);
 	}

@@ -24,8 +24,7 @@ namespace gui {
 	extern float ui_scale;
 
 
-//Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p.y), nullptr) {//rect::ID
-Text::Text() : Text(":::fake:::", 0.05f, {0,0}) {}
+Text::Text() : Text("", 0.05f, {0,0}) {}
 
 Text::Text(const string &t, float h, const vec2 &p) : Picture(rect(p.x,p.x,p.y,p.y), nullptr) {//rect::ID
 	type = Type::TEXT;

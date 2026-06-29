@@ -15,12 +15,17 @@
 
 namespace gui {
 
-Picture::Picture() : Picture(rect::ID, engine.context ? engine.context->tex_white : nullptr) {}
-
-Picture::Picture(const rect &r, shared<ygfx::Texture> tex, const rect &s) :
-	Node(r)
-{
+Picture::Picture() {
 	type = Type::PICTURE;
+	source = rect::ID;
+	bg_blur = 0;
+	angle = 0;
+	radius = 0;
+	visible = true;
+	allow_hover = true;
+}
+
+Picture::Picture(const rect &r, shared<ygfx::Texture> tex, const rect &s) : Picture() {
 	size_mode_x = layout::SizeMode::Shrink;
 	size_mode_y = layout::SizeMode::Shrink;
 	min_width_user = r.width();
@@ -29,11 +34,6 @@ Picture::Picture(const rect &r, shared<ygfx::Texture> tex, const rect &s) :
 	margin.y1 = r.y1;
 	source = s;
 	texture = tex;
-	bg_blur = 0;
-	angle = 0;
-	radius = 0;
-	visible = true;
-	allow_hover = true;
 }
 
 Picture::~Picture() = default;

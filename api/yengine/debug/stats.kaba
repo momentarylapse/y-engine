@@ -119,7 +119,7 @@ class HistoryPanel extends Picture
 			for k in 0:5
 				im.set_pixel(i, H-y*k-1, Color.GRAY)
 
-		texture.write(im)
+		texture!.write(im)
 
 class ProfilerDisplay extends System
 	var t_fps = 0.0

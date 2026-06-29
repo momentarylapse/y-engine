@@ -179,9 +179,9 @@ void Node::set_option(const string& key, const string& value) {
 		margin.y1 = value._float();
 	} else if (key == "marginbottom") {
 		margin.y2 = value._float();
-	} else if (key == "marginright") {
-		margin.x1 = value._float();
 	} else if (key == "marginleft") {
+		margin.x1 = value._float();
+	} else if (key == "marginright") {
 		margin.x2 = value._float();
 	} else if (key == "hidden") {
 		visible = false;

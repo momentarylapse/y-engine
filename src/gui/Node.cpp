@@ -12,15 +12,14 @@
 #include <lib/layout/Node.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include "Text.h"
+#include "lib/base/iter.h"
 #include "lib/os/msg.h"
 
 namespace gui {
 
 using SizeMode = layout::SizeMode;
 
-Node::Node() : Node(rect::ID) {}
-
-Node::Node(const rect &r) : layout::Node(p2s(this)) {
+Node::Node() : layout::Node(p2s(this)) {
 	type = Type::NODE;
 	dz = 1;
 	col = White;
@@ -163,16 +162,67 @@ VBox::VBox() {
 }
 
 vec2 VBox::get_content_min_size() const {
-	return Node::get_content_min_size();
+	vec2 s = {0,0};
+	for (auto c: weak(children)) {
+		if (s.y > 0)
+			s.y += spacing;
+		if (c->visible) {
+			const auto ss = c->get_content_min_size();
+			s.x = max(s.x, ss.x);
+			s.y += ss.y;
+		}
+	}
+	return s;
 }
 
 vec2 VBox::get_greed_factor() const {
 	return Node::get_greed_factor();
 }
 
-void VBox::negotiate_content_area(const rect &available) {
-	for (auto c: weak(children))
-		c->negotiate_outer_area(available);
+Array<float> VBox::get_min_heights() const {
+	Array<float> h;
+	for (auto c: weak(children)) {
+		if (c->visible) {
+			const vec2 s = c->get_effective_min_size();
+			h.add(s.y);
+		} else {
+			h.add(0);
+		}
+	}
+	return h;
+}
 
+void VBox::negotiate_content_area(const rect& available) {
+	auto h = get_min_heights();
+	vec2 total_min_size = get_content_min_size();
+	float diff_x = max(available.width() - total_min_size.x, 0.0f); //  - spacing * (w.num + 1)
+	float diff_y = max(available.height() - total_min_size.y, 0.0f); //  - spacing * (h.num + 1)
+
+	/*vec2 total_greed = get_greed_factor();
+
+	float greed_to_y = (total_greed.y > 0) ? diff_y / total_greed.y : 0;
+
+	for (int i=0; i<h.num; i++)
+		h[i] += greed_to_y * gy[i];*/
+
+	float y0 = available.y1;
+	for (auto&& [i, c]: enumerate(weak(children))) {
+		if (c->visible) {
+			float y1 = y0 + h[i];
+			if (i == children.num - 1)
+				y1 = available.y2;
+			c->negotiate_outer_area(rect(available.x1, available.x2, y0, y1));
+			y0 = y1;
+		}
+		y0 += spacing;
+	}
+}
+
+void VBox::set_option(const string &key, const string &value) {
+	if (key == "spacing") {
+		spacing = value._float();
+	} else {
+		Node::set_option(key, value);
+	}
 }
 }
