@@ -23,7 +23,6 @@ extern bool _parse_tokens_smart_strings_;
 namespace gui {
 
 Array<Node*> all_nodes;
-Array<Node*> sorted_nodes;
 shared<Node> toplevel;
 static int ch_gui_iter = -1;
 
@@ -47,7 +46,6 @@ void reset() {
 	toplevel->size_mode_y = layout::SizeMode::Fill;
 
 	all_nodes = {};
-	sorted_nodes = {};
 }
 
 void add_to_node_list(Node *n) {
@@ -66,29 +64,33 @@ void update_tree() {
 void update(float aspect_ratio) {
 	if (toplevel)
 		toplevel->negotiate_outer_area({0,aspect_ratio, 0,1});
+}
 
-	sorted_nodes = all_nodes;
-	return;
-	//std::sort(sorted_nodes.begin(), sorted_nodes.end(), [](Node *a, Node *b) { return a->eff_z < b->eff_z; });
-	for (int i=0; i<sorted_nodes.num; i++)
-		for (int j=i+1; j<sorted_nodes.num; j++)
-			if (sorted_nodes[i]->eff_z > sorted_nodes[j]->eff_z)
-				sorted_nodes.swap(i, j);
+Node* find_mouse_event_handler(const vec2 &m) {
+	auto next_to_check = toplevel.get();
+	Node* best_handler = nullptr;
+	while (next_to_check) {
+		if (next_to_check->allow_hover)
+			best_handler = next_to_check;
 
-
-	//for (auto *p: all_nodes) {
-	//	p->rebuild();
-	//}
+		// any children under mouse?
+		Node* next = nullptr;
+		for (auto c: weak(next_to_check->children))
+			if (c->visible and c->area.inside(m)) {
+				next_to_check = c;
+				next = c;
+				break;
+			}
+		if (!next)
+			break;
+	}
+	return best_handler;
 }
 
 // input: [0:R]x[0:1]
 void handle_input(const vec2 &m, std::function<void(Node *n)> f) {
-	foreachb(Node *n, sorted_nodes) {
-		if (n->allow_hover and n->visible and n->area.inside(m)) {
-			f(n);
-			return;
-		}
-	}
+	if (auto n = find_mouse_event_handler(m))
+		f(n);
 }
 
 // input: [0:R]x[0:1]

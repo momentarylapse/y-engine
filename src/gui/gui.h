@@ -32,7 +32,6 @@ void iterate(float dt);
 
 extern shared<Node> toplevel;
 extern Array<Node*> all_nodes;
-extern Array<Node*> sorted_nodes;
 void update_tree();
 
 void delete_node(Node *n);
