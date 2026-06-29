@@ -40,14 +40,14 @@ j user meshes
 == ui ==
 
 * ui.Node from layout.Node
-	boxes
-	Rectangle
+...	boxes
+?	Rectangle
 	ShaderNode?
 ~	color space?
 J	BUG font size
 ~	BUG texture alpha
 J	BUG hover coordinates
-	BUG gl
+j	BUG gl
 
 
 == other ==

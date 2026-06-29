@@ -227,6 +227,7 @@ public:
 		auto monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
 
+		// TODO
 		engine.physical_aspect_ratio = (float)w / (float)h;
 
 		glfwWindowHint(GLFW_RED_BITS, vidmode->redBits);
