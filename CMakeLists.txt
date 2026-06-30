@@ -293,10 +293,7 @@ add_library(moduley SHARED
 	src/lib/base/array.cpp
 	src/lib/base/pointer.cpp
 	src/lib/base/strings.cpp
-	src/lib/doc/_kaba_export.cpp
 	src/lib/doc/chunked.cpp
-	src/lib/doc/pdf.cpp
-	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
@@ -583,10 +580,7 @@ add_executable(y
 	src/lib/base/array.cpp
 	src/lib/base/pointer.cpp
 	src/lib/base/strings.cpp
-	src/lib/doc/_kaba_export.cpp
 	src/lib/doc/chunked.cpp
-	src/lib/doc/pdf.cpp
-	src/lib/doc/ttf.cpp
 	src/lib/doc/xml.cpp
 	src/lib/image/color.cpp
 	src/lib/image/image.cpp
