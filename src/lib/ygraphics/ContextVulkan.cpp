@@ -1,6 +1,7 @@
 #if HAS_LIB_VULKAN
 
 #include "Context.h"
+#include "font.h"
 #include "../os/msg.h"
 #include "../image/image.h"
 #include "graphics-impl.h"

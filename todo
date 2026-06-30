@@ -44,6 +44,8 @@ j user meshes
 ?	Rectangle
 	ShaderNode?
 ~	color space?
+	uv source
+	user font
 J	BUG font size
 ~	BUG texture alpha
 J	BUG hover coordinates

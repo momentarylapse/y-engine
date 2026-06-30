@@ -11,19 +11,19 @@
 #include <lib/ygraphics/Context.h>
 
 #include "EngineData.h"
+#include "Text.h"
 #include "lib/os/app.h"
 #include "lib/os/msg.h"
 
 
 namespace gui {
-	font::Face *default_font = nullptr;
+	ygfx::FontManager* font_manager = nullptr;
 
 	void init_fonts() {
-		font::init();
-		default_font = font::load_face(config.default_font, false, false);
-		if (!default_font)
-			default_font = font::load_face("FreeSans", false, false);
-		if (!default_font)
+		font_manager = new ygfx::FontManager();
+		font_manager->directories = {config.game_dir | "Fonts"};
+		font_manager->try_load_defaults({config.default_font, "FreeSans"}, {});
+		if (!font_manager->default_font_regular)
 			throw Exception("no font found...");
 
 	}

@@ -12,18 +12,7 @@ struct mat4;
 namespace ygfx {
 
 class Context;
-
-struct TextCache {
-	string text;
-	font::Face* face;
-	float font_size;
-	int age;
-	Texture* texture;
-#if HAS_LIB_VULKAN
-	vulkan::DescriptorSet* dset;
-#endif
-	font::TextDimensions dimensions;
-};
+class FontManager;
 
 struct DrawingHelperData {
 	explicit DrawingHelperData(Context*);
@@ -66,10 +55,6 @@ struct DrawingHelperData {
 	const mat4* projection_matrix = nullptr;
 
 	void reset_frame();
-
-	Array<TextCache> text_caches;
-	TextCache& get_text_cache(const string& text, font::Face* face, float font_size, float ui_scale);
-	void iterate_text_caches();
 };
 
 class Context {
@@ -102,8 +87,6 @@ public:
 	Texture* tex_black = nullptr;
 	void _create_default_textures();
 };
-
-font::TextDimensions& get_cached_text_dimensions(const string& text, font::Face* face, float font_size, float ui_scale);
 
 }
 
