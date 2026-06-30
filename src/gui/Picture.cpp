@@ -23,6 +23,8 @@ Picture::Picture() {
 	radius = 0;
 	visible = true;
 	allow_hover = true;
+	size_mode_x = layout::SizeMode::Shrink;
+	size_mode_y = layout::SizeMode::Shrink;
 }
 
 Picture::Picture(const rect &r, shared<ygfx::Texture> tex, const rect &s) : Picture() {
