@@ -447,6 +447,8 @@ add_library(moduley SHARED
 	src/lib/ygraphics/Painter.cpp
 	src/lib/ygraphics/PainterGL.cpp
 	src/lib/ygraphics/PainterVulkan.cpp
+	src/lib/ygraphics/ShaderManager.cpp
+	src/lib/ygraphics/TextureManager.cpp
 	src/lib/yrenderer/helper/Bindable.cpp
 	src/lib/yrenderer/helper/ComputeTask.cpp
 	src/lib/yrenderer/helper/CubeMapSource.cpp
@@ -492,8 +494,6 @@ add_library(moduley SHARED
 	src/lib/yrenderer/Material.cpp
 	src/lib/yrenderer/MaterialManager.cpp
 	src/lib/yrenderer/Renderer.cpp
-	src/lib/yrenderer/ShaderManager.cpp
-	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/export.cpp
 	src/plugins/PluginManager.cpp
@@ -737,6 +737,8 @@ add_executable(y
 	src/lib/ygraphics/Painter.cpp
 	src/lib/ygraphics/PainterGL.cpp
 	src/lib/ygraphics/PainterVulkan.cpp
+	src/lib/ygraphics/ShaderManager.cpp
+	src/lib/ygraphics/TextureManager.cpp
 	src/lib/yrenderer/helper/Bindable.cpp
 	src/lib/yrenderer/helper/ComputeTask.cpp
 	src/lib/yrenderer/helper/CubeMapSource.cpp
@@ -782,8 +784,6 @@ add_executable(y
 	src/lib/yrenderer/Material.cpp
 	src/lib/yrenderer/MaterialManager.cpp
 	src/lib/yrenderer/Renderer.cpp
-	src/lib/yrenderer/ShaderManager.cpp
-	src/lib/yrenderer/TextureManager.cpp
 	src/net/NetworkManager.cpp
 	src/plugins/export.cpp
 	src/plugins/PluginManager.cpp
