@@ -5,11 +5,11 @@ use .model.*
 use kaba
 
 
-
 enum Button
 	LEFT
 	MIDDLE
 	RIGHT
+
 
 class extern Node as Sharable
 	enum SizeMode
@@ -61,17 +61,20 @@ class extern Node as Sharable
 	var allow_hover: bool
 	var children: shared![Node][]
 
+
 class extern HBox extends Node
 	func extern override __init__()
 	func extern override get_content_min_size() -> vec2
 	func extern override negotiate_content_area(available: Rect)
 	func extern override set_option(k: string, v: string)
 
+
 class extern VBox extends Node
 	func extern override __init__()
 	func extern override get_content_min_size() -> vec2
 	func extern override negotiate_content_area(available: Rect)
 	func extern override set_option(k: string, v: string)
+
 
 class extern Picture extends Node
 	func extern override __init__()
@@ -85,7 +88,8 @@ class extern Picture extends Node
 	var shader: shared[Shader]
 	var shader_data: Any
 
-class extern Text extends Picture
+
+class extern Label extends Picture
 	func extern override __init__()
 	func extern __init__(t: string, font_size: f32, p: vec2 = vec2.0)
 	func extern override __delete__()
@@ -93,6 +97,7 @@ class extern Text extends Picture
 	func extern override set_option(k: string, v: string)
 	var text: string
 	var font_size: f32
+
 
 class extern Picture3d extends Node
 	var model: Model*
@@ -104,10 +109,12 @@ class extern Picture3d extends Node
 		model = m
 		self.matrix = mat
 
+
 class extern Canvas extends Node
 	func extern override __init__()
 	func extern override __delete__()
 	func virtual mut on_draw(out p: Painter)
+
 
 var extern static toplevel: Node&
 func extern static key_state(k: Key) -> bool
@@ -118,6 +125,7 @@ func extern static button(b: Button) -> bool
 var extern static mouse, dmouse, scroll: vec2
 
 var extern static link_mouse_and_keyboard_into_pad: bool
+
 
 class extern Gamepad as Sharable
 	enum Button
@@ -147,6 +155,7 @@ enum VRDeviceRole
 	HEADSET
 	LIGHTHOUSE0
 	LIGHTHOUSE1
+
 
 struct extern VRDevice
 
@@ -181,6 +190,7 @@ struct extern VRDevice
 	func extern button(b: Button) -> bool
 	func extern clicked(b: Button) -> bool
 	func extern axis(a: Axis) -> f32
+
 
 func extern static get_vr_device(role: VRDeviceRole) -> VRDevice*
 

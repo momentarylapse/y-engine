@@ -31,7 +31,7 @@ public:
 		HBOX,
 		VBOX,
 		PICTURE,
-		TEXT,
+		LABEL,
 		MODEL,
 		CANVAS
 	};

@@ -2,7 +2,7 @@ use ..yengine.*
 
 class HDRDebugger extends System
 	var pic: shared![Picture][]
-	var t: shared[Text]
+	var t: shared[Label]
 
 	func override on_finished_loading()
 		for hdr in engine.camera_renderers[0].hdr_resolver
@@ -14,7 +14,7 @@ class HDRDebugger extends System
 				y0 -= h
 				h *= 0.5
 
-			var _t = new shared Text("", 0.05, [1.0, 0.0])
+			var _t = new shared Label("", 0.05, [1.0, 0.0])
 			toplevel.add(_t)
 			t = _t
 

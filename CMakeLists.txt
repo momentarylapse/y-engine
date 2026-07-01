@@ -276,9 +276,9 @@ add_library(moduley SHARED
 	src/gui/Canvas.cpp
 	src/gui/Font.cpp
 	src/gui/gui.cpp
+	src/gui/Label.cpp
 	src/gui/Node.cpp
 	src/gui/Picture.cpp
-	src/gui/Text.cpp
 	src/helper/DeletionQueue.cpp
 	src/helper/ErrorHandler.cpp
 	src/helper/ResourceManager.cpp
@@ -564,9 +564,9 @@ add_executable(y
 	src/gui/Canvas.cpp
 	src/gui/Font.cpp
 	src/gui/gui.cpp
+	src/gui/Label.cpp
 	src/gui/Node.cpp
 	src/gui/Picture.cpp
-	src/gui/Text.cpp
 	src/helper/DeletionQueue.cpp
 	src/helper/ErrorHandler.cpp
 	src/helper/ResourceManager.cpp

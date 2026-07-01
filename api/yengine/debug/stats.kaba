@@ -2,7 +2,7 @@ use yengine.*
 use profiler.*
 use image.*
 
-class FpsPanel extends Text
+class FpsPanel extends Label
 	func override __init__()
 		super.__init__("", 0.017, [0.01,0.01])
 		dz = 999
@@ -50,11 +50,11 @@ class ProfilerPanel extends Picture
 							var ll = profiler.channels[c].name
 							if w > 0.1
 								ll += " {{dt * 1000|0.2}}"
-							let label = new Text(ll, CHANNEL_HEIGHT*0.6, [x+0.001, y+0.002])
+							let label = new Label(ll, CHANNEL_HEIGHT*0.6, [x+0.001, y+0.002])
 							add(give(label))
 						started.remove(i)
 						break
-		var label = new Text(title, DISPLAY_HEIGHT*0.15, [engine.physical_aspect_ratio-0.14, y0-DISPLAY_HEIGHT*0.35])
+		var label = new Label(title, DISPLAY_HEIGHT*0.15, [engine.physical_aspect_ratio-0.14, y0-DISPLAY_HEIGHT*0.35])
 		label.color.a = 0.3
 		add(give(label))
 
@@ -83,7 +83,7 @@ class ProfilerPanel extends Picture
 				var p = new Picture([t*scale, t*scale+0.002, 0, DISPLAY_HEIGHT], tex_white)
 				p.color = [1,1,1,0.15]
 				add(give(p))
-				var l = new Text(" {{t*1000|0.0}} ms", CHANNEL_HEIGHT, [t*scale,0])
+				var l = new Label(" {{t*1000|0.0}} ms", CHANNEL_HEIGHT, [t*scale,0])
 				l.color.a = 0.5
 				add(give(l))
 

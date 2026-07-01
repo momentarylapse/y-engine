@@ -10,7 +10,7 @@
 #include <gui/Picture.h>
 #include <gui/Canvas.h>
 #include <gui/Font.h>
-#include <gui/Text.h>
+#include <gui/Label.h>
 #include <lib/yrenderer/Context.h>
 #include <lib/ygraphics/graphics-impl.h>
 #include <lib/ygraphics/Context.h>
@@ -74,8 +74,8 @@ void GuiRenderer::draw(const RenderParams& params) {
 void GuiRenderer::draw_node(ygfx::Painter& painter, gui::Node* n, const color& group_col) {
 	color col = group_col;
 
-	if (n->type == gui::Node::Type::TEXT) {
-		auto t = static_cast<gui::Text*>(n);
+	if (n->type == gui::Node::Type::LABEL) {
+		auto t = static_cast<gui::Label*>(n);
 		//painter.set_color(color(0.1f, 1,1,1));
 		//painter.draw_rect(t->area);
 
