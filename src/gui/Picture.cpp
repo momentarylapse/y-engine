@@ -21,6 +21,7 @@ Picture::Picture() {
 	bg_blur = 0;
 	angle = 0;
 	radius = 0;
+	softness = 0;
 	visible = true;
 	allow_hover = true;
 	size_mode_x = layout::SizeMode::Shrink;
@@ -51,6 +52,8 @@ void Picture::set_option(const string &k, const string &v) {
 		angle = v._float();
 	} else if (k == "radius") {
 		radius = v._float();
+	} else if (k == "softness") {
+		softness = v._float();
 	} else {
 		Node::set_option(k, v);
 	}

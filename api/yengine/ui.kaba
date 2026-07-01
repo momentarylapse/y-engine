@@ -22,7 +22,7 @@ class extern Node as Sharable
 	func extern mut __del_override__()
 
 	func extern mut add(n: shared![Node])
-	func extern mut add_from_source(s: string)
+	func extern mut add_from_source(s: string) -> Node*
 	func extern mut remove_all_children()
 	func extern mut remove(n: Node&)
 	func extern selfref _get(id: string) -> Node*
@@ -44,9 +44,11 @@ class extern Node as Sharable
 	func extern virtual mut on_right_button_down(m: vec2)
 	func extern virtual mut on_right_button_up(m: vec2)
 
+
 	var id: string
 	var width, height: f32
-	func extern set_area(r: Rect)
+	func extern mut set_pos(pos: vec2)
+	func extern mut set_area(r: Rect)
 	var area: Rect
 	var margin, padding: Rect
 	var dz: f32

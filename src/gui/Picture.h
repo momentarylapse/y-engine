@@ -26,7 +26,7 @@ public:
 
 	float bg_blur;
 	float angle;
-	float radius;
+	float radius, softness;
 
 	shared<ygfx::Shader> shader;
 	shared<ygfx::Texture> texture;

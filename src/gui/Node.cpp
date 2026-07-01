@@ -54,25 +54,26 @@ void Node::remove_all_children() {
 	update_tree();
 }
 
-void Node::set_area(const rect &r) {
-	margin.x1 = r.x1;
-	margin.y1 = r.y1;
-	min_width_user = r.width();
-	min_height_user = r.height();
+void Node::set_pos(const vec2& pos) {
+	margin.x1 = pos.x;
+	margin.y1 = pos.y;
 	align = {0,0};
 	size_mode_x = SizeMode::Shrink;
 	size_mode_y = SizeMode::Shrink;
 }
 
+void Node::set_area(const rect &r) {
+	set_pos(r.p00());
+	min_width_user = r.width();
+	min_height_user = r.height();
+}
+
 Node* Node::get(const string& _id) {
 	if (id == _id)
 		return this;
-	for (auto n: weak(children)) {
-		if (n->id == _id)
-			return n;
+	for (auto n: weak(children))
 		if (auto c = n->get(_id))
 			return c;
-	}
 	return nullptr;
 }
 
@@ -89,22 +90,26 @@ void Node::apply_resource(const layout::Resource &r) {
 	for (const auto& o: r.options)
 		set_option(o.key, o.value);
 
-	for (const auto& c: r.children) {
-		if (Node* n = create_node(c.type)) {
-			//msg_write("create " + c.type + "   " + p2s(n));
-			add(n);
-			n->apply_resource(c);
-		}
-	}
+	for (const auto& c: r.children)
+		add_from_resource(c);
 }
 
+Node* Node::add_from_resource(const layout::Resource& r) {
+	if (Node* n = create_node(r.type)) {
+		//msg_write("create... " + c.type + "   " + p2s(n));
+		add(n);
+		n->apply_resource(r);
+		return n;
+	}
+	return nullptr;
+}
 
-void Node::add_from_source(const string& source) {
+Node* Node::add_from_source(const string& source) {
 	auto r = layout::Resource::parse(source, false);
 	print_resource(r, "");
 	//if (r.id != "?")
 
-	apply_resource(r);
+	return add_from_resource(r);
 }
 
 Array<const layout::Node*> Node::_get_children(layout::ChildFilter f) const {

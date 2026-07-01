@@ -644,6 +644,7 @@ void export_ui(kaba::IExporter* ext) {
 		ext->link_class_func("Node.add_from_source", &gui::Node::add_from_source);
 		ext->link_class_func("Node.remove", &gui::Node::remove);
 		ext->link_class_func("Node.remove_all_children", &gui::Node::remove_all_children);
+		ext->link_class_func("Node.set_pos", &gui::Node::set_pos);
 		ext->link_class_func("Node.set_area", &gui::Node::set_area);
 		ext->link_class_func("Node._get", &gui::Node::get);
 		ext->link_virtual("Node.set_option", &gui::Node::set_option, &node);

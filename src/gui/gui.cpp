@@ -142,7 +142,7 @@ Node* create_node(const string& type) {
 		return new Node();
 	if (type == "Picture" or type == "Rectangle")
 		return new Picture();
-	if (type == "Text")
+	if (type == "Text" or type == "Label")
 		return new Text();
 	if (type == "Canvas")
 		return new Canvas();

@@ -88,6 +88,7 @@ void GuiRenderer::draw_node(ygfx::Painter& painter, gui::Node* n, const color& g
 		painter.set_fill(true);
 		painter.set_color(p->col);
 		painter.set_roundness(p->radius);
+		painter.softness = p->softness;
 		painter.set_texture(p->texture.get());
 		if (p->shader) {
 			painter.set_shader(p->shader.get());
@@ -95,6 +96,7 @@ void GuiRenderer::draw_node(ygfx::Painter& painter, gui::Node* n, const color& g
 		}
 		painter.draw_rect(p->area);
 		painter.set_roundness(0);
+		painter.softness = 0;
 		painter.set_shader(nullptr);
 		painter.set_texture(nullptr);
 	} else if (n->type == gui::Node::Type::CANVAS) {

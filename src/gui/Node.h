@@ -49,12 +49,14 @@ public:
 	shared_array<Node> children;
 
 	void add(shared<Node> n);
-	void add_from_source(const string& source);
+	Node* add_from_source(const string& source);
+	Node* add_from_resource(const layout::Resource& r);
 	void apply_resource(const layout::Resource& r);
 	void remove(Node &n);
 	void remove_all_children();
 	Node* get(const string &id);
 
+	void set_pos(const vec2& pos);
 	void set_area(const rect& area);
 
 	Array<const layout::Node *> _get_children(layout::ChildFilter f) const override;
