@@ -115,7 +115,7 @@ Node* Node::add_from_source(const string& source) {
 Array<const layout::Node*> Node::_get_children(layout::ChildFilter f) const {
 	Array<const layout::Node*> r;
 	for (auto c: weak(children))
-		if (c->visible)
+		if (c->visible or f == layout::ChildFilter::All)
 			r.add(c);
 	return r;
 }

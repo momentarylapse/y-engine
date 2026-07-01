@@ -41,10 +41,6 @@ Picture::Picture(const rect &r, shared<ygfx::Texture> tex, const rect &s) : Pict
 
 Picture::~Picture() = default;
 
-vec2 Picture::get_content_min_size() const {
-	return {0, 0};
-}
-
 void Picture::set_option(const string &k, const string &v) {
 	if (k == "texture") {
 		// ...

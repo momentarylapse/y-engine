@@ -19,7 +19,6 @@ public:
 	Picture(const rect &r, shared<ygfx::Texture> tex, const rect &source = rect::ID);
 	~Picture() override;
 
-	vec2 get_content_min_size() const override;
 	void set_option(const string &k, const string &v) override;
 
 	rect source;
