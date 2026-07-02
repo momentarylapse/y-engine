@@ -30,7 +30,6 @@ class extern Node as Sharable
 		return _get(id) as X*
 
 	func extern virtual mut set_option(key: string, value: string)
-	func extern virtual get_greed_factor() -> vec2
 	func extern virtual get_content_min_size() -> vec2
 	func extern virtual selfref get_children(_filter=0) -> Node&[]
 	func extern virtual mut negotiate_content_area(available: Rect)
