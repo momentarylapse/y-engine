@@ -8,6 +8,7 @@
     "libogg",
     "libvorbis",
     "opengl",
+    "pkgconf",
     "spirv-tools",
     "vulkan",
     "vulkan-headers",
