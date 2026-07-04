@@ -9,6 +9,7 @@
     "libvorbis",
     "opengl",
     "pkgconf",
+    "shaderc",
     "spirv-tools",
     "vulkan",
     "vulkan-headers",
