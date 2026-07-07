@@ -160,6 +160,7 @@ class extern Link extends Component
 
 
 class extern Physics extends System
+	let PARAMETERS = "enabled,mode,gravity"
 	enum Mode
 		NONE
 		SIMPLE

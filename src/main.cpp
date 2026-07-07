@@ -183,15 +183,6 @@ public:
 		ecs::SystemManager::register_system(ParticleManager::_class, new ParticleManager());
 		ecs::SystemManager::register_system(audio::Manager::_class, new audio::Manager());
 		ecs::SystemManager::register_system(NetworkManager::_class, new NetworkManager());
-		ecs::SystemManager::register_system(Physics::_class, new Physics());
-		if (auto physics = ecs::SystemManager::get<Physics>()) {
-			// TODO include in level_data.systems!
-			//physics->mode = PhysicsMode::FULL_EXTERNAL;
-			physics->enabled = level_data.physics_enabled;
-			physics->mode = level_data.physics_mode;
-			physics->gravity = level_data.gravity;
-			physics->collisions_enabled = true; // level_data.physics_enabled;
-		}
 		for (auto &s: level_data.systems)
 			ecs::SystemManager::create(s.filename, s.class_name, s.variables);
 		for (auto &s: config.additional_scripts)

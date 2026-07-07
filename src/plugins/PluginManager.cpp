@@ -314,6 +314,8 @@ const kaba::Class *find_class(const Path &filename, const string &name) {
 			return EgoMarker::_class;
 		if (name == "NameTag")
 			return NameTag::_class;
+		if (name == "Physics")
+			return Physics::_class;
 	}
 	try {
 		auto s = kaba::default_context->load_module(filename, false);
@@ -338,45 +340,50 @@ void *create_instance(const kaba::Class *c, const string &variables) {
 void* create_instance(const kaba::Class *c, const Array<ecs::InstanceDataVariable> &variables) {
 	//msg_write(format("INSTANCE  %s:   %s", filename, base_class));
 	msg_write(format("creating instance  %s", c->long_name()));
-	if (c == RigidBody::_class)
-		return new RigidBody;
-	if (c == ModelRef::_class)
-		return new ModelRef;
-	if (c == TerrainRef::_class)
-		return new TerrainRef;
-	if (c == TemplateRef::_class)
-		return new TemplateRef;
-	if (c == MeshCollider::_class)
-		return new MeshCollider;
-	if (c == TerrainCollider::_class)
-		return new TerrainCollider;
-	if (c == SphereCollider::_class)
-		return new SphereCollider;
-	if (c == BoxCollider::_class)
-		return new BoxCollider;
-//	if (c == Terrain::_class)
-//		return new Terrain;
-	if (c == Animator::_class)
-		return new Animator;
-	if (c == Skeleton::_class)
-		return new Skeleton;
-	if (c == Light::_class)
-		return new Light(yrenderer::LightType::POINT, White);
-	if (c == Link::_class)
-		return new Link;
-	if (c == Camera::_class)
-		return new Camera;
-	if (c == audio::SoundSource::_class)
-		return new audio::SoundSource;
-	if (c == LegacyParticle::_class)
-		return new LegacyParticle;
-	if (c == LegacyBeam::_class)
-		return new LegacyBeam;
-	if (c == CubeMapSource::_class)
-		return new CubeMapSource;
-	if (c == NameTag::_class)
-		return new NameTag;
-	void *p = c->create_instance();
+	auto instantiate = [c] () -> void* {
+		if (c == RigidBody::_class)
+			return new RigidBody;
+		if (c == ModelRef::_class)
+			return new ModelRef;
+		if (c == TerrainRef::_class)
+			return new TerrainRef;
+		if (c == TemplateRef::_class)
+			return new TemplateRef;
+		if (c == MeshCollider::_class)
+			return new MeshCollider;
+		if (c == TerrainCollider::_class)
+			return new TerrainCollider;
+		if (c == SphereCollider::_class)
+			return new SphereCollider;
+		if (c == BoxCollider::_class)
+			return new BoxCollider;
+		//	if (c == Terrain::_class)
+		//		return new Terrain;
+		if (c == Animator::_class)
+			return new Animator;
+		if (c == Skeleton::_class)
+			return new Skeleton;
+		if (c == Light::_class)
+			return new Light(yrenderer::LightType::POINT, White);
+		if (c == Link::_class)
+			return new Link;
+		if (c == Camera::_class)
+			return new Camera;
+		if (c == audio::SoundSource::_class)
+			return new audio::SoundSource;
+		if (c == LegacyParticle::_class)
+			return new LegacyParticle;
+		if (c == LegacyBeam::_class)
+			return new LegacyBeam;
+		if (c == CubeMapSource::_class)
+			return new CubeMapSource;
+		if (c == NameTag::_class)
+			return new NameTag;
+		if (c == Physics::_class)
+			return new Physics;
+		return c->create_instance();
+	};
+	auto p = instantiate();
 	assign_variables(p, c, variables);
 	return p;
 }
