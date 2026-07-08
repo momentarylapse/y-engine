@@ -19,7 +19,6 @@ void iterate_mouse_pre();
 void iterate_mouse();
 
 extern vec2 mouse; //   [0:R]x[0:1] coord system
-extern vec2 mouse01; // [0:1]x[0:1] coord system
 extern vec2 dmouse;
 extern vec2 scroll;
 

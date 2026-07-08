@@ -16,11 +16,12 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Config.h"
+
 namespace input {
 
 
 vec2 mouse; //   [0:R]x[0:1] coord system
-vec2 mouse01; // [0:1]x[0:1] coord system
 vec2 dmouse;
 vec2 scroll;
 bool ignore_velocity;
@@ -54,7 +55,6 @@ void init_mouse(GLFWwindow *window) {
 
 	dmouse = scroll = {0,0};
 	mouse = {engine.physical_aspect_ratio/2, 0.5f};
-	mouse01 = {0.5f, 0.5f};
 	ignore_velocity = true;
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -91,12 +91,10 @@ void iterate_mouse() {
 
 	auto mouse_prev = mouse;
 
-	//mouse = vec3(clampf(state.mx/1000.0f, 0, 1), clampf(state.my/1000.0f, 0, 1), 0);
-	dmouse = mouse_state.d / 800.0f;
+	dmouse = mouse_state.d * config.input_mouse_speed * 0.001f;
 	mouse += dmouse;
 	mouse.x = clamp(mouse.x, 0.0f, engine.physical_aspect_ratio);
 	mouse.y = clamp(mouse.y, 0.0f, 1.0f);
-	mouse01 = vec2(mouse.x / engine.physical_aspect_ratio, mouse.y);
 	scroll = mouse_state.scroll;
 
 	mouse_state.scroll = {0,0};
