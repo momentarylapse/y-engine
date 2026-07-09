@@ -414,6 +414,7 @@ add_library(moduley SHARED
 	src/lib/pattern/Observable.cpp
 	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
+	src/lib/threads/_kaba_export.cpp
 	src/lib/threads/Mutex.cpp
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
@@ -702,6 +703,7 @@ add_executable(y
 	src/lib/pattern/Observable.cpp
 	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
+	src/lib/threads/_kaba_export.cpp
 	src/lib/threads/Mutex.cpp
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
