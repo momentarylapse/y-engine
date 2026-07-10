@@ -398,6 +398,9 @@ add_library(moduley SHARED
 	src/lib/nix/nix_textures.cpp
 	src/lib/nix/nix_vertexbuffer.cpp
 	src/lib/nix/nix_view.cpp
+	src/lib/obs/_kaba_export.cpp
+	src/lib/obs/Log.cpp
+	src/lib/obs/Observable.cpp
 	src/lib/os/app.cpp
 	src/lib/os/CommandLineParser.cpp
 	src/lib/os/config.cpp
@@ -410,8 +413,6 @@ add_library(moduley SHARED
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
-	src/lib/pattern/_kaba_export.cpp
-	src/lib/pattern/Observable.cpp
 	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
 	src/lib/threads/_kaba_export.cpp
@@ -687,6 +688,9 @@ add_executable(y
 	src/lib/nix/nix_textures.cpp
 	src/lib/nix/nix_vertexbuffer.cpp
 	src/lib/nix/nix_view.cpp
+	src/lib/obs/_kaba_export.cpp
+	src/lib/obs/Log.cpp
+	src/lib/obs/Observable.cpp
 	src/lib/os/app.cpp
 	src/lib/os/CommandLineParser.cpp
 	src/lib/os/config.cpp
@@ -699,8 +703,6 @@ add_executable(y
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
-	src/lib/pattern/_kaba_export.cpp
-	src/lib/pattern/Observable.cpp
 	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
 	src/lib/threads/_kaba_export.cpp
