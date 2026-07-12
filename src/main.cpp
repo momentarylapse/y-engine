@@ -141,12 +141,14 @@ public:
 		engine.set_context(context, resource_manager);
 		PluginManager::default_resource_manager = resource_manager;
 
+		world = new World();
+
 		create_base_renderer(context, window);
 
 		audio::init();
 
 		PluginManager::init();
-		ecs::SystemManager::init(ch_iter, world.entity_manager.get());
+		ecs::SystemManager::init(ch_iter, world->entity_manager.get());
 
 		ErrorHandler::init();
 
@@ -172,7 +174,7 @@ public:
 		msg_write("| loading                                              |");
 		msg_right();
 		reset_game();
-		world.reset();
+		world->reset();
 
 		// load world description
 		LevelData level_data;
@@ -189,10 +191,10 @@ public:
 			ecs::SystemManager::create(s, "", {});
 
 		// entities
-		ok &= world.load(level_data);
+		ok &= world->load(level_data);
 
 		// TODO turn into Systems and use on_handle_finished_loading()!
-		for (auto& cam: world.entity_manager->get_component_list<Camera>())
+		for (auto& cam: world->entity_manager->get_component_list<Camera>())
 			create_and_attach_camera_renderer(engine.context, cam);
 
 		ecs::SystemManager::handle_finished_loading();
@@ -272,9 +274,9 @@ public:
 			if (input::get_key(input::KEY_CONTROL) and input::get_key(input::KEY_Q))
 				break;
 
-			if (world.next_filename) {
-				load_world(world.next_filename);
-				world.next_filename = "";
+			if (world->next_filename) {
+				load_world(world->next_filename);
+				world->next_filename = "";
 			}
 			auto tt = engine.context->gpu_read_timestamps();
 			for (int i=0; i<tt.num; i++)
@@ -295,7 +297,7 @@ public:
 		ecs::SystemManager::reset();
 		SchedulerManager::reset();
 		CameraReset();
-		world.reset();
+		world->reset();
 		gui::reset();
 
 		engine.resolution_scale_x = engine.resolution_scale_y = config.resolution_scale_max;
@@ -327,7 +329,7 @@ public:
 
 		ecs::SystemManager::handle_iterate(engine.elapsed);
 		SchedulerManager::iterate(engine.elapsed);
-		world.entity_manager->component_manager->iterate(engine.elapsed);
+		world->entity_manager->component_manager->iterate(engine.elapsed);
 
 		gui::iterate(engine.elapsed);
 

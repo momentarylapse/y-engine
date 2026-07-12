@@ -210,13 +210,13 @@ public:
 	}
 };
 Light* attach_light_parallel(ecs::Entity* e, const color& c) {
-	return world.attach_light_parallel(e, c);
+	return world->attach_light_parallel(e, c);
 }
 Light* attach_light_point(ecs::Entity* e, const color& c, float r) {
-	return world.attach_light_point(e, c, r);
+	return world->attach_light_point(e, c, r);
 }
 Light* attach_light_cone(ecs::Entity* e, const color& c, float r, float theta) {
-	return world.attach_light_cone(e, c, r, theta);
+	return world->attach_light_cone(e, c, r, theta);
 }
 
 void export_ecs(kaba::IExporter* ext) {
@@ -516,7 +516,7 @@ void export_world(kaba::IExporter* ext) {
 	//ext->link_class_func("Link.set_axis", &Link::set_axis);
 	//ext->link_class_func("Link.__del_override__", &DeletionQueue::add);
 
-	ext->link("world", &world);
+	ext->link("world", world); // :p
 	ext->link("cam", &cam_main);
 	ext->link_func("load_model", &__load_model);
 	ext->link_func("load_material", &__load_material);
