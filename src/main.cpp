@@ -109,6 +109,7 @@ public:
 
 		window = create_window();
 
+		profiler::init();
 		kaba::init();
 		NetworkManager::init();
 		ch_iter = profiler::create_channel("iter");
@@ -262,7 +263,7 @@ public:
 #ifdef USING_OPENGL
 			engine.context->gpu_timestamp({}, -1);
 #endif
-			engine.elapsed_rt = profiler::frame_dt;
+			engine.elapsed_rt = profiler::frame_dt();
 			engine.elapsed = engine.time_scale * min(engine.elapsed_rt, 1.0f / config.min_framerate);
 
 			input::iterate();
@@ -280,7 +281,7 @@ public:
 			}
 			auto tt = engine.context->gpu_read_timestamps();
 			for (int i=0; i<tt.num; i++)
-				profiler::current_frame_timing.gpu.add({engine.context->gpu_timestamp_queries[i], tt[i]});
+				profiler::current_frame_timing().gpu.add({engine.context->gpu_timestamp_queries[i], tt[i]});
 
 		}
 

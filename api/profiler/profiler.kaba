@@ -29,11 +29,11 @@ namespace profiler
 
 	func extern digest_report(td: FrameTimingData) -> ChannelStats[]
 
-	var extern static channels: Channel[]
-	var extern static previous_frame_timing: FrameTimingData
-	var extern static avg_frame_time: f32
-	var extern static frames: i32
-	var extern static history: FrameHistory
+	func extern globalref channels() -> Channel[]&
+	func extern globalref previous_frame_timing() -> FrameTimingData&
+	func extern avg_frame_time() -> f32
+	func extern frames() -> i32
+	func extern globalref history() -> FrameHistory&
 	#class Average
 	#	var frame_time: float
 	#	var location: float[16]
