@@ -516,7 +516,7 @@ void export_world(kaba::IExporter* ext) {
 	//ext->link_class_func("Link.set_axis", &Link::set_axis);
 	//ext->link_class_func("Link.__del_override__", &DeletionQueue::add);
 
-	ext->link("world", world); // :p
+	ext->link("world", &world);
 	ext->link("cam", &cam_main);
 	ext->link_func("load_model", &__load_model);
 	ext->link_func("load_material", &__load_material);

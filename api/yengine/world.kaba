@@ -254,4 +254,4 @@ func ref get_model(out e: Entity) -> Model*
 #	var b: RigidBody* = e.get_component(RigidBody)
 #	return b
 
-var extern world: World
+var extern world: World&
