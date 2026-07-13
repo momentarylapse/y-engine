@@ -303,6 +303,8 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	ext->link_class_func("VertexBuffer.update", &vertexbuffer_update_array);
 	ext->link_class_func("VertexBuffer.create_quad", &VertexBuffer::create_quad);
 
+	ext->link_class_func("DynamicVertexBuffer.__init__", &kaba::generic_init_ext<DynamicVertexBuffer, const string&>);
+
 	ext->declare_class_size("UniformBuffer", sizeof(UniformBuffer));
 	ext->link_class_func("UniformBuffer.__init__", &uniformbuffer_init);
 
@@ -548,6 +550,7 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	ext->declare_class_size("MaterialManager", sizeof(MaterialManager));
 	ext->declare_class_size("ShaderManager", sizeof(ShaderManager));
 	ext->declare_class_element("ShaderManager.default_shader", &ShaderManager::default_shader);
+	ext->link_class_func("ShaderManager.add_directory", &ShaderManager::add_directory);
 	ext->link_class_func("ShaderManager.load_shader_module", &ShaderManager::load_shader_module);
 
 	ext->declare_class_size("Context", sizeof(yrenderer::Context));
@@ -572,7 +575,7 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 }
 
 void export_package_yrenderer(kaba::IExporter* ext) {
-	ext->package_info("yrenderer", "0.14");
+	ext->package_info("yrenderer", "0.15");
 	_export_package_yrenderer_internal(ext);
 }
 
