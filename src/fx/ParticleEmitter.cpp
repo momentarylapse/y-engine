@@ -13,6 +13,7 @@
 #include <lib/math/random.h>
 #include <lib/os/msg.h>
 #include <lib/ygraphics/graphics-impl.h>
+#include <lib/ygraphics/Context.h>
 #include <lib/yrenderer/Context.h>
 
 static Random pe_random;
@@ -21,8 +22,8 @@ const kaba::Class *ParticleGroup::_class = nullptr;
 const kaba::Class *ParticleEmitter::_class = nullptr;
 
 ParticleGroup::ParticleGroup() {
-	if (engine.context and engine.context->tex_white)
-		texture = engine.context->tex_white;
+	if (engine.context and engine.context->context->tex_white)
+		texture = engine.context->context->tex_white;
 	source = rect::ID;
 }
 
