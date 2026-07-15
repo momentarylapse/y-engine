@@ -46,8 +46,6 @@
 #include "lib/os/app.h"
 #include "lib/ygraphics/Context.h"
 #include "lib/yrenderer/regions/RegionRenderer.h"
-#include "world/Model.h"
-#include "world/systems/Physics.h"
 #include "world/systems/AnimationManager.h"
 #include "world/components/Camera.h"
 #include "world/World.h"
