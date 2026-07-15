@@ -96,9 +96,15 @@ void ParticleEmitter::iterate_emitter(float dt) {
 	tt += dt;
 	while (tt >= spawn_dt) {
 		tt -= spawn_dt;
-		auto p = emit_particle(owner->pos, White, spawn_radius, spawn_time_to_live);
-		on_init_particle(p);
-		p->pos += p->vel * tt;
+		if (spawn_beams) {
+			auto p = emit_beam(owner->pos, v_0, White, spawn_radius, spawn_time_to_live);
+			on_init_beam(p);
+			p->pos += p->vel * tt;
+		} else {
+			auto p = emit_particle(owner->pos, White, spawn_radius, spawn_time_to_live);
+			on_init_particle(p);
+			p->pos += p->vel * tt;
+		}
 	}
 
 	iterate_particles(dt);
