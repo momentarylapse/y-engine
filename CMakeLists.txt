@@ -1,10 +1,16 @@
 # created by xmake
 
 cmake_minimum_required(VERSION 3.21)
+cmake_policy(SET CMP0091 NEW)
+
 project(y)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_BUILD_TYPE Debug)
+
+if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MT")
+endif()
 
 
 #=======================================================================================
@@ -205,6 +211,9 @@ if(${LIB_FFTW3_ENABLED})
 	list(APPEND DEPS ${FFTW3F_LIBRARIES})
 	list(APPEND COMPILE_OPTIONS ${FFTW3F_CFLAGS_OTHER})
 	list(APPEND COMPILE_DEFINITIONS HAS_LIB_FFTW3=1)
+	if(MSVC)
+		list(REMOVE_ITEM DEPS "m") # Windows :S
+	endif()
 else()
 	list(APPEND COMPILE_DEFINITIONS HAS_LIB_FFTW3=0)
 endif()
@@ -250,294 +259,10 @@ find_package(Threads REQUIRED)
 list(APPEND DEPS Threads::Threads)
 
 
-#=======================================================================================
-#    target moduley
-#=======================================================================================
-
-add_library(moduley SHARED
-	src/audio/audio.cpp
-	src/audio/AudioBuffer.cpp
-	src/audio/AudioStream.cpp
-	src/audio/Listener.cpp
-	src/audio/Loading.cpp
-	src/audio/SoundSource.cpp
-	src/ecs/BaseClass.cpp
-	src/ecs/Component.cpp
-	src/ecs/ComponentManager.cpp
-	src/ecs/Entity.cpp
-	src/ecs/EntityManager.cpp
-	src/ecs/System.cpp
-	src/ecs/SystemManager.cpp
-	src/fx/Beam.cpp
-	src/fx/Particle.cpp
-	src/fx/ParticleEmitter.cpp
-	src/fx/ParticleManager.cpp
-	src/gui/Canvas.cpp
-	src/gui/Font.cpp
-	src/gui/gui.cpp
-	src/gui/Label.cpp
-	src/gui/Node.cpp
-	src/gui/Picture.cpp
-	src/helper/DeletionQueue.cpp
-	src/helper/ErrorHandler.cpp
-	src/helper/ResourceManager.cpp
-	src/helper/Scheduler.cpp
-	src/input/Gamepad.cpp
-	src/input/InputManager.cpp
-	src/input/Keyboard.cpp
-	src/input/Mouse.cpp
-	src/input/VR.cpp
-	src/lib/any/any.cpp
-	src/lib/any/conversion.cpp
-	src/lib/base/array.cpp
-	src/lib/base/pointer.cpp
-	src/lib/base/strings.cpp
-	src/lib/doc/chunked.cpp
-	src/lib/doc/xml.cpp
-	src/lib/image/color.cpp
-	src/lib/image/image.cpp
-	src/lib/image/image_bmp.cpp
-	src/lib/image/image_jpg.cpp
-	src/lib/image/image_png.cpp
-	src/lib/image/image_tga.cpp
-	src/lib/image/ImagePainter.cpp
-	src/lib/kaba/asm/asm.cpp
-	src/lib/kaba/asm/asm_arm.cpp
-	src/lib/kaba/asm/asm_x86.cpp
-	src/lib/kaba/compiler/Backend.cpp
-	src/lib/kaba/compiler/BackendAmd64.cpp
-	src/lib/kaba/compiler/BackendARM.cpp
-	src/lib/kaba/compiler/BackendArm64.cpp
-	src/lib/kaba/compiler/BackendX86.cpp
-	src/lib/kaba/compiler/CommandList.cpp
-	src/lib/kaba/compiler/Compiler.cpp
-	src/lib/kaba/compiler/mapper.cpp
-	src/lib/kaba/compiler/Serializer.cpp
-	src/lib/kaba/compiler/SerialNode.cpp
-	src/lib/kaba/dynamic/call.cpp
-	src/lib/kaba/dynamic/dynamic.cpp
-	src/lib/kaba/dynamic/exception.cpp
-	src/lib/kaba/dynamic/sorting.cpp
-	src/lib/kaba/lib/dict.cpp
-	src/lib/kaba/lib/extern.cpp
-	src/lib/kaba/lib/lib.cpp
-	src/lib/kaba/lib/lib_async.cpp
-	src/lib/kaba/lib/lib_base.cpp
-	src/lib/kaba/lib/lib_image.cpp
-	src/lib/kaba/lib/lib_kaba.cpp
-	src/lib/kaba/lib/lib_math.cpp
-	src/lib/kaba/lib/lib_os.cpp
-	src/lib/kaba/lib/lib_threads.cpp
-	src/lib/kaba/lib/lib_time.cpp
-	src/lib/kaba/lib/list.cpp
-	src/lib/kaba/parser/AbstractParser.cpp
-	src/lib/kaba/parser/Concretifier.cpp
-	src/lib/kaba/parser/import.cpp
-	src/lib/kaba/parser/lexical.cpp
-	src/lib/kaba/parser/macros.cpp
-	src/lib/kaba/parser/Parser.cpp
-	src/lib/kaba/parser/Transformer.cpp
-	src/lib/kaba/parser/type_matching.cpp
-	src/lib/kaba/syntax/Block.cpp
-	src/lib/kaba/syntax/Class.cpp
-	src/lib/kaba/syntax/Constant.cpp
-	src/lib/kaba/syntax/Function.cpp
-	src/lib/kaba/syntax/Identifier.cpp
-	src/lib/kaba/syntax/Node.cpp
-	src/lib/kaba/syntax/Operator.cpp
-	src/lib/kaba/syntax/preprocessor.cpp
-	src/lib/kaba/syntax/Statement.cpp
-	src/lib/kaba/syntax/SyntaxTree.cpp
-	src/lib/kaba/syntax/Variable.cpp
-	src/lib/kaba/template/implicit.cpp
-	src/lib/kaba/template/implicit_array.cpp
-	src/lib/kaba/template/implicit_callable.cpp
-	src/lib/kaba/template/implicit_dict.cpp
-	src/lib/kaba/template/implicit_enum.cpp
-	src/lib/kaba/template/implicit_future.cpp
-	src/lib/kaba/template/implicit_list.cpp
-	src/lib/kaba/template/implicit_optional.cpp
-	src/lib/kaba/template/implicit_pointer.cpp
-	src/lib/kaba/template/implicit_product.cpp
-	src/lib/kaba/template/implicit_regular.cpp
-	src/lib/kaba/template/template.cpp
-	src/lib/kaba/CompilerConfiguration.cpp
-	src/lib/kaba/Context.cpp
-	src/lib/kaba/Interpreter.cpp
-	src/lib/kaba/kaba.cpp
-	src/lib/kaba/Module.cpp
-	src/lib/kapi/kapi.cpp
-	src/lib/layout/Grid.cpp
-	src/lib/layout/Node.cpp
-	src/lib/layout/Resource.cpp
-	src/lib/math/Box.cpp
-	src/lib/math/complex.cpp
-	src/lib/math/interpolation.cpp
-	src/lib/math/mat3.cpp
-	src/lib/math/mat4.cpp
-	src/lib/math/math.cpp
-	src/lib/math/plane.cpp
-	src/lib/math/quaternion.cpp
-	src/lib/math/random.cpp
-	src/lib/math/ray.cpp
-	src/lib/math/rect.cpp
-	src/lib/math/vec2.cpp
-	src/lib/math/vec3.cpp
-	src/lib/math/vec4.cpp
-	src/lib/net/_kaba_export.cpp
-	src/lib/net/BinaryBuffer.cpp
-	src/lib/net/net.cpp
-	src/lib/net/Socket.cpp
-	src/lib/nix/_kaba_export.cpp
-	src/lib/nix/nix.cpp
-	src/lib/nix/nix_buffer.cpp
-	src/lib/nix/nix_draw.cpp
-	src/lib/nix/nix_framebuffer.cpp
-	src/lib/nix/nix_light.cpp
-	src/lib/nix/nix_shader.cpp
-	src/lib/nix/nix_textures.cpp
-	src/lib/nix/nix_vertexbuffer.cpp
-	src/lib/nix/nix_view.cpp
-	src/lib/obs/_kaba_export.cpp
-	src/lib/obs/Log.cpp
-	src/lib/obs/Observable.cpp
-	src/lib/os/app.cpp
-	src/lib/os/CommandLineParser.cpp
-	src/lib/os/config.cpp
-	src/lib/os/date.cpp
-	src/lib/os/file.cpp
-	src/lib/os/filesystem.cpp
-	src/lib/os/formatter.cpp
-	src/lib/os/msg.cpp
-	src/lib/os/path.cpp
-	src/lib/os/stream.cpp
-	src/lib/os/terminal.cpp
-	src/lib/os/time.cpp
-	src/lib/profiler/_kaba_export.cpp
-	src/lib/profiler/Profiler.cpp
-	src/lib/threads/_kaba_export.cpp
-	src/lib/threads/Mutex.cpp
-	src/lib/threads/Thread.cpp
-	src/lib/threads/ThreadedWork.cpp
-	src/lib/threads/ThreadPool.cpp
-	src/lib/vulkan/_kaba_export.cpp
-	src/lib/vulkan/AccelerationStructure.cpp
-	src/lib/vulkan/Buffer.cpp
-	src/lib/vulkan/CommandBuffer.cpp
-	src/lib/vulkan/DescriptorSet.cpp
-	src/lib/vulkan/Device.cpp
-	src/lib/vulkan/FrameBuffer.cpp
-	src/lib/vulkan/helper.cpp
-	src/lib/vulkan/Instance.cpp
-	src/lib/vulkan/Pipeline.cpp
-	src/lib/vulkan/Queue.cpp
-	src/lib/vulkan/RenderPass.cpp
-	src/lib/vulkan/Semaphore.cpp
-	src/lib/vulkan/Shader.cpp
-	src/lib/vulkan/SwapChain.cpp
-	src/lib/vulkan/Texture.cpp
-	src/lib/vulkan/VertexBuffer.cpp
-	src/lib/vulkan/vulkan.cpp
-	src/lib/ygraphics/Context.cpp
-	src/lib/ygraphics/ContextGL.cpp
-	src/lib/ygraphics/ContextVulkan.cpp
-	src/lib/ygraphics/font.cpp
-	src/lib/ygraphics/Painter.cpp
-	src/lib/ygraphics/PainterGL.cpp
-	src/lib/ygraphics/PainterVulkan.cpp
-	src/lib/ygraphics/ShaderManager.cpp
-	src/lib/ygraphics/TextCache.cpp
-	src/lib/ygraphics/TextureManager.cpp
-	src/lib/yrenderer/helper/Bindable.cpp
-	src/lib/yrenderer/helper/ComputeTask.cpp
-	src/lib/yrenderer/helper/CubeMapSource.cpp
-	src/lib/yrenderer/helper/jitter.cpp
-	src/lib/yrenderer/helper/LightMeter.cpp
-	src/lib/yrenderer/helper/LineHelper.cpp
-	src/lib/yrenderer/helper/Pipeline.cpp
-	src/lib/yrenderer/helper/PipelineManager.cpp
-	src/lib/yrenderer/post/HDRResolver.cpp
-	src/lib/yrenderer/post/MultisampleResolver.cpp
-	src/lib/yrenderer/post/PostProcessor.cpp
-	src/lib/yrenderer/post/PostProcessorGL.cpp
-	src/lib/yrenderer/post/PostProcessorVulkan.cpp
-	src/lib/yrenderer/post/ThroughShaderRenderer.cpp
-	src/lib/yrenderer/regions/RegionRenderer.cpp
-	src/lib/yrenderer/regions/RegionRendererGL.cpp
-	src/lib/yrenderer/regions/RegionRendererVulkan.cpp
-	src/lib/yrenderer/scene/mesh/CubeEmitter.cpp
-	src/lib/yrenderer/scene/pass/CubeMapRenderer.cpp
-	src/lib/yrenderer/scene/pass/ShadowRenderer.cpp
-	src/lib/yrenderer/scene/path/RenderPath.cpp
-	src/lib/yrenderer/scene/path/RenderPathDeferred.cpp
-	src/lib/yrenderer/scene/path/RenderPathForward.cpp
-	src/lib/yrenderer/scene/CameraParams.cpp
-	src/lib/yrenderer/scene/Light.cpp
-	src/lib/yrenderer/scene/MeshEmitter.cpp
-	src/lib/yrenderer/scene/RenderViewData.cpp
-	src/lib/yrenderer/scene/SceneRenderer.cpp
-	src/lib/yrenderer/scene/SceneView.cpp
-	src/lib/yrenderer/target/HeadlessRenderer.cpp
-	src/lib/yrenderer/target/HuiWindowRendererGL.cpp
-	src/lib/yrenderer/target/HuiWindowRendererVulkan.cpp
-	src/lib/yrenderer/target/TargetRenderer.cpp
-	src/lib/yrenderer/target/TextureRendererGL.cpp
-	src/lib/yrenderer/target/TextureRendererVulkan.cpp
-	src/lib/yrenderer/target/WindowRendererGL.cpp
-	src/lib/yrenderer/target/WindowRendererVulkan.cpp
-	src/lib/yrenderer/target/XhuiRenderer.cpp
-	src/lib/yrenderer/_kaba_export.cpp
-	src/lib/yrenderer/Context.cpp
-	src/lib/yrenderer/ContextGL.cpp
-	src/lib/yrenderer/ContextVulkan.cpp
-	src/lib/yrenderer/Material.cpp
-	src/lib/yrenderer/MaterialManager.cpp
-	src/lib/yrenderer/Renderer.cpp
-	src/net/NetworkManager.cpp
-	src/plugins/export.cpp
-	src/plugins/PluginManager.cpp
-	src/renderer/gui/GuiRenderer.cpp
-	src/renderer/helper/Raytracing.cpp
-	src/renderer/helper/RendererFactory.cpp
-	src/renderer/world/emitter/WorldInstancedEmitter.cpp
-	src/renderer/world/emitter/WorldModelsEmitter.cpp
-	src/renderer/world/emitter/WorldParticlesEmitter.cpp
-	src/renderer/world/emitter/WorldSkyboxEmitter.cpp
-	src/renderer/world/emitter/WorldTerrainsEmitter.cpp
-	src/renderer/world/emitter/WorldUserMeshesEmitter.cpp
-	src/renderer/world/WorldRendererVulkanRayTracing.cpp
-	src/renderer/FullCameraRenderer.cpp
-	src/world/components/Animator.cpp
-	src/world/components/Camera.cpp
-	src/world/components/Collider.cpp
-	src/world/components/CubeMapSource.cpp
-	src/world/components/Light.cpp
-	src/world/components/Link.cpp
-	src/world/components/MultiInstance.cpp
-	src/world/components/RigidBody.cpp
-	src/world/components/Skeleton.cpp
-	src/world/components/UserMesh.cpp
-	src/world/systems/AnimationManager.cpp
-	src/world/systems/Physics.cpp
-	src/world/LevelData.cpp
-	src/world/Model.cpp
-	src/world/ModelManager.cpp
-	src/world/Terrain.cpp
-	src/world/World.cpp
-	src/Config.cpp
-	src/EngineData.cpp
-	src/LibExport.cpp
-	src/main.cpp)
-target_include_directories(moduley PUBLIC ${INCLUDE_DIRECTORIES})
-target_link_directories(moduley PUBLIC ${LINK_DIRECTORIES})
-target_compile_options(moduley PUBLIC ${COMPILE_OPTIONS})
-target_compile_definitions(moduley PUBLIC ${COMPILE_DEFINITIONS}  SOURCE_ROOT="${CMAKE_SOURCE_DIR}" INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
-target_link_libraries(moduley PUBLIC ${DEPS})
-if (NOT WIN32)
-	target_compile_options(moduley PUBLIC -fvisibility=hidden)
+find_library(MATH_LIBRARY m)
+if(MATH_LIBRARY)
+	list(APPEND DEPS ${MATH_LIBRARY})
 endif()
-target_include_directories(moduley PUBLIC src/)
-set_target_properties(moduley PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 
 #=======================================================================================
