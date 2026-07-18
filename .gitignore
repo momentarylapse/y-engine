@@ -9,4 +9,5 @@
 /cmake-build*
 /out
 /vcpkg_installed
+/launch.vs.json
 
