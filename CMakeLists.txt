@@ -434,6 +434,8 @@ add_executable(y
 	src/lib/os/stream.cpp
 	src/lib/os/terminal.cpp
 	src/lib/os/time.cpp
+	src/lib/plugin/Instance.cpp
+	src/lib/plugin/PluginManager.cpp
 	src/lib/profiler/_kaba_export.cpp
 	src/lib/profiler/Profiler.cpp
 	src/lib/threads/_kaba_export.cpp
