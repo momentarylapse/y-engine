@@ -339,6 +339,10 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 
 	{
 		ext->declare_class_size("RenderParams", sizeof(RenderParams));
+		ext->declare_class_element("RenderParams.desired_aspect_ratio", &RenderParams::desired_aspect_ratio);
+		ext->declare_class_element("RenderParams.target_is_window", &RenderParams::target_is_window);
+		ext->declare_class_element("RenderParams.frame_buffer", &RenderParams::frame_buffer);
+		ext->declare_class_element("RenderParams.area", &RenderParams::area);
 		ext->link_class_func("RenderParams.__assign__", &kaba::generic_assign<RenderParams>);
 	}
 

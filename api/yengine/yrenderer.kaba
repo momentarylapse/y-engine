@@ -78,6 +78,7 @@ class extern TextureManager
 class extern ShaderManager
 	var default_shader: string
 #	func extern __init__(ctx: GfxContext, dir: os.Path[])
+	func extern mut add_directory(dir: os.Path)
 	func extern mut load_shader_module(filename: os.Path)
 class extern MaterialManager
 #	func extern __init__(tm: TextureManager, dir: os.Path[])
@@ -108,6 +109,10 @@ func extern api_init_xhui(p: void*) -> xfer[Context] # p: xhui.Painter*
 
 
 struct extern RenderParams
+	var desired_aspect_ratio: f32
+	var target_is_window: bool
+	var frame_buffer: FrameBuffer*
+	var area: Rect
 	func extern __assign__(o: RenderParams)
 
 class extern RenderData as @noauto
