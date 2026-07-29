@@ -1,7 +1,5 @@
 use os
-use .gfx.*
-
-let EXPORT_IMPORTS = true
+use out .gfx.*
 
 
 enum extern LightType
@@ -117,6 +115,8 @@ struct extern RenderParams
 
 class extern RenderData as @noauto
 	func extern draw_triangles(params: RenderParams, vb: VertexBuffer&)
+	func extern draw_instanced(params: RenderParams, vb: VertexBuffer&, count: i32)
+	func extern draw(params: RenderParams, vb: VertexBuffer&, topology: PrimitiveTopology)
 
 class extern RenderViewData
 	func extern __init__(ctx: Context&)

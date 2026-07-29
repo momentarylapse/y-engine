@@ -478,6 +478,8 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	{
 		ext->declare_class_size("RenderData", sizeof(RenderData));
 		ext->link_class_func("RenderData.draw_triangles", &RenderData::draw_triangles);
+		ext->link_class_func("RenderData.draw_instanced", &RenderData::draw_instanced);
+		ext->link_class_func("RenderData.draw", &RenderData::draw);
 	}
 
 	{
@@ -579,7 +581,7 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 }
 
 void export_package_yrenderer(kaba::IExporter* ext) {
-	ext->package_info("yrenderer", "0.15");
+	ext->package_info("yrenderer", "0.16");
 	_export_package_yrenderer_internal(ext);
 }
 
