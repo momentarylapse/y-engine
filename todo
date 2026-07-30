@@ -4,6 +4,8 @@
 
 * repair multisample
 * repair deferred/ambient occlusion
+j repair shadows
+j repair scaling
 
 
 -- vulkan --
