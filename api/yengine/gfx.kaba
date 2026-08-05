@@ -74,8 +74,6 @@ class extern CubeMap extends Texture
 	func extern __init__(size: i32, format: string)
 class extern DepthBuffer extends Texture
 	func extern override __init__(w: i32, h: i32, format: string)
-class extern ImageTexture extends Texture
-	func extern override __init__(w: i32, h: i32, format: string)
 class extern StorageTexture extends Texture
 	func extern __init__(nx: i32, ny: i32, nz: i32, format: string)
 class extern VolumeTexture extends Texture
@@ -93,6 +91,9 @@ class extern VertexBuffer
 	func extern __init__(format: string = "3f,3f,2f")
 	func extern mut update(data: @DynamicArray)
 	func extern mut create_quad(d: Rect, s = Rect.ID)
+
+class extern DynamicVertexBuffer extends VertexBuffer
+	func extern override __init__(format: string = "3f,3f,2f")
 
 class extern UniformBuffer extends Buffer
 	func extern __init__(size: i32)
