@@ -166,13 +166,18 @@ shared<Node> Transformer::conv_eval_const_func(shared<Node> c) {
 	} else if (c->kind == NodeKind::ConstructorAsFunction) {
 		return eval_constructor_function(tree, c, c->as_func());
 	} else if (c->kind == NodeKind::CallFunction) {
+		// x + 0 -> x
+		if (c->as_func()->inline_no == InlineID::Int32Add or c->as_func()->inline_no == InlineID::Int64Add or c->as_func()->inline_no == InlineID::Float32Add or c->as_func()->inline_no == InlineID::Float64Add)
+			if (c->params[1]->kind == NodeKind::Constant)
+				if (c->params[1]->as_const()->as_int64() == 0)
+					return c->params[0];
 		return eval_function_call(tree, c, c->as_func());
 	}
 	return conv_eval_const_func_nofunc(c);
 }
 
 shared<Node> Transformer::conv_eval_const_func_nofunc(shared<Node> c) {
-	if (c->kind == NodeKind::DynamicArray) {
+	if (c->kind == NodeKind::ListElement) {
 		if (all_params_are_const(c)) {
 			auto cr = add_node_const(tree->add_constant(c->type, c->token_id), c->token_id);
 			DynamicArray *da = &c->params[0]->as_const()->as_array();
@@ -180,7 +185,7 @@ shared<Node> Transformer::conv_eval_const_func_nofunc(shared<Node> c) {
 			rec_assign(cr->as_const()->p(), (char*)da->data + index * da->element_size, c->type);
 			return cr;
 		}
-	} else if (c->kind == NodeKind::Array) {
+	} else if (c->kind == NodeKind::ArrayElement) {
 		// hmmm, not existing, I guess....
 		if (all_params_are_const(c)) {
 			auto cr = add_node_const(tree->add_constant(c->type, c->token_id), c->token_id);

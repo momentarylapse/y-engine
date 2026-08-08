@@ -143,10 +143,10 @@ struct CommonTypes {
 	const Class* future_core_t;
 	const Class* promise_t;
 	const Class* enum_t;
-	const Class* struct_t;
-	const Class* interface_t;
-	const Class* namespace_t;
-	const Class* trait_t;
+	const Class* result_t;
+	const Class* error;
+	const Class* ____namespace_t;
+	const Class* ____trait_t;
 
 
 	const Class* image;
@@ -177,6 +177,10 @@ struct CommonTypes {
 
 	const Class* i32_ref;
 	const Class* box;
+
+	const Class* result_void;
+	const Class* result_bytes;
+	const Class* result_string;
 };
 extern CommonTypes common_types;
 }

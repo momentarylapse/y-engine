@@ -35,12 +35,6 @@ Path guess_absolute_path(const Path &filename, const Array<Path>& dirs) {
 			return d | filename;
 
 	return Path::EMPTY;
-	/*if (engine.ignore_missing_files) {
-		msg_error("missing shader: " + filename.str());
-		return Shader::load("");
-	}
-	throw Exception("missing shader: " + filename.str());
-	return filename;*/
 }
 
 
@@ -55,28 +49,40 @@ void ShaderManager::add_directory(const Path& dir) {
 }
 
 
-xfer<Shader> ShaderManager::__load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size) {
+base::result<shared<Shader>> ShaderManager::__load_shader(const Path& path, const string &overwrite_bindings, int overwrite_push_size) {
 #ifdef USING_VULKAN
 	//msg_write("loading shader: " + str(path));
 	vulkan::overwrite_bindings = overwrite_bindings;
 	vulkan::overwrite_push_size = overwrite_push_size;
-	return Shader::load(path);
+	return Shader::load(path).transform<shared<Shader>>([] (Shader* s) {
+		return shared{s};
+	});
 #else
-	return ctx->ctx->load_shader(path);
+	try {
+		return shared{ctx->ctx->load_shader(path)};
+	} catch (Exception& e) {
+		return base::Error(e.message());
+	}
 #endif
 }
 
-xfer<Shader> ShaderManager::__create_shader(const string& source, const string &overwrite_bindings, int overwrite_push_size) {
+base::result<shared<Shader>> ShaderManager::__create_shader(const string& source, const string &overwrite_bindings, int overwrite_push_size) {
 #ifdef USING_VULKAN
 	vulkan::overwrite_bindings = overwrite_bindings;
 	vulkan::overwrite_push_size = overwrite_push_size;
-	return Shader::create(source);
+	return Shader::create(source).transform<shared<Shader>>([] (Shader* s) {
+		return shared{s};
+	});
 #else
-	return ctx->ctx->create_shader(source);
+	try {
+		return shared{ctx->ctx->create_shader(source)};
+	} catch (Exception& e) {
+		return base::Error(e.message());
+	}
 #endif
 }
 
-shared<Shader> ShaderManager::load_shader(const Path& filename) {
+base::result<shared<Shader>> ShaderManager::load_shader(const Path& filename) {
 	//if (!filename)
 	//	TODO default shader?
 	//	return __load_shader("");
@@ -87,25 +93,23 @@ shared<Shader> ShaderManager::load_shader(const Path& filename) {
 			msg_error("missing shader: " + str(filename));
 			return __load_shader("", "", -1);
 		}
-		throw Exception("missing shader: " + str(filename));
+		return base::Error{"missing shader: " + str(filename)};
 		//fn = shader_dir | filename;
 	}
 
 	for (auto&& [key, s]: shader_map)
 		if (key == fn) {
 #ifdef USING_VULKAN
-			return s;
+			return shared{s};
 #else
-			return (s->program >= 0) ? s : nullptr;
+			return (s->program >= 0) ? base::result{shared{s}} : base::Error{"..."};
 #endif
 		}
 
-	auto s = __load_shader(fn, "", -1);
-	if (!s)
-		return nullptr;
+	RESULT_PROPAGATE_ERROR(s, __load_shader(fn, "", -1), x1);
 
 	shaders.add(s);
-	shader_map.add({fn, s});
+	shader_map.add({fn, s.get()});
 	return s;
 }
 
@@ -140,7 +144,7 @@ string ShaderManager::expand_tessellation_evaluation_shader_source(const string 
 	return source + format("\n<TessellationEvaluationShader>\n#import tessellation-evaluation-%s\n</TessellationEvaluationShader>", variant);
 }
 
-shared<Shader> ShaderManager::load_surface_shader(const Path& _filename, const string& render_path, const string& vertex_module, const string& geometry_module, const string& tessellation_module) {
+base::result<shared<Shader>> ShaderManager::load_surface_shader(const Path& _filename, const string& render_path, const string& vertex_module, const string& geometry_module, const string& tessellation_module) {
 	//msg_write("load_surface_shader: " + str(_filename) + "  " + render_path + "  " + vertex_module + "  " + geometry_module);
 	//select_default_vertex_module("vertex-" + variant);
 	//return load_shader(filename);
@@ -159,7 +163,7 @@ shared<Shader> ShaderManager::load_surface_shader(const Path& _filename, const s
 			msg_error("missing shader: " + str(filename));
 			return __load_shader("", "", -1);
 		}
-		throw Exception("missing shader: " + str(filename));
+		return base::Error{"missing shader: " + str(filename)};
 		//fn = shader_dir | filename;
 	}
 
@@ -169,9 +173,9 @@ shared<Shader> ShaderManager::load_surface_shader(const Path& _filename, const s
 	for (auto&& [key, s]: shader_map)
 		if (key == fnx) {
 #ifdef USING_VULKAN
-			return s;
+			return shared{s};
 #else
-			return (s->program >= 0) ? s : nullptr;
+			return (s->program >= 0) ? base::result{shared{s}} : base::Error{"..."};
 #endif
 		}
 
@@ -187,27 +191,28 @@ shared<Shader> ShaderManager::load_surface_shader(const Path& _filename, const s
 	}
 	source = expand_fragment_shader_source(source, render_path);
 
-	auto shader = __create_shader(source, DEFAULT_BINDINGS, DEFAULT_PUSH_SIZE);
+	RESULT_PROPAGATE_ERROR(shader, __create_shader(source, DEFAULT_BINDINGS, DEFAULT_PUSH_SIZE), x1);
 
 	//auto s = Shader::load(fn);
 
 	shaders.add(shader);
-	shader_map.add({fnx, shader});
+	shader_map.add({fnx, shader.get()});
 	return shader;
 }
 
-Shader* ShaderManager::create_shader(const string &source) {
+base::result<shared<Shader>> ShaderManager::create_shader(const string &source) {
 	return __create_shader(source, "", -1);
 }
 
-void ShaderManager::load_shader_module(const Path& path) {
+base::result_void ShaderManager::load_shader_module(const Path& path) {
 	Path fn = guess_absolute_path(path, shader_dirs);
 	if (fn) {
 		if (shader_modules.find(fn) >= 0)
-			return;
+			return base::result_success();
 		shader_modules.add(fn);
 	}
-	load_shader(path);
+	RESULT_PROPAGATE_ERROR(s, load_shader(path), xx1);
+	return base::result_success();
 }
 
 

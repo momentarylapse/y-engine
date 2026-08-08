@@ -77,7 +77,7 @@ class extern ShaderManager
 	var default_shader: string
 #	func extern __init__(ctx: GfxContext, dir: os.Path[])
 	func extern mut add_directory(dir: os.Path)
-	func extern mut load_shader_module(filename: os.Path)
+	func extern mut load_shader_module(filename: os.Path) -> result[void]
 class extern MaterialManager
 #	func extern __init__(tm: TextureManager, dir: os.Path[])
 
@@ -95,11 +95,11 @@ class extern Context as @noauto
 	func extern create_managers(texture_dirs: os.Path[], shader_dirs: os.Path[], material_dirs: os.Path[])
 	func extern load_material(path: os.Path) -> Material&
 	func extern create_internal_material() -> Material&
-	func extern load_texture(path: os.Path) -> shared![Texture]
-	func extern load_shader(path: os.Path) -> shared![Shader]
-	func extern create_shader(source: string) -> xfer[Shader]
-	func extern load_surface_shader(path: os.Path, render_path: string, vertex_module: string, geometry_module: string) -> shared![Shader]
-	func extern load_shader_module(path: os.Path)
+	func extern load_texture(path: os.Path) -> result[shared![Texture]]
+	func extern load_shader(path: os.Path) -> result[shared![Shader]]
+	func extern create_shader(source: string) -> result[shared![Shader]]
+	func extern load_surface_shader(path: os.Path, render_path: string, vertex_module: string, geometry_module: string) -> result[shared![Shader]]
+	func extern load_shader_module(path: os.Path) -> result[void]
 
 
 func extern api_init_glfw(window: void*) -> xfer[Context] # p: GLFWwindow*
