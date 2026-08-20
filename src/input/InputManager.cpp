@@ -9,7 +9,7 @@
 #include "Mouse.h"
 #include "Keyboard.h"
 #include "Gamepad.h"
-#include "VR.h"
+//#include "VR.h"
 #include <lib/profiler/Profiler.h>
 #include <GLFW/glfw3.h>
 
@@ -23,7 +23,7 @@ void init(GLFWwindow *window) {
 	init_mouse(window);
 	init_keyboard(window);
 	init_pads();
-	init_vr();
+//	init_vr();
 }
 
 void remove(GLFWwindow *window) {
@@ -42,7 +42,7 @@ void iterate() {
 	iterate_mouse();
 	iterate_keyboard();
 	iterate_pads();
-	iterate_vr();
+//	iterate_vr();
 
 	profiler::end(channel);
 }

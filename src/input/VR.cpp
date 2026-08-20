@@ -163,25 +163,26 @@ VRDevice* get_vr_device(VRDeviceRole role) {
 	return nullptr;
 }
 
+
 #else
 
-void init_vr() {}
+	void init_vr() {}
 
-void iterate_vr() {}
+	void iterate_vr() {}
 
-VRDevice* get_vr_device(VRDeviceRole role) {
+	VRDevice* get_vr_device(VRDeviceRole role) {
 	return nullptr;
 }
 
-float VRDevice::axis(int index) const {
+	float VRDevice::axis(int index) const {
 	return 0;
 }
 
-bool VRDevice::button(int b) const {
+	bool VRDevice::button(int b) const {
 	return false;
 }
 
-bool VRDevice::clicked(int b) const {
+	bool VRDevice::clicked(int b) const {
 	return false;
 }
 

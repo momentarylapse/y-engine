@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
+#include <cmath>
 
 
 #include <lib/os/msg.h>
@@ -13,6 +14,7 @@
 #include <lib/math/math.h>
 #include <lib/kaba/kaba.h>
 #include <lib/profiler/Profiler.h>
+#include <lib/vr/vr.h>
 
 #include "helper/DeletionQueue.h"
 #include "helper/ErrorHandler.h"
@@ -38,14 +40,16 @@
 #include "plugins/PluginManager.h"
 
 #include <lib/yrenderer/Context.h>
-#include "renderer/helper/RendererFactory.h"
+#include <lib/yrenderer/regions/RegionRenderer.h>
 #include <lib/yrenderer/target/WindowRenderer.h>
+#include <lib/yrenderer/target/VrRenderer.h>
+#include "renderer/helper/RendererFactory.h"
 #include "renderer/FullCameraRenderer.h"
 
 #include "Config.h"
-#include "lib/os/app.h"
-#include "lib/ygraphics/Context.h"
-#include "lib/yrenderer/regions/RegionRenderer.h"
+#include <lib/os/app.h>
+#include <lib/ygraphics/Context.h>
+
 #include "world/systems/AnimationManager.h"
 #include "world/components/Camera.h"
 #include "world/World.h"
@@ -105,6 +109,11 @@ public:
 		if (config.api_version != EngineData::CURRENT_API_VERSION)
 			throw Exception(format("api version mismatch: game=%s engine=%s", config.api_version, EngineData::CURRENT_API_VERSION));
 
+		engine.app_name = app_name;
+		engine.version = app_version;
+		if (config.ignore_missing_files)
+			engine.ignore_missing_files = true;
+
 		window = create_window();
 
 		profiler::init();
@@ -112,11 +121,6 @@ public:
 		NetworkManager::init();
 		ch_iter = profiler::create_channel("iter");
 		SchedulerManager::init(ch_iter);
-
-		engine.app_name = app_name;
-		engine.version = app_version;
-		if (config.ignore_missing_files)
-			engine.ignore_missing_files = true;
 
 
 
@@ -126,7 +130,23 @@ public:
 			config.game_dir | "Scripts",
 			config.game_dir | "Fonts");
 
-		auto context = yrenderer::api_init_glfw(window);
+
+		yrenderer::Context* context = nullptr;
+
+		if (config.screen_mode == ScreenMode::VR) {
+			vr::init(app_name, app_name);
+			context = vr::instance->create_yrenderer();
+			vr::instance->create_session(context);
+			vr::CreateSwapchains();
+
+		} else {
+
+			context = yrenderer::api_init_glfw(window);
+
+		}
+
+
+
 		context->context->_create_auxiliary_stuff();
 		auto resource_manager = new ResourceManager(context,
 			config.game_dir | "Objects",
@@ -142,7 +162,12 @@ public:
 
 		world = new World();
 
-		create_base_renderer(context, window);
+		if (config.screen_mode == ScreenMode::VR) {
+			create_base_renderer_vr(context);
+		} else {
+			create_base_renderer(context, window);
+		}
+
 
 		audio::init();
 
@@ -202,7 +227,7 @@ public:
 		msg_write("|                                                      |");
 		msg_write("o------------------------------------------------------o");
 	}
-	
+
 	GLFWwindow* create_window() {
 		glfwInit();
 #ifdef USING_VULKAN
@@ -219,8 +244,9 @@ public:
 		auto monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
 
-		// TODO
-		engine.physical_aspect_ratio = (float)w / (float)h;
+		int width_mm, height_mm;
+		glfwGetMonitorPhysicalSize(monitor, &width_mm, &height_mm);
+
 
 		glfwWindowHint(GLFW_RED_BITS, vidmode->redBits);
 		glfwWindowHint(GLFW_GREEN_BITS, vidmode->greenBits);
@@ -229,12 +255,20 @@ public:
 
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
-		if (config.screen_mode == ScreenMode::Windowed)
+		if (config.screen_mode == ScreenMode::Fullscreen) {
+			engine.physical_aspect_ratio = (float)width_mm / (float)height_mm;
+		} else if (config.screen_mode == ScreenMode::Windowed) {
 			monitor = nullptr;
-
-		if (config.screen_mode == ScreenMode::WindowedFullscreen) {
+			engine.physical_aspect_ratio = ((float)width_mm * (float)w / (float)vidmode->width) / ((float)height_mm * (float)h / (float)vidmode->height);
+		} else if (config.screen_mode == ScreenMode::WindowedFullscreen) {
+			engine.physical_aspect_ratio = (float)width_mm / (float)height_mm;
 			w = vidmode->width;
 			h = vidmode->height;
+		} else if (config.screen_mode == ScreenMode::VR) {
+			engine.physical_aspect_ratio = 1.0f; // ?!?
+			// dummy window
+			w = 640;
+			h = 480;
 		}
 		string title = "y-engine";
 #ifdef USING_VULKAN
@@ -313,6 +347,7 @@ public:
 		// TODO
 		//delete engine.world_renderer;
 		delete engine.window_renderer;
+		delete engine.vr_renderer;
 		engine.resource_manager->clear();
 		yrenderer::api_end(engine.context);
 		glfwDestroyWindow(window);
@@ -323,6 +358,10 @@ public:
 	void iterate() {
 		profiler::begin(ch_iter);
 		ecs::SystemManager::handle_iterate_pre(engine.elapsed);
+
+		if (config.screen_mode == ScreenMode::VR) {
+			//vr::instance->iterate();
+		}
 
 		DeletionQueue::delete_all();
 
@@ -373,22 +412,49 @@ public:
 
 
 	void draw_frame() {
-		update_dynamic_resolution();
 
-		if (!engine.window_renderer->start_frame())
-			return;
-		const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
-		ecs::SystemManager::handle_draw_pre();
-		timer_render.peek();
-		for (auto t: engine.render_tasks)
-			if (t->_priority < 1000 and t->active)
-				t->render(params);
-		engine.window_renderer->draw(params);
-		for (auto t: engine.render_tasks)
-			if (t->_priority >= 1000 and t->active)
-				t->render(params);
-		render_times.add(timer_render.get());
-		engine.window_renderer->end_frame(params);
+		if (config.screen_mode == ScreenMode::VR) {
+			vr::PollEvents();
+
+
+			if (!engine.vr_renderer->start_frame())
+				return;
+			ecs::SystemManager::handle_draw_pre();
+			timer_render.peek();
+
+			for (int i=0; i<2; i++) {
+				engine.vr_renderer->start_view(i);
+				const auto fov = engine.vr_renderer->eye_fov;
+				const auto params = engine.vr_renderer->create_params(fov.width() / fov.height());
+				cam_main->owner->pos = engine.vr_renderer->eye_pos*500 + vec3(0,200,-300);
+				cam_main->owner->ang = engine.vr_renderer->eye_ang;
+				cam_main->fov = 2 * atanf(fov.height() / 2);
+				cam_main->offset = -fov.center();
+				engine.vr_renderer->draw(params);
+				engine.vr_renderer->end_view();
+			}
+
+			render_times.add(timer_render.get());
+			engine.vr_renderer->end_frame();
+		} else {
+			if (!engine.window_renderer->start_frame())
+				return;
+			const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
+			ecs::SystemManager::handle_draw_pre();
+			timer_render.peek();
+
+			for (auto t: engine.render_tasks)
+				if (t->_priority < 1000 and t->active)
+					t->render(params);
+			engine.window_renderer->draw(params);
+			for (auto t: engine.render_tasks)
+				if (t->_priority >= 1000 and t->active)
+					t->render(params);
+
+			render_times.add(timer_render.get());
+			engine.window_renderer->end_frame(params);
+		}
+		update_dynamic_resolution();
 	}
 
 
