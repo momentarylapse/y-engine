@@ -110,6 +110,7 @@ void create_base_renderer(yrenderer::Context* ctx, GLFWwindow* window) {
 
 
 void create_base_renderer_vr(yrenderer::Context* ctx) {
+#ifdef HAS_VR_RENDERER
 	cubemap_default_resolution = config.cubemap_resolution;
 	cubemap_default_rate = config.cubemap_update_rate;
 
@@ -124,4 +125,5 @@ void create_base_renderer_vr(yrenderer::Context* ctx) {
 		throw;
 	}
 	print_render_graph(engine.vr_renderer);
+#endif
 }

@@ -4,6 +4,8 @@
 
 #pragma once
 #if __has_include(<lib/vr/vr.h>)
+#if HAS_LIB_OPENXR
+#define HAS_VR_RENDERER 1
 
 #include "WindowRenderer.h"
 #include <lib/math/quaternion.h>
@@ -41,4 +43,5 @@ public:
 
 }
 
+#endif
 #endif

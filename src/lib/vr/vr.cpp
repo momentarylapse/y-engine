@@ -1161,7 +1161,7 @@ void render_layer_end() {
 bool Instance::start_frame() {
 	if (!m_sessionRunning)
 		return false;
-	msg_write("<<----");
+//	msg_write("<<----");
 
 	// Get the XrFrameState for timing and rendering info.
 	frameState = {XR_TYPE_FRAME_STATE};
@@ -1172,50 +1172,17 @@ bool Instance::start_frame() {
 	XrFrameBeginInfo frameBeginInfo{XR_TYPE_FRAME_BEGIN_INFO};
 	OPENXR_CHECK(xrBeginFrame(m_session, &frameBeginInfo), "Failed to begin the XR Frame.");
 
-	// Variables for rendering and layer composition.
-	bool rendered = false;
 	renderLayerInfo.predictedDisplayTime = frameState.predictedDisplayTime;
-
-
-/*	// XR_DOCS_TAG_BEGIN_RenderLayer1
-	// Locate the views from the view configuration within the (reference) space at the display time.
-	std::vector<XrView> views(m_viewConfigurationViews.size(), {XR_TYPE_VIEW});
-
-	XrViewState viewState{XR_TYPE_VIEW_STATE};  // Will contain information on whether the position and/or orientation is valid and/or tracked.
-	XrViewLocateInfo viewLocateInfo{XR_TYPE_VIEW_LOCATE_INFO};
-	viewLocateInfo.viewConfigurationType = m_viewConfiguration;
-	viewLocateInfo.displayTime = renderLayerInfo.predictedDisplayTime;
-	viewLocateInfo.space = m_localSpace;
-	uint32_t viewCount = 0;
-	XrResult result = xrLocateViews(m_session, &viewLocateInfo, &viewState, static_cast<uint32_t>(views.size()), &viewCount, views.data());
-	if (result != XR_SUCCESS) {
-		msg_error("Failed to locate Views.");
-		//return false;
-	}
-	cur_views = views;
-
-	// Resize the layer projection views to match the view count. The layer projection views are used in the layer projection.
-	renderLayerInfo.layerProjectionViews.resize(viewCount, {XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW});*/
 	return true;
 }
 
 void Instance::end_frame() {
-
-	// Fill out the XrCompositionLayerProjection structure for usage with xrEndFrame().
-/*	renderLayerInfo.layerProjection.layerFlags = XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT | XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
-	renderLayerInfo.layerProjection.space = m_localSpace;
-	renderLayerInfo.layerProjection.viewCount = static_cast<uint32_t>(renderLayerInfo.layerProjectionViews.size());
-	renderLayerInfo.layerProjection.views = renderLayerInfo.layerProjectionViews.data();
-
-	renderLayerInfo.layers.clear();
-	renderLayerInfo.layers.push_back(reinterpret_cast<XrCompositionLayerBaseHeader *>(&renderLayerInfo.layerProjection));*/
-
 	render_frame_end();
-	msg_write("---->>");
+//	msg_write("---->>");
 }
 
 void Instance::start_view(int index, vulkan::RenderPass* render_pass) {
-	msg_write("<<");
+//	msg_write("<<");
 
 	colorSwapchainInfo = &m_colorSwapchainInfos[index];
 	depthSwapchainInfo = &m_depthSwapchainInfos[index];
@@ -1229,7 +1196,7 @@ void Instance::start_view(int index, vulkan::RenderPass* render_pass) {
 	OPENXR_CHECK(xrAcquireSwapchainImage(colorSwapchainInfo->swapchain, &acquireInfo, &colorImageIndex), "Failed to acquire Image from the Color Swapchian");
 	OPENXR_CHECK(xrAcquireSwapchainImage(depthSwapchainInfo->swapchain, &acquireInfo, &depthImageIndex), "Failed to acquire Image from the Depth Swapchian");
 	image_index = (int)colorImageIndex;
-	msg_write(format("acq  %d  %d", colorImageIndex, depthImageIndex));
+//	msg_write(format("acq  %d  %d", colorImageIndex, depthImageIndex));
 
 	XrSwapchainImageWaitInfo waitInfo = {XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO};
 	waitInfo.timeout = XR_INFINITE_DURATION;
@@ -1268,11 +1235,42 @@ void Instance::end_view(int) {
 	XrSwapchainImageReleaseInfo releaseInfo{XR_TYPE_SWAPCHAIN_IMAGE_RELEASE_INFO};
 	OPENXR_CHECK(xrReleaseSwapchainImage(colorSwapchainInfo->swapchain, &releaseInfo), "Failed to release Image back to the Color Swapchain");
 	OPENXR_CHECK(xrReleaseSwapchainImage(depthSwapchainInfo->swapchain, &releaseInfo), "Failed to release Image back to the Depth Swapchain");
-	msg_write(">>");
+//	msg_write(">>");
 }
 
 #else
 void init(const string& engine, const string& app_name) {}
+void end() {}
+
+yrenderer::Context* Instance::create_yrenderer() { return nullptr; }
+void Instance::create_session(yrenderer::Context* ctx) {}
+void Instance::iterate() {}
+
+bool Instance::start_frame() { return false; }
+void Instance::end_frame() {}
+void Instance::start_view(int index, vulkan::RenderPass* render_pass) {}
+void Instance::end_view(int index) {}
+
+
+void* _create_instance(const string& engine, const string& app_name) { return nullptr; }
+void _create_debug_messenger() {}
+void _destroy_debug_messenger() {}
+
+void CreateSwapchains() {}
+void DestroySwapchains() {}
+
+void GetViewConfigurationViews() {}
+void GetEnvironmentBlendModes() {}
+
+void CreateReferenceSpace() {}
+void DestroyReferenceSpace() {}
+
+void PollEvents() {}
+
+bool render_frame_start() { return false; }
+void render_frame_end() {}
+bool render_layer_start() { return false; }
+void render_layer_end() {}
 
 #endif
 }

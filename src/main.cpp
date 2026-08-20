@@ -134,15 +134,16 @@ public:
 		yrenderer::Context* context = nullptr;
 
 		if (config.screen_mode == ScreenMode::VR) {
+#ifdef HAS_VR_RENDERER
 			vr::init(app_name, app_name);
 			context = vr::instance->create_yrenderer();
 			vr::instance->create_session(context);
 			vr::CreateSwapchains();
-
+#else
+			throw Exception("no vr support compiled into the engine!");
+#endif
 		} else {
-
 			context = yrenderer::api_init_glfw(window);
-
 		}
 
 
@@ -163,7 +164,9 @@ public:
 		world = new World();
 
 		if (config.screen_mode == ScreenMode::VR) {
+#ifdef HAS_VR_RENDERER
 			create_base_renderer_vr(context);
+#endif
 		} else {
 			create_base_renderer(context, window);
 		}
@@ -347,7 +350,9 @@ public:
 		// TODO
 		//delete engine.world_renderer;
 		delete engine.window_renderer;
+#ifdef HAS_VR_RENDERER
 		delete engine.vr_renderer;
+#endif
 		engine.resource_manager->clear();
 		yrenderer::api_end(engine.context);
 		glfwDestroyWindow(window);
@@ -414,6 +419,7 @@ public:
 	void draw_frame() {
 
 		if (config.screen_mode == ScreenMode::VR) {
+#ifdef HAS_VR_RENDERER
 			vr::PollEvents();
 
 
@@ -436,6 +442,7 @@ public:
 
 			render_times.add(timer_render.get());
 			engine.vr_renderer->end_frame();
+#endif
 		} else {
 			if (!engine.window_renderer->start_frame())
 				return;

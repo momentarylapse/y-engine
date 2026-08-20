@@ -3,7 +3,7 @@
 //
 
 #include "VrRenderer.h"
-#if __has_include(<lib/vr/vr.h>)
+#ifdef HAS_VR_RENDERER
 #include <cmath>
 #include "../Context.h"
 #include <lib/ygraphics/graphics-impl.h>
