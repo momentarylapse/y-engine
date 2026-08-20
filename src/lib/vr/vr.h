@@ -3,9 +3,9 @@
 #include <lib/base/base.h>
 #include <lib/base/pointer.h>
 #include <lib/ygraphics/graphics-fwd.h>
-
-#include "lib/math/rect.h"
-#include "lib/math/vec3.h"
+#include <lib/math/rect.h>
+#include <lib/math/vec3.h>
+#include <lib/math/quaternion.h>
 
 namespace yrenderer {
 	struct Context;
@@ -17,6 +17,12 @@ struct View {
 	shared_array<ygfx::Texture> textures;
 	shared_array<ygfx::Texture> depth_buffers;
 	shared<ygfx::FrameBuffer> framebuffer;
+};
+
+struct Controller {
+	bool active = false;
+	vec3 pos;
+	quaternion ang;
 };
 
 class Instance {
@@ -40,6 +46,7 @@ public:
 	vec3 eye_pos(int index) const;
 	quaternion eye_ang(int index) const;
 	rect eye_fov(int index) const;
+	Controller controllers[2];
 };
 
 

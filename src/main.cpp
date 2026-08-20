@@ -138,7 +138,7 @@ public:
 			vr::init(app_name, app_name);
 			context = vr::instance->create_yrenderer();
 			vr::instance->create_session(context);
-			vr::instance->scale = 100;
+			vr::instance->scale = 500;
 			vr::CreateSwapchains();
 #else
 			throw Exception("no vr support compiled into the engine!");
@@ -366,7 +366,7 @@ public:
 		ecs::SystemManager::handle_iterate_pre(engine.elapsed);
 
 		if (config.screen_mode == ScreenMode::VR) {
-			//vr::instance->iterate();
+			vr::instance->iterate();
 		}
 
 		DeletionQueue::delete_all();

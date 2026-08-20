@@ -41,11 +41,14 @@ Instance* instance = nullptr;
 
 #if HAS_LIB_OPENXR
 
+
+
 static XrInstance xrInstance = XR_NULL_HANDLE;
 static XrDebugUtilsMessengerEXT m_debugUtilsMessenger;
 XrSession m_session = XR_NULL_HANDLE;
 XrSessionState m_sessionState = XR_SESSION_STATE_UNKNOWN;
 XrSystemId systemID;
+Array<const char*> activeInstanceExtensions;
 bool m_applicationRunning = true;
 bool m_sessionRunning = false;
 XrSpace m_localSpace = XR_NULL_HANDLE;
@@ -62,12 +65,6 @@ XrEnvironmentBlendMode m_environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_MAX_EN
 
 	struct ImageViewCreateInfo {
 		void* image;
-		enum class Type : uint8_t {
-			RTV,
-			DSV,
-			SRV,
-			UAV
-		} type;
 		enum class View : uint8_t {
 			TYPE_1D,
 			TYPE_2D,
@@ -92,6 +89,18 @@ XrEnvironmentBlendMode m_environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_MAX_EN
 	std::unordered_map<VkImage, VkImageLayout> imageStates;
     std::unordered_map<VkImageView, ImageViewCreateInfo> imageViewResources;
 	std::unordered_map<XrSwapchain, std::pair<int, std::vector<XrSwapchainImageVulkanKHR>>> swapchainImagesMap{};
+
+
+	quaternion q_from_oxr(const XrQuaternionf& qq) {
+		auto q = *(quaternion*)&qq;
+		q.x = -q.x;
+		q.y = -q.y;
+		return q;
+	}
+
+	vec3 pos_from_oxr(const XrVector3f& v) {
+		return vec3(v.x, v.y, -v.z) * instance->scale;
+	}
 
 	XrSwapchainImageBaseHeader *AllocateSwapchainImageData(XrSwapchain swapchain, int type, uint32_t count) {
 		swapchainImagesMap[swapchain].first = type;
@@ -166,6 +175,23 @@ XrEnvironmentBlendMode m_environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_MAX_EN
 
 	std::vector<SwapchainInfo> m_colorSwapchainInfos = {};
 	std::vector<SwapchainInfo> m_depthSwapchainInfos = {};
+
+	struct RenderLayerInfo {
+		XrTime predictedDisplayTime = 0;
+		std::vector<XrCompositionLayerBaseHeader *> layers;
+		XrCompositionLayerProjection layerProjection = {XR_TYPE_COMPOSITION_LAYER_PROJECTION};
+		std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
+	};
+
+	XrFrameState frameState;
+	RenderLayerInfo renderLayerInfo;
+	Array<XrView> cur_views;
+	uint32_t viewCount = 0;
+	int viewWidth, viewHeight;
+	SwapchainInfo *colorSwapchainInfo;
+	SwapchainInfo *depthSwapchainInfo;
+	uint32_t colorImageIndex = 0;
+	uint32_t depthImageIndex = 0;
 
 
 void CreateActionSet();
@@ -297,8 +323,8 @@ void DestroyOpenXRDebugUtilsMessenger(XrInstance m_xrInstance, XrDebugUtilsMesse
 }
 
 void Instance::create_session(yrenderer::Context* ctx) {
-//	CreateActionSet();
-//	SuggestBindings();
+	CreateActionSet();
+	SuggestBindings();
 
 
 	msg_write("--------create session");
@@ -325,10 +351,9 @@ void Instance::create_session(yrenderer::Context* ctx) {
 	OPENXR_CHECK(xrCreateSession(xrInstance, &sessionCI, &m_session), "Failed to create Session.");
 
 
-	/*CreateActionPoses();
-	AttachActionSet();*/
+	CreateActionPoses();
+	AttachActionSet();
 	CreateReferenceSpace();
-	//CreateSwapchains();
 }
 
 
@@ -351,8 +376,7 @@ void Instance::create_session(yrenderer::Context* ctx) {
         }
         return str;
     }
-    // XR_DOCS_TAG_END_CreateXrPath
-    // XR_DOCS_TAG_BEGIN_CreateActionSet
+
     void CreateActionSet() {
         XrActionSetCreateInfo actionSetCI{XR_TYPE_ACTION_SET_CREATE_INFO};
         // The internal name the runtime uses for this Action Set.
@@ -383,8 +407,6 @@ void Instance::create_session(yrenderer::Context* ctx) {
             strncpy(actionCI.localizedActionName, name, XR_MAX_LOCALIZED_ACTION_NAME_SIZE);
             OPENXR_CHECK(xrCreateAction(m_actionSet, &actionCI, &xrAction), "Failed to create Action.");
         };
-        // XR_DOCS_TAG_END_CreateActionLambda
-        // XR_DOCS_TAG_BEGIN_CreateActions
         // An Action for grabbing cubes.
         CreateAction(m_grabCubeAction, "grab-cube", XR_ACTION_TYPE_FLOAT_INPUT, {"/user/hand/left", "/user/hand/right"});
         CreateAction(m_spawnCubeAction, "spawn-cube", XR_ACTION_TYPE_BOOLEAN_INPUT);
@@ -397,9 +419,7 @@ void Instance::create_session(yrenderer::Context* ctx) {
         m_handPaths[0] = CreateXrPath("/user/hand/left");
         m_handPaths[1] = CreateXrPath("/user/hand/right");
     }
-    // XR_DOCS_TAG_END_CreateActions
 
-    // XR_DOCS_TAG_BEGIN_SuggestBindings1
     void SuggestBindings() {
         auto SuggestBindings = [](const char *profile_path, Array<XrActionSuggestedBinding> bindings) -> bool {
             // The application can call xrSuggestInteractionProfileBindings once per interaction profile that it supports.
@@ -506,6 +526,7 @@ void Instance::create_session(yrenderer::Context* ctx) {
             // Specify the subAction Path.
             actionStateGetInfo.subactionPath = m_handPaths[i];
             OPENXR_CHECK(xrGetActionStatePose(m_session, &actionStateGetInfo, &m_handPoseState[i]), "Failed to get Pose State.");
+        	//msg_write(m_handPoseState[i].isActive);
             if (m_handPoseState[i].isActive) {
                 XrSpaceLocation spaceLocation{XR_TYPE_SPACE_LOCATION};
                 XrResult res = xrLocateSpace(m_handPoseSpace[i], m_localSpace, predictedTime, &spaceLocation);
@@ -517,10 +538,13 @@ void Instance::create_session(yrenderer::Context* ctx) {
                     m_handPoseState[i].isActive = false;
                 }
             }
+        	instance->controllers[i].active = m_handPoseState[i].isActive;
+        	instance->controllers[i].ang = q_from_oxr(m_handPose[i].orientation);
+        	instance->controllers[i].pos = pos_from_oxr(m_handPose[i].position);
         }
 
-		msg_write(str(*(vec3*)&m_handPose[0].position));
-		msg_write(str(*(quaternion*)&m_handPose[0].orientation));
+		//msg_write(str(*(vec3*)&m_handPose[0].position));
+		//msg_write(str(*(quaternion*)&m_handPose[0].orientation));
 
         // XR_DOCS_TAG_END_PollActions2
         // XR_DOCS_TAG_BEGIN_PollActions3
@@ -648,32 +672,15 @@ void PollEvents() {
 }
 
 void Instance::iterate() {
-
 	if (!m_sessionRunning)
 		return;
 
-
-	XrFrameState frameState{XR_TYPE_FRAME_STATE};
-	XrFrameWaitInfo frameWaitInfo{XR_TYPE_FRAME_WAIT_INFO};
-	OPENXR_CHECK(xrWaitFrame(m_session, &frameWaitInfo, &frameState), "Failed to wait for XR Frame.");
-
-	// Tell the OpenXR compositor that the application is beginning the frame.
-	XrFrameBeginInfo frameBeginInfo{XR_TYPE_FRAME_BEGIN_INFO};
-	OPENXR_CHECK(xrBeginFrame(m_session, &frameBeginInfo), "Failed to begin the XR Frame.");
-
-	// Variables for rendering and layer composition.
-	bool rendered = false;
-	//RenderLayerInfo renderLayerInfo;
-	//renderLayerInfo.predictedDisplayTime = frameState.predictedDisplayTime;
-
 	// Check that the session is active and that we should render.
 	bool sessionActive = (m_sessionState == XR_SESSION_STATE_SYNCHRONIZED || m_sessionState == XR_SESSION_STATE_VISIBLE || m_sessionState == XR_SESSION_STATE_FOCUSED);
-	//if (sessionActive && frameState.shouldRender) {
+	if (sessionActive && frameState.shouldRender) {
 		PollActions(frameState.predictedDisplayTime);
-	//}
+	}
 }
-
-Array<const char*> activeInstanceExtensions;
 
 void* _create_instance(const string& engine, const string& app_name) {
 	instance = new Instance;
@@ -974,7 +981,6 @@ void CreateSwapchains() {
 		for (uint32_t j = 0; j < colorSwapchainImageCount; j++) {
 			ImageViewCreateInfo imageViewCI;
 			imageViewCI.image = GetSwapchainImage(colorSwapchainInfo.swapchain, j);
-			imageViewCI.type = ImageViewCreateInfo::Type::RTV;
 			imageViewCI.view = ImageViewCreateInfo::View::TYPE_2D;
 			imageViewCI.format = colorSwapchainInfo.swapchainFormat;
 			imageViewCI.aspect = ImageViewCreateInfo::Aspect::COLOR_BIT;
@@ -995,7 +1001,6 @@ void CreateSwapchains() {
 		for (uint32_t j = 0; j < depthSwapchainImageCount; j++) {
 			ImageViewCreateInfo imageViewCI;
 			imageViewCI.image = GetSwapchainImage(depthSwapchainInfo.swapchain, j);
-			imageViewCI.type = ImageViewCreateInfo::Type::DSV;
 			imageViewCI.view = ImageViewCreateInfo::View::TYPE_2D;
 			imageViewCI.format = depthSwapchainInfo.swapchainFormat;
 			imageViewCI.aspect = ImageViewCreateInfo::Aspect::DEPTH_BIT;
@@ -1081,22 +1086,6 @@ yrenderer::Context* Instance::create_yrenderer() {
 	return ctx2;
 }
 
-struct RenderLayerInfo {
-	XrTime predictedDisplayTime = 0;
-	std::vector<XrCompositionLayerBaseHeader *> layers;
-	XrCompositionLayerProjection layerProjection = {XR_TYPE_COMPOSITION_LAYER_PROJECTION};
-	std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
-};
-
-XrFrameState frameState;
-RenderLayerInfo renderLayerInfo;
-Array<XrView> cur_views;
-uint32_t viewCount = 0;
-int viewWidth, viewHeight;
-SwapchainInfo *colorSwapchainInfo;
-SwapchainInfo *depthSwapchainInfo;
-uint32_t colorImageIndex = 0;
-uint32_t depthImageIndex = 0;
 
 bool render_frame_start() {
 	// Get the XrFrameState for timing and rendering info.
@@ -1239,19 +1228,8 @@ void Instance::end_view(int) {
 //	msg_write(">>");
 }
 
-quaternion q_from_oxr(const XrQuaternionf& qq) {
-	auto q = *(quaternion*)&qq;
-	q.x = -q.x;
-	q.y = -q.y;
-	return q;
-}
-
-vec3 v3_from_oxr(const XrVector3f& v) {
-	return {v.x, v.y, -v.z};
-}
-
 vec3 Instance::eye_pos(int index) const {
-	return v3_from_oxr(cur_views[index].pose.position) * scale;
+	return pos_from_oxr(cur_views[index].pose.position);
 }
 
 quaternion Instance::eye_ang(int index) const {

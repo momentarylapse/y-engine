@@ -147,8 +147,8 @@ var extern static vr_active: bool
 
 
 # FIXME kaba link sub classes (VRDevice.Role) (-_-)
-enum VRDeviceRole
-	NONE
+enum extern VRDeviceRole
+	NONE = -1
 	CONTROLLER_RIGHT
 	CONTROLLER_LEFT
 	HEADSET
