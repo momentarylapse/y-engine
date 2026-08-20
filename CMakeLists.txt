@@ -251,6 +251,21 @@ else()
 endif()
 
 
+# lib: openxr (optional)
+set(LIB_OPENXR_ENABLED true CACHE BOOL "Use openxr library?")
+find_package(OpenXR)
+if(OpenXR_FOUND)
+else()
+	set(LIB_OPENXR_ENABLED false CACHE BOOL "openxr library not found" FORCE)
+endif()
+if(${LIB_OPENXR_ENABLED})
+	list(APPEND DEPS OpenXR::openxr_loader)
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_OPENXR=1)
+else()
+	list(APPEND COMPILE_DEFINITIONS HAS_LIB_OPENXR=0)
+endif()
+
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 list(APPEND DEPS Threads::Threads)
@@ -443,6 +458,7 @@ add_executable(y
 	src/lib/threads/Thread.cpp
 	src/lib/threads/ThreadedWork.cpp
 	src/lib/threads/ThreadPool.cpp
+	src/lib/vr/vr.cpp
 	src/lib/vulkan/_kaba_export.cpp
 	src/lib/vulkan/AccelerationStructure.cpp
 	src/lib/vulkan/Buffer.cpp
