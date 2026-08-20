@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cmath>
 #include <unordered_map>
 
 #include "lib/vulkan/common.h"
@@ -1238,6 +1239,30 @@ void Instance::end_view(int) {
 //	msg_write(">>");
 }
 
+quaternion q_from_oxr(const XrQuaternionf& qq) {
+	auto q = *(quaternion*)&qq;
+	q.x = -q.x;
+	q.y = -q.y;
+	return q;
+}
+
+vec3 v3_from_oxr(const XrVector3f& v) {
+	return {v.x, v.y, -v.z};
+}
+
+vec3 Instance::eye_pos(int index) const {
+	return v3_from_oxr(cur_views[index].pose.position) * scale;
+}
+
+quaternion Instance::eye_ang(int index) const {
+	return q_from_oxr(cur_views[index].pose.orientation);
+}
+
+rect Instance::eye_fov(int index) const {
+	auto f = cur_views[index].fov;
+	return rect(tanf(f.angleLeft), tanf(f.angleRight), tanf(f.angleDown), tanf(f.angleUp));
+}
+
 #else
 void init(const string& engine, const string& app_name) {}
 void end() {}
@@ -1250,6 +1275,10 @@ bool Instance::start_frame() { return false; }
 void Instance::end_frame() {}
 void Instance::start_view(int index, vulkan::RenderPass* render_pass) {}
 void Instance::end_view(int index) {}
+
+vec3 Instance::eye_pos(int index) const { return v_0; }
+quaternion Instance::eye_ang(int index) const { return quaternion::ID; }
+rect Instance::eye_fov(int index) const { return rect::EMPTY; }
 
 
 void* _create_instance(const string& engine, const string& app_name) { return nullptr; }

@@ -4,6 +4,9 @@
 #include <lib/base/pointer.h>
 #include <lib/ygraphics/graphics-fwd.h>
 
+#include "lib/math/rect.h"
+#include "lib/math/vec3.h"
+
 namespace yrenderer {
 	struct Context;
 }
@@ -32,6 +35,11 @@ public:
 	void end_view(int index);
 
 	int image_index = 0;
+
+	float scale = 1.0f;
+	vec3 eye_pos(int index) const;
+	quaternion eye_ang(int index) const;
+	rect eye_fov(int index) const;
 };
 
 

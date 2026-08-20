@@ -33,11 +33,16 @@ VrRenderer::VrRenderer(Context* ctx) :
 	gamma_correction = true;
 }
 
-RenderParams VrRenderer::create_params(float aspect_ratio) {
-	auto p = RenderParams::into_window(vr::instance->views[current_view_index].framebuffer.get(), aspect_ratio);
+RenderParams VrRenderer::create_params() {
+	const auto eye_fov = vr::instance->eye_fov(current_view_index);
+	auto p = RenderParams::into_window(vr::instance->views[current_view_index].framebuffer.get(), eye_fov.width() / eye_fov.height());
 	p.command_buffer = command_buffer.get();
 	p.render_pass = render_pass.get();
 	p.area = rect(0, (float)vr::viewWidth, 0, (float)vr::viewHeight);
+	p.is_vr = true;
+	p.vr_eye_fov = eye_fov;
+	p.vr_eye_ang = vr::instance->eye_ang(current_view_index);
+	p.vr_eye_pos = vr::instance->eye_pos(current_view_index);
 	return p;
 }
 
@@ -63,14 +68,6 @@ void VrRenderer::start_view(int index) {
 	vr::instance->start_view(index, render_pass.get());
 	in_flight_fence->wait();
 	in_flight_fence->reset();
-
-	eye_pos = *(vec3*)&vr::cur_views[index].pose.position;
-	eye_pos.z = -eye_pos.z;
-	eye_ang = *(quaternion*)&vr::cur_views[index].pose.orientation;
-	eye_ang.x = -eye_ang.x;
-	eye_ang.y = -eye_ang.y;
-	auto f = vr::cur_views[index].fov;
-	eye_fov = rect(tanf(f.angleLeft), tanf(f.angleRight), tanf(f.angleDown), tanf(f.angleUp));
 
 	command_buffer->begin();
 }

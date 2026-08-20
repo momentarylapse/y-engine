@@ -26,7 +26,7 @@ public:
 	void prepare(const RenderParams& params) override;
 	void draw(const RenderParams& params) override;
 
-	RenderParams create_params(float aspect_ratio);
+	RenderParams create_params();
 
 	owned<Fence> in_flight_fence;
 	owned<ygfx::CommandBuffer> command_buffer;
@@ -34,9 +34,6 @@ public:
 	Device *device;
 	bool gamma_correction;
 	int current_view_index = 0;
-	vec3 eye_pos;
-	quaternion eye_ang;
-	rect eye_fov;
 };
 
 #endif

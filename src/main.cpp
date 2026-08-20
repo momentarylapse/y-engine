@@ -138,6 +138,7 @@ public:
 			vr::init(app_name, app_name);
 			context = vr::instance->create_yrenderer();
 			vr::instance->create_session(context);
+			vr::instance->scale = 100;
 			vr::CreateSwapchains();
 #else
 			throw Exception("no vr support compiled into the engine!");
@@ -430,14 +431,18 @@ public:
 
 			for (int i=0; i<2; i++) {
 				engine.vr_renderer->start_view(i);
-				const auto fov = engine.vr_renderer->eye_fov;
-				const auto params = engine.vr_renderer->create_params(fov.width() / fov.height());
-				cam_main->owner->pos = engine.vr_renderer->eye_pos*500 + vec3(0,200,-300);
-				cam_main->owner->ang = engine.vr_renderer->eye_ang;
+				const auto fov = vr::instance->eye_fov(i);
+				const auto params = engine.vr_renderer->create_params();
+				const vec3 p0 = cam_main->owner->pos;
+				const auto q0 = cam_main->owner->ang;
+				cam_main->owner->pos += q0 * vr::instance->eye_pos(i);
+				cam_main->owner->ang = q0 * vr::instance->eye_ang(i);
 				cam_main->fov = 2 * atanf(fov.height() / 2);
 				cam_main->offset = -fov.center();
 				engine.vr_renderer->draw(params);
 				engine.vr_renderer->end_view();
+				cam_main->owner->pos = p0;
+				cam_main->owner->ang = q0;
 			}
 
 			render_times.add(timer_render.get());
