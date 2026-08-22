@@ -8,6 +8,7 @@
 #include "Gamepad.h"
 #include "Mouse.h"
 #include "Keyboard.h"
+#include "VR.h"
 #include <EngineData.h>
 #include <cmath>
 #include <GLFW/glfw3.h>
@@ -89,6 +90,23 @@ void iterate_pads() {
 			main_pad->state->axes[0] = 1;
 		if (get_key(KEY_LEFT) or get_key(KEY_A))
 			main_pad->state->axes[0] = -1;
+
+		if (vr_active) {
+			if (auto c = get_vr_device(VrDeviceRole::ControllerLeft)) {
+				main_pad->state->axes[0] = c->axis((int)VrAxis::JOYSTICK_H);
+				main_pad->state->axes[1] = -c->axis((int)VrAxis::JOYSTICK_V);
+				main_pad->state->axes[4] = c->axis((int)VrAxis::TRIGGER);
+				main_pad->state->buttons[(int)Gamepad::Button::UP] = c->button((int)VrButton::A);
+				main_pad->state->buttons[(int)Gamepad::Button::Down] = c->button((int)VrButton::B);
+			}
+			if (auto c = get_vr_device(VrDeviceRole::ControllerRight)) {
+				main_pad->state->axes[2] = c->axis((int)VrAxis::JOYSTICK_H);
+				main_pad->state->axes[3] = -c->axis((int)VrAxis::JOYSTICK_V);
+				main_pad->state->axes[5] = c->axis((int)VrAxis::TRIGGER);
+				main_pad->state->buttons[(int)Gamepad::Button::Triangle] = c->button((int)VrButton::A);
+				main_pad->state->buttons[(int)Gamepad::Button::Cross] = c->button((int)VrButton::B);
+			}
+		}
 	}
 }
 
