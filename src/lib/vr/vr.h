@@ -24,10 +24,15 @@ struct Controller {
 	bool active = false;
 	vec3 pos;
 	quaternion ang;
+	vec3 aim_pos;
+	quaternion aim_ang;
 	float trigger = 0;
 	vec2 thumb_stick = vec2(0, 0);
+	vec2 track_pad = vec2(0, 0);
 	bool button_a = false;
 	bool button_b = false;
+	bool button_menu = false;
+	float vibration = 0;
 };
 
 class Instance {

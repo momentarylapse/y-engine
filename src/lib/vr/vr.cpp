@@ -147,12 +147,12 @@ XrActionStateFloat trigger_state[2] = {{XR_TYPE_ACTION_STATE_FLOAT}, {XR_TYPE_AC
 XrActionStateVector2f thumb_stick_state[2] = {{XR_TYPE_ACTION_STATE_VECTOR2F}, {XR_TYPE_ACTION_STATE_VECTOR2F}};
 XrActionStateBoolean button_a_state[2] = {{XR_TYPE_ACTION_STATE_BOOLEAN}, {XR_TYPE_ACTION_STATE_BOOLEAN}};
 XrActionStateBoolean button_b_state[2] = {{XR_TYPE_ACTION_STATE_BOOLEAN}, {XR_TYPE_ACTION_STATE_BOOLEAN}};
-XrAction m_buzzAction;
-float m_buzz[2] = {0, 0};
-XrAction action_palm_pose;
+XrAction action_buzz;
 XrPath hand_paths[2] = {0, 0};
-XrSpace hand_pose_space[2];
+XrAction action_grip_pose, action_aim_pose;
+XrSpace hand_pose_space[2], aim_pose_space[2];
 XrActionStatePose hand_pose_state[2] = {{XR_TYPE_ACTION_STATE_POSE}, {XR_TYPE_ACTION_STATE_POSE}};
+XrActionStatePose aim_pose_state[2] = {{XR_TYPE_ACTION_STATE_POSE}, {XR_TYPE_ACTION_STATE_POSE}};
 XrPosef hand_pose[2] = {
 	{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0}},
 	{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0}}};
@@ -389,8 +389,9 @@ void CreateActionSet() {
 	CreateAction(action_thumb_stick, "thumb-stick", XR_ACTION_TYPE_VECTOR2F_INPUT, {"/user/hand/left", "/user/hand/right"});
 	CreateAction(action_button_a, "button-a", XR_ACTION_TYPE_BOOLEAN_INPUT, {"/user/hand/left", "/user/hand/right"});
 	CreateAction(action_button_b, "button-b", XR_ACTION_TYPE_BOOLEAN_INPUT, {"/user/hand/left", "/user/hand/right"});
-	CreateAction(action_palm_pose, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, {"/user/hand/left", "/user/hand/right"});
-	CreateAction(m_buzzAction, "buzz", XR_ACTION_TYPE_VIBRATION_OUTPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_grip_pose, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_aim_pose, "aim-pose", XR_ACTION_TYPE_POSE_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_buzz, "buzz", XR_ACTION_TYPE_VIBRATION_OUTPUT, {"/user/hand/left", "/user/hand/right"});
 	hand_paths[0] = CreateXrPath("/user/hand/left");
 	hand_paths[1] = CreateXrPath("/user/hand/right");
 }
@@ -409,18 +410,20 @@ void SuggestBindings() {
 	};
 	bool any_ok = false;
 	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {
-//			{action_trigger, CreateXrPath("/user/hand/left/input/trigger/value")},
-//			{action_trigger, CreateXrPath("/user/hand/right/input/trigger/value")},
+//			{action_trigger, CreateXrPath("/user/hand/left/input/select/click")},
+//			{action_trigger, CreateXrPath("/user/hand/right/input/select/click")},
 //			{action_thumb_stick, CreateXrPath("/user/hand/left/input/thumbstick")},
 //			{action_thumb_stick, CreateXrPath("/user/hand/right/input/thumbstick")},
 			{action_button_a, CreateXrPath("/user/hand/left/input/a/click")},
 			{action_button_a, CreateXrPath("/user/hand/right/input/a/click")},
 			{action_button_b, CreateXrPath("/user/hand/left/input/b/click")},
 			{action_button_b, CreateXrPath("/user/hand/right/input/b/click")},
-			{action_palm_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
-			{action_palm_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
-			{m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
-{m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});
+			{action_grip_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
+			{action_grip_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
+			{action_aim_pose, CreateXrPath("/user/hand/left/input/aim/pose")},
+			{action_aim_pose, CreateXrPath("/user/hand/right/input/aim/pose")},
+			{action_buzz, CreateXrPath("/user/hand/left/output/haptic")},
+			{action_buzz, CreateXrPath("/user/hand/right/output/haptic")}});
 	any_ok |= SuggestBindings("/interaction_profiles/valve/index_controller", {
 			{action_trigger, CreateXrPath("/user/hand/left/input/trigger/value")},
 			{action_trigger, CreateXrPath("/user/hand/right/input/trigger/value")},
@@ -430,10 +433,12 @@ void SuggestBindings() {
 			{action_button_a, CreateXrPath("/user/hand/right/input/a/click")},
 			{action_button_b, CreateXrPath("/user/hand/left/input/b/click")},
 			{action_button_b, CreateXrPath("/user/hand/right/input/b/click")},
-			{action_palm_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
-			{action_palm_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
-			{m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
-			{m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});
+			{action_grip_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
+			{action_grip_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
+			{action_aim_pose, CreateXrPath("/user/hand/left/input/aim/pose")},
+			{action_aim_pose, CreateXrPath("/user/hand/right/input/aim/pose")},
+			{action_buzz, CreateXrPath("/user/hand/left/output/haptic")},
+			{action_buzz, CreateXrPath("/user/hand/right/output/haptic")}});
 	// Each Action here has two paths, one for each SubAction path.
 /*	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {
 			{m_grabCubeAction, CreateXrPath("/user/hand/left/input/squeeze/value")},
@@ -476,8 +481,10 @@ void CreateActionPoses() {
 		OPENXR_CHECK(xrCreateActionSpace(session, &actionSpaceCI, &space), "Failed to create ActionSpace.");
 		return space;
 	};
-	hand_pose_space[0] = CreateActionPoseSpace(m_session, action_palm_pose, "/user/hand/left");
-	hand_pose_space[1] = CreateActionPoseSpace(m_session, action_palm_pose, "/user/hand/right");
+	hand_pose_space[0] = CreateActionPoseSpace(m_session, action_grip_pose, "/user/hand/left");
+	hand_pose_space[1] = CreateActionPoseSpace(m_session, action_grip_pose, "/user/hand/right");
+	aim_pose_space[0] = CreateActionPoseSpace(m_session, action_aim_pose, "/user/hand/left");
+	aim_pose_space[1] = CreateActionPoseSpace(m_session, action_aim_pose, "/user/hand/right");
 }
 
 void AttachActionSet() {
@@ -488,39 +495,48 @@ void AttachActionSet() {
 }
 
 void PollActions(XrTime predictedTime) {
-	// Update our action set with up-to-date input data.
-	// First, we specify the actionSet we are polling.
-	XrActiveActionSet activeActionSet{};
-	activeActionSet.actionSet = main_action_set;
-	activeActionSet.subactionPath = XR_NULL_PATH;
-	// Now we sync the Actions to make sure they have current data.
-	XrActionsSyncInfo actionsSyncInfo{XR_TYPE_ACTIONS_SYNC_INFO};
-	actionsSyncInfo.countActiveActionSets = 1;
-	actionsSyncInfo.activeActionSets = &activeActionSet;
-	OPENXR_CHECK(xrSyncActions(m_session, &actionsSyncInfo), "Failed to sync Actions.");
-	// XR_DOCS_TAG_END_PollActions
-	// XR_DOCS_TAG_BEGIN_PollActions2
+	XrActiveActionSet active_action_set{
+		.actionSet = main_action_set,
+		.subactionPath = XR_NULL_PATH
+	};
+	XrActionsSyncInfo actions_sync_info{
+		.type = XR_TYPE_ACTIONS_SYNC_INFO,
+		.countActiveActionSets = 1,
+		.activeActionSets = &active_action_set
+	};
+	OPENXR_CHECK(xrSyncActions(m_session, &actions_sync_info), "Failed to sync Actions.");
 	XrActionStateGetInfo actionStateGetInfo{XR_TYPE_ACTION_STATE_GET_INFO};
-	// We pose a single Action, twice - once for each subAction Path.
-	actionStateGetInfo.action = action_palm_pose;
-	// For each hand, get the pose state if possible.
+	actionStateGetInfo.action = action_grip_pose;
 	for (int i=0; i<2; i++) {
-		// Specify the subAction Path.
 		actionStateGetInfo.subactionPath = hand_paths[i];
-		OPENXR_CHECK(xrGetActionStatePose(m_session, &actionStateGetInfo, &hand_pose_state[i]), "Failed to get Pose State.");
-		//msg_write(m_handPoseState[i].isActive);
+		OPENXR_CHECK(xrGetActionStatePose(m_session, &actionStateGetInfo, &hand_pose_state[i]), "Failed to get Hand Pose State.");
 		if (hand_pose_state[i].isActive) {
-			XrSpaceLocation spaceLocation{XR_TYPE_SPACE_LOCATION};
-			XrResult res = xrLocateSpace(hand_pose_space[i], m_localSpace, predictedTime, &spaceLocation);
-			if (XR_UNQUALIFIED_SUCCESS(res) and (spaceLocation.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 and (spaceLocation.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
-				hand_pose[i] = spaceLocation.pose;
+			XrSpaceLocation location{XR_TYPE_SPACE_LOCATION};
+			XrResult res = xrLocateSpace(hand_pose_space[i], m_localSpace, predictedTime, &location);
+			if (XR_UNQUALIFIED_SUCCESS(res) and (location.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 and (location.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
+				hand_pose[i] = location.pose;
+				instance->controllers[i].ang = q_from_oxr(location.pose.orientation);
+				instance->controllers[i].pos = pos_from_oxr(location.pose.position);
 			} else {
 				hand_pose_state[i].isActive = false;
 			}
 		}
 		instance->controllers[i].active = hand_pose_state[i].isActive;
-		instance->controllers[i].ang = q_from_oxr(hand_pose[i].orientation);
-		instance->controllers[i].pos = pos_from_oxr(hand_pose[i].position);
+	}
+	actionStateGetInfo.action = action_aim_pose;
+	for (int i=0; i<2; i++) {
+		actionStateGetInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrGetActionStatePose(m_session, &actionStateGetInfo, &aim_pose_state[i]), "Failed to get Aim Pose State.");
+		if (aim_pose_state[i].isActive) {
+			XrSpaceLocation location{XR_TYPE_SPACE_LOCATION};
+			XrResult res = xrLocateSpace(aim_pose_space[i], m_localSpace, predictedTime, &location);
+			if (XR_UNQUALIFIED_SUCCESS(res) and (location.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 and (location.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
+				instance->controllers[i].aim_ang = q_from_oxr(location.pose.orientation);
+				instance->controllers[i].aim_pos = pos_from_oxr(location.pose.position);
+			} else {
+				aim_pose_state[i].isActive = false;
+			}
+		}
 	}
 
 	//msg_write(str(*(vec3*)&m_handPose[0].position));
@@ -552,16 +568,13 @@ void PollActions(XrTime predictedTime) {
 		instance->controllers[i].button_b = button_b_state[i].currentState;
 	}
 	for (int i=0; i<2; i++) {
-		m_buzz[i] *= 0.5f;
-		if (m_buzz[i] < 0)
-			m_buzz[i] = 0;
 		XrHapticVibration vibration{XR_TYPE_HAPTIC_VIBRATION};
-		vibration.amplitude = m_buzz[i];
+		vibration.amplitude = instance->controllers[i].vibration;
 		vibration.duration = XR_MIN_HAPTIC_DURATION;
 		vibration.frequency = XR_FREQUENCY_UNSPECIFIED;
 
 		XrHapticActionInfo hapticActionInfo{XR_TYPE_HAPTIC_ACTION_INFO};
-		hapticActionInfo.action = m_buzzAction;
+		hapticActionInfo.action = action_buzz;
 		hapticActionInfo.subactionPath = hand_paths[i];
 		OPENXR_CHECK(xrApplyHapticFeedback(m_session, &hapticActionInfo, (XrHapticBaseHeader *)&vibration), "Failed to apply haptic feedback.");
 	}
@@ -1214,15 +1227,21 @@ void Instance::end_view(int) {
 }
 
 vec3 Instance::eye_pos(int index) const {
+	if (index < 0 or index >= cur_views.num)
+		return v_0;
 	return pos_from_oxr(cur_views[index].pose.position);
 }
 
 quaternion Instance::eye_ang(int index) const {
+	if (index < 0 or index >= cur_views.num)
+		return quaternion::ID;
 	return q_from_oxr(cur_views[index].pose.orientation);
 }
 
 rect Instance::eye_fov(int index) const {
-	auto f = cur_views[index].fov;
+	if (index < 0 or index >= cur_views.num)
+		return rect::EMPTY;
+	const auto f = cur_views[index].fov;
 	return rect(tanf(f.angleLeft), tanf(f.angleRight), tanf(f.angleDown), tanf(f.angleUp));
 }
 
