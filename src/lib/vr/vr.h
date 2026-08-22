@@ -5,6 +5,7 @@
 #include <lib/ygraphics/graphics-fwd.h>
 #include <lib/math/rect.h>
 #include <lib/math/vec3.h>
+#include <lib/math/vec2.h>
 #include <lib/math/quaternion.h>
 
 namespace yrenderer {
@@ -23,6 +24,10 @@ struct Controller {
 	bool active = false;
 	vec3 pos;
 	quaternion ang;
+	float trigger = 0;
+	vec2 thumb_stick = vec2(0, 0);
+	bool button_a = false;
+	bool button_b = false;
 };
 
 class Instance {

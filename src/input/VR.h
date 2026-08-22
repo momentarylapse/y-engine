@@ -32,6 +32,7 @@ namespace input {
 		quaternion ang;
 		int button_mask = 0;
 		int button_mask_prev = 0;
+		float _axis[12];
 		bool button(int b) const;
 		bool clicked(int b) const;
 		float axis(int index) const;

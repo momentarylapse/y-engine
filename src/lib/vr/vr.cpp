@@ -3,19 +3,15 @@
 #include <lib/os/msg.h>
 #include <lib/base/algo.h>
 #include <lib/ygraphics/Context.h>
-
-#include "lib/math/quaternion.h"
-#include "lib/vulkan/vulkan.h"
-#include "lib/vulkan/Device.h"
-#include "lib/vulkan/Instance.h"
+#include <lib/math/quaternion.h>
+#include <lib/vulkan/vulkan.h>
+#include <lib/vulkan/Device.h>
+#include <lib/vulkan/Instance.h>
+#include <lib/vulkan/common.h>
 #include "lib/yrenderer/Context.h"
 #include <vector>
-#include <string>
-#include <algorithm>
 #include <cmath>
 #include <unordered_map>
-
-#include "lib/vulkan/common.h"
 
 #if HAS_LIB_OPENXR
 #include <vulkan/vulkan.h>
@@ -53,145 +49,138 @@ bool m_applicationRunning = true;
 bool m_sessionRunning = false;
 XrSpace m_localSpace = XR_NULL_HANDLE;
 
-std::vector<XrEnvironmentBlendMode> m_applicationEnvironmentBlendModes = {XR_ENVIRONMENT_BLEND_MODE_OPAQUE, XR_ENVIRONMENT_BLEND_MODE_ADDITIVE};
-std::vector<XrEnvironmentBlendMode> m_environmentBlendModes = {};
+Array<XrEnvironmentBlendMode> m_applicationEnvironmentBlendModes = {XR_ENVIRONMENT_BLEND_MODE_OPAQUE, XR_ENVIRONMENT_BLEND_MODE_ADDITIVE};
+Array<XrEnvironmentBlendMode> m_environmentBlendModes = {};
 XrEnvironmentBlendMode m_environmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_MAX_ENUM;
 
-	struct SwapchainInfo {
-		XrSwapchain swapchain = XR_NULL_HANDLE;
-		int64_t swapchainFormat = 0;
-	};
+struct SwapchainInfo {
+	XrSwapchain swapchain = XR_NULL_HANDLE;
+	int64_t swapchainFormat = 0;
+};
 
 
-	struct ImageViewCreateInfo {
-		void* image;
-		enum class View : uint8_t {
-			TYPE_1D,
-			TYPE_2D,
-			TYPE_3D,
-			TYPE_CUBE,
-			TYPE_1D_ARRAY,
-			TYPE_2D_ARRAY,
-			TYPE_CUBE_ARRAY,
-		} view;
-		int64_t format;
-		enum class Aspect : uint8_t {
-			COLOR_BIT = 0x01,
-			DEPTH_BIT = 0x02,
-			STENCIL_BIT = 0x04
-		} aspect;
-		uint32_t baseMipLevel;
-		uint32_t levelCount;
-		uint32_t baseArrayLayer;
-		uint32_t layerCount;
-	};
+struct ImageViewCreateInfo {
+	void* image;
+	enum class View : uint8_t {
+		TYPE_1D,
+		TYPE_2D,
+		TYPE_3D,
+		TYPE_CUBE,
+		TYPE_1D_ARRAY,
+		TYPE_2D_ARRAY,
+		TYPE_CUBE_ARRAY,
+	} view;
+	int64_t format;
+	enum class Aspect : uint8_t {
+		COLOR_BIT = 0x01,
+		DEPTH_BIT = 0x02,
+		STENCIL_BIT = 0x04
+	} aspect;
+	uint32_t baseMipLevel;
+	uint32_t levelCount;
+	uint32_t baseArrayLayer;
+	uint32_t layerCount;
+};
 
-	std::unordered_map<VkImage, VkImageLayout> imageStates;
-    std::unordered_map<VkImageView, ImageViewCreateInfo> imageViewResources;
-	std::unordered_map<XrSwapchain, std::pair<int, std::vector<XrSwapchainImageVulkanKHR>>> swapchainImagesMap{};
-
-
-	quaternion q_from_oxr(const XrQuaternionf& qq) {
-		auto q = *(quaternion*)&qq;
-		q.x = -q.x;
-		q.y = -q.y;
-		return q;
-	}
-
-	vec3 pos_from_oxr(const XrVector3f& v) {
-		return vec3(v.x, v.y, -v.z) * instance->scale;
-	}
-
-	XrSwapchainImageBaseHeader *AllocateSwapchainImageData(XrSwapchain swapchain, int type, uint32_t count) {
-		swapchainImagesMap[swapchain].first = type;
-		swapchainImagesMap[swapchain].second.resize(count, {XR_TYPE_SWAPCHAIN_IMAGE_VULKAN_KHR});
-		return reinterpret_cast<XrSwapchainImageBaseHeader *>(swapchainImagesMap[swapchain].second.data());
-	}
-	XrSwapchainImageBaseHeader* GetSwapchainImageData(XrSwapchain swapchain, uint32_t index) {
-		return (XrSwapchainImageBaseHeader*)&swapchainImagesMap[swapchain].second[index];
-	}
-	// XR_DOCS_TAG_BEGIN_GetSwapchainImage_Vulkan
-	void* GetSwapchainImage(XrSwapchain swapchain, uint32_t index) {
-		VkImage image = swapchainImagesMap[swapchain].second[index].image;
-		VkImageLayout layout = swapchainImagesMap[swapchain].first == 0 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		imageStates[image] = layout;
-		return (void *)image;
-	}
-
-	void *CreateImageView(const ImageViewCreateInfo &imageViewCI) {
-		VkImageView imageView{};
-		VkImageViewCreateInfo vkImageViewCI;
-		vkImageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		vkImageViewCI.pNext = nullptr;
-		vkImageViewCI.flags = 0;
-		vkImageViewCI.image = (VkImage)imageViewCI.image;
-		vkImageViewCI.viewType = VkImageViewType(imageViewCI.view);
-		vkImageViewCI.format = (VkFormat)imageViewCI.format;
-		vkImageViewCI.components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
-		vkImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits(imageViewCI.aspect);
-		vkImageViewCI.subresourceRange.baseMipLevel = imageViewCI.baseMipLevel;
-		vkImageViewCI.subresourceRange.levelCount = imageViewCI.levelCount;
-		vkImageViewCI.subresourceRange.baseArrayLayer = imageViewCI.baseArrayLayer;
-		vkImageViewCI.subresourceRange.layerCount = imageViewCI.layerCount;
-		if (vkCreateImageView(vulkan::default_device->device, &vkImageViewCI, nullptr, &imageView) != VK_SUCCESS)
-			throw Exception("Failed to create ImageView.");
-
-		imageViewResources[imageView] = imageViewCI;
-		return (void *)imageView;
-	}
-
-	PFN_xrGetVulkanGraphicsRequirementsKHR xrGetVulkanGraphicsRequirementsKHR = nullptr;
-	PFN_xrGetVulkanInstanceExtensionsKHR xrGetVulkanInstanceExtensionsKHR = nullptr;
-	PFN_xrGetVulkanDeviceExtensionsKHR xrGetVulkanDeviceExtensionsKHR = nullptr;
-	PFN_xrGetVulkanGraphicsDeviceKHR xrGetVulkanGraphicsDeviceKHR = nullptr;
-
-	XrActionSet m_actionSet;
-	// An action for grabbing blocks, and an action to change the color of a block.
-	XrAction m_grabCubeAction, m_spawnCubeAction, m_changeColorAction;
-	// The realtime states of these actions.
-	XrActionStateFloat m_grabState[2] = {{XR_TYPE_ACTION_STATE_FLOAT}, {XR_TYPE_ACTION_STATE_FLOAT}};
-	XrActionStateBoolean m_changeColorState[2] = {{XR_TYPE_ACTION_STATE_BOOLEAN}, {XR_TYPE_ACTION_STATE_BOOLEAN}};
-	XrActionStateBoolean m_spawnCubeState = {XR_TYPE_ACTION_STATE_BOOLEAN};
-	// The haptic output action for grabbing cubes.
-	XrAction m_buzzAction;
-	// The current haptic output value for each controller.
-	float m_buzz[2] = {0, 0};
-	// The action for getting the hand or controller position and orientation.
-	XrAction m_palmPoseAction;
-	// The XrPaths for left and right hand hands or controllers.
-	XrPath m_handPaths[2] = {0, 0};
-	// The spaces that represents the two hand poses.
-	XrSpace m_handPoseSpace[2];
-	XrActionStatePose m_handPoseState[2] = {{XR_TYPE_ACTION_STATE_POSE}, {XR_TYPE_ACTION_STATE_POSE}};
-	// The current poses obtained from the XrSpaces.
-	XrPosef m_handPose[2] = {
-		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0}},
-		{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0}}};
+std::unordered_map<VkImage, VkImageLayout> imageStates;
+std::unordered_map<VkImageView, ImageViewCreateInfo> imageViewResources;
+std::unordered_map<XrSwapchain, std::pair<int, std::vector<XrSwapchainImageVulkanKHR>>> swapchainImagesMap{};
 
 
-	// chosen:
-	static XrViewConfigurationType view_type = XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM;
-	std::vector<XrViewConfigurationView> m_viewConfigurationViews; // [left, right]
+quaternion q_from_oxr(const XrQuaternionf& qq) {
+	auto q = *(quaternion*)&qq;
+	q.x = -q.x;
+	q.y = -q.y;
+	return q;
+}
 
-	std::vector<SwapchainInfo> m_colorSwapchainInfos = {};
-	std::vector<SwapchainInfo> m_depthSwapchainInfos = {};
+vec3 pos_from_oxr(const XrVector3f& v) {
+	return vec3(v.x, v.y, -v.z) * instance->scale;
+}
 
-	struct RenderLayerInfo {
-		XrTime predictedDisplayTime = 0;
-		std::vector<XrCompositionLayerBaseHeader *> layers;
-		XrCompositionLayerProjection layerProjection = {XR_TYPE_COMPOSITION_LAYER_PROJECTION};
-		std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
-	};
+XrSwapchainImageBaseHeader *AllocateSwapchainImageData(XrSwapchain swapchain, int type, uint32_t count) {
+	swapchainImagesMap[swapchain].first = type;
+	swapchainImagesMap[swapchain].second.resize(count, {XR_TYPE_SWAPCHAIN_IMAGE_VULKAN_KHR});
+	return reinterpret_cast<XrSwapchainImageBaseHeader *>(swapchainImagesMap[swapchain].second.data());
+}
+XrSwapchainImageBaseHeader* GetSwapchainImageData(XrSwapchain swapchain, uint32_t index) {
+	return (XrSwapchainImageBaseHeader*)&swapchainImagesMap[swapchain].second[index];
+}
+// XR_DOCS_TAG_BEGIN_GetSwapchainImage_Vulkan
+void* GetSwapchainImage(XrSwapchain swapchain, uint32_t index) {
+	VkImage image = swapchainImagesMap[swapchain].second[index].image;
+	VkImageLayout layout = swapchainImagesMap[swapchain].first == 0 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	imageStates[image] = layout;
+	return (void *)image;
+}
 
-	XrFrameState frameState;
-	RenderLayerInfo renderLayerInfo;
-	Array<XrView> cur_views;
-	uint32_t viewCount = 0;
-	int viewWidth, viewHeight;
-	SwapchainInfo *colorSwapchainInfo;
-	SwapchainInfo *depthSwapchainInfo;
-	uint32_t colorImageIndex = 0;
-	uint32_t depthImageIndex = 0;
+void *CreateImageView(const ImageViewCreateInfo &imageViewCI) {
+	VkImageView imageView{};
+	VkImageViewCreateInfo vkImageViewCI;
+	vkImageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	vkImageViewCI.pNext = nullptr;
+	vkImageViewCI.flags = 0;
+	vkImageViewCI.image = (VkImage)imageViewCI.image;
+	vkImageViewCI.viewType = VkImageViewType(imageViewCI.view);
+	vkImageViewCI.format = (VkFormat)imageViewCI.format;
+	vkImageViewCI.components = {VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
+	vkImageViewCI.subresourceRange.aspectMask = VkImageAspectFlagBits(imageViewCI.aspect);
+	vkImageViewCI.subresourceRange.baseMipLevel = imageViewCI.baseMipLevel;
+	vkImageViewCI.subresourceRange.levelCount = imageViewCI.levelCount;
+	vkImageViewCI.subresourceRange.baseArrayLayer = imageViewCI.baseArrayLayer;
+	vkImageViewCI.subresourceRange.layerCount = imageViewCI.layerCount;
+	if (vkCreateImageView(vulkan::default_device->device, &vkImageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		throw Exception("Failed to create ImageView.");
+
+	imageViewResources[imageView] = imageViewCI;
+	return (void *)imageView;
+}
+
+PFN_xrGetVulkanGraphicsRequirementsKHR xrGetVulkanGraphicsRequirementsKHR = nullptr;
+PFN_xrGetVulkanInstanceExtensionsKHR xrGetVulkanInstanceExtensionsKHR = nullptr;
+PFN_xrGetVulkanDeviceExtensionsKHR xrGetVulkanDeviceExtensionsKHR = nullptr;
+PFN_xrGetVulkanGraphicsDeviceKHR xrGetVulkanGraphicsDeviceKHR = nullptr;
+
+XrActionSet main_action_set;
+XrAction action_button_a, action_button_b, action_trigger, action_thumb_stick;
+XrActionStateFloat trigger_state[2] = {{XR_TYPE_ACTION_STATE_FLOAT}, {XR_TYPE_ACTION_STATE_FLOAT}};
+XrActionStateVector2f thumb_stick_state[2] = {{XR_TYPE_ACTION_STATE_VECTOR2F}, {XR_TYPE_ACTION_STATE_VECTOR2F}};
+XrActionStateBoolean button_a_state[2] = {{XR_TYPE_ACTION_STATE_BOOLEAN}, {XR_TYPE_ACTION_STATE_BOOLEAN}};
+XrActionStateBoolean button_b_state[2] = {{XR_TYPE_ACTION_STATE_BOOLEAN}, {XR_TYPE_ACTION_STATE_BOOLEAN}};
+XrAction m_buzzAction;
+float m_buzz[2] = {0, 0};
+XrAction action_palm_pose;
+XrPath hand_paths[2] = {0, 0};
+XrSpace hand_pose_space[2];
+XrActionStatePose hand_pose_state[2] = {{XR_TYPE_ACTION_STATE_POSE}, {XR_TYPE_ACTION_STATE_POSE}};
+XrPosef hand_pose[2] = {
+	{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0}},
+	{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0}}};
+
+
+// chosen:
+static XrViewConfigurationType view_type = XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM;
+std::vector<XrViewConfigurationView> m_viewConfigurationViews; // [left, right]
+
+std::vector<SwapchainInfo> m_colorSwapchainInfos = {};
+std::vector<SwapchainInfo> m_depthSwapchainInfos = {};
+
+struct RenderLayerInfo {
+	XrTime predictedDisplayTime = 0;
+	std::vector<XrCompositionLayerBaseHeader *> layers;
+	XrCompositionLayerProjection layerProjection = {XR_TYPE_COMPOSITION_LAYER_PROJECTION};
+	std::vector<XrCompositionLayerProjectionView> layerProjectionViews;
+};
+
+XrFrameState frameState;
+RenderLayerInfo renderLayerInfo;
+Array<XrView> cur_views;
+uint32_t viewCount = 0;
+int viewWidth, viewHeight;
+SwapchainInfo *colorSwapchainInfo;
+SwapchainInfo *depthSwapchainInfo;
+uint32_t colorImageIndex = 0;
+uint32_t depthImageIndex = 0;
 
 
 void CreateActionSet();
@@ -357,230 +346,226 @@ void Instance::create_session(yrenderer::Context* ctx) {
 }
 
 
-    // XR_DOCS_TAG_BEGIN_CreateXrPath
-    XrPath CreateXrPath(const char *path_string) {
-        XrPath xrPath;
-        OPENXR_CHECK(xrStringToPath(xrInstance, path_string, &xrPath), "Failed to create XrPath from string.");
-        return xrPath;
-    }
-    string FromXrPath(XrPath path) {
-        uint32_t strl;
-        char text[XR_MAX_PATH_LENGTH];
-        XrResult res;
-        res = xrPathToString(xrInstance, path, XR_MAX_PATH_LENGTH, &strl, text);
-        string str;
-        if (res == XR_SUCCESS) {
-            str = text;
-        } else {
-            OPENXR_CHECK(res, "Failed to retrieve path.");
-        }
-        return str;
-    }
+XrPath CreateXrPath(const char *path_string) {
+	XrPath xrPath;
+	OPENXR_CHECK(xrStringToPath(xrInstance, path_string, &xrPath), "Failed to create XrPath from string.");
+	return xrPath;
+}
 
-    void CreateActionSet() {
-        XrActionSetCreateInfo actionSetCI{XR_TYPE_ACTION_SET_CREATE_INFO};
-        // The internal name the runtime uses for this Action Set.
-        strncpy(actionSetCI.actionSetName, "openxr-tutorial-actionset", XR_MAX_ACTION_SET_NAME_SIZE);
-        // Localized names are required so there is a human-readable action name to show the user if they are rebinding Actions in an options screen.
-        strncpy(actionSetCI.localizedActionSetName, "OpenXR Tutorial ActionSet", XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE);
-        // Set a priority: this comes into play when we have multiple Action Sets, and determines which Action takes priority in binding to a specific input.
-        actionSetCI.priority = 0;
+string FromXrPath(XrPath path) {
+	uint32_t strl;
+	char text[XR_MAX_PATH_LENGTH];
+	XrResult res;
+	res = xrPathToString(xrInstance, path, XR_MAX_PATH_LENGTH, &strl, text);
+	string str;
+	if (res == XR_SUCCESS)
+		str = text;
+	else
+		OPENXR_CHECK(res, "Failed to retrieve path.");
+	return str;
+}
 
-        OPENXR_CHECK(xrCreateActionSet(xrInstance, &actionSetCI, &m_actionSet), "Failed to create ActionSet.");
-        // XR_DOCS_TAG_END_CreateActionSet
+void CreateActionSet() {
+	XrActionSetCreateInfo actionSetCI{XR_TYPE_ACTION_SET_CREATE_INFO};
+	strncpy(actionSetCI.actionSetName, "main-actionset", XR_MAX_ACTION_SET_NAME_SIZE);
+	strncpy(actionSetCI.localizedActionSetName, "Main ActionSet", XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE);
+	actionSetCI.priority = 0;
 
-        // XR_DOCS_TAG_BEGIN_CreateActionLambda
-        auto CreateAction = [](XrAction &xrAction, const char *name, XrActionType xrActionType, Array<const char *> subaction_paths = {}) -> void {
-            XrActionCreateInfo actionCI{XR_TYPE_ACTION_CREATE_INFO};
-            // The type of action: float input, pose, haptic output etc.
-            actionCI.actionType = xrActionType;
-            // Subaction paths, e.g. left and right hand. To distinguish the same action performed on different devices.
-            Array<XrPath> subaction_xrpaths;
-            for (auto p : subaction_paths) {
-                subaction_xrpaths.add(CreateXrPath(p));
-            }
-            actionCI.countSubactionPaths = (uint32_t)subaction_xrpaths.num;
-            actionCI.subactionPaths = &subaction_xrpaths[0];
-            // The internal name the runtime uses for this Action.
-            strncpy(actionCI.actionName, name, XR_MAX_ACTION_NAME_SIZE);
-            // Localized names are required so there is a human-readable action name to show the user if they are rebinding the Action in an options screen.
-            strncpy(actionCI.localizedActionName, name, XR_MAX_LOCALIZED_ACTION_NAME_SIZE);
-            OPENXR_CHECK(xrCreateAction(m_actionSet, &actionCI, &xrAction), "Failed to create Action.");
-        };
-        // An Action for grabbing cubes.
-        CreateAction(m_grabCubeAction, "grab-cube", XR_ACTION_TYPE_FLOAT_INPUT, {"/user/hand/left", "/user/hand/right"});
-        CreateAction(m_spawnCubeAction, "spawn-cube", XR_ACTION_TYPE_BOOLEAN_INPUT);
-        CreateAction(m_changeColorAction, "change-color", XR_ACTION_TYPE_BOOLEAN_INPUT, {"/user/hand/left", "/user/hand/right"});
-        // An Action for the position of the palm of the user's hand - appropriate for the location of a grabbing Actions.
-        CreateAction(m_palmPoseAction, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, {"/user/hand/left", "/user/hand/right"});
-        // An Action for a vibration output on one or other hand.
-        CreateAction(m_buzzAction, "buzz", XR_ACTION_TYPE_VIBRATION_OUTPUT, {"/user/hand/left", "/user/hand/right"});
-        // For later convenience we create the XrPaths for the subaction path names.
-        m_handPaths[0] = CreateXrPath("/user/hand/left");
-        m_handPaths[1] = CreateXrPath("/user/hand/right");
-    }
+	OPENXR_CHECK(xrCreateActionSet(xrInstance, &actionSetCI, &main_action_set), "Failed to create ActionSet.");
 
-    void SuggestBindings() {
-        auto SuggestBindings = [](const char *profile_path, Array<XrActionSuggestedBinding> bindings) -> bool {
-            // The application can call xrSuggestInteractionProfileBindings once per interaction profile that it supports.
-            XrInteractionProfileSuggestedBinding interactionProfileSuggestedBinding{XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING};
-            interactionProfileSuggestedBinding.interactionProfile = CreateXrPath(profile_path);
-            interactionProfileSuggestedBinding.suggestedBindings = &bindings[0];
-            interactionProfileSuggestedBinding.countSuggestedBindings = (uint32_t)bindings.num;
-            if (xrSuggestInteractionProfileBindings(xrInstance, &interactionProfileSuggestedBinding) == XrResult::XR_SUCCESS)
-                return true;
-            msg_write(format("Failed to suggest bindings with %s", profile_path));
-            return false;
-        };
-        // XR_DOCS_TAG_END_SuggestBindings1
-        // XR_DOCS_TAG_BEGIN_SuggestBindings2
-        bool any_ok = false;
-        // Each Action here has two paths, one for each SubAction path.
-        any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {{m_changeColorAction, CreateXrPath("/user/hand/left/input/select/click")},
-                                                                                  {m_grabCubeAction, CreateXrPath("/user/hand/right/input/select/click")},
-                                                                                  {m_spawnCubeAction, CreateXrPath("/user/hand/right/input/menu/click")},
-                                                                                  {m_palmPoseAction, CreateXrPath("/user/hand/left/input/grip/pose")},
-                                                                                  {m_palmPoseAction, CreateXrPath("/user/hand/right/input/grip/pose")},
-                                                                                  {m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
-                                                                                  {m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});
-        // XR_DOCS_TAG_END_SuggestBindings2
-        // XR_DOCS_TAG_BEGIN_SuggestTouchNativeBindings
-        // Each Action here has two paths, one for each SubAction path.
-        any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {{m_grabCubeAction, CreateXrPath("/user/hand/left/input/squeeze/value")},
-                                                                                    {m_grabCubeAction, CreateXrPath("/user/hand/right/input/squeeze/value")},
-                                                                                    {m_spawnCubeAction, CreateXrPath("/user/hand/right/input/a/click")},
-                                                                                    {m_changeColorAction, CreateXrPath("/user/hand/left/input/trigger/value")},
-                                                                                    {m_changeColorAction, CreateXrPath("/user/hand/right/input/trigger/value")},
-                                                                                    {m_palmPoseAction, CreateXrPath("/user/hand/left/input/grip/pose")},
-                                                                                    {m_palmPoseAction, CreateXrPath("/user/hand/right/input/grip/pose")},
-                                                                                    {m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
-                                                                                    {m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});
-        // XR_DOCS_TAG_END_SuggestTouchNativeBindings
-        // XR_DOCS_TAG_BEGIN_SuggestBindings3
-        if (!any_ok) {
-            exit(1);
-        }
-    }
-    void RecordCurrentBindings() {
-        if (m_session) {
-            // now we are ready to:
-            XrInteractionProfileState interactionProfile = {XR_TYPE_INTERACTION_PROFILE_STATE, 0, 0};
-            // for each action, what is the binding?
-            OPENXR_CHECK(xrGetCurrentInteractionProfile(m_session, m_handPaths[0], &interactionProfile), "Failed to get profile.");
-            if (interactionProfile.interactionProfile) {
-                msg_write("user/hand/left ActiveProfile " + FromXrPath(interactionProfile.interactionProfile));
-            }
-            OPENXR_CHECK(xrGetCurrentInteractionProfile(m_session, m_handPaths[1], &interactionProfile), "Failed to get profile.");
-            if (interactionProfile.interactionProfile) {
-                msg_write("user/hand/right ActiveProfile " + FromXrPath(interactionProfile.interactionProfile));
-            }
-        }
-    }
-    // XR_DOCS_TAG_END_SuggestBindings3
-    // XR_DOCS_TAG_BEGIN_CreateActionPoses
-    void CreateActionPoses() {
-        // Create an xrSpace for a pose action.
-        auto CreateActionPoseSpace = [](XrSession session, XrAction xrAction, const char *subaction_path = nullptr) -> XrSpace {
-            XrSpace xrSpace;
-            const XrPosef xrPoseIdentity = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}};
-            // Create frame of reference for a pose action
-            XrActionSpaceCreateInfo actionSpaceCI{XR_TYPE_ACTION_SPACE_CREATE_INFO};
-            actionSpaceCI.action = xrAction;
-            actionSpaceCI.poseInActionSpace = xrPoseIdentity;
-            if (subaction_path)
-                actionSpaceCI.subactionPath = CreateXrPath(subaction_path);
-            OPENXR_CHECK(xrCreateActionSpace(session, &actionSpaceCI, &xrSpace), "Failed to create ActionSpace.");
-            return xrSpace;
-        };
-        m_handPoseSpace[0] = CreateActionPoseSpace(m_session, m_palmPoseAction, "/user/hand/left");
-        m_handPoseSpace[1] = CreateActionPoseSpace(m_session, m_palmPoseAction, "/user/hand/right");
-    }
-    // XR_DOCS_TAG_END_CreateActionPoses
-    // XR_DOCS_TAG_BEGIN_AttachActionSet
-    void AttachActionSet() {
-        // Attach the action set we just made to the session. We could attach multiple action sets!
-        XrSessionActionSetsAttachInfo actionSetAttachInfo{XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO};
-        actionSetAttachInfo.countActionSets = 1;
-        actionSetAttachInfo.actionSets = &m_actionSet;
-        OPENXR_CHECK(xrAttachSessionActionSets(m_session, &actionSetAttachInfo), "Failed to attach ActionSet to Session.");
-    }
+	auto CreateAction = [](XrAction& action, const char* name, XrActionType type, const Array<const char *>& subaction_paths = {}) -> void {
+		XrActionCreateInfo actionCI{XR_TYPE_ACTION_CREATE_INFO};
+		actionCI.actionType = type;
+		Array<XrPath> subaction_xrpaths;
+		for (auto p : subaction_paths)
+			subaction_xrpaths.add(CreateXrPath(p));
+		actionCI.countSubactionPaths = (uint32_t)subaction_xrpaths.num;
+		actionCI.subactionPaths = &subaction_xrpaths[0];
+		strncpy(actionCI.actionName, name, XR_MAX_ACTION_NAME_SIZE);
+		strncpy(actionCI.localizedActionName, name, XR_MAX_LOCALIZED_ACTION_NAME_SIZE);
+		OPENXR_CHECK(xrCreateAction(main_action_set, &actionCI, &action), "Failed to create Action.");
+	};
+	CreateAction(action_trigger, "trigger", XR_ACTION_TYPE_FLOAT_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_thumb_stick, "thumb-stick", XR_ACTION_TYPE_VECTOR2F_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_button_a, "button-a", XR_ACTION_TYPE_BOOLEAN_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_button_b, "button-b", XR_ACTION_TYPE_BOOLEAN_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(action_palm_pose, "palm-pose", XR_ACTION_TYPE_POSE_INPUT, {"/user/hand/left", "/user/hand/right"});
+	CreateAction(m_buzzAction, "buzz", XR_ACTION_TYPE_VIBRATION_OUTPUT, {"/user/hand/left", "/user/hand/right"});
+	hand_paths[0] = CreateXrPath("/user/hand/left");
+	hand_paths[1] = CreateXrPath("/user/hand/right");
+}
 
-    void PollActions(XrTime predictedTime) {
-        // Update our action set with up-to-date input data.
-        // First, we specify the actionSet we are polling.
-        XrActiveActionSet activeActionSet{};
-        activeActionSet.actionSet = m_actionSet;
-        activeActionSet.subactionPath = XR_NULL_PATH;
-        // Now we sync the Actions to make sure they have current data.
-        XrActionsSyncInfo actionsSyncInfo{XR_TYPE_ACTIONS_SYNC_INFO};
-        actionsSyncInfo.countActiveActionSets = 1;
-        actionsSyncInfo.activeActionSets = &activeActionSet;
-        OPENXR_CHECK(xrSyncActions(m_session, &actionsSyncInfo), "Failed to sync Actions.");
-        // XR_DOCS_TAG_END_PollActions
-        // XR_DOCS_TAG_BEGIN_PollActions2
-        XrActionStateGetInfo actionStateGetInfo{XR_TYPE_ACTION_STATE_GET_INFO};
-        // We pose a single Action, twice - once for each subAction Path.
-        actionStateGetInfo.action = m_palmPoseAction;
-        // For each hand, get the pose state if possible.
-        for (int i = 0; i < 2; i++) {
-            // Specify the subAction Path.
-            actionStateGetInfo.subactionPath = m_handPaths[i];
-            OPENXR_CHECK(xrGetActionStatePose(m_session, &actionStateGetInfo, &m_handPoseState[i]), "Failed to get Pose State.");
-        	//msg_write(m_handPoseState[i].isActive);
-            if (m_handPoseState[i].isActive) {
-                XrSpaceLocation spaceLocation{XR_TYPE_SPACE_LOCATION};
-                XrResult res = xrLocateSpace(m_handPoseSpace[i], m_localSpace, predictedTime, &spaceLocation);
-                if (XR_UNQUALIFIED_SUCCESS(res) &&
-                    (spaceLocation.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 &&
-                    (spaceLocation.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
-                    m_handPose[i] = spaceLocation.pose;
-                } else {
-                    m_handPoseState[i].isActive = false;
-                }
-            }
-        	instance->controllers[i].active = m_handPoseState[i].isActive;
-        	instance->controllers[i].ang = q_from_oxr(m_handPose[i].orientation);
-        	instance->controllers[i].pos = pos_from_oxr(m_handPose[i].position);
-        }
+void SuggestBindings() {
+	auto SuggestBindings = [] (const char* profile_path, const Array<XrActionSuggestedBinding>& bindings) -> bool {
+		// The application can call xrSuggestInteractionProfileBindings once per interaction profile that it supports.
+		XrInteractionProfileSuggestedBinding interactionProfileSuggestedBinding{XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING};
+		interactionProfileSuggestedBinding.interactionProfile = CreateXrPath(profile_path);
+		interactionProfileSuggestedBinding.suggestedBindings = &bindings[0];
+		interactionProfileSuggestedBinding.countSuggestedBindings = (uint32_t)bindings.num;
+		if (xrSuggestInteractionProfileBindings(xrInstance, &interactionProfileSuggestedBinding) == XrResult::XR_SUCCESS)
+			return true;
+		msg_write(format("Failed to suggest bindings with %s", profile_path));
+		return false;
+	};
+	bool any_ok = false;
+	any_ok |= SuggestBindings("/interaction_profiles/khr/simple_controller", {
+//			{action_trigger, CreateXrPath("/user/hand/left/input/trigger/value")},
+//			{action_trigger, CreateXrPath("/user/hand/right/input/trigger/value")},
+//			{action_thumb_stick, CreateXrPath("/user/hand/left/input/thumbstick")},
+//			{action_thumb_stick, CreateXrPath("/user/hand/right/input/thumbstick")},
+			{action_button_a, CreateXrPath("/user/hand/left/input/a/click")},
+			{action_button_a, CreateXrPath("/user/hand/right/input/a/click")},
+			{action_button_b, CreateXrPath("/user/hand/left/input/b/click")},
+			{action_button_b, CreateXrPath("/user/hand/right/input/b/click")},
+			{action_palm_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
+			{action_palm_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
+			{m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
+{m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});
+	any_ok |= SuggestBindings("/interaction_profiles/valve/index_controller", {
+			{action_trigger, CreateXrPath("/user/hand/left/input/trigger/value")},
+			{action_trigger, CreateXrPath("/user/hand/right/input/trigger/value")},
+			{action_thumb_stick, CreateXrPath("/user/hand/left/input/thumbstick")},
+			{action_thumb_stick, CreateXrPath("/user/hand/right/input/thumbstick")},
+			{action_button_a, CreateXrPath("/user/hand/left/input/a/click")},
+			{action_button_a, CreateXrPath("/user/hand/right/input/a/click")},
+			{action_button_b, CreateXrPath("/user/hand/left/input/b/click")},
+			{action_button_b, CreateXrPath("/user/hand/right/input/b/click")},
+			{action_palm_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
+			{action_palm_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
+			{m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
+			{m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});
+	// Each Action here has two paths, one for each SubAction path.
+/*	any_ok |= SuggestBindings("/interaction_profiles/oculus/touch_controller", {
+			{m_grabCubeAction, CreateXrPath("/user/hand/left/input/squeeze/value")},
+			{m_grabCubeAction, CreateXrPath("/user/hand/right/input/squeeze/value")},
+			{action_button_a, CreateXrPath("/user/hand/right/input/a/click")},
+			{action_trigger, CreateXrPath("/user/hand/left/input/trigger/value")},
+			{action_trigger, CreateXrPath("/user/hand/right/input/trigger/value")},
+			{action_palm_pose, CreateXrPath("/user/hand/left/input/grip/pose")},
+			{action_palm_pose, CreateXrPath("/user/hand/right/input/grip/pose")},
+			{m_buzzAction, CreateXrPath("/user/hand/left/output/haptic")},
+			{m_buzzAction, CreateXrPath("/user/hand/right/output/haptic")}});*/
+	if (!any_ok)
+		exit(1);
+}
 
-		//msg_write(str(*(vec3*)&m_handPose[0].position));
-		//msg_write(str(*(quaternion*)&m_handPose[0].orientation));
+void RecordCurrentBindings() {
+	if (m_session) {
+		XrInteractionProfileState interactionProfile = {XR_TYPE_INTERACTION_PROFILE_STATE, nullptr, 0};
+		// for each action, what is the binding?
+		OPENXR_CHECK(xrGetCurrentInteractionProfile(m_session, hand_paths[0], &interactionProfile), "Failed to get profile.");
+		if (interactionProfile.interactionProfile)
+			msg_write("user/hand/left ActiveProfile " + FromXrPath(interactionProfile.interactionProfile));
+		OPENXR_CHECK(xrGetCurrentInteractionProfile(m_session, hand_paths[1], &interactionProfile), "Failed to get profile.");
+		if (interactionProfile.interactionProfile)
+			msg_write("user/hand/right ActiveProfile " + FromXrPath(interactionProfile.interactionProfile));
+	}
+}
 
-        // XR_DOCS_TAG_END_PollActions2
-        // XR_DOCS_TAG_BEGIN_PollActions3
-        for (int i = 0; i < 2; i++) {
-            actionStateGetInfo.action = m_grabCubeAction;
-            actionStateGetInfo.subactionPath = m_handPaths[i];
-            OPENXR_CHECK(xrGetActionStateFloat(m_session, &actionStateGetInfo, &m_grabState[i]), "Failed to get Float State of Grab Cube action.");
-        }
-        for (int i = 0; i < 2; i++) {
-            actionStateGetInfo.action = m_changeColorAction;
-            actionStateGetInfo.subactionPath = m_handPaths[i];
-            OPENXR_CHECK(xrGetActionStateBoolean(m_session, &actionStateGetInfo, &m_changeColorState[i]), "Failed to get Boolean State of Change Color action.");
-        }
-        // The Spawn Cube action has no subActionPath:
-        {
-            actionStateGetInfo.action = m_spawnCubeAction;
-            actionStateGetInfo.subactionPath = 0;
-            OPENXR_CHECK(xrGetActionStateBoolean(m_session, &actionStateGetInfo, &m_spawnCubeState), "Failed to get Boolean State of Spawn Cube action.");
-        }
-        // XR_DOCS_TAG_END_PollActions3
-        // XR_DOCS_TAG_BEGIN_PollActions4
-        for (int i = 0; i < 2; i++) {
-            m_buzz[i] *= 0.5f;
-            if (m_buzz[i] < 0.01f)
-                m_buzz[i] = 0.0f;
-            XrHapticVibration vibration{XR_TYPE_HAPTIC_VIBRATION};
-            vibration.amplitude = m_buzz[i];
-            vibration.duration = XR_MIN_HAPTIC_DURATION;
-            vibration.frequency = XR_FREQUENCY_UNSPECIFIED;
+void CreateActionPoses() {
+	// Create an xrSpace for a pose action.
+	auto CreateActionPoseSpace = [] (XrSession session, XrAction action, const char *subaction_path = nullptr) -> XrSpace {
+		XrSpace space;
+		const XrPosef identity = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}};
+		// Create frame of reference for a pose action
+		XrActionSpaceCreateInfo actionSpaceCI{XR_TYPE_ACTION_SPACE_CREATE_INFO};
+		actionSpaceCI.action = action;
+		actionSpaceCI.poseInActionSpace = identity;
+		if (subaction_path)
+			actionSpaceCI.subactionPath = CreateXrPath(subaction_path);
+		OPENXR_CHECK(xrCreateActionSpace(session, &actionSpaceCI, &space), "Failed to create ActionSpace.");
+		return space;
+	};
+	hand_pose_space[0] = CreateActionPoseSpace(m_session, action_palm_pose, "/user/hand/left");
+	hand_pose_space[1] = CreateActionPoseSpace(m_session, action_palm_pose, "/user/hand/right");
+}
 
-            XrHapticActionInfo hapticActionInfo{XR_TYPE_HAPTIC_ACTION_INFO};
-            hapticActionInfo.action = m_buzzAction;
-            hapticActionInfo.subactionPath = m_handPaths[i];
-            OPENXR_CHECK(xrApplyHapticFeedback(m_session, &hapticActionInfo, (XrHapticBaseHeader *)&vibration), "Failed to apply haptic feedback.");
-        }
-    }
+void AttachActionSet() {
+	XrSessionActionSetsAttachInfo actionSetAttachInfo{XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO};
+	actionSetAttachInfo.countActionSets = 1;
+	actionSetAttachInfo.actionSets = &main_action_set;
+	OPENXR_CHECK(xrAttachSessionActionSets(m_session, &actionSetAttachInfo), "Failed to attach ActionSet to Session.");
+}
+
+void PollActions(XrTime predictedTime) {
+	// Update our action set with up-to-date input data.
+	// First, we specify the actionSet we are polling.
+	XrActiveActionSet activeActionSet{};
+	activeActionSet.actionSet = main_action_set;
+	activeActionSet.subactionPath = XR_NULL_PATH;
+	// Now we sync the Actions to make sure they have current data.
+	XrActionsSyncInfo actionsSyncInfo{XR_TYPE_ACTIONS_SYNC_INFO};
+	actionsSyncInfo.countActiveActionSets = 1;
+	actionsSyncInfo.activeActionSets = &activeActionSet;
+	OPENXR_CHECK(xrSyncActions(m_session, &actionsSyncInfo), "Failed to sync Actions.");
+	// XR_DOCS_TAG_END_PollActions
+	// XR_DOCS_TAG_BEGIN_PollActions2
+	XrActionStateGetInfo actionStateGetInfo{XR_TYPE_ACTION_STATE_GET_INFO};
+	// We pose a single Action, twice - once for each subAction Path.
+	actionStateGetInfo.action = action_palm_pose;
+	// For each hand, get the pose state if possible.
+	for (int i=0; i<2; i++) {
+		// Specify the subAction Path.
+		actionStateGetInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrGetActionStatePose(m_session, &actionStateGetInfo, &hand_pose_state[i]), "Failed to get Pose State.");
+		//msg_write(m_handPoseState[i].isActive);
+		if (hand_pose_state[i].isActive) {
+			XrSpaceLocation spaceLocation{XR_TYPE_SPACE_LOCATION};
+			XrResult res = xrLocateSpace(hand_pose_space[i], m_localSpace, predictedTime, &spaceLocation);
+			if (XR_UNQUALIFIED_SUCCESS(res) and (spaceLocation.locationFlags & XR_SPACE_LOCATION_POSITION_VALID_BIT) != 0 and (spaceLocation.locationFlags & XR_SPACE_LOCATION_ORIENTATION_VALID_BIT) != 0) {
+				hand_pose[i] = spaceLocation.pose;
+			} else {
+				hand_pose_state[i].isActive = false;
+			}
+		}
+		instance->controllers[i].active = hand_pose_state[i].isActive;
+		instance->controllers[i].ang = q_from_oxr(hand_pose[i].orientation);
+		instance->controllers[i].pos = pos_from_oxr(hand_pose[i].position);
+	}
+
+	//msg_write(str(*(vec3*)&m_handPose[0].position));
+	//msg_write(str(*(quaternion*)&m_handPose[0].orientation));
+
+	for (int i=0; i<2; i++) {
+		actionStateGetInfo.action = action_trigger;
+		actionStateGetInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrGetActionStateFloat(m_session, &actionStateGetInfo, &trigger_state[i]), "Failed to get Float State of Trigger action.");
+		instance->controllers[i].trigger = trigger_state[i].currentState;
+	}
+	for (int i=0; i<2; i++) {
+		actionStateGetInfo.action = action_thumb_stick;
+		actionStateGetInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrGetActionStateVector2f(m_session, &actionStateGetInfo, &thumb_stick_state[i]), "Failed to get Vec2 State of Thumbstick action.");
+		instance->controllers[i].thumb_stick.x = thumb_stick_state[i].currentState.x;
+		instance->controllers[i].thumb_stick.y = thumb_stick_state[i].currentState.y;
+	}
+	for (int i=0; i<2; i++) {
+		actionStateGetInfo.action = action_button_a;
+		actionStateGetInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrGetActionStateBoolean(m_session, &actionStateGetInfo, &button_a_state[i]), "Failed to get Boolean State of Button A action.");
+		instance->controllers[i].button_a = button_a_state[i].currentState;
+	}
+	for (int i=0; i<2; i++) {
+		actionStateGetInfo.action = action_button_b;
+		actionStateGetInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrGetActionStateBoolean(m_session, &actionStateGetInfo, &button_b_state[i]), "Failed to get Boolean State of Button B action.");
+		instance->controllers[i].button_b = button_b_state[i].currentState;
+	}
+	for (int i=0; i<2; i++) {
+		m_buzz[i] *= 0.5f;
+		if (m_buzz[i] < 0)
+			m_buzz[i] = 0;
+		XrHapticVibration vibration{XR_TYPE_HAPTIC_VIBRATION};
+		vibration.amplitude = m_buzz[i];
+		vibration.duration = XR_MIN_HAPTIC_DURATION;
+		vibration.frequency = XR_FREQUENCY_UNSPECIFIED;
+
+		XrHapticActionInfo hapticActionInfo{XR_TYPE_HAPTIC_ACTION_INFO};
+		hapticActionInfo.action = m_buzzAction;
+		hapticActionInfo.subactionPath = hand_paths[i];
+		OPENXR_CHECK(xrApplyHapticFeedback(m_session, &hapticActionInfo, (XrHapticBaseHeader *)&vibration), "Failed to apply haptic feedback.");
+	}
+}
 
 void PollEvents() {
 
@@ -846,12 +831,12 @@ void GetEnvironmentBlendModes() {
 	// Retrieves the available blend modes. The first call gets the count of the array that will be returned. The next call fills out the array.
 	uint32_t environmentBlendModeCount = 0;
 	OPENXR_CHECK(xrEnumerateEnvironmentBlendModes(xrInstance, systemID, view_type, 0, &environmentBlendModeCount, nullptr), "Failed to enumerate EnvironmentBlend Modes.");
-	m_environmentBlendModes.resize(environmentBlendModeCount);
-	OPENXR_CHECK(xrEnumerateEnvironmentBlendModes(xrInstance, systemID, view_type, environmentBlendModeCount, &environmentBlendModeCount, m_environmentBlendModes.data()), "Failed to enumerate EnvironmentBlend Modes.");
+	m_environmentBlendModes.resize((int)environmentBlendModeCount);
+	OPENXR_CHECK(xrEnumerateEnvironmentBlendModes(xrInstance, systemID, view_type, environmentBlendModeCount, &environmentBlendModeCount, &m_environmentBlendModes[0]), "Failed to enumerate EnvironmentBlend Modes.");
 
 	// Pick the first application supported blend mode supported by the hardware.
 	for (const XrEnvironmentBlendMode &environmentBlendMode : m_applicationEnvironmentBlendModes) {
-		if (std::find(m_environmentBlendModes.begin(), m_environmentBlendModes.end(), environmentBlendMode) != m_environmentBlendModes.end()) {
+		if (base::find(m_environmentBlendModes, environmentBlendMode)) {
 			m_environmentBlendMode = environmentBlendMode;
 			break;
 		}

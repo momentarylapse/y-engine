@@ -25,7 +25,9 @@ bool VRDevice::clicked(int index) const {
 
 
 float VRDevice::axis(int index) const {
-	return 0;
+	if (index < 0 or index >= 12)
+		return 0;
+	return _axis[index];
 }
 
 void init_vr() {
@@ -43,6 +45,12 @@ void iterate_vr() {
 		auto cc = get_vr_device(i == 1 ? VRDeviceRole::ControllerRight : VRDeviceRole::ControllerLeft);
 		cc->pos = c.pos;
 		cc->ang = c.ang;
+		cc->button_mask = c.button_a << 4 | c.button_b << 5;
+		if (c.trigger > 0.5f)
+			cc->button_mask |= 1 << 0;
+		cc->_axis[1] = c.trigger;
+		cc->_axis[10] = c.thumb_stick.x;
+		cc->_axis[11] = c.thumb_stick.y;
 	}
 
 }
@@ -57,23 +65,23 @@ VRDevice* get_vr_device(VRDeviceRole role) {
 
 #else
 
-	void init_vr() {}
+void init_vr() {}
 
-	void iterate_vr() {}
+void iterate_vr() {}
 
-	VRDevice* get_vr_device(VRDeviceRole role) {
+VRDevice* get_vr_device(VRDeviceRole role) {
 	return nullptr;
 }
 
-	float VRDevice::axis(int index) const {
+float VRDevice::axis(int index) const {
 	return 0;
 }
 
-	bool VRDevice::button(int b) const {
+bool VRDevice::button(int b) const {
 	return false;
 }
 
-	bool VRDevice::clicked(int b) const {
+bool VRDevice::clicked(int b) const {
 	return false;
 }
 
