@@ -194,6 +194,6 @@ struct extern VrDevice
 	func extern axis(a: Axis) -> f32
 
 
-func extern static get_vr_device(role: VrDeviceRole) -> VrDevice*
+func extern static globalref get_vr_device(role: VrDeviceRole) -> VrDevice*
 
 

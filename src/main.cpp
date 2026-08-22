@@ -138,7 +138,7 @@ public:
 			vr::init(app_name, app_name);
 			context = vr::instance->create_yrenderer();
 			vr::instance->create_session(context);
-			vr::instance->scale = 500;
+			vr::instance->scale = config.vr_scale;
 			vr::CreateSwapchains();
 #else
 			throw Exception("no vr support compiled into the engine!");
