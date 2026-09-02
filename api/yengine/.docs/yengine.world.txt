@@ -385,6 +385,21 @@
 	pos = ""
 	radius = ""
 
+[yengine.world.World.create_link_hinge]
+	@info = ""
+	@return = ""
+	a = ""
+	axis = ""
+	b = ""
+	pos = ""
+
+[yengine.world.World.create_link_socket]
+	@info = ""
+	@return = ""
+	a = ""
+	b = ""
+	pos = ""
+
 [yengine.world.World.create_object_multi]
 	@info = ""
 	@return = ""
@@ -438,6 +453,11 @@
 	@info = ""
 	@return = ""
 	index = ""
+
+[yengine.world.World.find_by_name]
+	@info = ""
+	@return = ""
+	name = ""
 
 [yengine.world.World.lights]
 	@info = ""

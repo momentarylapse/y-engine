@@ -290,6 +290,8 @@ class extern RegionRenderer
 		var renderer: Renderer&
 	var regions: Region[]
 	func extern add_region(r: Renderer&, dest: Rect, z: i32)
+	func extern remove_region(r: Renderer*)
+	func extern selfref get_region(r: Renderer*) -> Region*
 
 class extern LightMeter
 	var histogram: i32[]

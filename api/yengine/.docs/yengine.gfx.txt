@@ -1,4 +1,42 @@
 
+[yengine.gfx.Alpha]
+	@info = ""
+
+[yengine.gfx.Alpha.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.gfx.Alpha.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.gfx.Alpha.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.gfx.Api]
+	@info = ""
+
+[yengine.gfx.Api.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.gfx.Api.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.gfx.Api.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
 [yengine.gfx.Buffer]
 	@info = ""
 
@@ -22,6 +60,7 @@
 
 [yengine.gfx.CubeMap]
 	@info = ""
+	depth = ""
 	height = ""
 	width = ""
 
@@ -30,8 +69,28 @@
 	format = ""
 	size = ""
 
+[yengine.gfx.CullMode]
+	@info = ""
+
+[yengine.gfx.CullMode.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.gfx.CullMode.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.gfx.CullMode.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
 [yengine.gfx.DepthBuffer]
 	@info = ""
+	depth = ""
 	height = ""
 	width = ""
 
@@ -40,6 +99,13 @@
 	format = ""
 	h = ""
 	w = ""
+
+[yengine.gfx.DynamicVertexBuffer]
+	@info = ""
+
+[yengine.gfx.DynamicVertexBuffer.__init__]
+	@info = ""
+	format = ""
 
 [yengine.gfx.FrameBuffer]
 	@info = ""
@@ -57,6 +123,12 @@
 [yengine.gfx.FrameBuffer.depth_buffer]
 	@info = ""
 	@return = ""
+
+[yengine.gfx.GfxContext]
+	@info = ""
+
+[yengine.gfx.GfxContext.make_public]
+	@info = ""
 
 [yengine.gfx.ImageTexture]
 	@info = ""
@@ -126,6 +198,7 @@
 
 [yengine.gfx.StorageTexture]
 	@info = ""
+	depth = ""
 	height = ""
 	width = ""
 
@@ -138,6 +211,7 @@
 
 [yengine.gfx.Texture]
 	@info = ""
+	depth = ""
 	height = ""
 	width = ""
 
@@ -191,6 +265,11 @@
 	@info = ""
 	format = ""
 
+[yengine.gfx.VertexBuffer.create_quad]
+	@info = ""
+	d = ""
+	s = ""
+
 [yengine.gfx.VertexBuffer.update]
 	@info = ""
 	data = ""
@@ -211,6 +290,7 @@
 
 [yengine.gfx.VolumeTexture]
 	@info = ""
+	depth = ""
 	height = ""
 	width = ""
 
@@ -221,10 +301,26 @@
 	ny = ""
 	nz = ""
 
+[yengine.gfx.api]
+	@info = ""
+	@return = ""
+
 [yengine.gfx.create_shader]
 	@info = ""
 	@return = ""
 	source = ""
+
+[yengine.gfx.ivec3]
+	@info = ""
+	x = ""
+	y = ""
+	z = ""
+
+[yengine.gfx.ivec3.__init__]
+	@info = ""
+	x = ""
+	y = ""
+	z = ""
 
 [yengine.gfx.load_shader]
 	@info = ""

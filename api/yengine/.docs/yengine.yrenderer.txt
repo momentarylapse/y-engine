@@ -1,0 +1,643 @@
+
+[yengine.yrenderer.CameraParams]
+	@info = ""
+	ang = ""
+	fov = ""
+	max_depth = ""
+	min_depth = ""
+	pos = ""
+
+[yengine.yrenderer.CameraParams.__init__]
+	@info = ""
+	ang = ""
+	fov = ""
+	max_depth = ""
+	min_depth = ""
+	pos = ""
+
+[yengine.yrenderer.CameraParams.projection_matrix]
+	@info = ""
+	@return = ""
+	aspect_ratio = ""
+
+[yengine.yrenderer.CameraParams.view_matrix]
+	@info = ""
+	@return = ""
+
+[yengine.yrenderer.ComputeTask]
+	@info = ""
+	active = ""
+	nx = ""
+	ny = ""
+	nz = ""
+	shader_data = ""
+
+[yengine.yrenderer.ComputeTask.__init__]
+	@info = ""
+	ctx = ""
+	n = ""
+	name = ""
+	shader = ""
+
+[yengine.yrenderer.ComputeTask.bind_image]
+	@info = ""
+	index = ""
+	tex = ""
+
+[yengine.yrenderer.ComputeTask.bind_storage_buffer]
+	@info = ""
+	buf = ""
+	index = ""
+
+[yengine.yrenderer.ComputeTask.bind_texture]
+	@info = ""
+	index = ""
+	tex = ""
+
+[yengine.yrenderer.ComputeTask.bind_uniform_buffer]
+	@info = ""
+	buf = ""
+	index = ""
+
+[yengine.yrenderer.ComputeTask.render]
+	@info = ""
+	params = ""
+
+[yengine.yrenderer.Context]
+	@info = ""
+	context = ""
+	material_manager = ""
+	shader_manager = ""
+	tex_white = ""
+	texture_manager = ""
+
+[yengine.yrenderer.Context.create_internal_material]
+	@info = ""
+	@return = ""
+
+[yengine.yrenderer.Context.create_managers]
+	@info = ""
+	material_dirs = ""
+	shader_dirs = ""
+	texture_dirs = ""
+
+[yengine.yrenderer.Context.create_shader]
+	@info = ""
+	@return = ""
+	source = ""
+
+[yengine.yrenderer.Context.load_material]
+	@info = ""
+	@return = ""
+	path = ""
+
+[yengine.yrenderer.Context.load_shader]
+	@info = ""
+	@return = ""
+	path = ""
+
+[yengine.yrenderer.Context.load_shader_module]
+	@info = ""
+	@return = ""
+	path = ""
+
+[yengine.yrenderer.Context.load_surface_shader]
+	@info = ""
+	@return = ""
+	geometry_module = ""
+	path = ""
+	render_path = ""
+	vertex_module = ""
+
+[yengine.yrenderer.Context.load_texture]
+	@info = ""
+	@return = ""
+	path = ""
+
+[yengine.yrenderer.CubeEmitter]
+	@info = ""
+	ctx = ""
+	material = ""
+	matrix = ""
+
+[yengine.yrenderer.CubeEmitter.__init__]
+	@info = ""
+	ctx = ""
+
+[yengine.yrenderer.CubeEmitter.set_cube]
+	@info = ""
+	cube = ""
+
+[yengine.yrenderer.HDRResolver]
+	@info = ""
+	bloom_factor = ""
+	bloom_levels = ""
+	depth_buffer = ""
+	exposure = ""
+	light_meter = ""
+	texture = ""
+
+[yengine.yrenderer.HDRResolver.BloomLevel]
+	@info = ""
+	tex_out = ""
+
+[yengine.yrenderer.HDRResolver.BloomLevel.__init__]
+	@info = ""
+
+[yengine.yrenderer.HDRResolver.__init__]
+	@info = ""
+	ctx = ""
+	height = ""
+	width = ""
+
+[yengine.yrenderer.LightMeter]
+	@info = ""
+	brightness = ""
+	histogram = ""
+
+[yengine.yrenderer.LightMeter.__init__]
+	@info = ""
+
+[yengine.yrenderer.LightType]
+	@info = ""
+
+[yengine.yrenderer.LightType.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.yrenderer.LightType.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.yrenderer.LightType.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.yrenderer.LineHelper]
+	@info = ""
+
+[yengine.yrenderer.LineHelper.__init__]
+	@info = ""
+
+[yengine.yrenderer.LineHelper.begin_draw]
+	@info = ""
+	params = ""
+	rvd = ""
+
+[yengine.yrenderer.LineHelper.draw_lines]
+	@info = ""
+	contiguous = ""
+	points = ""
+
+[yengine.yrenderer.LineHelper.set_color]
+	@info = ""
+	c = ""
+
+[yengine.yrenderer.LineHelper.set_line_width]
+	@info = ""
+	w = ""
+
+[yengine.yrenderer.LineHelper.set_z]
+	@info = ""
+	enabled = ""
+
+[yengine.yrenderer.LineHelper.start_frame]
+	@info = ""
+	ui_scale = ""
+
+[yengine.yrenderer.Material]
+	@info = ""
+	albedo = ""
+	cast_shadow = ""
+	emission = ""
+	friction = ""
+	metal = ""
+	pass0 = ""
+	roughness = ""
+	shader_data = ""
+	textures = ""
+
+[yengine.yrenderer.Material.Friction]
+	@info = ""
+	jump = ""
+	rolling = ""
+	sliding = ""
+
+[yengine.yrenderer.Material.Pass]
+	@info = ""
+	cull_mode = ""
+	destination = ""
+	mode = ""
+	shader_path = ""
+	source = ""
+	wire_mode = ""
+	z_test = ""
+	z_write = ""
+
+[yengine.yrenderer.Material.__init__]
+	@info = ""
+
+[yengine.yrenderer.MaterialManager]
+	@info = ""
+
+[yengine.yrenderer.MeshEmitter]
+	@info = ""
+	ctx = ""
+
+[yengine.yrenderer.MeshEmitter.__init__]
+	@info = ""
+	ctx = ""
+	name = ""
+
+[yengine.yrenderer.MeshEmitter.emit]
+	@info = ""
+	params = ""
+	rvd = ""
+	shadow_pass = ""
+
+[yengine.yrenderer.MeshEmitter.prepare]
+	@info = ""
+	params = ""
+
+[yengine.yrenderer.RayTracingData]
+	@info = ""
+	buffer_meshes = ""
+	num_meshes = ""
+
+[yengine.yrenderer.RayTracingData.__init__]
+	@info = ""
+	buffer_meshes = ""
+	num_meshes = ""
+
+[yengine.yrenderer.RegionRenderer]
+	@info = ""
+	regions = ""
+
+[yengine.yrenderer.RegionRenderer.Region]
+	@info = ""
+	dest = ""
+	renderer = ""
+	z = ""
+
+[yengine.yrenderer.RegionRenderer.Region.__init__]
+	@info = ""
+	dest = ""
+	renderer = ""
+	z = ""
+
+[yengine.yrenderer.RegionRenderer.__init__]
+	@info = ""
+
+[yengine.yrenderer.RegionRenderer.add_region]
+	@info = ""
+	dest = ""
+	r = ""
+	z = ""
+
+[yengine.yrenderer.RenderData]
+	@info = ""
+
+[yengine.yrenderer.RenderData.draw]
+	@info = ""
+	params = ""
+	topology = ""
+	vb = ""
+
+[yengine.yrenderer.RenderData.draw_instanced]
+	@info = ""
+	count = ""
+	params = ""
+	vb = ""
+
+[yengine.yrenderer.RenderData.draw_triangles]
+	@info = ""
+	params = ""
+	vb = ""
+
+[yengine.yrenderer.RenderParams]
+	@info = ""
+	area = ""
+	desired_aspect_ratio = ""
+	frame_buffer = ""
+	target_is_window = ""
+
+[yengine.yrenderer.RenderParams.__init__]
+	@info = ""
+	area = ""
+	desired_aspect_ratio = ""
+	frame_buffer = ""
+	target_is_window = ""
+
+[yengine.yrenderer.RenderPath]
+	@info = ""
+	ambient_occlusion_radius = ""
+	background_color = ""
+	scene_view = ""
+	view = ""
+	wireframe = ""
+
+[yengine.yrenderer.RenderPath.__init__]
+	@info = ""
+
+[yengine.yrenderer.RenderPath.add_background_emitter]
+	@info = ""
+	emitter = ""
+
+[yengine.yrenderer.RenderPath.add_opaque_emitter]
+	@info = ""
+	emitter = ""
+
+[yengine.yrenderer.RenderPath.add_transparent_emitter]
+	@info = ""
+	emitter = ""
+
+[yengine.yrenderer.RenderPath.remove_all_emitters]
+	@info = ""
+
+[yengine.yrenderer.RenderPath.set_lights]
+	@info = ""
+	lights = ""
+
+[yengine.yrenderer.RenderPath.set_view]
+	@info = ""
+	view = ""
+
+[yengine.yrenderer.RenderPathDeferred]
+	@info = ""
+	ambient_occlusion_radius = ""
+	background_color = ""
+	scene_view = ""
+	view = ""
+	wireframe = ""
+
+[yengine.yrenderer.RenderPathDeferred.__init__]
+	@info = ""
+	ctx = ""
+	height = ""
+	shadow_resolution = ""
+	width = ""
+
+[yengine.yrenderer.RenderPathForward]
+	@info = ""
+	ambient_occlusion_radius = ""
+	background_color = ""
+	scene_view = ""
+	view = ""
+	wireframe = ""
+
+[yengine.yrenderer.RenderPathForward.__init__]
+	@info = ""
+	ctx = ""
+	shadow_resolution = ""
+
+[yengine.yrenderer.RenderTask]
+	@info = ""
+	active = ""
+
+[yengine.yrenderer.RenderTask.__init__]
+	@info = ""
+
+[yengine.yrenderer.RenderTask.render]
+	@info = ""
+	params = ""
+
+[yengine.yrenderer.RenderViewData]
+	@info = ""
+
+[yengine.yrenderer.RenderViewData.__init__]
+	@info = ""
+	ctx = ""
+
+[yengine.yrenderer.RenderViewData.get_shader]
+	@info = ""
+	@return = ""
+	geometry_shader_module = ""
+	material = ""
+	pass_no = ""
+	tessellation_module = ""
+	vertex_shader_module = ""
+
+[yengine.yrenderer.RenderViewData.set_view]
+	@info = ""
+	cam = ""
+	params = ""
+	proj = ""
+
+[yengine.yrenderer.RenderViewData.start]
+	@info = ""
+	@return = ""
+	material = ""
+	matrix = ""
+	params = ""
+	pass_no = ""
+	shader = ""
+	top = ""
+	vb = ""
+
+[yengine.yrenderer.Renderer]
+	@info = ""
+
+[yengine.yrenderer.Renderer.__init__]
+	@info = ""
+
+[yengine.yrenderer.Renderer.add_child]
+	@info = ""
+	r = ""
+
+[yengine.yrenderer.Renderer.draw]
+	@info = ""
+	params = ""
+
+[yengine.yrenderer.Renderer.prepare]
+	@info = ""
+	params = ""
+
+[yengine.yrenderer.SceneRenderer]
+	@info = ""
+	background_color = ""
+
+[yengine.yrenderer.SceneRenderer.__init__]
+	@info = ""
+	ctx = ""
+	scene_view = ""
+	type = ""
+
+[yengine.yrenderer.SceneRenderer.add_emitter]
+	@info = ""
+	emitters = ""
+
+[yengine.yrenderer.SceneRenderer.set_view]
+	@info = ""
+	cam = ""
+	params = ""
+	proj = ""
+
+[yengine.yrenderer.SceneView]
+	@info = ""
+	fog_color = ""
+	fog_density = ""
+	fog_enabled = ""
+	lights = ""
+	main_camera_params = ""
+	num_surfels = ""
+	probe_cells = ""
+	probe_max = ""
+	probe_min = ""
+	ray_tracing_data = ""
+	shadow_box_size = ""
+	shadow_indices = ""
+	surfel_buffer = ""
+
+[yengine.yrenderer.SceneView.__init__]
+	@info = ""
+
+[yengine.yrenderer.SceneView.choose_lights]
+	@info = ""
+	lights = ""
+
+[yengine.yrenderer.SceneView.choose_shadows]
+	@info = ""
+
+[yengine.yrenderer.ShaderManager]
+	@info = ""
+	default_shader = ""
+
+[yengine.yrenderer.ShaderManager.__init__]
+	@info = ""
+
+[yengine.yrenderer.ShaderManager.add_directory]
+	@info = ""
+	dir = ""
+
+[yengine.yrenderer.ShaderManager.load_shader_module]
+	@info = ""
+	@return = ""
+	filename = ""
+
+[yengine.yrenderer.TextureManager]
+	@info = ""
+
+[yengine.yrenderer.TextureRenderer]
+	@info = ""
+	clear_colors = ""
+	clear_z = ""
+
+[yengine.yrenderer.TextureRenderer.__init__]
+	@info = ""
+	ctx = ""
+	name = ""
+	options = ""
+	textures = ""
+
+[yengine.yrenderer.TextureRenderer.set_area]
+	@info = ""
+	area = ""
+
+[yengine.yrenderer.TransparencyMode]
+	@info = ""
+
+[yengine.yrenderer.TransparencyMode.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.yrenderer.TransparencyMode.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.yrenderer.TransparencyMode.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.yrenderer.WindowRenderer]
+	@info = ""
+
+[yengine.yrenderer.WindowRenderer.__init__]
+	@info = ""
+	ctx = ""
+	window = ""
+
+[yengine.yrenderer.WindowRenderer.create_params]
+	@info = ""
+	@return = ""
+	aspect_ration = ""
+
+[yengine.yrenderer.WindowRenderer.end_frame]
+	@info = ""
+	params = ""
+
+[yengine.yrenderer.WindowRenderer.start_frame]
+	@info = ""
+	@return = ""
+
+[yengine.yrenderer.XhuiRenderer]
+	@info = ""
+	active = ""
+
+[yengine.yrenderer.XhuiRenderer.__init__]
+	@info = ""
+	ctx = ""
+
+[yengine.yrenderer.XhuiRenderer.before_draw]
+	@info = ""
+	p = ""
+
+[yengine.yrenderer.XhuiRenderer.draw]
+	@info = ""
+	p = ""
+
+[yengine.yrenderer.XhuiRenderer.extract_params]
+	@info = ""
+	@return = ""
+	p = ""
+
+[yengine.yrenderer.YLight]
+	@info = ""
+	allow_shadow = ""
+	ang = ""
+	color = ""
+	enabled = ""
+	harshness = ""
+	pos = ""
+	power = ""
+	shadow_dist_max = ""
+	shadow_dist_min = ""
+	theta = ""
+	type = ""
+	user_shadow_control = ""
+	user_shadow_theta = ""
+
+[yengine.yrenderer.YLight.init]
+	@info = ""
+	c = ""
+	theta = ""
+	type = ""
+
+[yengine.yrenderer.YLight.suggest_shadow_projection]
+	@info = ""
+	@return = ""
+	cam = ""
+	shadow_box_size = ""
+
+[yengine.yrenderer.api_init_glfw]
+	@info = ""
+	@return = ""
+	window = ""
+
+[yengine.yrenderer.api_init_xhui]
+	@info = ""
+	@return = ""
+	p = ""
+
+[yengine.yrenderer.apply_shader_data]
+	@info = ""
+	params = ""
+	s = ""
+	shader_data = ""

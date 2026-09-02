@@ -21,12 +21,18 @@
 [yengine.ui.Canvas]
 	@info = ""
 	align = ""
+	allow_hover = ""
+	area = ""
 	children = ""
 	color = ""
 	dz = ""
 	height = ""
+	id = ""
 	margin = ""
+	padding = ""
 	pos = ""
+	size_mode_x = ""
+	size_mode_y = ""
 	visible = ""
 	width = ""
 	x = ""
@@ -91,12 +97,18 @@
 [yengine.ui.HBox]
 	@info = ""
 	align = ""
+	allow_hover = ""
+	area = ""
 	children = ""
 	color = ""
 	dz = ""
 	height = ""
+	id = ""
 	margin = ""
+	padding = ""
 	pos = ""
+	size_mode_x = ""
+	size_mode_y = ""
 	visible = ""
 	width = ""
 	x = ""
@@ -105,15 +117,74 @@
 [yengine.ui.HBox.__init__]
 	@info = ""
 
+[yengine.ui.HBox.get_content_min_size]
+	@info = ""
+	@return = ""
+
+[yengine.ui.HBox.negotiate_content_area]
+	@info = ""
+	available = ""
+
+[yengine.ui.HBox.set_option]
+	@info = ""
+	k = ""
+	v = ""
+
+[yengine.ui.Label]
+	@info = ""
+	align = ""
+	allow_hover = ""
+	angle = ""
+	area = ""
+	blur = ""
+	children = ""
+	color = ""
+	dz = ""
+	font_size = ""
+	height = ""
+	id = ""
+	margin = ""
+	padding = ""
+	shader = ""
+	shader_data = ""
+	size_mode_x = ""
+	size_mode_y = ""
+	source = ""
+	text = ""
+	texture = ""
+	visible = ""
+	width = ""
+
+[yengine.ui.Label.__init__]
+	@info = ""
+	font_size = ""
+	p = ""
+	t = ""
+
+[yengine.ui.Label.get_content_min_size]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Label.set_option]
+	@info = ""
+	k = ""
+	v = ""
+
 [yengine.ui.Node]
 	@info = ""
 	align = ""
+	allow_hover = ""
+	area = ""
 	children = ""
 	color = ""
 	dz = ""
 	height = ""
+	id = ""
 	margin = ""
+	padding = ""
 	pos = ""
+	size_mode_x = ""
+	size_mode_y = ""
 	visible = ""
 	width = ""
 	x = ""
@@ -138,6 +209,25 @@
 	label = ""
 	type = ""
 
+[yengine.ui.Node.SizeMode]
+	@info = ""
+
+[yengine.ui.Node.SizeMode.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.Node.SizeMode.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.Node.SizeMode.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
 [yengine.ui.Node.__init__]
 	@info = ""
 	r = ""
@@ -148,13 +238,28 @@
 
 [yengine.ui.Node.add_from_source]
 	@info = ""
+	@return = ""
 	s = ""
 
 [yengine.ui.Node.get]
 	@info = ""
 
+[yengine.ui.Node.get_children]
+	@info = ""
+	@return = ""
+	_filter = ""
+
+[yengine.ui.Node.get_content_min_size]
+	@info = ""
+	@return = ""
+
+[yengine.ui.Node.negotiate_content_area]
+	@info = ""
+	available = ""
+
 [yengine.ui.Node.on_enter]
 	@info = ""
+	m = ""
 
 [yengine.ui.Node.on_iterate]
 	@info = ""
@@ -166,26 +271,32 @@
 [yengine.ui.Node.on_left_button_down]
 	@info = ""
 	@return = ""
+	m = ""
 
 [yengine.ui.Node.on_left_button_up]
 	@info = ""
 	@return = ""
+	m = ""
 
 [yengine.ui.Node.on_middle_button_down]
 	@info = ""
 	@return = ""
+	m = ""
 
 [yengine.ui.Node.on_middle_button_up]
 	@info = ""
 	@return = ""
+	m = ""
 
 [yengine.ui.Node.on_right_button_down]
 	@info = ""
 	@return = ""
+	m = ""
 
 [yengine.ui.Node.on_right_button_up]
 	@info = ""
 	@return = ""
+	m = ""
 
 [yengine.ui.Node.remove]
 	@info = ""
@@ -198,19 +309,34 @@
 	@info = ""
 	r = ""
 
+[yengine.ui.Node.set_option]
+	@info = ""
+	key = ""
+	value = ""
+
+[yengine.ui.Node.set_pos]
+	@info = ""
+	pos = ""
+
 [yengine.ui.Picture]
 	@info = ""
 	align = ""
+	allow_hover = ""
 	angle = ""
+	area = ""
 	blur = ""
 	children = ""
 	color = ""
 	dz = ""
 	height = ""
+	id = ""
 	margin = ""
+	padding = ""
 	pos = ""
 	shader = ""
 	shader_data = ""
+	size_mode_x = ""
+	size_mode_y = ""
 	source = ""
 	texture = ""
 	visible = ""
@@ -224,18 +350,29 @@
 	source = ""
 	tex = ""
 
+[yengine.ui.Picture.set_option]
+	@info = ""
+	k = ""
+	v = ""
+
 [yengine.ui.Picture3d]
 	@info = ""
 	align = ""
+	allow_hover = ""
+	area = ""
 	children = ""
 	color = ""
 	dz = ""
 	height = ""
+	id = ""
 	lighting = ""
 	margin = ""
 	matrix = ""
 	model = ""
+	padding = ""
 	pos = ""
+	size_mode_x = ""
+	size_mode_y = ""
 	visible = ""
 	width = ""
 	world_3d = ""
@@ -283,12 +420,18 @@
 [yengine.ui.VBox]
 	@info = ""
 	align = ""
+	allow_hover = ""
+	area = ""
 	children = ""
 	color = ""
 	dz = ""
 	height = ""
+	id = ""
 	margin = ""
+	padding = ""
 	pos = ""
+	size_mode_x = ""
+	size_mode_y = ""
 	visible = ""
 	width = ""
 	x = ""
@@ -296,6 +439,19 @@
 
 [yengine.ui.VBox.__init__]
 	@info = ""
+
+[yengine.ui.VBox.get_content_min_size]
+	@info = ""
+	@return = ""
+
+[yengine.ui.VBox.negotiate_content_area]
+	@info = ""
+	available = ""
+
+[yengine.ui.VBox.set_option]
+	@info = ""
+	k = ""
+	v = ""
 
 [yengine.ui.VRDevice]
 	@info = ""
@@ -378,6 +534,103 @@
 	i = ""
 
 [yengine.ui.VRDeviceRole.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.VrDevice]
+	@info = ""
+	aim_ang = ""
+	aim_pos = ""
+	ang = ""
+	name = ""
+	pos = ""
+	role = ""
+	vibration = ""
+
+[yengine.ui.VrDevice.Axis]
+	@info = ""
+
+[yengine.ui.VrDevice.Axis.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.VrDevice.Axis.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.VrDevice.Axis.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.VrDevice.Button]
+	@info = ""
+
+[yengine.ui.VrDevice.Button.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.VrDevice.Button.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.VrDevice.Button.parse]
+	@info = ""
+	@return = ""
+	label = ""
+	type = ""
+
+[yengine.ui.VrDevice.__init__]
+	@info = ""
+	aim_ang = ""
+	aim_pos = ""
+	ang = ""
+	name = ""
+	pos = ""
+	role = ""
+	vibration = ""
+
+[yengine.ui.VrDevice.axis]
+	@info = ""
+	@return = ""
+	a = ""
+
+[yengine.ui.VrDevice.button]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.VrDevice.clicked]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.VrDevice.touch]
+	@info = ""
+	@return = ""
+	b = ""
+
+[yengine.ui.VrDeviceRole]
+	@info = ""
+
+[yengine.ui.VrDeviceRole.all]
+	@info = ""
+	@return = ""
+	type = ""
+
+[yengine.ui.VrDeviceRole.from_int]
+	@info = ""
+	@return = ""
+	i = ""
+
+[yengine.ui.VrDeviceRole.parse]
 	@info = ""
 	@return = ""
 	label = ""

@@ -279,6 +279,11 @@
 	@info = ""
 	@return = ""
 
+[yengine.engine.create_shader]
+	@info = ""
+	@return = ""
+	source = ""
+
 [yengine.engine.ivec3]
 	@info = ""
 	x = ""
@@ -290,6 +295,16 @@
 	x = ""
 	y = ""
 	z = ""
+
+[yengine.engine.load_shader]
+	@info = ""
+	@return = ""
+	filename = ""
+
+[yengine.engine.load_texture]
+	@info = ""
+	@return = ""
+	filename = ""
 
 [yengine.engine.rt_setup]
 	@info = ""
