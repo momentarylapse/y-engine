@@ -149,7 +149,7 @@ class extern Renderer
 
 class extern RenderTask extends Renderer
 	var active: bool
-	func virtual render(params: RenderParams)
+	func virtual mut render(params: RenderParams)
 
 
 class extern ComputeTask extends RenderTask
@@ -159,11 +159,18 @@ class extern ComputeTask extends RenderTask
 	shader_data: Any
 	func extern __init__(ctx: Context&, name: string, shader: shared![Shader], n: i32[])
 	func override extern render(params: RenderParams)
-	func extern bind_texture(index: i32, tex: Texture&)
-	func extern bind_image(index: i32, tex: Texture&)
-	func extern bind_uniform_buffer(index: i32, buf: UniformBuffer&)
-	func extern bind_storage_buffer(index: i32, buf: ShaderStorageBuffer&)
+	func extern mut bind_texture(index: i32, tex: Texture&)
+	func extern mut bind_image(index: i32, tex: Texture&)
+	func extern mut bind_uniform_buffer(index: i32, buf: UniformBuffer&)
+	func extern mut bind_storage_buffer(index: i32, buf: ShaderStorageBuffer&)
 
+
+class extern ComputeScheduler
+	func extern mut __init__(ctx: Context&)
+	func extern mut __delete__()
+	func extern mut start() -> RenderParams
+	func extern mut submit(block=true)
+	func extern mut wait()
 
 #---------------------------
 # targets
@@ -171,15 +178,15 @@ class extern ComputeTask extends RenderTask
 # glfw
 class extern WindowRenderer extends Renderer
 	func extern __init__(ctx: Context&, window: void*)
-	func extern start_frame() -> bool
-	func extern end_frame(params: RenderParams)
-	func extern create_params(aspect_ration: f32) -> RenderParams
+	func extern mut start_frame() -> bool
+	func extern mut end_frame(params: RenderParams)
+	func extern mut create_params(aspect_ration: f32) -> RenderParams
 
 
 class extern XhuiRenderer extends RenderTask
 	func extern __init__(ctx: Context&)
-	func extern before_draw(p: void*) # xhui.Painter*
-	func extern draw(p: void*) # xhui.Painter*
+	func extern mut before_draw(p: void*) # xhui.Painter*
+	func extern mut draw(p: void*) # xhui.Painter*
 	func extern extract_params(p: void*) -> RenderParams
 
 
@@ -202,7 +209,7 @@ class extern MeshEmitter extends Object as shared
 
 class extern CubeEmitter extends MeshEmitter
 	func extern __init__(ctx: Context&)
-	func extern set_cube(cube: Box)
+	func extern mut set_cube(cube: Box)
 	var material: owned![Material]
 	var matrix: mat4
 
@@ -299,7 +306,8 @@ class extern LightMeter
 
 
 class extern HDRResolver extends Renderer
-	func extern __init__(ctx: Context&, width: i32, height: i32)
+	func extern mut __init__(ctx: Context&)
+	func extern mut set_resolution(width: i32, height: i32)
 	var texture: shared![Texture]
 	var depth_buffer: shared![DepthBuffer]
 	var exposure: f32

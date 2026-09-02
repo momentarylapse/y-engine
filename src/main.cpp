@@ -74,18 +74,6 @@ using namespace std::chrono;
 
 
 
-namespace yrenderer {
-	rect dynamicly_scaled_area(ygfx::FrameBuffer *fb) {
-		//return rect(0, fb->width, 0, fb->height);
-		return rect(0, max((float)fb->width * engine.resolution_scale_x, 2.0f),
-			0, max((float)fb->height * engine.resolution_scale_y, 2.0f));
-	}
-
-	rect dynamicly_scaled_source() {
-		return rect(0, engine.resolution_scale_x, 0, engine.resolution_scale_y);
-	}
-}
-
 
 class YEngineApp {
 public:
@@ -281,6 +269,8 @@ public:
 		title += " (gl)";
 #endif
 		GLFWwindow* window = glfwCreateWindow(w, h, title.c_str(), monitor, nullptr);
+		engine.output_width = w;
+		engine.output_height = h;
 
 		glfwSetWindowUserPointer(window, this);
 		glfwMakeContextCurrent(window);
@@ -433,6 +423,8 @@ public:
 				engine.vr_renderer->start_view(i);
 				const auto fov = vr::instance->eye_fov(i);
 				const auto params = engine.vr_renderer->create_params();
+				engine.output_width = (int)params.area.width();
+				engine.output_height = (int)params.area.height();
 				const vec3 p0 = cam_main->owner->pos;
 				const auto q0 = cam_main->owner->ang;
 				cam_main->owner->pos += q0 * vr::instance->eye_pos(i);
@@ -452,6 +444,8 @@ public:
 			if (!engine.window_renderer->start_frame())
 				return;
 			const auto params = engine.window_renderer->create_params(engine.physical_aspect_ratio);
+			engine.output_width = (int)params.area.width();
+			engine.output_height = (int)params.area.height();
 			ecs::SystemManager::handle_draw_pre();
 			timer_render.peek();
 
