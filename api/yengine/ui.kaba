@@ -113,6 +113,7 @@ class extern Canvas extends Node
 	func extern override __init__()
 	func extern override __delete__()
 	func virtual mut on_draw(out p: Painter)
+	func extern static set_texture(out p: Painter, t: Texture*)
 
 
 var extern static toplevel: Node&
