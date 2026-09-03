@@ -4,28 +4,29 @@
 #include <lib/base/algo.h>
 #include <lib/ygraphics/Context.h>
 #include <lib/math/quaternion.h>
+#if HAS_LIB_VULKAN
 #include <lib/vulkan/vulkan.h>
 #include <lib/vulkan/Device.h>
 #include <lib/vulkan/Instance.h>
 #include <lib/vulkan/common.h>
-#include "lib/yrenderer/Context.h"
+#endif
+#include <lib/yrenderer/Context.h>
 #include <vector>
 #include <cmath>
 #include <unordered_map>
 
-#if HAS_LIB_OPENXR
+#if HAS_LIB_OPENXR && HAS_LIB_VULKAN
 #include <vulkan/vulkan.h>
 #include <openxr/openxr.h>
-//#ifdef USING_VULKAN
 #define XR_USE_GRAPHICS_API_VULKAN
 #include <openxr/openxr_platform.h>
-#endif
 
 namespace vulkan {
 	extern Array<string> additional_instance_extensions;
 	extern Array<string> additional_device_extensions;
 	VkSurfaceFormatKHR choose_swap_surface_format(const Array<VkSurfaceFormatKHR>& available_formats, bool gamma_correction);
 }
+#endif
 
 namespace yrenderer {
 	void _create_context_stuff(Context* ctx);
@@ -35,7 +36,7 @@ namespace vr {
 
 Instance* instance = nullptr;
 
-#if HAS_LIB_OPENXR
+#if HAS_LIB_OPENXR && HAS_LIB_VULKAN
 
 
 
@@ -1255,7 +1256,7 @@ void Instance::iterate() {}
 
 bool Instance::start_frame() { return false; }
 void Instance::end_frame() {}
-void Instance::start_view(int index, vulkan::RenderPass* render_pass) {}
+//void Instance::start_view(int index, vulkan::RenderPass* render_pass) {}
 void Instance::end_view(int index) {}
 
 vec3 Instance::eye_pos(int index) const { return v_0; }

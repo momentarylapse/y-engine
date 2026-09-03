@@ -47,7 +47,9 @@ public:
 
 	bool start_frame();
 	void end_frame();
+#ifdef USING_VULKAN
 	void start_view(int index, vulkan::RenderPass* render_pass);
+#endif
 	void end_view(int index);
 
 	int image_index = 0;
