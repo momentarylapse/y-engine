@@ -7,6 +7,15 @@
 </Layout>
 <VertexShader>
 
+struct Matrix {
+	mat4 model;
+	mat4 view;
+	mat4 project;
+};
+#ifdef vulkan
+#else
+uniform Matrix matrix;
+#endif
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
@@ -14,7 +23,11 @@ layout(location = 2) in vec2 in_uv;
 layout(location = 0) out vec2 out_uv;
 
 void main() {
+#ifdef vulkan
 	gl_Position = vec4(in_position, 1.0);
+#else
+	gl_Position = matrix.project * vec4(in_position, 1.0);
+#endif
 	out_uv = in_uv;
 }
 </VertexShader>
