@@ -49,8 +49,9 @@ float calc_light_visibility_point(vec3 p, vec3 LP, float light_radius, int N) {
 	for (int i=0; i<N; i++) {
 		vec3 lsp = LP + rand_dir(p + vec3(i,2*i,3*i)) * light_radius;
 		float d = length(lsp - p);
-		vec3 L = (lsp-p) / d;//normalize(lsp - p);
-		if (!simple_trace(p, L, d+1))
+		vec3 L = (lsp-p) / d;
+	//	vec3 L = normalize(lsp - p);
+		if (!simple_trace(p, L, d))
 			light_visibility += 1.0 / N;
 	}
 	return light_visibility;
@@ -81,7 +82,7 @@ vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel, int N) {
 			float d = length(LP - p);
 			float light_radius = 10.0;
 			float light_visibility = calc_light_visibility_point(p + n * 0.01, LP, light_radius, 1);//N);
-			f = max(-dot(n, L), 0.05) * light_visibility / pow(d, 2);
+			f = max(dot(n, L), 0.05) * light_visibility / pow(d, 2);
 
 		} else {
 			// directional

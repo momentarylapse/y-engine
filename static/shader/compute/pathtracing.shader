@@ -86,8 +86,8 @@ struct HitData {
 	TriaHitData thd;
 };
 
-bool trace(vec3 p0, vec3 dir, out HitData hd) {
-	hd.thd.t = 1000000;
+bool trace(vec3 p0, vec3 dir, float max_depth, out HitData hd) {
+	hd.thd.t = max_depth;
 	bool hit = false;
 	TriaHitData thd;
 	for (int k=0; k<push.num_meshes; k++) {
@@ -114,9 +114,9 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 }
 
 
-bool simple_trace(vec3 p, vec3 dir, float depth_max) {
+bool simple_trace(vec3 p, vec3 dir, float max_depth) {
 	HitData hd_temp;
-	return trace(p, dir, hd_temp);
+	return trace(p, dir, max_depth, hd_temp);
 }
 
 float MAX_DEPTH = 200000;
@@ -143,8 +143,8 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 	HitData hd;
 	vec3 color = vec3(0);
 	for (int i=0; i<N; i++) {
-		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(i,2*i,3*i))), roughness);
-		if (trace(p, dir, hd)) {
+		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(cur_pixel,i))), roughness);
+		if (trace(p, dir, MAX_DEPTH, hd)) {
 			color += calc_direct_light(hd.thd.p, hd.thd.n, albedo, cur_pixel, 1) / N;
 			color += get_emission(hd.mesh) / N;
 		} else {
@@ -166,7 +166,7 @@ void main() {
 	vec3 cam_pos = (push.iview * vec4(0,0,0,1)).xyz;
 
 	HitData hd;
-	if (trace(cam_pos, dir, hd)) {
+	if (trace(cam_pos, dir, MAX_DEPTH, hd)) {
 		vec3 albedo = get_albedo(hd.mesh);
 
 		vec3 color = get_emission(hd.mesh);
