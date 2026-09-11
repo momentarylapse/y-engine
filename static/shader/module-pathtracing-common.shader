@@ -7,6 +7,7 @@
 //   bool simple_trace(vec3 p, vec3 dir, float max_depth);
 //   float MAX_DEPTH;
 
+const float pi = 3.141592654;
 
 struct Light {
 	vec4 pos;
@@ -33,8 +34,13 @@ float rand3d(vec3 p) {
 }
 
 vec3 rand_dir(vec3 p) {
-	vec3 v = vec3(rand3d(p)*2-1, rand3d(p + vec3(10.43767,20.92546,30.7536))*2-1, rand3d(p + vec3(40.2695,50.976234,60.1567))*2-1);
-	return normalize(v);
+	float u = rand3d(p);
+	float v = rand3d(p + vec3(10.43767,20.92546,30.7536));
+	float z = 2*v-1;
+	float a = sqrt(1-z*z);
+	return vec3(cos(u*2*pi) * a, sin(u*2*pi) * a, z);
+	//vec3 v = vec3(rand3d(p)*2-1, rand3d(p + vec3(10.43767,20.92546,30.7536))*2-1, rand3d(p + vec3(40.2695,50.976234,60.1567))*2-1);
+	//return normalize(v);
 }
 
 
@@ -56,7 +62,7 @@ float calc_light_visibility_directional(vec3 p, vec3 L, float fuzzyness, int N) 
 		vec3 LL = -normalize(L + fuzzyness * rand_dir(p + vec3(i,2*i,3*i)));
 		if (!simple_trace(p, LL, MAX_DEPTH))
 			light_visibility += 1.0 / N;
-		else if (i == 8 && light_visibility == 0.0)
+		else if (i == N/3 && light_visibility == 0.0)
 			break;
 	}
 	return light_visibility;
