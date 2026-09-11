@@ -53,12 +53,13 @@ layout(binding=2, std430) uniform LightData {
 	ivec4 probe_cells;
 	vec4 probe_min, probe_max;
 	mat4 shadow_proj[2];
+	vec4 fog_color;
 	Light light[32];
 };
 layout(local_size_x=16, local_size_y=16) in;
 
 float rand(vec3 p) {
-	return fract(sin(dot(p ,vec3(12.9898,78.233,4213.1234)) + push.t_rand) * 43758.5453);
+	return fract(sin(dot(p ,vec3(12.9898,78.233,42.1234)) + push.t_rand) * 43758.5453);
 }
 
 vec3 rand3d(vec3 p) {
@@ -87,8 +88,8 @@ bool trace_tria(vec3 p0, vec3 dir, vec3 a, vec3 b, vec3 c, out TriaHitData thd) 
 	if (x*y < 0 || x*z < 0)
 	//if ((x < 0) || (y < 0) || (z < 0))
 		return false;
-	
-	//hit.p = 
+
+	//hit.p =
 	vec3 n = normalize(cross(u1, u2));
 	if (dot(n, dir) > 0)
 		n = - n;
@@ -97,7 +98,7 @@ bool trace_tria(vec3 p0, vec3 dir, vec3 a, vec3 b, vec3 c, out TriaHitData thd) 
 	float t = dot(p - p0, dir);
 	if (t <= 0)
 		return false;
-	
+
 	thd.n = n;
 	thd.p = p;
 	thd.t = t;
@@ -177,9 +178,9 @@ vec3 calc_direct_light(vec3 albedo, vec3 p, vec3 n, int N) {
 
 vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughness) {
 	int N = 15;
-	
+
 	vec3 refl = reflect(eye_dir, n);
-	
+
 	HitData hd;
 	vec3 color = vec3(0);
 	for (int i=0; i<N; i++) {
@@ -187,6 +188,8 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 		if (trace(p, dir, hd)) {
 			color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 1) / N;
 			color += get_emission(hd.mesh) / N;
+		} else {
+			color += push.background.rgb / N;
 		}
 	}
 	return color;
@@ -194,7 +197,7 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 
 void main() {
 	ivec2 store_pos = ivec2(gl_GlobalInvocationID.xy);
-		
+
 	vec2 r = vec2(gl_GlobalInvocationID.xy) / vec2(push.out_width, push.out_height);
 	vec3 dir = normalize(vec3((r.x - 0.5) * push.out_ratio, 0.5 - r.y, 1));
 	dir.x += rand(dir) / push.out_width;
@@ -205,14 +208,14 @@ void main() {
 	HitData hd;
 	if (trace(cam_pos, dir, hd)) {
 		vec3 albedo = get_albedo(hd.mesh);
-		
+
 		vec3 color = get_emission(hd.mesh);
-		
+
 		// direct sunlight
 		color += calc_direct_light(albedo, hd.thd.p, hd.thd.n, 5);
-		
+
 		color += calc_bounced_light(hd.thd.p + hd.thd.n * 0.1, hd.thd.n, dir, albedo, get_roughness(hd.mesh));
-		
+
 		imageStore(image, store_pos, vec4(color,1));
 	} else {
 		// background
