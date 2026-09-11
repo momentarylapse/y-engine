@@ -1,7 +1,7 @@
 <Layout>
 	version = 460
 	extensions = GL_EXT_ray_tracing,GL_EXT_buffer_reference2,GL_EXT_scalar_block_layout
-	bindings = [[acceleration-structure,image,buffer,buffer,buffer,buffer]]
+	bindings = [[acceleration-structure,image,buffer,buffer,buffer,buffer,buffer,buffer,buffer,buffer]]
 </Layout>
 
 <RayGenShader>
@@ -13,26 +13,18 @@ struct RayPayload {
 	vec4 emission;
 };
 
-// packed std140
-/*struct UniformParams {
-	// Camera
-	vec4 camPos;
-	vec4 camDir;
-	vec4 camUp;
-	vec4 camSide;
-	vec4 camNearFarFov;
-	mat4 m;
-};*/
-
-struct Light {
-	vec4 pos;
-	vec4 dir;
-	vec4 color;
-	float radius, theta, harshness;
-	int shadow_index;
-};
-
+layout(location = 0) rayPayloadEXT RayPayload ray;
 layout(set=0, binding=0)          uniform accelerationStructureEXT scene;
+
+bool simple_trace(vec3 p, vec3 dir, float max_depth) {
+	traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 0, 1, 0, p, 0.0, dir, max_depth, 0);
+	return ray.pos_and_dist.w > 0;
+}
+const float MAX_DEPTH = 20000;
+
+#import pathtracing-common
+
+
 layout(set=0, binding=1, rgba16f) uniform image2D image;
 layout(set=0, binding=2, std140)  uniform MoreData {
 	mat4 iview;
@@ -40,28 +32,14 @@ layout(set=0, binding=2, std140)  uniform MoreData {
 	int num_triangles;
 	int _num_lights;
 } push;
-layout(set=0, binding=4) uniform LightData {
-	int num_lights;
-	int num_surfels;
-	int _dummy0, _dummy1;
-	ivec4 probe_cells;
-	vec4 probe_min, probe_max;
-	mat4 shadow_proj[2];
-	vec4 fog_color;
-	Light light[500];
-};
 //layout(set=0, binding=3, std140) uniform Vertices { float v[]; } vertices;
 
 /*layout(set = 0,      binding = 2)     uniform AppData {
     UniformParams Params;
 };*/
 
-layout(location = 0) rayPayloadEXT RayPayload ray;
-
 const int NUM_REFLECTIONS = 50;
 const int NUM_SHADOW_SAMPLES = 30;
-
-const float MAX_DEPTH = 20000;
 
 
 vec3 calc_ray_dir(vec2 screen_uv, float aspect) {
@@ -76,64 +54,6 @@ vec3 calc_ray_dir(vec2 screen_uv, float aspect) {
 
 	const vec3 ray_dir = normalize(dir + (u * screen_uv.x) - (v * screen_uv.y));
 	return ray_dir;
-}
-
-float rand3d(vec3 p) {
-	return fract(sin(dot(p ,vec3(12.9898,78.233,42.1234))) * 43758.5453);
-}
-
-vec3 rand_dir(vec3 p) {
-	vec3 v = vec3(rand3d(p)*2-1, rand3d(p + vec3(10.43767,20.92546,30.7536))*2-1, rand3d(p + vec3(40.2695,50.976234,60.1567))*2-1);
-	return normalize(v);
-}
-
-float calc_light_visibility_point(vec3 p, vec3 LP, float light_radius, int N) {
-	float light_visibility = 0.0;
-	for (int i=0; i<N; i++) {
-		vec3 lsp = LP + rand_dir(p + vec3(i,2*i,3*i)) * light_radius;
-		vec3 L = normalize(lsp - p);
-		float d = length(lsp - p);
-		traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 0, 1, 0, p, 0.0, L, d, 0);
-		if (ray.pos_and_dist.w < 0)
-			light_visibility += 1.0 / N;
-	}
-	return light_visibility;
-}
-
-float calc_light_visibility_directional(vec3 p, vec3 L, float fuzzyness, int N) {
-	float light_visibility = 0.0;
-	for (int i=0; i<N; i++) {
-		vec3 LL = -normalize(L + fuzzyness * rand_dir(p + vec3(i,2*i,3*i)));
-		traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 0, 1, 0, p, 0.0, LL, MAX_DEPTH, 0);
-		if (ray.pos_and_dist.w < 0)
-			light_visibility += 1.0 / N;
-	}
-	return light_visibility;
-}
-
-
-vec3 calc_direct_light(vec3 p, vec3 n, vec3 albedo, vec2 cur_pixel, int N) {
-	vec3 color = vec3(0);
-	for (int i=0; i<num_lights; i++) {
-		float f;
-		if (light[i].radius > 0) {
-			// point light
-			vec3 LP = light[i].pos.xyz;
-			vec3 L = normalize(LP - p);
-			float d = length(LP - p);
-			float light_radius = 10.0;
-			float light_visibility = calc_light_visibility_point(p + n * 0.01, LP, light_radius, N);
-			f = max(-dot(n, L), 0.05) * light_visibility / pow(d, 2);
-
-		} else {
-			// directional
-			vec3 L = (push.iview * vec4(light[i].dir.xyz,0)).xyz;
-			float light_visibility = calc_light_visibility_directional(p + n * 0.01, L, 0.03, N);
-			f = max(-dot(n, L), 0.05) * light_visibility;
-		}
-		color += f * albedo * light[i].color.rgb;
-	}
-	return color;
 }
 
 
