@@ -63,7 +63,7 @@ vec3 calc_bounced_light(vec3 p, vec3 n, vec3 eye_dir, vec3 albedo, float roughne
 
 	vec3 color = vec3(0);
 	for (int i=0; i<NUM_REFLECTIONS; i++) {
-		vec3 dir = mix(refl, normalize(n + 0.7 * rand_dir(p + vec3(cur_pixel,i))), roughness);
+		vec3 dir = mix(refl, normalize(n + 0.9 * rand_dir(p + vec3(cur_pixel,i))), roughness);
 		traceRayEXT(scene, gl_RayFlagsOpaqueEXT, 0xff, 1, 1, 1, p + n * 0.01, 0.0, dir, MAX_DEPTH, 0);
 		color += albedo * ray.emission.rgb;
 		if (ray.pos_and_dist.w > 0) {

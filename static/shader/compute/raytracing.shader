@@ -70,8 +70,8 @@ bool trace_tria(vec3 p0, vec3 dir, vec3 a, vec3 b, vec3 c, out TriaHitData thd) 
 	if (x*y < 0 || x*z < 0)
 	//if ((x < 0) || (y < 0) || (z < 0))
 		return false;
-	
-	//hit.p = 
+
+	//hit.p =
 	vec3 n = normalize(cross(u1, u2));
 	if (dot(n, dir) > 0)
 		n = - n;
@@ -80,16 +80,16 @@ bool trace_tria(vec3 p0, vec3 dir, vec3 a, vec3 b, vec3 c, out TriaHitData thd) 
 	float t = dot(p - p0, dir);
 	if (t <= 0)
 		return false;
-	
+
 	thd.n = n;
 	thd.p = p;
 	thd.t = t;
 	return true;
 }
 
-bool trace(vec3 p0, vec3 dir, out HitData hd) {
-	hd.thd.t = 1000000;
+bool trace(vec3 p0, vec3 dir, float max_depth, out HitData hd) {
 	bool hit = false;
+	hd.thd.t = max_depth;
 	TriaHitData thd;
 	for (int k=0; k<push.num_meshes; k++) {
 		Mesh m = mesh[k];
@@ -117,10 +117,14 @@ bool trace(vec3 p0, vec3 dir, out HitData hd) {
 void main() {
 	ivec2 store_pos = ivec2(gl_GlobalInvocationID.xy);
 	Request req = requests[gl_GlobalInvocationID.x][gl_GlobalInvocationID.y];
-	
+
 	HitData hd;
+	vec3 p0 = req.p0.xyz;
+	vec3 p1 = req.p1.xyz;
+	vec3 dir = normalize(p1 - p0);
+	float max_depth = length(p1 - p0);
 	Reply reply;
-	if (trace(req.p0.xyz, req.p1.xyz, hd)) {
+	if (trace(p0, dir, max_depth, hd)) {
 		reply.p.xyz = hd.thd.p;
 		reply.n.xyz = hd.thd.n;
 		reply.fgt = vec4(hd.thd.f, hd.thd.g, hd.thd.t, 0);
