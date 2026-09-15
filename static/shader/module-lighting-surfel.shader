@@ -97,10 +97,14 @@ vec3 _surf_light_add(Light l, vec3 p, vec3 n, vec3 albedo, float metal, float ro
         return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-vec4 _surf_surfel_color(vec3 p, vec3 n) {
+/*float rand3d(vec3 p) {
+	return fract(sin(dot(p ,vec3(12.9898,78.233,42.1234))) * 43758.5453);
+}*/
+
+vec3 _surf_surfel_color(vec3 p, vec3 n) {
 	vec3 pp = (inverse(matrix.view) * vec4(p, 1)).xyz;
 	vec3 pn = (inverse(matrix.view) * vec4(n, 0)).xyz;
-	vec4 c = vec4(0,0,0,1);
+	vec3 c = vec3(0,0,0);
 	float dmin = 100000;
 
 	for (int i=0; i<num_surfels; i++) {
@@ -116,7 +120,8 @@ vec4 _surf_surfel_color(vec3 p, vec3 n) {
 	//		d -= dz * 1000; // penalty below surfel
 		if (d < dmin) {
 			dmin = d;
-			c = surfels[i].color;
+			c = surfels[i].color.rgb;
+	//		c.rgb = vec3(rand3d(surfels[i].pos.xyz), rand3d(surfels[i].pos.yzx), rand3d(surfels[i].pos.zxy));
 		}
 	}
 	return c;
@@ -183,7 +188,7 @@ vec4 perform_lighting(vec3 p, vec3 n, vec4 albedo, vec4 emission, float metal, f
 
 	*/
 
-	color.rgb += _surf_surfel_color(p, n).rgb;
+	color.rgb += _surf_surfel_color(p, n);
 
 
 	if (roughness0 < 0.2 && metal > 0.8) {

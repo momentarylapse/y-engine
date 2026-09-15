@@ -71,8 +71,8 @@ layout(binding=10) uniform Multi {
 layout(binding=11) uniform BoneData {
 	mat4 bone_matrix[1024];
 };
-layout(binding=12) uniform SurfelData {
-	Surfel surfels[1024];
+layout(binding=12) readonly buffer SurfelData {
+	Surfel surfels[4096];
 };
 
 //uniform Fog fog;

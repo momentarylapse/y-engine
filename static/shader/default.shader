@@ -1,5 +1,5 @@
 <Layout>
-	version = 420
+	version = 460
 	pushsize = 0
 	input = [vec3,vec3,vec2]
 	topology = triangles

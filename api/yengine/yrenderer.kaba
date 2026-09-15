@@ -236,7 +236,7 @@ class extern SceneView
 	var shadow_indices: i32[] # read-only
 	var lights: YLight&[] # read-only
 	var shadow_box_size: f32
-	var surfel_buffer: owned[UniformBuffer]
+	var surfel_buffer: owned[ShaderStorageBuffer]
 	var num_surfels: i32
 	var probe_cells: ivec3
 	var probe_min: vec3
