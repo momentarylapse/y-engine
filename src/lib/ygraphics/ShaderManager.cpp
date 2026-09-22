@@ -119,7 +119,7 @@ base::result<shared<Shader>> ShaderManager::load_shader(const Path& filename) {
 	RESULT_PROPAGATE_ERROR(s, __load_shader(fn, "", "", -1), x1);
 
 	shaders.add(s);
-	shader_map.add({fn, s.get()});
+	shader_map.set(fn, s.get());
 	return s;
 }
 
@@ -165,13 +165,13 @@ base::result<shared<Shader>> ShaderManager::load_surface_shader(const Path& _fil
 
 
 	if (!filename)
-		return __load_shader("", "", "", -1);
+		return dummy_surface_shader();
 
 	Path fn = guess_absolute_path(filename, shader_dirs);
 	if (fn.is_empty()) {
 		if (ignore_missing_files) {
 			msg_error("missing shader: " + str(filename));
-			return __load_shader("", "", "", -1);
+			return dummy_surface_shader();
 		}
 		return base::Error{"missing shader: " + str(filename)};
 		//fn = shader_dir | filename;
@@ -202,12 +202,18 @@ base::result<shared<Shader>> ShaderManager::load_surface_shader(const Path& _fil
 	source = expand_fragment_shader_source(source, render_path);
 
 	RESULT_PROPAGATE_ERROR(shader, __create_shader(source, DEFAULT_VERSION, DEFAULT_BINDINGS, DEFAULT_PUSH_SIZE), x1);
-
 	//auto s = Shader::load(fn);
 
 	shaders.add(shader);
-	shader_map.add({fnx, shader.get()});
+	shader_map.set(fnx, shader.get());
 	return shader;
+}
+
+shared<Shader> ShaderManager::dummy_surface_shader() {
+	if (!dummy_shader)
+		dummy_shader = REQUIRED(__create_shader(expand_vertex_shader_source("<Layout>\n</Layout>\n<FragmentShader>\n#import basic-data\nvoid main() { out_color = vec4(1,0,0,1); }\n</FragmentShader>", "default"),
+			DEFAULT_VERSION, DEFAULT_BINDINGS, DEFAULT_PUSH_SIZE));
+	return dummy_shader;
 }
 
 base::result<shared<Shader>> ShaderManager::create_shader(const string &source) {
@@ -230,6 +236,7 @@ base::result_void ShaderManager::load_shader_module(const Path& path) {
 void ShaderManager::clear() {
 	shaders.clear();
 	shader_map.clear();
+	dummy_shader = nullptr;
 }
 
 }
