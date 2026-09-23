@@ -103,19 +103,23 @@ void init_vr() {}
 
 void iterate_vr() {}
 
-VRDevice* get_vr_device(VRDeviceRole role) {
+VrDevice* get_vr_device(VrDeviceRole) {
 	return nullptr;
 }
 
-float VRDevice::axis(int index) const {
+float VrDevice::axis(int) const {
 	return 0;
 }
 
-bool VRDevice::button(int b) const {
+bool VrDevice::button(int) const {
 	return false;
 }
 
-bool VRDevice::clicked(int b) const {
+bool VrDevice::clicked(int) const {
+	return false;
+}
+
+bool VrDevice::touch(int) const {
 	return false;
 }
 
