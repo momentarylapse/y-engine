@@ -13,6 +13,7 @@ namespace yrenderer {
 class LightMeter : public yrenderer::ComputeTask {
 public:
 	LightMeter(Context* ctx, ygfx::Texture* tex);
+	void set_texture(ygfx::Texture* tex);
 	ygfx::UniformBuffer* params;
 	ygfx::ShaderStorageBuffer* buf;
 	Array<int> histogram;

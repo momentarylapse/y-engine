@@ -29,6 +29,13 @@ LightMeter::LightMeter(Context* ctx, Texture* tex)
 	brightness = 1;
 }
 
+void LightMeter::set_texture(ygfx::Texture* tex) {
+	if (tex == texture)
+		return;
+	texture = tex;
+	bind_texture(0, tex);
+}
+
 void LightMeter::read() {
 	profiler::begin(ch_prepare);
 

@@ -288,8 +288,10 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 //		texture_renderer->set_area({0, params.area.width() * fx, 0, params.area.height() * fy});
 		//texture_renderer->set_area(yrenderer::dynamicly_scaled_area(texture_renderer->frame_buffer.get(), {1,1}));
 
-	if (light_meter and hdr_resolver)
+	if (light_meter and hdr_resolver) {
+		light_meter->set_texture(hdr_resolver->texture.get());
 		light_meter->active = cam and cam->auto_exposure;
+	}
 
 
 	prepare_children(params);
