@@ -235,7 +235,7 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 		ext->declare_class_element("YLight.theta", &Light::theta);
 		ext->declare_class_element("YLight.harshness", &Light::harshness);
 		ext->declare_class_element("YLight.enabled", &Light::enabled);
-		ext->declare_class_element("YLight.allow_shadow", &Light::allow_shadow);
+		ext->declare_class_element("YLight.allow_shadows", &Light::allow_shadows);
 		ext->declare_class_element("YLight.user_shadow_control", &Light::user_shadow_control);
 		ext->declare_class_element("YLight.user_shadow_theta", &Light::user_shadow_theta);
 		ext->declare_class_element("YLight.shadow_dist_max", &Light::shadow_dist_max);
@@ -549,8 +549,9 @@ void _export_package_yrenderer_internal(kaba::IExporter* ext) {
 	}
 
 	ext->declare_class_size("LightMeter", sizeof(LightMeter));
-	ext->declare_class_element("LightMeter.histogram", &LightMeter::histogram);
-	ext->declare_class_element("LightMeter.brightness", &LightMeter::brightness);
+	ext->declare_class_element("LightMeter.active", &LightMeter::active);
+	ext->declare_class_element("LightMeter.buffer", &LightMeter::buf);
+	ext->link_class_func("LightMeter.read_histogram", &LightMeter::read_histogram);
 
 	ext->declare_class_size("TextureManager", sizeof(TextureManager));
 	ext->declare_class_size("MaterialManager", sizeof(MaterialManager));

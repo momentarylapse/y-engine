@@ -64,14 +64,14 @@ class extern Terrain
 
 
 class extern Light extends Component
-	let PARAMETERS = "type,color,power,theta,harshness,enabled,allow_shadow"
+	let PARAMETERS = "type,color,power,theta,harshness,enabled,allow_shadows"
 	var type: i32#LightType
 	var color: Color
 	var power: f32
 	var theta: f32
 	var harshness: f32
 	var enabled: bool
-	var allow_shadow: bool
+	var allow_shadows: bool
 	var user_shadow_control: bool
 	var user_shadow_theta: f32
 	var shadow_dist_min: f32
@@ -89,11 +89,6 @@ class extern Camera extends Component
 	var exposure: f32
 	var bloom_radius: f32
 	var bloom_factor: f32
-
-	var auto_exposure: bool
-	var auto_exposure_min: f32
-	var auto_exposure_max: f32
-	var auto_exposure_speed: f32 # ignored
 
 	var focus_enabled: bool
 	var focal_length: f32

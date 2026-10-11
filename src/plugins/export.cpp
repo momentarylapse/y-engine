@@ -303,10 +303,6 @@ void export_world(kaba::IExporter* ext) {
 	ext->declare_class_size("Camera", sizeof(Camera));
 	ext->declare_class_element("Camera.fov", &Camera::fov);
 	ext->declare_class_element("Camera.exposure", &Camera::exposure);
-	ext->declare_class_element("Camera.auto_exposure", &Camera::auto_exposure);
-	ext->declare_class_element("Camera.auto_exposure_min", &Camera::auto_exposure_min);
-	ext->declare_class_element("Camera.auto_exposure_max", &Camera::auto_exposure_max);
-	ext->declare_class_element("Camera.auto_exposure_speed", &Camera::auto_exposure_speed);
 	ext->declare_class_element("Camera.bloom_radius", &Camera::bloom_radius);
 	ext->declare_class_element("Camera.bloom_factor", &Camera::bloom_factor);
 	ext->declare_class_element("Camera.focus_enabled", &Camera::focus_enabled);
@@ -506,7 +502,7 @@ void export_world(kaba::IExporter* ext) {
 	ext->declare_class_element("Light.theta", _OFFSET(light, light.theta));
 	ext->declare_class_element("Light.harshness", _OFFSET(light, light.harshness));
 	ext->declare_class_element("Light.enabled", _OFFSET(light, light.enabled));
-	ext->declare_class_element("Light.allow_shadow", _OFFSET(light, light.allow_shadow));
+	ext->declare_class_element("Light.allow_shadows", _OFFSET(light, light.allow_shadows));
 	ext->declare_class_element("Light.user_shadow_control", _OFFSET(light, light.user_shadow_control));
 	ext->declare_class_element("Light.user_shadow_theta", _OFFSET(light, light.user_shadow_theta));
 	ext->declare_class_element("Light.shadow_dist_max", _OFFSET(light, light.shadow_dist_max));

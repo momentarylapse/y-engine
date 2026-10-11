@@ -290,21 +290,11 @@ void FullCameraRenderer::prepare(const yrenderer::RenderParams& params) {
 
 	if (light_meter and hdr_resolver) {
 		light_meter->set_texture(hdr_resolver->texture.get());
-		light_meter->active = cam and cam->auto_exposure;
+		//light_meter->active = cam and cam->auto_exposure;
 	}
 
 
 	prepare_children(params);
-
-
-	if (light_meter and hdr_resolver) {
-		light_meter->active = cam and cam->auto_exposure;
-		if (light_meter->active) {
-			light_meter->read();
-			light_meter->setup();
-			light_meter->adjust_camera(&cam->exposure, cam->auto_exposure_min, cam->auto_exposure_max);
-		}
-	}
 }
 
 void FullCameraRenderer::draw(const yrenderer::RenderParams& params) {

@@ -16,9 +16,9 @@ class HDRDisplay extends Canvas
 				y0 -= h
 				h *= 0.5
 
-		for lm in engine.camera_renderers[0].light_meter
-			p.set_font_size(0.03)
-			p.draw_str([1.0, 0.0], "max brightness: {{lm.brightness|.3}}")
+#		for lm in engine.camera_renderers[0].light_meter
+#			p.set_font_size(0.03)
+#			p.draw_str([1.0, 0.0], "max brightness: {{lm.brightness|.3}}")
 
 
 class HDRDebugger extends System

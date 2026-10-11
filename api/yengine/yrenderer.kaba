@@ -20,7 +20,7 @@ struct extern YLight
 	var theta: f32
 	var harshness: f32
 	var enabled: bool
-	var allow_shadow: bool
+	var allow_shadows: bool
 	var user_shadow_control: bool
 	var user_shadow_theta: f32
 	var shadow_dist_min: f32
@@ -301,8 +301,9 @@ class extern RegionRenderer
 	func extern selfref get_region(r: Renderer*) -> Region*
 
 class extern LightMeter
-	var histogram: i32[]
-	var brightness: f32
+	var active: bool
+	var buffer: ShaderStorageBuffer&
+	func extern read_histogram() -> i32[]
 
 
 class extern HDRResolver extends Renderer

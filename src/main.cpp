@@ -99,6 +99,7 @@ public:
 
 		engine.app_name = app_name;
 		engine.version = app_version;
+		engine.debug = (config.debug_level >= 2);
 		if (config.ignore_missing_files)
 			engine.ignore_missing_files = true;
 
