@@ -9,20 +9,29 @@
 
 namespace obs {
 
-	class FileWatcher : public obs::Node<VirtualBase> {
+	class FileWatcher : public Node<VirtualBase> {
 	public:
 		FileWatcher();
 		~FileWatcher() override;
-		void add_file(const Path& filename);
+		void add(const Path& path);
 		void iterate();
 
+		struct MoveInfo {
+			Path from, to;
+		};
+
 		xsource<Path> out_edited{this, "edited"};
+		xsource<Path> out_deleted{this, "deleted"};
+		xsource<Path> out_created{this, "created"};
+		xsource<MoveInfo> out_moved{this, "moved"};
 
 		int epoll_fd;
 		int inotify_fd;
 		struct Item {
 			int w;
-			Path filename;
+			Path path;
+
+			string last_move_from;
 		};
 		Array<Item> items;
 	};
