@@ -4,6 +4,7 @@
 
 #pragma once
 
+#if __has_include("../os/path.h")
 #include "Observable.h"
 #include "../os/path.h"
 
@@ -37,3 +38,4 @@ namespace obs {
 	};
 } // obs
 
+#endif

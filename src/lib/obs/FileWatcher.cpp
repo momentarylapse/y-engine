@@ -4,6 +4,8 @@
 
 #include "FileWatcher.h"
 
+#if __has_include("../os/path.h")
+
 #if defined(OS_LINUX)
 #include <cstdio>
 #include <unistd.h>
@@ -122,3 +124,5 @@ void FileWatcher::iterate() {
 #endif
 }
 } // obs
+
+#endif
