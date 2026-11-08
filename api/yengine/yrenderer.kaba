@@ -130,9 +130,10 @@ class extern LineHelper
 	func extern mut start_frame(ui_scale=1.0)
 	func extern mut begin_draw(params: RenderParams, rvd: RenderViewData)
 	func extern mut set_color(c: Color)
-	func extern mut set_z(enabled: bool)
+	func extern mut set_z_test(enabled: bool)
 	func extern mut set_line_width(w: f32)
 	func extern mut draw_lines(points: vec3[], contiguous=true)
+	func extern mut draw_circle(center: vec3, axis: vec3, radius: f32)
 
 func extern apply_shader_data(params: RenderParams, s: Shader*, shader_data: Any)
 

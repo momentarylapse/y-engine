@@ -58,6 +58,7 @@ class extern Terrain
 	var height: f32[]
 	var vertex_shader_module: string
 	var texture_scale: vec3[8]
+	var changed: bool
 	func extern get_height(e: Entity&, p: vec3) -> f32
 	func extern mut update(x1: i32, x2: i32, y1: i32, y2: i32, mask: i32)
 	# ...
